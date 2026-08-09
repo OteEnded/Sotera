@@ -42,6 +42,15 @@ export function effectiveProviders(serverConfig) {
 export function providerMeta(serverConfig) {
   return serverConfig?._providerMeta || {}
 }
+// ⚠️ BYOK'S SURFACE IS REMOVED FROM SOTERA; THIS PLUMBING IS INTENTIONALLY LEFT INERT.
+// There is no route or page that can create an owner_user_id provider row any more (BYOK is a
+// multi-user feature — hers are configured once in Backend/config.json). With zero such rows the
+// overlay is always {} and effectiveProvidersFor short-circuits to the global map, so this costs one
+// object-key check per resolution and changes nothing.
+// It is kept rather than excised because it sits on the CHAT PATH: removing a no-op from the hot path
+// buys tidiness and risks turns. If BYOK is ever wanted back, the mechanism is still here — only the
+// surface needs rebuilding. Do not read these functions as evidence that BYOK exists.
+//
 // BYOK overlay for one user: { name -> providerConfig } (empty for no rows / no user).
 export function userProvidersFor(serverConfig, userId) {
   return (userId && serverConfig?._userProviders?.[userId]) || {}

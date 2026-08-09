@@ -1,0 +1,12 @@
+{
+  "name": "sotera-test",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "check": "node checks/boot-check.mjs",
+    "unit": "node --test \"unit/**/*.test.mjs\"",
+    "all": "node pipeline/test-all.mjs"
+  },
+  "dependencies": { "pg": "^8.19.0" }
+}

@@ -41,10 +41,34 @@
 
 SET search_path = persona_sotera, public;
 
--- ── §1 — SAFE NOW: owners that have no designed NULL meaning ────────────────────────
--- Verified 2026-08-10: zero NULL rows present in each, so these tighten without a backfill.
--- ⚠️ Apply AFTER the strip pass and re-verify with real turns. A constraint added before the code
--- that writes it is settled turns a silent bug into a live 500 in front of whoever is using her.
+-- ── §1 — NOT SAFE YET. I called these "safe now" and was wrong; here is the evidence. ───
+--
+-- The row check passes: zero NULLs in all three tables (2026-08-10). That is NOT sufficient, and
+-- believing it was is the same mistake as reading a green test that never ran. What matters is what
+-- the CODE writes, and every one of these three has a live path that writes NULL deliberately:
+--
+--   admin.route.js:1265     owner_user_id: null,                      -- platform-global provider
+--   admin.route.js:632      owner_user_id: request.user.id ?? null,   -- "null = root (config superuser)"
+--   chat-site.route.js:491  user_id: request.user.id ?? null
+--   schedules/store.js:82   user_id: userId ?? null
+--
+-- ⇒ Adding NOT NULL today would not FIX the null-owner defect, it would WEAPONISE it: a latent bad
+-- write becomes a live 500 in front of whoever is using her. Worse for the person, no better for the
+-- data.
+--
+-- ⚠️ AND mst_providers MUST NOT GET NOT NULL AT ALL in its current design: `owner_user_id IS NULL`
+-- is how a PLATFORM provider is distinguished from a BYOK one. Constraining it would break root
+-- adding a provider from the console. Same shape as txn_memories in §0 — NULL carrying meaning.
+--
+-- CORRECT ORDER, and it is not negotiable:
+--   1. Remove the `?? null` fallbacks; resolve a real owner or fail with a clear error at the CALL
+--      SITE, where the caller is known and can be told what went wrong.
+--   2. Give mst_providers an explicit scope ('platform' | 'user') so NULL stops carrying meaning.
+--   3. THEN these constraints, which by then can only catch a genuine regression.
+--
+-- ALTER TABLE txn_conversations ALTER COLUMN user_id SET NOT NULL;
+-- ALTER TABLE mst_api_keys      ALTER COLUMN owner_user_id SET NOT NULL;
+-- (mst_providers: see the warning above — needs the scope column first, not a constraint.)
 
 -- A conversation always belongs to someone.
 -- ALTER TABLE txn_conversations ALTER COLUMN user_id SET NOT NULL;
