@@ -712,6 +712,11 @@ const MSG_TOOLBAR = 'mt-1 flex flex-wrap gap-1.5'
 const MSG_BODY = 'max-w-full whitespace-pre-wrap break-words text-[15px] leading-[1.6] text-ink'
 const MSG_BODY_USER = 'max-w-[80%] rounded-[16px_16px_4px_16px] border border-[var(--mint-edge)] bg-mint px-3.5 py-3'
 const MSG_BODY_ASSISTANT = 'w-full rounded-[4px_16px_16px_16px] border border-line bg-panel-strong px-3.5 py-3'
+// Her name, not her role. "ASSISTANT" is what a service is called; a persona has a name, and the
+// transcript is where that shows. A plain constant rather than config plumbing because one persona =
+// one repo — this file will never render anybody else. The other places her name lives:
+// Backend/app/components/persona.json (what the runtime calls her) and Frontend/public/config.json.
+const PERSONA_NAME = 'Sotera'
 const METRICS_LINE = 'chat-metrics font-mono text-[11px] tracking-[0.01em] text-muted'
 // attached-document pill (composer strip + inside message bubbles) and its ×
 const FILE_CHIP = 'chat-file-chip inline-flex items-center gap-1.5 rounded-full border border-line bg-[var(--code-bg)] px-3 py-1.5 text-[12px] text-ink'
@@ -2864,7 +2869,7 @@ export default function ChatApp() {
 
       const parts: string[] = []
       for (const m of messages) {
-        const who = m.role === 'user' ? 'You' : 'Assistant'
+        const who = m.role === 'user' ? 'You' : PERSONA_NAME
         const interleaved = m.role === 'assistant' && (m.segments?.some((s) => s.type === 'tool' || s.type === 'steer') ?? false)
         const hasReasoningSegments = m.segments?.some((s) => s.type === 'reasoning') ?? false
         const blocks: string[] = []
@@ -2968,7 +2973,7 @@ ${parts.join('\n')}
     // markdown (default)
     const lines: string[] = [`# ${activeTitle}`, '', `*Model: ${model} · exported ${new Date().toLocaleString()}*`, '']
     for (const m of messages) {
-      lines.push(`## ${m.role === 'user' ? 'You' : 'Assistant'}`, '')
+      lines.push(`## ${m.role === 'user' ? 'You' : PERSONA_NAME}`, '')
       if (m.reasoning) lines.push('<details><summary>Reasoning</summary>', '', m.reasoning, '', '</details>', '')
       for (const t of m.tools || []) {
         lines.push(`**🔧 ${t.name}**`, '', '```json', JSON.stringify(t.args ?? {}, null, 2), '```', '', '```', String(t.result ?? ''), '```', '')
@@ -3387,7 +3392,7 @@ ${parts.join('\n')}
             )
             return (
               <div key={m.id ?? `i${i}`} className={`chat-msg chat-msg-${m.role} group/msg mx-auto flex w-full max-w-[860px] flex-col gap-1 ${m.role === 'user' ? 'items-end text-left' : 'items-start'}`}>
-                <div className="chat-msg-role text-[11px] font-extrabold uppercase tracking-[0.06em] text-muted">{m.role === 'user' ? 'You' : 'Assistant'}</div>
+                <div className="chat-msg-role text-[11px] font-extrabold uppercase tracking-[0.06em] text-muted">{m.role === 'user' ? 'You' : PERSONA_NAME}</div>
                 {/* WHAT THE EYE SAW — first thing in the ASSISTANT's turn, above Reasoning (Ote's placement,
                     2026-08-03). It belongs here, not under the user's image: looking at the picture is work
                     the assistant DID, and the turn then reads in the order it happened — looked, thought,
@@ -3665,7 +3670,7 @@ ${parts.join('\n')}
             const isMarathon = /marathon/i.test(runName)
             return (
               <div className="chat-msg chat-msg-assistant mx-auto flex w-full max-w-[860px] flex-col items-start gap-1" data-ui="scheduled-run-live">
-                <div className="chat-msg-role text-[11px] font-extrabold uppercase tracking-[0.06em] text-muted">Assistant</div>
+                <div className="chat-msg-role text-[11px] font-extrabold uppercase tracking-[0.06em] text-muted">{PERSONA_NAME}</div>
                 <div className="flex items-center gap-2.5 rounded-[10px] border border-[var(--think-edge)] bg-[var(--think-soft)] px-3 py-2 text-[13px] text-[var(--think)]">
                   <span className="chat-scroll-dots" aria-hidden="true"><i /><i /><i /></span>
                   {isMarathon

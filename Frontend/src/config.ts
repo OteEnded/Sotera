@@ -10,8 +10,8 @@ type AppConfig = {
 
 const DEFAULT_CONFIG: AppConfig = {
   app: {
-    name: 'FullStack Template',
-    subtitle: 'Fastify serves the React build and optional DB-backed API examples.',
+    name: 'Sotera',
+    subtitle: 'A persona, not a platform.',
   },
   api: {
     base_url: '',
