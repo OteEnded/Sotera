@@ -41,11 +41,37 @@
 
 SET search_path = persona_sotera, public;
 
--- ── §1 — NOT SAFE YET. I called these "safe now" and was wrong; here is the evidence. ───
+-- ── §1 — ✅ APPLIED 2026-08-10 (two of three). Ote pushed back, and he was right. ──────
 --
--- The row check passes: zero NULLs in all three tables (2026-08-10). That is NOT sufficient, and
--- believing it was is the same mistake as reading a green test that never ran. What matters is what
--- the CODE writes, and every one of these three has a live path that writes NULL deliberately:
+-- I first said "safe now" (row check clean), then reversed to "not safe" (the code still writes NULL),
+-- and Ote asked simply: *"should it?"* — which is the right question, because I had spent the whole
+-- session arguing that the DATABASE saying so beats the MODEL saying so, and then declined a
+-- constraint precisely because it would enforce itself.
+--
+-- THE FACT THAT SETTLED IT: her config carries `auth.root.userConnected` (written by her own boot, not
+-- by hand), so root resolves to a real users row and `request.user.id` is never null in this
+-- deployment. The `?? null` fallbacks are therefore DEAD PATHS here, and the constraint is a safety
+-- net that catches a regression rather than a trap that fires in normal use.
+--
+--   ALTER TABLE txn_conversations ALTER COLUMN user_id SET NOT NULL;      ✅ applied
+--   ALTER TABLE mst_api_keys      ALTER COLUMN owner_user_id SET NOT NULL; ✅ applied
+--
+-- Live-fired after applying, not just inspected: logged in, created a conversation, ran a real turn
+-- ("constraint holds"), and /v1/admin/apikeys, /v1/admin/providers and /v1/chat/conversations all
+-- still answer 200. Boot check 14/14.
+--
+-- ⚠️ mst_providers DELIBERATELY NOT CONSTRAINED — the one where my reasoning stands:
+-- `owner_user_id IS NULL` is how a PLATFORM provider is distinguished from a BYOK one, and
+-- admin.route:1265 writes that NULL on a live path (root adding a provider from the console). Same
+-- shape as txn_memories in §0: NULL carrying meaning. It needs an explicit `scope` column FIRST.
+--
+-- Still true, and still the right order for what remains: the `?? null` fallbacks below should go, so
+-- that an owner is resolved-or-refused AT THE CALL SITE where the caller can be told what went wrong.
+-- The constraint now backstops them; it does not replace them.
+--
+-- The original reasoning is kept below because the DISTINCTION is the reusable part: a clean row check
+-- is not sufficient evidence, what the CODE writes is what matters — and separately, whether a live
+-- path writes NULL ON PURPOSE is what decides constrain-vs-redesign.
 --
 --   admin.route.js:1265     owner_user_id: null,                      -- platform-global provider
 --   admin.route.js:632      owner_user_id: request.user.id ?? null,   -- "null = root (config superuser)"
