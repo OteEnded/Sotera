@@ -156,5 +156,10 @@
             }
         },
         "publicBaseUrl": ""
+    },
+    "memory": {
+        "extractModel": "ollama/qwen3.5:9b (aux models run on CPU — this is a RAM choice, not VRAM)",
+        "consolidateModel": "",
+        "reflectModel": ""
     }
 }
