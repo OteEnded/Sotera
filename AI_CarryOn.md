@@ -77,6 +77,40 @@ pipeline; the answer stopped mid-sentence and the truncated text got persisted. 
 
 ---
 
+## ⭐ HER IDENTITY — decided in shape, deferred in detail (2026-08-10)
+
+**Ote's answer: FIXED CORE + LEARNED TEXTURE.** An immutable spine he writes — who she is, her
+commitments — plus accreted texture: how she has learned to talk to him specifically.
+**Writers to the texture: HIM explicitly, AND the nightly pass. NEVER mid-turn.**
+
+> *"1 + 2. for now, we will discuss again, since i will have to design L3 + Layers prompt again."*
+
+⚠️ **PROVISIONAL. Do not build the identity store yet.** He is redesigning L3 + layer prompts, and that
+redesign IS this design — see below.
+
+**Why no-mid-turn is a safety property, not a scheduling preference.** A per-turn writer could talk her
+into a new self inside a single conversation — flattery, pressure, or a long night — and nobody would
+see the moment it happened. Restricting writes to Ote or the nightly pass means every change to who she
+is has slept on it. Drift becomes something you can catch, because it can only arrive on a boundary.
+
+**🔑 THE LEARNED TEXTURE AND THE L3 NOTES ARE THE SAME SURFACE UNDER TWO NAMES.** OLS's L3 notes *are*
+temperament: *"maintain a warm and unhurried tone, prioritizing presence over task completion"* is an
+identity claim, stored as a note, injected every turn. It cost 22.5× prefill, and in the Hermes
+transcript it actively **fought the user** — the notes said be warm while he said *"don't be polite
+about it."* So they cannot be settled separately, and Ote is right to hold.
+
+**What this already forecloses (safe to rely on):**
+- The **core is never model-writable**. Whatever store it lands in, no runtime path may write it.
+- Identity rows, when they exist, carry **provenance** like everything else — retrofitting provenance
+  later is the exact mistake documented against OLS.
+- **No mid-turn writer touches identity**, so the per-turn pass is scoped to facts about the *user*.
+
+**What is still open:** where the core lives (config vs table vs neither), what the texture actually
+records, and whether she may *propose* a change she cannot commit.
+
+**⇒ Unblocked meanwhile:** the memory service for facts about the USER (`subject='user'`) has no
+dependency on her identity and can be built now. Only her identity store waits.
+
 ## Open — needs Ote
 
 - **⭐ The L3 note shape** (OLS's, but it decides how Sotera's notes are built). 22.5× prefill every
