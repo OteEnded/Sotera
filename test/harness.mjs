@@ -18,6 +18,23 @@ import pg from 'pg'
 
 export const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8210'
 
+// ⛔ NEVER TEST AS ROOT. Root is OTE'S ACCOUNT — his chats, his memories, his data.
+// This rule already existed on OteLLMServices and I failed to carry it to Sotera: a night of testing
+// ran as root, and the residue showed up in HIS Options → Memory panel, mixed in with his own rows so
+// he could not tell which were his. He had to ask "wtf are those, is that you?" — which is the exact
+// question a test account exists to make unnecessary.
+//
+// Use agent_dev for everything. Root ONLY for surfaces that are genuinely root-only (config, the
+// root-vs-admin boundary itself), and say so at the call site when you do.
+export const TEST_USER = { username: 'agent_dev', password: 'agentdev123' }
+
+/** Log in as the test account. Returns the jar name to pass to `call`. */
+export async function asAgent(call) {
+  const r = await call('agent', 'POST', '/v1/auth/login', TEST_USER)
+  if (r.status !== 200) throw new Error(`agent_dev login failed (${r.status}) — create it: POST /v1/admin/users {username:"agent_dev",password:"agentdev123",roles:["admin"]}`)
+  return 'agent'
+}
+
 export function pgConfig() {
   const cfgPath = new URL('../Backend/config.json', import.meta.url)
   const c = JSON.parse(readFileSync(cfgPath, 'utf8')).database?.connection

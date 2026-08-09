@@ -147,6 +147,44 @@ records, and whether she may *propose* a change she cannot commit.
 **⇒ Unblocked meanwhile:** the memory service for facts about the USER (`subject='user'`) has no
 dependency on her identity and can be built now. Only her identity store waits.
 
+## ⛔ TEST AS `agent_dev`. NEVER AS ROOT.
+
+`agent_dev` / `agentdev123` (admin, non-root) exists in her DB. Use it for everything. Root is **Ote's
+account** — his chats, his memories, his Options panel. Root only for genuinely root-only surfaces, and
+say so at the call site.
+
+**This rule already existed on OteLLMServices and I failed to carry it here.** A night of testing ran as
+root, and the residue landed in HIS Memory panel mixed with his own rows, so he could not tell which
+were his and had to ask *"wtf are those. is that you?"* — the exact question a test account exists to
+make unnecessary. `test/harness.mjs` now exports `TEST_USER` + `asAgent()`; use them.
+
+## 🔎 THE CAPTURE BUG, NAMED (2026-08-10) — `preferred_name` is a slot that must be filled
+
+Two junk captures, both from ordinary use, both the same shape:
+
+| stored | from | |
+|---|---|---|
+| `preferred_name: Your Starting` @0.8 | *"this is **your starting** point"* | pronoun + gerund, title-cased |
+| `preferred_name: I Phasing` @0.9 | *"im **i phasing** it right?"* | a TYPO for "phrasing", in a question about wording |
+
+**He never stated a name in either conversation.** There was no true value to find, so the extractor
+manufactured one rather than leaving the slot empty — and it is guessing at something already known
+(his profile carries **Ote**, which is what she calls him).
+
+⇒ **The bug is not "it guesses badly", it is "it treats `preferred_name` as mandatory".** That is why a
+bigger model made it worse, not better: it fills the slot more confidently (0.8 → 0.9).
+
+⚠️ Both failures came from **informal input** — a typo, and a Thai proverb mid-sentence. The extractor is
+brittle to anything that is not clean English prose, so it is worst for the person actually using it.
+A test suite written in tidy English will never catch this.
+
+✅ **Not everything is broken:** `current goal: build Rome in one day` and `physical state: body is
+degrading under pressure` both trace correctly to *"i kinda want to build rome in one day so. but my
+body is degrading as i push"*. Good captures, kept. `preferred_name` specifically is the defect.
+
+**Fix:** `preferred_name` requires an explicit naming act ("call me X", "my name is X"), never a pattern
+match, and never when the profile already has one. Repro: `test/repro/capture-invents-a-name.mjs`.
+
 ## Open — needs Ote
 
 - **⭐ The L3 note shape** (OLS's, but it decides how Sotera's notes are built). 22.5× prefill every
