@@ -1,6 +1,6 @@
 {
-  "name": "sotera-backend",
-  "version": "0.0.1",
+  "name": "ote-llm-services-backend",
+  "version": "0.1.0",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -9,18 +9,28 @@
     "dev": "node --watch server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ote",
   "license": "ISC",
-  "description": "Sotera — backend. A persona, not a platform.",
+  "description": "OteLLMServices — multi-provider LLM gateway service (provider abstraction, tool transport, SSE streaming, scoped API-key auth); infrastructure only, no persona/chat/memory logic",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
+    "@fastify/secure-session": "^8.2.0",
     "@fastify/static": "^9.0.0",
     "@fastify/websocket": "^11.2.0",
+    "@ote/components-sdk": "file:../../OteAIComponentSDK",
+    "bcryptjs": "^3.0.2",
     "fastify": "^5.8.2",
     "fastify-plugin": "^5.1.0",
     "iso-639-1": "^3.1.5",
+    "katex": "^0.18.1",
+    "mammoth": "^1.12.0",
     "node-cron": "^4.2.1",
+    "ollama": "^0.6.3",
+    "openai": "^6.34.0",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.19.0",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "speech-rule-engine": "4.1.4",
+    "xlsx": "file:./vendor/xlsx-0.20.3.tgz"
   }
 }

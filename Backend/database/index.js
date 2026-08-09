@@ -4,6 +4,7 @@ import { loadConfig, log, logQuery } from "../lib/utility.js";
 const config = loadConfig();
 
 import initModels from "./models/index.js";
+import seedIdentity from "./seeds/seed_identity.js";
 
 const dbConfig = config.database.connection;
 
@@ -48,6 +49,8 @@ export async function initDB() {
         ...models.models,
         choices: models.choices
     };
+
+    await seedIdentity(db);
 
     return db;
 }

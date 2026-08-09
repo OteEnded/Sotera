@@ -1,15 +1,106 @@
 {
     "app": {
-        "port": 8210
+        "port": 8201
     },
     "providers": {
         "ollama": {
             "kind": "ollama",
             "host": "http://127.0.0.1:11434"
+        },
+        "openrouter": {
+            "kind": "openai-compatible",
+            "baseURL": "https://openrouter.ai/api/v1",
+            "apiKey": ""
+        },
+        "siliconflow": {
+            "kind": "openai-compatible",
+            "baseURL": "https://api.siliconflow.com/v1",
+            "apiKey": ""
+        },
+        "deepseek": {
+            "kind": "openai-compatible",
+            "baseURL": "https://api.deepseek.com/v1",
+            "apiKey": ""
+        },
+        "zai": {
+            "kind": "openai-compatible",
+            "baseURL": "https://api.z.ai/api/paas/v4",
+            "apiKey": ""
+        },
+        "llamacpp": {
+            "kind": "openai-compatible",
+            "baseURL": "http://127.0.0.1:11435/v1",
+            "apiKey": "sk-local-llamacpp"
+        },
+        "xiaomimimo": {
+            "kind": "openai-compatible",
+            "baseURL": "https://api.xiaomimimo.com/v1",
+            "apiKey": ""
         }
     },
     "chat": {
-        "defaultModel": "ollama/gemma4:e4b"
+        "defaultModel": "ollama/gemma4:e4b",
+        "systemPrompt": "(optional — REPLACES the built-in prompt wholesale. null = use the default)",
+        "assistantIdentity": "(optional — who the assistant IS, its own prompt part so a custom systemPrompt cannot silently delete it. null = the default, matched to chat.speech.voice. \"\" = no identity line at all)",
+        "visionRelay": {
+            "model": "ollama/gemma4:e4b"
+        },
+        "context": {
+            "recentMessages": 12,
+            "summaryModel": null,
+            "titleModel": null
+        },
+        "tools": {
+            "enabled": true,
+            "maxCalls": 8
+        },
+        "web": {
+            "braveApiKey": ""
+        }
+    },
+    "auth": {
+        "root": {
+            "username": "root",
+            "password": "change-me"
+        },
+        "consumers": [],
+        "session": {
+            "secret": "change-me-to-a-32+-char-random-secret-string (REQUIRED: server refuses to boot on this default — DevTools/maintenance/rotate-secrets.mjs generates real values)",
+            "salt": "change-me-16char",
+            "cookieName": "ote_llm_session",
+            "maxAgeSeconds": 604800
+        },
+        "keyEncryptionSecret": "change-me-encrypts-api-keys-for-re-copy (falls back to session.secret if empty; rotate ONLY via DevTools/maintenance/rotate-secrets.mjs — it re-encrypts stored keys so they stay recoverable)"
+    },
+    "console": {
+        "keyRevealSeconds": 60
+    },
+    "components": {
+        "lockMode": "update — dev boxes; set \"frozen\" on deploys (boot ABORTS if resolution drifts from the committed persona.lock.json)",
+        "dailyDigest": {
+            "enabled": false,
+            "time": "07:30",
+            "tz": "Asia/Bangkok",
+            "model": "(optional — falls back to chat.defaultModel)",
+            "prompt": "(optional — override the default digest prompt)",
+            "skillId": "(optional — run the digest turn AS this skill, e.g. skill.research)"
+        }
+    },
+    "maintenance": {
+        "healthSuiteEnabled": "(optional, default false) run the DEFAULT test-all tier nightly at 03:00, log always, alert only on red. GPU-free. Deploy-level rather than a runtime setting on purpose: it must not be flippable by the suite it runs."
+    },
+    "security": {
+        "loginMaxAttempts": 8,
+        "loginIpMaxAttempts": 30,
+        "revealMaxAttempts": 8,
+        "rateWindowMinutes": 15
+    },
+    "usage": {
+        "retentionDays": 0,
+        "coldStorage": {
+            "enabled": true,
+            "directory": "./cold-storage/usage"
+        }
     },
     "logging": {
         "message": {
@@ -45,16 +136,25 @@
             "alter": false
         },
         "connection": {
-            "username": "(the app role — NOT a superuser)",
+            "username": "",
             "password": "",
-            "database": "ote_ai_toolbox",
+            "database": "",
             "schemas": {
                 "parent": "public",
-                "project": "persona_sotera"
+                "project": "ote_llm_services"
             },
             "host": "127.0.0.1",
-            "port": 54322,
+            "port": 5432,
             "dialect": "postgres"
         }
+    },
+    "api": {
+        "anthropic": {
+            "defaultModel": "ollama/gemma4:26b",
+            "modelMap": {
+                "claude-*": "ollama/gemma4:26b"
+            }
+        },
+        "publicBaseUrl": ""
     }
 }

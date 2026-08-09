@@ -45,12 +45,20 @@ const parseConfig = (raw: unknown): AppConfig => {
 };
 
 const loadConfigFrom = async (path: string): Promise<AppConfig> => {
-  const response = await fetch(path, { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error(`Failed to load ${path}`);
+  // Hard timeout: a stalled config fetch used to hang the top-level await in main.tsx
+  // forever, leaving a blank gradient until a manual refresh. Always resolve fast so
+  // the app mounts (falling back to defaults) even when the network misbehaves.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 5000);
+  try {
+    const response = await fetch(path, { cache: 'no-store', signal: ctrl.signal });
+    if (!response.ok) {
+      throw new Error(`Failed to load ${path}`);
+    }
+    return parseConfig(await response.json());
+  } finally {
+    clearTimeout(timer);
   }
-  const json = await response.json();
-  return parseConfig(json);
 };
 
 export const initAppConfig = async (): Promise<void> => {
@@ -81,11 +89,6 @@ export const apiUrl = (path: string): string => {
     throw new Error(`apiUrl path must start with '/': ${path}`);
   }
 
-  const configuredBaseUrl = getAppConfig().api.base_url;
-  
-  // If config has an explicit base_url, use it (for cross-origin scenarios)
-  // Otherwise, use the current origin (same domain where frontend was served)
-  const baseUrl = configuredBaseUrl || window.location.origin;
-  
-  return `${baseUrl}${path}`;
+  const baseUrl = getAppConfig().api.base_url;
+  return baseUrl ? `${baseUrl}${path}` : path;
 };

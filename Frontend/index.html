@@ -4,7 +4,77 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ote FullStack Template</title>
+    <title>OteLLMServices</title>
+    <meta name="theme-color" content="#171310" />
+    <script>
+      // Theme boot — runs BEFORE the stylesheet so the first paint is already themed.
+      // DARK is the no-data default on purpose: a user in a dark room must never be
+      // flashbanged while their real preference is still loading. The app caches the
+      // resolved preference in localStorage after login, so only a first-ever visit
+      // (or a cleared cache) boots on the default.
+      (function () {
+        var pref = null;
+        try { pref = localStorage.getItem('ote:theme'); } catch (e) { /* storage blocked */ }
+        if (pref !== 'light' && pref !== 'dark' && pref !== 'system') pref = 'dark';
+        var theme = pref === 'system'
+          ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          : pref;
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <style>
+      /* pre-stylesheet safety: even before index.css arrives, the page background is
+         already the right family — no white flash in dark, no dark flash in light */
+      html[data-theme='dark'] { background: #171310; color-scheme: dark; }
+      html[data-theme='light'] { background: #f3efe7; color-scheme: light; }
+    </style>
+    <script>
+      // Boot watchdog — the outermost guard against a blank page, for when the app never
+      // MOUNTS AT ALL (main bundle 404 after a redeploy, a stalled boot). It runs even if
+      // the module bundle fails to load/parse, unlike the React error boundary. It stays
+      // OUT of the way once the app has mounted: a route chunk failing after mount is
+      // lazyWithReload's job (own guard), so the two never stack into a reload loop.
+      (function () {
+        var GUARD = 'ote:boot-reloaded';
+        var mounted = function () { var r = document.getElementById('root'); return !!r && r.childElementCount > 0; };
+        function removeCard() { var el = document.getElementById('boot-fallback'); if (el && el.parentNode) el.parentNode.removeChild(el); }
+        function showCard() {
+          if (mounted() || document.getElementById('boot-fallback')) return;
+          var el = document.createElement('div');
+          el.id = 'boot-fallback';
+          el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#4a4a4a';
+          el.innerHTML =
+            '<div style="font-size:15px;font-weight:600">This page didn’t finish loading</div>' +
+            '<div style="font-size:13px;opacity:.7;max-width:340px">A network hiccup or an app update can cause this. Reloading usually fixes it.</div>' +
+            '<button id="boot-reload" style="cursor:pointer;border:0;background:#c65d3b;color:#fff;font-size:14px;font-weight:600;padding:9px 20px;border-radius:8px">Reload</button>';
+          document.body.appendChild(el);
+          document.getElementById('boot-reload').addEventListener('click', function () {
+            try { sessionStorage.removeItem(GUARD); } catch (e) { /* storage blocked */ }
+            location.reload();
+          });
+        }
+        // once the app mounts: tidy up and reset the boot guard
+        var poll = setInterval(function () {
+          if (mounted()) { clearInterval(poll); clearTimeout(timer); removeCard(); try { sessionStorage.removeItem(GUARD); } catch (e) {} }
+        }, 250);
+        // the MAIN bundle failed to load and nothing mounted -> reload once for a fresh
+        // index.html; if we already did (or it's a post-mount route chunk), leave it alone.
+        window.addEventListener('error', function (e) {
+          var t = e && e.target;
+          if (!t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return;
+          setTimeout(function () {
+            if (mounted()) return; // app is up (or the boundary rendered) — not our problem
+            try {
+              if (sessionStorage.getItem(GUARD) !== '1') { sessionStorage.setItem(GUARD, '1'); location.reload(); return; }
+            } catch (e2) { /* storage blocked */ }
+            showCard();
+          }, 800);
+        }, true);
+        // silent-hang safety net: still blank after 12s (don't auto-reload — the load may
+        // still be progressing on a slow link; let the user choose)
+        var timer = setTimeout(showCard, 12000);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

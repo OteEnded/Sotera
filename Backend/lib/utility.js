@@ -90,6 +90,19 @@ export function loadConfig() {
     return cachedConfig;
 }
 
+// Persist the (mutated) config object back to config.json. Because loadConfig() caches
+// and fastify.config decorates the SAME object, callers mutate it in place, then call
+// this — the change is both live immediately and durable across restarts.
+// Atomic: write to a temp file, then rename over config.json (a crash mid-write can
+// never leave a truncated config full of secrets).
+export function saveConfig(config = cachedConfig) {
+    if (!config) throw new Error("saveConfig: no config loaded");
+    const configPath = resolveConfigPath();
+    const tmpPath = `${configPath}.tmp`;
+    fs.writeFileSync(tmpPath, JSON.stringify(config, null, 4) + "\n", "utf-8");
+    fs.renameSync(tmpPath, configPath);
+}
+
 // Logging functions
 export function logInit() {
     const options = getLogOptions();
@@ -243,9 +256,9 @@ export async function log(message, level = "info", importMetaUrl) {
     }
 
     if (options.logToDatabase) {
-        if (db?.LogMessages) {
+        if (db?.log_messages) {
             try {
-                await db.LogMessages.create({
+                await db.log_messages.create({
                     server_start_on: serverStartOn,
                     report_by: relPath,
                     report_on: reportOn,
@@ -293,12 +306,12 @@ export function setDB(db_from_plugin_init) {
     // Flush pending message logs
     if (
         messageOptions.logToDatabase &&
-        db?.LogMessages &&
+        db?.log_messages &&
         pendingLogRows.length > 0
     ) {
         const rowsToInsert = pendingLogRows.splice(0, pendingLogRows.length);
         Promise.all(
-            rowsToInsert.map((row) => db.LogMessages.create(row)),
+            rowsToInsert.map((row) => db.log_messages.create(row)),
         ).catch((err) => {
             console.error(
                 "Error flushing pending message logs to database:",
@@ -312,7 +325,7 @@ export function setDB(db_from_plugin_init) {
     // Flush pending request logs
     if (
         requestOptions.logToDatabase &&
-        db?.LogRequests &&
+        db?.log_requests &&
         pendingRequestLogRows.length > 0
     ) {
         const rowsToInsert = pendingRequestLogRows.splice(
@@ -320,7 +333,7 @@ export function setDB(db_from_plugin_init) {
             pendingRequestLogRows.length,
         );
         Promise.all(
-            rowsToInsert.map((row) => db.LogRequests.create(row)),
+            rowsToInsert.map((row) => db.log_requests.create(row)),
         ).catch((err) => {
             console.error(
                 "Error flushing pending request logs to database:",
@@ -351,9 +364,9 @@ export async function logRequest(requestData) {
     }
 
     if (options.logToDatabase) {
-        if (db?.LogRequests) {
+        if (db?.log_requests) {
             try {
-                await db.LogRequests.create(requestData);
+                await db.log_requests.create(requestData);
             } catch (err) {
                 console.error("Error writing request log to database:", err);
             }

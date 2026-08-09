@@ -53,8 +53,4 @@ Runtime config shape:
 }
 ```
 
-**API base URL behavior:**
-
-- When `api.base_url` is empty (default), the frontend automatically uses the current origin (the domain it was loaded from) for API calls.
-- This works seamlessly when the backend serves the frontend, as the API and frontend share the same origin.
-- Set `api.base_url` explicitly only if you need cross-origin API calls (e.g., frontend on `app.example.com` calling API at `api.example.com`).
+Use `api.base_url` when the frontend should call a different backend origin in development or deployment.

@@ -1,6 +1,11 @@
 .history
 logs/
 node_modules/
-configs/
 config.json
+# ⚠️ THE BACKUPS HOLD THE SAME SECRETS AS THE ORIGINAL. config-writer.js and the connect-root-user
+# util both drop `config.json.bak.<timestamp>` beside it before editing, and the bare `config.json`
+# rule above does NOT match those names — so without this line a backup carrying root's password
+# would sit in `git status` waiting for someone to `git add .`. Caught the same day the writer landed.
+config.json.bak.*
+.config.json.tmp-*
 .vscode/

@@ -1,0 +1,4 @@
+
+⚠️  SECURITY: auth.root.password in Backend/config.json is weak (short or a common value).
+    Root is a full superuser reachable from the network — set a strong, unique password and restart.
+
