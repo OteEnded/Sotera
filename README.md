@@ -1,242 +1,65 @@
-# Ote's FullStack Template
+# Sotera
 
-Reusable full-stack starter built around Fastify for the backend and React + Vite for the frontend.
+The first persona. **She/her** — Ote's words, cited, never inferred from the name.
 
-This template is designed to let you start quickly with a practical structure instead of an empty shell. It gives you a working backend, a working frontend, optional PostgreSQL + Sequelize support, and a simple example feature that shows the full data flow from UI to API to database.
+A persona in this workspace is *an assembled cognitive identity*: the top layer of the five-layer canon
+(*LLMServices = Cognition Infra · PersonaTemplate = Cognitive Runtime · SDK = Capability Runtime ·
+PortableComponents = Capability Ecosystem · **Persona** = the assembled identity*).
 
-## Stack
+She is **not** an app built on OteLLMServices. She owns local resources natively — Ollama, and in time
+the model manager, TTS/STT and the rest — and OLS is demoted to one API provider among several.
 
-- Backend: Fastify
-- Frontend: React + Vite
-- CSS tooling: Tailwind CSS configured via PostCSS, plus shipped custom stylesheet examples
-- Database: PostgreSQL + Sequelize
-- Runtime: Node.js
-- Optional extras: cron scaffold, websocket scaffold, config-driven logging
+```
+Sotera ──▶ [Local Models]         ──▶ Ollama · llama.cpp · vLLM · …
+Sotera ──▶ [Other Local Resource] ──▶ tts · stt · eye · …
+Sotera ──▶ [OpenAI / Anthropic]   ──▶ OLS · OpenRouter · Xiaomi · …
+```
 
-## Template Structure
+## Status — early scaffold, honest about it
 
-```text
+| | |
+|---|---|
+| ✅ | Boots on `:8210`, streams a real turn from Ollama natively, persists it with reasoning kept separate from the answer |
+| ✅ | Schema live in `ote_ai_toolbox` / `persona_sotera`, with the memory findings enforced as constraints |
+| ❌ | No memory service, no chat UI, no auth, no SDK wiring, **no local model manager** |
+
+**The chat UI is a placeholder and says so.** Do not read the front page as a product.
+
+## Run
+
+```bash
+cd Backend && npm install && npm run dev     # or run_windows.bat at the repo root
+curl http://127.0.0.1:8210/api/health
+```
+
+Needs Postgres on `127.0.0.1:54322` and Ollama on `127.0.0.1:11434`.
+⛔ **Ollama is Ote's and always-on — never start, stop or restart it.** If it is down, ask.
+
+## Layout
+
+```
 Backend/
-  app/
-  database/
-  lib/
-  public/
-  config.example.json
-  config.json
-  server.js
-
-Frontend/
-  public/
-  src/
-  package.json
-  vite.config.ts
-
-wizard.bat / wizard.sh   run once after cloning — creates your root run script
-scripts/             launchers/ (run-script templates), server_*, pull_*, pull_run_*
-scripts/lib/         helper units (install_*, build_*) used by the above
-AI_CarryOn.md
-AI_ProgressTracking.md
-AI_TemplateCreation.md
+  database/migrations/001_core.sql    ⭐ THE SCHEMA. Source of truth — models mirror it, never the reverse
+  database/models/                    Sequelize mirrors; sync runs alter:false so it cannot reshape a table
+  app/providers/ollama.js             native local client (the CLIENT — the manager is not built)
+  app/routes/api/chat-site.route.js   UI-facing surface, SSE streaming
+Frontend/                             React + Vite (placeholder page)
 ```
 
-## How It Works
+## Two rules that are easy to break by accident
 
-- `Frontend/` is the React app used during development.
-- `Backend/` is the Fastify server.
-- Frontend production builds output into `Backend/public/dist`.
-- Fastify serves both API routes and the built frontend.
-- Database support is optional and can stay disabled until a project needs it.
+**1 · The schema is the source of truth.** The constraints that matter — `NOT NULL` on every owner,
+CHECKs that make an impossible state impossible, partial indexes that only cover live rows — exist in
+the SQL and nowhere else. *"The model says so"* is a convention; *"the database says so"* is a rule.
+These were written from nine findings measured against OLS
+(`Reference/docs/ANALYSIS_MEMORY_FINDINGS_FOR_SOTERA.md`), including a stored fact that contradicted its
+own source message while carrying 0.85 confidence.
 
-## Included Example Flow
-
-This template keeps one small generic example feature so the starter stays useful:
-
-- backend example API under `/api/template-items`
-- backend metadata endpoint under `/api/template/meta`
-- frontend overview page at `/`
-- frontend example items page at `/items`
-
-The example feature is intended to be replaced with your real project domain.
-
-## Quick Start
-
-### Quickest way — run the wizard, then your run script
-
-Double-click (or run from any terminal) the wizard once, pick your OS, then run
-the script it creates:
-
-```bat
-wizard.bat             REM pick Windows/Linux/Both  (Linux/macOS: bash wizard.sh)
-run_windows.bat        REM the wizard created this   (Linux/macOS: bash run_linux.sh)
-```
-
-The wizard copies a launcher from `scripts/launchers/` to the repo root, so you
-end up with a single run file for your OS. On first run that script installs
-backend + frontend dependencies (if `node_modules` is missing), builds the
-frontend into `Backend/public/dist`, then starts the Fastify backend — which
-serves both the API and the built frontend at `http://localhost:3000`.
-
-**Hosting on a server (production)** — scripts live in `scripts/`:
-
-```bat
-scripts\server_windows.bat     REM install, build, run with NODE_ENV=production
-scripts\pull_windows.bat       REM git pull only
-scripts\pull_run_windows.bat   REM git pull, then build + run
-```
-
-Linux/macOS equivalents are the matching `*_linux.sh` files. For a long-running
-service, run the backend under a process manager (pm2, or nssm/Task Scheduler on
-Windows; systemd on Linux).
+**2 · There is no standard API surface here, on purpose.** Memory comes from driving a UI, not from
+being an API client — in OLS every memory write path is reachable only from the chat *site*. Adding an
+OpenAI/Anthropic-shaped route would create a second entry point that silently bypasses everything that
+makes her herself. She emits her own API later, deliberately.
 
 ---
 
-PowerShell note:
-
-- If `npm` is blocked by PowerShell execution policy on Windows, use `npm.cmd` instead.
-
-### 1. Install dependencies
-
-Backend:
-
-```bash
-cd Backend
-npm install
-```
-
-Frontend:
-
-```bash
-cd Frontend
-npm install
-```
-
-### 2. Prepare config
-
-Backend local config:
-
-```bash
-cd Backend
-cp config.example.json config.json
-```
-
-Windows PowerShell:
-
-```powershell
-Copy-Item config.example.json config.json
-```
-
-Frontend runtime config already includes a local starter config in `Frontend/public/config.json`.
-
-### 3. Run development servers
-
-Backend:
-
-```bash
-cd Backend
-npm run dev
-```
-
-Frontend:
-
-```bash
-cd Frontend
-npm run dev
-```
-
-### 4. Build frontend for Fastify hosting
-
-```bash
-cd Frontend
-npm run build
-```
-
-That outputs the frontend into `Backend/public/dist`.
-
-## Verification
-
-The template was rechecked on 2026-04-17 with these results:
-
-- frontend production build completed successfully
-- backend booted successfully with the default config
-- workspace diagnostics were clean
-
-## Backend Notes
-
-The backend starter includes:
-
-- plugin-based bootstrapping
-- request, message, and query logging
-- optional DB initialization
-- API route registration
-- SPA/static asset serving
-- cron scaffold
-- websocket scaffold
-
-Main backend endpoints:
-
-- `GET /api/health`
-- `GET /api/template/meta`
-- `GET /api/template-items`
-- `POST /api/template-items` (create)
-- `POST /api/template-items/:uuid` (update — REST surface is GET + POST only)
-
-## Frontend Notes
-
-The frontend starter includes:
-
-- React Router setup
-- runtime config loading from `public/config.json`
-- automatic API base URL detection (uses the current origin by default)
-- Tailwind CSS tooling configured and ready to use
-- starter overview page
-- starter example CRUD-style page
-- shipped UI styling that is mostly implemented in `src/index.css`
-- build output configured for Fastify hosting
-
-**API base URL:**
-By default, the frontend uses the same origin it was served from for API calls. This means if your backend serves the frontend at `https://example.com`, API calls go to `https://example.com/api/...` automatically. You only need to configure `api.base_url` if the API is hosted on a different domain.
-
-## Database Notes
-
-Database is disabled by default in `Backend/config.json` and `Backend/config.example.json`.
-
-When database is disabled, the backend still runs and serves the frontend, and query log files are not created.
-
-To enable it:
-
-1. Set `database.enabled` to `true`
-2. Fill in `database.connection`
-3. Review `database.sync.force` and `database.sync.alter` carefully before using real data
-
-If enabled, the template can seed the example `TemplateItems` data for development.
-
-## Suggested First Changes For A New Project
-
-- Rename package names and project labels
-- Replace the example `TemplateItems` feature with your real models and routes
-- Update the frontend overview text and styling to match your project
-- Add your own API modules under `Backend/app/routes/api/`
-- Add your business logic under `Backend/app/services/`
-- Remove any starter parts you do not need, such as cron or websocket scaffolds
-
-## AI Tracking Files
-
-This template keeps three root AI support files for longer projects:
-
-- `AI_CarryOn.md`: short current-state handoff for the project implementer
-- `AI_ProgressTracking.md`: append-only implementation history for the project implementer
-- `AI_TemplateCreation.md`: template-maintainer design and cleanup notes
-
-The first two are meant to be reused by the next project built from this template.
-
-`AI_TemplateCreation.md` is for template-maintainer tracking and stays separate from project-implementation history.
-
-## Philosophy
-
-This template is intentionally not empty.
-
-The goal is to give you:
-
-- enough structure to move fast
-- enough example code to understand the intended flow
-- enough flexibility to strip it down or scale it up depending on the next project
+See `AI_CarryOn.md` for current state, decisions taken, and what is open.

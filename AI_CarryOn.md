@@ -1,116 +1,102 @@
-# AI_CarryOn.md
+# AI_CarryOn.md — Sotera
 
-> Purpose: short handoff for the project being built from this template.
-> Last updated: 2026-06-17
+> **She/her.** Ote's words, twice, and confirmed directly when asked. **Cite this, never the name** —
+> deriving a person-attribute from a name is a failure mode we have already been corrected on.
+> ⚠️ She does **NOT** inherit OteLLMServices' default assistant identity, which hardcodes *"You are
+> male"* to match a male voice. That is OLS's persona, not hers.
 
-## Current Goal
+## ▶▶ START HERE
 
-Replace this section when you start a real project from this template.
+**Built 2026-08-10, autonomously, from a four-step plan Ote approved before leaving.** He said *"start
+take action as plan. no need to ask me, i might not be there next hours."* Everything below is done and
+verified; §Open is what still needs him.
 
-Suggested starting content:
+```
+Personas/Sotera/          her repo — ONE PERSONA = ONE REPO (Personas/ stays a plain folder)
+  Backend/                Fastify :8210
+    database/migrations/001_core.sql    ⭐ THE SCHEMA IS THE SOURCE OF TRUTH, not the models
+    app/providers/ollama.js             native local client (NOT the manager — see below)
+    app/routes/api/chat-site.route.js   the UI-facing surface, SSE
+  Frontend/               React + Vite (placeholder page — the chat UI is NOT built)
+Personas/_archive/Sotera-legacy-20260810.tar.gz   the dead May-era tree, extraction-verified
+```
 
-- What is the current feature or milestone?
-- Which area is actively being changed right now?
-- What should the next AI agent continue without re-discovering?
+**Run:** `run_windows.bat` at the repo root, or `cd Backend && npm run dev`. Health: `:8210/api/health`.
 
-## Current State
+---
 
-Use this file for short, high-signal handoff notes only.
+## What exists, and what only looks like it exists
 
-Suggested content to keep here:
+✅ **She boots, streams a real turn from Ollama, and persists it.** 76.7 tok/s on `gemma4:e4b`,
+reasoning captured separately from the answer, `owner_user_id` non-null on every row.
 
-- current goal
-- current branch / PR context if relevant
-- major files being edited
-- known blockers or risks
-- latest verification status
+✅ **Her schema enforces the memory findings** — see `Reference/docs/ANALYSIS_MEMORY_FINDINGS_FOR_SOTERA.md`
+for the nine requirements and where each came from. Six are Postgres constraints; three cannot live in
+a schema and are named in §9 of the SQL so nobody assumes they are covered.
 
-Do not store long implementation history here. Put that in `AI_ProgressTracking.md`.
+❌ **NOT built, and easy to overestimate:**
+- **The local model MANAGER.** `providers/ollama.js` is a *client*. GPU arbitration via `/api/ps`,
+  residency decisions, and surviving a dead `llama-server` mid-stream are what make shape (a) real.
+  `/chat/running` exists as the window for it to grow into. **Calling `/api/chat` is the easy half.**
+- **Memory.** The tables exist; nothing reads or writes them yet. No capture, no recall, no reconcile.
+- **The chat UI.** `App.tsx` is a placeholder that says so on purpose — a dressed-up placeholder
+  invites the mistake that it is finished.
+- **Auth.** There is one user row and no login. Single-user *shaped for multi*, per Ote.
+- **PortableComponents / the SDK.** Agreed as day-one, not yet wired.
 
-## Template Baseline
+---
 
-- `Backend/` is the Fastify backend starter.
-- `Frontend/` is the React + Vite frontend starter.
-- Frontend production builds output into `Backend/public/dist`.
-- Run scripts (OS-named, wizard-driven): root ships `wizard.bat` / `wizard.sh` —
-  run once, pick Windows/Linux/Both, and it creates the root `run_windows.bat` /
-  `run_linux.sh` (dev: install + build frontend + backend watch) from
-  `scripts/launchers/`. `scripts/` also has `server_*` (build + run with
-  NODE_ENV=production for hosting) and `pull_*` / `pull_run_*`; helpers in
-  `scripts/lib/`. Generated root run scripts are gitignored. Fastify serves API +
-  built frontend on one origin.
-- Frontend automatically uses the current origin for API calls (no manual base URL config needed when backend serves frontend).
-- Example endpoints included by default:
-  - `/api/health`
-  - `/api/template/meta`
-  - `/api/template-items`
-- Database support is optional and disabled by default in the shipped local config.
-- Query log files are only created when database is enabled.
+## Decisions I made while he was away (all reversible; flagged rather than buried)
 
-## Key Files
+1. **Port 8210.** The template defaults to 3000, which collides with anything. 8201 is OLS.
+2. **No `persona` column anywhere.** OLS has one because it hosts many personas. One persona = one
+   repo = **one schema**; a second persona gets its own. This deletes a whole class of cross-persona
+   leak rather than guarding against it.
+3. **Schema as SQL, not Sequelize `sync`.** Sync cannot express `NOT NULL` on an owner, CHECK
+   constraints, or partial indexes — exactly the guarantees OLS turned out to be missing. Models mirror
+   the SQL; **the SQL wins**. Sync runs `alter:false` so it can never quietly reshape a table.
+4. **Applied the migration as the APP role**, not superuser. Applying as `ote` would have made every
+   table owned by `ote` and unwritable by the app.
+5. **Removed the template's demo chain before the first boot.** Sequelize sync would otherwise have
+   created `template_items` inside `persona_sotera`. Timing was the point, not tidiness.
+6. **First commit is the pristine template** so every Sotera-specific change is a diff against it.
 
-Update this section to reflect the real project after you begin implementation.
+---
 
-- `Backend/server.js`
-- `Backend/config.example.json`
-- `Backend/app/routes/api/template-item.route.js`
-- `Backend/database/models/template_item.model.js`
-- `Backend/database/seeds/seed_template_items.js`
-- `Frontend/src/App.tsx`
-- `Frontend/src/config.ts` — API base URL auto-detection logic
-- `Frontend/src/pages/HomePage.tsx`
-- `Frontend/src/pages/ExampleItemsPage.tsx`
+## Two defects found tonight, both mine, both instructive
 
-### Planning / AI context
+**1 · Reasoning was being silently discarded.** Ollama streams `message.thinking` in its own field.
+My provider read only `message.content`, so on a thinking model (`gemma4:e4b`) ~90% of the output
+vanished. **Nothing failed and nothing logged** — the only signal was 25 content deltas against
+`eval_count: 250`, two numbers that did not reconcile. Now: its own stream event, its own column.
+⇒ *Reasoning is a different KIND of output from the reply, not a prefix of it.*
 
-- `AI_CarryOn.md` = short current-state handoff for the implementing project
-- `AI_ProgressTracking.md` = append-only implementation history for the implementing project
-- `AI_TemplateCreation.md` = template-maintainer notes, not implementer history
+**2 · My test truncated the stream and it looked like her bug.** `curl … | head -c 600` SIGPIPEs the
+pipeline; the answer stopped mid-sentence and the truncated text got persisted. The code was fine.
+⇒ *When output looks cut off, suspect the harness before the system.*
 
-## Git State
+---
 
-- Replace this section with the live git state of the derived project when work begins.
-- Template baseline remote:
-  - `origin`
-  - `https://github.com/OteEnded/OteFullStackTemplate_Fastify_React.git`
+## Open — needs Ote
 
-## Verification State
+- **⭐ The L3 note shape** (OLS's, but it decides how Sotera's notes are built). 22.5× prefill every
+  turn. Now corroborated twice independently: a cost-optimisation talk landed on *"unused skills and
+  tools load into the context window with every message"*, and it showed up **live** in the Hermes
+  transcript — the notes said *"maintain a warm and unhurried tone"* while he said *"don't be polite
+  about it"*, and the model spent reasoning negotiating between them. **The decision is WHERE notes
+  live**, not how they are worded.
+- **Hermes §25 Q3 follow-up:** he wants per-turn review *and* the nightly distiller — both are legal,
+  Principle 11 is one writer per **store**. Remaining call: **which store each one writes**, and who
+  wins a conflict.
+- **Voice.** OmniVoice ships male because that persona was male. She is she/her and the MM arc is
+  paused, so v0 is text-only unless he says otherwise. Text is the substrate anyway.
+- **Her identity content.** The schema has a place for who she is; nobody has written who she is.
+  That is the actual next question, and it is his, not mine.
 
-- Replace this section with real verification notes for the derived project.
-- Template baseline was verified before publication on 2026-04-17.
+## Next, in order
 
-Notes:
-
-- `AI_TemplateCreation.md` is intentionally ignored by git.
-- `Backend/config.json` is ignored through `Backend/.gitignore`.
-- Frontend build output under `Backend/public/dist/` is ignored at the root level.
-
-## Commit Message Policy
-
-Use a consistent commit format:
-
-- `OteEnded[feat]: ...`
-- `OteEnded[fix]: ...`
-- `OteEnded[refactor]: ...`
-- `OteEnded[docs]: ...`
-- `OteEnded[chore]: ...`
-
-Examples:
-
-- `OteEnded[feat]: add initial fullstack template structure`
-- `OteEnded[refactor]: replace checklist flow with generic template items`
-- `OteEnded[docs]: add root template README`
-
-Git workflow policy:
-
-- Do not commit automatically after every edit.
-- Commit only when the user explicitly asks for a commit.
-- Before committing, re-check `git status` and make sure ignored files stay out of the commit.
-- If the remote changes later, record it in this file for the derived project.
-- Keep this file short and current.
-
-## Suggested Next Steps
-
-1. Replace the example `TemplateItems` flow with the real domain.
-2. Update this file with the actual current goal and implementation state.
-3. Start appending detailed work history in `AI_ProgressTracking.md`.
+1. Wire PortableComponents/the SDK — a persona *is* an assembly, so her capability list should be real.
+2. The memory service: capture → reconcile → recall, against the tables that already enforce the rules.
+   ⚠️ The relevance floor ([R4]) and queued≠saved ([R8]) live **here**, not in the schema.
+3. The chat UI, replacing the placeholder.
+4. Then the local model manager — the half of shape (a) that is still missing.
