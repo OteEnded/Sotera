@@ -1,18 +1,17 @@
 {
-  "name": "fullstack-template-backend",
-  "version": "1.0.0",
+  "name": "sotera-backend",
+  "version": "0.0.1",
   "type": "module",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "node --watch server.js",
-    "db:reset-seed": "node database/scripts/reset_and_seed_mock_data.js"
+    "dev": "node --watch server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Backend API for the Fastify + React full-stack template",
+  "description": "Sotera — backend. A persona, not a platform.",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "@fastify/static": "^9.0.0",

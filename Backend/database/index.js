@@ -4,7 +4,6 @@ import { loadConfig, log, logQuery } from "../lib/utility.js";
 const config = loadConfig();
 
 import initModels from "./models/index.js";
-import seedTemplateItems from "./seeds/seed_template_items.js";
 
 const dbConfig = config.database.connection;
 
@@ -49,10 +48,6 @@ export async function initDB() {
         ...models.models,
         choices: models.choices
     };
-
-    await seedTemplateItems(db, {
-        forceSync: config.database?.seed?.force_template_items_sync === true,
-    });
 
     return db;
 }

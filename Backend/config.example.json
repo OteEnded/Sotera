@@ -35,19 +35,16 @@
             "force": false,
             "alter": false
         },
-        "seed": {
-            "force_template_items_sync": false
-        },
         "connection": {
-            "username": "",
+            "username": "(the app role — NOT a superuser)",
             "password": "",
-            "database": "",
+            "database": "ote_ai_toolbox",
             "schemas": {
                 "parent": "public",
-                "project": ""
+                "project": "persona_sotera"
             },
             "host": "127.0.0.1",
-            "port": 5432,
+            "port": 54322,
             "dialect": "postgres"
         }
     }

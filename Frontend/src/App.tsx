@@ -1,8 +1,10 @@
-import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import ExampleItemsPage from './pages/ExampleItemsPage';
 import './index.css';
 
+// Deliberately minimal. This is the scaffold's front door, not Sotera's chat surface — that arrives
+// with the runtime port. Kept honest rather than dressed up, so nobody mistakes a placeholder for
+// a built UI.
 export default function App() {
   return (
     <BrowserRouter>
@@ -12,26 +14,15 @@ export default function App() {
 
         <section className="app-frame">
           <header className="hero">
-            <p className="hero-kicker">Fastify + React Starter</p>
-            <h1>Reusable Full-Stack Template</h1>
+            <p className="hero-kicker">Persona</p>
+            <h1>Sotera</h1>
             <p className="hero-copy">
-              A generic baseline with Fastify serving the built React app, optional Sequelize setup,
-              and one small example feature to replace with your real domain.
+              Scaffold only. The chat surface, memory and local model manager are not built yet.
             </p>
           </header>
 
-          <nav className="app-nav" aria-label="Primary">
-            <NavLink to="/" end className={({ isActive }) => isActive ? 'app-nav-link active' : 'app-nav-link'}>
-              Overview
-            </NavLink>
-            <NavLink to="/items" className={({ isActive }) => isActive ? 'app-nav-link active' : 'app-nav-link'}>
-              Example Items
-            </NavLink>
-          </nav>
-
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/items" element={<ExampleItemsPage />} />
           </Routes>
         </section>
       </main>
