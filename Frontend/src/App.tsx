@@ -27,7 +27,6 @@ const ComponentsPage = lazyWithReload(() => import('./pages/admin/ComponentsPage
 const MemoriesPage = lazyWithReload(() => import('./pages/admin/MemoriesPage'));
 const SystemPage = lazyWithReload(() => import('./pages/admin/SystemPage'));
 const ApiDocsPage = lazyWithReload(() => import('./pages/ApiDocsPage'));
-const MyProvidersPage = lazyWithReload(() => import('./pages/MyProvidersPage'));
 const MyKeysPage = lazyWithReload(() => import('./pages/MyKeysPage'));
 const MyUsagePage = lazyWithReload(() => import('./pages/MyUsagePage'));
 const Account = lazyWithReload(() => import('./pages/Account'));
@@ -42,7 +41,6 @@ const NAV: { to: string; label: string; end: boolean; cap: Capability | null; hi
   { to: '/console/apikeys', label: 'API Keys', end: false, cap: 'manage_users' },
   { to: '/console/mykeys', label: 'My API Keys', end: false, cap: 'own_keys', hideForCap: 'manage_users' },
   { to: '/console/providers', label: 'Providers', end: false, cap: 'system_config' },
-  { to: '/console/myproviders', label: 'My Providers (BYOK)', end: false, cap: 'select_model', hideForRoot: true },
   { to: '/console/models', label: 'Models', end: false, cap: 'manage_users' }, // root + admin (batch verify)
   { to: '/console/local', label: 'Local', end: false, cap: 'system_config' }, // resident models + attribution + both memory meters
   { to: '/console/usage', label: 'Usage', end: false, cap: 'manage_users' },
@@ -125,7 +123,6 @@ function AppRouter() {
           element={hasConsole ? <ConsoleLayout><GatewayConsole /></ConsoleLayout> : <Navigate to="/chat" replace />}
         />
         <Route path="/console/account" element={<ConsoleLayout><Account /></ConsoleLayout>} />
-        {can('select_model') && <Route path="/console/myproviders" element={<ConsoleLayout><MyProvidersPage /></ConsoleLayout>} />}
         {can('own_keys') && <Route path="/console/mykeys" element={<ConsoleLayout><MyKeysPage /></ConsoleLayout>} />}
         {can('own_keys') && <Route path="/console/myusage" element={<ConsoleLayout><MyUsagePage /></ConsoleLayout>} />}
         {can('manage_users') && <Route path="/console/users" element={<ConsoleLayout><UsersPage /></ConsoleLayout>} />}

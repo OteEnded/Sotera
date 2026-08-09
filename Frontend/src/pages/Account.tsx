@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { apiGet, apiPatch, apiPost } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import ConfirmModal from '../components/ConfirmModal'
@@ -11,7 +10,7 @@ type DevRequest = { id: string; requestedRole: string; note: string | null; stat
 
 // `embedded` = rendered inside the chat site's Options modal (no page chrome/title).
 export default function Account({ embedded = false }: { embedded?: boolean }) {
-  const { user, refresh, can } = useAuth()
+  const { user, refresh } = useAuth()
 
   // membership card (member -> power free upgrade; developer = manual request)
   const [upgradeAsk, setUpgradeAsk] = useState(false)
@@ -44,7 +43,6 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
   }, [user])
 
   // BYOK moved to its own page (/console/myproviders) — Account keeps identity + password.
-  const byokVisible = Boolean(user && !user.isRoot && can('select_model'))
 
   const roles = user?.roles || []
   const isMember = !user?.isRoot && roles.includes('member') && !roles.some((r) => ['power', 'developer', 'admin'].includes(r))
@@ -258,15 +256,9 @@ export default function Account({ embedded = false }: { embedded?: boolean }) {
         {err && <div className="gw-meta gw-error">{err}</div>}
       </section>
 
-      {byokVisible && (
-        <section className="gw-card">
-          <div className="gw-card-title">My model providers (BYOK)</div>
-          <p className="adm-dim m-0">
-            Moved to its own page: <Link className="underline decoration-dotted underline-offset-2" to="/console/myproviders">My Providers (BYOK)</Link>
-            {' '}— add personal providers whose models appear in your chat picker and run on your key.
-          </p>
-        </section>
-      )}
+      {/* BYOK removed for Sotera: per-user provider keys are a multi-user product feature. Her
+          providers are configured once in Backend/config.json. Inbound API keys (/console/mykeys)
+          are a different thing entirely and stay — they are how a client authenticates TO her. */}
 
       {upgradeAsk && (
         <ConfirmModal
