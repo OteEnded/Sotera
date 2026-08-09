@@ -126,7 +126,7 @@ export default function Login() {
         className="w-full max-w-[380px] bg-panel-strong border border-line rounded-[14px] p-7 shadow-modal flex flex-col gap-2"
         onSubmit={submit}
       >
-        <p className="m-0 text-xs tracking-[0.12em] uppercase text-accent">OteLLMServices</p>
+        <p className="m-0 text-xs tracking-[0.12em] uppercase text-accent">Sotera</p>
         <h1 className="mt-0.5 mb-0 text-[26px]">{title}</h1>
         <p className="mt-0 mb-3.5 text-muted text-sm">{blurb}</p>
 

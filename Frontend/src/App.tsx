@@ -73,7 +73,7 @@ function ConsoleLayout({ children }: { children: ReactNode }) {
       <section className="app-frame">
         <header className="adm-topbar">
           <div>
-            <p className="hero-kicker">OteLLMServices</p>
+            <p className="hero-kicker">Sotera</p>
             <h1 className="adm-topbar-title">Console</h1>
           </div>
           <div className="adm-topbar-user">

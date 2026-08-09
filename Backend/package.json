@@ -1,5 +1,5 @@
 {
-  "name": "ote-llm-services-backend",
+  "name": "sotera-backend",
   "version": "0.1.0",
   "type": "module",
   "main": "server.js",
@@ -11,7 +11,7 @@
   "keywords": [],
   "author": "Ote",
   "license": "ISC",
-  "description": "OteLLMServices — multi-provider LLM gateway service (provider abstraction, tool transport, SSE streaming, scoped API-key auth); infrastructure only, no persona/chat/memory logic",
+  "description": "Sotera - backend. A persona, not a platform.",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "@fastify/secure-session": "^8.2.0",

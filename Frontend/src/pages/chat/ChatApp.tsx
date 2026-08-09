@@ -3024,7 +3024,7 @@ ${parts.join('\n')}
       {sidebarOpen && <div className="chat-sidebar-overlay" {...dismissOnBackdrop(() => setSidebarOpen(false))} />}
       <aside className={sidebarOpen ? 'chat-sidebar open' : 'chat-sidebar'}>
         <div className="chat-brand px-1.5 pt-1">
-          <p className="hero-kicker">OteLLMServices</p>
+          <p className="hero-kicker">Sotera</p>
           <strong className="block text-lg mt-0.5">Chat</strong>
         </div>
 

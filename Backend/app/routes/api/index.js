@@ -12,7 +12,7 @@ export default async function (fastify) {
   fastify.get('/health', async () => {
     return {
       ok: true,
-      service: 'OteLLMServices API',
+      service: 'Sotera API',
       timestamp: new Date().toISOString()
     }
   })
