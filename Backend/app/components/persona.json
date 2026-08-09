@@ -2,19 +2,19 @@
   "name": "ote-chat",
   "description": "The Chat Site's persona (the first, proto Persona Runtime). It assembles component projects BY SOURCE from the sibling PortableComponents ecosystem; the host (chat-site) PROVIDES the concrete `memory` (Sequelize) and `search` (Brave) services per request, so the components stay portable. Each entry is { id?, name?, source, enabled? }: `source` (required) is a path relative to this file; `id` is an optional runtime alias; `name` is a human label (always set here for easy rechecking — the install warns if it doesn't match the resolved component); `enabled` (default true) toggles an entry off without deleting it.",
   "components": [
-    { "name": "CurrentTime", "enabled": true, "source": "../../../../PortableComponents/Tools/CurrentTime" },
-    { "name": "Calculator", "enabled": true, "source": "../../../../PortableComponents/Tools/Calculator" },
-    { "name": "Memory", "enabled": true, "source": "../../../../PortableComponents/Packages/Memory" },
-    { "name": "WebSearch", "enabled": true, "source": "../../../../PortableComponents/Tools/WebSearch" },
-    { "name": "ConversationSearch", "enabled": true, "source": "../../../../PortableComponents/Tools/ConversationSearch" },
-    { "name": "WorkingMemory", "enabled": true, "source": "../../../../PortableComponents/Tools/WorkingMemory" },
-    { "name": "WebFetch", "enabled": true, "source": "../../../../PortableComponents/Tools/WebFetch" },
-    { "name": "Research", "enabled": true, "source": "../../../../PortableComponents/Skills/Research" },
-    { "name": "Json", "enabled": true, "source": "../../../../PortableComponents/Tools/Json" },
-    { "name": "ServiceOverview", "enabled": true, "source": "../../../../PortableComponents/Tools/ServiceOverview" },
-    { "name": "DailyDigest", "enabled": false, "source": "../../../../PortableComponents/Features/DailyDigest" },
-    { "name": "Scheduler", "enabled": true, "source": "../../../../PortableComponents/Packages/Scheduler" },
-    { "name": "Todo", "enabled": true, "source": "../../../../PortableComponents/Packages/Todo" },
-    { "name": "HumanInteraction", "enabled": true, "source": "../../../../PortableComponents/Packages/HumanInteraction" }
+    { "name": "CurrentTime", "enabled": true, "source": "../../../../../PortableComponents/Tools/CurrentTime" },
+    { "name": "Calculator", "enabled": true, "source": "../../../../../PortableComponents/Tools/Calculator" },
+    { "name": "Memory", "enabled": true, "source": "../../../../../PortableComponents/Packages/Memory" },
+    { "name": "WebSearch", "enabled": true, "source": "../../../../../PortableComponents/Tools/WebSearch" },
+    { "name": "ConversationSearch", "enabled": true, "source": "../../../../../PortableComponents/Tools/ConversationSearch" },
+    { "name": "WorkingMemory", "enabled": true, "source": "../../../../../PortableComponents/Tools/WorkingMemory" },
+    { "name": "WebFetch", "enabled": true, "source": "../../../../../PortableComponents/Tools/WebFetch" },
+    { "name": "Research", "enabled": true, "source": "../../../../../PortableComponents/Skills/Research" },
+    { "name": "Json", "enabled": true, "source": "../../../../../PortableComponents/Tools/Json" },
+    { "name": "ServiceOverview", "enabled": true, "source": "../../../../../PortableComponents/Tools/ServiceOverview" },
+    { "name": "DailyDigest", "enabled": false, "source": "../../../../../PortableComponents/Features/DailyDigest" },
+    { "name": "Scheduler", "enabled": true, "source": "../../../../../PortableComponents/Packages/Scheduler" },
+    { "name": "Todo", "enabled": true, "source": "../../../../../PortableComponents/Packages/Todo" },
+    { "name": "HumanInteraction", "enabled": true, "source": "../../../../../PortableComponents/Packages/HumanInteraction" }
   ]
 }

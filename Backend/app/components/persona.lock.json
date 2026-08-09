@@ -1,9 +1,9 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.2",
-  "resolvedAt": "2026-08-02T17:42:23.592Z",
+  "resolvedAt": "2026-08-09T19:01:35.749Z",
   "projects": {
-    "../../../../PortableComponents/Tools/CurrentTime": {
+    "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
       "name": "CurrentTime",
       "version": "0.1.0",
@@ -16,7 +16,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Tools/Calculator": {
+    "../../../../../PortableComponents/Tools/Calculator": {
       "id": "@ote/tool-calculator",
       "name": "Calculator",
       "version": "0.1.0",
@@ -29,7 +29,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Packages/Memory": {
+    "../../../../../PortableComponents/Packages/Memory": {
       "id": "@ote/memory",
       "name": "Memory",
       "version": "0.1.0",
@@ -50,7 +50,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Tools/WebSearch": {
+    "../../../../../PortableComponents/Tools/WebSearch": {
       "id": "@ote/tool-web-search",
       "name": "WebSearch",
       "version": "0.1.1",
@@ -63,7 +63,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Tools/ConversationSearch": {
+    "../../../../../PortableComponents/Tools/ConversationSearch": {
       "id": "@ote/tool-conversation-search",
       "name": "ConversationSearch",
       "version": "0.1.0",
@@ -76,7 +76,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Tools/WorkingMemory": {
+    "../../../../../PortableComponents/Tools/WorkingMemory": {
       "id": "@ote/tool-working-memory",
       "name": "WorkingMemory",
       "version": "0.1.0",
@@ -89,7 +89,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Tools/WebFetch": {
+    "../../../../../PortableComponents/Tools/WebFetch": {
       "id": "@ote/tool-web-fetch",
       "name": "WebFetch",
       "version": "0.1.0",
@@ -104,7 +104,7 @@
         "net:fetch"
       ]
     },
-    "../../../../PortableComponents/Skills/Research": {
+    "../../../../../PortableComponents/Skills/Research": {
       "id": "@ote/skill-research",
       "name": "Research",
       "version": "0.1.1",
@@ -117,7 +117,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Tools/Json": {
+    "../../../../../PortableComponents/Tools/Json": {
       "id": "@ote/tool-json",
       "name": "Json",
       "version": "0.1.0",
@@ -131,7 +131,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Tools/ServiceOverview": {
+    "../../../../../PortableComponents/Tools/ServiceOverview": {
       "id": "@ote/tool-service-overview",
       "name": "ServiceOverview",
       "version": "0.1.0",
@@ -144,7 +144,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Packages/Scheduler": {
+    "../../../../../PortableComponents/Packages/Scheduler": {
       "id": "@ote/scheduler",
       "name": "Scheduler",
       "version": "0.1.0",
@@ -161,7 +161,7 @@
       ],
       "permissions": []
     },
-    "../../../../PortableComponents/Packages/Todo": {
+    "../../../../../PortableComponents/Packages/Todo": {
       "id": "@ote/todo",
       "name": "Todo",
       "version": "0.1.0",
@@ -179,7 +179,7 @@
         "service:todoStore"
       ]
     },
-    "../../../../PortableComponents/Packages/HumanInteraction": {
+    "../../../../../PortableComponents/Packages/HumanInteraction": {
       "id": "@ote/human-interaction",
       "name": "HumanInteraction",
       "version": "0.1.0",
