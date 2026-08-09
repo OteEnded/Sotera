@@ -1,6 +1,6 @@
 {
     "app": {
-        "port": 8201
+        "port": 8210
     },
     "providers": {
         "ollama": {
@@ -27,11 +27,6 @@
             "baseURL": "https://api.z.ai/api/paas/v4",
             "apiKey": ""
         },
-        "llamacpp": {
-            "kind": "openai-compatible",
-            "baseURL": "http://127.0.0.1:11435/v1",
-            "apiKey": "sk-local-llamacpp"
-        },
         "xiaomimimo": {
             "kind": "openai-compatible",
             "baseURL": "https://api.xiaomimimo.com/v1",
@@ -41,7 +36,7 @@
     "chat": {
         "defaultModel": "ollama/gemma4:e4b",
         "systemPrompt": "(optional — REPLACES the built-in prompt wholesale. null = use the default)",
-        "assistantIdentity": "(optional — who the assistant IS, its own prompt part so a custom systemPrompt cannot silently delete it. null = the default, matched to chat.speech.voice. \"\" = no identity line at all)",
+        "assistantIdentity": "(optional — who SHE is, as its own prompt part so a custom systemPrompt cannot silently delete it. ⚠ null INHERITS OteLLMServices' hardcoded \"You are male\" — Sotera is she/her, so do not leave this null. This is a PLACEHOLDER: her real identity core is Ote's to write.)",
         "visionRelay": {
             "model": "ollama/gemma4:e4b"
         },
@@ -60,14 +55,14 @@
     },
     "auth": {
         "root": {
-            "username": "root",
+            "username": "ote",
             "password": "change-me"
         },
         "consumers": [],
         "session": {
             "secret": "change-me-to-a-32+-char-random-secret-string (REQUIRED: server refuses to boot on this default — DevTools/maintenance/rotate-secrets.mjs generates real values)",
             "salt": "change-me-16char",
-            "cookieName": "ote_llm_session",
+            "cookieName": "sotera_session",
             "maxAgeSeconds": 604800
         },
         "keyEncryptionSecret": "change-me-encrypts-api-keys-for-re-copy (falls back to session.secret if empty; rotate ONLY via DevTools/maintenance/rotate-secrets.mjs — it re-encrypts stored keys so they stay recoverable)"
@@ -130,7 +125,7 @@
         }
     },
     "database": {
-        "enabled": false,
+        "enabled": true,
         "sync": {
             "force": false,
             "alter": false
@@ -138,28 +133,28 @@
         "connection": {
             "username": "",
             "password": "",
-            "database": "",
+            "database": "ote_ai_toolbox",
             "schemas": {
                 "parent": "public",
-                "project": "ote_llm_services"
+                "project": "persona_sotera"
             },
             "host": "127.0.0.1",
-            "port": 5432,
+            "port": 54322,
             "dialect": "postgres"
         }
     },
     "api": {
         "anthropic": {
-            "defaultModel": "ollama/gemma4:26b",
+            "defaultModel": "ollama/gemma4:e4b",
             "modelMap": {
-                "claude-*": "ollama/gemma4:26b"
+                "claude-*": "ollama/gemma4:e4b"
             }
         },
         "publicBaseUrl": ""
     },
     "memory": {
-        "extractModel": "ollama/qwen3.5:9b (aux models run on CPU — this is a RAM choice, not VRAM)",
-        "consolidateModel": "",
-        "reflectModel": ""
+        "extractModel": "ollama/qwen3.5:9b — aux models run on CPU (memory.extractDevice), so this is a RAM choice not VRAM. ⚠ A BIGGER MODEL DOES NOT FIX BAD CAPTURE: qwen3.5:9b produced byte-identical junk to gemma4:e4b on the same sentence. Chosen on cost (6.1GB/4.8s vs 9.4GB/13.2s).",
+        "consolidateModel": "(optional — falls back to the default)",
+        "reflectModel": "(optional — falls back to the default)"
     }
 }
