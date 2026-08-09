@@ -1,6 +1,15 @@
 {
     "app": {
-        "port": 3000
+        "port": 8210
+    },
+    "providers": {
+        "ollama": {
+            "kind": "ollama",
+            "host": "http://127.0.0.1:11434"
+        }
+    },
+    "chat": {
+        "defaultModel": "ollama/gemma4:e4b"
     },
     "logging": {
         "message": {
