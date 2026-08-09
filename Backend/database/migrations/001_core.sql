@@ -1,3 +1,10 @@
+-- ⛔ SUPERSEDED AS DDL — KEPT AS THE SPEC. Do not run this file.
+--
+-- Written before Ote chose to clone OteLLMServices for a head start. OLS's 35 models expect OLS's
+-- shape, so its schema landed instead and this became the SPECIFICATION for the corrections rather
+-- than the foundation. The diff that actually applies is 002_owner_corrections.sql.
+-- Everything below still states WHAT must be true and WHY, with the measured failure behind each.
+--
 -- =====================================================================================
 -- Sotera — core schema, v0.  Target: database `ote_ai_toolbox`, schema `persona_sotera`.
 -- Idempotent: safe to re-run.
