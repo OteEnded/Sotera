@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
-  "sdkVersion": "0.6.2",
-  "resolvedAt": "2026-08-10T00:06:54.436Z",
+  "sdkVersion": "0.6.3",
+  "resolvedAt": "2026-08-10T05:44:10.094Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -10,7 +10,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-d07010f74a58f3711fea068c2d4bd46fde166d04569f175b7707d6f1eca516ab",
       "components": [
         "get_current_time"
       ],
@@ -23,7 +23,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-e1c4ab90f5d32f0141d023fd8878aa8d30fd7efc8d3a03c7fba432226f01642b",
       "components": [
         "calculate"
       ],
@@ -36,7 +36,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-158d866f8add9f2fd837ccd0f673c2e135432171ab1b40afb11918e39aa1d92a",
       "components": [
         "recall_memory",
         "list_memories",
@@ -57,7 +57,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-8891113d8bc76fd01bee09ebb302665dab0352f4daefa887e6cbca1519d55c9b",
       "components": [
         "search_web"
       ],
@@ -70,7 +70,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-a63db2dd863951e3b7798391a16681419167ea8331118272f27187224c3a380e",
       "components": [
         "search_conversations"
       ],
@@ -83,7 +83,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-44ebec42a86f558a12c7a7b6e2231eb72acb51dfba995c2cc5325efa7b4f3d48",
       "components": [
         "update_working_memory"
       ],
@@ -96,7 +96,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-b0c6b8c6af40f229baa6192cfef98361a9ad25ffe62417a05d763e0bde85e5e5",
       "components": [
         "fetch_url_content"
       ],
@@ -111,7 +111,7 @@
       "type": "skill",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-b52bb4d9701e8b6ca6218369cf50ef95dca7c19811397daf95d205a7a3c5aea4",
       "components": [
         "skill.research"
       ],
@@ -124,7 +124,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-c8bac3734222366ee52e1322432e04cb08b8226d84a2456fd9b5942e11e0efe0",
       "components": [
         "parse_json",
         "stringify_json"
@@ -138,7 +138,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-abbc987f8e03716c7b1961e5eb322b51a9179cc26de3ad2bef65451482233ea0",
       "components": [
         "get_service_overview"
       ],
@@ -151,7 +151,7 @@
       "type": "capability",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-1f89a7e2bb43e9ab4329d44ed80c8c3af5ba66e1ffd1df701a106e445c77753d",
       "components": [
         "create_schedule",
         "update_schedule",
@@ -168,7 +168,7 @@
       "type": "capability",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-0478b78fd85352c5ac2b8265c2a288ad212897e21f2418e403b88afc045f2a67",
       "components": [
         "feature.todo",
         "write_todos",
@@ -186,7 +186,7 @@
       "type": "capability",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": null,
+      "integrity": "sha256-ac5df64e1d1ec66c4c76aa6da715904a157f06f373958070704a4e3da460c8f8",
       "components": [
         "feature.human-interaction",
         "ask_user"
