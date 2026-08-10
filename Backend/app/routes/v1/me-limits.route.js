@@ -1,4 +1,5 @@
 import { requireLogin } from '../../auth/index.js'
+import { ownerIdOf } from '../../auth/owner.js'
 import { tokenBudgetFor } from '../../usage/limits.js'
 
 // Self-service token budget: how much of today's limit is used, the active boosts
@@ -7,6 +8,6 @@ import { tokenBudgetFor } from '../../usage/limits.js'
 // composer shows it when a send is refused with 429 token_limit_exceeded.
 export default async function meLimitsRoutes(fastify) {
   fastify.get('/me/limits', { preHandler: requireLogin() }, async (request) => {
-    return tokenBudgetFor(fastify, request.user.id ?? null)
+    return tokenBudgetFor(fastify, ownerIdOf(request.user, 'your token budget'))
   })
 }

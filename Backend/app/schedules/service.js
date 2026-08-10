@@ -12,6 +12,8 @@
 import crypto from 'node:crypto'
 import { runtime, listSkills, buildToolContext, runTool } from '../components/runtime.js'
 import { internalCallHeaders } from '../auth/index.js'
+import { ownerIdOf } from '../auth/owner.js'
+import { isRootConnectedUser } from '../auth/root-identity.js'
 import { loadRootPrefs } from '../routes/v1/me-prefs.route.js'
 import { getSetting } from '../settings/index.js'
 import { notifyChatEvent } from '../chat/notify.js'
@@ -211,7 +213,19 @@ async function runToolAction(fastify, row) {
       ? (await fastify.db.mst_users.findByPk(row.user_id, { attributes: ['id', 'chat_prefs'] }))?.chat_prefs?.timezone ?? null
       : (await loadRootPrefs(fastify.db))?.timezone ?? null
   } catch { /* time must never break a run */ }
-  const ctx = buildToolContext(fastify, { user: { id: row.user_id ?? null, isRoot: row.user_id == null, capabilities: [] } }, { timezone })
+  // ⚠️ WAS `isRoot: row.user_id == null` — root-ness inferred from the SHAPE of the owner column, the
+  // defect this codebase has now hit at eight separate sites. It failed in BOTH directions at once:
+  // root owns its schedules by id today, so root's own runs lost root's capabilities; and any row that
+  // ended up unowned would have run AS ROOT. The second direction is the one that matters — it turns a
+  // missing owner into a privilege grant. Root-ness is a question for root-identity.js, never for a
+  // column's nullness, and the owner is now required rather than defaulted.
+  const ctx = buildToolContext(fastify, {
+    user: {
+      id: ownerIdOf({ id: row.user_id }, 'a scheduled tool run'),
+      isRoot: isRootConnectedUser(fastify.config, row.user_id),
+      capabilities: [],
+    },
+  }, { timezone })
   const result = await runTool(toolId, args || {}, ctx)
   // runTool reports failures as { error } instead of throwing — surface them as run failures
   if (result && typeof result === 'object' && result.error) {
@@ -304,7 +318,7 @@ async function resolveDedicatedDestination(fastify, user, action, name) {
   // composition (the ⏰ marker + the standing-instruction seed) is the service's call;
   // the Store just persists the conversation + seed message and hands back the new id.
   action.conversationId = await store.createSeededConversation({
-    userId: user?.id ?? null,
+    userId: ownerIdOf(user, 'a schedule conversation'),
     title: `⏰ ${name}`, // the schedule-chat marker, same as per-run conversations
     model: action.model,
     seedRole: 'assistant',
@@ -331,7 +345,7 @@ export async function createJob(fastify, user, body) {
     return err(403, 'schedules_locked', 'Your role tier is not allowed to create schedules.')
   }
   const max = getSetting(fastify.config, 'chat.maxSchedulesPerUser')
-  const count = await store.count(user?.id ?? null)
+  const count = await store.count(user?.id)
   if (count >= max) {
     return err(400, 'schedule_cap', `You already have ${count} schedules — the platform cap is ${max}.`)
   }
@@ -350,12 +364,14 @@ export async function createJob(fastify, user, body) {
   if (action.type === 'skill-turn' && action.conversationId === DEDICATED_DESTINATION) {
     await resolveDedicatedDestination(fastify, user, action, body.name.trim())
   } else if (action.type === 'skill-turn' && action.conversationId != null) {
-    if (!(await store.ownsConversation(action.conversationId, user?.id ?? null))) {
+    if (!(await store.ownsConversation(action.conversationId, user?.id))) {
       return err(400, 'conversation_not_found', 'No such conversation of yours — pick one you own, or null for a new conversation per run.')
     }
   }
   const row = await store.create({
-    user_id: user?.id ?? null,
+    // `store.create` passes fields straight through to Sequelize, so the refusal has to happen here —
+    // a schedule with no owner would run on a timer forever with nobody able to see or stop it.
+    user_id: ownerIdOf(user, 'a schedule'),
     name: body.name.trim(),
     trigger,
     action,
@@ -381,7 +397,7 @@ export async function updateJob(fastify, user, id, b = {}) {
   if ((getSetting(fastify.config, 'chat.maxSchedulesPerUser') || 0) <= 0) {
     return err(403, 'schedules_disabled', 'Scheduling is disabled on this platform.')
   }
-  const row = await store.findOwned(id, user?.id ?? null)
+  const row = await store.findOwned(id, user?.id)
   if (!row) return err(404, 'not_found', 'No such schedule.')
   if (b.name !== undefined && (typeof b.name !== 'string' || !b.name.trim() || b.name.length > 80)) {
     return err(400, 'invalid_schedule', 'name must be 1–80 characters')
@@ -400,7 +416,7 @@ export async function updateJob(fastify, user, id, b = {}) {
       // picking "dedicated" on an EDIT mints a fresh home chat for the schedule
       await resolveDedicatedDestination(fastify, user, nextAction, (b.name ?? row.name).trim())
     } else if (nextAction.type === 'skill-turn' && nextAction.conversationId != null) {
-      if (!(await store.ownsConversation(nextAction.conversationId, user?.id ?? null))) {
+      if (!(await store.ownsConversation(nextAction.conversationId, user?.id))) {
         return err(400, 'conversation_not_found', 'No such conversation of yours — pick one you own, or null for a new conversation per run.')
       }
     }
@@ -414,7 +430,7 @@ export async function updateJob(fastify, user, id, b = {}) {
     const t = nextAction
     if ((t?.type ?? 'skill-turn') === 'skill-turn'
       && t.conversationId != null && t.conversationId !== DEDICATED_DESTINATION
-      && !(await store.ownsConversation(t.conversationId, user?.id ?? null))) {
+      && !(await store.ownsConversation(t.conversationId, user?.id))) {
       return err(400, 'target_missing', 'The chat this schedule ran in was deleted — pick a new destination (an existing chat, a fresh chat per run, or a dedicated chat) before re-enabling.')
     }
   }
@@ -442,7 +458,7 @@ export async function updateJob(fastify, user, id, b = {}) {
  */
 export async function rotateHook(fastify, user, id) {
   const store = createTriggerJobsStore(fastify.db)
-  const row = await store.findOwned(id, user?.id ?? null)
+  const row = await store.findOwned(id, user?.id)
   if (!row) return { error: { status: 404, code: 'not_found', message: 'No such schedule.' } }
   if (row.trigger?.type !== 'webhook') {
     return { error: { status: 400, code: 'not_webhook', message: 'Only webhook schedules have a fire URL to renew.' } }
@@ -461,7 +477,7 @@ export async function rotateHook(fastify, user, id) {
  */
 export async function schedulesTargeting(fastify, conversationId, userId) {
   const store = createTriggerJobsStore(fastify.db)
-  const rows = await store.findAllOwned(userId ?? null)
+  const rows = await store.findAllOwned(userId)
   return rows
     .filter((r) => (r.action?.type ?? 'skill-turn') === 'skill-turn' && r.action?.conversationId === conversationId)
     .map((r) => ({ id: r.id, name: r.name, enabled: r.enabled }))
@@ -488,7 +504,7 @@ export async function deactivateSchedulesForConversation(fastify, conversationId
 /** Delete a scheduled job (owner-scoped; the live trigger unregisters). { ok } | { error }. */
 export async function deleteJob(fastify, user, id) {
   const store = createTriggerJobsStore(fastify.db)
-  const row = await store.findOwned(id, user?.id ?? null)
+  const row = await store.findOwned(id, user?.id)
   if (!row) return { error: { status: 404, code: 'not_found', message: 'No such schedule.' } }
   runtime.triggers.unregister(jobTriggerId(row.id))
   const name = row.name
@@ -535,7 +551,7 @@ export function createScheduleService({ fastify, user, currentModel = null, curr
     },
     async update(spec = {}) {
       if (!spec.id) return { error: 'id is required — find it with list_schedules' }
-      const row = await store.findOwned(spec.id, user?.id ?? null)
+      const row = await store.findOwned(spec.id, user?.id)
       if (!row) return { error: 'no such schedule of yours — call list_schedules to see ids' }
       const b = {}
       if (spec.name !== undefined) b.name = spec.name
@@ -571,7 +587,7 @@ export function createScheduleService({ fastify, user, currentModel = null, curr
       return { deleted: true, id: out.id, name: out.name }
     },
     async list() {
-      const rows = await store.findAllOwned(user?.id ?? null)
+      const rows = await store.findAllOwned(user?.id)
       return {
         schedules: rows.map((r) => {
           const v = jobView(r)

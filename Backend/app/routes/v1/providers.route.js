@@ -1,4 +1,5 @@
 import { listModels, listAllModels, GatewayError } from '../../chat-runtime/index.js'
+import { ownerIdOf } from '../../auth/owner.js'
 import { listConfiguredProviders } from '../../adapters/index.js'
 import { requireScopes } from '../../auth/index.js'
 
@@ -11,7 +12,7 @@ export default async function providersRoutes(fastify) {
     url: '/models',
     preHandler: requireScopes(['models.read']),
     handler: async (request, reply) => {
-      const { models, errors } = await listAllModels({ serverConfig: fastify.config, userId: request.apiKey?.userId ?? null })
+      const { models, errors } = await listAllModels({ serverConfig: fastify.config, userId: ownerIdOf(request.apiKey, 'this API-key request') })
       const created = Math.floor(Date.now() / 1000)
       const body = {
         object: 'list',
@@ -34,7 +35,7 @@ export default async function providersRoutes(fastify) {
     url: '/providers',
     preHandler: requireScopes(['providers.read']),
     handler: async (request, reply) => {
-      return reply.send({ providers: listConfiguredProviders(fastify.config, { userId: request.apiKey?.userId ?? null }) })
+      return reply.send({ providers: listConfiguredProviders(fastify.config, { userId: ownerIdOf(request.apiKey, 'this API-key request') }) })
     },
   })
 
@@ -52,7 +53,7 @@ export default async function providersRoutes(fastify) {
     preHandler: requireScopes(['models.read']),
     handler: async (request, reply) => {
       try {
-        const models = await listModels({ serverConfig: fastify.config, provider: request.params.name, userId: request.apiKey?.userId ?? null })
+        const models = await listModels({ serverConfig: fastify.config, provider: request.params.name, userId: ownerIdOf(request.apiKey, 'this API-key request') })
         return reply.send({ provider: request.params.name, models })
       } catch (error) {
         if (error instanceof GatewayError) {

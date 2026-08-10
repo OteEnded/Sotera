@@ -1,5 +1,6 @@
 import { Op } from 'sequelize'
 import { requireLogin } from '../../auth/index.js'
+import { ownerIdOf, ownedBy } from '../../auth/owner.js'
 import { makeLimiter } from '../../auth/rate-limit.js'
 
 // Feedback submits: cap per account per hour (every submit counts). Bounds spam / DB bloat —
@@ -26,7 +27,7 @@ export default async function meFeedbackRoutes(fastify) {
   fastify.get('/me/feedback', async (request) => {
     const rows = await fastify.db.txn_feedback.findAll({
       // a cancelled item is withdrawn — gone from the submitter's view (admins still see it)
-      where: { user_id: request.user.id ?? null, status: { [Op.ne]: 'cancelled' } },
+      where: { ...ownedBy(request.user, 'your feedback'), status: { [Op.ne]: 'cancelled' } },
       order: [['rolling_id', 'DESC']],
       limit: 50,
     })
@@ -49,7 +50,7 @@ export default async function meFeedbackRoutes(fastify) {
   // images, fetched lazily (data URLs would bloat the list payload). Owner-bound.
   fastify.get('/me/feedback/:id/images', async (request, reply) => {
     const row = await fastify.db.txn_feedback.findOne({
-      where: { id: request.params.id, user_id: request.user.id ?? null, status: { [Op.ne]: 'cancelled' } },
+      where: { id: request.params.id, ...ownedBy(request.user, 'this feedback'), status: { [Op.ne]: 'cancelled' } },
       attributes: ['id', 'images', 'reply_images'],
     })
     if (!row) return reply.code(404).send({ error: { code: 'not_found', message: 'Feedback not found' } })
@@ -64,7 +65,7 @@ export default async function meFeedbackRoutes(fastify) {
   // submitter's list but stay visible to admins (status=cancelled), so triage keeps context.
   fastify.post('/me/feedback/:id/cancel', async (request, reply) => {
     const row = await fastify.db.txn_feedback.findOne({
-      where: { id: request.params.id, user_id: request.user.id ?? null },
+      where: { id: request.params.id, ...ownedBy(request.user, 'this feedback') },
     })
     if (!row) return reply.code(404).send({ error: { code: 'not_found', message: 'Feedback not found' } })
     if (row.status !== 'submitted' && row.status !== 'pending') {
@@ -102,7 +103,7 @@ export default async function meFeedbackRoutes(fastify) {
     }
     const images = (request.body.images || []).filter((u) => typeof u === 'string' && IMAGE_RE.test(u)).slice(0, MAX_FEEDBACK_IMAGES)
     const row = await fastify.db.txn_feedback.create({
-      user_id: request.user.id ?? null, // root has no DB row
+      user_id: ownerIdOf(request.user, 'a feedback row'), // root HAS a row - see auth/owner.js
       category: request.body.category || 'other',
       message,
       context: (request.body.context || '').slice(0, 300) || null,

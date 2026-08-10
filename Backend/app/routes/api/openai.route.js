@@ -11,6 +11,7 @@ import chatRoutes from '../v1/chat.route.js'
 import embeddingsRoutes from '../v1/embeddings.route.js'
 import { listAllModels } from '../../chat-runtime/index.js'
 import { requireScopes } from '../../auth/index.js'
+import { ownerIdOf } from '../../auth/owner.js'
 
 export default async function openaiRoutes(fastify) {
   // Reuse the exact OpenAI-compatible plugins (register /chat/completions + /embeddings).
@@ -18,7 +19,7 @@ export default async function openaiRoutes(fastify) {
   await fastify.register(embeddingsRoutes)
 
   fastify.get('/models', { preHandler: requireScopes(['models.read']) }, async (request, reply) => {
-    const { models } = await listAllModels({ serverConfig: fastify.config, userId: request.apiKey?.userId ?? null })
+    const { models } = await listAllModels({ serverConfig: fastify.config, userId: ownerIdOf(request.apiKey, 'this API-key request') })
     return reply.send({
       object: 'list',
       data: models.map((m) => ({ id: m.id, object: 'model', created: 0, owned_by: m.ownedBy })),

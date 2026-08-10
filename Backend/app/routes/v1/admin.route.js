@@ -18,6 +18,13 @@ import { logConfigChange, logSettingChanges } from '../../audit/config-log.js'
 import { encryptRawKey, decryptRawKey } from '../../auth/key-vault.js'
 import { revealLimiter, resetAllLimits, listBuckets, clearBucket } from '../../auth/rate-limit.js'
 import { isRootConnectedUser, rootUserIdFrom } from '../../auth/root-identity.js'
+// OWNERSHIP vs ATTRIBUTION — two different columns and two different failure modes.
+//   ownerIdOf     → columns that decide who may READ or DELETE a row (owner_user_id, user_id). An
+//                   unresolvable owner must REFUSE: an unattributable row can never be cleaned up.
+//   ownerIdOrNull → columns that only record WHO DID IT (actor_user_id, granted_by, taken_by…). These
+//                   carry a username alongside, so null degrades the record instead of orphaning it —
+//                   and losing the audit row entirely would be worse than losing one id on it.
+import { ownerIdOf, ownerIdOrNull } from '../../auth/owner.js'
 import { allSettings, setSetting, resetSetting, getSetting } from '../../settings/index.js'
 import { calKey, startCalibration, calibrationStatus, appliedOptimum } from '../../chat-runtime/ollama-ctx.js'
 import { historyFor, CTX_HISTORY_MAX } from '../../chat-runtime/ctx-history.js'
@@ -629,7 +636,10 @@ export default async function adminRoutes(fastify) {
     const rawKey = generateRawKey(name)
     const lastUnderscore = rawKey.lastIndexOf('_')
     const apiKey = await fastify.db.mst_api_keys.create({
-      owner_user_id: request.user.id ?? null, // null = root (config superuser)
+      // ⚠️ THIS COMMENT USED TO SAY "null = root (config superuser)" AND IT WAS LOAD-BEARING AND FALSE.
+      // Root has had a user row since 2026-08-06; minting a NULL-owned key made root's own keys
+      // invisible to `?owner=root` and surfaced a stranger's key to two separate tests.
+      owner_user_id: ownerIdOf(request.user, 'an API key'),
       key_hash: sha256(rawKey),
       key_encrypted: encryptRawKey(fastify.config, rawKey), // re-copyable behind a credential re-check
       key_prefix: rawKey.slice(0, lastUnderscore + 1),
@@ -826,7 +836,10 @@ export default async function adminRoutes(fastify) {
           api_key_id: key?.id ?? request.params.id ?? null,
           key_name: key?.name ?? null,
           key_prefix: key?.key_prefix ?? null,
-          actor_user_id: request.user.isRoot ? null : request.user.id,
+          // ⚠️ WAS `request.user.isRoot ? null : request.user.id` — it THREW AWAY root's id on purpose,
+          // back when root had none. Root now has a row, so that line anonymised the audit trail of the
+          // one account most able to reveal a secret. Record the id we actually have.
+          actor_user_id: ownerIdOrNull(request.user),
           actor_username: request.user.username,
           outcome,
           ip: request.ip || null,
@@ -1433,7 +1446,7 @@ export default async function adminRoutes(fastify) {
       const latencyMs = Date.now() - startedAt
       try {
         await fastify.db.log_usage.create({
-          user_id: request.user.id ?? null,
+          user_id: ownerIdOf(request.user, 'a usage row'),
           provider: request.params.name,
           model: `${request.params.name}/${request.body.model}`,
           endpoint: 'provider.test',
@@ -1911,7 +1924,7 @@ export default async function adminRoutes(fastify) {
     const { provider, model, reason } = request.body
     const [row, created] = await fastify.db.mst_model_blocks.findOrCreate({
       where: { provider: provider.trim().toLowerCase(), model: model.trim() },
-      defaults: { provider, model, reason: reason || null, blocked_by: request.user.id ?? null },
+      defaults: { provider, model, reason: reason || null, blocked_by: ownerIdOrNull(request.user) },
     })
     if (!created && reason !== undefined) await row.update({ reason: reason || null })
     await rebuildModelBlocklist(fastify.db)
@@ -2052,7 +2065,7 @@ export default async function adminRoutes(fastify) {
       try {
         grant = await grantTokens(fastify.db, {
           userId: row.user_id, tokensPerDay, tier, source: 'feedback',
-          feedbackId: row.id, note: `Feedback reward (tier ${tier})`, grantedBy: request.user.id ?? null,
+          feedbackId: row.id, note: `Feedback reward (tier ${tier})`, grantedBy: ownerIdOrNull(request.user),
         })
       } catch (e) {
         // partial unique index on feedback_id: a concurrent resolve won the race
@@ -2076,10 +2089,10 @@ export default async function adminRoutes(fastify) {
     const patch = { status }
     if (status === 'pending') {
       // taking the case (re-taking reassigns; taken_by null = root took it)
-      patch.taken_by = request.user.id ?? null
+      patch.taken_by = ownerIdOrNull(request.user)
       patch.taken_at = new Date()
     } else if (closing) {
-      patch.handled_by = request.user.id ?? null
+      patch.handled_by = ownerIdOrNull(request.user)
       patch.handled_at = new Date()
     } else {
       // back to the queue (reopen/release) — case ownership + resolution stamps clear
@@ -2093,7 +2106,7 @@ export default async function adminRoutes(fastify) {
     if (typeof request.body.reply === 'string') {
       const text = request.body.reply.trim()
       patch.reply = text || null
-      patch.replied_by = text ? (request.user.id ?? null) : null
+      patch.replied_by = text ? ownerIdOrNull(request.user) : null
       patch.replied_at = text ? new Date() : null
     }
     if (Array.isArray(request.body.replyImages)) {
@@ -2200,7 +2213,7 @@ export default async function adminRoutes(fastify) {
     if (!user) return reply
     const [row, created] = await fastify.db.mst_user_limits.findOrCreate({ where: { user_id: user.id }, defaults: { user_id: user.id } })
     const before = created ? '(platform default)' : describeOverride(row)
-    const patch = { updated_by: request.user.id ?? null }
+    const patch = { updated_by: ownerIdOrNull(request.user) }
     if ('dailyTokens' in request.body) patch.daily_tokens = request.body.dailyTokens
     if ('monthlyTokens' in request.body) patch.monthly_tokens = request.body.monthlyTokens
     if ('unlimited' in request.body) patch.unlimited = request.body.unlimited
@@ -2230,7 +2243,7 @@ export default async function adminRoutes(fastify) {
     if (!user) return reply
     const grant = await grantTokens(fastify.db, {
       userId: user.id, tokensPerDay: request.body.tokensPerDay, source: 'manual',
-      note: request.body.note || null, grantedBy: request.user.id ?? null,
+      note: request.body.note || null, grantedBy: ownerIdOrNull(request.user),
     })
     await auditLimits(user.id, null, `granted ${describeGrant(grant)}`, request.user)
     request.log?.info?.(`[limits] manual grant +${request.body.tokensPerDay}/day for '${user.username}' by ${request.user.username}`)

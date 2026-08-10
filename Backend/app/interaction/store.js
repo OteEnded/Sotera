@@ -3,6 +3,8 @@
 // lifecycle, no timers, no events, no push. Returns PLAIN data (never ORM instances) so
 // the Host Service above it stays persistence-agnostic.
 
+import { ownerIdOf } from '../auth/owner.js'
+
 const view = (row) => (row ? {
   id: row.id,
   conversationId: row.conversation_id,
@@ -19,7 +21,7 @@ export function createInteractionStore(db) {
     async create({ conversationId, userId, questions, expiresAt }) {
       const row = await db.txn_interaction_sessions.create({
         conversation_id: conversationId,
-        user_id: userId ?? null,
+        user_id: ownerIdOf({ id: userId }, 'an interaction session'), // see auth/owner.js
         status: 'pending',
         questions,
         expires_at: expiresAt ?? null,

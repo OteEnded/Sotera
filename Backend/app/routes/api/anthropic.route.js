@@ -12,6 +12,7 @@
 
 import { chat as gatewayChat, streamChat as gatewayStreamChat, listAllModels, parseModelRef, GatewayError } from '../../chat-runtime/index.js'
 import { resolveApiKey } from '../../auth/index.js'
+import { ownerIdOf } from '../../auth/owner.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 import {
@@ -97,7 +98,7 @@ export default async function anthropicRoutes(fastify) {
       const requestedModel = body.model
 
       // Token budget gate — Anthropic clients (Claude Code) meter into the same per-user budget.
-      const limitHit = await checkTokenBudget(fastify, request.apiKey?.userId ?? null, request.log)
+      const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.apiKey, 'this API-key request'), request.log)
       if (limitHit) return reply.code(429).send(anthropicError('rate_limit_error', limitHit.message))
 
       const { modelId, mapped } = resolveAnthropicModel(effectiveConfig(fastify), requestedModel)
@@ -115,7 +116,7 @@ export default async function anthropicRoutes(fastify) {
         try {
           await fastify.db?.log_usage?.create({
             // key owner stamped too — attribution/budget must survive key deletion
-            user_id: request.apiKey?.userId ?? null,
+            user_id: ownerIdOf(request.apiKey, 'this API-key request'),
             api_key_id: request.apiKey?.apiKeyId ?? null,
             provider, model: modelId, endpoint: 'anthropic.messages',
             prompt_tokens: usage?.promptTokens ?? null,
@@ -132,7 +133,7 @@ export default async function anthropicRoutes(fastify) {
         const { provider, model } = parseModelRef({ model: modelId })
         const internal = toInternalRequest(body)
         // BYOK: the key owner's own provider rows apply to their API calls too
-        const gwReq = { provider, model, messages: internal.messages, tools: internal.tools, options: internal.options, userId: request.apiKey?.userId ?? null }
+        const gwReq = { provider, model, messages: internal.messages, tools: internal.tools, options: internal.options, userId: ownerIdOf(request.apiKey, 'this API-key request') }
 
         if (!wantsStream) {
           const result = await gatewayChat({ serverConfig, request: gwReq })
@@ -204,7 +205,7 @@ export default async function anthropicRoutes(fastify) {
   fastify.get('/models', { preHandler: requireScopesAnthropic(['chat']) }, async (request, reply) => {
     const eff = effectiveConfig(fastify)
     const cfg = eff.api.anthropic
-    const { models } = await listAllModels({ serverConfig: fastify.config, userId: request.apiKey?.userId ?? null })
+    const { models } = await listAllModels({ serverConfig: fastify.config, userId: ownerIdOf(request.apiKey, 'this API-key request') })
 
     let aliases = Array.isArray(cfg.advertisedModels) ? cfg.advertisedModels.filter((x) => typeof x === 'string' && x) : []
     if (!aliases.length) aliases = Object.keys(cfg.modelMap || {}).filter((k) => !k.endsWith('*'))

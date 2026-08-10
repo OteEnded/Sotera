@@ -12,6 +12,7 @@ import { capsForModel, capsVerdictForModel, mergeCapVerdict, SPECIALIST_CAPS } f
 import { extractFile, MAX_FILES } from '../../files/extract.js'
 import { toolDefinitions, runTool, buildToolContext, resolveSkill, listSkills, memoryToolNames, attachLogger } from '../../components/runtime.js'
 import { readSkillFile } from '../../components/skill-store.js'
+import { ownerIdOf, ownedBy } from '../../auth/owner.js'
 import { buildMemoryV2 } from '../../components/memory-v2-host.js'
 import { captureFacts } from '../../components/memory-extract-host.js'
 import { recordTurn, recordCapture, recordAuto } from '../../components/memory-capture-telemetry.js'
@@ -241,7 +242,9 @@ export default async function chatSiteRoutes(fastify) {
     }
   }
 
-  const ownWhere = (req) => ({ user_id: req.user.id ?? null })
+  // Scope every query on this route to the caller. `ownedBy` REFUSES rather than falling back to
+  // `user_id IS NULL` — that fallback is how a query once read rows nobody owned. See auth/owner.js.
+  const ownWhere = (req) => ownedBy(req.user, 'this conversation')
 
   // Attach capability tags + gating verdicts to "provider/model" entries: probe rows
   // (model_capabilities) override DECLARED metadata (Ollama /api/show), which overrides
@@ -352,7 +355,7 @@ export default async function chatSiteRoutes(fastify) {
     // NAME it instead of leaving the user to guess (Ote 2026-08-03). Same helper the turn uses.
     const visionRelayDefault = platformVisionRelayModel(fastify.config)
     if (can(request.user, 'select_model')) {
-      const userId = request.user?.id ?? null // BYOK: include this user's own providers
+      const userId = ownerIdOf(request.user, 'this request') // BYOK: include this user's own providers
       const { models, errors } = await listAllModels({ serverConfig: fastify.config, userId })
       return reply.send({ canSelect: true, defaultModel: def, platformDefaultModel, canSetDefaultModel, backgroundGeneration, backgroundMaxConcurrent, steerEnabled, maxSteersPerReply, marathonEnabled, defaultSettings, visionRelayDefault, speechEnabled, models: await withCapabilities(models, userId), errors })
     }
@@ -411,9 +414,9 @@ export default async function chatSiteRoutes(fastify) {
       if (looksLikeTopic) {
         try {
           const cs = buildConversationSearch(fastify, {
-            userId: request.user?.id ?? null,
+            userId: ownerIdOf(request.user, 'this request'),
             currentConversationId: null, // a user searching their history means ALL of it, current chat included
-            embed: makeEmbedder(fastify, { userId: request.user?.id ?? null }),
+            embed: makeEmbedder(fastify, { userId: ownerIdOf(request.user, 'an embedding') }),
           })
           // ⚠️ 5s, AND THE NUMBER IS NOT ARBITRARY — it was 2500 and that silently broke first use.
           // Measured: the embedder COLD-loads in ~3.1s (ram-bandwidth-baseline), warm calls are ~170ms.
@@ -457,13 +460,13 @@ export default async function chatSiteRoutes(fastify) {
   fastify.get('/chat/events', { preHandler: chatCap }, (request, reply) => {
     // cap concurrent streams per user (tabs/devices) so an authenticated client can't
     // exhaust sockets/timers — generous enough for real multi-device use
-    if (chatSubscriberCount(request.user.id ?? null) >= 8) {
+    if (chatSubscriberCount(ownerIdOf(request.user, 'this request')) >= 8) {
       return reply.code(429).send({ error: { code: 'too_many_streams', message: 'Too many open event streams — close some tabs.' } })
     }
     reply.hijack()
     reply.raw.writeHead(200, SSE_HEADERS)
     reply.raw.write(sse({ type: 'hello' }))
-    const unsubscribe = subscribeChatEvents(request.user.id ?? null, (payload) => {
+    const unsubscribe = subscribeChatEvents(ownerIdOf(request.user, 'this request'), (payload) => {
       if (reply.raw.writableEnded || reply.raw.destroyed) return
       try { reply.raw.write(sse(payload)) } catch { /* closed mid-write — close handler cleans up */ }
     })
@@ -488,7 +491,7 @@ export default async function chatSiteRoutes(fastify) {
     // Incognito is a create-time STICKY privacy choice available to ANY chat user (not a tuning
     // privilege) — set only at create, never patchable (absent from the PATCH schema on purpose).
     const convo = await fastify.db.txn_conversations.create({
-      user_id: request.user.id ?? null,
+      user_id: ownerIdOf(request.user, 'a conversation'),
       title: request.body?.title || 'New chat',
       model,
       settings,
@@ -514,7 +517,7 @@ export default async function chatSiteRoutes(fastify) {
     try {
       const settings = resolveSettings(request.user, convo, fastify.config)
       const { provider: providerName, model: modelName } = parseModelRef({ model: convo.model })
-      const provCfg = effectiveProvidersFor(fastify.config, request.user?.id ?? null)?.[providerName]
+      const provCfg = effectiveProvidersFor(fastify.config, ownerIdOf(request.user, 'this request'))?.[providerName]
       const provKind = provCfg?.kind || providerName
       let ctxWindow = provKind === 'ollama' ? guardWindow(fastify.config, provCfg?.host, modelName) : 0
       if (provKind === 'ollama' && Number.isInteger(provCfg?.numCtxCap) && provCfg.numCtxCap > 0) {
@@ -929,7 +932,7 @@ export default async function chatSiteRoutes(fastify) {
 
     // Token budget gate — this endpoint calls the provider too; without it, a blocked
     // user could loop ✦ suggestions for free (unmetered) tokens.
-    const limitHit = await checkTokenBudget(fastify, request.user.id ?? null, request.log)
+    const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.user, 'a token budget check'), request.log)
     if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
 
     const recent = (await fastify.db.txn_messages.findAll({
@@ -960,14 +963,16 @@ export default async function chatSiteRoutes(fastify) {
       const startedAt = Date.now()
       const res = await chat({
         serverConfig: fastify.config,
-        request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false }, max_tokens: 24 }, userId: request.user?.id ?? null },
+        request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false }, max_tokens: 24 }, userId: ownerIdOf(request.user, 'this request') },
       })
       const t = (res?.message?.content || '').trim().split('\n')[0].replace(/^["'#\s]+|["'.\s]+$/g, '')
       if (t) suggestedTitle = t.slice(0, 60)
       // meter it — suggestions spend real provider tokens against the user's budget
       try {
         await fastify.db.log_usage.create({
-          user_id: request.user.id ?? null,
+          // Inside a best-effort try: an unresolvable owner means NO usage row rather than an
+          // unattributable one. Unmetered is recoverable; a row nobody owns never is.
+          user_id: ownerIdOf(request.user, 'a usage row'),
           api_key_id: request.chatApiKey?.id ?? null,
           provider, model: modelId, endpoint: 'chat.suggest-title',
           prompt_tokens: res?.usage?.promptTokens ?? null,
@@ -987,7 +992,7 @@ export default async function chatSiteRoutes(fastify) {
   fastify.get('/chat/conversations/:id/schedule-targets', { preHandler: chatCap }, async (request, reply) => {
     const convo = await fastify.db.txn_conversations.findOne({ where: { id: request.params.id, ...ownWhere(request) } })
     if (!convo) return reply.code(404).send({ error: { code: 'not_found', message: 'Conversation not found' } })
-    const targeting = await schedulesTargeting(fastify, convo.id, request.user.id ?? null)
+    const targeting = await schedulesTargeting(fastify, convo.id, ownerIdOf(request.user, 'this request'))
     return reply.send({ schedules: targeting, activeCount: targeting.filter((t) => t.enabled).length })
   })
 
@@ -997,7 +1002,7 @@ export default async function chatSiteRoutes(fastify) {
     // Deactivate any schedules that run INTO this chat before it's gone — otherwise they'd
     // fire into a void. They go inactive (reason 'target-deleted') and can't re-arm until the
     // owner picks a new destination (enforced in updateJob).
-    const disabledSchedules = await deactivateSchedulesForConversation(fastify, convo.id, request.user.id ?? null).catch(() => [])
+    const disabledSchedules = await deactivateSchedulesForConversation(fastify, convo.id, ownerIdOf(request.user, 'this request')).catch(() => [])
     await fastify.db.txn_messages.destroy({ where: { conversation_id: convo.id } })
     await convo.destroy()
     return reply.send({ ok: true, id: request.params.id, deleted: true, disabledSchedules })
@@ -1012,7 +1017,7 @@ export default async function chatSiteRoutes(fastify) {
       if (!usage) return
       const { provider } = parseModelRef({ model: modelId })
       await fastify.db.log_usage.create({
-        user_id: userId ?? null,
+        user_id: ownerIdOf({ id: userId }, 'an internal usage row'),
         api_key_id: null,
         provider, model: modelId, endpoint,
         prompt_tokens: usage.promptTokens ?? null,
@@ -1106,7 +1111,7 @@ export default async function chatSiteRoutes(fastify) {
       : null
     const boundSkillId = skillOnceId || (bindingOn ? settings.skill : null)
     const activeSkill = boundSkillId
-      ? resolveSkill(boundSkillId, { caller: { userId: request.user?.id ?? null }, config: fastify.config })
+      ? resolveSkill(boundSkillId, { caller: { userId: ownerIdOf(request.user, 'this request') }, config: fastify.config })
       : null
     // Bundled files of an imported Agent Skill (references/assets) — advertised in the system
     // prompt and served on demand via the read_skill_file tool (progressive disclosure).
@@ -1215,7 +1220,7 @@ export default async function chatSiteRoutes(fastify) {
 
     // Model window (known for Ollama-kind via calibration) — drives BOTH the token-aware
     // fold threshold below and the overflow guard before the agent loop.
-    const provCfg = effectiveProvidersFor(fastify.config, request.user?.id ?? null)?.[providerName]
+    const provCfg = effectiveProvidersFor(fastify.config, ownerIdOf(request.user, 'this request'))?.[providerName]
     const provKind = provCfg?.kind || providerName
     // guardWindow knows the global limit ∩ calibration but NOT a provider's own numCtxCap, so a
     // CPU-pinned provider reported 262144 while every request through it is capped at 8192. That is not
@@ -1254,7 +1259,7 @@ export default async function chatSiteRoutes(fastify) {
         write({ type: 'status', phase: 'summarizing' })
         try {
           const newSummary = await Promise.race([
-            summarizeMessages(convo.summary, foldable, summaryModelId, request.user?.id ?? null),
+            summarizeMessages(convo.summary, foldable, summaryModelId, ownerIdOf(request.user, 'this request')),
             new Promise((_, reject) => setTimeout(() => reject(new Error('summary timeout')), 25_000)),
           ])
           await convo.update({ summary: newSummary, summarized_upto_id: lastOlderId })
@@ -1272,7 +1277,7 @@ export default async function chatSiteRoutes(fastify) {
           write({ type: 'status', phase: 'summarizing' })
           try {
             const newSummary = await Promise.race([
-              summarizeMessages(convo.summary, olderUnsummarized, summaryModelId, request.user?.id ?? null),
+              summarizeMessages(convo.summary, olderUnsummarized, summaryModelId, ownerIdOf(request.user, 'this request')),
               new Promise((_, reject) => setTimeout(() => reject(new Error('summary timeout')), 25_000)),
             ])
             await convo.update({ summary: newSummary, summarized_upto_id: lastOlderId })
@@ -1302,7 +1307,7 @@ export default async function chatSiteRoutes(fastify) {
     let schedulePointer = null
     if (toolsOn) {
       try {
-        const jobs = await fastify.db.mst_trigger_jobs.findAll({ where: { user_id: request.user.id ?? null } })
+        const jobs = await fastify.db.mst_trigger_jobs.findAll({ where: ownedBy(request.user, 'schedules') })
         const mine = jobs.filter((j) => (j.action?.type ?? 'skill-turn') === 'skill-turn' && j.action?.conversationId === convo.id)
         if (mine.length) {
           const pick = mine.sort((a, b) => new Date(b.last_run_at || b.created_at) - new Date(a.last_run_at || a.created_at))[0]
@@ -1315,7 +1320,7 @@ export default async function chatSiteRoutes(fastify) {
     let pinnedMemories = []
     if (settings.useMemory) {
       const pinned = await fastify.db.txn_user_memories.findAll({
-        where: { user_id: request.user.id ?? null, is_enabled: true }, order: [['rolling_id', 'ASC']],
+        where: { ...ownedBy(request.user, 'pinned notes'), is_enabled: true }, order: [['rolling_id', 'ASC']],
       })
       pinnedMemories = pinned.map((m) => m.content)
     }
@@ -1340,7 +1345,7 @@ export default async function chatSiteRoutes(fastify) {
     let recallMemories = []   // [content] — recalled non-card (episodic/semantic/identity)
     if (settings.useMemory && lastUserText) {
       try {
-        const memR = buildMemoryV2(fastify, { userId: request.user?.id ?? null })
+        const memR = buildMemoryV2(fastify, { userId: ownerIdOf(request.user, 'memory') })
         const recall = await Promise.race([
           memR.recall({ query: lastUserText, limit: 6 }),
           new Promise((res) => setTimeout(() => res(null), 4000)),
@@ -1360,7 +1365,7 @@ export default async function chatSiteRoutes(fastify) {
         // ⚠ NO `query` — selection is DELIBERATELY independent of the turn (2026-08-08). Notes sit in the
         // cached prefix; ranking them per turn changed their ORDER, and a different order is different
         // bytes, which re-prefilled the whole prompt every turn. Measured at 22.5×. See selectActiveNotes.
-        personaNotes = await buildReflection(fastify, { userId: request.user?.id ?? null })
+        personaNotes = await buildReflection(fastify, { userId: ownerIdOf(request.user, 'reflection notes') })
           .listActiveNotes({ limit: notesMax })
       }
     } catch { /* L3 notes are best-effort — never block the turn */ }
@@ -1400,9 +1405,9 @@ export default async function chatSiteRoutes(fastify) {
       if (settings.useMemory && lastUserText && convCtxOn && enoughToRetrieveOn) {
         const maxEv = getSetting(fastify.config, 'memory.conversationContextMax') || 2
         const cs = buildConversationSearch(fastify, {
-          userId: request.user?.id ?? null,
+          userId: ownerIdOf(request.user, 'this request'),
           currentConversationId: convo.id,
-          embed: makeEmbedder(fastify, { userId: request.user?.id ?? null }),
+          embed: makeEmbedder(fastify, { userId: ownerIdOf(request.user, 'an embedding') }),
         })
         const res = await Promise.race([
           cs.search(lastUserText, { limit: maxEv, minLength: 40, denseMinSim: 0.6 }), // higher floor than the tool — passive injection wants confident matches only
@@ -1530,7 +1535,7 @@ export default async function chatSiteRoutes(fastify) {
       const keptSet = new Set(keptNotes)
       const usedIds = personaNotes.filter((n) => n.id && keptSet.has(n.content)).map((n) => n.id)
       // Fire-and-forget: recording use must never delay or fail a reply.
-      void buildReflection(fastify, { userId: request.user?.id ?? null }).reinforceNotes(usedIds).catch(() => {})
+      void buildReflection(fastify, { userId: ownerIdOf(request.user, 'reflection notes') }).reinforceNotes(usedIds).catch(() => {})
     }
     const keptSummary = sel.kept.some((k) => k.section === 'summary') ? convo.summary : null
     const keptCards = keptOf('card')   // recalled Knowledge Cards that fit the budget (rendered with recall)
@@ -1641,7 +1646,7 @@ export default async function chatSiteRoutes(fastify) {
                   provider: rref.provider, model: rref.model,
                   messages: [{ role: 'user', content: 'Describe this image in detail for another AI that cannot see it. Include any visible text verbatim. Be factual and concise.', images: [row.images[i]] }],
                   options: relayOptions,
-                  userId: request.user?.id ?? null,
+                  userId: ownerIdOf(request.user, 'this request'),
                 },
               })
               let res
@@ -1651,7 +1656,7 @@ export default async function chatSiteRoutes(fastify) {
                 request.log?.warn?.({ err: e1?.message, relayModelId, image: i + 1 }, 'vision relay: describe failed — retrying once')
                 res = await describeOnce() // a second failure falls to the outer catch (honest note + status)
               }
-              await logInternalUsage('chat.vision-relay', relayModelId, res?.usage, request.user?.id ?? null)
+              await logInternalUsage('chat.vision-relay', relayModelId, res?.usage, ownerIdOf(request.user, 'this request'))
               const text = (res?.message?.content || '').trim() || '(no description produced)'
               // RECORD WHICH EYE SAW IT (Ote 2026-08-03). Descriptions used to be bare strings, so a
               // cached one could never be attributed — which is exactly why a blind describer went
@@ -1842,7 +1847,7 @@ export default async function chatSiteRoutes(fastify) {
       // The YIELD is recorded and logged, not dropped. Dropping it once cost a live investigation: a turn
       // extracted one fact where the same sentence extracts two offline, and nothing could say whether the
       // second was never extracted, unparsed, or lost in commit. Same fire-and-forget, one .then richer.
-      captureFacts(fastify, { userId: request.user?.id ?? null, sourceMessageId: srcMsgId }, lastUserText, { source: `conversation:${convo.id}` })
+      captureFacts(fastify, { userId: ownerIdOf(request.user, 'this request'), sourceMessageId: srcMsgId }, lastUserText, { source: `conversation:${convo.id}` })
         .then((r) => {
           recordCapture({ facts: r?.facts ?? 0, error: !!r?.error })
           fastify.log?.info?.({ conversation: convo.id, facts: r?.facts ?? 0, actions: r?.actions ?? [], error: !!r?.error, skipped: !!r?.skipped }, 'memory.capture(auto): yield')
@@ -2049,7 +2054,7 @@ export default async function chatSiteRoutes(fastify) {
           serverConfig: fastify.config,
           // conversationId rides along purely for local-monitor attribution — it tells the Local console
           // WHICH chat is on a resident model, not just which user.
-          request: { provider: providerName, model: modelName, messages: working, tools: toolDefs, options, userId: request.user?.id ?? null, conversationId: convo.id },
+          request: { provider: providerName, model: modelName, messages: working, tools: toolDefs, options, userId: ownerIdOf(request.user, 'this request'), conversationId: convo.id },
         }), roundTtftMs, () => clientGone || steerReg.hasPending(convo.id))) {
           if (clientGone) break
           switch (evt.event) {
@@ -2226,7 +2231,7 @@ export default async function chatSiteRoutes(fastify) {
               } else {
                 // resolveSkill IS the trace point (skill.used, caller attached) — a triggered
                 // run counts exactly like a bound one.
-                dynamicSkill = resolveSkill(wanted, { caller: { userId: request.user?.id ?? null }, config: fastify.config })
+                dynamicSkill = resolveSkill(wanted, { caller: { userId: ownerIdOf(request.user, 'this request') }, config: fastify.config })
                 write({ type: 'status', phase: 'skill', skill: dynamicSkill.id, name: dynamicSkill.name, origin: dynamicSkill.origin, files: dynamicSkill.skillFiles.length, triggered: true })
                 result = {
                   skill: dynamicSkill.id,
@@ -2262,7 +2267,7 @@ export default async function chatSiteRoutes(fastify) {
               // the model would say "Done, I'll call you Kestrel" while the corner still read the old
               // name. Same channel the todo rail and title updates use. Only on an actual WRITE, so the
               // first (needs_confirmation) call never moves the UI.
-              if (wrote) notifyChatEvent(request.user?.id ?? null, { type: 'profile-changed', displayName: result.displayName })
+              if (wrote) notifyChatEvent(ownerIdOf(request.user, 'this request'), { type: 'profile-changed', displayName: result.displayName })
               toolCtx.events?.emit?.('tool.executed', { name: tc.name, args: tc.arguments, ok: result?.ok !== false, durationMs: Date.now() - t0, isReadOnly: !wrote, caller: toolCtx.caller })
             } else {
               result = await runTool(tc.name, tc.arguments, toolCtx)
@@ -2334,7 +2339,7 @@ export default async function chatSiteRoutes(fastify) {
         const forcedTtftMs = ttftBudget(working) // same context-adaptive budget as the main loop
         for await (const evt of watchFirstToken(streamChat({
           serverConfig: fastify.config,
-          request: { provider: providerName, model: modelName, messages: working, options, userId: request.user?.id ?? null, conversationId: convo.id },
+          request: { provider: providerName, model: modelName, messages: working, options, userId: ownerIdOf(request.user, 'this request'), conversationId: convo.id },
         }), forcedTtftMs, () => clientGone || steerReg.hasPending(convo.id))) {
           if (clientGone) break
           if (evt.event === 'aborted_before_token') break // Stop/steer landed during a stall
@@ -2395,7 +2400,7 @@ export default async function chatSiteRoutes(fastify) {
       //       runs and NOTHING on others, so the fallback can fire and still capture zero
       // "attempted" and "captured 0" must be separable, or (b) hides inside (a) forever.
       request.log?.info?.({ conversation: convo.id, toolRounds: toolActivity.length }, '[memory] fallback capture — the model held write tools but wrote nothing this turn')
-      captureFacts(fastify, { userId: request.user?.id ?? null, sourceMessageId: lastUserMsg?.id ?? null }, lastUserText, { source: `conversation:${convo.id}` })
+      captureFacts(fastify, { userId: ownerIdOf(request.user, 'this request'), sourceMessageId: lastUserMsg?.id ?? null }, lastUserText, { source: `conversation:${convo.id}` })
         .then((r) => {
           recordCapture({ facts: r?.facts ?? 0, error: !!r?.error, viaFallback: true })
           request.log?.info?.({ conversation: convo.id, facts: r?.facts ?? 0, actions: r?.actions ?? null, skipped: r?.skipped ?? false, error: r?.error ?? false }, '[memory] fallback capture result')
@@ -2517,7 +2522,7 @@ export default async function chatSiteRoutes(fastify) {
       const isNewChat = convo.title === 'New chat'
       const nameNewChat = async () => {
         const firstUser = history.find((m) => m.role === 'user')
-        const t = await generateTitle(firstUser?.content || '', answer, titleModelId, request.user?.id ?? null)
+        const t = await generateTitle(firstUser?.content || '', answer, titleModelId, ownerIdOf(request.user, 'this request'))
         if (t && t !== convo.title) await fastify.db.txn_conversations.update({ title: t }, { where: { id: convo.id } })
         return t || convo.title
       }
@@ -2557,7 +2562,7 @@ export default async function chatSiteRoutes(fastify) {
         }
         if (!genError && bgFold.length) {
           const foldUpto = bgFold[bgFold.length - 1].rolling_id
-          summarizeMessages(convo.summary, bgFold, summaryModelId, request.user?.id ?? null)
+          summarizeMessages(convo.summary, bgFold, summaryModelId, ownerIdOf(request.user, 'this request'))
             .then((s) => fastify.db.txn_conversations.update(
               { summary: s, summarized_upto_id: foldUpto },
               { where: { id: convo.id, [Op.or]: [{ summarized_upto_id: null }, { summarized_upto_id: { [Op.lt]: foldUpto } }] } },
@@ -2570,7 +2575,7 @@ export default async function chatSiteRoutes(fastify) {
       try {
         const clip = (s, n = 20000) => (s && s.length > n ? s.slice(0, n) + '…[truncated]' : s)
         await fastify.db.log_usage.create({
-          user_id: request.user.id ?? null,
+          user_id: ownerIdOf(request.user, 'a usage row'),
           api_key_id: request.chatApiKey?.id ?? null, // the user's system chat key
           provider: providerName, model: modelId, endpoint: 'chat',
           prompt_tokens: usage?.promptTokens ?? null, completion_tokens: usage?.completionTokens ?? null,
@@ -2603,7 +2608,7 @@ export default async function chatSiteRoutes(fastify) {
         // scheduled runs use) — the reply is already visible, only the title fills in later.
         if (isNewChat && !genError) {
           nameNewChat()
-            .then((t) => { if (t && t !== convo.title) notifyChatEvent(request.user?.id ?? null, { type: 'conversations-changed', conversationId: convo.id }) })
+            .then((t) => { if (t && t !== convo.title) notifyChatEvent(ownerIdOf(request.user, 'this request'), { type: 'conversations-changed', conversationId: convo.id }) })
             .catch(() => { /* generateTitle never throws, but never let a stray rejection escape */ })
         }
         return reply
@@ -2764,7 +2769,7 @@ export default async function chatSiteRoutes(fastify) {
 
     // Token budget gate — BEFORE persisting the turn, so an over-limit send keeps the
     // user's draft in the composer instead of burying it in the thread unanswered.
-    const limitHit = await checkTokenBudget(fastify, request.user.id ?? null, request.log)
+    const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.user, 'a token budget check'), request.log)
     if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
     const genBlock = atGenLimit(request)
     if (genBlock) return reply.code(429).send({ error: genBlock })
@@ -2832,7 +2837,7 @@ export default async function chatSiteRoutes(fastify) {
       return reply.code(409).send({ error: { code: 'not_generating', message: 'Nothing is generating in this conversation right now — send it as a normal message.' } })
     }
     // The steer extends the same turn's generation — meter it like a send (fails open).
-    const limitHit = await checkTokenBudget(fastify, request.user.id ?? null, request.log)
+    const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.user, 'a token budget check'), request.log)
     if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
 
     const content = (request.body.content || '').trim()
@@ -2863,7 +2868,7 @@ export default async function chatSiteRoutes(fastify) {
     const busyRegen = alreadyGenerating(convo.id)
     if (busyRegen) return reply.code(409).send({ error: busyRegen })
 
-    const limitHit = await checkTokenBudget(fastify, request.user.id ?? null, request.log)
+    const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.user, 'a token budget check'), request.log)
     if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
     const genBlock = atGenLimit(request)
     if (genBlock) return reply.code(429).send({ error: genBlock })
@@ -2913,7 +2918,7 @@ export default async function chatSiteRoutes(fastify) {
     const busyEdit = alreadyGenerating(convo.id)
     if (busyEdit) return reply.code(409).send({ error: busyEdit })
 
-    const limitHit = await checkTokenBudget(fastify, request.user.id ?? null, request.log)
+    const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.user, 'a token budget check'), request.log)
     if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
     const genBlock = atGenLimit(request)
     if (genBlock) return reply.code(429).send({ error: genBlock })
@@ -2933,7 +2938,7 @@ export default async function chatSiteRoutes(fastify) {
   //   Persona Memory v2 (the `memories` table) is the assistant's own memory — see the GET
   //   /chat/memory `assistant` list + DELETE /chat/memory/v2/:id below. (v1 kv/facts retired.)
   const memOut = (m) => ({ id: m.id, content: m.content, isEnabled: m.is_enabled, createdAt: m.created_at })
-  const memWhere = (req) => ({ user_id: req.user.id ?? null })
+  const memWhere = (req) => ownedBy(req.user, 'this note')
 
   fastify.get('/chat/memory', { preHandler: chatCap }, async (request, reply) => {
     const notes = await fastify.db.txn_user_memories.findAll({ where: memWhere(request), order: [['rolling_id', 'ASC']] })
@@ -2942,7 +2947,7 @@ export default async function chatSiteRoutes(fastify) {
     // assistant remembers. Scoped to this user; best-effort (never breaks the modal).
     let assistant = []
     try {
-      assistant = (await buildMemoryV2(fastify, { userId: request.user?.id ?? null }).list({ limit: 500 })).memories
+      assistant = (await buildMemoryV2(fastify, { userId: ownerIdOf(request.user, 'memory') }).list({ limit: 500 })).memories
     } catch { /* memory unavailable — show notes only */ }
     return reply.send({ memories: notes.map(memOut), assistant })
   })
@@ -2951,7 +2956,7 @@ export default async function chatSiteRoutes(fastify) {
   fastify.delete('/chat/memory/v2/:id', { preHandler: chatCap }, async (request, reply) => {
     const [n] = await fastify.db.txn_memories.update(
       { expired_at: new Date(), tier: 'cold' },
-      { where: { id: request.params.id, user_id: request.user?.id ?? null } },
+      { where: { id: request.params.id, ...ownedBy(request.user, 'this memory') } },
     )
     if (!n) return reply.code(404).send({ error: { code: 'not_found', message: 'Memory not found' } })
     return reply.send({ ok: true, id: request.params.id, forgotten: true })
@@ -2961,7 +2966,7 @@ export default async function chatSiteRoutes(fastify) {
     preHandler: chatCap,
     schema: { body: { type: 'object', required: ['content'], properties: { content: { type: 'string', minLength: 1, maxLength: 2000 } }, additionalProperties: false } },
   }, async (request, reply) => {
-    const row = await fastify.db.txn_user_memories.create({ user_id: request.user.id ?? null, content: request.body.content.trim(), is_enabled: true })
+    const row = await fastify.db.txn_user_memories.create({ user_id: ownerIdOf(request.user, 'a note'), content: request.body.content.trim(), is_enabled: true })
     return reply.code(201).send({ memory: memOut(row) })
   })
 

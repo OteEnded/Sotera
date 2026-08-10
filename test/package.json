@@ -4,9 +4,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "check": "node checks/boot-check.mjs",
+    "test": "node pipeline/test-all.mjs",
+    "all": "node pipeline/test-all.mjs",
     "unit": "node --test \"unit/**/*.test.mjs\"",
-    "all": "node pipeline/test-all.mjs"
+    "check": "node checks/boot-check.mjs",
+    "owner": "node checks/owner-check.mjs"
   },
   "dependencies": { "pg": "^8.19.0" }
 }

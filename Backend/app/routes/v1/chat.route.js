@@ -1,6 +1,7 @@
 import { chat as gatewayChat, streamChat as gatewayStreamChat, parseModelRef, GatewayError } from '../../chat-runtime/index.js'
 import { toChatCompletion, makeStreamFormatter, sseData, SSE_DONE, OPENAI_SSE_HEADERS } from '../../chat-runtime/openai.js'
 import { requireScopes } from '../../auth/index.js'
+import { ownerIdOf } from '../../auth/owner.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 
 // OpenAI-compatible chat completions.
@@ -50,7 +51,7 @@ export default async function chatRoutes(fastify) {
       let firstTokenAt = null
 
       // Token budget gate — the key owner's per-user limit covers their API keys too.
-      const limitHit = await checkTokenBudget(fastify, request.apiKey?.userId ?? null, request.log)
+      const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.apiKey, 'this API-key request'), request.log)
       if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
 
       // Best-effort usage log, keyed to the calling API key — never blocks the response.
@@ -72,7 +73,7 @@ export default async function chatRoutes(fastify) {
           await fastify.db?.log_usage?.create({
             // key owner stamped too: attribution (and the token budget) must survive
             // the key being deleted later — display still prefers the key's owner
-            user_id: request.apiKey?.userId ?? null,
+            user_id: ownerIdOf(request.apiKey, 'this API-key request'),
             api_key_id: request.apiKey?.apiKeyId ?? null,
             provider, model: modelId, endpoint: 'chat.completions',
             prompt_tokens: usage?.promptTokens ?? null,
@@ -94,7 +95,7 @@ export default async function chatRoutes(fastify) {
           tools: body.tools,
           options: buildOptions(body),
           // BYOK: the key owner's own provider rows apply to their API calls too
-          userId: request.apiKey?.userId ?? null,
+          userId: ownerIdOf(request.apiKey, 'this API-key request'),
         }
 
         if (!wantsStream) {

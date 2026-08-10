@@ -12,6 +12,7 @@
 // GET    /admin/schedules           root/admin read-only ops view (all users)
 
 import { requireLogin } from '../../auth/index.js'
+import { ownerIdOf, ownedBy } from '../../auth/owner.js'
 import { requireCapability } from '../../auth/permissions.js'
 import { getSetting } from '../../settings/index.js'
 import { runtime, listSkills } from '../../components/runtime.js'
@@ -43,12 +44,12 @@ export default async function schedulesRoutes(fastify) {
   }
 
   const ownJob = async (request) => fastify.db.mst_trigger_jobs.findOne({
-    where: { id: request.params.id, user_id: request.user.id ?? null },
+    where: { id: request.params.id, ...ownedBy(request.user, 'this schedule') },
   })
 
   fastify.get('/chat/schedules', { preHandler: chatCap }, async (request) => {
     const rows = await fastify.db.mst_trigger_jobs.findAll({
-      where: { user_id: request.user.id ?? null },
+      where: ownedBy(request.user, 'your schedules'),
       order: [['created_at', 'ASC']],
     })
     return {
@@ -113,12 +114,12 @@ export default async function schedulesRoutes(fastify) {
       }
     } catch { /* key-ensure failed — the token budget below still caps spend */ }
     // ...and the same budget gate
-    const limitHit = await checkTokenBudget(fastify, request.user.id ?? null, request.log)
+    const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.user, 'a token budget check'), request.log)
     if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
 
     let current = null
     if (request.body.scheduleId) {
-      const row = await fastify.db.mst_trigger_jobs.findOne({ where: { id: request.body.scheduleId, user_id: request.user.id ?? null } })
+      const row = await fastify.db.mst_trigger_jobs.findOne({ where: { id: request.body.scheduleId, ...ownedBy(request.user, 'this schedule') } })
       if (!row) return reply.code(404).send({ error: { code: 'not_found', message: 'No such schedule.' } })
       if ((row.action?.type ?? 'skill-turn') !== 'skill-turn') {
         return reply.code(400).send({ error: { code: 'assist_unsupported', message: 'Prompt editing works for instruction schedules — tool/http jobs are edited by hand.' } })
@@ -180,7 +181,7 @@ export default async function schedulesRoutes(fastify) {
           provider, model,
           messages: [{ role: 'system', content: sys }, { role: 'user', content: userMsg }],
           options: { stream: false, reasoning: { enabled: false }, max_tokens: 700 },
-          userId: request.user?.id ?? null,
+          userId: ownerIdOf(request.user, 'a schedule run'),
         },
       })
       usage = res?.usage ?? null
@@ -223,7 +224,7 @@ export default async function schedulesRoutes(fastify) {
 
     try {
       await fastify.db.log_usage.create({
-        user_id: request.user.id ?? null,
+        user_id: ownerIdOf(request.user, 'a usage row'),
         api_key_id: null,
         provider: parseModelRef({ model: modelId }).provider, model: modelId, endpoint: 'chat.schedule-assist',
         prompt_tokens: usage?.promptTokens ?? null,

@@ -2,6 +2,8 @@
 // → Store → DB). Owns ONLY the TodoSessions/TodoTasks rows: no reconcile, no events, no push.
 // Returns PLAIN data (never ORM instances) so the Host Service above it stays persistence-agnostic.
 
+import { ownerIdOf } from '../auth/owner.js'
+
 const TASK_ATTRS = ['id', 'title', 'description', 'status', 'ordinal']
 
 export function createTodoStore(db) {
@@ -28,7 +30,12 @@ export function createTodoStore(db) {
     },
 
     async createSession(conversationId, userId, title) {
-      const s = await db.txn_todo_sessions.create({ conversation_id: conversationId, user_id: userId ?? null, title: title ?? null, status: 'active' })
+      const s = await db.txn_todo_sessions.create({
+        conversation_id: conversationId,
+        user_id: ownerIdOf({ id: userId }, 'a todo session'), // see auth/owner.js — never `?? null`
+        title: title ?? null,
+        status: 'active',
+      })
       return { id: s.id }
     },
 

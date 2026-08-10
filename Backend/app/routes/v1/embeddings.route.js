@@ -1,5 +1,6 @@
 import { embeddings as gatewayEmbeddings, parseModelRef, GatewayError } from '../../chat-runtime/index.js'
 import { requireScopes } from '../../auth/index.js'
+import { ownerIdOf } from '../../auth/owner.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 
 // OpenAI-compatible embeddings.
@@ -65,7 +66,7 @@ export default async function embeddingsRoutes(fastify) {
       const startedAt = Date.now()
 
       // Token budget gate — embeddings meter into the same per-user budget.
-      const limitHit = await checkTokenBudget(fastify, request.apiKey?.userId ?? null, request.log)
+      const limitHit = await checkTokenBudget(fastify, ownerIdOf(request.apiKey, 'this API-key request'), request.log)
       if (limitHit) return reply.code(429).send({ error: { code: limitHit.code, message: limitHit.message, budget: limitHit.budget } })
 
       try {
@@ -73,7 +74,7 @@ export default async function embeddingsRoutes(fastify) {
         const result = await gatewayEmbeddings({
           serverConfig: fastify.config,
           db: fastify.db, // enables the platform exact-match cache (embeddings.cacheEnabled)
-          request: { provider, model, input: body.input, userId: request.apiKey?.userId ?? null },
+          request: { provider, model, input: body.input, userId: ownerIdOf(request.apiKey, 'this API-key request') },
         })
 
         // usage log (best-effort; inputs are NOT stored — embeddings often carry bulk private text)
@@ -81,7 +82,7 @@ export default async function embeddingsRoutes(fastify) {
           const count = Array.isArray(body.input) ? body.input.length : 1
           await fastify.db?.log_usage?.create({
             // key owner stamped too — attribution/budget must survive key deletion
-            user_id: request.apiKey?.userId ?? null,
+            user_id: ownerIdOf(request.apiKey, 'this API-key request'),
             api_key_id: request.apiKey?.apiKeyId ?? null,
             provider, model: body.model, endpoint: 'embeddings',
             prompt_tokens: result.promptTokens,

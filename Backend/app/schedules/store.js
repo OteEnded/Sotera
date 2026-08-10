@@ -8,13 +8,23 @@
 // site in the service (jobView, syncJobTrigger, the performers) already reads those column
 // names off the row, so plain records are drop-in; only the WRITE paths route through here.
 
+//
+// ⚠️ EVERY OWNER-SCOPED METHOD HERE REFUSES A MISSING OWNER — it does not fall back to
+// `user_id IS NULL`. That fallback is not a safe default: it silently re-scopes the query to whatever
+// unowned rows happen to exist, so a caller that lost track of its user reads (or writes) the wrong
+// pile instead of failing. The store is the last layer that can still tell, so it tells.
+import { ownerIdOf } from '../auth/owner.js'
+
 const plain = (row) => (row ? row.get({ plain: true }) : null)
+
+/** The owner scope for a store query, or a refusal. `userId` here is already an id, not a user object. */
+const scope = (userId, what) => ({ user_id: ownerIdOf({ id: userId }, what) })
 
 export function createTriggerJobsStore(db) {
   return {
     // ── TriggerJobs (the jobs) ─────────────────────────────────────────────
     async count(userId) {
-      return db.mst_trigger_jobs.count({ where: { user_id: userId ?? null } })
+      return db.mst_trigger_jobs.count({ where: scope(userId, 'schedules') })
     },
 
     async create(fields) {
@@ -23,7 +33,7 @@ export function createTriggerJobsStore(db) {
 
     // owner-scoped fetch (the API/tool paths — a user only ever sees their own)
     async findOwned(id, userId) {
-      return plain(await db.mst_trigger_jobs.findOne({ where: { id, user_id: userId ?? null } }))
+      return plain(await db.mst_trigger_jobs.findOne({ where: { id, ...scope(userId, 'this schedule') } }))
     },
 
     // by-id fetch, ignoring owner (the executor — the trigger already vouches for ownership)
@@ -32,7 +42,7 @@ export function createTriggerJobsStore(db) {
     },
 
     async findAllOwned(userId) {
-      const rows = await db.mst_trigger_jobs.findAll({ where: { user_id: userId ?? null }, order: [['created_at', 'ASC']] })
+      const rows = await db.mst_trigger_jobs.findAll({ where: scope(userId, 'schedules'), order: [['created_at', 'ASC']] })
       return rows.map((r) => r.get({ plain: true }))
     },
 
@@ -79,7 +89,7 @@ export function createTriggerJobsStore(db) {
     // message. Composition (title, seed text, provider) is the service's call; THIS just
     // persists the rows and hands back the new conversation id.
     async createSeededConversation({ userId, title, model, seedRole, seedContent, seedProvider }) {
-      const convo = await db.txn_conversations.create({ user_id: userId ?? null, title, model })
+      const convo = await db.txn_conversations.create({ user_id: ownerIdOf({ id: userId }, 'a schedule conversation'), title, model })
       await db.txn_messages.create({
         conversation_id: convo.id,
         role: seedRole,
@@ -93,7 +103,7 @@ export function createTriggerJobsStore(db) {
     // does this user own this conversation? (the "append to an existing chat" destination
     // check — a user may only point a schedule at a conversation of their own).
     async ownsConversation(conversationId, userId) {
-      const convo = await db.txn_conversations.findOne({ where: { id: conversationId, user_id: userId ?? null }, attributes: ['id'] })
+      const convo = await db.txn_conversations.findOne({ where: { id: conversationId, ...scope(userId, 'this conversation') }, attributes: ['id'] })
       return convo != null
     },
 
