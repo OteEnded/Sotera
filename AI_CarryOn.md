@@ -22,6 +22,8 @@ Personas/_archive/Sotera-legacy-20260810.tar.gz   the dead May-era tree, extract
 ```
 
 **Run:** `run_windows.bat` at the repo root, or `cd Backend && npm run dev`. Health: `:8210/api/health`.
+**Test:** `cd test && npm test` — unit + every check, one command, real exit code. It fails fast if she
+is not answering on :8210, because a suite that cannot reach the server reports *its* failure, not hers.
 
 ---
 
@@ -34,15 +36,25 @@ reasoning captured separately from the answer, `owner_user_id` non-null on every
 for the nine requirements and where each came from. Six are Postgres constraints; three cannot live in
 a schema and are named in §9 of the SQL so nobody assumes they are covered.
 
+✅ **Memory is LIVE** — capture, recall and reconcile all run. It is what produced the four memories from
+his first night, and what surfaced the identity bug below. ⚠️ *This line used to say "the tables exist;
+nothing reads or writes them yet" and that stopped being true the moment he first talked to her.*
+
+✅ **PortableComponents / the SDK are wired** — 14 components install at boot through
+`installComponents`, resolved from `persona.json` and pinned in `persona.lock.json` (lockMode `update`
+in dev, `frozen` for deploys). ⚠️ *Also used to say "agreed as day-one, not yet wired."*
+
+✅ **Auth is real** — root (`ote`) plus `agent_dev`, sessions, roles, capabilities, owner-scoped
+everything. Single-user *shaped for multi*, per Ote.
+
 ❌ **NOT built, and easy to overestimate:**
 - **The local model MANAGER.** `providers/ollama.js` is a *client*. GPU arbitration via `/api/ps`,
   residency decisions, and surviving a dead `llama-server` mid-stream are what make shape (a) real.
   `/chat/running` exists as the window for it to grow into. **Calling `/api/chat` is the easy half.**
-- **Memory.** The tables exist; nothing reads or writes them yet. No capture, no recall, no reconcile.
 - **The chat UI.** `App.tsx` is a placeholder that says so on purpose — a dressed-up placeholder
-  invites the mistake that it is finished.
-- **Auth.** There is one user row and no login. Single-user *shaped for multi*, per Ote.
-- **PortableComponents / the SDK.** Agreed as day-one, not yet wired.
+  invites the mistake that it is finished. She has no face; `/chat` (ported from OLS) is what he uses.
+- **Her identity store.** The schema has a place for who she is; nobody has written who she is. Held
+  deliberately — it is the same surface as his L3 redesign.
 
 ---
 
@@ -158,32 +170,99 @@ root, and the residue landed in HIS Memory panel mixed with his own rows, so he 
 were his and had to ask *"wtf are those. is that you?"* — the exact question a test account exists to
 make unnecessary. `test/harness.mjs` now exports `TEST_USER` + `asAgent()`; use them.
 
-## 🔎 THE CAPTURE BUG, NAMED (2026-08-10) — `preferred_name` is a slot that must be filled
+## 🔎 THE CAPTURE BUG — ✅ FIXED 2026-08-10. IT WAS A REGEX, NOT THE MODEL.
 
-Two junk captures, both from ordinary use, both the same shape:
+**Four invented names in one night**, all stored as his `preferred_name` at importance 9:
 
-| stored | from | |
-|---|---|---|
-| `preferred_name: Your Starting` @0.8 | *"this is **your starting** point"* | pronoun + gerund, title-cased |
-| `preferred_name: I Phasing` @0.9 | *"im **i phasing** it right?"* | a TYPO for "phrasing", in a question about wording |
+| stored | from |
+|---|---|
+| `Your Starting` @0.8 ×2 | *"hi, this is **your starting** point of being something"* |
+| `I Phasing` @0.9 | *"im **i phasing** it right?"* — a TYPO for "phrasing", in a question about wording |
+| `Being Your` @0.9 | *"**But if I'm being your** daughter…"* — **he was quoting HER OWN sentence back to her, inside quote marks** |
 
-**He never stated a name in either conversation.** There was no true value to find, so the extractor
-manufactured one rather than leaving the slot empty — and it is guessing at something already known
-(his profile carries **Ote**, which is what she calls him).
+⚠️ **MY FIRST DIAGNOSIS WAS WRONG, AND HOW IT WAS WRONG IS THE LESSON WORTH KEEPING.** I blamed the LLM
+extractor — *"it treats `preferred_name` as a slot that must be filled"* — on this evidence: same
+sentence, same pipeline, only `memory.extractModel` changed, `gemma4:e4b` and `qwen3.5:9b` returned
+**byte-identical** results. I wrote that up as *"two models of very different size agreeing exactly is
+not sampling noise, it is the PROMPT."*
 
-⇒ **The bug is not "it guesses badly", it is "it treats `preferred_name` as mandatory".** That is why a
-bigger model made it worse, not better: it fills the slot more confidently (0.8 → 0.9).
+**Backwards.** Two models cannot agree to the byte. A regex can. That result was proof **no model was in
+the loop at all** — the cause was `memory-identity.js`, pure deterministic pattern matching. The
+strongest-looking evidence pointed straight at the answer and I read it as the opposite.
 
-⚠️ Both failures came from **informal input** — a typo, and a Thai proverb mid-sentence. The extractor is
-brittle to anything that is not clean English prose, so it is worst for the person actually using it.
-A test suite written in tidy English will never catch this.
+✅ **The model paths were clean the whole time.** Of the four memories that night, the two from the LLM
+extractor (`current goal: build Rome in one day`, `physical state: body is degrading under pressure`)
+and the one from her own `remember_fact` call (`interaction_preference`) were all **correct**. 3 for 3.
+Only the regex lied.
 
-✅ **Not everything is broken:** `current goal: build Rome in one day` and `physical state: body is
-degrading under pressure` both trace correctly to *"i kinda want to build rome in one day so. but my
-body is degrading as i push"*. Good captures, kept. `preferred_name` specifically is the defect.
+**Three holes, each independently sufficient, all now closed:**
+1. `NON_NAME` listed ~90 non-names and contained **not one pronoun**. A deny-list fails OPEN. Now every
+   token is checked against a closed pronoun/determiner/copula set.
+2. Every pattern carried `strict: true|false`, thoughtfully set — and **read nowhere**. A dead flag that
+   reads as a guard is worse than no flag. It now requires capital evidence, which separates *"I'm Wren"*
+   from *"im building rome"*. Explicit forms (*"call me ote"*) are exempt — they state intent, and he
+   types lowercase. **Caseless scripts are exempt too** (Thai, Chinese) so the rule is not "Latin only".
+3. Quoted spans are skipped — quoting is not asserting. The assertion gate exists for exactly this and
+   never ran here, because identity capture is a separate entry point.
 
-**Fix:** `preferred_name` requires an explicit naming act ("call me X", "my name is X"), never a pattern
-match, and never when the profile already has one. Repro: `test/repro/capture-invents-a-name.mjs`.
+**Tests:** `test/unit/memory-identity.test.mjs` (23). ⚠️ OteLLMServices **has** a unit suite for this
+module and Sotera was cloned without it — the code shipped here untested. *Carrying the code and leaving
+the test is how a module arrives already broken.* Live proof: `test/repro/capture-invents-a-name.mjs`.
+
+**Still open, and his:** [R1] provenance (quoted vs synthesized) and [R5] confidence that survives a
+re-read of its own source — both coupled to the L3/identity design.
+
+## 🔑 OWNERSHIP — resolved-or-refused, never defaulted (2026-08-10)
+
+`?? null` on an owner was **not four sites. It was ~70, across 14 files.** All now route through
+`Backend/app/auth/owner.js`:
+
+- `ownerIdOf` — **ownership** columns (who may read/delete). **Refuses** with 503. An unattributable row
+  is permanent: no user-delete can reach it, because there is no user.
+- `ownerIdOrNull` — **attribution** columns (who *did* it). They carry a username, so null degrades the
+  record instead of orphaning it.
+- `ownedBy` — a scoped `WHERE`. The old `user_id: x ?? null` did not return *nothing* when the owner was
+  missing; it returned whatever was **unowned**. That is the query that leaked a stranger's API key.
+
+⚠️ **An EIGHTH instance of the data-shape defect was still live in her**, and it is the worst:
+`isRoot: row.user_id == null` in the schedule executor — wrong in both directions, because a missing
+owner became a **privilege grant**. Any unowned schedule would have run as root.
+
+**Authentication still fails open** — root's login stays DB-free so he can sign in and repair a broken
+database. Only *writing* fails closed.
+
+**Why she can be strict where OLS could not:** OLS had 118 conversations / 966 messages / 91 memories
+already NULL-owned. She has zero, verified across all 21 owner-bearing columns.
+
+**Net:** `test/checks/owner-check.mjs` reads no code — it drives the real endpoints, then asks the
+**database** whether anything unowned appeared. A site I missed shows up whether or not I knew it existed.
+
+## 🧩 PORTABLECOMPONENTS — versioned, and audited (2026-08-10)
+
+Ote asked: *"if we use portable component here, it might not be the version we improved?"*
+
+**His suspicion was wrong in a reassuring direction:** `defineTool`/`defineFeature`/`defineSkill`/
+`definePackage` appear **zero** times in OteLLMServices' Backend. No component was ever built app-locally
+and forked. What *is* app-local there is the host-service half — the intended Feature→HostService→Store
+layering.
+
+**But the question had no mechanism behind it, and that was the real defect.** The tree had *no version
+control at all*, and both projects resolve the same directory by relative path, so an edit for one lands
+in the other. Now: **one git repo per component** (his call — *"each component its own repo, not the whole
+folder"*), 15 repos, **local only, no remotes until he lists them**. The root folder is deliberately not
+a repo.
+
+**Type audit — 14 of 15 were already correct.** One was not: `@ote/memory` declared `capability` but
+exports **nine components, all `tool`**; and its `contains[]` listed **seven** of the nine
+(`list_archived_memories` and `restore_memory` shipped in no manifest). Both fixed.
+`test/checks/component-canon-check.mjs` now derives the expected type from what each package actually
+exports, so this cannot drift silently again.
+
+⚠️ **His call, deliberately untouched:** it is a bundle of Manager Tools living in `Packages/` under the
+name *"Memory"*. The content is canon-correct — the canon says memory tools do **not** belong inside a
+Memory component — but the name promises a Memory component, and **there is no `memory`-kind component
+anywhere in the ecosystem** (`defineMemory` exists in the SDK; nothing calls it — the knowledge lives
+host-side, exactly as the Layering Law prescribes). Renaming moves a path both she and OLS resolve.
 
 ## Open — needs Ote
 
@@ -203,8 +282,16 @@ match, and never when the profile already has one. Repro: `test/repro/capture-in
 
 ## Next, in order
 
-1. Wire PortableComponents/the SDK — a persona *is* an assembly, so her capability list should be real.
-2. The memory service: capture → reconcile → recall, against the tables that already enforce the rules.
-   ⚠️ The relevance floor ([R4]) and queued≠saved ([R8]) live **here**, not in the schema.
-3. The chat UI, replacing the placeholder.
-4. Then the local model manager — the half of shape (a) that is still missing.
+1. **The chat UI**, replacing the placeholder — she has no face yet, and `/chat` is what he actually uses.
+2. **The local model manager** — the half of shape (a) that is still missing. `providers/ollama.js` is a
+   *client*; GPU arbitration via `/api/ps`, residency decisions, and surviving a dead `llama-server`
+   mid-stream are what make owning local models real. OLS's `local-monitor.js` is prior art.
+3. **`persona.lock.json` integrity.** Every project records `"integrity": null`, so the lock names
+   versions but cannot notice the shared tree changing underneath her. Now fixable — each component has
+   a git history to pin to.
+4. **A fresh clone of this repo cannot boot.** `persona.json` points at `../../../../../PortableComponents`,
+   outside her repo. Independently versioned components make this solvable; it needs a resolution story
+   (submodules? `file:` deps? a fetch step?) and that shape is his call.
+
+*(Memory service capture→reconcile→recall is LIVE — it is what produced the four memories analysed above.
+The relevance floor [R4] and queued≠saved [R8] are still unbuilt, and live in the service, not the schema.)*

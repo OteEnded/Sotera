@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.2",
-  "resolvedAt": "2026-08-09T19:01:35.749Z",
+  "resolvedAt": "2026-08-10T00:06:54.436Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -33,7 +33,7 @@
       "id": "@ote/memory",
       "name": "Memory",
       "version": "0.1.0",
-      "type": "capability",
+      "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
       "integrity": null,
