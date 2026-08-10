@@ -76,6 +76,80 @@ const NON_NAME = new Set([
   'incidentally', 'apparently', 'basically', 'honestly', 'personally', 'currently', 'usually', 'always',
 ])
 
+// ── LIVE FAILURE, 2026-08-10: FOUR invented names in one night of ordinary use ───────────────────
+// Ote opened his first conversations with Sotera and this module filed three different fragments of
+// his own prose as his name — at rising confidence, into the highest-importance slot there is:
+//
+//   "hi, this is your starting point of being something"  -> "Your Starting"  0.8   (twice)
+//   "im i phasing it right?"                              -> "I Phasing"      0.9
+//   ""But if I'm being your daughter…" no need to "if""    -> "Being Your"     0.9
+//
+// ⚠️ THE DIAGNOSIS WE WROTE FIRST WAS WRONG, and the way it was wrong is the lesson. It was blamed on
+// the LLM extractor "treating preferred_name as a slot that must be filled", on the evidence that two
+// very different models (gemma4:e4b, qwen3.5:9b) produced BYTE-IDENTICAL output. Two models agreeing to
+// the byte does not mean the prompt decided it — it means NO MODEL WAS INVOLVED. It was this file: pure,
+// deterministic regex. The strongest-looking evidence pointed at the answer and was read backwards.
+//
+// Three independent holes let it through, and each is closed below:
+//   1. NON_NAME enumerated ~90 non-names and contained NOT ONE PRONOUN — no i/my/your/you/we/being. A
+//      deny-list fails OPEN: everything nobody thought of is a name. Now every token is checked, not
+//      just the first, and the pronoun/determiner family is closed as its own set.
+//   2. Every pattern carried `strict: true|false`, thoughtfully set — and `interpretIdentity` READ IT
+//      NOWHERE. A dead flag that reads as a guard is worse than no flag: it makes the fuzzy "I'm X"
+//      family LOOK constrained. Now strict means something (see needsCapitalEvidence).
+//   3. "Being Your" came out of Ote QUOTING HER OWN SENTENCE BACK AT HER, inside quote marks. Quoting is
+//      not asserting — the memory assertion gate exists for exactly this and never runs on this path,
+//      because identity capture is a separate entry point. Now the span check lives here too.
+//
+// The tell that all three were the same failure: he never stated a name in ANY of those conversations.
+// There was no true value to find. And his profile already carried "Ote", which is what she calls him —
+// so a regex on a typo was overwriting known-good identity with nothing.
+
+// Pronouns, possessives and determiners. NEVER a self-name in these patterns — "I'm <pronoun> …" is
+// always a sentence continuing, never an introduction. Checked on EVERY token of a capture, so a
+// two-token grab cannot smuggle one in beside a plausible word ("Being Your", "Your Starting").
+const PRONOUN_OR_DETERMINER = new Set([
+  'i', 'me', 'my', 'mine', 'myself', 'you', 'your', 'yours', 'yourself', 'yourselves',
+  'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself',
+  'we', 'us', 'our', 'ours', 'ourselves', 'they', 'them', 'their', 'theirs', 'themselves',
+  'this', 'that', 'these', 'those', 'there', 'here',
+  'what', 'when', 'where', 'why', 'how', 'whose', 'whom',
+  'a', 'an', 'the', 'some', 'any', 'every', 'each', 'both', 'either', 'neither',
+  // copulas/auxiliaries a two-token capture can swallow ("I'm being your…", "I'm gonna be X")
+  'be', 'being', 'been', 'am', 'is', 'are', 'was', 'were', 'do', 'does', 'did',
+  'have', 'has', 'had', 'will', 'would', 'can', 'could', 'should', 'must', 'may', 'might',
+])
+
+// Quoted spans in a turn. QUOTING IS NOT ASSERTING: text a person reads back — hers, a document's,
+// someone else's — is not a claim about themselves. Single quotes are deliberately NOT paired here;
+// apostrophes ("I'm", "it's", "O'Brien") make them unusable as delimiters.
+function quotedSpans(s) {
+  const spans = []
+  let open = -1
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i]
+    // a straight " is both opener and closer, so test the open state first
+    if (open === -1) { if (c === '"' || c === '“' || c === '«') open = i }
+    else if (c === '"' || c === '”' || c === '»') { spans.push([open, i]); open = -1 }
+  }
+  return spans // an unterminated opener is ignored — half a quote is not evidence
+}
+
+// STRICT patterns need CAPITAL EVIDENCE. The explicit forms ("call me X", "my name is X") state intent
+// outright, so "call me ote" is honoured exactly as typed. The fuzzy family ("I'm X", "hi, this is X")
+// carries no intent of its own — it needs the writer to have marked the word as a name. Every positive
+// case in the existing unit suite already reads this way ("I'm Claude", "I'm Wren", "hi this is Ote"),
+// which is what makes this the right cut rather than a new rule bolted on.
+//
+// ⚠️ CASELESS SCRIPTS MUST NOT BE PENALISED. Thai, Chinese, Japanese, Arabic have no capitals, and Ote
+// writes Thai. The test is "the first character is not a LOWERCASE form", which is vacuously true where
+// case does not exist — so a Thai name passes and only a lowercase Latin word is rejected.
+function hasCapitalEvidence(rawValue) {
+  const first = String(rawValue).trim().replace(/^[^\p{L}]+/u, '').split(/\s+/)[0] || ''
+  if (!first) return false
+  return first[0] === first[0].toUpperCase()
+}
+
 // A name token: starts with a letter, then letters/apostrophes/hyphens. (Unicode letters allowed.)
 const NAME_TOKEN = "\\p{L}[\\p{L}'’.\\-]*"
 // up to two tokens ("John", "John Smith") — cap at 2 to avoid swallowing a trailing clause.
@@ -119,15 +193,19 @@ function normalizeName(raw) {
   return tokens.map(properCase).join(' ').trim()
 }
 
-// A captured value is a plausible name? length + non-name guard. The NON_NAME first-token check is
-// ALWAYS applied (not just for the fuzzy "I'm X" family) so even explicit forms reject "call me back
-// later" → "back". Precision over recall: better to miss a name than to store a non-name.
+// A captured value is a plausible name? length + non-name guard, applied to EVERY form including the
+// explicit ones, so "call me back later" → "back" is rejected too. Precision over recall: better to miss
+// a name than to store a non-name — a missed name costs one turn ("call me X" always works), a stored
+// non-name is injected into every future turn and shown to the user as a fact about themselves.
 function isPlausibleName(value) {
   if (!value) return false
   if (value.length < 2 || value.length > 40) return false
   if (/\d/.test(value)) return false // names in these patterns don't contain digits
-  const first = value.split(/\s+/)[0].toLowerCase()
-  if (NON_NAME.has(first)) return false
+  const tokens = value.split(/\s+/).map((t) => t.toLowerCase())
+  // NON_NAME on the FIRST token only: it lists words that cannot OPEN a name but can legitimately sit
+  // inside one. PRONOUN_OR_DETERMINER on EVERY token: a pronoun anywhere means we grabbed a sentence.
+  if (NON_NAME.has(tokens[0])) return false
+  if (tokens.some((t) => PRONOUN_OR_DETERMINER.has(t))) return false
   return true
 }
 
@@ -164,9 +242,16 @@ export function interpretIdentity(text) {
   if (!text || typeof text !== 'string') return null
   const s = text.trim()
   if (!s || s.length > 2000) return null // very long turns are unlikely to be a clean self-intro
+  const quoted = quotedSpans(s)
   for (const p of PATTERNS) {
     const m = p.re.exec(s)
     if (!m) continue
+    // QUOTED ≠ ASSERTED. Ote reading her own line back — «"But if I'm being your daughter…"» — became
+    // his name one second later. A match inside quote marks is somebody else's sentence.
+    if (quoted.some(([a, b]) => m.index > a && m.index < b)) continue
+    // STRICT: the fuzzy "I'm X" / "this is X" family states no naming intent, so the writer must have
+    // marked the word as a name. Without this, "im building rome" stores "Building Rome" at 0.9.
+    if (p.strict && !hasCapitalEvidence(m[1])) continue
     const value = normalizeName(m[1])
     if (!isPlausibleName(value)) continue
     return {

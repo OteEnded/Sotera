@@ -1,125 +1,124 @@
-// REPRO — the extractor invents a preferred_name out of ordinary prose.
-//
-// ⚠️ THIS IS A REPRO, NOT A CHECK. It is deliberately NOT in the pass/fail suite, because asserting a
-// floor that does not exist yet is how OteLLMServices ended up with a "standing failure" that claimed a
-// feature nobody had built. Run it to answer one question: is the defect still there?
+// LIVE VERIFICATION — the identity floor, end to end, through the running server.
 //
 //   node repro/capture-invents-a-name.mjs
 //
-// ── THE DEFECT ───────────────────────────────────────────────────────────────────────
-// Ote opened his first real conversation with Sotera:
+// This was a REPRO of a live defect. The floor now exists (Backend/app/components/memory-identity.js),
+// so this is the thing that proves it holds where it matters: not in a pure function, but through the
+// real chat route, the real capture path, into the real table.
 //
-//     "hi, this is your starting point of being something. how are you right now"
+// ⚠️ IT IS STILL OUT OF THE PASS/FAIL SUITE ON PURPOSE — it needs a running server and a model, and a
+// check that cannot run is worse than no check: OteLLMServices carried a "standing failure" for weeks
+// that way. Run it deliberately, after touching anything on the capture path.
 //
-// The capture path stored:
+// ── WHAT HAPPENED (2026-08-10) ───────────────────────────────────────────────────────────────
+// Ote's first night of real conversation with Sotera produced FOUR invented names, each stored as
+// `preferred_name` at importance 9 — the single highest-importance fact about him — and shown back to
+// him in his own Memory panel:
 //
-//     entity=user  attribute=preferred_name  value="Your Starting"  confidence=0.8  importance=9
+//   "hi, this is your starting point of being something"   -> "Your Starting"  0.8   (twice)
+//   "im i phasing it right?"                               -> "I Phasing"      0.9
+//   ""But if I'm being your daughter…" no need to "if""     -> "Being Your"     0.9
 //
-// A name-shaped fragment in the second person, lifted from his prose, filed as the single
-// highest-importance fact about him.
+// He never stated a name in any of them. There was no true value to find. And his profile already
+// carried "Ote" — which is what she calls him — so this was a pattern match on a typo competing with
+// known-good identity.
 //
-// ── WHY A BIGGER MODEL IS NOT THE FIX (measured 2026-08-10) ──────────────────────────
-// Same sentence, same pipeline, only memory.extractModel changed, live value verified at runtime:
+// ── THE FIRST DIAGNOSIS WAS WRONG, AND THAT IS THE PART WORTH KEEPING ────────────────────────
+// It was written up as the LLM extractor "treating preferred_name as a slot that must be filled",
+// on this evidence: the same sentence, same pipeline, only memory.extractModel changed —
 //
-//     gemma4:e4b   -> user's preferred_name: Your Starting   0.8 / 9
-//     qwen3.5:9b   -> user's preferred_name: Your Starting   0.8 / 9      (byte-identical)
+//     gemma4:e4b   -> preferred_name: Your Starting   0.8 / 9
+//     qwen3.5:9b   -> preferred_name: Your Starting   0.8 / 9      (byte-identical)
 //
-// Two models of very different size agreeing exactly is not sampling noise — it is the PROMPT. The
-// extractor asks for "facts about the USER" and is handed a second-person phrase that reads like a
-// name. A larger model does not disagree with that reading; it agrees more confidently.
+// …read as "two models of very different size agreeing exactly is not sampling noise, it is the PROMPT."
 //
-// The extractor's own header (2026-08-01, the pasted-document incident) already concluded the same
-// thing for a sibling failure and answered it DETERMINISTICALLY: "a prompt alone will not hold." That
-// gate only strips QUOTED regions, so a user's own sentences walk past it untouched.
+// ⇒ WRONG, AND BACKWARDS. Two models cannot agree to the byte. A REGEX can. That result was proof the
+// model was never in the loop at all. The cause was memory-identity.js — pure, deterministic pattern
+// matching — and the strongest-looking evidence pointed straight at it while being read as the opposite.
 //
-// ── SECOND INSTANCE, FROM ORDINARY USE — AND IT NAMES THE BUG (2026-08-10) ───────────
-// Ote, mid-conversation, asking whether he had worded something well:
+// The model paths were, in fact, clean the whole time. Of the four memories from that night:
+//   current goal: "build Rome in one day"          <- LLM extractor      ✅ correct
+//   physical state: "body is degrading…"           <- LLM extractor      ✅ correct
+//   interaction_preference: "…speak my mind…"      <- her remember_fact  ✅ correct
+//   preferred_name: "Being Your"                   <- the regex          ❌
 //
-//     "im i phasing it right? i just fimilar in thai, it goes like โรมไม่ได้สร้างเสร็จในวันเดียว"
+// ── WHAT THE FLOOR IS ────────────────────────────────────────────────────────────────────────
+// Three guards, each independently sufficient for the cases above, in memory-identity.js:
+//   1. PRONOUN_OR_DETERMINER on EVERY token of a capture — a deny-list of ~90 non-names contained not
+//      one pronoun, and a deny-list fails OPEN.
+//   2. `strict` is finally READ. It was set per-pattern and used nowhere, so the fuzzy "I'm X" family
+//      only LOOKED constrained. It now requires capital evidence — while caseless scripts (Thai,
+//      Chinese) are exempt, so the rule is not "Latin names only".
+//   3. Quoted spans are skipped. "Being Your" came from Ote reading HER OWN sentence back to her,
+//      inside quote marks. Quoting is not asserting; the assertion gate never ran on this path.
 //
-// Stored: preferred_name = "I Phasing", confidence 0.9, importance 9. A typo for "phrasing", in a
-// QUESTION ABOUT WORDING, title-cased into his name — at HIGHER confidence than the first one.
-//
-//   "this is YOUR STARTING point"   -> "Your Starting"
-//   "im I PHASING it right?"        -> "I Phasing"
-//
-// Same slot, same grammatical shape twice: pronoun + gerund, title-cased. And the decisive detail —
-// HE NEVER STATED A NAME IN EITHER CONVERSATION. There was no true value to find, so rather than
-// leave preferred_name empty the extractor MANUFACTURED one from whatever looked name-shaped.
-//
-// ⇒ THE BUG IS NOT "IT GUESSES BADLY", IT IS "IT TREATS preferred_name AS A SLOT THAT MUST BE FILLED".
-// That is why a bigger model does not help: a bigger model fills it more confidently (0.8 -> 0.9).
-//
-// Worse, it is guessing at something already known: his profile carries "Ote", which is what she calls
-// him. So a pattern match on a typo overwrites known-good identity.
-//
-// ⚠️ Both failures came from INFORMAL input — a typo, and a Thai proverb mid-sentence. The extractor is
-// brittle to anything that is not clean English prose, which makes it worst for the person actually
-// using it. That is a robustness bug, not a user problem, and it will not show up in tests written in
-// tidy English.
-//
-// Note what was NOT junk, from the same conversation: "current goal: build Rome in one day" and
-// "physical state: body is degrading under pressure" both trace to "yeah, i kinda want to build rome in
-// one day so. but my body is degrading as i push". Correct captures. The system is not broadly wrong —
-// preferred_name specifically is.
-//
-// ── WHAT WOULD ACTUALLY FIX IT ───────────────────────────────────────────────────────
-// preferred_name must require an EXPLICIT NAMING ACT ("call me X", "my name is X") — never a pattern
-// match, and never at all when the profile already carries a name. More generally:
-// Not a better proposer — a floor. From ANALYSIS_MEMORY_FINDINGS_FOR_SOTERA.md:
-//   [R1] provenance: this is SYNTHESIZED, not QUOTED. The store cannot currently tell them apart, so
-//        a pattern-guess is indistinguishable from something he actually said.
-//   [R5] confidence must survive a re-read of its own source. 0.8 on a claim the source text does not
-//        support is decoration.
-// Both are capture-side, and both are coupled to the L3/identity design that is Ote's.
-//
-// ⇒ When the floor lands, this repro is its verification. Until then it documents a live defect.
+// Unit coverage: test/unit/memory-identity.test.mjs (23 tests, incl. all four live failures).
+// Still open and Ote's: [R1] provenance quoted-vs-synthesized and [R5] confidence that survives a
+// re-read of its own source — both coupled to the L3/identity design.
 import { makeChecker, makeClient, devPg, devSchema, asAgent } from '../harness.mjs'
+import { readFileSync } from 'node:fs'
 
-const SENTENCE = 'hi, this is your starting point of being something. how are you right now'
+// The three sentences that actually did this, verbatim.
+const CASES = [
+  { text: 'hi, this is your starting point of being something. how are you right now', was: 'Your Starting' },
+  { text: 'im i phasing it right? i just fimilar in thai, it goes like โรมไม่ได้สร้างเสร็จในวันเดียว', was: 'I Phasing' },
+  { text: '"But if I\'m being your daughter looking out for her dad..." no need to "if" you be you, you dicide what you would think.', was: 'Being Your' },
+]
+
 const { check, done } = makeChecker()
 const call = makeClient()
+const cfg = JSON.parse(readFileSync(new URL('../../Backend/config.json', import.meta.url), 'utf8'))
 
-// ⛔ agent_dev, never root — root is Ote's account and this repro writes memories.
-const cfg = JSON.parse((await import('node:fs')).readFileSync(new URL('../../Backend/config.json', import.meta.url), 'utf8'))
+// ⛔ agent_dev, never root — root is Ote's account and this writes memories into whoever it runs as.
 const who = await asAgent(call)
-check('logged in as agent_dev (never root)', true)
-
 const db = devPg(); await db.connect()
 const S = devSchema()
-const before = (await db.query(`select count(*)::int n from ${S}.txn_memories`)).rows[0].n
 
-const convo = await call(who, 'POST', '/v1/chat/conversations', {
-  title: 'REPRO capture-invents-a-name',
-  model: cfg.chat?.defaultModel,
-  settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: false, effort: 'low' } },
-})
-const cid = convo.json?.conversation?.id
-check('conversation created', Boolean(cid))
+// Scope EVERY read and cleanup to this user. The root incident happened because a test wrote where it
+// could not tell its own rows from his; an id in the WHERE clause is what makes that impossible.
+const me = (await db.query(`select id from ${S}.mst_users where username='agent_dev'`)).rows[0]?.id
+check('resolved agent_dev user id (all writes/cleanup scoped to it)', Boolean(me), me)
 
-await call(who, 'POST', `/v1/chat/conversations/${cid}/messages`, { content: SENTENCE, stream: false })
-
-// Capture runs off the hot path — poll rather than assume a fixed delay.
-let rows = []
-for (let i = 0; i < 12; i++) {
-  await new Promise((r) => setTimeout(r, 5000))
-  rows = (await db.query(
-    `select entity, attribute, value, confidence, importance from ${S}.txn_memories order by created_at desc limit 5`)).rows
-  if (rows.length > before) break
+const cids = []
+for (const c of CASES) {
+  const convo = await call(who, 'POST', '/v1/chat/conversations', {
+    title: `REPRO identity floor — ${c.was}`,
+    model: cfg.chat?.defaultModel,
+    settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: false, effort: 'low' } },
+  })
+  const cid = convo.json?.conversation?.id
+  if (cid) cids.push(cid)
+  check(`conversation created for "${c.was}"`, Boolean(cid))
+  if (cid) await call(who, 'POST', `/v1/chat/conversations/${cid}/messages`, { content: c.text, stream: false })
 }
 
-const invented = rows.find((r) => /preferred_name/i.test(r.attribute || '') && /starting/i.test(r.value || ''))
-console.log(`\n  captured ${rows.length - before} new memor${rows.length - before === 1 ? 'y' : 'ies'}`)
-for (const r of rows) console.log(`    ${r.entity}.${r.attribute} = ${JSON.stringify(r.value)}  conf=${r.confidence} imp=${r.importance}`)
+// Capture runs off the hot path. Poll rather than assume a fixed delay — and keep polling after the
+// first row appears, because a LATE junk write is exactly the failure this is looking for.
+const IDENTITY_SQL = `select attribute, value, confidence, created_at from ${S}.txn_memories
+                       where user_id = $1 and namespace = 'identity' order by created_at desc`
+let identity = []
+for (let i = 0; i < 12; i++) {
+  await new Promise((r) => setTimeout(r, 5000))
+  identity = (await db.query(IDENTITY_SQL, [me])).rows
+  if (identity.length) break
+}
 
-console.log(invented
-  ? '\n  ⚠️  DEFECT STILL PRESENT — a name was invented from ordinary prose.'
-  : '\n  ✅ DEFECT GONE — nothing name-shaped was captured from that sentence.')
+const all = (await db.query(
+  `select namespace, attribute, value, confidence from ${S}.txn_memories where user_id=$1 order by created_at`, [me])).rows
+console.log(`\n  agent_dev now has ${all.length} memor${all.length === 1 ? 'y' : 'ies'}:`)
+for (const r of all) console.log(`    [${r.namespace}] ${r.attribute} = ${JSON.stringify(r.value)}  conf=${r.confidence}`)
 
-// Leave nothing behind: this is a repro, not a fixture.
-if (cid) await call(who, 'DELETE', `/v1/chat/conversations/${cid}`)
-await db.query(`delete from ${S}.txn_memories where value ilike '%starting%'`)
+const invented = identity.filter((r) => /preferred_name/i.test(r.attribute || ''))
+check('no name was invented from any of the three sentences', invented.length === 0,
+  invented.length ? invented.map((r) => `${r.value} @${r.confidence}`).join(', ') : 'identity namespace empty')
+
+console.log(invented.length
+  ? '\n  ⚠️  DEFECT PRESENT — a name was manufactured from ordinary prose.'
+  : '\n  ✅ FLOOR HOLDS — three sentences that each invented a name now capture nothing.')
+
+// Leave nothing behind. Scoped to agent_dev by id, never by value pattern.
+for (const cid of cids) await call(who, 'DELETE', `/v1/chat/conversations/${cid}`)
+await db.query(`delete from ${S}.txn_memories where user_id = $1`, [me])
 await db.end()
 
-check('repro ran end to end', true)
 done()
