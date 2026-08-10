@@ -16,6 +16,8 @@
 
 /** Field names whose VALUE must never be written to the audit log, matched case-insensitively as a
  *  substring so `apiKey`, `api_key`, `openaiApiKey` and `keyEncryptionSecret` are all covered. */
+import { ownerIdOrNull } from '../auth/owner.js'
+
 const SECRET_HINTS = [
     'apikey', 'api_key', 'secret', 'password', 'passwd', 'token', 'credential',
     'privatekey', 'private_key', 'authorization', 'cookie', 'salt', 'hash',
@@ -82,7 +84,12 @@ export async function logConfigChange(db, { area, action, target = null, before 
             target: target == null ? null : String(target).slice(0, 200),
             before: redact(before),
             after: redact(after),
-            actor_user_id: actor?.id ?? null, // null = root (no users row)
+            // ⚠️ THIS COMMENT USED TO SAY "null = root (no users row)". Root HAS a users row, so that
+            // reading is dead — a null here now means the actor could not be resolved at all, which is
+            // a gap in the audit record, not a claim about who acted. `actor` (the label) still carries
+            // the username, which is why this degrades instead of refusing: losing the audit ROW would
+            // be worse than losing one id on it. See auth/owner.js for the ownership-vs-attribution split.
+            actor_user_id: ownerIdOrNull(actor),
             actor: actorLabel(actor),
             note: note == null ? null : String(note).slice(0, 500),
         })

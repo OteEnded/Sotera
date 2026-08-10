@@ -4,6 +4,8 @@
 // admin/root-visible only; users never see it. The latest 'username' row also drives the 48h
 // self-change cooldown (admin/root changes are exempt but still logged).
 
+import { ownerIdOrNull } from './owner.js'
+
 export const USERNAME_COOLDOWN_MS = 48 * 60 * 60 * 1000
 
 /**
@@ -24,7 +26,10 @@ export async function logUserChange(db, { userId, field, oldValue, newValue, act
     field,
     old_value: oldValue ?? null,
     new_value: newValue ?? null,
-    changed_by_user_id: actor?.id ?? null, // null = root (no DB row)
+    // ⚠️ WAS "// null = root (no DB row)" — root has a row now, so null no longer identifies anybody.
+    // Attribution, not ownership: `changed_by` above still names the actor, so a null degrades the
+    // record rather than orphaning it. See auth/owner.js.
+    changed_by_user_id: ownerIdOrNull(actor),
     changed_by,
   })
 }

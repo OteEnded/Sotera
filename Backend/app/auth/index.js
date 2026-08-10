@@ -77,8 +77,14 @@ export async function resolveApiKey(db, token, config = null) {
   // row, which is what the row was added for, AND still skip a gate that cannot meaningfully apply — root
   // cannot be demoted or deactivated. `config` is optional so a caller without it degrades to the old
   // null-only behaviour rather than throwing.
-  const ownerIsRoot = row.owner_user_id === null
-    || (config ? isRootConnectedUser(config, row.owner_user_id) : false)
+  //
+  // ⚠️ SOTERA DROPS THE NULL BRANCH ENTIRELY (2026-08-10). OteLLMServices keeps `owner_user_id === null ||
+  // isRootConnectedUser(…)` because it still has legacy null-owned keys to honour. Sotera has none —
+  // `mst_api_keys.owner_user_id` is NOT NULL (migration 002) and the count is zero — so that branch is not
+  // merely unused, it is unreachable. Keeping it would leave one last rule saying "an unowned key is a
+  // ROOT key", which is the exact sentence this codebase has now had to delete eight times. Root-ness is
+  // a question for root-identity.js, and only for it.
+  const ownerIsRoot = config ? isRootConnectedUser(config, row.owner_user_id) : false
   if (!ownerIsRoot) {
     const owner = row.owner // null if the owner is soft-deleted (paranoid include) or gone
     if (!owner || owner.is_active === false) return null
