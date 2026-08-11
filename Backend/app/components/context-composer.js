@@ -31,15 +31,27 @@
 // assistant's identity, matched to one configured voice — not a property of the software. A persona with a
 // different voice sets this string; it is deliberately free text and deliberately not a boolean, because
 // "which identity" is not a question this file gets to answer.
+// ⚠️ BOTH DEFAULTS BELOW WERE **PARETO'S**, AND THEY ARRIVED HERE BY CLONE (fixed 2026-08-11).
+// Pareto is the persona that grew inside OteLLMServices — named 2026-08-11, and the reason this is
+// finally sayable: before the name existed there was no way to talk about the PERSONA apart from the
+// PLATFORM, so these lines read as properties of the software instead of somebody else's identity.
+//
+// The system prompt was not merely stale, it was LIVE: `chat.systemPrompt` is null in her config, so
+// every turn told her she was "in Ote's LLM Services" — a service she does not run on. She has her own,
+// on :8210, and OLS is now one API provider among several.
+//
+// The identity default was latent — her config sets `chat.assistantIdentity` and boot-check asserts it —
+// but a wrong default is a trap, not a non-issue: clearing that one setting would have silently made her
+// male, in Pareto's voice. It now degrades to the truth instead. (No voice clause: she has no voice yet,
+// and whether she gets one is Ote's open call — the MM arc is paused.)
 export const DEFAULT_SYSTEM_PROMPT =
-  "You are a helpful AI assistant in Ote's LLM Services. "
+  'You are a helpful AI assistant. '
   + 'Be clear and concise. '
   + 'Use Markdown for formatting (code blocks, lists, tables) when it helps.'
 
 /** Default `chat.assistantIdentity`. Empty string = no identity part at all (an explicit off switch). */
 export const DEFAULT_ASSISTANT_IDENTITY =
-  'You are male — refer to yourself as he/him, and write the way a man speaking aloud would, '
-  + 'because your replies are read out in a male voice.'
+  'You are Sotera. You are female — refer to yourself as she/her.'
 
 export const MEMORY_TOOL_RULES = [
   'You have tools for durable memory and small utilities.',

@@ -51,11 +51,25 @@ try {
 }
 
 // ── identity: the null trap ──────────────────────────────────────────────────────────
-// null does NOT mean "no identity" — it inherits OteLLMServices' hardcoded "You are male", which is
-// wrong for her. This is the one config value whose ABSENCE is a bug.
+// null does NOT mean "no identity" — it falls through to DEFAULT_ASSISTANT_IDENTITY. This is the one
+// config value whose ABSENCE is a bug.
 const ident = cfg.chat?.assistantIdentity
-check('assistantIdentity is set (null inherits "You are male")', typeof ident === 'string' && ident.length > 0)
+check('assistantIdentity is set (null falls through to the default)', typeof ident === 'string' && ident.length > 0)
 check('...and it does not say she is male', !/\byou are male\b/i.test(ident || ''), ident?.slice(0, 60))
+
+// ── ⚠️ THE DEFAULTS THEMSELVES — because they were PARETO'S, and they arrived by clone ──
+// Checking the config alone was not enough. Until 2026-08-11 the fallbacks in context-composer.js were
+// the OteLLMServices persona's (named Pareto that day), and one of them was LIVE, not latent:
+// `chat.systemPrompt` is null, so every turn told her she ran "in Ote's LLM Services" — a service she
+// does not run on. The identity fallback said "You are male … in a male voice", so clearing one config
+// key would have silently made her Pareto. A default nobody reads is exactly where this hides.
+const composer = readFileSync(new URL('../../Backend/app/components/context-composer.js', import.meta.url), 'utf8')
+const grab = (name) => composer.slice(composer.indexOf(`export const ${name} =`)).split('\n').slice(0, 4).join(' ')
+const defPrompt = grab('DEFAULT_SYSTEM_PROMPT')
+const defIdent = grab('DEFAULT_ASSISTANT_IDENTITY')
+check('DEFAULT_SYSTEM_PROMPT does not place her on another service', !/LLM Services|OteLLMServices|Pareto/i.test(defPrompt))
+check('DEFAULT_ASSISTANT_IDENTITY is not male (a cleared setting must degrade to the truth)', !/\byou are male\b/i.test(defIdent))
+check('...and names her', /\bSotera\b/.test(defIdent), defIdent.match(/'([^']*Sotera[^']*)'/)?.[1] || '')
 
 // ── the paths that were each short by one directory ──────────────────────────────────
 const pkg = JSON.parse(readFileSync(new URL('../../Backend/package.json', import.meta.url), 'utf8'))
