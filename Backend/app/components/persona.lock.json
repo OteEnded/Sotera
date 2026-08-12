@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
-  "sdkVersion": "0.6.3",
-  "resolvedAt": "2026-08-10T05:44:10.094Z",
+  "sdkVersion": "0.6.4",
+  "resolvedAt": "2026-08-12T10:04:13.421Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -10,7 +10,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": "sha256-d07010f74a58f3711fea068c2d4bd46fde166d04569f175b7707d6f1eca516ab",
+      "integrity": "sha256-fc486a121bf911cf2347be2388e675321b747670dcd0b07bef20bff9e8f82581",
       "components": [
         "get_current_time"
       ],
@@ -23,7 +23,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": "sha256-e1c4ab90f5d32f0141d023fd8878aa8d30fd7efc8d3a03c7fba432226f01642b",
+      "integrity": "sha256-6df82688b0755a1f17e74550f6aae91e5940bd6b35b216abd000f7334eab7617",
       "components": [
         "calculate"
       ],
@@ -36,7 +36,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": "sha256-158d866f8add9f2fd837ccd0f673c2e135432171ab1b40afb11918e39aa1d92a",
+      "integrity": "sha256-f9400532b5d79fa3d441eb6423b1af0a01d71de7370113cbcb5d15f266464b2a",
       "components": [
         "recall_memory",
         "list_memories",
@@ -48,7 +48,47 @@
         "list_archived_memories",
         "restore_memory"
       ],
-      "permissions": []
+      "permissions": [],
+      "infrastructure": {
+        "required": [
+          {
+            "id": "postgres",
+            "note": "The reference memory.v2 is Sequelize over Postgres. A different store is legal if it satisfies the MemoryStore port — this names what the reference host uses, not a law."
+          }
+        ],
+        "graded": [
+          {
+            "id": "pgvector",
+            "note": "embedding_hv halfvec(2048), HNSW at scale. Absent: denseRelevances returns null (NOT an empty Map — null means 'cannot answer, fall back'; empty would mean 'nothing matched' and read as amnesia). Warns once, then stops querying.",
+            "degradesTo": "in-JS cosine over candidate embeddings — correct, slower, does not scale"
+          },
+          {
+            "id": "postgres-fulltext",
+            "note": "generated content_tsv column + GIN index. Absent: lexicalSearch returns []. Warns once.",
+            "degradesTo": "dense-only recall — exact-word matches get weaker"
+          },
+          {
+            "id": "embedding-model",
+            "note": "host-provided embed(text); here Matryoshka-truncated qwen3-embedding via Ollama. Rows persist with embedding: null.",
+            "degradesTo": "NO semantic recall — memories still store and enumerate, but relevance ranking has nothing to rank with"
+          },
+          {
+            "id": "slot-store",
+            "note": "mst_slots. Absent is silent and legal; PRESENT BUT INCOMPLETE throws — 'not provided' and 'provided broken' are different failures.",
+            "degradesTo": "facts write slot_id null, exactly as before Phase 6 — reworded beliefs stop collapsing onto one concept"
+          },
+          {
+            "id": "audit-sink",
+            "note": "log_memory_changes, via an injected writer.",
+            "degradesTo": "beliefs still change, the trail is missing — you lose the answer to 'where did my fact go?'"
+          },
+          {
+            "id": "conversation-store",
+            "note": "txn_messages + txn_conversations.",
+            "degradesTo": "recall_memory_source returns the memory and its source id but no surrounding conversation — and that is SUCCESS, not failure"
+          }
+        ]
+      }
     },
     "../../../../../PortableComponents/Tools/WebSearch": {
       "id": "@ote/tool-web-search",
@@ -70,7 +110,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": "sha256-a63db2dd863951e3b7798391a16681419167ea8331118272f27187224c3a380e",
+      "integrity": "sha256-8314b3a02f1fd471fbe14f8e14ff0c7ac0f649af75faf3342c022727f90b77c9",
       "components": [
         "search_conversations"
       ],
@@ -83,7 +123,7 @@
       "type": "tool",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": "sha256-44ebec42a86f558a12c7a7b6e2231eb72acb51dfba995c2cc5325efa7b4f3d48",
+      "integrity": "sha256-085be5e703150d7326a3d0c76d82d560bbdef68d43c3530313089e72b203001e",
       "components": [
         "update_working_memory"
       ],
