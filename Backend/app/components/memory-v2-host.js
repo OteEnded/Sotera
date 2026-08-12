@@ -7,7 +7,7 @@
 import { createMemoryV2Service } from './memory-v2-service.js'
 import { createSequelizeMemoryStore } from './memory-store-sequelize.js'
 import { createSlotStore } from './memory-slot-store.js'
-import { logMemoryChange } from '../audit/memory-log.js'
+import { logMemoryChange, snapshot } from '../audit/memory-log.js'
 import { makeEmbedder } from './memory-embed.js'
 import { rowsBySlotIndex } from './memory-slot-resolver.js'
 import { buildSlotResolver } from './memory-resolver-host.js'
@@ -41,7 +41,17 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
   // a database was involved. ⚠️ It used to call `logMemoryChange(db, …)` directly with a `db` the
   // factory no longer receives — syntactically valid, ReferenceError at runtime, inside a swallowing
   // try. The audit trail would have stopped silently, which is the incident memory-log.js exists for.
-  const auditLog = (entry) => logMemoryChange(fastify.db, entry)
+  //
+  // ⚠️ THE HOST PROJECTS `before`, NOT THE COGNITION. The service used to call
+  // `snapshot(row)` itself, importing it from ../audit/memory-log.js — the LAST reach across the seam
+  // after step 1b, and a real one: it made the component depend on the host's audit module to describe
+  // its own belief. It now hands over the raw row and the writer decides what is worth persisting,
+  // which is where a persistence decision belongs. (`after` is always a plain object built by the
+  // cognition — a description of the CHANGE, not of a row — so it is passed through untouched.)
+  const auditLog = (entry) => logMemoryChange(fastify.db, {
+    ...entry,
+    ...(entry?.before ? { before: snapshot(entry.before) } : {}),
+  })
 
   return createMemoryV2Service({
     store, slotStore, auditLog,

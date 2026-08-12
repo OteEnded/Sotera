@@ -18,7 +18,6 @@ import { resolveConflict, WIRE_ACTION } from './memory-conflict.js'
 import { createCosineSlotResolver, rowsBySlotIndex } from './memory-slot-resolver.js'
 import { recordResolution, bump as bumpResolverCounter } from './memory-resolver-telemetry.js'
 import { SELF_ENTITY, SELF_OWNER_ALIASES } from './memory-observation.js'
-import { snapshot } from '../audit/memory-log.js'
 
 // ONE WRITE LANE PER (persona, user) — module-level on purpose. A per-instance queue cannot serialize two
 // writers that were built from separate `buildMemoryV2` calls in the same turn, which is exactly how the
@@ -381,7 +380,7 @@ export function createMemoryV2Service({ store, slotStore: injectedSlotStore = nu
         await store.update(plan.collapse, { invalid_at: new Date(now()) })
         for (const dup of matches.filter((r) => plan.collapse.includes(r.id))) {
           audit({ memoryId: dup.id, action: 'collapse', relatedId: plan.target, slotId: slot?.id ?? dup.slot_id ?? null,
-            reason: `duplicate of the live belief · ${auditReason}`, before: snapshot(dup), source })
+            reason: `duplicate of the live belief · ${auditReason}`, before: dup, source })
         }
       }
       return { ok: true, action: wire, id: plan.target, collapsed: plan.collapse.length }
@@ -412,7 +411,7 @@ export function createMemoryV2Service({ store, slotStore: injectedSlotStore = nu
         relatedId: created.id,
         slotId: slot?.id ?? old.slot_id ?? null,
         reason: auditReason,
-        before: snapshot(old),
+        before: old,
         after: { replacedBy: created.id, value: String(value).slice(0, 200) },
         source,
       })
@@ -609,7 +608,7 @@ export function createMemoryV2Service({ store, slotStore: injectedSlotStore = nu
     audit({
       memoryId: prior.id, action: 'revive', relatedId: target.id, slotId: prior.slot_id ?? null,
       reason: `un-superseded: the belief that displaced it (${target.id}) was forgotten`,
-      before: snapshot(prior), after: { invalid_at: null, tier: 'warm' }, source: prior.source ?? null,
+      before: prior, after: { invalid_at: null, tier: 'warm' }, source: prior.source ?? null,
     })
     log?.info?.(
       { revived: prior.id, after: target.id, slot: prior.slot_id, attribute: prior.attribute },
@@ -785,7 +784,7 @@ export function createMemoryV2Service({ store, slotStore: injectedSlotStore = nu
       if (!target) return { ok: true, forgotten: false, restored: null }
       const n = await store.update([id], { expired_at: new Date(now()), tier: 'cold' })
       if (!n) return { ok: true, forgotten: false, restored: null }
-      audit({ memoryId: id, action: 'forget', slotId: target.slot_id ?? null, before: snapshot(target),
+      audit({ memoryId: id, action: 'forget', slotId: target.slot_id ?? null, before: target,
         reason: 'soft-forget (archived, recoverable)', source: target.source ?? null })
       let restored = null
       try { restored = await reviveSuperseded(target) } catch (e) {
@@ -835,7 +834,7 @@ export function createMemoryV2Service({ store, slotStore: injectedSlotStore = nu
         reason: blockedBy
           ? `restored from archive, but slot still held by ${blockedBy} — un-archived, not believed`
           : 'restored from archive',
-        before: snapshot(row), after: { ...patch }, source: row.source ?? null,
+        before: row, after: { ...patch }, source: row.source ?? null,
       })
       return { ok: true, restored: true, nowLive, blockedBy, memory: view({ ...row, ...patch }) }
     },
