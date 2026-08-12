@@ -280,6 +280,35 @@ host-side, exactly as the Layering Law prescribes). Renaming moves a path both s
 - **Her identity content.** The schema has a place for who she is; nobody has written who she is.
   That is the actual next question, and it is his, not mine.
 
+## 🧠 MEMORY IS A PORTABLE COMPONENT NOW (RFC steps 1–3, 2026-08-11/12)
+
+`Reference/docs/RFC_MEMORY_AS_COMPONENT.md` — accepted, steps 1–3 done. **The 20 cognition modules live
+in `PortableComponents/Packages/Memory/cognition/`**, consumed by her Backend as a `file:` dependency;
+the 11 `-host.js` adapters stay here. Ote's rule for the seam:
+
+> **A component boundary follows what happens when the dependency DISAPPEARS** — not shared tables, not
+> conceptual relatedness. *"When this capability isn't available, what does the system promise to do?"*
+
+- `store` **required** → memory is broken, fail loudly · `slotStore` **optional** → bookkeeping skipped,
+  memory still works · `auditLog` **optional** → beliefs still change, the trail is missing.
+- ⚠️ **Absent ≠ broken.** An absent SlotStore is silent and legal; a *supplied but incomplete* one throws.
+- Every degradation is a **tested contract**, not a comment (his instruction). The load-bearing one:
+  `denseRelevances` returns **`null`, never an empty Map** — null = *"cannot answer, fall back to JS
+  cosine"*, empty = *"answered, nothing matched"* → silent amnesia.
+
+**Portability is PROVEN, not asserted:** the package has its own suite that runs *with the host absent*
+(8/8), including `createMemoryV2Service` driving a hand-written in-memory store. `sequelize`, `fastify`
+and `pg` are not even resolvable from inside it. That test lives in the package on purpose — run from
+inside the host it would prove nothing, since the host's `node_modules` is exactly what's being ruled out.
+
+⚠️ **A `file:` dependency, NOT the component loader** — two mechanisms, different jobs: *"I need this
+code"* vs *"I am loading this component at runtime."* The host adapters import pure functions
+(`rankMemories`, `interpretIdentity`) directly. Routing those through `defineMemory` would have built an
+API around functions that don't need one.
+
+**Package type is now `capability`** — multi-kind (memory + tools). `component-canon-check` *derives*
+that from exports, so a stale `type` fails the check rather than rotting quietly.
+
 ## Next, in order
 
 1. **The chat UI**, replacing the placeholder — she has no face yet, and `/chat` is what he actually uses.
