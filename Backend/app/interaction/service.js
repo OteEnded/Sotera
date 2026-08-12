@@ -167,6 +167,11 @@ export async function askInteraction(fastify, user, conversationId, spec) {
     result: formatAnswers(norm.questions, resolved?.response, status === 'timeout' ? 'timeout' : resolved?.status || status),
     interactionId: session.id,
     status: resolved?.status || status,
+    // The RAW response as well as the prose. `result` is written for a MODEL to read; a non-model
+    // caller (the identity resolver, which must turn an answer into a deterministic write) needs the
+    // selection itself, and parsing it back out of a sentence would be inventing a protocol from prose.
+    response: resolved?.response ?? null,
+    questions: norm.questions,
   }
 }
 

@@ -47,10 +47,22 @@ export function commitToMemory(mem, obs) {
  * would make that function wait on its own queue slot: a deadlock, not a slowdown.
  * @returns {{ mem: object, pipeline: { ingest:Function, observe:Function }, router: object }}
  */
-export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMessageId = null, self = null, serializeCommits = false } = {}) {
+export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMessageId = null, self = null, serializeCommits = false, ask = null } = {}) {
   const log = fastify?.log ?? null
   const mem = buildMemoryV2(fastify, { userId, persona, sourceMessageId, self })
-  const identity = createIdentityResolver(mem, { log })
+  // `ask` is the Identity Resolver's OPTIONAL port for the one case it must not decide alone: a name
+  // that would REPLACE a name she already has. Null is the ordinary state — most callers (the model's
+  // remember_fact, the fact extractor, a maintenance pass) have no conversation and no human attached,
+  // and the resolver's documented behaviour without it is to DEFER, never to assume.
+  //
+  // ⚠️ AND THIS IS WHY IDENTITY MUST NOT JOIN `serializeCommits`. Identity capture and the fact
+  // extractor can both reach the Identity Resolver, and only the extractor rides the serial write lane
+  // — so both can see an empty slot and both adopt. The obvious fix (serialize identity too) is the
+  // WRONG one now: an identity commit can HOLD FOR UP TO FIVE MINUTES waiting for a human to answer,
+  // and on the write lane that would stall every other memory write in the process for the duration.
+  // The race is closed in the STORE instead — setIdentity converges the slot to one live row — which
+  // is the same principle the rest of memory uses: the datastore guarantees convergence, not the caller.
+  const identity = createIdentityResolver(mem, { log, ask })
   const episodic = createEpisodicResolver(mem, { log })
   const card = createCardResolver(mem, { log })
   const router = createResolverRouter({

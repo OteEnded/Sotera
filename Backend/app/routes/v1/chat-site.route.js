@@ -1865,7 +1865,29 @@ export default async function chatSiteRoutes(fastify) {
     // The call is CPU-placed (num_gpu:0) and fire-and-forget, so it can neither evict the chat model nor
     // delay this reply. Interpretation is the model's; adoption stays deterministic.
     if (settings.useMemory && request.user?.id && lastUserText) {
-      captureIdentity(fastify, { userId: request.user.id, sourceMessageId: lastUserMsg?.id ?? null }, lastUserText, { source: `conversation:${convo.id}` }).catch(() => {})
+      // conversationId + user + interactive are what let the ADOPTION GATE ask instead of guessing when
+      // a name would REPLACE one she already has (RFC step 5). Without them it degrades to defer —
+      // keep the current name, change nothing — which is what every non-chat caller gets.
+      // ⚠️ THE YIELD IS LOGGED, exactly as captureFacts' is, and for the same reason it was added there:
+      // "dropping it once cost a live investigation". It cost one again on 2026-08-12 — identity capture
+      // silently produced nothing for a whole test run and the log said NOTHING AT ALL, so the first
+      // suspicion fell on code that turned out to be fine. (Ollama was down.) A path that can decline to
+      // act must say so, or its silence is indistinguishable from its absence.
+      captureIdentity(fastify, {
+        userId: request.user.id,
+        sourceMessageId: lastUserMsg?.id ?? null,
+        user: request.user,
+        conversationId: convo.id,
+        interactive: interactiveTurn,
+      }, lastUserText, { source: `conversation:${convo.id}` })
+        .then((r) => {
+          if (r?.skipped) return // disabled, or no user to scope to — not an event
+          fastify.log?.info?.({
+            conversation: convo.id, identity: !!r?.identity, action: r?.action ?? null,
+            value: r?.value ?? null, from: r?.from ?? null, via: r?.via ?? null, error: !!r?.error,
+          }, 'memory.identity: yield')
+        })
+        .catch(() => {})
     }
 
     // RuntimeContext from the PortableComponents adapter: injects host services (memory/search)

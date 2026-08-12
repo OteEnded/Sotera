@@ -13,7 +13,10 @@
 // memory.identityLlm=false is the path that must work without one.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { identityInterpreter, identityEnabled, identityLlmEnabled, identityModel } from '../../Backend/app/components/memory-identity-host.js'
+import {
+  identityInterpreter, identityEnabled, identityLlmEnabled, identityModel,
+  makeIdentityAsk, interpretAskAnswer,
+} from '../../Backend/app/components/memory-identity-host.js'
 import { SETTING_KEYS } from '../../Backend/app/settings/index.js'
 
 // A fastify stub. `config` is the real shape getSetting() reads, so the settings layer is genuinely
@@ -46,21 +49,19 @@ test('the identity model FOLLOWS the extraction model at read time, not through 
   assert.ok(identityModel(stub().config).includes('/'), 'and there is always SOME model, never empty')
 })
 
-// ── THE FLOOR ────────────────────────────────────────────────────────────────────────────────────
-test('with the model off, the English patterns still capture — this is the floor', async () => {
+// ── NO FLOOR (step 5) ────────────────────────────────────────────────────────────────────────────
+//
+// ⚠️ THESE ASSERTIONS ARE THE INVERSE OF WHAT THEY SAID THIS MORNING, and that is the change. The
+// English patterns used to catch "Hi, I'm Claude" whenever the model was off or unreachable. They are
+// deleted. With no model, identity capture now does NOTHING — deliberately, because a missed name
+// costs one turn while a wrong one is injected into every future turn and shown to the user as a fact
+// about themselves. Two interpreters with different rules, where the weaker speaks only when the
+// stronger is silent, runs the fuzzy guess exactly when you would least want it.
+test('with the model off, NOTHING is captured — silence, not a guess', async () => {
   const interpret = identityInterpreter(stub({ identityLlm: false }))
-  const o = await interpret("Hi, I'm Claude.")
-  assert.equal(o.value, 'Claude')
-  assert.equal(o.type, 'identity')
-  assert.equal(o.context.via, 'regex')
-})
-
-test('and the floor is monolingual — which is the entire reason step 4 exists', async () => {
-  const interpret = identityInterpreter(stub({ identityLlm: false }))
-  // MEASURED 2026-08-10. Not an aspiration: this is what the shipped detector does today.
-  assert.equal(await interpret('ผมชื่อโอต'), null)
-  assert.equal(await interpret('私の名前はオテです'), null)
-  assert.equal(await interpret('me llamo Ote'), null)
+  for (const t of ["Hi, I'm Claude.", 'my name is Ote', 'call me Rex', 'ผมชื่อโอต']) {
+    assert.equal(await interpret(t), null, t)
+  }
 })
 
 // ── THE ORDER ────────────────────────────────────────────────────────────────────────────────────
@@ -70,25 +71,63 @@ test('and the floor is monolingual — which is the entire reason step 4 exists'
 // that ships. What these assert is the ORDER and the FALLBACK, which is the part only the host owns.
 const counting = (reply) => { const c = { calls: 0 }; c.llm = async () => { c.calls++; return typeof reply === 'function' ? reply() : reply }; return c }
 
-test('the model is asked first, and the patterns are not consulted when it answers', async () => {
+test('the model reads the turn, in the language it was written in', async () => {
   const c = counting('{"act":"assert","name":"โอต","evidence":"ผมชื่อโอต","confidence":0.95}')
   const o = await identityInterpreter(stub({ identityLlm: true }), { llm: c.llm })('ผมชื่อโอต')
   assert.equal(c.calls, 1, 'exactly one aux call, on a turn that carries a naming cue')
-  assert.equal(o.value, 'โอต', 'Thai — the case the patterns cannot reach')
+  assert.equal(o.value, 'โอต', 'Thai — the case the patterns never reached')
   assert.equal(o.context.via, 'llm')
 })
 
-test('when the model is unreachable the patterns catch what they can — never an exception', async () => {
+test('an unreachable model is silence, never an exception and never a guess', async () => {
   const dead = async () => { throw new Error('ollama is not running') }
   const interpret = identityInterpreter(stub({ identityLlm: true }), { llm: dead })
-  assert.equal((await interpret("Hi, I'm Claude."))?.context.via, 'regex', 'the floor caught it')
-  assert.equal(await interpret('ผมชื่อโอต'), null, 'and honestly returns nothing where it cannot')
+  assert.equal(await interpret("Hi, I'm Claude."), null, 'English is not a special case any more')
+  assert.equal(await interpret('ผมชื่อโอต'), null)
 })
 
 test('the switch beats the injection — memory.identityLlm=false means no model, whoever supplies one', async () => {
   const c = counting('{"act":"assert","name":"โอต","evidence":"ผมชื่อโอต","confidence":0.95}')
   assert.equal(await identityInterpreter(stub({ identityLlm: false }), { llm: c.llm })('ผมชื่อโอต'), null)
   assert.equal(c.calls, 0, 'an injected model must not be a way around a setting that says off')
+})
+
+// ── THE ASK (step 5) ─────────────────────────────────────────────────────────────────────────────
+//
+// The resolver's contract with no ask port is DEFER — keep the name she has. So every guard here must
+// choose "return null" (do not ask) over "ask badly", and none of them may become "assume".
+test('there is no ask when there is nobody to ask, or nowhere to show it', () => {
+  const f = stub()
+  assert.equal(makeIdentityAsk(f, { user: { id: 'u' }, conversationId: null, interactive: true }), null, 'no conversation')
+  assert.equal(makeIdentityAsk(f, { user: { id: 'u' }, conversationId: 'c', interactive: false }), null, 'headless side-call')
+  assert.equal(makeIdentityAsk(f, { user: null, conversationId: 'c', interactive: true }), null, 'no human')
+  assert.equal(makeIdentityAsk(f, {}), null, 'nothing at all')
+  assert.equal(typeof makeIdentityAsk(f, { user: { id: 'u' }, conversationId: 'c', interactive: true }), 'function')
+})
+
+test('an answer becomes a write ONLY when it unambiguously names something else', () => {
+  const answered = (response) => ({ status: 'answered', response })
+  // the two shapes a click produces, and the shape free text produces
+  assert.deepEqual(interpretAskAnswer(answered({ answers: [{ selected: ['Otto'], custom: null }] }), 'Ote'), { adopt: true, value: 'Otto' })
+  assert.deepEqual(interpretAskAnswer(answered({ answers: [{ selected: [], custom: 'โอต' }] }), 'Ote'), { adopt: true, value: 'โอต' })
+  assert.deepEqual(interpretAskAnswer(answered({ freeText: 'call me Z' }), 'Ote'), { adopt: true, value: 'call me Z' })
+  // choosing what she already holds is a real answer, and it means LEAVE IT ALONE
+  assert.deepEqual(interpretAskAnswer(answered({ answers: [{ selected: ['Ote'] }] }), 'Ote'), { adopt: false })
+  assert.deepEqual(interpretAskAnswer(answered({ answers: [{ selected: ['  ote  '] }] }), 'Ote'), { adopt: false }, 'and case/padding do not make it a different name')
+})
+
+test('NOT ANSWERING IS NOT PERMISSION — every non-answer resolves to no', () => {
+  for (const out of [
+    null, undefined, {},
+    { status: 'skipped', response: { answers: [{ selected: ['Otto'] }] } },
+    { status: 'timeout' },
+    { status: 'cancelled' },
+    { error: 'ask_user needs a conversation' },
+    { status: 'answered', response: null },
+    { status: 'answered', response: { answers: [{ selected: [], custom: '   ' }] } },
+  ]) {
+    assert.deepEqual(interpretAskAnswer(out, 'Ote'), { adopt: false }, JSON.stringify(out))
+  }
 })
 
 test('a turn with no naming cue costs no model call at all', async () => {

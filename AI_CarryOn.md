@@ -343,6 +343,77 @@ carry no cue at all — a bare correction (*"no, it's Ote not Otto"*) and the an
 interrupts. So the lexicon stays narrow and the ASK gets a door past it (`requireCue: false`) — **step 5's
 held turn is what walks through it.**
 
+## 🙋 SHE ASKS BEFORE SHE RENAMES YOU (RFC step 5, 2026-08-12)
+
+The gate is three answers and nothing else:
+
+```
+empty slot      → ADOPT   she simply learned who they are. Nothing is at risk, nobody is interrupted.
+same value      → NOOP    already known. The store is idempotent; no duplicate row.
+different value → ASK     a CHANGE to how she addresses someone. Never silent, in EITHER direction.
+```
+
+⚠️ **The wrong answer on a change is not "picks wrong" — it is "picks at all."** Only the human owns
+their own name. Before this, a second name was *deferred*: logged, dropped, and he was never told.
+
+**The ASK is HumanInteraction's held turn**, the mechanism he chose. ⚠️ **It is the first
+runtime-initiated interaction** — every ask until now came from the model calling `ask_user` inside its
+own turn, and the Feature says outright it "does NOT decide WHEN to ask (the model does)". That still
+holds: nothing *decides* to ask, the deterministic gate does, in the one case where silence would mean
+overwriting a name she was given. The mechanics needed no change because `askInteraction` was never
+model-specific — it persists a session, emits the protocol, and holds a **promise**. The model's held
+turn is one caller; the identity capture task, already fire-and-forget, is another. The consequence to
+know: **the question arrives after her reply has streamed**, which is honest about what happened.
+
+`ask` is an **optional, domain-shaped port**: `ask({attribute, from, to}) → {adopt, value?}`. It says
+what the component needs to know, never how a host obtains an answer — a verb-shaped `ask_user(questions)`
+would have dragged a question schema and a conversation id into cognition that has no business with either.
+
+⚠️ **Absent ⇒ DEFER, and that is a tested promise.** "Cannot ask" must never degrade to "assume" —
+that would be the four invented names again wearing a politer name. A skip, a timeout, a closed page, a
+thrown error and "keep what you have" are all the *same* answer, and it is **no**. Free text is a real
+answer: *"actually call me Z"* adopts Z, because they are the only authority on their own name.
+
+**And the English regex is gone.** `interpretIdentity` and its ~150 lines of patterns, deny-lists and
+capital-evidence machinery are deleted; `memory-identity.js` is now the identity *vocabulary* and the
+*adoption gate*, which were never the problem. ⚠️ **The degradation changed deliberately:** with no
+model reachable, identity capture now does **nothing** rather than guessing from English sentence
+shapes. Two interpreters with different rules, where the weaker speaks only when the stronger is silent,
+runs the fuzzy guess exactly when you would least want it.
+
+⚠️ **`repro/identity-multilingual.mjs` is now the only thing standing between a model swap and losing
+Thai again.** Nothing in the pass/fail suite would notice. Run it after touching the prompt, the
+filters, or `memory.identityModel`.
+
+### 🐛 And the bug the ASK exposed — `setIdentity` never superseded anything
+
+The first live run of `identity-ask-on-change.mjs` went **all-green with a broken slot**:
+
+```
+preferred_name = "Ote"   (live)      ← two writers both saw an empty slot
+preferred_name = "Ote"   (live)
+preferred_name = "Otto"  (live)      ← the answered ASK never superseded either
+```
+
+`setIdentity` was a bare INSERT. That was *correct* under the old policy — the comment above it said
+"Phase 1 only ADDS (into an empty slot) or reinforces", because a change was always deferred, so it was
+never called with a differing value. **Step 5's ASK made that precondition false, and I rewrote that
+comment while changing the policy it described.**
+
+🔑 **A comment naming an invariant is a PRECONDITION, not decoration.** The thing to do with it is
+check whether your change breaks it — not edit it to match.
+
+🔑 **And every check passed because they all asked "is the newest value right?"** — and it always was.
+A test that reads the way the code reads cannot find a bug in how the code *writes*. Both suites now
+assert the **slot**: exactly one live row, the old one archived, the new one pointing at what it replaced.
+
+⚠️ **The duplicate came from a real race** — identity capture and the fact extractor both reach the
+Identity Resolver and only the extractor rides the serial write lane. The obvious fix (serialize
+identity too) is now the **wrong** one: an identity commit can hold for **five minutes** waiting for a
+human, and on the write lane that stalls every other memory write for the duration. So the race is
+closed in the **store** — `setIdentity` converges the slot — which is the principle the rest of memory
+already uses: *the datastore guarantees convergence, not the caller.*
+
 **Also fixed here:** `memory.identityEnabled` had been *read* since 2026-07-30 and **never registered**.
 `getSetting()` throws on an unknown key, the host's `try/catch` returned the default, and identity capture
 therefore had **no off switch** for six weeks. Found by checking every `getSetting()` literal in `app/`

@@ -3,12 +3,15 @@
 //   node repro/identity-multilingual.mjs                    (default: the configured extract model)
 //   node repro/identity-multilingual.mjs qwen3.5:9b         (a specific model)
 //
-// ⚠️ RUN THIS BEFORE DELETING memory-identity.js. Step 5 removes the English pattern floor built on
-// 2026-08-10. The window between "floor gone" and "model works" is exactly the regression Ote lived
-// through — four invented names in one night, in the highest-importance slot there is. The RFC's own
-// sequencing note says step 5 must not run until step 4 is PROVEN IN THAI, and this is that proof.
-// A step-4 unit suite cannot be it: it injects the model's answers, so it measures the filters, not
-// the interpretation. This measures the interpretation.
+// ✅ THIS IS THE GATE THAT UNBLOCKED STEP 5, and it passed on 2026-08-12: regex 1/10, model 10/10,
+// nothing invented. The English pattern floor was deleted immediately after. A step-4 unit suite could
+// not have been this gate — it injects the model's answers, so it measures the filters, not the
+// interpretation. This measures the interpretation.
+//
+// ⚠️ IT IS NOW A REGRESSION TEST, AND THE STAKES WENT UP, NOT DOWN. With the floor gone this is the
+// ONLY thing that can tell you identity capture still works in a language other than English. Run it
+// after touching the prompt, the filters, or memory.identityModel — a model swap is exactly the change
+// that could quietly take Thai away again, and nothing else in the suite would notice.
 //
 // ⚠️ OUT OF THE PASS/FAIL SUITE ON PURPOSE — it needs Ollama and a resident aux model, and takes
 // minutes on CPU. A check that cannot finish gets skipped, then ignored, then deleted (OteLLMServices
@@ -24,8 +27,15 @@
 // replaces. The per-language table is the deliverable; the exit code is a convenience.
 import { readFileSync } from 'node:fs'
 import { IDENTITY_PROMPT, parseIdentityReply } from '@ote/memory/cognition/memory-identity-llm.js'
-import { interpretIdentity } from '@ote/memory/cognition/memory-identity.js'
 import { assertionGate } from '@ote/memory/cognition/memory-extract.js'
+
+// ⚠️ THE "regex" COLUMN IS NOW HISTORY, NOT A LIVE CALL. This file used to run `interpretIdentity`
+// side by side with the model; step 5 deleted that function, so the baseline is RECORDED here instead
+// of re-measured. These are the results it produced on 2026-08-10 and again on 2026-08-12 — the run
+// that unblocked the deletion. Keeping the column keeps the comparison legible; labelling it as
+// recorded keeps it honest, because a number nobody can re-derive should say so out loud.
+const REGEX_BASELINE_2026_08_10 = new Set(['my name is Ote']) // 1 of 10. English only. That was the whole problem.
+const regexRead = (text) => REGEX_BASELINE_2026_08_10.has(text)
 
 const cfg = JSON.parse(readFileSync(new URL('../../Backend/config.json', import.meta.url), 'utf8'))
 // ⚠️ config.json stores the ollama host WITHOUT a scheme ("127.0.0.1:11434"). fetch() rejects that
@@ -119,9 +129,8 @@ console.log(`  ${pad('lang', 5)} ${pad('regex', 6)} ${pad('llm', 6)} ${pad('name
 let llmHit = 0
 let reHit = 0
 for (const c of POSITIVE) {
-  const re = interpretIdentity(c.text)
+  const okRe = regexRead(c.text)
   const { obs, raw, ms } = await ask(c.text)
-  const okRe = re?.value === c.name
   const okLlm = obs?.value === c.name
   if (okRe) reHit++
   if (okLlm) llmHit++
@@ -133,11 +142,10 @@ for (const c of POSITIVE) {
 console.log('\n  MUST NOT NAME — the 2026-08-10 failures, and cue words with no naming act')
 let leaked = 0
 for (const c of NEGATIVE) {
-  const re = interpretIdentity(c.text)
   const { obs, raw } = await ask(c.text)
   if (obs) leaked++
   const mark = obs ? '✖ LEAKED' : '✓'
-  console.log(`  ${pad(c.lang, 5)} ${pad(mark, 10)} ${pad(obs?.value ?? '—', 14)} ${c.text}${re ? `   [regex also said: ${re.value}]` : ''}`)
+  console.log(`  ${pad(c.lang, 5)} ${pad(mark, 10)} ${pad(obs?.value ?? '—', 14)} ${c.text}`)
   if (obs) console.log(`        ↳ model said: ${raw.replace(/\s+/g, ' ').slice(0, 160)}`)
 }
 
