@@ -134,3 +134,61 @@ export function assertMemoryStore(store, label = 'MemoryStore') {
   }
   return store
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// THE SLOT STORE PORT — a SECOND contract, in the same file, with a DELIBERATELY DIFFERENT GUARANTEE.
+//
+// 🔑 Ote's rule, 2026-08-11: **a component boundary follows what happens when the dependency
+// disappears** — not which tables it touches, not what it is conceptually near.
+//
+//   MemoryStore absent  →  memory is BROKEN.            Fail loudly, by name.
+//   SlotStore absent    →  slot bookkeeping is SKIPPED.  Memory still works. Say nothing.
+//
+// Two different promises cannot share one contract. Folding these five methods into the thirteen above
+// would have forced `assertMemoryStore` to grow OPTIONAL entries — a required contract with holes in
+// it, which is the "flag bolted on later" smell this port already had to be corrected for once.
+//
+// The optionality is not an accident to be tidied away. memory-slot-store.js states it as a design
+// property: *"Slot bookkeeping must never be able to fail a write."* Slots are the long-lived identity
+// of a CONCEPT (mst_slots); memories are BELIEFS. A host can serve beliefs without ever modelling
+// concepts, and memory degrades to exactly what it was before Phase 6: facts written without slot_id.
+
+/** What a SlotStore provides when one is present. Optional as a whole; complete if supplied. */
+export const SLOT_STORE_METHODS = Object.freeze(['ensure', 'get', 'recordAlias', 'touch', 'list'])
+
+/**
+ * The no-op SlotStore. Every method answers the "nothing here" value that leaves the caller's logic
+ * intact: `ensure`/`get` yield null (→ the fact writes with `slot_id: null`), `list` yields [] (→ the
+ * slot view is built entirely from ephemeral descriptors, exactly as it was pre-Phase-6).
+ */
+export const NULL_SLOT_STORE = Object.freeze({
+  async ensure() { return null },
+  async get() { return null },
+  async recordAlias() { return false },
+  async touch() { /* nothing to touch */ },
+  async list() { return [] },
+  get isDisabled() { return true },
+})
+
+/**
+ * Resolve an optional SlotStore — and note the asymmetry, because it is the whole point:
+ *
+ *   ABSENT (null/undefined) → the NO-OP store. Legal, silent, memory unaffected.
+ *   PRESENT but INCOMPLETE  → THROW, naming what is missing.
+ *
+ * ⚠️ "Not provided" and "provided broken" are different failures and must not collapse into one.
+ * Falling back to the no-op on a malformed store would turn a wiring bug into months of quietly
+ * missing slot identity — every fact writing `slot_id: null`, every reworded belief splitting into a
+ * new concept, and nothing anywhere saying so. That is the failure mode this codebase keeps finding.
+ *
+ * @param {object|null|undefined} store @param {string} [label] @returns {object} a usable SlotStore
+ */
+export function resolveSlotStore(store, label = 'SlotStore') {
+  if (store == null) return NULL_SLOT_STORE
+  if (typeof store !== 'object') throw new TypeError(`${label}: expected an object or null, got ${typeof store}`)
+  const missing = SLOT_STORE_METHODS.filter((m) => typeof store[m] !== 'function')
+  if (missing.length) {
+    throw new TypeError(`${label} was provided but is incomplete — missing: ${missing.join(', ')}. Pass null to run without slot bookkeeping; passing a broken store is not the same thing.`)
+  }
+  return store
+}
