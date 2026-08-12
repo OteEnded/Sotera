@@ -13,6 +13,14 @@
 //
 // ⚠️ OUT OF THE PASS/FAIL SUITE — needs the server, a live model, and about two minutes.
 // ⛔ agent_dev, never root. This RENAMES whoever it runs as.
+//
+// ⚠️⚠️ AND IT WIPES agent_dev's MEMORIES AT THE END — every one, not just the rows it made. That is
+// correct hygiene for a test account and a real hazard the moment the account holds anything you care
+// about. Found the honest way on 2026-08-12: I had just held a genuine conversation with her as
+// agent_dev — she had learned my name and three facts — and running this erased all of it. The account
+// is a test fixture, so nothing was lost that mattered; but a "friendship" and a cleanup target cannot
+// be the same rows, and if you ever want a persistent relationship to survive, use a different user.
+// (The same sweep is in capture-invents-a-name.mjs and identity-thai-end-to-end.mjs.)
 import { makeChecker, makeClient, devPg, devSchema, asAgent } from '../harness.mjs'
 import { readFileSync } from 'node:fs'
 
