@@ -50,19 +50,34 @@
  * @typedef {Object} MemoryStore
  *
  * ── READS ──────────────────────────────────────────────────────────────────────────────────────
- * @property {(opts?: {kind?: string|string[], namespace?: string}) => Promise<MemoryRow[]>} findLive
- *   Everything live in scope. The workhorse: candidate generation, slot views, fact reconcile.
+ * ⚠️ TWO SCOPES, AND THE DISTINCTION IS DOMAIN, NOT SQL. Measured across every call site in the 902-line
+ * service: recall wants everything the user can SEE (their rows ∪ the persona-global identity rows);
+ * reconcile, episode clustering and card matching all want only what the user OWNS. Those are different
+ * questions, so they are different methods. My first draft of this port guessed one `findLive` plus a
+ * speculative `findSlot`, and reading the code collapsed four guesses into these two.
+ *
+ * @property {(opts?: {kind?: string|string[], namespace?: string}) => Promise<MemoryRow[]>} findVisible
+ *   Live rows this subject can SEE — theirs plus the persona-global identity. Recall candidates.
+ * @property {(opts?: {kind?: string, namespace?: string}) => Promise<MemoryRow[]>} findOwnLive
+ *   Live rows this subject OWNS, newest-first. Reconcile (semantic), episodeClusters (episodic),
+ *   findPriorCard (card). ⚠️ Never includes the persona-global rows — reconciling against a belief the
+ *   user does not own would let one user's write displace a persona-wide fact.
  * @property {(id: string) => Promise<MemoryRow|null>} findById
- *   One row, still scope-checked — an id from outside the scope must read as absent, not as a hit.
+ *   One LIVE row, scope-checked — an id from outside the scope must read as absent, not as a hit.
+ * @property {(id: string) => Promise<MemoryRow|null>} findAnyById
+ *   As above but INCLUDING archived rows. Separate on purpose: pin/forget/revive legitimately act on
+ *   the dead, and a single method with an `includeArchived` flag is one bad default away from leaking
+ *   a forgotten belief into a live prompt.
  * @property {(ids: string[]) => Promise<MemoryRow[]>} findByIds
  *   Rehydrate a ranked id list in one round trip (search returns ids, ranking needs rows).
- * @property {(opts: {entity?: string, attribute?: string, namespace?: string, kind?: string, slotId?: string}) => Promise<MemoryRow[]>} findSlot
- *   The rows occupying one semantic slot. Reconcile's read half — it decides, the store only fetches.
- * @property {(opts: {kind?: string, limit?: number}) => Promise<MemoryRow[]>} listArchived
- *   ⚠️ The ONLY read that returns non-live rows (superseded or forgotten), each carrying why + when.
- *   Without it memory can only ever LOSE: every other read hides the dead, so a belief that was taken
- *   away is indistinguishable from one never held.
- * @property {(opts?: {kind?: string, namespace?: string}) => Promise<number>} count
+ * @property {(opts: {slotId?: string|null, entity?: string, attribute?: string}) => Promise<number>} countLiveInSlot
+ *   How many live beliefs occupy this slot. The guard that makes un-superseding safe: revive the
+ *   displaced belief ONLY if nothing else has taken the slot, so it always holds exactly one.
+ *   Prefers slotId; falls back to (entity, attribute) for rows written before the Slot store existed.
+ * @property {(opts: {kind?: string, namespace?: string, limit?: number, offset?: number}) => Promise<MemoryRow[]>} listArchived
+ *   ⚠️ The ONLY read that returns non-live rows (superseded or forgotten). Without it memory can only
+ *   ever LOSE: every other read hides the dead, so a belief that was taken away is indistinguishable
+ *   from one never held.
  *
  * ── SEARCH: two arms, because they fail independently ──────────────────────────────────────────
  * @property {(opts: {query: string, kind?: string, namespace?: string, limit?: number}) => Promise<string[]>} lexicalSearch
@@ -86,9 +101,17 @@
  *   not a belief change, and a failure here must never fail a read.
  */
 
-/** Every method a MemoryStore must provide. Order = the doc above. */
+/**
+ * Every method a MemoryStore must provide. Order = the doc above.
+ *
+ * ⚠️ THIS LIST IS MEASURED, NOT DESIGNED. The first draft had 12 entries invented from a call-site
+ * grep; reading all 902 lines changed five of them. `findLive`+`findSlot` became `findVisible`+
+ * `findOwnLive` (two different questions, not one), `count` became `countLiveInSlot` (its only caller
+ * asks about slot occupancy), and `findAnyById` appeared because pin/forget/revive act on archived rows.
+ * A port guessed from grep output is a port that will need a flag bolted on later.
+ */
 export const MEMORY_STORE_METHODS = Object.freeze([
-  'findLive', 'findById', 'findByIds', 'findSlot', 'listArchived', 'count',
+  'findVisible', 'findOwnLive', 'findById', 'findAnyById', 'findByIds', 'countLiveInSlot', 'listArchived',
   'lexicalSearch', 'denseRelevances', 'getSource',
   'create', 'update', 'touch',
 ])
