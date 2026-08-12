@@ -200,6 +200,26 @@ const SETTING_DEFS = {
     validate: (v) => typeof v === 'boolean',
     describe: 'When on, each captured turn is distilled into atomic facts (update-not-append) via memory.extractModel. Off = raw episodic capture only (no per-turn extraction LLM call).',
   },
+  // ⚠️ memory.identityEnabled was READ from 2026-07-30 and never REGISTERED here. getSetting() throws
+  // on an unknown key, memory-identity-host.js caught it and returned the default — so the switch was
+  // dead, identity capture could not be turned off, and nothing said so. Found 2026-08-12 by checking
+  // every getSetting() literal in app/ against SETTING_KEYS: 101 of 102 resolved, and the one that did
+  // not was this. A defensive try/catch around a lookup will hide a typo forever.
+  'memory.identityEnabled': {
+    fromConfig: (c) => c?.memory?.identityEnabled ?? true,
+    validate: (v) => typeof v === 'boolean',
+    describe: 'When on, each user turn is checked for the writer NAMING THEMSELVES ("my name is…", "call me…", "ผมชื่อ…") and the name is stored in the reserved identity slot, which the Profile projects as preferredName. Runs regardless of the one-writer rule — identity owns its own slot, so it never races the model\'s memory tools. Off = the persona only ever knows the account username.',
+  },
+  'memory.identityLlm': {
+    fromConfig: (c) => c?.memory?.identityLlm ?? true,
+    validate: (v) => typeof v === 'boolean',
+    describe: 'Interpret the naming ACT with a model (multilingual) instead of English regex patterns alone. MEASURED 2026-08-10: the pattern detector captured in 1 of 9 languages — Thai, Japanese, Chinese, Spanish, French and German all returned nothing, and a pattern list cannot be made multilingual by making it more precise. The model only INTERPRETS; adoption stays deterministic and a name must appear verbatim in the turn before it can be stored. Off = the English patterns alone (the pre-2026-08-12 behaviour), which is the fallback when the model is unavailable either way.',
+  },
+  'memory.identityModel': {
+    fromConfig: (c) => c?.memory?.identityModel ?? '',
+    validate: (v) => typeof v === 'string' && (v === '' || MODEL_ID.test(v)),
+    describe: 'Model that interprets the naming act (memory.identityLlm). Empty (default) = follow memory.extractModel, so identity rides the aux model already resident and costs no extra RAM. ⚠️ The follow happens at READ time in the host, never as a config-default chain here: a chain cannot see extractModel\'s DB override, which is how the episode distiller once silently ran gemma while extraction ran qwen. The call is small (one object out) and fires only on turns carrying a naming cue.',
+  },
   'memory.consolidateEnabled': {
     fromConfig: (c) => c?.memory?.consolidateEnabled ?? false,
     validate: (v) => typeof v === 'boolean',

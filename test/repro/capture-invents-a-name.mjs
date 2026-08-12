@@ -2,9 +2,15 @@
 //
 //   node repro/capture-invents-a-name.mjs
 //
-// This was a REPRO of a live defect. The floor now exists (Backend/app/components/memory-identity.js),
-// so this is the thing that proves it holds where it matters: not in a pure function, but through the
-// real chat route, the real capture path, into the real table.
+// This was a REPRO of a live defect. The floor now exists
+// (PortableComponents/Packages/Memory/cognition/memory-identity.js — it moved into the Memory package
+// on 2026-08-12), so this is the thing that proves it holds where it matters: not in a pure function,
+// but through the real chat route, the real capture path, into the real table.
+//
+// ⚠️ AND IT NOW COVERS A SECOND INTERPRETER. Since RFC step 4 a MODEL reads the turn first and the
+// patterns are the fallback, so these three sentences must be refused by BOTH. Run this and
+// identity-multilingual.mjs together — this one asks "can anything invent a name end to end?", that
+// one asks "can the model read a real one in Thai?". Neither answers the other's question.
 //
 // ⚠️ IT IS STILL OUT OF THE PASS/FAIL SUITE ON PURPOSE — it needs a running server and a model, and a
 // check that cannot run is worse than no check: OteLLMServices carried a "standing failure" for weeks

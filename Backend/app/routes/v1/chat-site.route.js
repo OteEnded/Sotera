@@ -1855,10 +1855,15 @@ export default async function chatSiteRoutes(fastify) {
         .catch(() => {})
     }
 
-    // IDENTITY capture (Memory V3 Phase 1) — deterministic + high-precision self-naming → the reserved
-    // identity slot → Profile.preferredName. Runs REGARDLESS of the one-writer rule above: identity has
-    // its OWN slot (no race with the model's generic memory writes), so "I'm Claude" is learned whether
-    // or not the model holds memory tools. Skips root/anonymous (config/username-driven name).
+    // IDENTITY capture (Memory V3 Phase 1 · RFC step 4) — self-naming → the reserved identity slot →
+    // Profile.preferredName. Runs REGARDLESS of the one-writer rule above: identity has its OWN slot (no
+    // race with the model's generic memory writes), so "I'm Claude" / "ผมชื่อโอต" is learned whether or
+    // not the model holds memory tools. Skips root/anonymous (config/username-driven name).
+    //
+    // ⚠️ SINCE 2026-08-12 THIS CAN COST AN AUX LLM CALL — but only on turns carrying a naming cue, which
+    // a cheap multilingual lexicon decides before any model is reached. Ordinary turns still cost zero.
+    // The call is CPU-placed (num_gpu:0) and fire-and-forget, so it can neither evict the chat model nor
+    // delay this reply. Interpretation is the model's; adoption stays deterministic.
     if (settings.useMemory && request.user?.id && lastUserText) {
       captureIdentity(fastify, { userId: request.user.id, sourceMessageId: lastUserMsg?.id ?? null }, lastUserText, { source: `conversation:${convo.id}` }).catch(() => {})
     }

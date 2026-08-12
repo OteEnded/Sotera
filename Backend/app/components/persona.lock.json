@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-12T10:39:46.933Z",
+  "resolvedAt": "2026-08-12T11:14:42.695Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -36,7 +36,7 @@
       "type": "capability",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": "sha256-c060f58c345bdbba6b1dab57301664c6296b29c1ac73ddefda23535b154ee210",
+      "integrity": "sha256-ad58834a600e04ca0fed5f7d5e1b0086843aaac6834c88b760ea87fd05f9e450",
       "components": [
         "persona_memory",
         "recall_memory",
@@ -87,6 +87,11 @@
             "id": "conversation-store",
             "note": "txn_messages + txn_conversations.",
             "degradesTo": "recall_memory_source returns the memory and its source id but no surrounding conversation — and that is SUCCESS, not failure"
+          },
+          {
+            "id": "identity-interpreter-model",
+            "note": "host-provided llm(prompt) for interpretIdentityLlm; here whatever memory.identityModel names, following memory.extractModel. Fires only on turns carrying a naming cue, so it is not a per-turn cost. Absent/disabled/unreachable all fall through to the patterns; `via` records which interpreter spoke.",
+            "degradesTo": "self-naming is read by English regex patterns only — MEASURED 2026-08-10: 1 of 9 languages, with Thai/Japanese/Chinese/Korean/Spanish/French/German all capturing nothing"
           }
         ]
       }

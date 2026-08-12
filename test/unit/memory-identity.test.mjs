@@ -8,7 +8,12 @@
 // code and leaving the test is how a module arrives already broken.
 //
 // The suite below is OLS's, plus the live failures. Read the "LIVE FAILURE" block in
-// Backend/app/components/memory-identity.js for why each guard exists.
+// PortableComponents/Packages/Memory/cognition/memory-identity.js for why each guard exists.
+//
+// ⚠️ THIS MODULE IS NOW THE FLOOR, NOT THE MECHANISM (RFC step 4, 2026-08-12). `interpretIdentityLlm`
+// reads the turn first and speaks nine languages; these patterns catch English when the model is off,
+// unavailable, or unsure. RFC step 5 deletes this file — and this suite with it — but ONLY after
+// repro/identity-multilingual.mjs proves the model in Thai against a live model.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { interpretIdentity, identityPlan, IDENTITY_ATTR, IDENTITY_NAMESPACE } from '@ote/memory/cognition/memory-identity.js'

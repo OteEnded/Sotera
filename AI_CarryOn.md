@@ -309,6 +309,46 @@ API around functions that don't need one.
 **Package type is now `capability`** — multi-kind (memory + tools). `component-canon-check` *derives*
 that from exports, so a stale `type` fails the check rather than rotting quietly.
 
+## 🌏 IDENTITY NOW SPEAKS MORE THAN ENGLISH (RFC step 4, 2026-08-12)
+
+**She could not learn Ote's name in Ote's language.** Measured across nine languages on 2026-08-10, the
+pattern detector interpreted **one** — English. `ผมชื่อโอต` captured nothing. The 2026-08-10 fix made that
+detector more *precise*; nothing can make a list of one language's phrasings multilingual.
+
+So the halves swapped, which is the actual idea and not just "add an LLM":
+
+> **The LLM INTERPRETS. Deterministic code ADOPTS, and is the only thing that writes.**
+
+The four invented names were never a detector being bad — they were **detection committing straight to
+belief.** So the model's answer now passes four deterministic filters before it is even an observation:
+
+| # | filter | what it buys |
+|---|---|---|
+| 1 | **assertion gate** | quoted/pasted regions are removed *before* the model reads the turn — the gate that existed and never ran on this path, which is how `"But if I'm being your daughter…"` became his name |
+| 2 | **explicit act** | `assert · prefer-address · correct` only. Anything else, including an unknown string, is not a naming act — **Ote's floor (c)**, kept under the ASK "either way" |
+| 3 | **verbatim spans** | the name *and* the quoted evidence must appear literally in the turn, and the name must sit inside the evidence. **This is the language-neutral one** — it needs no lexicon and no idea what a name looks like, so it refuses an invented Thai name by the same code path as an English one |
+| 4 | **function words** | last line only, for the one failure shape with live evidence. Deny-lists fail open, so it is never the mechanism |
+
+⚠️ **The regex is the FLOOR now, not the mechanism — and it must not be deleted yet.** Step 5 removes it,
+and only after `test/repro/identity-multilingual.mjs` proves the model in Thai. That file is the gate:
+it runs the same ten sentences past both interpreters and prints a per-language table.
+
+**A cue lexicon decides whether to spend a model call** — not whether anything is true. That inversion is
+what makes a word list acceptable here when it was not acceptable as a detector: over-triggering costs one
+CPU aux call, under-triggering misses a name. Both are cheap; a wrong *belief* was not.
+
+⚠️ **A measured recall hole, recorded rather than papered over:** the two turns that most need identity
+carry no cue at all — a bare correction (*"no, it's Ote not Otto"*) and the answer to a direct question
+(*"โอต"*). Widening the lexicon means firing on every short turn, and his best interventions are four-word
+interrupts. So the lexicon stays narrow and the ASK gets a door past it (`requireCue: false`) — **step 5's
+held turn is what walks through it.**
+
+**Also fixed here:** `memory.identityEnabled` had been *read* since 2026-07-30 and **never registered**.
+`getSetting()` throws on an unknown key, the host's `try/catch` returned the default, and identity capture
+therefore had **no off switch** for six weeks. Found by checking every `getSetting()` literal in `app/`
+against the live `SETTING_KEYS` — 101 of 102 resolved. ⚠️ **A defensive try/catch around a lookup hides a
+typo forever**, and a unit test now asserts every key the identity host reads is registered.
+
 ## Next, in order
 
 1. **The chat UI**, replacing the placeholder — she has no face yet, and `/chat` is what he actually uses.

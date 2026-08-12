@@ -3,78 +3,25 @@
 // internal LLM call — title/summary use the same `chat()`), and a one-shot `captureFacts` that
 // runs the full extract→reconcile pipeline for one turn. Meant to be called FIRE-AND-FORGET off the
 // hot path — it never blocks or breaks a reply.
+//
+// The LLM construction itself (placement · keep-alive · window · temperature 0, all measured) moved to
+// memory-aux-llm-host.js on 2026-08-12, when identity interpretation became a second consumer needing
+// byte-identical behaviour with a different model and token budget.
 
-import { chat } from '../chat-runtime/index.js'
 import { getSetting } from '../settings/index.js'
 import { extractFacts } from '@ote/memory/cognition/memory-extract.js'
 import { buildMemoryPipeline } from './memory-pipeline-host.js'
 import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { bump } from '@ote/memory/cognition/memory-capture-telemetry.js'
+import { makeAuxLlm, extractModel } from './memory-aux-llm-host.js'
 
-const DEFAULT_EXTRACT_MODEL = 'ollama/gemma4:e4b'
+export { extractModel }
 
-export function extractModel(config) {
-  try { return getSetting(config, 'memory.extractModel') || DEFAULT_EXTRACT_MODEL } catch { return DEFAULT_EXTRACT_MODEL }
-}
 export function extractEnabled(config) {
   try { return getSetting(config, 'memory.extractEnabled') !== false } catch { return true }
 }
-function auxNumCtx(config) {
-  try { const v = getSetting(config, 'memory.auxNumCtx'); return Number.isInteger(v) && v > 0 ? v : 8192 } catch { return 8192 }
-}
 
-function splitModelId(full) {
-  const i = full.indexOf('/')
-  return i === -1 ? { provider: 'ollama', model: full } : { provider: full.slice(0, i), model: full.slice(i + 1) }
-}
-
-/**
- * PLACEMENT — the same measured lever as memory.embeddingDevice and memory.resolverDevice, and it matters MORE
- * here now that fallback capture makes this call fire on ordinary turns rather than only tool-less ones.
- *
- * Measured on 2x16GB with the 26.5GB chat model resident: any aux model placed on the GPU does not fit, so
- * Ollama evicts the chat model and the user's NEXT TURN pays ~29s to reload it. Extraction is fire-and-forget
- * off the hot path, so its own latency is invisible while that stall is not — which makes CPU the correct
- * default for exactly the same reason it is correct for the embedder.
- */
-function auxDevice(config) {
-  try { return getSetting(config, 'memory.extractDevice') === 'gpu' ? 'gpu' : 'cpu' } catch { return 'cpu' }
-}
-function auxKeepAlive(config) {
-  try { const v = getSetting(config, 'memory.extractKeepAlive'); return typeof v === 'string' && v ? v : '30m' } catch { return '30m' }
-}
-
-/**
- * TEMPERATURE 0 — MEASURED, and the effect here is larger than it was for the adjudicator.
- *
- * Extraction is STRUCTURED PERCEPTION: its output becomes the ATTRIBUTE, and the attribute IS the slot key.
- * Sampled, the same sentence produced different keys AND — far worse — different DECISIONS. Measured on
- * gemma4:e4b, 5 runs per sentence:
- *   "I drink a flat white every morning before work"  →  default temp: 4/5 runs extracted NOTHING, 1/5 captured
- *                                                     →  temperature 0: 5/5 captured
- *   "I usually go to bed around 1am"                  →  default temp: "around 1am" / "around 1 am" (2 values)
- *                                                     →  temperature 0: 1 value
- * So a large share of what was recorded as "capture sparsity — the model declined to call remember_fact" was
- * actually the EXTRACTOR silently dropping the fact, and it was invisible because zero extracted facts is
- * indistinguishable from a turn containing nothing worth keeping.
- *
- * This is the same principle as the resolver's, applied where it bites hardest: be DETERMINISTIC wherever the
- * output becomes an IDENTITY or a decision to persist. (Prose-producing aux calls — card induction, reflection
- * notes — are deliberately NOT changed here: their output is text to read, not a key to match on. Whether they
- * suffer the same silent-omission problem is untested.)
- */
-function makeFactLlm(fastify, { userId = null } = {}) {
-  const { provider, model } = splitModelId(extractModel(fastify.config))
-  const options = { stream: false, reasoning: { enabled: false }, max_tokens: 400, numCtx: auxNumCtx(fastify.config), keepAlive: auxKeepAlive(fastify.config), temperature: 0 }
-  if (auxDevice(fastify.config) === 'cpu') options.numGpu = 0 // 0 VRAM — never evict the chat model
-  return async (prompt) => {
-    const res = await chat({
-      serverConfig: fastify.config,
-      request: { provider, model, messages: [{ role: 'user', content: prompt }], options, userId },
-    })
-    return res?.message?.content || ''
-  }
-}
+const makeFactLlm = (fastify, { userId = null } = {}) => makeAuxLlm(fastify, { maxTokens: 400, userId })
 
 /**
  * factInterpreter — the auto-extractor as an INTERPRETATION-stage interpreter (Memory V3 Phase 2): raw
