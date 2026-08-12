@@ -13,8 +13,8 @@
 
 import { chat } from '../chat-runtime/index.js'
 import { getSetting } from '../settings/index.js'
-import { createCosineSlotResolver, SLOT_SEM_THRESHOLD } from './memory-slot-resolver.js'
-import { createGrayZoneResolver, GRAY_ZONE_MODE } from './memory-grayzone-resolver.js'
+import { createCosineSlotResolver, SLOT_SEM_THRESHOLD } from '@ote/memory/cognition/memory-slot-resolver.js'
+import { createGrayZoneResolver, GRAY_ZONE_MODE } from '@ote/memory/cognition/memory-grayzone-resolver.js'
 import { extractModel } from './memory-extract-host.js'
 
 const DEFAULTS = { min: 0.70, max: 0.85, tie: 0.02 }

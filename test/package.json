@@ -10,5 +10,8 @@
     "check": "node checks/boot-check.mjs",
     "owner": "node checks/owner-check.mjs"
   },
-  "dependencies": { "pg": "^8.19.0" }
+  "dependencies": {
+    "pg": "^8.19.0",
+    "@ote/memory": "file:../../../PortableComponents/Packages/Memory"
+  }
 }

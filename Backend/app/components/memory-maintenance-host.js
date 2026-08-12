@@ -19,7 +19,7 @@
 // episodic prose and unscored rows. That is deliberate (facts should not rot silently), but it means
 // raising this number is a far bigger change than it looks: at 6 it starts eating real facts.
 
-import { memoryDecayPlan } from './memory-rank.js'
+import { memoryDecayPlan } from '@ote/memory/cognition/memory-rank.js'
 import { logMemoryChange, snapshot } from '../audit/memory-log.js'
 import { getSetting } from '../settings/index.js'
 

@@ -23,7 +23,7 @@ import assert from 'node:assert/strict'
 import {
   MEMORY_STORE_METHODS, SLOT_STORE_METHODS, NULL_SLOT_STORE,
   assertMemoryStore, resolveSlotStore,
-} from '../../Backend/app/components/memory-store-port.js'
+} from '@ote/memory/cognition/memory-store-port.js'
 import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
 
 // ── a models bag good enough to construct against, with the query arm under our control ──────────

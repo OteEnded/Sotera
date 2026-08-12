@@ -13,9 +13,9 @@
 // (reconcileFact excludes IDENTITY_NAMESPACE), so it runs independently of the generic one-writer rule:
 // no race with the model's memory writes. The runtime owns identity — deterministic truth in services.
 
-import { interpretIdentity } from './memory-identity.js'
+import { interpretIdentity } from '@ote/memory/cognition/memory-identity.js'
 import { buildMemoryPipeline } from './memory-pipeline-host.js'
-import { OBSERVATION_TYPE } from './memory-observation.js'
+import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { getSetting } from '../settings/index.js'
 
 export function identityEnabled(config) {

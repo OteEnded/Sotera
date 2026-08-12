@@ -11,7 +11,7 @@
 // Backend/app/components/memory-identity.js for why each guard exists.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { interpretIdentity, identityPlan, IDENTITY_ATTR, IDENTITY_NAMESPACE } from '../../Backend/app/components/memory-identity.js'
+import { interpretIdentity, identityPlan, IDENTITY_ATTR, IDENTITY_NAMESPACE } from '@ote/memory/cognition/memory-identity.js'
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────
 // THE FOUR THAT ACTUALLY HAPPENED — 2026-08-10, Ote's first conversations with Sotera.

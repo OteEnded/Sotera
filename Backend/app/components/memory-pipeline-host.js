@@ -9,12 +9,12 @@
 // the ConflictResolver out and Phase 5 extracts the classification-only Slot Resolver, both WITHOUT
 // touching the pipeline or its callers.
 
-import { createObservationPipeline } from './memory-pipeline.js'
-import { createResolverRouter, DEFAULT_RESOLVER } from './memory-resolver-router.js'
-import { createIdentityResolver } from './memory-identity-resolver.js'
-import { createEpisodicResolver } from './memory-episodic-resolver.js'
-import { createCardResolver } from './memory-card-resolver.js'
-import { OBSERVATION_TYPE } from './memory-observation.js'
+import { createObservationPipeline } from '@ote/memory/cognition/memory-pipeline.js'
+import { createResolverRouter, DEFAULT_RESOLVER } from '@ote/memory/cognition/memory-resolver-router.js'
+import { createIdentityResolver } from '@ote/memory/cognition/memory-identity-resolver.js'
+import { createEpisodicResolver } from '@ote/memory/cognition/memory-episodic-resolver.js'
+import { createCardResolver } from '@ote/memory/cognition/memory-card-resolver.js'
+import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { buildMemoryV2 } from './memory-v2-host.js'
 
 /**

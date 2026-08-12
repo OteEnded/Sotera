@@ -19,7 +19,7 @@ import { resolveProfile } from './profile-service.js'
 import { Op } from 'sequelize'
 import {
   shapeTranscript, buildEpisodePrompt, classifyEpisodeReply, episodeSource, episodeWatermarks,
-} from './memory-distill.js'
+} from '@ote/memory/cognition/memory-distill.js'
 
 const DAY = 864e5
 const DEFAULT_DISTILL_MODEL = 'ollama/gemma4:e4b'

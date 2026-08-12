@@ -6,7 +6,7 @@
 import { chat } from '../chat-runtime/index.js'
 import { getSetting } from '../settings/index.js'
 import { buildMemoryPipeline } from './memory-pipeline-host.js'
-import { runDream } from './memory-dream.js'
+import { runDream } from '@ote/memory/cognition/memory-dream.js'
 
 const DEFAULT_CONSOLIDATE_MODEL = 'ollama/gemma4:e4b'
 

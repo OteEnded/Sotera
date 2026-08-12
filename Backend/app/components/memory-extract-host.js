@@ -6,10 +6,10 @@
 
 import { chat } from '../chat-runtime/index.js'
 import { getSetting } from '../settings/index.js'
-import { extractFacts } from './memory-extract.js'
+import { extractFacts } from '@ote/memory/cognition/memory-extract.js'
 import { buildMemoryPipeline } from './memory-pipeline-host.js'
-import { OBSERVATION_TYPE } from './memory-observation.js'
-import { bump } from './memory-capture-telemetry.js'
+import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
+import { bump } from '@ote/memory/cognition/memory-capture-telemetry.js'
 
 const DEFAULT_EXTRACT_MODEL = 'ollama/gemma4:e4b'
 

@@ -10,7 +10,7 @@
 
 import { registerHostService } from './runtime.js'
 import { makeEmbedder } from './memory-embed-host.js' // shared embedding utility (same model/dims/CPU config)
-import { rrfFuse } from './memory-rank.js'       // shared rank-fusion (lexical ⊕ dense)
+import { rrfFuse } from '@ote/memory/cognition/memory-rank.js'       // shared rank-fusion (lexical ⊕ dense)
 import { getSetting } from '../settings/index.js'
 
 const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim()

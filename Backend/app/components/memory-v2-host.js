@@ -4,12 +4,12 @@
 
 // ⚠️ THIS FILE IS THE HOST HALF, and after RFC step 1b it is where the database stops. It assembles the
 // three adapters the cognition needs and hands them over; `fastify.db` must not travel past this line.
-import { createMemoryV2Service } from './memory-v2-service.js'
+import { createMemoryV2Service } from '@ote/memory/cognition/memory-v2-service.js'
 import { createSequelizeMemoryStore } from './memory-store-sequelize-host.js'
 import { createSlotStore } from './memory-slot-store-host.js'
 import { logMemoryChange, snapshot } from '../audit/memory-log.js'
 import { makeEmbedder } from './memory-embed-host.js'
-import { rowsBySlotIndex } from './memory-slot-resolver.js'
+import { rowsBySlotIndex } from '@ote/memory/cognition/memory-slot-resolver.js'
 import { buildSlotResolver } from './memory-resolver-host.js'
 
 // Until Personas are first-class (Milestone B) the chat site runs one default persona → null.

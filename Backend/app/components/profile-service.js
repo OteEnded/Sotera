@@ -28,7 +28,7 @@
 
 import { logUserChange } from '../auth/user-changes.js'
 import { buildMemoryV2 } from './memory-v2-host.js'
-import { IDENTITY_ATTR } from './memory-identity.js'
+import { IDENTITY_ATTR } from '@ote/memory/cognition/memory-identity.js'
 
 const MAX_NAME = 100 // matches the display_name column + the /me and admin schemas
 
