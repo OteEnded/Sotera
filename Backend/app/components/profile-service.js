@@ -62,6 +62,21 @@ function rememberProposal(userId, entry) {
     const oldest = [...PENDING_RENAMES.entries()].sort((a, b) => a[1].at - b[1].at)[0]
     if (oldest) PENDING_RENAMES.delete(oldest[0])
   }
+  // ⚠️ A RE-PROPOSAL MUST NOT RESET THE CLOCK — found live 2026-08-12, in conversation, not by a test.
+  //
+  // I told her "call me Claude", she proposed and asked. I said "yeah please do". She then RE-PROPOSED
+  // and confirmed in that same reply — and the consent check refused it, because overwriting the entry
+  // had moved the proposal's turnId to the current turn, making her own confirm look same-turn. She
+  // asked again. Answering again would loop forever: the user can never say yes, because every yes
+  // arrives in a turn where she has just re-proposed.
+  //
+  // Keeping the EARLIEST proposal for the same name preserves the security property exactly. The
+  // measured bypass (propose + confirm in ONE reply, no user input) still fails: there is no earlier
+  // proposal, so the turnId still matches the current turn and it is still refused. What now succeeds
+  // is the legitimate case it was blocking by accident — a proposal from an earlier turn that the user
+  // has actually answered since.
+  const prior = PENDING_RENAMES.get(userId)
+  if (prior && prior.name === entry.name && prior.turnId && prior.turnId !== entry.turnId) return
   PENDING_RENAMES.set(userId, entry)
 }
 // Test-only introspection. A bound that nothing checks is a hope, not a bound — and this map exists

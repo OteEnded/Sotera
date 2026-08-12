@@ -9,7 +9,8 @@
 // byte-identical behaviour with a different model and token budget.
 
 import { getSetting } from '../settings/index.js'
-import { extractFacts } from '@ote/memory/cognition/memory-extract.js'
+import { extractFacts, assertionGate } from '@ote/memory/cognition/memory-extract.js'
+import { classifyCapture, PROVENANCE } from '@ote/memory/cognition/memory-provenance.js'
 import { buildMemoryPipeline } from './memory-pipeline-host.js'
 import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { bump } from '@ote/memory/cognition/memory-capture-telemetry.js'
@@ -30,6 +31,12 @@ const makeFactLlm = (fastify, { userId = null } = {}) => makeAuxLlm(fastify, { m
  */
 function factInterpreter(fastify, { userId = null, source = null } = {}) {
   return async (text) => {
+    // [R1]/[R5] CLASSIFICATION HAPPENS HERE because this is where the user's own words are. The service
+    // records a class and enforces the ceiling; only Interpretation can DECIDE one, since deciding
+    // needs the turn text to check the cited span against — and the whole point is that the check is
+    // deterministic. `assertionGate` gives the same asserted prose the extractor was shown, so a fact
+    // cannot be "quoted" from a region that was stripped as somebody else's document.
+    const asserted = assertionGate(text)
     const facts = await extractFacts({
       llm: makeFactLlm(fastify, { userId }),
       text,
@@ -41,7 +48,17 @@ function factInterpreter(fastify, { userId = null, source = null } = {}) {
         fastify.log?.debug?.({ reason, quotedChars }, 'memory.extract: turn gated as quoted material — no facts taken from a pasted document')
       },
     })
-    return facts.map((f) => ({ ...f, owner: f.entity, type: OBSERVATION_TYPE.fact, source }))
+    return facts.map((f) => {
+      const c = classifyCapture({
+        proposed: PROVENANCE.quoted, // the extractor always CLAIMS the strongest; the check decides
+        evidence: f.evidence,
+        sourceText: asserted.extract ? asserted.text : '',
+        value: f.value,
+        confidence: null, // the service owns the capture-time default; the ceiling still applies there
+      })
+      if (c.provenance !== PROVENANCE.quoted) bump(`provenance_${c.provenance}`)
+      return { ...f, owner: f.entity, type: OBSERVATION_TYPE.fact, source, provenance: c.provenance }
+    })
   }
 }
 

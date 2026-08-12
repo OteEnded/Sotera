@@ -29,6 +29,12 @@ export function commitToMemory(mem, obs) {
   if (obs.confidence != null) args.confidence = obs.confidence
   if (obs.source != null) args.source = obs.source
   if (obs.namespace != null) args.namespace = obs.namespace
+  // ⚠️ AN EXPLICIT ALLOWLIST SILENTLY DROPS EVERY FIELD ADDED AFTER IT WAS WRITTEN, and this is the
+  // SECOND time that shape has bitten this arc — `installComponents` did the same to the resolver's new
+  // passport fields on 2026-08-12. Provenance dying here would have been invisible in the worst way:
+  // every row landing `synthesized` (the safe default), so nothing would break, nothing would log, and
+  // "she can tell your words from her inferences" would simply be untrue.
+  if (obs.provenance != null) args.provenance = obs.provenance
   return mem.reconcileFact(args)
 }
 

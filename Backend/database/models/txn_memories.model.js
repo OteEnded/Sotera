@@ -134,6 +134,34 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.FLOAT,
                 allowNull: true,
             },
+            // [R1] HOW THIS BELIEF CAME TO BE BELIEVED — quoted · elicited · synthesized · observed.
+            // Added by database/migrations/003_provenance.sql (sync alter:false cannot add columns, and
+            // this project's models are what CREATE the schema — the .sql files are deltas run by hand).
+            //
+            // ⚠️ NULL means "predates provenance", and it is the honest record of a period when we did
+            // not ask. It does NOT mean quoted: normalizeProvenance() reads a missing value as
+            // `synthesized`, the weakest class, because every route to "unknown" is a route to not
+            // knowing. The measured failure this closes: a quote and a model-synthesized interpretation
+            // were tagged IDENTICALLY (`source: model-tool`), so a memory saved from a pattern was
+            // impersonating a quoted fact.
+            provenance: {
+                type: DataTypes.ENUM('quoted', 'elicited', 'synthesized', 'observed'),
+                allowNull: true,
+            },
+            // [R5] When this claim was last checked AGAINST ITS OWN SOURCE TEXT. Null = never, which is
+            // the truth for everything written before 2026-08-12 — and is why a confidence number on its
+            // own was never enough to trust. "stayed in Bangkok" carried 0.85 from a message that says
+            // the opposite.
+            last_verified_at: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            },
+            // [R5] The row that disputes this one. A contradiction that cannot name its opponent is a
+            // feeling; this makes it something you can follow.
+            contradicted_by: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
             access_count: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
