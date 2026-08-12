@@ -7,6 +7,36 @@
 
 ## ▶▶ START HERE
 
+### ⭐ WHERE WE ARE — 2026-08-12 22:16. **RFC_MEMORY_AS_COMPONENT IS FINISHED, ALL SIX STEPS.**
+### ⏭ NEXT: **L3 + the layer prompt system**, with Ote. He asked for it explicitly and it is his to frame.
+
+**Memory is a portable component, identity speaks nine languages, she asks before she renames anyone,
+and every belief now records HOW it was learned.** Read the four sections below in this order:
+🧠 *Memory is a portable component* · 🌏 *Identity now speaks more than English* · 🙋 *She asks before she
+renames you* · then §Open for what still needs him.
+
+**Gates, all green as of 22:16** — `PortableComponents/Packages/Memory && npm test` **62/62 with the host
+absent** · `cd test && npm test` **5/5** · three live repros in `test/repro/` (Thai end-to-end · the
+invented-names floor · the ASK gate). Migration **003_provenance.sql** is applied to her dev DB
+(additive, nullable, no backfill, idempotent, revert steps in its §3).
+
+⚠️ **THE L3 QUESTION, stated so the next session starts sharp.** It is not *where the layers live* — it
+is **which layer loses when two of them disagree.** The live evidence is already in
+`ANALYSIS_MEMORY_FINDINGS_FOR_SOTERA §3e`: her notes said *"maintain a warm and unhurried tone,
+prioritizing presence"* while Ote had said *"don't be polite about it"*, and the model **spent reasoning
+tokens negotiating between its notes and its user** instead of answering him. Same shape as *"Be clear
+and concise"* sitting against her core. So the first thing to settle with him: **when a persona note and
+the person in front of her conflict, who wins — and is that a rule or a judgement?** Everything about
+layering follows from that answer.
+
+⚠️ **`test/ui/talk-to-sotera.mjs` is how you TALK to her** (one turn per invocation, real UI, as
+`agent_dev`). Ote asked for that deliberately — *"dynamicy turn by turn, no proscitpted"* — and it earned
+its keep immediately: it found the rename-consent loop that no scripted drive could have. ⚠️ But note the
+hazard recorded in `test/repro/identity-ask-on-change.mjs`: **every repro wipes `agent_dev`'s memories**,
+so a relationship built there does not survive a test run.
+
+---
+
 **Built 2026-08-10, autonomously, from a four-step plan Ote approved before leaving.** He said *"start
 take action as plan. no need to ask me, i might not be there next hours."* Everything below is done and
 verified; §Open is what still needs him.
