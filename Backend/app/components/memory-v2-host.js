@@ -2,7 +2,12 @@
 // with a real embedder over the platform gateway. This is the seam the chat route (and, later, the
 // Context Composer + the portable memory tools) use to reach v2.
 
+// ⚠️ THIS FILE IS THE HOST HALF, and after RFC step 1b it is where the database stops. It assembles the
+// three adapters the cognition needs and hands them over; `fastify.db` must not travel past this line.
 import { createMemoryV2Service } from './memory-v2-service.js'
+import { createSequelizeMemoryStore } from './memory-store-sequelize.js'
+import { createSlotStore } from './memory-slot-store.js'
+import { logMemoryChange } from '../audit/memory-log.js'
 import { makeEmbedder } from './memory-embed.js'
 import { rowsBySlotIndex } from './memory-slot-resolver.js'
 import { buildSlotResolver } from './memory-resolver-host.js'
@@ -24,5 +29,22 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
   // With `memory.resolver.grayZoneMode` off (the default) this is exactly the cosine resolver: no added
   // cost, no behaviour change. See memory-resolver-host.js / RFC §15.
   const slotResolver = buildSlotResolver(fastify, { embed, loadIndex: rowsBySlotIndex, userId })
-  return createMemoryV2Service({ db: fastify.db, embed, persona, userId, sourceMessageId, log: fastify.log, self, slotResolver, actor })
+  const log = fastify.log
+
+  // THE THREE ADAPTERS, and each one's guarantee if it were absent (Ote's rule for where a seam goes):
+  //   store     REQUIRED — memory is broken without it. Owns scope + every query.
+  //   slotStore OPTIONAL — absent means facts write with slot_id null, as before Phase 6.
+  //   auditLog  OPTIONAL — absent means beliefs still change, the trail is missing.
+  const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, log })
+  const slotStore = createSlotStore({ db: fastify.db, persona, userId, log })
+  // Bind the writer to THIS host's storage. The cognition calls `auditLog(entry)` and never learns that
+  // a database was involved. ⚠️ It used to call `logMemoryChange(db, …)` directly with a `db` the
+  // factory no longer receives — syntactically valid, ReferenceError at runtime, inside a swallowing
+  // try. The audit trail would have stopped silently, which is the incident memory-log.js exists for.
+  const auditLog = (entry) => logMemoryChange(fastify.db, entry)
+
+  return createMemoryV2Service({
+    store, slotStore, auditLog,
+    embed, persona, userId, sourceMessageId, log, self, slotResolver, actor,
+  })
 }

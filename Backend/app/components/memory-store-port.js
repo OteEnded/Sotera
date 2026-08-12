@@ -70,10 +70,12 @@
  *   a forgotten belief into a live prompt.
  * @property {(ids: string[]) => Promise<MemoryRow[]>} findByIds
  *   Rehydrate a ranked id list in one round trip (search returns ids, ranking needs rows).
- * @property {(opts: {slotId?: string|null, entity?: string, attribute?: string}) => Promise<number>} countLiveInSlot
- *   How many live beliefs occupy this slot. The guard that makes un-superseding safe: revive the
- *   displaced belief ONLY if nothing else has taken the slot, so it always holds exactly one.
- *   Prefers slotId; falls back to (entity, attribute) for rows written before the Slot store existed.
+ * @property {(opts: {slotId?: string|null, entity?: string, attribute?: string}) => Promise<MemoryRow[]>} findLiveInSlot
+ *   The live beliefs occupying this slot. The guard behind the one-live-belief-per-slot invariant.
+ *   ⚠️ Returns ROWS, not a count — measured, again: `reviveSuperseded` only needs "is it empty?", but
+ *   `restore` must name the holder ("un-archived, not believed — slot still held by X"). A count would
+ *   have forced a second method for the same question. Prefers slotId; falls back to
+ *   (entity, attribute) for rows written before the Slot store existed.
  * @property {(opts: {kind?: string, namespace?: string, limit?: number, offset?: number}) => Promise<MemoryRow[]>} listArchived
  *   ⚠️ The ONLY read that returns non-live rows (superseded or forgotten). Without it memory can only
  *   ever LOSE: every other read hides the dead, so a belief that was taken away is indistinguishable
@@ -111,7 +113,7 @@
  * A port guessed from grep output is a port that will need a flag bolted on later.
  */
 export const MEMORY_STORE_METHODS = Object.freeze([
-  'findVisible', 'findOwnLive', 'findById', 'findAnyById', 'findByIds', 'countLiveInSlot', 'listArchived',
+  'findVisible', 'findOwnLive', 'findById', 'findAnyById', 'findByIds', 'findLiveInSlot', 'listArchived',
   'lexicalSearch', 'denseRelevances', 'getSource',
   'create', 'update', 'touch',
 ])

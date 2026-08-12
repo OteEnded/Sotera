@@ -6,17 +6,19 @@
 // Phase 2 layers Mem0 reconcile (ADD/UPDATE/DELETE/NOOP), LLM importance, hybrid RRF, bi-temporal
 // supersede, and decay tiers on top of this same shape. Reconcile is NOT here yet — remember() adds.
 
-import { Op } from 'sequelize'
+// ⚠️ NO `import { Op } from 'sequelize'`. Its absence is the point: this file is cognition, and the
+// moment it can express a WHERE clause it has started deciding scope, which is the store's job and the
+// one thing that would stop this working for a host that scopes personas differently.
+import { assertMemoryStore, resolveSlotStore } from './memory-store-port.js'
 import { rankMemories, cosine, rrfFuse, dedupeByValue, sameValueMeaning } from './memory-rank.js'
 import { norm } from './memory-extract.js'
 import { clusterMemories, consolidationPlan, buildCardPrompt, parseCard } from './memory-consolidate.js'
 import { IDENTITY_NAMESPACE, identityAttributeOf } from './memory-identity.js'
 import { resolveConflict, WIRE_ACTION } from './memory-conflict.js'
 import { createCosineSlotResolver, rowsBySlotIndex } from './memory-slot-resolver.js'
-import { createSlotStore } from './memory-slot-store.js'
 import { recordResolution, bump as bumpResolverCounter } from './memory-resolver-telemetry.js'
 import { SELF_ENTITY, SELF_OWNER_ALIASES } from './memory-observation.js'
-import { logMemoryChange, snapshot } from '../audit/memory-log.js'
+import { snapshot } from '../audit/memory-log.js'
 
 // ONE WRITE LANE PER (persona, user) — module-level on purpose. A per-instance queue cannot serialize two
 // writers that were built from separate `buildMemoryV2` calls in the same turn, which is exactly how the
@@ -81,18 +83,29 @@ const view = (r) => ({
 })
 
 /**
+ * ⚠️ THIS FACTORY TAKES A `store`, NOT A `db` (RFC_MEMORY_AS_COMPONENT step 1b, 2026-08-11). Everything
+ * below is COGNITION and is about to become a portable Memory-kind component; it must not know that
+ * Sequelize, Postgres, pgvector or a `persona` column exist. The store knows. See memory-store-port.js.
+ *
+ * 🔑 The rule that decides which dependency is which (Ote): a boundary follows what happens when the
+ * dependency DISAPPEARS. `store` absent = memory is broken, fail loudly. `slotStore` absent = slot
+ * bookkeeping is skipped and memory still works, silently — so it is optional and resolves to a no-op.
+ *
  * @param {object}   deps
- * @param {object}   deps.db        Sequelize models bag (needs `txn_memories`)
+ * @param {import('./memory-store-port.js').MemoryStore} deps.store  REQUIRED. Persistence + scope.
+ * @param {object|null} [deps.slotStore]  OPTIONAL. Absent → no-op (facts write with `slot_id: null`);
+ *        supplied-but-incomplete → throws, because that is a wiring bug, not a capability gap.
  * @param {(t:string)=>Promise<{vector:number[]|null, model:string|null}>} [deps.embed]
- * @param {string|null} [deps.persona]
- * @param {string|null} [deps.userId]
+ * @param {string|null} [deps.persona]  ⚠️ SCOPE ONLY — carried for audit/telemetry labelling. It must
+ *        never reach a query; the store owns scoping. Kept so log lines stay attributable.
+ * @param {string|null} [deps.userId]   same: labelling only.
  * @param {()=>number}  [deps.now]  injectable clock (tests)
  * @param {{resolve:Function, indexVectorFor:Function}} [deps.slotResolver] the RESOLUTION stage — defaults
  *        to the cosine v1. Injectable so v2 (gray-zone LLM) / v3 (ontology) swap in without touching the
  *        store: that replaceability is the whole point of the seam (RFC §6/§8).
  */
-export function createMemoryV2Service({ db, embed = null, persona = null, userId = null, sourceMessageId = null, log = null, self = null, slotResolver = null, actor = null, now = () => Date.now() } = {}) {
-  const { txn_memories } = db
+export function createMemoryV2Service({ store, slotStore: injectedSlotStore = null, auditLog = null, embed = null, persona = null, userId = null, sourceMessageId = null, log = null, self = null, slotResolver = null, actor = null, now = () => Date.now() } = {}) {
+  assertMemoryStore(store, 'createMemoryV2Service: store')
   // RESOLUTION stage: classification-only, deps at construction, private embedding index.
   // `loadIndex` is the §8a PRIVATE-INDEX PORT — the resolver asks for "a vector per candidate slot" and
   // this adapter answers from wherever the index physically lives (today: the slot_embedding column on
@@ -102,9 +115,11 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
   // context, so there is no hidden state). The HOST may inject a CHAIN instead (cosine → gray-zone →
   // ontology); the store cannot tell the difference, which is the whole point of the seam.
   const resolver = slotResolver ?? createCosineSlotResolver({ embed, loadIndex: rowsBySlotIndex })
-  // SLOT STORE (Phase 6): long-lived slot identity + learned aliases. Degrades to a no-op when the
-  // table/column isn't provisioned, so slot bookkeeping can never fail a write.
-  const slotStore = createSlotStore({ db, persona, userId, log, now })
+  // SLOT STORE (Phase 6): long-lived slot identity + learned aliases. INJECTED now rather than built
+  // from a `db` here — the cognition cannot construct a persistence adapter and stay portable.
+  // Absent → NULL_SLOT_STORE, and every write proceeds with `slot_id: null` exactly as it did
+  // pre-Phase-6. Slot bookkeeping must never be able to fail a write.
+  const slotStore = resolveSlotStore(injectedSlotStore, 'createMemoryV2Service: slotStore')
   const P = persona ?? null
   const U = userId ?? null
   const SRC_MSG = sourceMessageId ?? null // provenance: the message this turn's writes came from
@@ -126,13 +141,21 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
   // for the incident. Plain ADDs are not logged: the row is its own record.
   // Fire-and-forget by construction — the writer already swallows its own errors, and the `.catch()`
   // guarantees a logging problem can never reject the memory write that triggered it.
+  // ⚠️ THE AUDIT WRITER IS INJECTED NOW, and finding out why is the best argument for this whole seam:
+  // this line still read `logMemoryChange(db, …)` after `db` was gone from the signature. Syntactically
+  // fine, so `node --check` passed — it would have thrown ReferenceError at runtime, on every write that
+  // supersedes or collapses a belief, inside a `try` that swallows it. The audit trail would simply have
+  // stopped, silently, which is the exact incident app/audit/memory-log.js exists because of.
+  //
+  // Guarantee (Ote's rule): audit absent → beliefs still write, the trail is missing. So it is OPTIONAL,
+  // like slotStore, and defaults to a no-op rather than reaching for a database the cognition must not
+  // have. The HOST supplies a writer bound to its own storage.
   const AUDIT_ACTOR = actor ?? 'system'
   const audit = (entry) => {
-    try { logMemoryChange(db, { userId: U, persona: P, actor: AUDIT_ACTOR, log, ...entry })?.catch?.(() => {}) }
+    if (!auditLog) return
+    try { auditLog({ userId: U, persona: P, actor: AUDIT_ACTOR, log, ...entry })?.catch?.(() => {}) }
     catch { /* audit is never load-bearing */ }
   }
-  let lexicalDisabled = false // set if the tsvector column is absent → degrade to vector-only, warn once
-  let denseDisabled = false // set if pgvector/embedding_hv is absent → fall back to JS cosine, warn once
 
   // Background write queue. Model-driven captures return immediately (the model's turn never blocks
   // on the embed — ~1-2s on CPU — or the reconcile/persist); the real work runs here, off the turn's
@@ -177,14 +200,12 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
         if (c > bestCos) { bestCos = c; best = e }
       }
       if (best && bestCos >= dedupThresholdFor(kind)) {
-        await txn_memories.increment('access_count', { by: 1, where: { id: best.id } })
-        await txn_memories.update({ last_access: new Date(now()) }, { where: { id: best.id } })
+        await store.touch([best.id])
         return { ok: true, deduped: true, id: best.id, similarity: Number(bestCos.toFixed(4)) }
       }
     }
-    const row = await txn_memories.create({
-      persona: P,
-      user_id: kind === 'identity' ? null : U, // identity is persona-global (D1 hybrid)
+    const row = await store.create({
+      // no persona / user_id: the store stamps scope, and enforces identity-is-persona-global
       namespace,
       kind,
       content: String(content),
@@ -267,10 +288,9 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     if (owner === SELF_ENTITY && identityAttributeOf(attribute)) {
       log?.warn?.({ attribute }, 'memory: an IDENTITY attribute reached the generic slot path — a writer is bypassing the observation pipeline')
     }
-    const liveFacts = (await txn_memories.findAll({
-      where: { persona: P, user_id: U, kind: 'semantic', invalid_at: null, expired_at: null },
-      order: [['created_at', 'DESC']], raw: true, // newest-first → matches[0] is the most recent
-    })).filter((r) => r.entity && r.attribute && r.namespace !== IDENTITY_NAMESPACE) // slot candidates only; identity is owned by the Identity Resolver, not the generic slot reconcile
+    // OWN live rows, newest-first (matches[0] = most recent). Deliberately NOT findVisible: reconciling
+    // against a persona-global belief would let one user's write displace a persona-wide fact.
+    const liveFacts = (await store.findOwnLive({ kind: 'semantic' })).filter((r) => r.entity && r.attribute && r.namespace !== IDENTITY_NAMESPACE) // slot candidates only; identity is owned by the Identity Resolver, not the generic slot reconcile
     // Canonicalize each live row's owner the SAME way, so legacy rows written under a different label
     // (e.g. "agent_dev") still match this write's canonical owner and collapse instead of duplicating.
     const canonLive = liveFacts.map((r) => ({ ...r, entity: resolveOwner(r.entity) }))
@@ -331,7 +351,7 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
       await slotStore.touch(slot)
       // attach this slot's existing history (rows written before the slot store, or by another writer)
       const orphans = matches.filter((r) => !r.slot_id).map((r) => r.id)
-      if (orphans.length) await txn_memories.update({ slot_id: slot.id }, { where: { id: orphans } })
+      if (orphans.length) await store.update(orphans, { slot_id: slot.id })
     }
 
     // CONFLICT RESOLUTION (Phase 4) — decide how this claim relates to what we believe. The decision is
@@ -355,12 +375,10 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     if (!plan.write) {
       // NOOP / DUPLICATE: reinforce the current belief, collapse any duplicate live rows, and BACKFILL
       // its slot_embedding if it predates semantic reconcile (so future variants can match it).
-      await txn_memories.increment('access_count', { by: 1, where: { id: plan.target } })
-      const patch = { last_access: new Date(now()) }
-      if (slotVec && !Array.isArray(primary.slot_embedding)) patch.slot_embedding = slotVec
-      await txn_memories.update(patch, { where: { id: plan.target } })
+      await store.touch([plan.target]) // access_count + last_access
+      if (slotVec && !Array.isArray(primary.slot_embedding)) await store.update([plan.target], { slot_embedding: slotVec })
       if (plan.collapse.length) {
-        await txn_memories.update({ invalid_at: new Date(now()) }, { where: { id: plan.collapse } })
+        await store.update(plan.collapse, { invalid_at: new Date(now()) })
         for (const dup of matches.filter((r) => plan.collapse.includes(r.id))) {
           audit({ memoryId: dup.id, action: 'collapse', relatedId: plan.target, slotId: slot?.id ?? dup.slot_id ?? null,
             reason: `duplicate of the live belief · ${auditReason}`, before: snapshot(dup), source })
@@ -371,8 +389,8 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
 
     const content = `${owner}'s ${attribute}: ${value}` // readable sentence → embedded + shown on recall
     const { vector, model } = embed ? await embed(content) : { vector: null, model: null }
-    const created = await txn_memories.create({
-      persona: P, user_id: U, namespace, kind: 'semantic', content,
+    const created = await store.create({
+      namespace, kind: 'semantic', content,
       entity: owner, attribute: String(attribute), value: String(value),
       embedding: vector, embedding_model: model, slot_embedding: slotVec,
       importance: clampImportance(importance),
@@ -383,7 +401,7 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     // UPDATE → invalidate the superseded row AND every duplicate live row in the slot, so exactly one
     // live row (the new one) remains. NEW (no prior slot) → nothing to invalidate.
     const stale = [...(plan.supersedes ? [plan.supersedes] : []), ...plan.collapse]
-    if (stale.length) await txn_memories.update({ invalid_at: new Date(now()) }, { where: { id: stale } })
+    if (stale.length) await store.update(stale, { invalid_at: new Date(now()) })
     // AUDIT the displacement. THIS is the row that was missing on 2026-07-31: a junk fact took the `role`
     // slot at cosine 0.84 and the only trace was a supersedes_id pointer with no actor, no reason and no
     // snapshot of what it replaced.
@@ -410,10 +428,10 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
   // persona identity, a different axis); user identity is per-(persona,user) like semantic facts.
   async function getIdentity({ attribute } = {}) {
     if (!attribute) throw new Error('attribute is required')
-    const row = await txn_memories.findOne({
-      where: { persona: P, user_id: U, kind: 'semantic', namespace: IDENTITY_NAMESPACE, entity: SELF_ENTITY, attribute: String(attribute), invalid_at: null, expired_at: null },
-      order: [['created_at', 'DESC']], raw: true,
-    })
+    // findOwnLive is already newest-first; the entity/attribute match is COGNITION, not scope, so it
+    // stays here rather than growing the port a method for one small namespace.
+    const rows = await store.findOwnLive({ kind: 'semantic', namespace: IDENTITY_NAMESPACE })
+    const row = rows.find((r) => r.entity === SELF_ENTITY && String(r.attribute) === String(attribute)) ?? null
     return row ? { value: row.value ?? null, confidence: row.confidence ?? null, id: row.id, source: row.source ?? null } : null
   }
 
@@ -424,8 +442,8 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     if (!attribute || value == null || !String(value).trim()) throw new Error('attribute and value are required')
     const content = `${SELF_ENTITY}'s ${attribute}: ${value}`
     const { vector, model } = embed ? await embed(content) : { vector: null, model: null }
-    const row = await txn_memories.create({
-      persona: P, user_id: U, namespace: IDENTITY_NAMESPACE, kind: 'semantic', content,
+    const row = await store.create({
+      namespace: IDENTITY_NAMESPACE, kind: 'semantic', content,
       entity: SELF_ENTITY, attribute: String(attribute), value: String(value),
       embedding: vector, embedding_model: model,
       importance: 9, confidence: clampConfidence(confidence),
@@ -437,79 +455,23 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
   // Candidate set for retrieval: this user's episodic/semantic/card UNION the persona's global
   // identity. `card` = a Phase-3 consolidated per-topic summary (per-user, like semantic).
   async function candidates({ kind = null, namespace = null } = {}) {
-    const base = live()
-    if (namespace) base.namespace = namespace
-    if (kind) {
-      return txn_memories.findAll({
-        where: { ...base, persona: P, kind, user_id: kind === 'identity' ? null : U },
-        raw: true,
-      })
-    }
-    const [userRows, identityRows] = await Promise.all([
-      txn_memories.findAll({ where: { ...base, persona: P, user_id: U, kind: ['episodic', 'semantic', 'card'] }, raw: true }),
-      txn_memories.findAll({ where: { ...base, persona: P, user_id: null, kind: 'identity' }, raw: true }),
-    ])
-    return [...userRows, ...identityRows]
+    // VISIBLE = mine ∪ the persona-global identity. The union itself is the store's business now.
+    return store.findVisible({ kind, namespace })
   }
 
-  // Shared scope WHERE for the raw-SQL arms (lexical + dense), mirroring candidates(): this persona,
-  // this user's episodic/semantic/card UNION the persona-global identity, live rows only. Mutates
-  // `repl` with the bound values and returns the clause list. (IS NOT DISTINCT FROM = null-safe.)
-  const { tableName: MEM_TABLE, schema: MEM_SCHEMA } = txn_memories.getTableName()
-  const memTable = MEM_SCHEMA ? `"${MEM_SCHEMA}"."${MEM_TABLE}"` : `"${MEM_TABLE}"`
-  function scopeClause(kind, namespace, repl) {
-    const where = ['persona IS NOT DISTINCT FROM :persona', 'invalid_at IS NULL', 'expired_at IS NULL']
-    repl.persona = P
-    if (namespace) { where.push('namespace = :ns'); repl.ns = namespace }
-    if (kind) {
-      where.push('kind = :kind AND user_id IS NOT DISTINCT FROM :su')
-      repl.kind = kind; repl.su = kind === 'identity' ? null : U
-    } else {
-      where.push("((user_id IS NOT DISTINCT FROM :u AND kind IN ('episodic','semantic','card')) OR (user_id IS NULL AND kind = 'identity'))")
-      repl.u = U
-    }
-    return where
-  }
-
-  // Lexical (full-text) arm — Postgres tsvector over `content`, scoped like candidates(). Returns
-  // matched ids ranked by ts_rank (best-first). Needs the generated `content_tsv` column + GIN index
-  // (see memories.model.js); if absent, degrade to vector-only and warn once.
-  async function lexicalSearch({ query, kind = null, namespace = null, limit = 32 } = {}) {
-    if (lexicalDisabled || !query || !String(query).trim()) return []
-    const repl = { q: String(query), lim: Math.max(1, Math.min(limit, 200)) }
-    const where = scopeClause(kind, namespace, repl)
-    where.push("content_tsv @@ websearch_to_tsquery('english', :q)")
-    const sql = `SELECT id FROM ${memTable} WHERE ${where.join(' AND ')} ` +
-      `ORDER BY ts_rank(content_tsv, websearch_to_tsquery('english', :q)) DESC LIMIT :lim`
-    try {
-      return (await txn_memories.sequelize.query(sql, { replacements: repl, type: 'SELECT' })).map((r) => r.id)
-    } catch (e) {
-      lexicalDisabled = true
-      log?.warn?.({ err: e?.message }, '[memory.v2] lexical arm disabled (tsvector column missing?) — vector-only recall')
-      return []
-    }
-  }
-
-  // Dense arm — pgvector cosine over the generated `embedding_hv halfvec` column (HNSW at scale).
-  // Returns a Map id→cosine-relevance (1 − distance) for the top-`limit` in scope; feeds the SAME
-  // composite ranking as before (rankMemories `relevances`). Needs embedding_hv + pgvector; if
-  // absent, returns null so retrieve() falls back to in-JS cosine over the candidate embeddings.
-  async function denseRelevances({ qVec, kind = null, namespace = null, limit = 200 } = {}) {
-    if (denseDisabled || !Array.isArray(qVec) || !qVec.length) return null
-    const repl = { q: `[${qVec.join(',')}]`, lim: Math.max(1, Math.min(limit, 1000)) }
-    const where = scopeClause(kind, namespace, repl)
-    where.push('embedding_hv IS NOT NULL')
-    const sql = `SELECT id, (1 - (embedding_hv <=> :q::halfvec(2048))) AS relevance FROM ${memTable} ` +
-      `WHERE ${where.join(' AND ')} ORDER BY embedding_hv <=> :q::halfvec(2048) LIMIT :lim`
-    try {
-      const rows = await txn_memories.sequelize.query(sql, { replacements: repl, type: 'SELECT' })
-      return new Map(rows.map((r) => [r.id, Number(r.relevance) || 0]))
-    } catch (e) {
-      denseDisabled = true
-      log?.warn?.({ err: e?.message }, '[memory.v2] pgvector dense arm disabled (embedding_hv missing?) — JS cosine fallback')
-      return null
-    }
-  }
+  // ── THE TWO SEARCH ARMS NOW LIVE IN THE STORE ──────────────────────────────────────────────────
+  // They used to build raw SQL here — the tsvector clause, the pgvector `<=>` operator, the table name,
+  // and `scopeClause`, which encoded persona/user/identity scoping in hand-written predicates. All of
+  // that is exactly what a portable component must not know, and it was the single biggest obstacle to
+  // this file becoming one.
+  //
+  // These wrappers stay so every caller (retrieve, and the `_denseRelevances` test hook) is unchanged,
+  // and so the FAILURE CONTRACT has one documented home on the cognition side too:
+  //   lexical → []    "no text index here" — recall continues on the dense arm alone
+  //   dense   → null  "I cannot answer" — retrieve() falls back to in-JS cosine.
+  //   ⚠️ NOT an empty Map, which would mean "I answered, nothing matched" → silent amnesia.
+  const lexicalSearch = (opts) => store.lexicalSearch(opts)
+  const denseRelevances = (opts) => store.denseRelevances(opts)
 
   async function retrieve({ query = null, kind = null, namespace = null, limit = 8, minRelevance = 0.15, weights } = {}) {
     const rows = await candidates({ kind, namespace })
@@ -560,8 +522,8 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
 
   async function reinforce(ids) {
     if (!ids?.length) return
-    await txn_memories.increment('access_count', { by: 1, where: { id: ids } })
-    await txn_memories.update({ last_access: new Date(now()), tier: 'hot' }, { where: { id: ids } })
+    await store.touch(ids)                     // access_count + last_access
+    await store.update(ids, { tier: 'hot' })   // ...and promote: recall is what makes a memory hot
   }
 
   // list = ENUMERATE memories in scope (NOT relevance-ranked or gated, unlike recall). Recency
@@ -586,15 +548,7 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
    * 'superseded' (something replaced it) vs 'forgotten' (someone or the decay pass archived it).
    */
   async function listArchived({ kind = null, namespace = null, limit = 100, offset = 0 } = {}) {
-    const where = {
-      persona: P,
-      [Op.or]: [{ invalid_at: { [Op.ne]: null } }, { expired_at: { [Op.ne]: null } }],
-      ...(kind ? { kind } : {}),
-      ...(namespace ? { namespace } : {}),
-    }
-    // identity rows are persona-global (user_id null); everything else is this user's
-    where[Op.and] = [{ [Op.or]: [{ user_id: U }, { user_id: null, kind: 'identity' }] }]
-    const rows = await txn_memories.findAll({ where, order: [['created_at', 'DESC']], raw: true })
+    const rows = await store.listArchived({ kind, namespace })
     const cap = Math.min(Math.max(limit, 1), 500)
     return {
       count: rows.length,
@@ -614,25 +568,12 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
   // caller's user (or persona-global identity). Needs db.txn_messages (host wiring); degrades gracefully.
   async function getSource({ id, context = 2 } = {}) {
     if (!id) throw new Error('id is required')
-    const m = await txn_memories.findOne({ where: { id, persona: P }, raw: true })
-    if (!m || !(m.user_id === U || m.user_id === null)) return { ok: true, found: false } // not in scope
-    const res = { ok: true, found: true, memory: view(m), source: m.source ?? null, sourceMessageId: m.source_message_id ?? null }
-    if (!m.source_message_id || !db.txn_messages) return res // consolidation/migrated/generic — no source message
-    const msg = await db.txn_messages.findOne({ where: { id: m.source_message_id }, raw: true })
-    if (!msg) { res.note = 'source message no longer exists (deleted)'; return res }
-    res.conversationId = msg.conversation_id
-    if (db.txn_conversations) {
-      const conv = await db.txn_conversations.findOne({ where: { id: msg.conversation_id }, raw: true })
-      res.conversationTitle = conv?.title ?? null
-    }
-    // the source message + a few neighbours each side (persona-scale conversations — fetch + slice)
-    const all = await db.txn_messages.findAll({ where: { conversation_id: msg.conversation_id }, order: [['rolling_id', 'ASC']], raw: true })
-    const idx = all.findIndex((n) => n.id === msg.id)
-    const c = Math.max(0, Math.min(10, context))
-    res.context = all.slice(Math.max(0, idx - c), idx + c + 1).map((n) => ({
-      role: n.role, content: String(n.content || '').slice(0, 600), at: n.created_at, isSource: n.id === msg.id,
-    }))
-    return res
+    // ⚠️ The store may legitimately answer WITHOUT conversation context — a host can have memory and no
+    // chat history, and that is SUCCESS, not failure. Shape whatever came back; never demand context.
+    const r = await store.getSource({ id, context })
+    if (!r?.found) return { ok: true, found: false }
+    const { memory, ...rest } = r
+    return { ok: true, ...rest, memory: view(memory) }
   }
 
   /**
@@ -646,10 +587,10 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
    */
   async function reviveSuperseded(target) {
     if (!target?.supersedes_id) return null
-    const prior = await txn_memories.findOne({
-      where: { id: target.supersedes_id, persona: P, expired_at: null },
-      raw: true,
-    })
+    const found = await store.findAnyById(target.supersedes_id)
+    // expired_at set = deliberately DELETED. Reviving it as a side effect of deleting its successor
+    // would override an explicit act, so a deleted predecessor is left alone.
+    const prior = found && !found.expired_at ? found : null
     // Not found, or deliberately deleted (expired_at set) → leave it alone. Deleting a belief is an
     // explicit act; reviving it as a side effect of deleting its successor would override the user.
     if (!prior) return null
@@ -657,14 +598,14 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     if (!prior.invalid_at) return null // already live — nothing to revive
     // Does anything else already hold this slot? Prefer slot_id (the real identity); fall back to the
     // (entity, attribute) key for rows written before the Slot store existed.
-    const where = prior.slot_id
-      ? { slot_id: prior.slot_id }
-      : { entity: prior.entity, attribute: prior.attribute, user_id: prior.user_id }
+    const slotKey = prior.slot_id
+      ? { slotId: prior.slot_id }
+      : { entity: prior.entity, attribute: prior.attribute }
     // `prior` is invalid at this point (checked above), so a live-row count can never include it —
     // no id-exclusion needed, and no extra sequelize operator import to get it wrong.
-    const others = await txn_memories.count({ where: { ...where, persona: P, invalid_at: null, expired_at: null } })
-    if (others > 0) return null
-    await txn_memories.update({ invalid_at: null, tier: 'warm' }, { where: { id: prior.id } })
+    const others = await store.findLiveInSlot(slotKey)
+    if (others.length > 0) return null
+    await store.update([prior.id], { invalid_at: null, tier: 'warm' })
     audit({
       memoryId: prior.id, action: 'revive', relatedId: target.id, slotId: prior.slot_id ?? null,
       reason: `un-superseded: the belief that displaced it (${target.id}) was forgotten`,
@@ -711,9 +652,7 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
 
   /** This scope's live episodic clusters, biggest-topic-first, capped. The observer's raw material. */
   async function episodeClusters({ minSize = 4, threshold = 0.55, maxCards = 5 } = {}) {
-    const episodes = await txn_memories.findAll({
-      where: { persona: P, user_id: U, kind: 'episodic', invalid_at: null, expired_at: null }, raw: true,
-    })
+    const episodes = await store.findOwnLive({ kind: 'episodic' })
     return consolidationPlan(clusterMemories(episodes, { threshold }), { minSize }).slice(0, maxCards)
   }
 
@@ -724,12 +663,10 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
    */
   async function findPriorCard(memberIds = []) {
     if (!memberIds.length) return null
-    const members = await txn_memories.findAll({ where: { id: memberIds }, raw: true })
+    const members = await store.findByIds(memberIds)
     const c = centroid(members.map((m) => m.embedding))
     if (!c) return null
-    const liveCards = await txn_memories.findAll({
-      where: { persona: P, user_id: U, kind: 'card', invalid_at: null, expired_at: null }, raw: true,
-    })
+    const liveCards = await store.findOwnLive({ kind: 'card' })
     let prior = null
     let best = CARD_MERGE_THRESHOLD
     for (const lc of liveCards) {
@@ -748,7 +685,7 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
   async function commitCard({ topic, summary, memberIds = [], namespace = null } = {}) {
     if (!topic || !summary) throw new Error('topic and summary are required')
     const prior = await findPriorCard(memberIds)
-    const members = memberIds.length ? await txn_memories.findAll({ where: { id: memberIds }, raw: true }) : []
+    const members = memberIds.length ? await store.findByIds(memberIds) : []
     const content = `[${topic}] ${summary}`
     const { vector, model } = embed ? await embed(content) : { vector: null, model: null }
     const evidence = {
@@ -757,15 +694,15 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
       count: memberIds.length,
       supersedes: prior?.id ?? null,
     }
-    const row = await txn_memories.create({
-      persona: P, user_id: U, namespace: namespace || members[0]?.namespace || prior?.namespace || 'default', kind: 'card',
+    const row = await store.create({
+      namespace: namespace || members[0]?.namespace || prior?.namespace || 'default', kind: 'card',
       content, embedding: vector, embedding_model: model,
       entity: topic, attribute: 'summary',
       importance: 6, confidence: CONFIDENCE_DEFAULT.consolidation, valid_at: new Date(now()), source: 'consolidation', tier: 'warm',
       supersedes_id: prior?.id ?? null, evidence,
     })
-    if (prior) await txn_memories.update({ invalid_at: new Date(now()) }, { where: { id: prior.id } })
-    if (memberIds.length) await txn_memories.update({ expired_at: new Date(now()), tier: 'cold' }, { where: { id: memberIds } })
+    if (prior) await store.update([prior.id], { invalid_at: new Date(now()) })
+    if (memberIds.length) await store.update(memberIds, { expired_at: new Date(now()), tier: 'cold' })
     return { ok: true, id: row.id, topic, summary, archived: memberIds.length, evolved: !!prior, evidence }
   }
 
@@ -815,7 +752,12 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     },
     async pin({ id, pinned = true } = {}) {
       if (!id) throw new Error('id is required')
-      const [n] = await txn_memories.update({ pinned: !!pinned }, { where: { id, persona: P } })
+      // The scope guard used to ride on `where: { id, persona: P }`. It is now an explicit read-then-
+      // write: findAnyById is scope-checked (an out-of-scope id reads as ABSENT), and pin legitimately
+      // acts on archived rows, which is why it is findAnyById and not findById.
+      const target = await store.findAnyById(id)
+      if (!target) return { ok: true, updated: false, pinned: !!pinned }
+      const n = await store.update([id], { pinned: !!pinned })
       return { ok: true, updated: n > 0, pinned: !!pinned }
     },
     // soft-forget: mark system-expired + demote to cold; never hard-delete (belief history preserved).
@@ -839,9 +781,9 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     // they were removed for being redundant, not for being wrong.
     async forget({ id } = {}) {
       if (!id) throw new Error('id is required')
-      const target = await txn_memories.findOne({ where: { id, persona: P }, raw: true })
+      const target = await store.findAnyById(id)
       if (!target) return { ok: true, forgotten: false, restored: null }
-      const [n] = await txn_memories.update({ expired_at: new Date(now()), tier: 'cold' }, { where: { id, persona: P } })
+      const n = await store.update([id], { expired_at: new Date(now()), tier: 'cold' })
       if (!n) return { ok: true, forgotten: false, restored: null }
       audit({ memoryId: id, action: 'forget', slotId: target.slot_id ?? null, before: snapshot(target),
         reason: 'soft-forget (archived, recoverable)', source: target.source ?? null })
@@ -864,28 +806,29 @@ export function createMemoryV2Service({ db, embed = null, persona = null, userId
     // report a recovery that did not happen.
     async restore({ id } = {}) {
       if (!id) throw new Error('id is required')
-      const row = await txn_memories.findOne({ where: { id, persona: P }, raw: true })
+      // findAnyById is already scope-checked, so out-of-scope and not-found collapse into one answer —
+      // which is correct: a row you may not see does not exist, as far as you are concerned.
+      const row = await store.findAnyById(id)
       if (!row) return { ok: true, restored: false, reason: 'not found' }
-      if (row.user_id !== U && row.user_id !== null) return { ok: true, restored: false, reason: 'not in scope' }
       if (!row.invalid_at && !row.expired_at) return { ok: true, restored: false, nowLive: true, reason: 'already live' }
       // ⚠️ THE SLOT IS CHECKED UNCONDITIONALLY, not only when the row was superseded. The first version
       // guarded only the `invalid_at` case and the live integrity check caught it immediately: a row that
       // was FORGOTTEN WHILE LIVE has invalid_at null, so un-archiving it made it live beside whatever had
       // since taken the slot — two contradictory beliefs, the exact invariant this is supposed to defend.
-      const where = row.slot_id
-        ? { slot_id: row.slot_id }
-        : { entity: row.entity, attribute: row.attribute, user_id: row.user_id }
-      const holder = await txn_memories.findOne({
-        where: { ...where, persona: P, invalid_at: null, expired_at: null }, raw: true,
-      })
-      const blockedBy = holder && holder.id !== row.id ? holder.id : null
+      const slotKey = row.slot_id
+        ? { slotId: row.slot_id }
+        : { entity: row.entity, attribute: row.attribute }
+      // findLiveInSlot returns ROWS, not a count, precisely so this can NAME the holder — "un-archived,
+      // not believed, slot still held by X" is the truthful answer, and a count could not give it.
+      const holder = (await store.findLiveInSlot(slotKey)).find((r) => r.id !== row.id) ?? null
+      const blockedBy = holder ? holder.id : null
       // Un-archive always. When something else holds the slot the row comes back as SUPERSEDED rather
       // than live — which is the truthful state, and keeps it eligible for the ordinary un-supersede
       // path later if the holder is itself removed.
       const patch = blockedBy
         ? { expired_at: null, invalid_at: row.invalid_at ?? new Date(now()), tier: 'cold' }
         : { expired_at: null, invalid_at: null, tier: 'warm' }
-      await txn_memories.update(patch, { where: { id } })
+      await store.update([id], patch)
       const nowLive = !blockedBy
       audit({
         memoryId: id, action: 'revive', slotId: row.slot_id ?? null, relatedId: blockedBy,

@@ -97,11 +97,12 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       return txn_memories.findAll({ where: { id: ids }, raw: true })
     },
 
-    async countLiveInSlot({ slotId = null, entity = null, attribute = null } = {}) {
+    async findLiveInSlot({ slotId = null, entity = null, attribute = null } = {}) {
       // Prefer the slot's real identity; fall back to (entity, attribute) for rows written before the
-      // Slot store existed. Callers pass an already-invalid row's keys, so no id-exclusion is needed.
+      // Slot store existed. Rows, not a count: reviveSuperseded asks "is it empty?", restore must name
+      // the holder. Callers pass an already-invalid row's keys, so no id-exclusion is needed.
       const key = slotId ? { slot_id: slotId } : { entity, attribute, user_id: U }
-      return txn_memories.count({ where: { ...key, ...LIVE, persona: P } })
+      return txn_memories.findAll({ where: { ...key, ...LIVE, persona: P }, raw: true })
     },
 
     async listArchived({ kind = null, namespace = null } = {}) {
