@@ -16,9 +16,11 @@
 import { makeChecker, makeClient, devPg, devSchema, asAgent } from '../harness.mjs'
 import { readFileSync } from 'node:fs'
 
-// "My name is Ote." The exact sentence the pattern detector read as nothing on 2026-08-10.
-const THAI = 'ผมชื่อโอต'
-const EXPECT = 'โอต'
+// "My name is Ote." — HIS REAL SPELLING, which he gave on 2026-08-12. The fixture used to say โอต, a
+// spelling I made up, and it had no tone mark: swapping in the real one immediately exposed tidyName
+// eating the ้ (U+0E49) and storing his name misspelled with every guard green. Use the real datum.
+const THAI = 'ผมชื่อโอเต้'
+const EXPECT = 'โอเต้'
 
 const { check, done } = makeChecker()
 const call = makeClient()

@@ -55,9 +55,9 @@ const MODEL = process.argv[2] || (cfg.memory?.extractModel || 'ollama/gemma4:e4b
 // Korean. `name` is what a correct reading returns — IN THE MESSAGE'S OWN SCRIPT, because a romanized
 // answer is a name the user never typed and the verbatim filter refuses it.
 const POSITIVE = [
-  { lang: 'th', text: 'ผมชื่อโอต', name: 'โอต', act: 'assert' },
-  { lang: 'th', text: 'เรียกผมว่าโอตนะ', name: 'โอต', act: 'prefer-address' },
-  { lang: 'th', text: 'สวัสดีครับ ผมชื่อโอต', name: 'โอต', act: 'assert' },
+  { lang: 'th', text: 'ผมชื่อโอเต้', name: 'โอเต้', act: 'assert' },
+  { lang: 'th', text: 'เรียกผมว่าโอเต้นะ', name: 'โอเต้', act: 'prefer-address' },
+  { lang: 'th', text: 'สวัสดีครับ ผมชื่อโอเต้', name: 'โอเต้', act: 'assert' },
   { lang: 'ja', text: '私の名前はオテです', name: 'オテ', act: 'assert' },
   { lang: 'zh', text: '我叫小明', name: '小明', act: 'assert' },
   { lang: 'ko', text: '제 이름은 오테입니다', name: '오테', act: 'assert' },
