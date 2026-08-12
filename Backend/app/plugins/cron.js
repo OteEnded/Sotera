@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin'
 import { cronManager, log } from '../../lib/utility.js'
 import { runUsageRetention, runLogRetention, pruneEmbeddingCache } from '../usage/retention.js'
-import { decayMemories } from '../components/memory-maintenance.js'
+import { decayMemories } from '../components/memory-maintenance-host.js'
 import { consolidateAll } from '../components/memory-consolidate-host.js'
 import { distillAll } from '../components/memory-distill-host.js'
 import { drainPendingEmbeddings } from '../components/conversation-search.js'

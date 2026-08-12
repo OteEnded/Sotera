@@ -27,7 +27,7 @@ const embeddingsRequestSchema = {
  * and still use embed."*
  *
  * ⚠️ THIS DISABLES THE PUBLIC ROUTE ONLY, AND THAT DISTINCTION IS LOAD-BEARING. Memory does NOT come
- * through here — `components/memory-embed.js` imports `embeddings` from `chat-runtime` DIRECTLY, so
+ * through here — `components/memory-embed-host.js` imports `embeddings` from `chat-runtime` DIRECTLY, so
  * recall, hybrid search and the dedup gate are untouched by this flag. Anyone tempted to "finish the job"
  * by disabling the embedder itself would silently break every one of those.
  *

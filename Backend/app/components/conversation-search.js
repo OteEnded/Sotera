@@ -9,7 +9,7 @@
 // offers a few hybrid-matched excerpts to the Composer each turn as scored evidence candidates.
 
 import { registerHostService } from './runtime.js'
-import { makeEmbedder } from './memory-embed.js' // shared embedding utility (same model/dims/CPU config)
+import { makeEmbedder } from './memory-embed-host.js' // shared embedding utility (same model/dims/CPU config)
 import { rrfFuse } from './memory-rank.js'       // shared rank-fusion (lexical ⊕ dense)
 import { getSetting } from '../settings/index.js'
 

@@ -24,7 +24,7 @@ import {
   MEMORY_STORE_METHODS, SLOT_STORE_METHODS, NULL_SLOT_STORE,
   assertMemoryStore, resolveSlotStore,
 } from '../../Backend/app/components/memory-store-port.js'
-import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize.js'
+import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
 
 // ── a models bag good enough to construct against, with the query arm under our control ──────────
 function fakeDb({ queryThrows = false, withConversations = true } = {}) {

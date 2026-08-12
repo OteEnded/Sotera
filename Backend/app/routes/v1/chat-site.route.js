@@ -23,7 +23,7 @@ import { resolveProfile, setDisplayName } from '../../components/profile-service
 import { initConversationSearch, buildConversationSearch, evidenceLine, hasRetrievableTopic } from '../../components/conversation-search.js'
 import { initReflection, buildReflection } from '../../components/reflection-host.js'
 import { normalizeWorkingMemory, renderWorkingMemory, extractIntent, initWorkingMemory } from '../../components/working-memory-host.js'
-import { makeEmbedder } from '../../components/memory-embed.js'
+import { makeEmbedder } from '../../components/memory-embed-host.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 import { createSteerRegistry } from '../../chat/steer-registry.js'
@@ -2952,14 +2952,38 @@ export default async function chatSiteRoutes(fastify) {
     return reply.send({ memories: notes.map(memOut), assistant })
   })
 
-  // forget a v2 assistant memory (soft — archived, user-scoped so one user can't touch another's)
+  // Forget a v2 assistant memory (soft — archived, never hard-deleted).
+  //
+  // ⚠️ THIS WENT STRAIGHT TO THE DATABASE UNTIL 2026-08-12, AND IT WAS THE ONLY DELETION PATH THAT DID.
+  // `txn_memories.update({ expired_at, tier:'cold' })` archives the row and skips the two behaviours
+  // that live ONLY in the service:
+  //
+  //   1. THE AUDIT ROW. No record of the deletion — so "where did my fact go?" was unanswerable for
+  //      exactly the deletions the user makes DELIBERATELY, which are the ones they will ask about.
+  //   2. UN-SUPERSEDE. Forgetting a belief that DISPLACED another must give the displaced one back, or
+  //      the slot is left EMPTY instead of reverting. Not hypothetical: a junk fact scraped from pasted
+  //      JSON superseded Ote's real "role" fact (importance 10, recalled 109×), and deleting the junk
+  //      left the slot with zero live rows and the true belief unreachable, because every read path
+  //      filters on invalid_at IS NULL AND expired_at IS NULL.
+  //
+  // The admin route (`/admin/memories/:id/forget`) already routed through the service, with a comment
+  // saying an admin action that skipped these would be "the one deletion path with no record". The hole
+  // was closed there and left open HERE — on the path a person actually uses.
+  //
+  // Scope is preserved by construction: the service resolves through `store.findAnyById`, which is
+  // persona+user scoped, so an id outside this user's scope reads as ABSENT and returns 404 as before.
+  // Regression coverage: test/checks/memory-lifecycle-check.mjs.
   fastify.delete('/chat/memory/v2/:id', { preHandler: chatCap }, async (request, reply) => {
-    const [n] = await fastify.db.txn_memories.update(
-      { expired_at: new Date(), tier: 'cold' },
-      { where: { id: request.params.id, ...ownedBy(request.user, 'this memory') } },
-    )
-    if (!n) return reply.code(404).send({ error: { code: 'not_found', message: 'Memory not found' } })
-    return reply.send({ ok: true, id: request.params.id, forgotten: true })
+    const mem = buildMemoryV2(fastify, {
+      userId: ownerIdOf(request.user, 'this memory'),
+      actor: 'user', // a person pressed delete — distinct from 'model' and from the decay pass
+    })
+    const res = await mem.forget({ id: request.params.id })
+    if (!res.forgotten) return reply.code(404).send({ error: { code: 'not_found', message: 'Memory not found' } })
+    // `restored` is surfaced, not swallowed: if forgetting this belief revived the one it had displaced,
+    // the user asked to remove something and got a DIFFERENT answer back rather than nothing, and a UI
+    // told only "forgotten: true" would show a memory reappearing with no explanation.
+    return reply.send({ ok: true, id: request.params.id, forgotten: true, restored: res.restored ?? null })
   })
 
   fastify.post('/chat/memory', {

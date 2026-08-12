@@ -150,7 +150,7 @@ export function assertMemoryStore(store, label = 'MemoryStore') {
 // would have forced `assertMemoryStore` to grow OPTIONAL entries — a required contract with holes in
 // it, which is the "flag bolted on later" smell this port already had to be corrected for once.
 //
-// The optionality is not an accident to be tidied away. memory-slot-store.js states it as a design
+// The optionality is not an accident to be tidied away. memory-slot-store-host.js states it as a design
 // property: *"Slot bookkeeping must never be able to fail a write."* Slots are the long-lived identity
 // of a CONCEPT (mst_slots); memories are BELIEFS. A host can serve beliefs without ever modelling
 // concepts, and memory degrades to exactly what it was before Phase 6: facts written without slot_id.
