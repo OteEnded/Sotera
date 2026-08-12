@@ -3,6 +3,12 @@
 
 AI_TemplateCreation.md
 
+# Dependencies. ⚠️ THIS WAS MISSING UNTIL 2026-08-12 and 140 files under test/node_modules
+# were tracked - dependency bytes in the repo, and after adding a file: dep, an npm symlink committed
+# as an EMBEDDED GIT REPOSITORY (which a clone silently cannot fetch). Backend/ was fine only because
+# nobody had run npm install there before the first commit.
+node_modules/
+
 # Lockfiles — each project generates its own via `npm install`
 package-lock.json
 
