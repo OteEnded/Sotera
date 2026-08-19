@@ -41,7 +41,14 @@ ok(thai.length > 0, 'Thai messages exist for this user', `${thai.length} rows`)
 // makes `any(...)` a syntax error rather than a wrong answer. Loud failure, at least.
 const embedded = await Q(`select count(*)::int n from persona_sotera.txn_message_embeddings
   where message_id IN (:ids)`, { ids: thai.map((t) => t.id) })
-ok(embedded[0].n === thai.length, 'every Thai message is embedded', `${embedded[0].n}/${thai.length}`)
+// ⚠️ THIS ASSERTION USED TO READ `embedded === thai.length` AND WENT RED WITHIN THE HOUR. Embedding is
+// a NIGHTLY drain (CS2b, 04:10), so a backlog between drains is the designed steady state — the moment
+// anyone speaks Thai, "all embedded" is false and stays false until morning. That encoded a transient
+// post-drain state as an invariant, which is the same defect as the person-subject check that encoded a
+// migration-time count. ⭐ The real precondition is only that SOMETHING is embedded, so the retrieval
+// assertions below mean something; the property under test is retrieval + arm, not backlog depth.
+ok(embedded[0].n > 0, 'at least one Thai message is embedded (precondition for the retrieval test)',
+  `${embedded[0].n}/${thai.length} embedded — a backlog between nightly drains is expected, not a failure`)
 
 // ── 1. ⭐ The lexical arm CANNOT do this — establish the baseline the dense arm has to beat ───────
 const TERM = 'ข้าวผัด' // not present; use a term that IS present instead:
