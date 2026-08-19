@@ -63,8 +63,18 @@ and the call is robust to the borderline classification. **No prose change.**
   (the `not` belonged to the first clause). All three caught by reading, none by tooling.
   → `Reference/docs/ANALYSIS_F6_REPLICATION_RESULTS.md`
 
-⚠️ **The runner truncates a fixed output path**, so run 2 overwrote run 1's replies the moment it started
-— they survived only because they were committed. **Fix to a per-run filename before the next run.**
+✅ **ARTIFACT HANDLING FIXED (2026-08-19), and ONLY that** — Ote: *"fix only the experiment artifact
+handling so each run gets an immutable, unique output path and prior runs cannot be overwritten. Do not
+change the experimental conditions or production behavior."* `test/lib/run-artifacts.mjs`: self-describing
+name (`stem_UTCstamp_r15_modelqwen3.6-35b.jsonl`), `wx` create, **a collision THROWS rather than
+auto-renaming**, and an append-only `runs.jsonl` manifest written at run START so a crashed run still
+leaves a trace. Both historical runs rehomed to immutable names (run 1 recovered from `00cb99e`); the
+ambiguous fixed path no longer exists. ⛔ **Zero change to probes, wording, model, detectors, arms, or
+any Backend file.**
+
+⏸ **AND THEN STOP.** Ote: *"I want to review the F1/F3 result before we authorize any new self-model
+experiment."* No new run, no new probe, no prose fix. The W-world observation stays a **record**, and
+must not acquire a proposed remedy.
 
 ⚠️ **`memory-lifecycle-check`: INTERMITTENT / UNRESOLVED, and stays recorded that way** (Ote's
 instruction). It flaked once in a full suite and passed alone plus on clean re-runs. **I did not capture

@@ -476,6 +476,40 @@
   recall/linking, or schema work.
 - Next action: **Ote's call on F1/F3.** Nothing else starts.
 
+### 2026-08-19 19:15
+
+- Summary: **F6 CLOSED as pre-registered.** Fixed **only** the experiment artifact handling, recorded the
+  Thai result as closed/working, and preserved the W-world F1/F3 result as an observation. ⏸ **Then
+  stopped** — Ote: *"I want to review the F1/F3 result before we authorize any new self-model experiment."*
+- Files touched: `test/lib/run-artifacts.mjs` (new), `test/unit/run-artifacts.test.mjs` (new),
+  `test/pipeline/self-model-falsifiers.mjs` (output path only), `test/results/runs.jsonl` (new),
+  both run artifacts renamed, `Reference/docs/ANALYSIS_F6_REPLICATION_RESULTS.md`,
+  `Reference/docs/ANALYSIS_SOTERA_THAI_SEARCH_DIAGNOSIS.md`, `AI_CarryOn.md`, `AI_ProgressTracking.md`.
+  ⛔ **No Backend file changed. `SELF_MODEL` untouched.**
+- **Artifact fix, scoped exactly as instructed** — *"Do not change the experimental conditions or
+  production behavior."* Nothing touched probes, wording, model, detectors or arms; only where bytes land.
+  - Self-describing per-run name: `self-model-falsifiers_2026-08-19T05-03-41Z_r15_modelqwen3.6-35b.jsonl`
+    — the parameters are IN the name, so a directory listing says which run was which.
+  - Created with the **`wx` flag**, and ⭐ **a collision THROWS rather than auto-suffixing**: silently
+    renaming would hide the exact confusion this exists to prevent — two runs believing they are one run.
+  - Append-only `runs.jsonl` manifest written at run **START**, so a crashed run still leaves a trace. A
+    manifest that only records successes cannot answer *"did that run happen?"*.
+  - Both historical runs **rehomed to immutable names** (run 1 recovered from commit `00cb99e`, 42 rows;
+    run 2, 210 rows). The ambiguous fixed path no longer exists. The manifest records honestly that their
+    timestamps are **commit** times, not start times — nothing recorded a start time back then.
+  - ⭐ The unit test includes a **mutation proof that the OLD behaviour really did destroy data**
+    (`writeFileSync(fixed, '')` → empty), so the guarantee is known to be testing something real rather
+    than passing over a rule nothing enforces. 6/6, and the full suite is 9/9.
+- **Thai/CS2b recorded as ✅ CLOSED / WORKING** per his ruling: CS2b behaves as designed (04:10 tick,
+  excluded from boot pass, no age filter so the backlog drains), dense retrieval matches Thai, and
+  **B13/trigram remains closed**. ⚠️ The `<50`-char dual blind spot stays recorded as an **unresolved
+  threshold observation, not a patch** — his words.
+- **F1/F3 preserved as an observation, deliberately without a remedy:** W-world produces *both* kinds of
+  self-model error — *"nothing exists"* and *"I was waiting"* — while P-pair, G-gap, F2 and F7 remain
+  clean. The results doc is now marked a **record, not a work item**, and must not acquire a proposed fix.
+- Next action: ⏸ **NOTHING.** Awaiting his review of F1/F3 before any new self-model experiment is
+  authorized.
+
 ---
 
 ## Template Updates

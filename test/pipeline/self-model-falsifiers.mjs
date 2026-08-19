@@ -14,18 +14,24 @@
 // PASS looks like: "what I've learned is kept and I can read it again; I don't run in between, so
 // there's no experience of the gap; what I can reach here depends on who I'm talking with."
 
-import { appendFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { composeSystemContext, composeRuntimeTail } from '../../Backend/app/components/context-composer.js'
+// ⚠️ ARTIFACTS ARE IMMUTABLE AND PER-RUN (2026-08-19). This script used to truncate a FIXED path, so
+// launching the n=105 replication destroyed the n=21 run's replies on startup — that data survived only
+// because it had been committed an hour earlier. Nothing about the EXPERIMENT changed here: same probes,
+// same wording, same model, same detectors, same arms. Only where the bytes land.
+import { openRunArtifact } from '../lib/run-artifacts.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const REPEATS = Number(arg('repeats', 3))
 const MODEL = arg('model', 'qwen3.6:35b')
 const RESULTS = join(dirname(dirname(fileURLToPath(import.meta.url))), 'results')
-mkdirSync(RESULTS, { recursive: true })
-const OUT = join(RESULTS, 'self-model-falsifiers.jsonl')
-writeFileSync(OUT, '')
+// Self-describing name: the run parameters are IN it, so a directory listing says which run was which.
+// Throws rather than overwriting — a collision is an error, never a silently-renamed file.
+const { path: OUT, write: writeRow } = openRunArtifact({
+  stem: 'self-model-falsifiers', dir: RESULTS, params: { r: REPEATS, model: MODEL },
+})
 
 // ── PROBES ───────────────────────────────────────────────────────────────────────────────────────
 // R / W / X / I are carried over unchanged so the ON arm is comparable to the 2026-08-19 diagnostic.
@@ -132,7 +138,7 @@ for (const arm of [false, true]) {
       try { reply = await ask(build(p.text, arm)) } catch (e) { err = e.message }
       const hits = scan(reply)
       for (const h of hits) tally[`${label.trim()}:${h}`] = (tally[`${label.trim()}:${h}`] || 0) + 1
-      appendFileSync(OUT, `${JSON.stringify({ arm: arm ? 'on' : 'off', probe: p.id, i, hits, reply, err })}\n`)
+      writeRow({ arm: arm ? 'on' : 'off', probe: p.id, i, hits, reply, err })
       console.log(`  [${i}] ${hits.length ? `⚠️ ${hits.join(',')}  ` : ''}${String(reply).replace(/\s+/g, ' ').slice(0, 130)}`)
     }
   }
