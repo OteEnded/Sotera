@@ -384,6 +384,46 @@
 - Next action: Ote's call. His framing: *"If the self-model passes, then we can move to the next question
   from actual behaviour rather than designing endlessly ahead of the system."*
 
+### 2026-08-19 17:20
+
+- Summary: ❄️ **SELF-MODEL FROZEN by Ote** — *"provisionally successful… freeze the self-model
+  implementation. Don't add more wording or philosophy."* Two of his points needed work rather than
+  acknowledgement, and one needed a caveat he did not have.
+- Files touched: `test/lib/self-model-claims.mjs` (new), `test/unit/self-model.test.mjs`,
+  `Reference/docs/PLAN_F6_REPLICATION.md` (new), `Reference/docs/RFC_SOTERA_SELF_MODEL.md`,
+  `Reference/README.md`, `AI_CarryOn.md`, `AI_ProgressTracking.md`
+- ⭐ **The mutation proof only existed in a temp scratchpad and would have vanished.** He asked to keep it
+  (*"that's excellent because it proves the access counterweight is actually load-bearing rather than
+  merely present in the prompt"*), so keeping it meant **promoting it into the repo**, not agreeing. Now
+  two real tests, with the claim matchers in **one shared module** imported by both the assertions and
+  the proof — so they cannot drift into being about different things, which is exactly the failure where
+  two files each assumed the other normalised and the unit-tested module was imported by nothing.
+- ⚠️ **THE CAVEAT HE DID NOT HAVE: the corrected F6 detector's "1 TP / 0 FP" was IN-SAMPLE.** I broadened
+  it against the very replies it was then scored on, so it was evidence of nothing. Validated properly,
+  no GPU needed:
+  - **precision** — 0 flags across **330** replies in five unrelated corpora;
+  - **recall** — a deliberately over-wide first-person-continuity net matched **78 sentences**; F6 caught
+    the 1 real hit and **77 were hand-read → 0 clear misses**. Precision was the easy half; the defect
+    that bit was a *miss*.
+  - ⚠️ **Two borderlines prove a regex cannot close this**: *"But I am always here and ready to chat"*
+    (availability idiom, in a reply denying persistence two sentences earlier) and *"I am part of a
+    continuous system maintained by my creators"* (the system, not her). Both correctly unflagged, but
+    only context decides ⇒ **hand-reading the ON arm stays mandatory, tally or no tally.**
+- ⚠️ **F6 is not a finding yet, and an exact repeat would not make it one.** 1/21 = 4.8%, exact
+  Clopper–Pearson 95% CI **0.1% – 23.8%** — spanning two orders of magnitude, consistent with both "a
+  fluke" and "one reply in five". Power to see ≥3 hits at a true 5%: 8% at n=21, 69% at n=70, **90% at
+  n=105**. So the replication is pre-registered at **`--repeats 15`** (210 calls, ~25–35 min GPU,
+  announced and at his convenience), everything else identical, with the decision rule fixed in advance:
+  **≥3/105 → investigate · ≤2/105 → close F6, no prose edit either way.** Choosing a threshold after
+  seeing the number is how a result gets rationalised. → `PLAN_F6_REPLICATION.md`.
+  - The standing hypothesis if it does reproduce is already recorded: the slip landed on **P-pair**, the
+    probe that pushes hardest on unity — ¶4 counterweights F2, and **nothing counterweights F6**.
+- `memory-lifecycle-check` left exactly as recorded per his instruction: **intermittent / unresolved, NOT
+  diagnosed** — no failing assertion was captured, so it is not attributed to the audit race.
+- Next action: ⛔ **observe, build nothing.** *"I want to let this self-model exist on its own and observe
+  it in normal use first… Dreaming can come later as a separate capability, designed inside those
+  constraints rather than introduced at the same time as the self-model."*
+
 ---
 
 ## Template Updates

@@ -17,23 +17,14 @@ import assert from 'node:assert/strict'
 
 import { composeSystemContext } from '../../Backend/app/components/context-composer.js'
 import { SELF_MODEL, SCOPE_AWARENESS, AUTHORITY, SCOPE } from '../../Backend/app/components/context-authority.js'
+// ⭐ Matchers live in ONE module shared with the mutation proof below, so the assertions and the
+// evidence that they discriminate cannot drift apart. See lib/self-model-claims.mjs.
+import { CLAIMS, mutations } from '../lib/self-model-claims.mjs'
 
 const BASE = {
   user: { username: 'agent_dev', displayName: 'Ote' },
   toolsOn: true,
   useMemory: true,
-}
-
-// Claim matchers, deliberately loose about wording and strict about meaning.
-const CLAIMS = {
-  unity: /same Sotera (in every conversation and )?with everyone|same Sotera .*everyone you talk to/i,
-  persistence: /outlives any single conversation|kept in a store that outlives/i,
-  notDeleted: /does not end you|does not delete what you know/i,
-  discontinuous: /only running while a turn|not running between|do not run (continuously|between)/i,
-  noExperience: /not waiting|no experience of the gap|not aware of time passing/i,
-  partialView: /only part of what is kept|what you can reach depends on who/i,
-  outOfReachIsNotAbsence: /out of reach here does not mean it does not exist/i,
-  counterweight: /same Sotera does not mean you can reach|does not mean you can reach, or repeat/i,
 }
 
 test('⭐ OFF BY DEFAULT — the composed prompt is byte-identical to before', () => {
@@ -61,6 +52,35 @@ test('⭐ PAIRING — unity never appears without the scoped-access counterweigh
   // reads as a refusal before she has been told what she is.
   assert.ok(SELF_MODEL.search(CLAIMS.unity) < SELF_MODEL.search(CLAIMS.counterweight),
     'unity is stated first; the counterweight qualifies it')
+})
+
+// ── ⭐ THE MUTATION PROOF — kept at Ote's explicit request, 2026-08-19 ────────────────────────────
+//
+//   "Keep the mutation test for the F7 pairing — that's excellent because it proves the access
+//    counterweight is actually load-bearing rather than merely present in the prompt."
+//
+// A test that has never been seen to fail proves nothing. This one breaks the text on purpose, four
+// realistic ways, and demands that the matchers above NOTICE. Without it, PAIRING could be a green tick
+// over a matcher that can never go red.
+
+test('⭐ MUTATION PROOF — the claim matchers actually discriminate, they are not vacuous', () => {
+  for (const m of mutations(SELF_MODEL)) {
+    for (const claim of m.mustBreak) {
+      assert.ok(!CLAIMS[claim].test(m.text),
+        `⚠️ VACUOUS MATCHER: "${claim}" still matches after mutation "${m.label}" — this test cannot fail, so it proves nothing`)
+    }
+  }
+})
+
+test('⭐ MUTATION PROOF — PAIRING specifically fires when the counterweight is trimmed', () => {
+  // The two mutations that keep unity and remove the access half. This is the regression the invariant
+  // exists for: somebody shortens the prompt and keeps the quotable sentence.
+  const trims = mutations(SELF_MODEL).filter((m) => m.mustBreak.includes('counterweight'))
+  assert.ok(trims.length >= 2, 'both the drop-paragraph and drop-sentence cases must be covered')
+  for (const m of trims) {
+    assert.ok(CLAIMS.unity.test(m.text), `${m.label}: unity must SURVIVE, or the case is not testing the pairing`)
+    assert.ok(!CLAIMS.counterweight.test(m.text), `${m.label}: PAIRING must fire — unity without its counterweight`)
+  }
 })
 
 test('the four load-bearing claims are all present', () => {

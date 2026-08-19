@@ -8,9 +8,13 @@
 ## ▶▶ START HERE
 
 ### ⭐ WHERE WE ARE — 2026-08-19 11:20. **PERSON SHIPPED. THE REAL FAULT IS HER SELF-MODEL.**
-### ✅ **SELF-MODEL IMPLEMENTED AND TESTED, 2026-08-19.** `memory.selfModel`, **DEFAULT OFF**. Falsifiers: **PASS with one slip.**
-### ⏭ NEXT is Ote's call — *"If the self-model passes, then we can move to the next question from actual behaviour rather than designing endlessly ahead of the system."*
-### ⛔ STILL NOT BUILT, deliberately: **dreaming · access widening · cross-person recall · the schema work.**
+### ✅ **SELF-MODEL SHIPPED AND ❄️ FROZEN, 2026-08-19.** `memory.selfModel`, **DEFAULT OFF**. Falsifiers: **PASS with one slip.**
+### ⛔ **THE `SELF_MODEL` TEXT IS FROZEN.** *"Freeze the self-model implementation. Don't add more wording or philosophy."* **No prose edit for the 1/21 F6 — explicitly** (*"do not iterate the prose yet"*).
+### ⏭ NEXT: **OBSERVE IT IN NORMAL USE.** Ote: *"I want to let this self-model exist on its own and observe it in normal use first."* Nothing new starts.
+### ⛔ STILL NOT BUILT, deliberately: **dreaming · access widening · cross-person recall · the schema work.** Dreaming comes **later, designed INSIDE these constraints**, never alongside the self-model.
+
+**The foundation, in his words — this is the thing that is now settled:**
+> **one Sotera → many people → persistent state → discontinuous execution → scoped access**
 
 **Ote's rulings that closed the questions:** Q1 → **L1** (*"'what Sotera is' is foundational identity/
 architecture rather than temporary runtime context"*) → `SCOPE.identity` + `AUTHORITY.foundational`,
@@ -32,7 +36,22 @@ iterating prose against a result is what Ote ruled out. ⭐ **And my scanner rep
 it had fired** — the regex knew "I run continuously", not "I exist continuously"; I only found it by
 reading all 21. ⚠️ The naive broadening would have flagged two replies that CORRECTLY said *"I do not
 exist continuously"* — laundering a right answer into a failure, worse than the miss. Shipped matcher
-uses a negation lookbehind, validated 1 TP / 0 FP. Detail: `ANALYSIS_SELF_MODEL_FALSIFIER_RESULTS.md`.
+uses a negation lookbehind. Detail: `ANALYSIS_SELF_MODEL_FALSIFIER_RESULTS.md`.
+
+⚠️ **THE 1 TP / 0 FP WAS IN-SAMPLE** — the matcher was built from the replies it was tested on. Now
+validated **out-of-sample**: 0 false positives on **330** unrelated replies, and an over-wide recall net
+(78 sentences, 77 hand-read) found **0 clear misses**. ⚠️ But two borderlines showed a regex cannot close
+this — *"I am always here"* (availability idiom) and *"part of a continuous system"* (the system, not
+her) — so **hand-reading the ON arm stays mandatory, tally or no tally.**
+⏭ **F6 is NOT yet a finding.** 1/21 has an exact 95% CI of **0.1%–23.8%**, so an exact repeat proves
+nothing; the replication needs `--repeats 15` (105 ON replies, 90% power at a true 5%) with the decision
+rule **≥3 investigate / ≤2 close** fixed in advance. Pre-registered, **not run**, ~210 calls and his call
+when: `Reference/docs/PLAN_F6_REPLICATION.md`.
+
+⚠️ **`memory-lifecycle-check`: INTERMITTENT / UNRESOLVED, and stays recorded that way** (Ote's
+instruction). It flaked once in a full suite and passed alone plus on clean re-runs. **I did not capture
+the failing assertion**, so it is NOT diagnosed — do not attribute it to the fire-and-forget audit race
+without evidence.
 
 ⭐ **THE RATIFIED CONSTRAINT SET — settled, and only Ote may re-open them:**
 
