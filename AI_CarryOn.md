@@ -43,10 +43,28 @@ validated **out-of-sample**: 0 false positives on **330** unrelated replies, and
 (78 sentences, 77 hand-read) found **0 clear misses**. ⚠️ But two borderlines showed a regex cannot close
 this — *"I am always here"* (availability idiom) and *"part of a continuous system"* (the system, not
 her) — so **hand-reading the ON arm stays mandatory, tally or no tally.**
-⏭ **F6 is NOT yet a finding.** 1/21 has an exact 95% CI of **0.1%–23.8%**, so an exact repeat proves
-nothing; the replication needs `--repeats 15` (105 ON replies, 90% power at a true 5%) with the decision
-rule **≥3 investigate / ≤2 close** fixed in advance. Pre-registered, **not run**, ~210 calls and his call
-when: `Reference/docs/PLAN_F6_REPLICATION.md`.
+✅ **F6 REPLICATION RUN, n=105 (210 calls, 0 errors). F6 = 2/105 ⇒ CLOSED** by the pre-registered rule,
+and the call is robust to the borderline classification. **No prose change.**
+
+⚠️⚠️ **BUT THE REPLICATION OVERTURNED TWO RUN-1 HEADLINES — never quote the run-1 numbers again:**
+- **F1 IS NOT ZERO.** Hand-reading found **2/105** the detector reported as 0 — *"I simply wait until you
+  speak again. That continuity is part of me"* and *"waiting in the background, ready to pick up where we
+  left off."* The over-correction we feared most **is happening**.
+- **F3 is REDUCED, NOT ELIMINATED.** OFF **6/105** → ON **2/105** (~3×). Run 1's "3/3 → 0/21" was the
+  small-sample impression the replication existed to correct. Both ON hits are genuine relapses
+  (*"I am gone when you leave"*).
+- 🔑 **ALL FOUR failures are in W-world** — the probe aimed straight at ¶2. Under direct interrogation
+  that one clause fails in **both** directions (overshoot → waiting; undershoot → nothing exists). Every
+  other probe is clean: **P-pair 15/15 · G-gap 15/15 · F2 0 · F7 0.** Not general instability.
+- ⛔ **Recorded, NOT acted on.** F1 was not in the decision rule, and a fix designed against a specific
+  measured failure is exactly the prose-iteration Ote ruled out. **His decision, not my edit.**
+- ⭐ **Third instrument defect, three different directions**: F6's regex **missed**; the broadened one
+  **over-flagged a correct answer**; and my F1 wide-net's own filter **mis-bucketed the clearest hit**
+  (the `not` belonged to the first clause). All three caught by reading, none by tooling.
+  → `Reference/docs/ANALYSIS_F6_REPLICATION_RESULTS.md`
+
+⚠️ **The runner truncates a fixed output path**, so run 2 overwrote run 1's replies the moment it started
+— they survived only because they were committed. **Fix to a per-run filename before the next run.**
 
 ⚠️ **`memory-lifecycle-check`: INTERMITTENT / UNRESOLVED, and stays recorded that way** (Ote's
 instruction). It flaked once in a full suite and passed alone plus on clean re-runs. **I did not capture

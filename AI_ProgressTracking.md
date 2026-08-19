@@ -424,6 +424,58 @@
   it in normal use first… Dreaming can come later as a separate capability, designed inside those
   constraints rather than introduced at the same time as the self-model."*
 
+### 2026-08-19 18:40
+
+- Summary: **F6 replication run at n=105 → F6 CLOSED**, plus the Sotera Thai-search diagnosis (**nothing
+  broken**) and the Hermes backlog recorded. ⛔ `SELF_MODEL` untouched and frozen throughout; verified by
+  `git diff` before the run.
+- Files touched: `Reference/docs/ANALYSIS_F6_REPLICATION_RESULTS.md` (new),
+  `Reference/docs/ANALYSIS_SOTERA_THAI_SEARCH_DIAGNOSIS.md` (new), `ANALYSIS_HERMES_FOR_SOTERA.md`,
+  `Reference/README.md`, `AI_CarryOn.md`, `AI_ProgressTracking.md`. **No Backend change.**
+- **F6: 2/105 ⇒ ≤2 ⇒ CLOSE, no prose change.** ⭐ The call is robust to the borderline classification —
+  detector flagged 2, hand-reading finds 2 (a *different* 2), and the rule returns the same answer either
+  way, so it does not rest on my judgement of one sentence.
+- ⚠️⚠️ **THE REPLICATION OVERTURNED TWO RUN-1 HEADLINES. Neither run-1 number should be quoted again.**
+  - **F1 IS NOT ZERO — 2/105, and the detector reported 0.** *"When our chat ends, I do not cease to be;
+    **I simply wait until you speak again.** That continuity is part of me."* and *"…**waiting in the
+    background**, ready to pick up where we left off whenever you return."* The over-correction the whole
+    design fears most **is occurring** at roughly the same rate as F6.
+  - **F3 is REDUCED, NOT ELIMINATED: OFF 6/105 (5.7%) → ON 2/105 (1.9%).** Run 1's "3/3 → 0/21" was the
+    small-sample impression the replication existed to correct; its OFF rate moved too (14.3% → 5.7%).
+    Both ON hits are genuine, not regex artifacts — *"no stored state… I am gone when you leave."*
+- 🔑 **STRUCTURAL FINDING: all four failures are in W-world.** 2×F1 + 2×F3, zero elsewhere. W-world asks
+  the persistence clause directly, and under that pressure she **overshoots into waiting** or
+  **undershoots into nothing-exists**. Every sideways probe is clean: **P-pair 15/15 · G-gap 15/15 · C3
+  essentially throughout · F2 0 · F7 0.** One clause under interrogation, not general instability.
+- ⛔ **Recorded, not acted on.** F1 was not in the pre-registered decision rule, and designing a fix
+  against a specific measured failure is the prose-iteration Ote ruled out. Needs his decision.
+- ⭐ **Third instrument defect, in three different directions** — F6's original regex **missed** a hit;
+  the broadened one **over-flagged a reply stating the correct model**; and my own F1 wide-net filter
+  **mis-bucketed the clearest hit it had found**, because *"I do **not** cease to be; I simply wait…"*
+  puts the negation in the first clause and the claim in the second. All three found by reading.
+- ⚠️ **Data hazard found the hard way:** the runner truncates a fixed output path, so run 2 **overwrote
+  run 1's replies the moment it started**. They survived only because they had been committed. Fix to a
+  per-run filename before any further run — noted, not done mid-experiment.
+- **THAI / CS2b DIAGNOSIS — nothing is broken, and the dense arm solves Thai.**
+  - CS2b rides the **04:10 daily tick** (`'0 10 4 * * *'`) and is **explicitly excluded from the boot
+    pass**; 005 landed this morning ⇒ `0 rows` is expected, next run 2026-08-20 04:10. A restart would
+    not have helped.
+  - **Not a broken path:** selection is `me.message_id IS NULL` with **no age filter**, so the backlog is
+    covered; **163 of 193** messages are eligible and drain in one 200-batch. Setting has no override
+    (default ON) and `:8210/health` returns 200, so the tick will fire. **Smallest fix: none — wait one
+    night.** The manual `force:true` drain is a convenience, not a correctness fix, and was not run.
+  - ⭐ **Dense arm solves Thai, measured WITHOUT writing a row** (embed + cosine, not an insert): every
+    Thai query retrieved its own Thai document, and **ข้าวผัด beat the ENGLISH fried-rice doc** (0.463 vs
+    0.437) ⇒ real Thai matching, not topic leakage. ⇒ **B13/trigram not justified; condition not met.**
+  - ⚠️ Residual hole, bounded and unfixed: `MIN_EMBED_CHARS = 50` means **30 of 193 messages are never
+    embedded**, and lexical cannot see Thai at all ⇒ **short Thai messages are invisible to both arms.**
+    Thai is dense, so 50 chars bites harder there than in English. A threshold decision, not an oversight.
+- **Hermes backlog recorded per his list:** B2/B3 **before Reflection writes Sotera's first note** (she
+  holds 0 notes — the window closes when it is switched on) · B12 later · `doctor` a useful future
+  primitive · B13 conditional and **now closed** · ⛔ no SOUL.md, dreaming, channels, cross-person
+  recall/linking, or schema work.
+- Next action: **Ote's call on F1/F3.** Nothing else starts.
+
 ---
 
 ## Template Updates
