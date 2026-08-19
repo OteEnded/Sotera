@@ -648,6 +648,38 @@
 - Next action: assessment for Ote (continue observation vs open an experiment), then the **design-only
   Channels RFC**. Dreaming stays parked.
 
+### 2026-08-19 14:25
+
+- Summary: ✅ **THAI DENSE RETRIEVAL FIXED** — migration 006, verified end-to-end, suite back to **10/10**.
+  Priority 1 of Ote's list complete.
+- Files touched: `Backend/database/migrations/006_message_embedding_hv_generated.sql` (new, applied),
+  `Reference/docs/ANALYSIS_CS2B_THAI_VERIFICATION.md`, `AI_CarryOn.md`, `AI_ProgressTracking.md`.
+- **The change:** dropped the always-NULL `embedding_hv` and its HNSW index on
+  `persona_sotera.txn_message_embeddings`, re-added it as **`GENERATED ALWAYS`**, rebuilt the index.
+  ⭐ Expression **copied verbatim** from `ote_llm_services.txn_message_embeddings.embedding_hv` rather
+  than re-derived — a second hand-written derivation is a second place to be wrong.
+- ⭐ **Verified the precondition BEFORE writing the migration**, because the failure mode here is a
+  migration that applies cleanly and changes nothing: all 202 rows are `jsonb_typeof='array'` with
+  `jsonb_array_length=2048`, so the CASE actually populates. The migration also **asserts its own
+  outcome** — a `RAISE EXCEPTION` if generated ≠ total, plus a refusal guard if `embedding_hv` had held
+  any non-null value (it would mean DROP COLUMN destroys data). It reported **202/202**.
+- Results: `embedding_hv` **0/202 → 202/202** · Thai query mode **`lexical+empty-dense` count 0 →
+  `hybrid` count 5** · `thai-dense-retrieval-check` **✖4 failed → ✅7 passed** · full suite **9/1 fail →
+  ✅ 10/10**. ⭐ **The red test went green by fixing the defect, not by normalising it** — Ote's condition.
+- ⭐ **Verified through the REAL chat path too**, not only the component: a fresh conversation, asked in
+  Thai about something said in Thai two conversations earlier. She called `search_conversations` and
+  answered — *"เจอแล้ว — คุณเล่าเรื่อง connection pool ที่ตอน deploy แล้วมันหลุด… เขียนลงลิสต์ไปแล้วสองรอบ"*.
+- ⚠️ Two observations from that turn, **recorded not fixed**: the **first attempt stored an EMPTY
+  assistant message** (no error in the log, did not reproduce on retry — noted against the known
+  empty-reply-ghost work); and she said **"เมื่อวานนี้" ("yesterday")** for a two-hour-old conversation
+  while getting the date itself right — same family as the OLS `event_at` past-tense slip.
+- ⛔ **Deliberately untouched, as stated to Ote before starting:** `user_id` and every column near it ·
+  migrations 001–003 (quarantined, not run, not reconciled) · `txn_memories` · the `embedding` jsonb
+  source (no re-embedding, no model calls) · composer, `SELF_MODEL`, and all settings.
+- Next action: **priority 2 — second-person natural observation** with `selfModel=true`, to see how
+  SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE behaves across two real people. Then B2/B3 design, then the
+  B16 writer model.
+
 ---
 
 ## Template Updates

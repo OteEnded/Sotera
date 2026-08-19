@@ -115,7 +115,30 @@ did not honour; **I did not establish which**, and this is the exact shape that 
 report here once before.
 ⛔ **Nothing modified; all of it brought back to Ote per instruction.**
 
-## ⚠️⚠️ THE DENSE ARM IS DEAD — MY MIGRATION-005 DEFECT (found 2026-08-19 ~13:55)
+## ✅ THAI DENSE RETRIEVAL FIXED — migration 006 (2026-08-19 ~14:20)
+
+`006_message_embedding_hv_generated.sql`. Dropped the always-NULL column + its HNSW index, re-added
+`embedding_hv` as **`GENERATED ALWAYS`** with the expression **copied verbatim from OLS** (a second
+hand-written derivation = a second place to be wrong). **202/202 generated**, asserted by the migration
+itself — it `RAISE EXCEPTION`s if generated ≠ total, because a migration that applies cleanly and
+populates nothing is exactly the bug being fixed.
+
+| | before | after |
+|---|---|---|
+| `embedding_hv` not null | 0/202 | **202/202** |
+| Thai query mode | `lexical+empty-dense` count 0 | **`hybrid` count 5** |
+| suite | 9 pass / 1 FAIL | **✅ 10/10** |
+
+⭐ **The red test went green by fixing the defect, not by normalising it.** And verified through the REAL
+chat path, not just the component — asked in Thai about a Thai message two conversations back, she called
+`search_conversations` and answered correctly in Thai.
+⚠️ Recorded, not fixed: the **first attempt returned an empty assistant message** (no error logged, did
+not reproduce); and she said **"เมื่อวานนี้" ("yesterday")** for a two-hour-old conversation while getting
+the date itself right — same family as the OLS `event_at` tense slip.
+⛔ Untouched: `user_id`, migrations 001–003 (quarantined), `txn_memories`, the `embedding` jsonb source
+(no re-embedding), composer/`SELF_MODEL`/settings.
+
+## ~~⚠️⚠️ THE DENSE ARM IS DEAD~~ — MY MIGRATION-005 DEFECT (found ~13:55, FIXED ~14:20 — kept for the lesson)
 
 `ANALYSIS_CS2B_THAI_VERIFICATION.md`. The drain works — **0 → 200 embeddings**, 8/8 Thai. But the writer
 inserts `embedding` (jsonb) and the reader requires **`embedding_hv`**, filtered `IS NOT NULL`:
