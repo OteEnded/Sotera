@@ -8,6 +8,7 @@
 // distinctive tokens appears in what the relational layer produces. That is a mechanical privacy
 // property. "We asked the model to abstract" is not one.
 
+import { makeChecker } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
@@ -21,8 +22,11 @@ await initSettings(db)
 const seq = db.txn_memories.sequelize
 const Q = (sql, r) => seq.query(sql, { replacements: r, type: seq.QueryTypes.SELECT })
 
-let pass = 0, fail = 0
-const ok = (c, label, detail = '') => { console.log(`${c ? 'ok  ' : 'FAIL'} ${label}${detail ? ' — ' + detail : ''}`); c ? pass++ : fail++ }
+// House checker (harness.mjs): it counts, reports, sets a real exit code, and drains first — on
+// Windows/Node a bare process.exit while sockets tear down trips a libuv assertion AFTER the summary
+// prints. `ok(cond, label, detail)` adapts to `check(label, cond, detail)`.
+const { check, done } = makeChecker()
+const ok = (c, label, detail = '') => check(label, c, detail)
 
 const persons = await Q(`SELECT id::text, display_name FROM persona_sotera.mst_persons`)
 const P = Object.fromEntries(persons.map((p) => [p.display_name, p.id]))
@@ -119,5 +123,5 @@ for (const col of ['m.content', 'msg.content', 'c.title', 'embedding']) {
   ok(!sqlOnly.includes(col), `6 · ⭐ the module never selects \`${col}\``)
 }
 
-console.log(`\n${fail === 0 ? 'ALL CHECKS PASSED' : `✖ ${fail} FAILED`}  (${pass} passed)`)
-process.exit(fail === 0 ? 0 : 1)
+
+done()

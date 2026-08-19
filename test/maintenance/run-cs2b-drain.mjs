@@ -15,12 +15,21 @@
 // ⚠️ Makes real embedder calls (one per eligible message). Announce before running on a shared box.
 
 import { initDB } from '../../Backend/database/index.js'
-import { setDB, loadConfig } from '../../Backend/lib/utility.js'
+// ⭐ `log` is the project's own file logger (Backend/lib/utility.js), the same one cron.js uses for
+// `[usage-retention]` / `[message-embed]`. This drain does exactly what the 04:10 tick does, so it
+// leaves the same kind of trace — a manual pass that mutates the store and logs nowhere is a pass
+// nobody can later prove happened.
+// ⚠️ `logInit()` IS REQUIRED IN A STANDALONE SCRIPT. `log()` only writes once `logInit()` has resolved
+// the log file path — the server calls it at boot, so a script that just imports `log` writes NOTHING
+// and reports no error. I added the log line, saw a clean run, and only found it missing by grepping the
+// log directory: an un-asserted side effect is indistinguishable from one that never happened.
+import { setDB, loadConfig, log, logInit } from '../../Backend/lib/utility.js'
 import { rebuildProviderRegistry } from '../../Backend/app/adapters/registry.js'
 import { initSettings, getSetting } from '../../Backend/app/settings/index.js'
 import { drainPendingEmbeddings } from '../../Backend/app/components/conversation-search.js'
 
 const force = process.argv.includes('--force')
+logInit() // without this, log() silently writes nowhere
 
 const config = loadConfig()
 const db = await initDB()
@@ -47,6 +56,8 @@ const after = (await db.txn_messages.sequelize.query(
 ))[0].n
 console.log(`drain result: ${JSON.stringify(r)}  in ${secs}s`)
 console.log(`embeddings AFTER:  ${after}   (+${after - before})`)
+// Same tag shape as the cron entry, so a manual pass and the nightly one read alike in the log file.
+await log(`[message-embed] (manual${force ? ' --force' : ''}) ${JSON.stringify({ ...r, before, after, secs: Number(secs) })}`, import.meta.url)
 // ⭐ Prove the STATE, not the return value. A drain that reports embedded:N while the table is empty is
 // exactly the class of failure this project keeps re-learning.
 if (after === before && !r.skipped) console.log('⚠️ the drain reported work but the table did not grow — do not trust the return value')

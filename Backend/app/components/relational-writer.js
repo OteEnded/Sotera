@@ -149,11 +149,11 @@ export function parseLabels(reply) {
  * @returns {Promise<{records: Array, scanned: number, contributed: number, skipped: number}>}
  */
 export async function abstractStance({
-  db, subjectUserId,
+  db, subjectUserId, log = null,
   model = { model: 'qwen3.6:35b', endpoint: 'http://127.0.0.1:11434/api/chat', timeoutMs: 180000 },
   maxConversations = 25,
 } = {}) {
-  if (!db || !subjectUserId) return { records: [], scanned: 0, contributed: 0, skipped: 0 }
+  if (!db || !subjectUserId) return { records: [], scanned: 0, contributed: 0, skipped: 0, reasons: {}, support: {} }
   const seq = db.txn_memories.sequelize
   const { schema } = db.txn_memories.getTableName()
   if (!schema) throw new Error('relational-writer: no project schema configured — refusing to guess one')
@@ -171,6 +171,16 @@ export async function abstractStance({
   if (!person?.pid) return { records: [], scanned: 0, contributed: 0, skipped: convs.length }
 
   const support = new Map() // label -> count of DISTINCT conversations supporting it
+  // ⭐ WHY the pass skipped things, as REASON CODES. The first version swallowed every failure with a
+  // bare `catch { skipped++ }`, so a systematically broken abstractor — a dead endpoint, a model that
+  // never returns valid JSON — looked exactly like "nothing worth recording". Failing closed is right;
+  // failing closed SILENTLY is how you never find out.
+  //
+  // ⚠️ REASON CODES, NOT MESSAGES. The writer is the only component that sees both sides of the privacy
+  // boundary, and its own design says it must have no output channel except the record — a LOG IS AN
+  // OUTPUT CHANNEL. A raw error string can embed a model reply, and a model reply can embed the
+  // conversation. So: a fixed vocabulary of causes, aggregated, with no ids and no text.
+  const reasons = { empty: 0, 'model-error': 0, unparseable: 0, 'no-labels': 0 }
   let contributed = 0, skipped = 0
   let windowStart = null, windowEnd = null
 
@@ -180,20 +190,27 @@ export async function abstractStance({
       const msgs = await Q(
         `SELECT role, content, created_at::date::text AS d FROM "${schema}"."txn_messages"
           WHERE conversation_id = :cid AND role IN ('user','assistant') ORDER BY created_at LIMIT 60`, { cid: c.id })
-      if (!msgs.length) { skipped++; continue }
+      if (!msgs.length) { skipped++; reasons.empty++; continue }
       for (const m of msgs) {
         if (!windowStart || m.d < windowStart) windowStart = m.d
         if (!windowEnd || m.d > windowEnd) windowEnd = m.d
       }
       const transcript = msgs.map((m) => `${m.role}: ${String(m.content).slice(0, 1200)}`).join('\n')
-      labels = parseLabels(await askModel(buildPrompt(transcript), model))
+      const reply = await askModel(buildPrompt(transcript), model)
+      labels = parseLabels(reply)
+      // Distinguish "the model answered and nothing applied" from "the model answered unusably" — the
+      // first is a normal outcome, the second is a broken abstractor wearing the same face.
+      if (!labels.length && !/^\s*\[\s*\]\s*$/.test(String(reply).trim())) reasons.unparseable++
     } catch {
       // ⭐ FAIL CLOSED, per conversation. One bad conversation contributes nothing and does not abort
       // the pass; it also never contributes a partial result.
+      // ⚠️ The error object is deliberately NOT captured — it can embed a model reply, and a model reply
+      // can embed the conversation. The cause is recorded as a code, never as a message.
       skipped++
+      reasons['model-error']++
       continue
     }
-    if (!labels.length) { skipped++; continue }
+    if (!labels.length) { skipped++; reasons['no-labels']++; continue }
     contributed++
     for (const l of new Set(labels)) support.set(l, (support.get(l) || 0) + 1)
   }
@@ -213,10 +230,18 @@ export async function abstractStance({
   }
   // `support` is diagnostics for choosing the floor (open question Q1). It is LABELS AND COUNTS ONLY —
   // the same closed vocabulary, so it carries no more information than a record does.
-  return {
-    records, scanned: convs.length, contributed, skipped,
+  const summary = {
+    records, scanned: convs.length, contributed, skipped, reasons,
     support: Object.fromEntries([...support].sort((a, b) => b[1] - a[1])),
   }
+  // ⚠️ Structured, aggregate, content-free. `records.length` and reason COUNTS only — never a label list
+  // at this level and never a message, so the operational channel cannot become a disclosure channel.
+  log?.debug?.({ scanned: summary.scanned, contributed, skipped, reasons, wouldRecord: records.length }, '[relational] stance pass')
+  if (reasons['model-error'] || reasons.unparseable) {
+    log?.warn?.({ modelError: reasons['model-error'], unparseable: reasons.unparseable, scanned: summary.scanned },
+      '[relational] abstractor failures — a silent fail-closed looks identical to "nothing worth recording"')
+  }
+  return summary
 }
 
 /**

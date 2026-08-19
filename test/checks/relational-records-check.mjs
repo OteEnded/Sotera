@@ -10,6 +10,7 @@
 // NO memories and NO conversations. This is not seeding Hermes facts to demonstrate the architecture —
 // it is the only way to observe a foreign-key behaviour, and it is cleaned up in a finally.
 
+import { makeChecker } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
@@ -22,8 +23,14 @@ const seq = db.txn_memories.sequelize
 const Q = (s, r) => seq.query(s, { replacements: r, type: seq.QueryTypes.SELECT })
 const X = (s, r) => seq.query(s, { replacements: r })
 
-let pass = 0, fail = 0
-const ok = (c, l, d = '') => { console.log(`${c ? 'ok  ' : 'FAIL'} ${l}${d ? ' — ' + d : ''}`); c ? pass++ : fail++ }
+// ⚠️ Uses the house checker from harness.mjs rather than a hand-rolled one. Its `done()` sets a real
+// exit code AND drains briefly first — on Windows/Node, exiting while keep-alive sockets tear down trips
+// a libuv assertion AFTER the summary prints, turning a pass into a reported failure. I hit exactly that
+// earlier in this session with a hand-rolled `process.exit`.
+// `ok(cond, label, detail)` is a thin adapter over `check(label, cond, detail)` so the assertions below
+// read condition-first; the reporting, counting and exit are all the harness's.
+const { check, done } = makeChecker()
+const ok = (c, l, d = '') => check(l, c, d)
 
 const users = Object.fromEntries((await Q('SELECT id::text, username FROM persona_sotera.mst_users')).map((u) => [u.username, u.id]))
 const persons = Object.fromEntries((await Q('SELECT id::text, display_name FROM persona_sotera.mst_persons')).map((p) => [p.display_name, p.id]))
@@ -161,5 +168,5 @@ try {
   ok(rows[0].n === 0, 'cleanup · no relational records left behind — this check persists nothing', `${rows[0].n} rows`)
 }
 
-console.log(`\n${fail === 0 ? 'ALL CHECKS PASSED' : `✖ ${fail} FAILED`}  (${pass} passed)`)
-process.exit(fail === 0 ? 0 : 1)
+
+done()

@@ -8,6 +8,7 @@
 //
 // Read-only: runs queries, writes nothing.
 
+import { makeChecker } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { rebuildProviderRegistry } from '../../Backend/app/adapters/registry.js'
@@ -24,11 +25,10 @@ const fastify = { db, config }
 const seq = db.txn_messages.sequelize
 const Q = (sql, replacements) => seq.query(sql, { replacements, type: seq.QueryTypes.SELECT })
 
-let pass = 0; let fail = 0
-const ok = (cond, label, detail = '') => {
-  console.log(`${cond ? 'ok  ' : 'FAIL'} ${label}${detail ? ' — ' + detail : ''}`)
-  cond ? pass++ : fail++
-}
+// House checker (harness.mjs) — counting, reporting, exit code and the drain that stops a libuv
+// assertion from turning a pass into a reported failure on Windows.
+const { check, done } = makeChecker()
+const ok = (cond, label, detail = '') => check(label, cond, detail)
 
 const [{ id: userId }] = await Q("select id from persona_sotera.mst_users where username = 'kavi'")
 
@@ -84,5 +84,4 @@ for (const q of ['connection pool หลุดตอน deploy', 'ปัญห�
     `mode=${modes}`)
 }
 
-console.log(`\n${fail === 0 ? 'ALL CHECKS PASSED' : `✖ ${fail} FAILED`}  (${pass} passed)`)
-process.exit(fail === 0 ? 0 : 1)
+done()
