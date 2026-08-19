@@ -32,7 +32,8 @@
 // table has no column for any of that, so this is a restatement of a guarantee rather than a new one.
 
 import { registerHostService } from './runtime.js'
-import { STANCE_LABELS } from './relational-taxonomy.js'
+import { STANCE_LABELS, STANCE_LABEL_KEYS, isStanceLabel } from './relational-taxonomy.js'
+import { createRelationalWriteLease, persistRelationalRecords } from './relational-writer.js'
 
 /**
  * Build the own-memory service for ONE request.
@@ -75,7 +76,8 @@ export function buildOwnMemory(fastify, { userId = null } = {}) {
 
     const stanceRows = me?.pid
       ? await Q(
-        `SELECT label, conversation_count, window_start::date::text AS ws, window_end::date::text AS we
+        `SELECT label, conversation_count, origin::text AS origin,
+                window_start::date::text AS ws, window_end::date::text AS we
            FROM "${schema}"."txn_relational_records"
           WHERE subject_person_id = :pid AND tier = 'stance'
           ORDER BY conversation_count DESC, label`, { pid: me.pid })
@@ -97,13 +99,88 @@ export function buildOwnMemory(fastify, { userId = null } = {}) {
           supportedByConversations: r.conversation_count,
           firstNoticed: r.ws,
           lastNoticed: r.we,
+          // ⭐ HOW SHE LEARNED IT, so she can answer "did I notice that or was I told?" honestly rather
+          // than inventing a cause — which she did before, from a label and a count alone.
+          howLearned: r.origin === 'instructed'
+            ? 'this person told you about your practice directly'
+            : 'you inferred it yourself from a pattern across conversations',
+          // The label is included ONLY so retract_own_practice has something to name. It is a closed
+          // vocabulary term, not content.
+          practiceLabel: r.label,
         })),
       },
       provenance: PROVENANCE,
     }
   }
 
-  return { recall }
+  /**
+   * ⭐ T1 · NOTE ONE PRACTICE, from an explicit instruction. Ote's rule:
+   *   · observed practice   → must clear FREQUENCY_FLOOR (3 conversations). The abstractor's job.
+   *   · instructed practice → a person said it about her practice; recorded immediately, `origin='instructed'`.
+   *
+   * ⛔ THE ANTI-BACKDOOR PROPERTIES, all structural:
+   *   · `label` must be in the CLOSED taxonomy — free text cannot enter, so this cannot smuggle a user
+   *     fact, a quote, or a sentence into the store;
+   *   · there is NO subject parameter — the subject is the current person, so it cannot target anyone else;
+   *   · it writes `origin='instructed'`, so the floor's guarantee stays AUDITABLE: "did anything bypass
+   *     the floor?" is answerable by a query. An unlabelled exception would make the floor unverifiable.
+   *   · it rides the same `WRITE_LANES` lane as every other writer — no second authority.
+   */
+  async function note({ label } = {}) {
+    if (!userId || !seq || !schema) return { ok: false, reason: 'no scope' }
+    if (!isStanceLabel(label)) {
+      // ⭐ Return the vocabulary rather than a bare error: a closed set is only usable if the caller can
+      // see it, and the model should correct itself rather than guess again.
+      return { ok: false, reason: `"${label}" is not one of your practice labels`, allowed: STANCE_LABEL_KEYS }
+    }
+    const [me] = await Q(
+      `SELECT person_id::text AS pid FROM "${schema}"."mst_users" WHERE id = :userId`, { userId })
+    if (!me?.pid) return { ok: false, reason: 'no person on file for this account' }
+
+    const lease = await createRelationalWriteLease({ fastify, subjectUserId: userId })
+    if (!lease) return { ok: false, reason: 'no write lease' }
+    const today = new Date().toISOString().slice(0, 10)
+    const res = await persistRelationalRecords({
+      db,
+      records: [{
+        subjectPersonId: me.pid, tier: 'stance', label,
+        conversationCount: 1, windowStart: today, windowEnd: today,
+      }],
+      lease,
+      origin: 'instructed',
+    })
+    return { ok: true, recorded: STANCE_LABELS[label], origin: 'instructed', written: res.written }
+  }
+
+  /**
+   * ⭐ T2 · RETRACT ONE OF HER OWN PRACTICES.
+   *
+   * *If Sotera can own a memory, she must be able to retract it.* She already tried — *"Do you want me
+   * to delete that claim entirely rather than carry around something unmoored?"* — and had no way to.
+   *
+   * ⛔ Strictly narrowing, and cannot be aimed: no id parameter (an id is a handle), no subject
+   * parameter, and the DELETE is bound to the current person AND `tier='stance'`. The worst it can do is
+   * remove one of her own observations about the person she is talking to.
+   */
+  async function retract({ label } = {}) {
+    if (!userId || !seq || !schema) return { ok: false, reason: 'no scope' }
+    if (!isStanceLabel(label)) return { ok: false, reason: `"${label}" is not one of your practice labels`, allowed: STANCE_LABEL_KEYS }
+    const [me] = await Q(
+      `SELECT person_id::text AS pid FROM "${schema}"."mst_users" WHERE id = :userId`, { userId })
+    if (!me?.pid) return { ok: false, reason: 'no person on file for this account' }
+    const rows = await seq.query(
+      `DELETE FROM "${schema}"."txn_relational_records"
+        WHERE subject_person_id = :pid AND tier = 'stance' AND label = :label::persona_sotera.relational_label
+        RETURNING id`,
+      { replacements: { pid: me.pid, label }, type: seq.QueryTypes.DELETE },
+    )
+    const removed = Array.isArray(rows) ? rows.length : (rows ? 1 : 0)
+    return removed
+      ? { ok: true, retracted: STANCE_LABELS[label], note: 'Gone from your own memory. It can come back if the pattern recurs.' }
+      : { ok: true, retracted: null, note: 'You had nothing stored under that — nothing to remove.' }
+  }
+
+  return { recall, note, retract }
 }
 
 /**

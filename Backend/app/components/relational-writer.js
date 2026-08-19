@@ -254,7 +254,8 @@ export async function abstractStance({
  * architecture can issue a lease. A prototype that could write WOULD BE the second writer, whatever
  * its comments said.
  */
-export async function persistRelationalRecords({ db, records = [], lease } = {}) {
+export async function persistRelationalRecords({ db, records = [], lease, origin = 'observed' } = {}) {
+  if (origin !== 'observed' && origin !== 'instructed') throw new Error(`relational-writer: origin must be observed|instructed, got "${origin}"`)
   // ⭐ NO LANE, NO WRITE. This is the whole guard: you cannot persist without holding a lane that was
   // constructed inside the subject's scope. There is no token to forge and no parameter to point elsewhere.
   if (!lease || typeof lease.enqueue !== 'function' || !lease.subjectPersonId) {
@@ -286,18 +287,27 @@ export async function persistRelationalRecords({ db, records = [], lease } = {})
       for (const r of records) {
         await seq.query(
           `INSERT INTO "${schema}"."txn_relational_records"
-             (subject_person_id, tier, label, conversation_count, window_start, window_end, deriver_version, taxonomy_version)
+             (subject_person_id, tier, label, conversation_count, window_start, window_end, deriver_version, taxonomy_version, origin)
            VALUES (:subjectPersonId, :tier::persona_sotera.relational_tier, :label::persona_sotera.relational_label,
-                   :conversationCount, :windowStart, :windowEnd, :deriverVersion, :taxonomyVersion)
+                   :conversationCount, :windowStart, :windowEnd, :deriverVersion, :taxonomyVersion,
+                   :origin::persona_sotera.relational_origin)
            ON CONFLICT (subject_person_id, tier, label) WHERE subject_person_id IS NOT NULL
-           DO UPDATE SET conversation_count = EXCLUDED.conversation_count,
+           DO UPDATE SET conversation_count = GREATEST(txn_relational_records.conversation_count, EXCLUDED.conversation_count),
+                         -- ⭐ instructed IS STICKY. A person stating something about her practice is
+                         -- STRONGER evidence than three inferences, so a later observed pass must never
+                         -- quietly downgrade it, and the floor's exception must stay visible.
+                         -- (No backticks in here: this is inside a JS template literal, and one backtick
+                         --  in a SQL comment terminates the string. It did, and it took a minute to see.)
+                         origin = CASE WHEN txn_relational_records.origin = 'instructed'
+                                         OR EXCLUDED.origin = 'instructed' THEN 'instructed'::persona_sotera.relational_origin
+                                    ELSE 'observed'::persona_sotera.relational_origin END,
                          window_start       = LEAST(txn_relational_records.window_start, EXCLUDED.window_start),
                          window_end         = GREATEST(txn_relational_records.window_end, EXCLUDED.window_end),
                          derived_at         = now(),
                          deriver_version    = EXCLUDED.deriver_version,
                          taxonomy_version   = EXCLUDED.taxonomy_version,
                          updated_at         = now()`,
-          { replacements: { ...r, deriverVersion: DERIVER_VERSION, taxonomyVersion: TAXONOMY_VERSION }, transaction: tx },
+          { replacements: { ...r, deriverVersion: DERIVER_VERSION, taxonomyVersion: TAXONOMY_VERSION, origin }, transaction: tx },
         )
       }
       return { written: records.length, skipped: 0 }

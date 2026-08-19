@@ -23,6 +23,7 @@ const { check, done } = makeChecker()
 const ok = (c, l, d = '') => check(l, c, d)
 
 const users = Object.fromEntries((await Q('SELECT id::text, username FROM persona_sotera.mst_users')).map((u) => [u.username, u.id]))
+const persons = Object.fromEntries((await Q('SELECT id::text, display_name FROM persona_sotera.mst_persons')).map((p) => [p.display_name, p.id]))
 const fastify = { db, config, log: null }
 
 // ── T1 · the tool takes NO arguments ─────────────────────────────────────────────────────────────
@@ -48,8 +49,8 @@ ok(/NOT things this person told you/i.test(kavi.provenance.whatTheseAreNot),
 
 // ── T3 · ⭐ NOTHING that could become a database handle or a leak ─────────────────────────────────
 const flat = JSON.stringify(kavi)
-for (const forbidden of ['subject_person_id', 'subjectPersonId', 'message_id', 'memory_id', 'conversation_id', 'embedding', 'content', 'deriver_version', 'label']) {
-  ok(!flat.includes(forbidden), `T3 · ⭐ the payload contains no \`${forbidden}\``)
+for (const forbidden of ['subject_person_id', 'subjectPersonId', 'message_id', 'memory_id', 'conversation_id', 'embedding', 'content', 'deriver_version', 'subject_person']) {
+  ok(!flat.includes(forbidden), `T3 · ⭐ the payload contains no ${forbidden}`)
 }
 ok(!/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(flat),
   'T3 · ⭐ no UUID of any kind is returned — an id is a handle, and a handle is the start of a database tool')
@@ -61,8 +62,8 @@ ok(mina.withThisPerson.person === 'Mina', 'T4 · built for Mina, it describes Mi
 ok(mina.withThisPerson.count === 0, 'T4 · ⭐ Mina\'s recall does NOT show Kavi\'s stance', `${mina.withThisPerson.count} items`)
 ok(!JSON.stringify(mina).includes('Kavi'), 'T4 · ⭐ …and never names Kavi at all')
 ok(svcMina.recall.length === 0, 'T4 · ⭐ `recall()` accepts no argument — the subject cannot be overridden at the call site')
-ok(Object.keys(svcMina).length === 1 && typeof svcMina.recall === 'function',
-  'T4 · the service exposes exactly one method — no search, no list, no lookup', Object.keys(svcMina).join(', '))
+ok(Object.keys(svcMina).sort().join(',') === 'note,recall,retract',
+  'T4 · ⭐ the service exposes EXACTLY recall/note/retract — no search, no list, no lookup, no by-id', Object.keys(svcMina).join(', '))
 
 // ── T5 · empty is reported as HER emptiness, not as a claim about anyone ─────────────────────────
 ok(mina.aboutMyself.count === 0 && Array.isArray(mina.aboutMyself.items),
@@ -80,5 +81,61 @@ ok(/user_id IS NULL AND kind = 'identity'/.test(sql),
   'T6 · its only txn_memories read is the PERSONA-GLOBAL identity slice — hers regardless of who is asking')
 ok(!/user_id\s*=\s*:userId[\s\S]{0,80}txn_memories/.test(sql),
   'T6 · it never reads another account\'s scoped memories')
+
+
+// ── T7 · T1/T2 — note and retract, and the auditable floor bypass ────────────────────────────────
+// ⚠️ Uses a TRANSIENT label the real records do not hold, and removes it, so the two live records
+// (i-verify-before-asserting, i-flag-uncertainty-explicitly) are never touched. Snapshot-verified below.
+{
+  const before = await Q(`SELECT label::text, origin::text FROM persona_sotera.txn_relational_records
+                            ORDER BY label`)
+  const svc = buildOwnMemory({ db, config, log: null }, { userId: users.kavi })
+  const PROBE = 'i-show-my-working' // not among the live records
+
+  // T1 · an unknown label is refused AND the vocabulary is returned
+  const bad = await svc.note({ label: 'we-get-along' })
+  ok(bad.ok === false && Array.isArray(bad.allowed) && bad.allowed.length > 0,
+    'T7 · ⭐ note_own_practice refuses a label outside the closed vocabulary, and returns the set',
+    bad.reason)
+  ok(!(await svc.note({ label: 'be nice to kavi about the deploy' })).ok,
+    'T7 · ⭐ free text cannot enter — it is not a label, so it is refused')
+
+  // T1 · an instructed note lands IMMEDIATELY, below the frequency floor, and is LABELLED as such
+  const noted = await svc.note({ label: PROBE })
+  ok(noted.ok && noted.origin === 'instructed', 'T7 · ⭐ an instructed note is recorded immediately', JSON.stringify(noted))
+  const [row] = await Q(`SELECT conversation_count, origin::text AS origin FROM persona_sotera.txn_relational_records
+                           WHERE subject_person_id = :p AND label = :l::persona_sotera.relational_label`,
+    { p: persons.Kavi, l: PROBE })
+  ok(row && row.conversation_count === 1 && row.origin === 'instructed',
+    'T7 · ⭐ …with support of 1 — BELOW the floor of 3 — and stamped `instructed` so the bypass is AUDITABLE',
+    `n=${row?.conversation_count} origin=${row?.origin}`)
+
+  // The recall surface tells her HOW she learned it, so she need not invent a cause
+  const after = await svc.recall()
+  const probeItem = after.withThisPerson.items.find((i) => i.practiceLabel === PROBE)
+  ok(/told you about your practice directly/i.test(probeItem?.howLearned || ''),
+    'T7 · ⭐ recall reports HOW it was learned — instructed vs inferred', probeItem?.howLearned)
+  const inferred = after.withThisPerson.items.find((i) => i.practiceLabel !== PROBE)
+  ok(/inferred it yourself/i.test(inferred?.howLearned || ''),
+    'T7 · …and the observed ones still read as inferred', inferred?.howLearned)
+
+  // T2 · retract removes exactly that one, and nothing else
+  const ret = await svc.retract({ label: PROBE })
+  ok(ret.ok && ret.retracted, 'T7 · ⭐ retract_own_practice removes her own observation', ret.retracted)
+  const gone = await Q(`SELECT count(*)::int n FROM persona_sotera.txn_relational_records
+                          WHERE subject_person_id = :p AND label = :l::persona_sotera.relational_label`,
+    { p: persons.Kavi, l: PROBE })
+  ok(gone[0].n === 0, 'T7 · …and it is actually gone')
+  const twice = await svc.retract({ label: PROBE })
+  ok(twice.ok && twice.retracted === null, 'T7 · retracting nothing is honest, not an error', twice.note)
+  ok(!(await svc.retract({ label: 'not-a-label' })).ok, 'T7 · retract also refuses labels outside the vocabulary')
+
+  // ⭐ THE REAL RECORDS ARE UNTOUCHED — the property two of my checks broke earlier today.
+  const afterAll = await Q(`SELECT label::text, origin::text FROM persona_sotera.txn_relational_records
+                              ORDER BY label`)
+  ok(JSON.stringify(afterAll) === JSON.stringify(before),
+    'T7 · ⭐ the live records are exactly as found — no deletion, no mutation',
+    `${afterAll.length} rows: ${afterAll.map((r) => r.label).join(', ')}`)
+}
 
 done()
