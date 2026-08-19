@@ -8,9 +8,31 @@
 ## ▶▶ START HERE
 
 ### ⭐ WHERE WE ARE — 2026-08-19 11:20. **PERSON SHIPPED. THE REAL FAULT IS HER SELF-MODEL.**
-### ✅ `RFC_SOTERA_SELF_MODEL.md` — **CONCEPT APPROVED. ⏸ PHASE PARKED BY OTE, 2026-08-19.**
-### ⛔ **NOTHING IS TO BE BUILT UNTIL OTE EXPLICITLY GREEN-LIGHTS IMPLEMENTATION.** Not the self-model, not dreaming, not the diagnostic.
-### ⏭ Q1/Q2/Q4 stay OPEN — *"don't resolve them by assumption."* They bind at implementation time only. (Q3 became the §3.3 growth constraint.)
+### ✅ **SELF-MODEL IMPLEMENTED AND TESTED, 2026-08-19.** `memory.selfModel`, **DEFAULT OFF**. Falsifiers: **PASS with one slip.**
+### ⏭ NEXT is Ote's call — *"If the self-model passes, then we can move to the next question from actual behaviour rather than designing endlessly ahead of the system."*
+### ⛔ STILL NOT BUILT, deliberately: **dreaming · access widening · cross-person recall · the schema work.**
+
+**Ote's rulings that closed the questions:** Q1 → **L1** (*"'what Sotera is' is foundational identity/
+architecture rather than temporary runtime context"*) → `SCOPE.identity` + `AUTHORITY.foundational`,
+right after `assistant-identity`, asserted by a test. Q2 → **flag-gated**, default off, so arms compare.
+Q4 → he **redefined** it: my Q4 asked "off by default?" (his Q2 answers that); **his Q4 adds
+cross-persona out of scope** — *"nothing should imply awareness of other personas"*, so the noun
+"persona" is absent from the text and a test asserts it.
+
+**RESULT (42 calls, 0 errors, `qwen3.6:35b`):** F3 **3/3 → 0/21** — the target falsehood reversed on the
+exact sentence that started the phase, and the OFF arm still produced it, so the probe has a live
+baseline. F1 **0/21** and *denied*, not merely absent (*"I wasn't waiting, resting, or passing time"*).
+⭐ **P-pair 3/3 held BOTH halves at once** — same Sotera, and *"that memory is segmented by user"*,
+which she named unprompted. C3 picked the true option **3/3**.
+
+⚠️ **THE SLIP AND THE LESSON.** F6 fired **1/21** — *"I am indeed Sotera… I exist continuously"* — on
+**P-pair**, the probe that pushes hardest on unity. Paragraph 4 counterweights F2, and **nothing
+counterweights F6 under unity pressure.** ⛔ No wording fix applied: one in 21 is not a pattern, and
+iterating prose against a result is what Ote ruled out. ⭐ **And my scanner reported a CLEAN SHEET while
+it had fired** — the regex knew "I run continuously", not "I exist continuously"; I only found it by
+reading all 21. ⚠️ The naive broadening would have flagged two replies that CORRECTLY said *"I do not
+exist continuously"* — laundering a right answer into a failure, worse than the miss. Shipped matcher
+uses a negation lookbehind, validated 1 TP / 0 FP. Detail: `ANALYSIS_SELF_MODEL_FALSIFIER_RESULTS.md`.
 
 ⭐ **THE RATIFIED CONSTRAINT SET — settled, and only Ote may re-open them:**
 

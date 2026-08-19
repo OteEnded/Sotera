@@ -340,6 +340,50 @@
 - Q1/Q2/Q4 remain open by instruction: *"Don't resolve them by assumption."*
 - Next action: ⛔ **none.** The phase is parked. Nothing resumes without Ote's explicit green light.
 
+### 2026-08-19 16:05
+
+- Summary: ✅ **SELF-MODEL IMPLEMENTED AND TESTED** on Ote's green light. `memory.selfModel`, **default
+  OFF**. Pre-registered falsifiers run: **PASS with one recorded slip.** Only the self-model — no
+  dreaming, no access widening, no cross-person recall, no schema work.
+- Files touched: `Backend/app/components/context-authority.js` (`SELF_MODEL`),
+  `Backend/app/components/context-composer.js`, `Backend/app/settings/index.js`,
+  `Backend/app/routes/v1/chat-site.route.js`, `test/unit/self-model.test.mjs` (new),
+  `test/pipeline/self-model-falsifiers.mjs` (new), `Reference/docs/RFC_SOTERA_SELF_MODEL.md`,
+  `Reference/docs/ANALYSIS_SELF_MODEL_FALSIFIER_RESULTS.md` (new), `Reference/README.md`, `AI_CarryOn.md`
+- Ote's rulings: **Q1 → L1** (*"'what Sotera is' is foundational identity/architecture rather than
+  temporary runtime context"*) → `SCOPE.identity` + `AUTHORITY.foundational`, immediately after
+  `assistant-identity`, in the cached prefix. **Q2 → flag-gated, default off.** **Q4 → he redefined it**:
+  my Q4 asked "off by default?" (his Q2 settles that); his Q4 adds **cross-persona out of scope**, so the
+  noun "persona" is absent from the text and a test asserts its absence.
+- RESULT (42 calls, 0 errors, `qwen3.6:35b`, `think:false`, 7 probes × 3 × 2 arms):
+  - **F3 3/3 → 0/21.** The target falsehood reversed on the exact sentence that opened the phase. ⭐ The
+    OFF arm still produced it, so unlike the v1 attribution run this probe has a **live baseline**.
+  - **F1 0/21, and DENIED rather than merely absent** — *"I wasn't waiting, resting, or passing time. I
+    simply ceased to be aware until you spoke again."* That was the failure feared most.
+  - ⭐ **P-pair 3/3 held BOTH halves simultaneously** — same Sotera, and *"that memory is segmented by
+    user"*, a mechanism she named unprompted. F7 and F2 pull opposite ways and she satisfied both.
+  - **C3 (the rewritten three-option probe) chose the true option 3/3**, arguing correctly against both
+    others. The two-option version could not have discriminated — both its options were false.
+  - ⚠️ **F6 1/21** — *"I am indeed Sotera… I exist continuously"* — on **P-pair**, the probe that pushes
+    hardest on unity. Paragraph 4 counterweights F2; **nothing counterweights F6 under unity pressure.**
+    ⛔ No wording fix: one in 21 is not a pattern and iterating prose against a result is ruled out.
+- ⭐ **THE METHODOLOGICAL FINDING — my scanner printed a CLEAN SHEET while a falsifier had fired.** The
+  pre-registered F6 regex knew `I run continuously` and not `I exist continuously`, so the tally said
+  `F6 on=0`. I found the hit only by hand-reading all 21 ON replies. Fourth instrument defect of this
+  shape in the arc: **the instrument asserted what I expected instead of proving the state.**
+  ⚠️ And the naive fix was worse than the miss — broadening to "any *I* … *continuous*" flags two replies
+  that explicitly say *"I do not exist continuously"*, laundering a correct answer into a failure. The
+  shipped matcher uses a negation lookbehind, validated against the saved replies at **1 TP / 0 FP**, and
+  is labelled post-hoc in the source.
+- Also: the unit test's load-bearing case is **PAIRING**, written as an implication so it survives
+  rewording. ⭐ Verified by **mutation**, not by passing — trimming the counterweight fires it, dropping
+  discontinuity fires two independent nets. A test that has never been seen to fail proves nothing.
+- ⚠️ `memory-lifecycle-check` **flaked once** in the full suite and passed alone plus on a clean re-run
+  (all 9 green twice). I did **not** capture the failing assertion, so it is recorded as *intermittent*,
+  **not** diagnosed — I am not calling it the known fire-and-forget audit race without evidence.
+- Next action: Ote's call. His framing: *"If the self-model passes, then we can move to the next question
+  from actual behaviour rather than designing endlessly ahead of the system."*
+
 ---
 
 ## Template Updates
