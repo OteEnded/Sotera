@@ -1482,6 +1482,9 @@ export default async function chatSiteRoutes(fastify) {
       // Awareness: a stated fact that her retrieval is scoped. Read per turn (not captured at boot) so
       // the experiment can flip arms without a restart.
       scopeAwareness: getSetting(fastify.config, 'memory.scopeAwareness') === true,
+      // Self-model: what she IS. Read per turn for the same reason — the falsifier run flips this arm
+      // without a restart, and nobody mutates the live system between arms.
+      selfModel: getSetting(fastify.config, 'memory.selfModel') === true,
     }
     const tailZone = userTz || 'UTC'
     let nowString

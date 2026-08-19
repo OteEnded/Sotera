@@ -15,7 +15,7 @@
 // ONLY: nothing here reads the classification yet, and the rendered strings are byte-identical to
 // before — that equality is asserted by a test, and is the whole safety argument for this step.
 // The resolver (P2) and the attribution-preserving render (P1) are the readers.
-import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINCIPLE, SCOPE_AWARENESS } from './context-authority.js'
+import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINCIPLE, SCOPE_AWARENESS, SELF_MODEL } from './context-authority.js'
 
 // ── L1 IDENTITY ──────────────────────────────────────────────────────────────────────────────────────────
 // ⚠ THE "he" IS NOT DECORATION — IT MATCHES THE VOICE. Ote, 2026-08-05: *"as we use male vocie indentity, set
@@ -260,6 +260,9 @@ export function composeSystemContext({
   // AWARENESS (2026-08-19): a stated fact that her retrieval is scoped, so an empty result stops
   // reading as an empty world. Default off; adds no information about what is hidden.
   scopeAwareness = false,
+  // SELF-MODEL (2026-08-19): what she IS — one Sotera, many people, persistent state, discontinuous
+  // execution, scoped access. L1 by Ote's ruling; default off so old and new are comparable.
+  selfModel = false,
 } = {}) {
   // Parts are collected WITH A KEY, not as bare strings, so the assembled prompt can describe itself:
   // the context-usage breakdown reports real per-section token counts instead of one opaque "system
@@ -275,6 +278,16 @@ export function composeSystemContext({
   // and must not take the identity with it. `??` not `||`: '' is the explicit OFF switch, so it has to
   // survive, while null/undefined (nothing configured) still gets the default.
   part('assistant-identity', assistantIdentity ?? DEFAULT_ASSISTANT_IDENTITY, AUTHORITY.foundational, SCOPE.identity)
+  // ⭐ SELF-MODEL — L1, and that placement is Ote's ruling, not a convenience.
+  // The open question was whether "what I am" is IDENTITY or CONTEXT, and L1 is the layer he wants
+  // deliberately minimal. He answered identity: "'what Sotera is' is foundational identity/architecture
+  // rather than temporary runtime context." So it sits here, immediately after the identity it
+  // elaborates, at SCOPE.identity — which AUTHORITY_BY_SCOPE permits only `foundational`, i.e. it is
+  // not hers to edit and not reachable by custom instructions. Placement also satisfies RFC §10
+  // (stability, not layer): this text never varies, so it belongs in the cached prefix.
+  // ⚠️ Its fourth paragraph is the SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE counterweight and must not
+  // be separated from the first — see SELF_MODEL's own note.
+  if (selfModel) part('self-model', SELF_MODEL, AUTHORITY.foundational, SCOPE.identity)
   if (customInstructions && customInstructions.trim()) {
     // ⚠️ SCOPE IS AN APPROXIMATION HERE, and knowingly so. Custom instructions are free text and can
     // say anything — "be terse" (style) and "always start with a summary" (task) are both ordinary.

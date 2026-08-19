@@ -275,6 +275,11 @@ const SETTING_DEFS = {
     validate: (v) => typeof v === 'boolean',
     describe: 'Tell the persona that her retrieval is SCOPED, so an empty result stops reading to her as an empty world. Fixes a measured falsehood (2026-08-19): asked whether she had spoken to anyone else, she answered "there is literally nothing" while 42 messages were open with another user — because user_id scoping returned nothing and she reported nothing-retrieved as nothing-exists. ⚠️ Adds NO information about what is hidden: the text is unconditional and byte-identical on a one-user and a thousand-user deployment, which a test asserts. Does NOT widen access and does NOT touch the user_id visibility boundary — it reduces what she claims, not what she can see.',
   },
+  'memory.selfModel': {
+    fromConfig: (c) => c?.memory?.selfModel ?? false,
+    validate: (v) => typeof v === 'boolean',
+    describe: 'Tell the persona what she IS, factually: one Sotera across every conversation and every person; what she learns is kept in a store that outlives any single conversation; she is only running while a turn is processed, with no waiting and no experience of the gap; and any one conversation shows her only part of what is kept. Fixes a measured falsehood (2026-08-19): asked whether anything of hers exists outside the conversation she answered "No, nothing does. I am stateless and ephemeral" — 4/4 — while holding four memories about the person she was addressing. ⚠️ It does NOT widen access and does NOT touch the user_id boundary: its closing clause says explicitly that being the same Sotera does not let her reach or repeat what someone else told her. ⚠️ It must NOT be trimmed to "just the persistence part" — the unity and scoped-access halves are one unit (SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE), and unity alone invites her to claim cross-person reach. Says nothing about consciousness, channels, other personas, or dreaming. DEFAULT OFF so old and new behaviour stay comparable against the pre-registered falsifiers.',
+  },
   'memory.layerAuthority': {
     fromConfig: (c) => c?.memory?.layerAuthority ?? false,
     validate: (v) => typeof v === 'boolean',
