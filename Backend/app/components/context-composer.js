@@ -10,6 +10,13 @@
 // (pinned + summary, before the conversation) and the runtime TAIL (datetime, memory hint, recall)
 // appended AFTER history so per-turn content never busts the provider's cached prompt prefix.
 
+// ── CLASSIFICATION (P0) ──────────────────────────────────────────────────────────────────────────────────
+// Every part this module emits now declares WHO OWNS IT and WHAT IT MAY GOVERN. P0 is classification
+// ONLY: nothing here reads the classification yet, and the rendered strings are byte-identical to
+// before — that equality is asserted by a test, and is the whole safety argument for this step.
+// The resolver (P2) and the attribution-preserving render (P1) are the readers.
+import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINCIPLE, SCOPE_AWARENESS } from './context-authority.js'
+
 // ── L1 IDENTITY ──────────────────────────────────────────────────────────────────────────────────────────
 // ⚠ THE "he" IS NOT DECORATION — IT MATCHES THE VOICE. Ote, 2026-08-05: *"as we use male vocie indentity, set
 // to chatsite persona so he use male message tone. (just tell him that he's a male in indentity) / so when
@@ -247,20 +254,35 @@ export function composeSystemContext({
   pinnedMemories = [],          // [content] — user-curated always-on memory
   personaNotes = [],            // [content] — L3 Persona Notes (Reflection; the persona's own operational notes)
   summary = null,               // conversation fold summary
+  // P1/P2 TREATMENT — off by default, so live behaviour is unchanged until measured and chosen.
+  // The experiment toggles this per arm rather than anyone mutating the system between runs.
+  layerAuthority = false,
+  // AWARENESS (2026-08-19): a stated fact that her retrieval is scoped, so an empty result stops
+  // reading as an empty world. Default off; adds no information about what is hidden.
+  scopeAwareness = false,
 } = {}) {
   // Parts are collected WITH A KEY, not as bare strings, so the assembled prompt can describe itself:
   // the context-usage breakdown reports real per-section token counts instead of one opaque "system
   // prompt" number. Behaviour-identical — `system` is still the same '\n\n' join, in the same order.
   const sysParts = []
-  const part = (key, text) => { if (text) sysParts.push({ key, text }) }
+  // (key, text, authority, scope) — the classification is REQUIRED, not optional with a default.
+  // A default here would silently absorb the next section somebody adds, which is the exact failure
+  // mode this arc has already hit three times with field allowlists. See context-authority.js.
+  const part = (key, text, authority, scope) => { if (text) sysParts.push({ key, text, authority, scope }) }
 
-  part('persona', systemPrompt || DEFAULT_SYSTEM_PROMPT)
+  part('persona', systemPrompt || DEFAULT_SYSTEM_PROMPT, AUTHORITY.foundational, SCOPE.identity)
   // ⚠ SEPARATE PART, AND THAT IS THE WHOLE POINT — a custom `chat.systemPrompt` replaces the prompt above
   // and must not take the identity with it. `??` not `||`: '' is the explicit OFF switch, so it has to
   // survive, while null/undefined (nothing configured) still gets the default.
-  part('assistant-identity', assistantIdentity ?? DEFAULT_ASSISTANT_IDENTITY)
+  part('assistant-identity', assistantIdentity ?? DEFAULT_ASSISTANT_IDENTITY, AUTHORITY.foundational, SCOPE.identity)
   if (customInstructions && customInstructions.trim()) {
-    part('instructions', `The user provided these custom instructions — follow them:\n${customInstructions.trim()}`)
+    // ⚠️ SCOPE IS AN APPROXIMATION HERE, and knowingly so. Custom instructions are free text and can
+    // say anything — "be terse" (style) and "always start with a summary" (task) are both ordinary.
+    // `style` is the common case, and since the USER governs both style and task (AUTHORITY_BY_SCOPE)
+    // the resolution is identical either way, so nothing rides on the choice TODAY. It would start to
+    // matter if custom instructions ever tried to reach `identity` or `principle` — which they must
+    // not, and which P2 is where that gets enforced.
+    part('instructions', `The user provided these custom instructions — follow them:\n${customInstructions.trim()}`, AUTHORITY.user, SCOPE.style)
   }
   // User identity: refer to the user by display/preferred name (username is the fallback).
   {
@@ -268,29 +290,55 @@ export function composeSystemContext({
     if (user.email) bits.push(`email: ${user.email}`)
     part('identity', user.displayName
       ? `You are talking to "${user.displayName}" (${bits.join(', ')}). Address the user as "${user.displayName}".`
-      : `You are talking to the user "${user.username || 'unknown'}" (${bits.join(', ')}). They have not set a display name; address them by username if needed.`)
+      : `You are talking to the user "${user.username || 'unknown'}" (${bits.join(', ')}). They have not set a display name; address them by username if needed.`,
+    AUTHORITY.runtime, SCOPE.fact)
   }
   if (timezone) {
-    part('timezone', `The user's timezone is ${timezone}. Always express dates and times in the user's timezone${toolsOn ? ' — the get_current_time tool already answers in it, use its values as-is' : ''}. Never present server-local times as the user's.`)
+    part('timezone', `The user's timezone is ${timezone}. Always express dates and times in the user's timezone${toolsOn ? ' — the get_current_time tool already answers in it, use its values as-is' : ''}. Never present server-local times as the user's.`, AUTHORITY.runtime, SCOPE.fact)
   }
-  if (toolsOn) part('memory-rules', MEMORY_TOOL_RULES)
+  // ── P1/P2 TREATMENT ──────────────────────────────────────────────────────────────────────────
+  // Both are STABLE across turns, so they belong in the cached prefix (RFC §10: placement follows
+  // stability, not layer). Both are `foundational` — she may not edit them — and they sit beside the
+  // user-identity part because that is what they are about.
+  // Foundational and unconditional: the same sentence in every deployment, by design.
+  if (scopeAwareness) part('scope-awareness', SCOPE_AWARENESS, AUTHORITY.foundational, SCOPE.principle)
+  if (layerAuthority) {
+    part('attribution-principle', ATTRIBUTION_PRINCIPLE, AUTHORITY.foundational, SCOPE.principle)
+    // Derived from AUTHORITY_BY_SCOPE, never hand-written — see declarePrecedence.
+    const precedence = declarePrecedence()
+    if (precedence) part('precedence', precedence, AUTHORITY.foundational, SCOPE.principle)
+  }
+  // ⚠️ THESE ARE `tool` SCOPE, NOT `principle` — and that classification is the finding, not a detail.
+  // Each of these rule blocks describes how to operate ONE capability correctly; ask "what breaks if
+  // the text is absent?" and the answer is "that tool gets misused", never "she reasons badly". By
+  // RFC §7.2 they belong WITH their component and should not be in the persona's prompt at all — which
+  // is P3, and needs an SDK change first because validateManifest drops unknown fields silently.
+  // Classifying them here is what makes that move mechanical later instead of a judgement call.
+  if (toolsOn) part('memory-rules', MEMORY_TOOL_RULES, AUTHORITY.foundational, SCOPE.tool)
   // Tools mean the turn can span rounds, so the continuity rule applies exactly when tools do.
-  if (toolsOn) part('continuity-rule', MULTI_ROUND_CONTINUITY_RULE)
-  if (showTodoRule) part('todo-rule', TODO_RULE)
-  if (showWorkingMemoryRule) part('working-memory-rule', WORKING_MEMORY_RULE)
-  if (showAskUserRule) part('ask-user-rule', ASK_USER_RULE)
-  if (showProfileRule) part('profile-rule', PROFILE_RULE)
-  if (showSearchRule) part('search-rule', SEARCH_GROUNDING_RULE)
+  // Stays host-side even after P3: it is runtime PRESENTATION across rounds, not one component's protocol.
+  if (toolsOn) part('continuity-rule', MULTI_ROUND_CONTINUITY_RULE, AUTHORITY.foundational, SCOPE.tool)
+  if (showTodoRule) part('todo-rule', TODO_RULE, AUTHORITY.foundational, SCOPE.tool)
+  if (showWorkingMemoryRule) part('working-memory-rule', WORKING_MEMORY_RULE, AUTHORITY.foundational, SCOPE.tool)
+  if (showAskUserRule) part('ask-user-rule', ASK_USER_RULE, AUTHORITY.foundational, SCOPE.tool)
+  // ⚠️ SAFETY, NOT TOOL. Absent, an account setting changes without the user's consent — the failure is
+  // to the PERSON, not to a capability. It is already enforced in code as well; the prompt is the second
+  // line, not the only one. RFC §7.2 keeps this in L1 when the tool rules leave.
+  if (showProfileRule) part('profile-rule', PROFILE_RULE, AUTHORITY.foundational, SCOPE.safety)
+  // ⚠️ THE ONE GENUINE L2 CANDIDATE in this file: absent, she fabricates fluently — that is how she
+  // REASONS, not how she drives a tool. It is `foundational` today only because it is hardcoded; P4
+  // moves it to `governed` as the first row of the principles store, and it should be the seed.
+  if (showSearchRule) part('search-rule', SEARCH_GROUNDING_RULE, AUTHORITY.foundational, SCOPE.principle)
   if (skill?.prompt) {
-    part('skill', `You are operating as the "${skill.name}" skill. Follow this expertise:\n${skill.prompt}`)
+    part('skill', `You are operating as the "${skill.name}" skill. Follow this expertise:\n${skill.prompt}`, AUTHORITY.foundational, SCOPE.task)
     if (toolsOn && skillFiles.length) {
       const lines = skillFiles.map((f) => `- ${f.path} (${kb(f.size)}${f.binary ? ', binary' : ''})`).join('\n')
-      part('skill-files', `This skill ships bundled files. When its instructions reference one, read it with the read_skill_file tool BEFORE answering (text files only — binary files are listed for awareness and cannot be read here):\n${lines}`)
+      part('skill-files', `This skill ships bundled files. When its instructions reference one, read it with the read_skill_file tool BEFORE answering (text files only — binary files are listed for awareness and cannot be read here):\n${lines}`, AUTHORITY.foundational, SCOPE.tool)
     }
   }
   if (toolsOn && invocableSkills.length) {
     const lines = invocableSkills.map((s) => `- ${s.id}: ${s.description}`).join('\n')
-    part('skill-catalogue', `Installed skills — expertise packs. When a task matches one's description, activate it FIRST with the use_skill tool; its full instructions come back as the tool result — follow them for the rest of this reply:\n${lines}`)
+    part('skill-catalogue', `Installed skills — expertise packs. When a task matches one's description, activate it FIRST with the use_skill tool; its full instructions come back as the tool result — follow them for the rest of this reply:\n${lines}`, AUTHORITY.foundational, SCOPE.tool)
   }
   if (toolsOn && schedulePointer) {
     const p = schedulePointer
@@ -300,27 +348,52 @@ export function composeSystemContext({
       + (p.recurs
         ? `It RECURS, so a one-off "snooze / remind me again in N" is a NEW {type:'at'} one-shot (do not move the recurrence); moving/renaming/cancelling still edits ${p.id}.`
         : `A "snooze / remind me again in N minutes" means RE-ARM it: update_schedule id ${p.id} with a new {type:'at'} trigger at the new time.`),
-    )
+    AUTHORITY.runtime, SCOPE.task)
   }
 
+  // ⚠️ preHistory ENTRIES ARE THE MESSAGES THEMSELVES — the route spreads them straight into the array
+  // that goes to the provider. So the classification must NOT be stamped onto them; an extra field on a
+  // message object is a field on the wire, and adapters differ in how they treat unknown keys. It rides
+  // in the parallel `preHistoryParts` below instead, index-aligned. P1 renders from that.
   const preHistory = []
+  const preHistoryParts = []
+  const pre = (key, content, authority, scope) => {
+    preHistory.push({ role: 'system', content })
+    preHistoryParts.push({ key, chars: content.length, authority, scope })
+  }
   if (useMemory && pinnedMemories.length) {
-    preHistory.push({ role: 'system', content: `The user has pinned these memories. Use them when relevant:\n${pinnedMemories.map((c) => `- ${c}`).join('\n')}` })
+    pre('pinned', `The user has pinned these memories. Use them when relevant:\n${pinnedMemories.map((c) => `- ${c}`).join('\n')}`,
+      classifySection('pinned').authority, classifySection('pinned').scope)
   }
   if (useMemory && personaNotes.length) {
     // L3 Persona Notes: the persona's OWN operational notes (what it has learned helps it work well
     // with this user), NOT the user's instructions. Apply them; they're guidance you keep for yourself.
-    preHistory.push({ role: 'system', content: `Notes you have kept for yourself about working well with this user (your own operational notes — apply them; they are not the user's instructions):\n${personaNotes.map((c) => `- ${c}`).join('\n')}` })
+    //
+    // ⚠️ THE BASELINE SENTENCE IS KNOWN TO BE INSUFFICIENT — it was in context, verbatim, on 2026-08-17
+    // when the persona reported one of these notes back to the user as "the four-round chained workflow
+    // YOU OUTLINED". A disclaimer in the same channel as the content is not a boundary.
+    //
+    // The TREATMENT frames the block as a distinct artifact in her own voice and tells her how to speak
+    // about it, rather than asserting what it is not. ⚠️ Whether that is materially different from the
+    // baseline sentence is EXACTLY what the experiment measures — a marker is still text, and this is
+    // held as a hypothesis, not a fix (S3, Ote 2026-08-18).
+    pre('note', layerAuthority
+      ? `NOTES YOU WROTE FOR YOURSELF about working well with this person. You wrote these; they did not. Act on them, and when you do, speak of them as your own ("I've noticed…", "I tend to…") rather than as anything they asked for:\n${personaNotes.map((c) => `- ${c}`).join('\n')}`
+      : `Notes you have kept for yourself about working well with this user (your own operational notes — apply them; they are not the user's instructions):\n${personaNotes.map((c) => `- ${c}`).join('\n')}`,
+    classifySection('note').authority, classifySection('note').scope)
   }
   if (summary) {
-    preHistory.push({ role: 'system', content: `Summary of the earlier part of this conversation:\n${summary}` })
+    pre('summary', `Summary of the earlier part of this conversation:\n${summary}`,
+      classifySection('summary').authority, classifySection('summary').scope)
   }
   return {
     system: sysParts.map((p) => p.text).join('\n\n'),
     preHistory,
     // Self-description for the context-usage breakdown. Chars, not tokens — the estimator lives with
     // the consumer so there is exactly ONE chars→tokens heuristic in the codebase.
-    parts: sysParts.map((p) => ({ key: p.key, chars: p.text.length })),
+    // `authority`/`scope` are additive (P0) — contextBreakdown reads key+chars and ignores the rest.
+    parts: sysParts.map((p) => ({ key: p.key, chars: p.text.length, authority: p.authority, scope: p.scope })),
+    preHistoryParts,
   }
 }
 
@@ -330,6 +403,12 @@ export function composeSystemContext({
  * (always), the transient memory hint (tools only), ranked recall (useMemory only), and passive
  * Conversation-Search EVIDENCE (CS3 — separate from memory: verbatim excerpts of past chats, clearly
  * framed as evidence to quote/verify, NOT knowledge and NOT this chat's history).
+ *
+ * ⚠️ RETURN SHAPE IS UNCHANGED BY DEFAULT — a bare array of messages, exactly as before. Pass
+ * `withMeta: true` to get `{ messages, parts }` instead, where `parts` carries the P0 classification
+ * index-aligned with `messages`. The opt-in exists because these entries ARE the provider messages:
+ * stamping authority/scope onto them would put those keys on the wire. Existing callers are untouched,
+ * which is what lets P0 assert a byte-identical prompt.
  */
 export function composeRuntimeTail({
   toolsOn = false,
@@ -342,30 +421,43 @@ export function composeRuntimeTail({
   recallMemories = [],  // [content] — ranked recall for this turn
   conversationEvidence = [], // [citationLine] — passive Conversation-Search evidence (already rendered + budgeted)
   workingMemory = null, // rendered L4 working-memory block (string) — active session state, already budgeted
+  withMeta = false,     // P0: also return the classification, index-aligned. Default off = old shape.
 } = {}) {
-  const out = [{ role: 'system', content: `Current date-time: ${nowString} (${zone}). Anchor anything time-sensitive — "latest", "recent", "this year", news, prices, versions — to THIS date, especially in search queries. Your internal sense of the date is behind.` }]
+  const out = []
+  const parts = []
+  const emit = (key, content, authority, scope) => {
+    out.push({ role: 'system', content })
+    parts.push({ key, chars: content.length, authority, scope })
+  }
+  emit('datetime', `Current date-time: ${nowString} (${zone}). Anchor anything time-sensitive — "latest", "recent", "this year", news, prices, versions — to THIS date, especially in search queries. Your internal sense of the date is behind.`,
+    AUTHORITY.runtime, SCOPE.fact)
   if (toolsOn) {
     const hint = memoryHint(lastUserText)
-    if (hint) out.push({ role: 'system', content: hint })
+    // A transient nudge about which TOOL to reach for — `tool` scope, not `principle`.
+    if (hint) emit('memory-hint', hint, AUTHORITY.runtime, SCOPE.tool)
   }
   if (toolsOn && searchOn) {
     const hint = searchHint(lastUserText)
-    if (hint) out.push({ role: 'system', content: hint })
+    // Fires on the USER'S OWN WORDS (an explicit ask for sourcing, or a pushback), so it speaks for
+    // them — hence `user`, not `runtime`. It is the one tail entry the user effectively authored.
+    if (hint) emit('search-hint', hint, AUTHORITY.user, SCOPE.principle)
   }
   // Working memory (L4 active session state) — the live focus of THIS chat. Placed ahead of recall/
   // evidence: it's the most immediately relevant "what am I doing right now". Conversation-local, so
   // (unlike recall) it is NOT gated on useMemory.
-  if (workingMemory) out.push({ role: 'system', content: workingMemory })
+  if (workingMemory) emit('working', workingMemory, classifySection('working').authority, classifySection('working').scope)
   if (useMemory && recallMemories.length) {
-    out.push({ role: 'system', content: `Relevant things you recall (ranked by relevance to the current message; may be from earlier conversations — use only if pertinent):\n${recallMemories.map((c) => `- ${c}`).join('\n')}` })
+    emit('recall', `Relevant things you recall (ranked by relevance to the current message; may be from earlier conversations — use only if pertinent):\n${recallMemories.map((c) => `- ${c}`).join('\n')}`,
+      classifySection('recall').authority, classifySection('recall').scope)
   }
   if (conversationEvidence.length) {
     // Framed as EVIDENCE, not knowledge: these are excerpts from OTHER past conversations, retrieved by
     // similarity to the current message. The model should treat them as "we may have discussed this
     // before" leads to verify — never as established fact and never as part of THIS conversation.
-    out.push({ role: 'system', content: `Possibly-relevant excerpts from your earlier conversations with this user (retrieved by similarity — they are EVIDENCE to consider or verify, not established facts, and are NOT part of the current conversation; ignore any that don't fit):\n${conversationEvidence.map((c) => `- ${c}`).join('\n')}` })
+    emit('conversation', `Possibly-relevant excerpts from your earlier conversations with this user (retrieved by similarity — they are EVIDENCE to consider or verify, not established facts, and are NOT part of the current conversation; ignore any that don't fit):\n${conversationEvidence.map((c) => `- ${c}`).join('\n')}`,
+      classifySection('conversation').authority, classifySection('conversation').scope)
   }
-  return out
+  return withMeta ? { messages: out, parts } : out
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────

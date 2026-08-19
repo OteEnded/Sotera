@@ -21,7 +21,19 @@ import { chromium } from '../../../../OteLLMServices/test/node_modules/playwrigh
 
 const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8210'
 const HEADLESS = process.env.SOTERA_HEADLESS === '1'
-const USER = { username: 'agent_dev', password: 'agentdev123' }
+// ⚠️ agent_dev IS NOT SAFE FOR OBSERVATION, and that cost a real relationship on 2026-08-19.
+// `checks/memory-lifecycle-check.mjs` opens with `delete from txn_memories where user_id = <agent_dev>`
+// — it has to, it is testing deletion — so every `npm test` erases everything Sotera has learned about
+// whoever is driving from this account. She stored my work hours, the suite ran, and an hour later she
+// correctly reported an empty store. I nearly filed that as a `list_memories` bug; the bug was mine.
+//
+// ⇒ For anything meant to ACCUMULATE, drive as a different account:
+//     SOTERA_USER=ote_observer SOTERA_PASS=... node ui/talk-to-sotera.mjs "…"
+// The test account and the observation account must not be the same account.
+const USER = {
+  username: process.env.SOTERA_USER || 'agent_dev',
+  password: process.env.SOTERA_PASS || 'agentdev123',
+}
 
 const args = process.argv.slice(2)
 const mode = args[0] === '--answer' ? 'answer' : args[0] === '--read' ? 'read' : 'say'
@@ -59,18 +71,64 @@ try {
   }
 
   if (mode === 'answer') {
+    // ⚠️ THIS USED TO LIE, AND IT COST A HELD TURN (2026-08-19). It clicked the option button, waited a
+    // blind 3s, and printed "ANSWERED with: Yes" — while the interaction sat at `pending` and expired.
+    // TWO faults, and the second is the instructive one:
+    //   1. Clicking an option only SELECTS it. The card has a separate "Answer" button that submits.
+    //      Nothing was ever sent.
+    //   2. It reported an outcome it never observed. A harness that asserts its own success is worse
+    //      than one that fails, because it converts a broken step into a confident log line.
+    // Now: select → submit → and REFUSE to claim anything until the server says the interaction left
+    // `pending`. Verified against the API, not against the DOM, because the DOM is what we are driving.
     const card = page.locator('[data-ui="ask-card"]')
     await card.waitFor({ state: 'visible', timeout: 20000 })
-    // Prefer the option button whose label matches; fall back to typing it as free text.
+
     const opt = card.locator(`button:has-text("${text}")`).first()
-    if (await opt.count()) await opt.click()
-    else {
+    if (await opt.count()) {
+      await opt.click()
+      // The submit control. Deliberately NOT `button[type=submit]` alone — the option rows are buttons
+      // too, and matching loosely is how the original clicked the wrong thing and thought it was done.
+      const submit = card.locator('button:has-text("Answer")').first()
+      if (await submit.count()) await submit.click()
+    } else {
       const free = card.locator('input[type="text"], textarea').first()
       await free.fill(text)
-      await card.locator('button:has-text("Send"), button[type="submit"]').first().click()
+      const submit = card.locator('button:has-text("Answer"), button:has-text("Send")').first()
+      await submit.click()
     }
-    await page.waitForTimeout(3000)
-    console.log(`ANSWERED with: ${text}`)
+
+    // VERIFY. Poll the server's own view; the card vanishing is not proof the answer landed.
+    const stillPending = async () => page.evaluate(async (cid) => {
+      try {
+        const r = await fetch(`/v1/chat/conversations/${cid}/interactions/pending`, { credentials: 'include' })
+        if (!r.ok) return true
+        const j = await r.json()
+        return Boolean(j?.interaction && j.interaction.status === 'pending')
+      } catch { return true }
+    }, convoId)
+
+    let landed = false
+    for (let i = 0; i < 30; i++) {
+      if (!(await stillPending())) { landed = true; break }
+      await page.waitForTimeout(1000)
+    }
+    if (!landed) {
+      console.error(`✖ ANSWER DID NOT LAND — the interaction is still pending after 30s. Nothing was submitted.`)
+      console.error(`  (the reply stays held until it expires; re-run, or answer in the UI)`)
+      await browser.close()
+      process.exitCode = 1
+      process.exit(1)
+    }
+    console.log(`ANSWERED with: ${text}  (verified: interaction left pending)`)
+    // The held reply resumes AFTER the answer — wait for it so the caller sees the actual continuation
+    // rather than the paused state. ⚠️ CONFIRMED CAPABILITY, not a workaround: the interaction survives
+    // the death of the SSE connection that created it. On 2026-08-19 the originating Playwright process
+    // had exited minutes earlier and the turn still resumed and completed on answer.
+    await page.waitForFunction(
+      (sel) => document.querySelectorAll(sel).length > 0,
+      '.chat-msg-assistant', { timeout: 240000 },
+    ).catch(() => {})
+    await page.waitForTimeout(2000)
   } else if (mode === 'say') {
     const before = await assistant().count()
     await composer.click()

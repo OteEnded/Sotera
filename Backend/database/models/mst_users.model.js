@@ -30,6 +30,17 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            // WHICH HUMAN holds this login (migration 004). An ACCOUNT is access; a PERSON is who
+            // someone is. Many accounts MAY point at one person — but only when a human explicitly
+            // establishes it. Never inferred from a name, an email, or a writing style.
+            //
+            // ⚠️ NULL is a real state and is already happening: `hermes_alias` was created 2026-08-18
+            // 23:00 with no person, because nothing in the runtime creates one at signup. That is a
+            // known gap, deliberately not closed here.
+            person_id: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
             password_hash: {
                 type: DataTypes.STRING,
                 allowNull: false,

@@ -162,6 +162,22 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.UUID,
                 allowNull: true,
             },
+            // WHO this belief is ABOUT (migration 004). NOT ownership and NOT visibility — `user_id`
+            // still answers both of those, unchanged.
+            //
+            // ⚠️ THE COLUMN EXISTED IN THE DATABASE FOR HALF A DAY WITHOUT THIS DECLARATION, AND EVERY
+            // WRITE SILENTLY DROPPED IT. Sequelize ignores attributes it does not know, so the store's
+            // `create({ ...row })` — which spreads and is NOT an allowlist — still lost the field. It
+            // was invisible: no error, no warning, just NULL. Measured on live data: all 7 memories
+            // Sotera wrote during the 2026-08-18 Hermes session have subject NULL, while the 5 rows the
+            // migration backfilled have subjects. A column the ORM does not declare does not exist.
+            //
+            // NULL is legal and means "we do not know who this is about" — the same honest-null rule as
+            // provenance above. It must never be inferred from prose.
+            subject_person_id: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
             access_count: {
                 type: DataTypes.INTEGER,
                 allowNull: false,

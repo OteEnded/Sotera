@@ -17,6 +17,7 @@ import { DataTypes } from "sequelize";
 
 // --- mst_ : master / configuration / identity ---
 import define_mst_users from "./mst_users.model.js";
+import define_mst_persons from "./mst_persons.model.js";
 import define_mst_roles from "./mst_roles.model.js";
 import define_mst_user_roles from "./mst_user_roles.model.js";
 import define_mst_api_keys from "./mst_api_keys.model.js";
@@ -142,6 +143,8 @@ export default function initModels(sequelize, schema) {
 
     // ── mst_ : what exists ────────────────────────────────────────────────────────────────────────
     const mst_users = def(define_mst_users);
+    // WHO a memory is about (004). Registered so the ORM stops silently dropping subject writes.
+    const mst_persons = def(define_mst_persons);
     const mst_roles = def(define_mst_roles);
     const mst_user_roles = def(define_mst_user_roles);
     const mst_api_keys = def(define_mst_api_keys);
@@ -269,6 +272,7 @@ export default function initModels(sequelize, schema) {
     return {
         models: {
             mst_users,
+            mst_persons,
             mst_roles,
             mst_user_roles,
             mst_api_keys,

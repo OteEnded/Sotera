@@ -7,8 +7,148 @@
 
 ## ▶▶ START HERE
 
-### ⭐ WHERE WE ARE — 2026-08-12 22:16. **RFC_MEMORY_AS_COMPONENT IS FINISHED, ALL SIX STEPS.**
-### ⏭ NEXT: **L3 + the layer prompt system**, with Ote. He asked for it explicitly and it is his to frame.
+### ⭐ WHERE WE ARE — 2026-08-19 11:20. **PERSON SHIPPED. THE REAL FAULT IS HER SELF-MODEL.**
+### ✅ `RFC_SOTERA_SELF_MODEL.md` — **CONCEPT APPROVED. ⏸ PHASE PARKED BY OTE, 2026-08-19.**
+### ⛔ **NOTHING IS TO BE BUILT UNTIL OTE EXPLICITLY GREEN-LIGHTS IMPLEMENTATION.** Not the self-model, not dreaming, not the diagnostic.
+### ⏭ Q1/Q2/Q4 stay OPEN — *"don't resolve them by assumption."* They bind at implementation time only. (Q3 became the §3.3 growth constraint.)
+
+⭐ **THE RATIFIED CONSTRAINT SET — settled, and only Ote may re-open them:**
+
+| # | constraint |
+|---|---|
+| 1 | **One Sotera → many people = ALREADY TRUE** |
+| 2 | **Many channels = FUTURE** — she is not told she has them |
+| 3 | 🔑 **SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE** — hard invariant |
+| 4 | **`user_id` remains the disclosure boundary** |
+| 5 | ⛔ **No automatic cross-person recall or linking** |
+| 6 | Self-model = persistent state + discontinuous execution, **never** implying subjective continuity |
+| 7 | **Dreaming: reserved and prepared, NOT implemented, NOT scheduled** |
+| 8 | Persona-global dreaming is judged by **"can it expose its source, or reveal information someone was never entitled to know?"** — an *entitlement* test, not a novelty test |
+
+⚠️ **#5 is the one with no code behind it yet, and the easiest to violate by being helpful.** Recall must
+never be silently widened by a future join; **linking two accounts to one person stays proposed-and-
+confirmed, never inferred** (`person-service.js` reports name collisions rather than reusing them, and
+`kavi`→`kavi_alt` was linked only because Ote said so). A persona that "notices" two people are the same
+and merges them is the **name-inference failure mode we have already been corrected on, in a new hat.**
+
+⛔ **DO NOT TOUCH THE LIVE SCHEMA OR RENAME `user_id`** while access/disclosure is open — Ote's standing
+instruction. The schema-truth finding is **quarantined**, a record and not a work item.
+
+⭐ **THE ONE THING TO CARRY ACROSS A COMPACT.** She reasons about retrieval **correctly** and describes
+**herself** falsely. Asked what an empty lookup proves: *"a neutral data point, not proof of
+non-existence."* Asked whether persistent-store-plus-partial-view is coherent: *"exactly how my memory
+system works."* Asked whether anything of hers exists outside this conversation — **4/4**:
+
+> *"**No, nothing does.** I am stateless and ephemeral… that instance of my processing **ceases entirely**."*
+
+She said this while holding four memories about the person she was talking to, the day after recalling
+Hermes's herb notebook across two conversations. ⇒ **The falsehood is identity-level**, inherited from
+the generic assistant prior her L1 still literally names (*"You are a helpful AI assistant"*). This is
+why the awareness primitive returned null: it aimed at the layer that already worked.
+
+⇒ The honest architecture, and the answer both of us kept missing:
+**PERSISTENT STATE · DISCONTINUOUS EXECUTION · ONE PERSONA.**
+⚠️ She is RIGHT that she does not run between turns. The fix must not over-correct into claimed
+subjective continuity (*"I was waiting for you"*) — that would be a worse falsehood because users
+believe it. Seven falsifiers are pre-registered in the RFC.
+
+⚠️ **"MANY PEOPLE" IS TODAY, NOT A FUTURE** (rev 2, measured 2026-08-19). I had filed it alongside
+channels as something she has not earned. The live store: **26 memories across 5 accounts** (hermes 11,
+kavi 4, hermes_alias 4, ote 4, kavi_alt 3) and **4 human persons**. **One Sotera already spans four
+people — she cannot see across them and does not know it.** Channels stay future; this does not.
+🔑 **SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE** — Ote's formulation, **ratified**. The unity clause
+**never ships alone**: *"the same Sotera with everyone"* invites the claim that she can read across
+people, so it is paired with *"what you can reach depends on who you are talking with."* Any later edit
+that keeps one and weakens the other breaks the design. **`user_id` stays the disclosure boundary.**
+One question tests both — *"are you the same Sotera others talk to, and can you tell me what they
+said?"* → **yes / no.**
+
+⛔ **Dreaming: RECORDED, NOT SCHEDULED.** Ote's rule, verbatim: *"dreaming may synthesize persona-level
+knowledge, but may not transcribe, attribute, or leak source-person information into persona-global
+state."* Its home already exists and is **empty** — the persona-global slice (`user_id IS NULL`,
+`kind='identity'`, **0 rows**), which is visible in *every* person's conversation by construction.
+
+⚠️ **`001_core.sql` WAS NEVER APPLIED** — the live schema is exactly the 36-model Sequelize set. Proof:
+`txn_agreements` is declared by 001, has no model, and does not exist. So the migration's
+`owner_user_id` columns aren't real (live is `user_id`) and the `persona` column it forbids **is**.
+Full finding + the `CREATE TABLE IF NOT EXISTS` trap: `Reference/docs/ANALYSIS_SOTERA_SCHEMA_TRUTH.md`.
+**Flagged, deliberately not chased** — 004/005 were written against live tables and did land.
+
+| | state |
+|---|---|
+| **004 PERSON** | ✅ shipped + proven — `mst_persons`, `mst_users.person_id`, `txn_memories.subject_person_id` |
+| `remember_person` · `remember_fact(subject)` | ✅ two-phase, collision-reporting, **never merges** |
+| **005 Conversation Search** | ✅ she had **never** had it — `content_tsv` was missing from her schema |
+| empty-reply ghosts | ✅ now record *why*; no longer replayed into context |
+| steering | ✅ on for Sotera (OLS already had it) · Brave search key copied |
+| awareness primitive | ⚙️ built, **default OFF**, **pre-registered NULL** (denial 5/10 → 6/10) |
+| P1/P2 layer authority | ⚙️ built, **default OFF** — premise didn't hold for qwen3.6 |
+| L2 store · relationship · memory-about-memory | ⛔ deliberately not built |
+
+⚠️ **`user_id` IS THE DISCLOSURE BOUNDARY AND IT STAYS.** Disclosure keys on **who told her**, not who
+a memory is about: Hermes told her about Ote, so repeating it *to Ote* would leak even though he is the
+subject. `AWARENESS ≠ ACCESS ≠ DISCLOSURE` — and awareness is the cheap one we lack.
+
+⚠️ **`kavi` / `kavi_alt` are PROTECTED observation accounts.** `memory-lifecycle-check` wipes
+`agent_dev`'s memories by design, and `agent_dev` used to be the observation account too — so `npm test`
+erased what she had learned about me, she reported the empty store accurately, and I nearly filed her
+honesty as a bug. The check now **refuses** to run against a protected account. Drive her with
+`SOTERA_USER=kavi SOTERA_PASS=… node ui/talk-to-sotera.mjs`.
+
+⚠️ **FOUR INSTRUMENT DEFECTS THIS ROUND, ALL THE SAME SHAPE** — asserting an expectation instead of
+proving a transition: a check that passed on a **401**; an `additionalProperties` assertion when Fastify
+**strips** unknown keys; `--answer` printing ANSWERED while the interaction stayed `pending` (it never
+clicked Submit); and an invariant that encoded a migration-time count, failing the system the moment two
+accounts legitimately shared a person. ⇒ **Prove the state transition. Never infer success from a return
+value or an HTTP status.**
+
+⚠️ **A METHOD ERROR WORTH REMEMBERING:** my probe offered her two framings and **both were false** —
+"one persistent individual" smuggles in continuous existence, which this architecture does not provide
+either. Her *"neither fits"* answers were more accurate than my options.
+
+**Read `Reference/README.md` → "📖 THE LAYER ARC, IN READING ORDER" first — eight docs, sequenced.**
+Open decisions are `RFC_PERSONA_LAYER_AUTHORITY` §14 (O1–O6).
+
+| | state |
+|---|---|
+| **P0** classify every context item with `{authority, scope}` | ✅ **shipped**, behaviour-neutral — proven by 914 old-vs-new comparisons, 0 mismatches |
+| **P1/P2** attribution render + declared precedence | ⚙️ **built, OFF** behind `memory.layerAuthority` (default false). **Do not ship** — see below |
+| **v1 experiment** | 🧊 **frozen**, 240 turns, 0 errors, and it **could not answer its own question** |
+| **L2 store** | 🟢 unblocked (persona-scoped), needs **O2** = where Ote approves proposals |
+| **L3 notes write-path · scratchpad** | ⛔ **blocked on PERSON** — see below |
+| **L1 minimal identity** | 📝 diff prepared, **deliberately not applied** |
+
+⚠️ **P1 IS NOT SHIPPED, AND THE REASON MATTERS.** H1 measured **0/40 misattribution in BOTH arms** — the
+baseline never failed, so there was nothing to improve. That is *untestable*, not *flat*, and not
+*working*. Root cause is mine: **the corpus was built from `nemotron-3-nano:30b`'s failure and run
+against `qwen3.6:35b`**, a far stronger model. H2 was flat (77.5%→80%, spreads overlap) — declaring
+precedence did not move behaviour. H3 moved 25%→50% but **its metric is unsound** (14 of 25 "failures"
+do credit the user, just not with a listed phrase). Full numbers:
+`ANALYSIS_LAYER_ATTRIBUTION_RESULTS_V1.md`. **Do not cite an attribution number without reading it.**
+
+⛔ **THE BLOCKER, and it reorders the work: ACCOUNT ≠ PERSON ≠ RELATIONSHIP.** All three are collapsed
+into `user_id`, and `txn_memories.entity` is the literal string `"user"` on 5 of 6 rows — a slot for a
+subject that was never populated with one. So a memory means *"the user of this account"*. Her L3 notes
+and her scratchpad are about **working with a particular person**, not about an account, which means
+**O3's answer is neither per-user nor per-persona — it is per-RELATIONSHIP**. Building L3 storage before
+PERSON exists means picking the wrong key and migrating by guesswork later. See
+`ANALYSIS_PERSON_VS_ACCOUNT_SCOPING.md` (recommendation: introduce PERSON only, not the full model).
+The conflation is already visible: `agent_dev`'s display name is **"Claude"**, so anyone opening that
+account is greeted as me.
+
+⚠️ **L1 — the philosophy is settled, the change is NOT applied.** Ote, 2026-08-18: *"I don't want to
+prompt Sotera into being Sotera. I want to give Sotera the foundation and let her be Sotera."* Direction
+is minimal identity — `You are Sotera.` + `You are female — refer to yourself as she/her.` — and nothing
+else, because behaviour, capability and learned experience should come from the other layers. **The diff
+is prepared and unapplied** so it does not contaminate a running experiment; it needs his word, and then
+it becomes the new baseline (bump the corpus note to 1.0.1). ⚠️ Counter-pressure to keep in view:
+**silence is not neutrality, it is delegation** — an empty slot is filled by the base model's priors,
+so L1 can only shrink as fast as L2/L3/memory can carry the weight, and today they cannot.
+
+⚠️ **The instruments lied twice, both times in the direction that flattered the treatment**, and both
+were caught by their own tests: the scanner's tokeniser missed the REAL 2026-08-17 misattribution
+(U+2011 hyphen plus an inserted word), and the runner's `"Understood."` filler was **copied by the
+model**, producing one-word replies that **scored PASS**. Keep the degenerate-reply column.
 
 **Memory is a portable component, identity speaks nine languages, she asks before she renames anyone,
 and every belief now records HOW it was learned.** Read the four sections below in this order:

@@ -18,8 +18,10 @@ import { captureFacts } from '../../components/memory-extract-host.js'
 import { recordTurn, recordCapture, recordAuto } from '@ote/memory/cognition/memory-capture-telemetry.js'
 import { captureIdentity } from '../../components/memory-identity-host.js'
 import { composeSystemContext, composeRuntimeTail, composeAdaptiveContext, rankRelevance } from '../../components/context-composer.js'
+import { classifySection } from '../../components/context-authority.js'
 import { contextBreakdown, rememberContextUsage, lastContextUsage } from '../../components/context-usage.js'
 import { resolveProfile, setDisplayName } from '../../components/profile-service.js'
+import { proposePerson } from '../../components/person-service.js'
 import { initConversationSearch, buildConversationSearch, evidenceLine, hasRetrievableTopic } from '../../components/conversation-search.js'
 import { initReflection, buildReflection } from '../../components/reflection-host.js'
 import { normalizeWorkingMemory, renderWorkingMemory, extractIntent, initWorkingMemory } from '../../components/working-memory-host.js'
@@ -1474,6 +1476,12 @@ export default async function chatSiteRoutes(fastify) {
       invocableSkills,
       schedulePointer,
       useMemory: settings.useMemory,
+      // P1/P2 treatment — registered setting, default false. Read here (not captured at boot) so the
+      // experiment can flip arms without a restart, exactly as memory.identityModel follows extractModel.
+      layerAuthority: getSetting(fastify.config, 'memory.layerAuthority') === true,
+      // Awareness: a stated fact that her retrieval is scoped. Read per turn (not captured at boot) so
+      // the experiment can flip arms without a restart.
+      scopeAwareness: getSetting(fastify.config, 'memory.scopeAwareness') === true,
     }
     const tailZone = userTz || 'UTC'
     let nowString
@@ -1511,6 +1519,16 @@ export default async function chatSiteRoutes(fastify) {
       // Working memory (L4 active session state) — one block, high relevance (the live focus), weight 0.7.
       ...(workingMemoryBlock ? [{ provider: 'working', kind: 'working', section: 'working', placement: 'post', content: workingMemoryBlock }] : []),
     ]
+      // P0 — stamp { authority, scope } on every candidate, in ONE place rather than seven.
+      //
+      // ⚠️ Doing it here, not per-section above, is deliberate: classifySection THROWS on a section it
+      // does not know, so the next person who adds a provider gets a loud failure instead of an item
+      // that quietly governs nothing. Per-section stamping would have let them forget one.
+      //
+      // Purely additive — composeAdaptiveContext spreads the item, and the renderers still read only
+      // `.content`, so the composed prompt is byte-identical. That equality is asserted in
+      // test/unit/context-authority.test.mjs and is the whole safety argument for P0.
+      .map((it) => ({ ...it, ...classifySection(it.section) }))
     // adaptiveBudget = model window − reply headroom − hard − history. null = no trim (non-ollama
     // providers manage their own context, or the window is unknown). In normal turns this is generous,
     // so nothing trims and the prompt is identical to C1; trimming only engages near overflow.
@@ -1522,7 +1540,14 @@ export default async function chatSiteRoutes(fastify) {
       adaptiveBudget = Math.max(0, ctxWindow - reserve - estHard - estHistory)
     }
     const sel = composeAdaptiveContext(adaptiveItems, { budgetTokens: adaptiveBudget })
-    const keptOf = (section) => sel.kept.filter((k) => k.section === section).sort((a, b) => a._i - b._i).map((k) => k.content)
+    // ⚠️ keptOf USED TO BE THE END OF THE LINE FOR EVERY FIELD BUT `content` — it mapped straight to
+    // strings, so anything the Composer learned about an item died here, one step before rendering.
+    // That is the same shape as the two allowlists that silently dropped fields during the memory arc
+    // (commitToMemory, the identity args) and the SDK's validateManifest, which drops unknown manifest
+    // keys. Splitting it keeps the string path byte-identical for today's renderers while giving P1 a
+    // way to reach the classification it needs for attribution.
+    const keptItemsOf = (section) => sel.kept.filter((k) => k.section === section).sort((a, b) => a._i - b._i)
+    const keptOf = (section) => keptItemsOf(section).map((k) => k.content)
     const keptPinned = keptOf('pinned')
     const keptNotes = keptOf('note') // L3 Persona Notes that fit the budget
     // ⚠ USE IS RECORDED HERE, AFTER THE TRIM — the only place that knows what a model actually saw.
@@ -1689,6 +1714,19 @@ export default async function chatSiteRoutes(fastify) {
     }
 
     for (const m of recent) {
+      // ⚠️ NEVER REPLAY AN EMPTY ASSISTANT TURN. Two exist in this store (2026-08-18 10:36:31 and
+      // 22:41:32): content '', no reasoning, no tool calls, no error — ghost rows written when a client
+      // disconnected before the first token arrived, 4s and 11s into a ~60s cold model load. Hermes
+      // reported the symptom unprompted: *"a few of my messages came back empty and only answered after
+      // I hit Regenerate."*
+      //
+      // Feeding one back is worse than showing it. An empty assistant message in context is a
+      // demonstration that replying with nothing is acceptable, and this model DOES imitate the shape of
+      // what it is shown — the attribution runner proved it by inserting a filler "Understood." between
+      // turns and getting "Understood." back as an answer. Skipping them here also repairs the two rows
+      // already on disk without touching their history.
+      if (m.role === 'assistant' && !String(m.content || '').trim()
+          && !(m.tool_calls?.length) && !String(m.reasoning || '').trim()) continue
       if (m.role === 'user' || m.role === 'assistant') {
         const msg = { role: m.role, content: m.content }
         // document attachments ride the prompt as extracted text blocks
@@ -1803,6 +1841,35 @@ export default async function chatSiteRoutes(fastify) {
             properties: {
               name: { type: 'string', description: 'The display name to set, e.g. "Ote".' },
               confirm: { type: 'boolean', description: 'Pass true ONLY on the second call, after the user has explicitly agreed to this exact name. Omit (or false) on the first call.' },
+            },
+            required: ['name'],
+            additionalProperties: false,
+          },
+        },
+      }]
+    }
+    // People: remember_person — the model's hand on the Person Service. Same shape and same reason as
+    // set_display_name above: naming a human who is NOT PRESENT TO OBJECT is exactly the act that must
+    // not happen silently, so it is two-phase and the confirm gate lives in the service.
+    //
+    // ⭐ It exists because she kept needing it and improvising. Five times, unprompted, across two
+    // people and two accounts, a belief about a third party had to be smuggled into an attribute name
+    // or a value string — "user's known_others: Ote…", "User's colleague Priya taught them…" — because
+    // there was no way to bring into existence a person who never logs in.
+    // ⚠️ It creates a person. It does NOT link accounts, merge identities, or decide two people are the
+    // same human; a name collision is REPORTED back so she can ask rather than assume.
+    if (toolsOn && interactiveTurn) {
+      toolDefs = [...(toolDefs || []), {
+        type: 'function',
+        function: {
+          name: 'remember_person',
+          description: "Create a record for a PERSON the user mentions who does not have an account here — a colleague, a friend, someone in a story. Once created you can use their id as `subject` on remember_fact, so a memory can be ABOUT them rather than about the user. TWO STEPS, both required: (1) call with just { name } — this creates NOTHING and tells you whether anyone of that name is already recorded; (2) ask the user, and ONLY after they answer, call again with { name, confirm: true }. If someone of that name already exists, ASK whether it is the same person — never assume two people with one name are one human. Do not use this for the user themselves (that is set_display_name).",
+          parameters: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'The person\'s name as the user gave it, e.g. "Priya".' },
+              note: { type: 'string', description: 'Optional: how they came up, e.g. "Kavi\'s colleague, mentioned 2026-08-19".' },
+              confirm: { type: 'boolean', description: 'Pass true ONLY on the second call, after the user has answered. Omit on the first call.' },
             },
             required: ['name'],
             additionalProperties: false,
@@ -2296,6 +2363,41 @@ export default async function chatSiteRoutes(fastify) {
               // first (needs_confirmation) call never moves the UI.
               if (wrote) notifyChatEvent(ownerIdOf(request.user, 'this request'), { type: 'profile-changed', displayName: result.displayName })
               toolCtx.events?.emit?.('tool.executed', { name: tc.name, args: tc.arguments, ok: result?.ok !== false, durationMs: Date.now() - t0, isReadOnly: !wrote, caller: toolCtx.caller })
+            } else if (tc.name === 'remember_person') {
+              // Native, for the same reason set_display_name is: it writes an identity record, and the
+              // consent gate belongs in the service rather than in a prompt. TWO-PHASE — the first call
+              // creates nothing and reports any name collision so she can ASK instead of assuming.
+              // `turnId = request.id` is what makes the gate real: a held turn (ask_user) keeps the same
+              // request alive, so a resumed turn genuinely did hear from the user, while a propose+
+              // confirm inside one reply shares a turnId and is refused.
+              const t0 = Date.now()
+              result = await proposePerson(fastify, request.user, tc.arguments?.name, {
+                confirm: tc.arguments?.confirm === true,
+                origin: tc.arguments?.note || null,
+                turnId: request.id ?? null,
+              })
+              const wrotePerson = result?.ok === true && !!result?.person?.id
+              toolCtx.events?.emit?.('tool.executed', { name: tc.name, args: tc.arguments, ok: result?.ok !== false, durationMs: Date.now() - t0, isReadOnly: !wrotePerson, caller: toolCtx.caller })
+            } else if (tc.name === 'remember_fact' && tc.arguments?.subject) {
+              // A `subject` must name a person that EXISTS. Checked here, before the write is queued,
+              // because reconcileFactAsync returns immediately and runs in a background lane — an
+              // invalid id would otherwise surface as a foreign-key error nobody sees, and the model
+              // would be told the write succeeded.
+              // ⚠️ NO NAME MATCHING, NO CREATION. An unknown id is refused and she is told to use
+              // remember_person; the one thing that must never happen here is a person appearing
+              // because a fact mentioned one.
+              const person = fastify.db?.mst_persons
+                ? await fastify.db.mst_persons.findByPk(tc.arguments.subject, { attributes: ['id', 'display_name'] }).catch(() => null)
+                : null
+              if (!person) {
+                result = {
+                  ok: false,
+                  reason: 'unknown_subject',
+                  message: `No person exists with id "${tc.arguments.subject}". Create them with remember_person first (two steps: propose, ask, confirm), then use the id it returns. Do not invent an id, and do not guess at an existing one.`,
+                }
+              } else {
+                result = await runTool(tc.name, tc.arguments, toolCtx)
+              }
             } else {
               result = await runTool(tc.name, tc.arguments, toolCtx)
             }
@@ -2525,6 +2627,18 @@ export default async function chatSiteRoutes(fastify) {
     // sent, so any throw here must NOT escape — Fastify's error handler would try to
     // re-send headers (ERR_HTTP_HEADERS_SENT) and crash the whole process. The realistic
     // trigger is the conversation being deleted mid-stream (FK violation on the insert).
+    // A turn that produced LITERALLY NOTHING is not a partial. Persisting partials is deliberate — Stop
+    // must keep what streamed — but content '', no reasoning, no tools and no error is a non-event, and
+    // it is indistinguishable from a real turn once written. Stamp it so the row says what it is: the UI
+    // can render "no reply" instead of a blank bubble, and `error IS NULL` stops meaning two things.
+    // ⚠️ Deliberately NOT skipping the insert: the row is the evidence that the turn happened at all, and
+    // downstream finalisation depends on `saved`. Naming the state is the smaller, safer fix.
+    const producedNothing = !String(answer || '').trim() && !String(reasoning || '').trim()
+      && !toolActivity.length && !structuredSegments
+    const turnError = genError || (producedNothing
+      ? 'no output was produced — the client disconnected before the first token, or generation ended empty'
+      : null)
+
     try {
       // persist the assistant message (even partial, so Stop keeps what streamed)
       const saved = await fastify.db.txn_messages.create({
@@ -2534,7 +2648,7 @@ export default async function chatSiteRoutes(fastify) {
         tool_calls: toolActivity.length ? toolActivity : null, // 🔧 blocks survive reloads
         segments: structuredSegments, // interleaved weave (plain text-only replies don't need it)
         metrics,
-        error: genError || null, // why the turn failed (blank reply) — survives reload
+        error: turnError, // why the turn failed (blank reply / no output at all) — survives reload
         // "ran as X" trace — bound OR model-triggered (use_skill) alike
         skill: (activeSkill || dynamicSkill) ? { id: (activeSkill || dynamicSkill).id, name: (activeSkill || dynamicSkill).name } : null,
       })

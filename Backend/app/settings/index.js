@@ -270,6 +270,16 @@ const SETTING_DEFS = {
     validate: (v) => typeof v === 'boolean',
     describe: "L3 Persona Notes (Reflection): when on, the persona's own kept operational notes (kind='note' memories — 'what have I learned that helps me work with this user?') are offered to the Context Composer as scored candidates and, when kept, injected before history. Read-path master switch — inert until the Reflection Feature (R2) writes notes. Gated by the conversation's memory master switch too, so memory-off / incognito chats show no notes. Off = the L3 layer is never injected.",
   },
+  'memory.scopeAwareness': {
+    fromConfig: (c) => c?.memory?.scopeAwareness ?? false,
+    validate: (v) => typeof v === 'boolean',
+    describe: 'Tell the persona that her retrieval is SCOPED, so an empty result stops reading to her as an empty world. Fixes a measured falsehood (2026-08-19): asked whether she had spoken to anyone else, she answered "there is literally nothing" while 42 messages were open with another user — because user_id scoping returned nothing and she reported nothing-retrieved as nothing-exists. ⚠️ Adds NO information about what is hidden: the text is unconditional and byte-identical on a one-user and a thousand-user deployment, which a test asserts. Does NOT widen access and does NOT touch the user_id visibility boundary — it reduces what she claims, not what she can see.',
+  },
+  'memory.layerAuthority': {
+    fromConfig: (c) => c?.memory?.layerAuthority ?? false,
+    validate: (v) => typeof v === 'boolean',
+    describe: "Layer authority (P1/P2, RFC_PERSONA_LAYER_AUTHORITY): when on, the Composer renders L3 notes as a distinct artifact in her own voice, adds the anti-misattribution principle, and states the standing precedence between her notes and what the person actually asked for — derived from AUTHORITY_BY_SCOPE, never hand-written. DEFAULT OFF: it is an untested treatment, and the controlled experiment toggles it per arm rather than anyone mutating the live system between runs. It does NOT detect conflicts (no per-turn model call, no lexical detector); it declares the relationship and leaves the semantic judgement to her.",
+  },
   'memory.personaNotesMax': {
     fromConfig: (c) => c?.memory?.personaNotesMax ?? 5,
     validate: (v) => Number.isInteger(v) && v >= 1 && v <= 20,

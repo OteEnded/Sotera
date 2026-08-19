@@ -30,7 +30,21 @@ const S = devSchema()
 const me = (await db.query(`select id from ${S}.mst_users where username='agent_dev'`)).rows[0]?.id
 check('agent_dev resolved', Boolean(me), me)
 
+// ⛔ OBSERVATION ACCOUNTS MUST NEVER BE CLEANED. This wipe is correct for a TEST account — the suite is
+// testing deletion, so it needs a clean slate — but on 2026-08-19 the observation account and the test
+// account were the same one (`agent_dev`). Sotera stored something real, `npm test` ran, and an hour
+// later she correctly reported an empty store. I nearly filed her honesty as a `list_memories` bug.
+//
+// A longitudinal relationship cannot accumulate in a table something truncates on every run. So the
+// guard is here, next to the destruction, rather than as a convention someone has to remember:
+// this refuses to run against any account that is not the designated test account.
+const PROTECTED_FROM_CLEANUP = new Set(['kavi', 'kavi_alt', 'ote', 'hermes', 'hermes_alias'])
 const cleanup = async () => {
+  const owner = (await db.query(`select username from ${S}.mst_users where id = $1`, [me])).rows[0]?.username
+  if (PROTECTED_FROM_CLEANUP.has(owner)) {
+    throw new Error(`refusing to wipe memories for "${owner}" — it is an observation account, not a test account. `
+      + 'This check destroys everything it is pointed at; point it at agent_dev.')
+  }
   await db.query(`delete from ${S}.log_memory_changes where user_id = $1`, [me])
   await db.query(`delete from ${S}.txn_memories where user_id = $1`, [me])
 }

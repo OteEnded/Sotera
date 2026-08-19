@@ -53,6 +53,40 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
   let lexicalDisabled = false
   let denseDisabled = false
 
+  // ── SUBJECT RESOLUTION (migration 004) ──────────────────────────────────────────────────────────
+  // WHO a belief is about, defaulted host-side so the portable cognition never learns that persons
+  // exist. Same seam as scope: the component passes content, the host stamps identity.
+  //
+  // The default is ONLY the definitionally-true case, exactly as the migration's backfill was:
+  //   · a persona-global row (kind 'identity', user_id null) is about the PERSONA
+  //   · any other row is about the person who holds this store's account
+  // Anything else — a memory about a third party, about a project — must be passed explicitly by a
+  // caller that actually knows. ⚠️ It is never inferred from content, and a missing person stays NULL
+  // rather than becoming a guess. `hermes_alias` has no person today and its rows will carry NULL,
+  // which is the honest answer.
+  //
+  // Cached because it is two ids that cannot change within one store's lifetime, and a lookup per
+  // write would put a query on the capture path for a value that is constant.
+  let subjectCache = null
+  const resolveSubjects = async () => {
+    if (subjectCache) return subjectCache
+    subjectCache = { user: null, persona: null }
+    try {
+      if (db.mst_persons) {
+        const p = await db.mst_persons.findOne({ where: { kind: 'persona' }, attributes: ['id'] })
+        subjectCache.persona = p?.id ?? null
+      }
+      if (U && db.mst_users) {
+        const u = await db.mst_users.findOne({ where: { id: U }, attributes: ['person_id'] })
+        subjectCache.user = u?.person_id ?? null
+      }
+    } catch (e) {
+      // Subject is additive and nothing reads it yet — a failure here must never fail a memory write.
+      log?.warn?.(e, '[memory-store] could not resolve subject persons; writing NULL subject')
+    }
+    return subjectCache
+  }
+
   /** VISIBLE: mine ∪ persona-global identity. `kind` narrows; identity is always user_id null. */
   const visibleWhere = (kind, namespace) => {
     const base = { ...LIVE, persona: P, ...(namespace ? { namespace } : {}) }
@@ -209,10 +243,28 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     async create(row = {}) {
       // THE STORE STAMPS SCOPE — the component must not pass persona/user_id, and the
       // identity-is-persona-global rule is enforced here rather than trusted to every caller.
+      // PRESERVE an explicit subject, otherwise DEFAULT it (see resolveSubjects above). `??` not `||`
+      // so a caller can never be silently overridden, and so a deliberate null stays null.
+      const subjects = await resolveSubjects()
+      const isPersonaGlobal = row.kind === 'identity'
+      // ⚠️ DEFAULT ONLY WHERE THE SUBJECT IS ACTUALLY KNOWN, which is narrower than it first looks.
+      // The first version defaulted EVERY non-identity row to the account holder, and the
+      // person-subject check caught it: a free-form `remember` carries `entity = null`, and the
+      // real-world example of exactly that shape is
+      //     "User's colleague Priya taught them the habit… she's sharper about root causes"
+      // — a memory whose subject is NOT the account holder. Stamping Kavi on it would have been a
+      // guessed subject, which is the one thing this column must never contain.
+      //
+      // So the rule matches migration 004's backfill exactly: `entity = 'user'` means the producer
+      // already said this is about the account holder; anything else means we do not know, and NULL is
+      // the honest record of not knowing. A third-party subject arrives explicitly or not at all.
+      const subjectDefault = isPersonaGlobal ? subjects.persona
+        : (row.entity === 'user' ? subjects.user : null)
       const created = await txn_memories.create({
         ...row,
         persona: P,
-        user_id: row.kind === 'identity' ? null : U,
+        user_id: isPersonaGlobal ? null : U,
+        subject_person_id: row.subject_person_id ?? subjectDefault,
       })
       return created.get ? created.get({ plain: true }) : created
     },
