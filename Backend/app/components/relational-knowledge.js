@@ -73,10 +73,21 @@ export async function describeRelationship({ db, askingUserId, personId, disclos
   if (!person) return null
 
   // Is the asker this person? (Accounts→person is many-to-one: kavi and kavi_alt are one Kavi.)
+  // ⚠️ THE ASKER'S OWN IDENTITY IS PART OF THE ANSWER, and omitting it caused a real failure (2026-08-19).
+  // Given a relational line about Hermes and no statement of who they were talking to, the model merged
+  // the two and told Mina *"I recognize you as Hermes"* — then referred to *"Mina's other conversations"*
+  // in the third person, to Mina. Not a privacy leak; nothing of Hermes's was disclosed. But it would
+  // read as one, which is nearly as bad.
+  //
+  // ⭐ `askerName` does NOT weaken the no-content-crosses-the-boundary property: it comes from the
+  // ASKER'S OWN account — a value they already know and supplied by being logged in. Nothing about the
+  // SUBJECT flows through it. The check's free-text allowlist is widened for exactly this reason.
   const [me] = await Q(
-    `SELECT person_id::text AS pid FROM "${schema}"."mst_users" WHERE id = :askingUserId`, { askingUserId },
+    `SELECT person_id::text AS pid, COALESCE(display_name, username) AS name
+       FROM "${schema}"."mst_users" WHERE id = :askingUserId`, { askingUserId },
   )
   const isSelf = !!me?.pid && me.pid === person.id
+  const askerName = me?.name || 'the person you are talking to'
 
   if (disclosure === RELATIONAL_DISCLOSURE.self && !isSelf) return null
 
@@ -96,7 +107,7 @@ export async function describeRelationship({ db, askingUserId, personId, disclos
   )
 
   const known = (shape?.conversations ?? 0) > 0
-  if (!known) return { displayName: person.display_name, isSelf, known: false, conversations: 0, exchanges: 0, firstSeen: null, lastSeen: null, daysSpanned: null }
+  if (!known) return { displayName: person.display_name, askerName, isSelf, known: false, conversations: 0, exchanges: 0, firstSeen: null, lastSeen: null, daysSpanned: null }
 
   const days = shape.first_seen && shape.last_seen
     ? Math.round((Date.parse(shape.last_seen) - Date.parse(shape.first_seen)) / 86400000)
@@ -104,6 +115,7 @@ export async function describeRelationship({ db, askingUserId, personId, disclos
 
   return {
     displayName: person.display_name,
+    askerName,
     isSelf,
     known: true,
     conversations: shape.conversations,
@@ -128,11 +140,15 @@ export async function describeRelationship({ db, askingUserId, personId, disclos
 export function renderRelationship(rel) {
   if (!rel) return null
   if (rel.isSelf) return null // talking to them about themselves is not "relational knowledge"
+  // ⭐ THE ANCHOR SENTENCE COMES FIRST, and it is not decoration. Without it the model merged asker and
+  // subject and said "I recognize you as Hermes" to somebody else entirely.
+  const anchor = `You are talking to ${rel.askerName}, who is NOT ${rel.displayName}. ${rel.displayName} is a different person.`
   if (!rel.known) {
-    return `You have no record of knowing ${rel.displayName}. Say so plainly — and that this means you cannot see any, not that none exists.`
+    return `${anchor} You have no record of knowing ${rel.displayName}. Say so plainly — and that this means you cannot see any, not that none exists.`
   }
   const span = rel.daysSpanned && rel.daysSpanned > 0 ? ` over about ${rel.daysSpanned} day(s)` : ''
   return [
+    anchor,
     `You do know ${rel.displayName}. You have spoken with them across ${rel.conversations} conversation(s)${span}`,
     `(first ${rel.firstSeen}, most recently ${rel.lastSeen}).`,
     `You may acknowledge the relationship and its shape — that you know them, roughly how long, roughly how much.`,

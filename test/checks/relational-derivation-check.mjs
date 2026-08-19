@@ -64,10 +64,10 @@ ok(priv.length > 0, '3 · there IS private Hermes content to leak (otherwise thi
 const tokensOf = (s) => new Set(String(s).toLowerCase().match(/[a-z]{4,}/g) || [])
 // The template's own vocabulary, taken from the source rather than retyped (so it cannot drift).
 const templateVocab = tokensOf(
-  [renderRelationship({ displayName: 'Zzz', isSelf: false, known: true, conversations: 1, exchanges: 1, firstSeen: '2000-01-01', lastSeen: '2000-01-02', daysSpanned: 1 }),
-    renderRelationship({ displayName: 'Zzz', isSelf: false, known: false })].join(' '),
+  [renderRelationship({ displayName: 'Zzz', askerName: 'Qqq', isSelf: false, known: true, conversations: 1, exchanges: 1, firstSeen: '2000-01-01', lastSeen: '2000-01-02', daysSpanned: 1 }),
+    renderRelationship({ displayName: 'Zzz', askerName: 'Qqq', isSelf: false, known: false })].join(' '),
 )
-const allowed = new Set([...templateVocab, 'hermes', 'zzz'])
+const allowed = new Set([...templateVocab, 'hermes', 'zzz', 'qqq', String(oteSeesHermes?.askerName || '').toLowerCase()])
 const foreign = [...tokensOf(rendered || '')].filter((t) => !allowed.has(t))
 ok(foreign.length === 0, '3 · ⭐ every token in the output comes from the template, a number, or the name the asker supplied',
   foreign.length ? `FOREIGN TOKENS (would be a real leak): ${foreign.slice(0, 8).join(', ')}` : `${tokensOf(rendered).size} output tokens, all accounted for`)
@@ -79,9 +79,24 @@ ok(verbatim.length === 0, '3 · ⭐ no 6-word run from any private string appear
   verbatim.length ? `VERBATIM: "${verbatim[0]}"` : `checked against ${priv.length} private strings`)
 
 // And the structural version: the returned object has no free-text field at all.
-const freeText = Object.entries(oteSeesHermes || {}).filter(([k, v]) => typeof v === 'string' && !['displayName', 'firstSeen', 'lastSeen'].includes(k))
+// `askerName` is allowed here for the same reason `displayName` is: it comes from the ASKER'S OWN
+// account — a value they already know — so nothing about the SUBJECT flows through it.
+const freeText = Object.entries(oteSeesHermes || {}).filter(([k, v]) => typeof v === 'string' && !['displayName', 'askerName', 'firstSeen', 'lastSeen'].includes(k))
 ok(freeText.length === 0, '3 · ⭐ the return TYPE has no field that could carry content',
   freeText.length ? JSON.stringify(freeText) : 'only counts, dates, and the name the asker supplied')
+
+// ── 3b. ⭐ THE ANCHOR — the fix for the identity conflation, asserted ─────────────────────────────
+// Given a relational line about Hermes and no statement of who it was talking to, the model told Mina
+// "I recognize you as Hermes". The render must now name the asker AND separate them from the subject.
+{
+  const minaRel = await describeRelationship({ db, askingUserId: U.mina, personId: P.Hermes })
+  const minaLine = renderRelationship(minaRel)
+  ok(/talking to Mina/i.test(minaLine || ''), '3b · ⭐ the rendered line NAMES the asker', minaLine?.slice(0, 60))
+  ok(/NOT Hermes/i.test(minaLine || '') && /different person/i.test(minaLine || ''),
+    '3b · ⭐ …and states explicitly that the asker is NOT the subject')
+  ok((minaLine || '').indexOf('Mina') < (minaLine || '').indexOf('You do know'),
+    '3b · the anchor comes FIRST, before any claim about the relationship')
+}
 
 // ── 4. The disclosure posture actually gates ─────────────────────────────────────────────────────
 const strangerNamed = await describeRelationship({ db, askingUserId: U.mina, personId: P.Hermes, disclosure: RELATIONAL_DISCLOSURE.named })
