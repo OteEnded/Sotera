@@ -22,19 +22,62 @@
 //  5. FAILS CLOSED     — any error, any unparseable model output, any unknown label ⇒ that conversation
 //                        contributes NOTHING. A partial abstraction is a leak with a bug attached.
 //
-// ── ⚠️ WHAT REMAINS BLOCKED, EXPLICITLY ────────────────────────────────────────────────────────────
-// Ote: *"The one-writer/B16 issue is still unresolved. Do not silently solve that by introducing a
-// second writer."* So `persistRelationalRecords` REQUIRES a lease that no code can currently mint —
-// `ONE_WRITER_LEASE` is `null` and there is no issuer. The persist path is written so the eventual
-// architecture has something to plug into, and it **throws** if called today. That is deliberate: a
-// prototype that could write would BE the second writer, whatever its comments said.
+// ── ✅ B16 RESOLVED (2026-08-19) — see the lane note below `DERIVER_VERSION` ────────────────────────
+// The earlier revision blocked persistence outright because the one-writer question was open. It is now
+// answered: relational records ride the SAME per-scope write lane as every other writer, and the lease
+// is that lane rather than a token. No second writer was introduced, and no new authority exists.
 
 import { validateRelationalRecord, STANCE_LABELS, STANCE_LABEL_KEYS, FREQUENCY_FLOOR, TAXONOMY_VERSION } from './relational-taxonomy.js'
+import { buildMemoryV2, DEFAULT_PERSONA } from './memory-v2-host.js'
 
 export const DERIVER_VERSION = 'stance-writer-0.1'
 
-/** ⛔ No issuer exists. The one-writer architecture will mint these; until then, nothing can persist. */
-export const ONE_WRITER_LEASE = null
+// ── ⭐ B16 / ONE WRITER: RESOLVED, AND WITHOUT A NEW AUTHORITY ──────────────────────────────────────
+//
+// The single-writer architecture already existed; it just had no relational door. `@ote/memory`'s
+// `memory-v2-service.js` keeps `WRITE_LANES` — a MODULE-LEVEL map keyed by `(persona, userId)` — and
+// every writer in a scope appends to that one promise chain via `mem.enqueue`. It is module-level on
+// purpose, and the comment there records why: while the queue was a per-instance closure, the model's
+// tool service and the automatic capture path each got their own chain, and a reproduction wrote two
+// live rows to an IDENTICAL slot key. **Keying the lane by scope is what makes "one writer" true.**
+//
+// So relational records do NOT get a writer. They get a **commit function on the existing lane**:
+//
+//   ordinary tool writes ─┐
+//   automatic capture    ─┼─→  WRITE_LANES[(persona,userId)]  ─→  serialized, FIFO, per scope
+//   relational records   ─┘
+//
+// ⭐ AND THE LEASE IS NOT A TOKEN — IT IS THE LANE ITSELF, ALREADY BOUND TO A SCOPE.
+// A token can be forged, copied, or passed to the wrong call. A lane obtained from
+// `buildMemoryV2({ userId: subjectUserId })` cannot: holding it IS proof you are operating in that
+// subject's scope, because that is the only way to construct it. This makes the "no cross-account
+// parameter" rule structural rather than a code-review habit — there is no way to *ask* to write into
+// someone else's scope, only to already be in one.
+//
+// ⚠️ WHAT IS STILL NOT DONE, on purpose: nothing schedules this. No cron entry, no per-turn hook, no
+// background fork. Reflection stays off. The writer runs only when something calls it explicitly.
+
+/**
+ * Mint a write lease for ONE subject. ⭐ There is no `otherUserId` parameter and cannot be one: the lease
+ * carries the lane for `subjectUserId`, and `persistRelationalRecords` refuses records about anyone else.
+ *
+ * @returns {Promise<null | {enqueue: Function, subjectUserId: string, subjectPersonId: string}>}
+ */
+export async function createRelationalWriteLease({ fastify, subjectUserId, persona = DEFAULT_PERSONA } = {}) {
+  if (!fastify?.db || !subjectUserId) return null
+  const seq = fastify.db.txn_memories.sequelize
+  const { schema } = fastify.db.txn_memories.getTableName()
+  if (!schema) throw new Error('relational-writer: no project schema configured — refusing to guess one')
+  const [row] = await seq.query(
+    `SELECT person_id::text AS pid FROM "${schema}"."mst_users" WHERE id = :subjectUserId`,
+    { replacements: { subjectUserId }, type: seq.QueryTypes.SELECT },
+  )
+  if (!row?.pid) return null // a subject with no person row has no relationship to record
+  // ⭐ THE SAME LANE every other writer in this scope uses. Not a new queue, not a new authority.
+  const mem = buildMemoryV2(fastify, { userId: subjectUserId, persona })
+  if (typeof mem?.enqueue !== 'function') throw new Error('relational-writer: memory service exposes no write lane — refusing to write off-lane')
+  return { enqueue: mem.enqueue, subjectUserId, subjectPersonId: row.pid }
+}
 
 /**
  * The abstraction prompt. ⭐ It receives ONE conversation and may reply with NOTHING BUT LABELS.
@@ -60,9 +103,17 @@ function buildPrompt(transcript) {
 }
 
 async function askModel(prompt, { model, endpoint, timeoutMs }) {
+  // ⭐ TEMPERATURE 0. This is a CLASSIFICATION against a closed set, not generation — sampling buys
+  // nothing and costs stability. Measured 2026-08-19 at default temperature: two runs over the SAME
+  // seven conversations produced one record and then none, because labels hovered on either side of the
+  // frequency floor. The store's convergence guarantee is about writes; it says nothing about whether
+  // the DERIVER is stable, and those are different properties that "idempotent" quietly conflates.
   const r = await fetch(endpoint, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], stream: false, think: false }),
+    body: JSON.stringify({
+      model, messages: [{ role: 'user', content: prompt }], stream: false, think: false,
+      options: { temperature: 0, top_p: 1, seed: 1 },
+    }),
     signal: AbortSignal.timeout(timeoutMs),
   })
   if (!r.ok) throw new Error(`model ${r.status}`)
@@ -160,7 +211,12 @@ export async function abstractStance({
     const v = validateRelationalRecord(candidate)
     if (v.ok) records.push(v.record) // ⛔ invalid candidates are DROPPED, never repaired
   }
-  return { records, scanned: convs.length, contributed, skipped }
+  // `support` is diagnostics for choosing the floor (open question Q1). It is LABELS AND COUNTS ONLY —
+  // the same closed vocabulary, so it carries no more information than a record does.
+  return {
+    records, scanned: convs.length, contributed, skipped,
+    support: Object.fromEntries([...support].sort((a, b) => b[1] - a[1])),
+  }
 }
 
 /**
@@ -173,15 +229,55 @@ export async function abstractStance({
  * architecture can issue a lease. A prototype that could write WOULD BE the second writer, whatever
  * its comments said.
  */
-export async function persistRelationalRecords({ db, records, lease } = {}) {
-  if (lease !== ONE_WRITER_LEASE || lease === null) {
-    throw new Error(
-      'relational-writer: persistence is BLOCKED — the one-writer architecture (B16) is unresolved and '
-      + 'no lease issuer exists. abstractStance() returns records for inspection; nothing may write them yet.',
-    )
+export async function persistRelationalRecords({ db, records = [], lease } = {}) {
+  // ⭐ NO LANE, NO WRITE. This is the whole guard: you cannot persist without holding a lane that was
+  // constructed inside the subject's scope. There is no token to forge and no parameter to point elsewhere.
+  if (!lease || typeof lease.enqueue !== 'function' || !lease.subjectPersonId) {
+    throw new Error('relational-writer: persistence requires a write lease from createRelationalWriteLease() — no off-lane writes')
   }
-  void db; void records
-  throw new Error('unreachable: no lease can currently be minted')
+  if (!db) throw new Error('relational-writer: no db')
+
+  // ⭐ SUBJECT-BOUND, ENFORCED AT THE COMMIT. A record about anyone other than the lease's subject is a
+  // programming error, and it fails the WHOLE batch rather than being filtered out — silently dropping
+  // the wrong-subject half would let a caller "mostly" write across scopes and never learn.
+  const foreign = records.filter((r) => r?.subjectPersonId !== lease.subjectPersonId)
+  if (foreign.length) throw new Error(`relational-writer: ${foreign.length} record(s) are about a different person than the lease — refusing the entire batch`)
+
+  // Defence in depth: re-validate at the commit boundary. The abstractor already validated, but the
+  // commit must not trust its caller.
+  for (const r of records) {
+    const v = validateRelationalRecord(r)
+    if (!v.ok) throw new Error(`relational-writer: invalid record at commit — ${v.reason}`)
+  }
+  if (!records.length) return { written: 0, skipped: 0 }
+
+  const seq = db.txn_memories.sequelize
+  const { schema } = db.txn_memories.getTableName()
+
+  // ⭐ ON THE LANE, AND IN ONE TRANSACTION. Serialized against every other writer in this scope by the
+  // enqueue; atomic against itself by the transaction. There is no state in which half a batch landed.
+  return lease.enqueue('relational.persist', async () => {
+    return seq.transaction(async (tx) => {
+      for (const r of records) {
+        await seq.query(
+          `INSERT INTO "${schema}"."txn_relational_records"
+             (subject_person_id, tier, label, conversation_count, window_start, window_end, deriver_version, taxonomy_version)
+           VALUES (:subjectPersonId, :tier::persona_sotera.relational_tier, :label::persona_sotera.relational_label,
+                   :conversationCount, :windowStart, :windowEnd, :deriverVersion, :taxonomyVersion)
+           ON CONFLICT (subject_person_id, tier, label) WHERE subject_person_id IS NOT NULL
+           DO UPDATE SET conversation_count = EXCLUDED.conversation_count,
+                         window_start       = LEAST(txn_relational_records.window_start, EXCLUDED.window_start),
+                         window_end         = GREATEST(txn_relational_records.window_end, EXCLUDED.window_end),
+                         derived_at         = now(),
+                         deriver_version    = EXCLUDED.deriver_version,
+                         taxonomy_version   = EXCLUDED.taxonomy_version,
+                         updated_at         = now()`,
+          { replacements: { ...r, deriverVersion: DERIVER_VERSION, taxonomyVersion: TAXONOMY_VERSION }, transaction: tx },
+        )
+      }
+      return { written: records.length, skipped: 0 }
+    })
+  })
 }
 
 export const __internals = { buildPrompt, DERIVER_VERSION, TAXONOMY_VERSION }

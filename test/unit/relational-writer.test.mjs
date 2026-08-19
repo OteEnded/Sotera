@@ -5,17 +5,47 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { parseLabels, persistRelationalRecords, ONE_WRITER_LEASE, __internals } from '../../Backend/app/components/relational-writer.js'
+import { parseLabels, persistRelationalRecords, __internals } from '../../Backend/app/components/relational-writer.js'
 import { STANCE_LABEL_KEYS } from '../../Backend/app/components/relational-taxonomy.js'
 
-test('⭐ PERSISTENCE IS BLOCKED — the one-writer question is not silently solved', async () => {
+// ⭐ THE LEASE IS THE LANE, NOT A TOKEN. A token can be forged or passed to the wrong call; a lane
+// obtained from buildMemoryV2({userId: subject}) cannot — holding it IS proof of operating in that scope.
+test('⭐ NO LANE, NO WRITE — persistence without a real lease is refused', async () => {
+  for (const [label, lease] of [
+    ['no lease at all', undefined],
+    ['null', null],
+    ['a forged string token', 'lease-please'],
+    ['an object pretending', { subjectPersonId: 'x' }],
+    ['a lane that is not callable', { enqueue: 'nope', subjectPersonId: 'x' }],
+  ]) {
+    await assert.rejects(() => persistRelationalRecords({ db: {}, records: [], lease }), /requires a write lease/, label)
+  }
+})
+
+test('⭐ SUBJECT-BOUND — a record about anyone but the lease subject fails the WHOLE batch', async () => {
+  const lane = (_l, fn) => fn()
+  const lease = { enqueue: lane, subjectUserId: 'u1', subjectPersonId: 'person-A' }
+  const mine = { subjectPersonId: 'person-A', tier: 'stance', label: STANCE_LABEL_KEYS[0], conversationCount: 3, windowStart: '2026-08-18', windowEnd: '2026-08-19' }
+  const theirs = { ...mine, subjectPersonId: 'person-B' }
   await assert.rejects(
-    () => persistRelationalRecords({ db: {}, records: [], lease: ONE_WRITER_LEASE }),
-    /BLOCKED/,
-    'a prototype that could write WOULD BE the second writer, whatever its comments said',
+    () => persistRelationalRecords({ db: {}, records: [mine, theirs], lease }),
+    /different person than the lease/,
+    'silently dropping the wrong-subject half would let a caller "mostly" write across scopes and never learn',
   )
-  await assert.rejects(() => persistRelationalRecords({ db: {}, records: [], lease: 'forged' }), /BLOCKED/)
-  assert.equal(ONE_WRITER_LEASE, null, 'no lease issuer exists yet — that is the point')
+})
+
+test('the commit re-validates rather than trusting its caller', async () => {
+  const lease = { enqueue: (_l, fn) => fn(), subjectUserId: 'u1', subjectPersonId: 'person-A' }
+  const bad = { subjectPersonId: 'person-A', tier: 'stance', label: 'we-get-along', conversationCount: 3, windowStart: '2026-08-18', windowEnd: '2026-08-19' }
+  await assert.rejects(() => persistRelationalRecords({ db: {}, records: [bad], lease }), /invalid record at commit/)
+})
+
+test('an empty batch is a no-op that never reaches the lane', async () => {
+  let touched = false
+  const lease = { enqueue: () => { touched = true }, subjectUserId: 'u1', subjectPersonId: 'person-A' }
+  const r = await persistRelationalRecords({ db: { txn_memories: {} }, records: [], lease })
+  assert.deepEqual(r, { written: 0, skipped: 0 })
+  assert.equal(touched, false, 'no reason to occupy the shared lane with nothing to write')
 })
 
 test('⭐ FAILS CLOSED — anything unexpected yields NO labels, never a partial result', () => {

@@ -116,6 +116,35 @@ try {
   ok(JSON.stringify({ ...rootNamed, askerName: null }) === JSON.stringify({ ...minaNamed, askerName: null }),
     'G7 · ⭐ at posture `named`, root and a stranger receive the IDENTICAL derivation', 'root is administrative, not epistemic')
 
+  // ── G9 · ⭐ END-TO-END WRITE, on the SHARED lane ─────────────────────────────────────────────────
+  // Proves the mechanism, not a claim about anyone: one record is written, checked, re-written to prove
+  // convergence, then removed. It is deliberately about `kavi` (an observation account) and is deleted.
+  {
+    const { createRelationalWriteLease, persistRelationalRecords } = await import('../../Backend/app/components/relational-writer.js')
+    const lease = await createRelationalWriteLease({ fastify: { db, config, log: null }, subjectUserId: users.kavi })
+    ok(!!lease?.enqueue && lease.subjectPersonId === persons.Kavi, 'G9 · a lease is minted from the SUBJECT\'s own scope', `person ${lease?.subjectPersonId?.slice(0, 8)}`)
+
+    const rec = { subjectPersonId: persons.Kavi, tier: 'stance', label: 'i-verify-before-asserting', conversationCount: 3, windowStart: '2026-08-18', windowEnd: '2026-08-19' }
+    const w1 = await persistRelationalRecords({ db, records: [rec], lease })
+    ok(w1.written === 1, 'G9 · ⭐ the record is WRITTEN — the one-writer question is resolved, not bypassed', JSON.stringify(w1))
+
+    // ⭐ CONVERGENCE: writing the same label again must UPDATE, not duplicate.
+    await persistRelationalRecords({ db, records: [{ ...rec, conversationCount: 5, windowEnd: '2026-08-20' }], lease })
+    const rows = await Q(`SELECT id::text, conversation_count, window_end::text we FROM persona_sotera.txn_relational_records
+                            WHERE subject_person_id = :p AND label = 'i-verify-before-asserting'`, { p: persons.Kavi })
+    ok(rows.length === 1, 'G9 · ⭐ re-deriving the same label UPDATES in place — one row, not two', `${rows.length} row(s)`)
+    ok(rows[0].conversation_count === 5 && rows[0].we === '2026-08-20', 'G9 · …and the window widens rather than being overwritten', `n=${rows[0].conversation_count} end=${rows[0].we}`)
+
+    // ⭐ A record about someone else, on this lease, must fail the WHOLE batch.
+    let refused = false
+    try { await persistRelationalRecords({ db, records: [{ ...rec, subjectPersonId: persons.Hermes }], lease }) } catch { refused = true }
+    ok(refused, 'G9 · ⭐ the lease REFUSES a record about a different person — no cross-account parameter exists')
+    const hermesRows = await Q(`SELECT count(*)::int n FROM persona_sotera.txn_relational_records WHERE subject_person_id = :p`, { p: persons.Hermes })
+    ok(hermesRows[0].n === 0, 'G9 · …and nothing about that person was written')
+
+    await X(`DELETE FROM persona_sotera.txn_relational_records WHERE subject_person_id = :p`, { p: persons.Kavi })
+  }
+
   // ── G8 · absence cannot be queried ───────────────────────────────────────────────────────────────
   const rel = await import('../../Backend/app/components/relational-knowledge.js')
   const tax = await import('../../Backend/app/components/relational-taxonomy.js')
