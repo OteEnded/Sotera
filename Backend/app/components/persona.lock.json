@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-19T13:02:50.106Z",
+  "resolvedAt": "2026-08-19T13:30:46.967Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -139,6 +139,22 @@
         "recall_own_memory",
         "note_own_practice",
         "retract_own_practice"
+      ],
+      "permissions": []
+    },
+    "../../../../../PortableComponents/Tools/Intention": {
+      "id": "@ote/tool-intention",
+      "name": "Intention",
+      "version": "0.1.0",
+      "type": "tool",
+      "sdk": "^0.6.0",
+      "trust": "first-party",
+      "integrity": "sha256-8be9caaf5fd2636e27c1bf3c3ea54911bc9ef113abe8fffb5aa0cfc65a06dc08",
+      "components": [
+        "recall_intention",
+        "set_intention",
+        "update_intention",
+        "close_intention"
       ],
       "permissions": []
     },

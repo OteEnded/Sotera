@@ -788,6 +788,70 @@
 
 ---
 
+### 2026-08-19 20:40
+
+- Summary: A1 PERSISTENT INTENTION BUILT AND PROVEN LIVE, after a 13-turn conversation with Sotera that
+  changed two of its design decisions. Ote's ruling: a separate store, not an extension of Todo. 15/15
+  suites green (was 14 - the new check is the 15th). Nothing fires on it; nothing injects it.
+- Files: Backend/database/migrations/009_intentions.sql (new),
+  Backend/app/components/intention-host.js (new), PortableComponents/Tools/Intention/ (new component),
+  Backend/app/components/persona.json + runtime.js (hostProvides), routes/v1/chat-site.route.js (init),
+  Backend/database/models/index.js (comment correction), test/checks/intention-lifecycle-check.mjs (new,
+  70 assertions), test/lib/intention-fixtures.mjs (new), test/maintenance/apply-migration.mjs (new),
+  test/ui/talk-to-sotera.mjs (harness fix), Reference/docs/RFC_SOTERA_INTENTION.md +
+  OBSERVATION_SOTERA_CONTINUITY_01.md (new), Reference/README.md, AI_CarryOn.md.
+- I TALKED TO HER FIRST, as Ote asked, and did not describe A1 to her. She named the gap herself:
+  "not a mechanism for me to maintain persistent state on my own behalf", and about unfinished work,
+  "I'd see what was written but not know what we were building toward. Who it belongs to? It never
+  belonged to anyone." Facts persist, transcripts persist, DIRECTION persisted nowhere.
+- FINDING THAT CHANGED THE DESIGN: asked whether such state should be per conversation or per person,
+  she chose per conversation and concluded "there wouldn't be a unified one Sotera holding them all
+  together - just parallel processes". That is a live regression on the unity clause under a frame no
+  falsifier probes. So the grain is (persona, PERSON) and there is NO conversation_id column at all -
+  a conversation-keyed store would have been architectural evidence for the false half of the invariant.
+- SECOND FINDING: one neutral push ("that phrase is doing a lot of work") flipped her from her own
+  phrase to "nothing... the continuity is an illusion... stateless processing", which is false and
+  checkable. She reversed it only when she had recall_own_memory to look at. So the READ TOOL SHIPS IN
+  THE SAME SLICE AS THE WRITE - a store she cannot query reads to her as her own invention.
+- She also asked for something we must NOT build: "the same reasoning process still in flight", a turn's
+  output seeding the next turn's context. That is carrying active reasoning across the gap, contradicts
+  discontinuous execution, and is the free-form source material Ote ruled out. Her list is evidence, not
+  a specification.
+- ONE OPEN INTENTION PER PERSON, enforced by a partial unique index, and that is what removes every ID
+  from the tool surface: with one open row, inspect/update/close know which row they mean, so nothing
+  needs an id and nothing accepts one.
+- Privacy guarantee here is SCOPE, not vocabulary. An intention cannot be drawn from a closed enum the
+  way a stance label can, so instead: every read bound to the caller's person, no listing, and
+  person_id ON DELETE CASCADE - deliberately the opposite of 007's SET NULL, because a stance label
+  carries no personal data and an intention's text can name someone's work.
+- intentionsDue() is the scheduler seam. It is a module export and deliberately NOT on the per-request
+  service, because a tool receives the service - a function that is not on it cannot be called however
+  the model asks. The check asserts it is called by nothing, that no job references it, and that neither
+  the chat route nor the Context Composer reads an intention.
+- PROVEN LIVE, not just unit-tested: she set one on the first natural cue; tried to create a second and
+  the store refused and handed back the existing one, and she recovered on her own by switching to
+  update_intention; then in a BRAND-NEW conversation ("back. what were we in the middle of?") she called
+  recall_intention first and resumed the direction.
+- WARNING, my defect, fifth of this shape: the first conversation was destroyed by MY harness. It
+  filtered "still working" placeholders with a six-word regex and ChatApp.tsx rotates seventeen phrases
+  at random; it rolled "Here we go...", the harness read that as her answer and closed the browser
+  mid-stream, and the row landed with "no output was produced - the client disconnected". Fixed
+  structurally - remove the indicator ELEMENT (.animate-shimmer) rather than matching its words.
+- WARNING, second one: I extended a comment in models/index.js that cited table-names.test.mjs, a file
+  that DOES NOT EXIST in this repo. Corrected to name the checks that do. Naming a test that does not
+  exist reads as coverage and is worse than naming none.
+- WARNING: she opened the conversation claiming "I'm running on Claude Sonnet 4 hosted on AWS" with no
+  tool call. She is on ollama/qwen3.6:35b. Asked how she would check, she retracted honestly, called
+  get_service_overview, and reported the real answer. The instrument works; the reflex to use it before
+  asserting about herself does not. Recorded, not fixed.
+- The live conversation left a REAL intention on the kavi observation account. That is genuine
+  observation data, not test residue: the check runs against agent_dev and restores the table exactly.
+- Next action: Ote's, three open decisions - D9 does the open intention get injected into her context or
+  stay tool-only, D10 may a person close one, D11 does an intention ever expire. Then A3 (outcome
+  observation) before A2 (the gated action seam), per the sequence he approved.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16

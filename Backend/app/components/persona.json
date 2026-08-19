@@ -33,6 +33,11 @@
       "source": "../../../../../PortableComponents/Tools/OwnMemory"
     },
     {
+      "name": "Intention",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/Intention"
+    },
+    {
       "name": "WorkingMemory",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/WorkingMemory"

@@ -56,10 +56,20 @@ import define_log_trigger_job_runs from "./log_trigger_job_runs.model.js";
 import define_log_config_changes from "./log_config_changes.model.js";
 import define_log_memory_changes from "./log_memory_changes.model.js";
 
-// NOTE: txn_message_embeddings has NO model — it is raw SQL only (app/components/conversation-search.js),
-// so it cannot appear in this list even though it is a real table. table-names.test.mjs asserts that its
-// one hand-written literal stays correct, because a wrong name there fails SOFT: the dense search arm
-// just returns no evidence.
+// NOTE: THREE real tables have NO model here, all raw SQL only, and each one is deliberate:
+//   · txn_message_embeddings   (app/components/conversation-search.js)
+//   · txn_relational_records   (app/components/relational-writer.js) — its shape is enforced by the
+//                               migration's proof block, and an ORM model would invite a `content`
+//                               attribute that the table refuses to have
+//   · txn_intentions           (app/components/intention-host.js) — same reason: the guarantees are
+//                               "these columns do not exist" and "one open row per person", both of
+//                               which live in the DDL, not in a model
+// ⚠️ A wrong table name in raw SQL fails SOFT — the dense search arm simply returns no evidence — so
+// each one needs a check that touches the REAL table. `checks/thai-dense-retrieval-check.mjs`,
+// `checks/relational-records-check.mjs` and `checks/intention-lifecycle-check.mjs` are those checks.
+// (The comment here used to cite a `table-names.test.mjs`; there is no such file in this repo — it
+// lives in OteLLMServices. Naming a test that does not exist reads as coverage and is worse than
+// naming none.)
 
 // Enum-ish column value sets — the single source of truth, enforced via validate.isIn in the models.
 // Exported so out-of-band model construction (e.g. eval/verify harnesses that build a model factory

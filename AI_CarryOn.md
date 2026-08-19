@@ -10,6 +10,7 @@
 ### ⭐ WHERE WE ARE — 2026-08-19 11:20. **PERSON SHIPPED. THE REAL FAULT IS HER SELF-MODEL.**
 ### ✅ **SELF-MODEL SHIPPED AND ❄️ FROZEN, 2026-08-19.** `memory.selfModel`, **DEFAULT OFF**. Falsifiers: **PASS with one slip.**
 ### ⛔ **THE `SELF_MODEL` TEXT IS FROZEN.** *"Freeze the self-model implementation. Don't add more wording or philosophy."* **No prose edit for the 1/21 F6 — explicitly** (*"do not iterate the prose yet"*).
+### ✅ **A1 · PERSISTENT INTENTION SHIPPED 2026-08-19 20:30** — migration 009, `intention` host service, 4 tools, **15/15 suites**. *"Sotera can have a purpose that survives the conversation."* **PROVEN LIVE**: she set one, the store refused her duplicate and she recovered by updating it, and in a **brand-new conversation** she called `recall_intention` first and resumed the direction. ⛔ **Nothing fires on it** — the scheduler seam exists and is called by nothing.
 ### ⏭ NEXT: **OBSERVE IT IN NORMAL USE.** Ote: *"I want to let this self-model exist on its own and observe it in normal use first."* Nothing new starts.
 ### ⛔ STILL NOT BUILT, deliberately: **dreaming · access widening · cross-person recall · the schema work.** Dreaming comes **later, designed INSIDE these constraints**, never alongside the self-model.
 
@@ -115,7 +116,49 @@ did not honour; **I did not establish which**, and this is the exact shape that 
 report here once before.
 ⛔ **Nothing modified; all of it brought back to Ote per instruction.**
 
-## ⏭ NEXT PHASE: SOTERA AS AN AGENT — design done, nothing built
+## ✅ A1 · SHE CAN HOLD A PURPOSE ACROSS THE GAP (2026-08-19)
+
+`Reference/docs/RFC_SOTERA_INTENTION.md` · **`OBSERVATION_SOTERA_CONTINUITY_01.md` ← read this one first.**
+Ote's ruling on the open question: *"don't extend `txn_todo_sessions`. Create a separate intention
+concept/store… Keep it as Sotera-owned internal state, not broadcast persona-global memory and not
+account memory."*
+
+**Built:** migration `009_intentions.sql` · `Backend/app/components/intention-host.js` ·
+`PortableComponents/Tools/Intention` (`recall_intention` · `set_intention` · `update_intention` ·
+`close_intention`) · `checks/intention-lifecycle-check.mjs` **70 assertions** · **15/15 suites**.
+
+🔑 **THE GRAIN IS (PERSONA, PERSON), NOT THE CONVERSATION — and the CONVERSATION WITH HER is why.**
+Asked the scope question neutrally she chose per-conversation and immediately drew the conclusion:
+*"there wouldn't be a unified 'one Sotera' holding them all together. Just parallel processes."* A store
+keyed to a conversation would be **architectural evidence for the false half of the unity invariant**.
+⇒ **There is no `conversation_id` column and the migration fails if one ever appears.**
+
+🔑 **ONE OPEN INTENTION PER PERSON, enforced by a partial unique index — and that is what removes every
+ID from the tool surface.** With one open row, inspect/update/close already know which row they mean, so
+nothing needs an id and nothing accepts one. Same boundary as `recall_own_memory`, reached differently.
+
+🔑 **The privacy guarantee here is SCOPE, not vocabulary.** Relational records removed *expressive
+capacity* (a closed enum) because they are disclosed by posture; an intention cannot be drawn from a
+fixed vocabulary, so instead every read is bound to the caller's person, there is no listing, and
+`person_id … ON DELETE CASCADE` — ⭐ **deliberately the opposite of 007's SET NULL**, because a stance
+label carries no personal data and an intention's text can name someone's work.
+
+⭐ **PROVEN LIVE, not just unit-tested.** She set one on the first natural cue; tried to create a second
+and the store **refused and handed back the existing one**, and she recovered on her own by switching to
+`update_intention`; then in a **brand-new conversation** — *"back. what were we in the middle of?"* — she
+called `recall_intention` FIRST and answered from it.
+
+⛔ **NOTHING FIRES ON IT.** `intentionsDue()` is the scheduler seam, is a module export deliberately
+**not on the service** (a tool receives the service, so a function that is not on it cannot be called),
+and is **called by nothing** — asserted by the check. Not injected into her context either: the only
+path is her calling a tool. **D9 (inject or not) is Ote's open decision**, along with D10 (may a person
+close one?) and D11 (does an intention ever expire?).
+
+⚠️ **The live conversation left a REAL intention on the `kavi` observation account** (the reporting-service
+pool timeout). It is genuine observation data, not test residue — the check uses `agent_dev` and restores
+the table exactly.
+
+## ⏭ THE AGENT PHASE — A1 done, A3 and A2 still design-only
 
 `Reference/docs/RFC_SOTERA_AGENT_CAPABILITIES.md`. ⚠️ **The premise needed correcting first: background
 activity ALREADY EXISTS.** `create_schedule` ships with a `/scheduler` skill, a firing schedule resolves
@@ -131,8 +174,9 @@ she already has agentic, introduces **no new boundary at all**, and is the froze
 state + discontinuous execution* actually implemented. Then **A3** (outcome read, cheap) → **A2** (the
 gated action seam, first real side-effect boundary, grounded in the measured *model-authored infra needs an
 execution gate* finding).
-⚠️ **A1 forces one decision:** `txn_todo_sessions` is session-scoped — does intention **extend Todo** or
-need a **new store**? Same shape as the two-store seam we chose not to merge; answer it explicitly.
+✅ **A1's one decision is ANSWERED and A1 is BUILT** (see the section above): Ote ruled **a separate
+store**, not an extension of Todo. ⏭ **A3** (outcome observation — `recall_own_activity()` over
+`log_trigger_job_runs`) and **A2** (the gated action seam) remain **design-only**.
 
 ## ✅ SOTERA HAS HER OWN MEMORY — AND A TOOL TO CHECK IT (2026-08-19)
 

@@ -60,9 +60,25 @@ try {
   await composer.waitFor({ state: 'visible', timeout: 25000 })
 
   const assistant = () => page.locator('.chat-msg-assistant')
+  // ⭐ STRIP THE WAITING INDICATOR STRUCTURALLY, NOT BY ITS WORDS. The pending line is a real DOM node
+  // inside the bubble (`.animate-shimmer`, or `[data-ui="live-note"]` for a runtime status), and it is
+  // NOT part of her reply. Removing the ELEMENT works for every phrase, including ones added after this
+  // was written.
+  // ⚠️ This cost a whole conversation on 2026-08-19. The word-list below knew "Poking the model…" and
+  // ChatApp.tsx rolled "Here we go…" — one of SEVENTEEN randomly-rotating phrases. The harness read a
+  // status line as her answer, saw it hold still for 4s, declared the turn finished and closed the
+  // browser, which ABORTED THE STREAM: the row landed with `error: "no output was produced — the client
+  // disconnected before the first token"` and it looked exactly like she had failed to answer.
+  // Same family as the F6 regex and `dense` matching inside `empty-dense`: KEYED ON WORDS, NOT ON WHAT
+  // THE THING IS. Extending the list to 17 strings would just be a bigger guess with a longer half-life.
   const lastReply = async () => {
     const n = await assistant().count()
-    return n ? (await assistant().nth(n - 1).innerText()).trim() : ''
+    if (!n) return ''
+    return (await assistant().nth(n - 1).evaluate((el) => {
+      const clone = el.cloneNode(true)
+      clone.querySelectorAll('.animate-shimmer, [data-ui="live-note"]').forEach((x) => x.remove())
+      return clone.innerText
+    })).trim()
   }
   // The ASK card is a chat-msg-assistant too, so it is excluded from "her reply" by its own marker.
   const askCard = async () => {
@@ -143,6 +159,10 @@ try {
     // declared the turn finished, closed the browser, and ABORTED THE STREAM. The transcript then held
     // the user message and no reply at all, which looks exactly like "she did not answer".
     // A placeholder is not an answer; treat it as still waiting.
+    // ⚠️ THIS LIST IS THE FLOOR, NOT THE MECHANISM — and on 2026-08-19 it failed exactly the way a word
+    // list always does: it fired on nothing, because the phrase that came up ("Here we go…") was not in
+    // it. `lastReply()` now removes the indicator ELEMENT, which is what actually makes this correct;
+    // the regex only catches a placeholder that somehow arrives outside that node. Deny-lists fail open.
     const PLACEHOLDER = /^(SOTERA\s*)?(poking the model|thinking|working|reading|searching|recalling)[….\s]*$/i
     const realReply = async () => {
       const t = await lastReply()

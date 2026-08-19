@@ -28,6 +28,7 @@ import { normalizeWorkingMemory, renderWorkingMemory, extractIntent, initWorking
 import { makeEmbedder } from '../../components/memory-embed-host.js'
 import { readOwnStance, renderOwnStance } from '../../components/relational-knowledge.js'
 import { initOwnMemory } from '../../components/own-memory-host.js'
+import { initIntention } from '../../components/intention-host.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 import { createSteerRegistry } from '../../chat/steer-registry.js'
@@ -3190,6 +3191,7 @@ export default async function chatSiteRoutes(fastify) {
   initInteraction(fastify)
   initConversationSearch() // `conversationSearch` host service (Conversation Search, step 4 CS1)
   initOwnMemory() // `ownMemory` host service — what SHE has stored about herself (recall_own_memory)
+  initIntention() // `intention` host service — what she is TRYING TO ACCOMPLISH with this person (A1)
   initReflection() // `reflection` host service (L3 Persona Notes; the Reflection Host Adapter, step 5 R1)
   initWorkingMemory() // `workingMemory` host service (L4 active session state; the update_working_memory tool, step 6 WM2)
   // Recover turns the server was killed mid-generation on — a conversation ending in an
