@@ -115,6 +115,32 @@ did not honour; **I did not establish which**, and this is the exact shape that 
 report here once before.
 ⛔ **Nothing modified; all of it brought back to Ote per instruction.**
 
+## ⚠️⚠️ THE DENSE ARM IS DEAD — MY MIGRATION-005 DEFECT (found 2026-08-19 ~13:55)
+
+`ANALYSIS_CS2B_THAI_VERIFICATION.md`. The drain works — **0 → 200 embeddings**, 8/8 Thai. But the writer
+inserts `embedding` (jsonb) and the reader requires **`embedding_hv`**, filtered `IS NOT NULL`:
+**200/200 jsonb, 0/200 halfvec.** In OLS the bridge is a **generated column**; measured:
+`ote_llm_services.txn_memories` **GENERATED ALWAYS** · `ote_llm_services.txn_message_embeddings`
+**GENERATED ALWAYS** · `persona_sotera.txn_message_embeddings` ⚠️ **generated = NEVER**.
+005 built the column **and an HNSW index over it** but omitted the generation expression — I copied the
+shape, not the mechanism that fills it.
+🔑 **Impact is asymmetric:** Latin script is FINE (verified live — a new conversation resolved *"the pool
+thing"* correctly via the **lexical** arm, and bounded itself honestly). **Thai gets
+`mode=lexical+empty-dense, count=0` — BOTH arms down ⇒ Conversation Search is English-only in practice.**
+⛔ **Smallest fix = one generated column + index rebuild (copy OLS's expression). NOT APPLIED — schema
+frozen.** It touches one column and goes nowhere near `user_id`.
+⚠️ **My `mode` check false-passed first run** — `/dense|hybrid/` matched **"dense" inside "empty-dense"**.
+Same family as the F6 regex: keyed on a WORD, not a CLAIM. Fixed and **verified by watching it fail**.
+
+🔑 **Tools now in the repo:** `test/maintenance/run-cs2b-drain.mjs` (run CS2b on demand — the 04:10 cron
+is excluded from the boot pass, so there is otherwise no way to populate the dense arm before morning)
+and `test/checks/thai-dense-retrieval-check.mjs` (**currently FAILS, correctly**).
+
+⚠️ **`"I'll keep that in mind"` → no write: NOT a bug.** `MEMORY_TOOL_RULES` is permissive (*"You MAY
+also save… never for casual chitchat"*), gated on her judging it *"genuinely earns keeping"*. Open for
+Ote: the gating has no notion of honouring a **promise made aloud** — but she is **honest about the
+consequence** (*"they weren't saved to durable memory"*), so store and self-report agree.
+
 ⚠️ **`memory-lifecycle-check`: INTERMITTENT / UNRESOLVED, and stays recorded that way** (Ote's
 instruction). It flaked once in a full suite and passed alone plus on clean re-runs. **I did not capture
 the failing assertion**, so it is NOT diagnosed — do not attribute it to the fire-and-forget audit race
