@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-19T02:46:25.350Z",
+  "resolvedAt": "2026-08-19T09:18:09.161Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -124,6 +124,19 @@
       "integrity": "sha256-8314b3a02f1fd471fbe14f8e14ff0c7ac0f649af75faf3342c022727f90b77c9",
       "components": [
         "search_conversations"
+      ],
+      "permissions": []
+    },
+    "../../../../../PortableComponents/Tools/OwnMemory": {
+      "id": "@ote/tool-own-memory",
+      "name": "OwnMemory",
+      "version": "0.1.0",
+      "type": "tool",
+      "sdk": "^0.6.0",
+      "trust": "first-party",
+      "integrity": "sha256-262526a126c2f4b1c453b39e122d1b1f641d2599f37bf5c52a52e838426abe19",
+      "components": [
+        "recall_own_memory"
       ],
       "permissions": []
     },

@@ -115,6 +115,36 @@ did not honour; **I did not establish which**, and this is the exact shape that 
 report here once before.
 ⛔ **Nothing modified; all of it brought back to Ote per instruction.**
 
+## ✅ SOTERA HAS HER OWN MEMORY — AND A TOOL TO CHECK IT (2026-08-19)
+
+**`memory.relationalStance = true` · `memory.selfModel = true` · floor = 3 · Reflection still `off`.**
+Live records, derived from real conversations with Kavi:
+`i-verify-before-asserting` (5 conv) · `i-flag-uncertainty-explicitly` (4 conv).
+
+🔑 **`recall_own_memory`** — a portable Tool (`PortableComponents/Tools/OwnMemory`) + an `ownMemory` host
+service (declared in `hostProvides`, registered like `conversationSearch`). ⭐ **THE BOUNDARY IS THE
+ABSENCE OF PARAMETERS**: no subject arg ⇒ no third party · nothing to iterate ⇒ no enumeration · no query
+arg ⇒ no conversation reach · **not one UUID is returned** (an id is a handle, and a handle is the start
+of a database tool). Provenance ships WITH the answer, including *what these are NOT*. 32 checks.
+
+⚠️ **Why it exists:** she used her injected stance correctly, then — asked to source it — checked
+`list_memories`, found nothing, and **retracted a TRUE statement as a fabrication**, offering to delete
+it. *A memory she cannot verify reads to her as her own invention.* Now: *"it is actually stored — not a
+guess"*, she separates account memory from her own unprompted (*"the tool correctly keeps those
+separate"*), and ⭐ **she flagged the remaining seam herself** — `list_memories(kind='identity')` and
+`recall_own_memory()` read different tables.
+⏭ Batch-1 proposal (**NOT built**): `note_own_practice` · `retract_own_practice` ·
+`describe_my_capabilities` → `Reference/docs/RFC_SOTERA_CAPABILITIES_BATCH_1.md`.
+
+⚠️⚠️ **TEST-vs-REAL-DATA, TWICE IN ONE DAY, SAME TABLE.** My checks first **deleted** the real record
+(cleanup by `subject_person_id`, and by the REAL `deriver_version`), and the fix — snapshot ids, delete
+only new ones — then **missed a MUTATION**: the write tests upsert on `(subject,tier,label)`, so they
+UPDATED the real row, and Sotera reported a test's window to a user. ⭐ **"Delete what I created" is not
+enough for an UPSERT table — the invariant is "leave the table exactly as I found it", which means
+restoring CONTENT.** Now `test/lib/relational-fixtures.mjs` snapshots and restores.
+⚠️ The window is **monotonic** (`LEAST`/`GREATEST`): a bad write widens it and re-derivation can never
+narrow it, so I had to clear and re-derive.
+
 ## ✅ THAI DENSE RETRIEVAL FIXED — migration 006 (2026-08-19 ~14:20)
 
 `006_message_embedding_hv_generated.sql`. Dropped the always-NULL column + its HNSW index, re-added

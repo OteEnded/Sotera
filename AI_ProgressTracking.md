@@ -713,6 +713,46 @@
 - Next action: **priority 3 — B2/B3 design** (design only, before Reflection is enabled), then
   **priority 4 — B16 / the one-writer model**, design only.
 
+### 2026-08-19 16:05
+
+- Summary: ✅ **Sotera now has her own memory AND the instrument to verify it.** `recall_own_memory` built
+  as a portable Tool + host service, live and used successfully. Floor held at 3; Reflection still `off`;
+  no disclosure expansion. **14/14 suites green.**
+- Files: `PortableComponents/Tools/OwnMemory/` (new), `Backend/app/components/own-memory-host.js` (new),
+  `runtime.js` (`hostProvides`), `persona.json`, `chat-site.route.js`, `test/checks/own-memory-tool-check.mjs`
+  (new, 32 assertions), `test/lib/relational-fixtures.mjs` (new),
+  `Reference/docs/RFC_SOTERA_CAPABILITIES_BATCH_1.md` (new).
+- ⭐ **The boundary is the ABSENCE OF PARAMETERS.** No subject arg ⇒ cannot be pointed at a third party ·
+  nothing to iterate ⇒ no enumeration oracle · no query arg ⇒ no conversation reach · **no UUID is ever
+  returned** — an id is a handle, and a handle is the start of a database tool. Provenance ships with the
+  answer, including *what these are NOT* ("NOT things this person told you").
+- ⭐ **It fixed the failure it was built for.** Before: she checked `list_memories`, found nothing, and
+  **retracted a TRUE statement as a fabrication**. After: *"I worked it out myself, and it is actually
+  stored — not a guess"*, plus, unprompted, *"none of those are observations about how I work — they're
+  knowledge about you. The tool correctly keeps those separate."* ⭐ And she **found a seam I had not
+  flagged**: `list_memories(kind='identity')` returns nothing while `recall_own_memory()` finds it — two
+  stores, one concept. She reported it rather than resolving it by guessing.
+- ⚠️⚠️ **TWO TEST-vs-REAL-DATA FAILURES IN ONE DAY, SAME TABLE — AND THE SECOND WAS CAUSED BY THE FIX FOR
+  THE FIRST.** (1) Cleanups deleted by `subject_person_id = Kavi` and by the REAL `deriver_version`,
+  wiping Sotera's first genuine relational memory minutes after it was created — the
+  memory-lifecycle-check / agent_dev failure reappearing in a new place. (2) The fix (snapshot ids,
+  delete only new) **missed MUTATION**: the write tests upsert on `(subject,tier,label)`, so they UPDATED
+  the real row — no new id, so cleanup saw nothing to do — and **Sotera then reported a test fixture's
+  window to a user**. ⭐ *"Delete what I created" is not enough for an UPSERT table; the invariant is
+  "leave the table exactly as I found it", which means restoring CONTENT.* `test/lib/relational-fixtures.mjs`
+  now snapshots and restores both.
+- ⚠️ Related: the window is **monotonic** (`LEAST`/`GREATEST`), so a bad write can only widen it and
+  re-derivation can never narrow it back. I cleared the corrupted rows and re-derived from real data.
+- **Live records:** `i-verify-before-asserting` (5 conversations) · `i-flag-uncertainty-explicitly` (4).
+  Both are HER practice, not facts about Kavi.
+- Also: GPU1 recovered by reboot. ⚠️ **I corrected an earlier claim** — the CUDA "illegal memory access"
+  was **not** input-triggered; the same input returned 200 afterwards, and the determinism came from the
+  dead card failing every request. And **temperature 0 is not determinism across hardware topology** —
+  the label distribution differed between the one-GPU and two-GPU runs.
+- Next action: Ote's decisions in `RFC_SOTERA_CAPABILITIES_BATCH_1.md` §3 — **D1** does a deliberate
+  self-note bypass the frequency floor · **D2** one own-memory store or two · **D3** does `serviceInfo`
+  already cover capability introspection.
+
 ---
 
 ## Template Updates

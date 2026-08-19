@@ -11,6 +11,7 @@
 // it is the only way to observe a foreign-key behaviour, and it is cleaned up in a finally.
 
 import { makeChecker } from '../harness.mjs'
+import { snapshotRelational, restoreRelational } from '../lib/relational-fixtures.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
@@ -39,13 +40,8 @@ const persons = Object.fromEntries((await Q('SELECT id::text, display_name FROM 
 // the row the controlled activation had just created. Same failure as memory-lifecycle-check wiping
 // agent_dev's real memories: **a cleanup predicate that also matches production data.**
 // ⭐ A test may only delete rows it can PROVE it created. Snapshot ids first; delete only what is new.
-const PRE_EXISTING = new Set((await Q('SELECT id::text FROM persona_sotera.txn_relational_records')).map((r) => r.id))
-async function cleanupFixtures() {
-  const now = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
-  const mine = now.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
-  if (mine.length) await X('DELETE FROM persona_sotera.txn_relational_records WHERE id IN (:ids)', { ids: mine })
-  return mine.length
-}
+const SNAP = await snapshotRelational(Q)
+async function cleanupFixtures() { return restoreRelational(Q, X, SNAP) }
 
 let probePerson = null
 try {
@@ -180,10 +176,10 @@ try {
   // never been activated; the moment a real record exists it becomes a demand that the check DESTROY it.
   // The right invariant is that the check leaves the table exactly as it found it.
   await cleanupFixtures().catch(() => {})
-  const rows = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
-  const added = rows.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
-  ok(added.length === 0, 'cleanup · the table is exactly as this check found it — real records untouched',
-    `${rows.length} rows present, ${added.length} added by this run`)
+  const undone = await cleanupFixtures()
+  ok(undone.deleted === 0 && undone.restored === 0,
+    'cleanup · the table is exactly as this check found it — real records untouched',
+    `deleted ${undone.deleted}, restored ${undone.restored} (both should already be 0 here)`)
 }
 
 

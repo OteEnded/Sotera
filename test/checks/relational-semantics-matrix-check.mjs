@@ -10,6 +10,7 @@
 // BEHAVIOUR, never adjust it.
 
 import { makeChecker } from '../harness.mjs'
+import { snapshotRelational, restoreRelational } from '../lib/relational-fixtures.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
@@ -38,15 +39,10 @@ const persons = Object.fromEntries((await Q('SELECT id::text, display_name FROM 
 // here, because this check exercises the REAL writer and its rows therefore carry the real deriver. So:
 // snapshot the ids that exist BEFORE anything runs, and delete only ids that are not in that set.
 // Provably scoped, regardless of person, label, or deriver.
-const PRE_EXISTING = new Set((await Q('SELECT id::text FROM persona_sotera.txn_relational_records')).map((r) => r.id))
+const SNAP = await snapshotRelational(Q)
 const rec = (over = {}) => ({ subjectPersonId: persons.Kavi, tier: 'stance', label: 'i-verify-before-asserting', conversationCount: 3, windowStart: '2026-08-18', windowEnd: '2026-08-19', ...over })
 /** Delete ONLY rows this run created. Never by subject, never by label, never by deriver. */
-async function cleanupFixtures() {
-  const now = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
-  const mine = now.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
-  if (mine.length) await X('DELETE FROM persona_sotera.txn_relational_records WHERE id IN (:ids)', { ids: mine })
-  return mine.length
-}
+async function cleanupFixtures() { return restoreRelational(Q, X, SNAP) }
 
 let fixturePerson = null
 try {
@@ -181,10 +177,10 @@ try {
   await cleanupFixtures().catch(() => {})
   // ⚠️ THE DELTA, NOT AN EMPTY TABLE — see the note at the top. Demanding zero rows is a demand that the
   // check delete real records, which is exactly the bug this file caused.
-  const rows = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
-  const added = rows.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
-  ok(added.length === 0, 'cleanup · the table is exactly as this check found it — real records untouched',
-    `${rows.length} rows present, ${added.length} added by this run`)
+  const undone = await cleanupFixtures()
+  ok(undone.deleted === 0 && undone.restored === 0,
+    'cleanup · the table is exactly as this check found it — real records untouched',
+    `deleted ${undone.deleted}, restored ${undone.restored} (both should already be 0 here)`)
   const fx = await Q("SELECT count(*)::int n FROM persona_sotera.mst_persons WHERE display_name LIKE '\\_\\_%'")
   ok(fx[0].n === 0, 'cleanup · no fixture persons left behind', `${fx[0].n}`)
 }

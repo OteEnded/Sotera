@@ -78,7 +78,9 @@ const install = await installComponents(runtime, PERSONA_CONFIG, {
   // components that require them. 'conversationSearch'/'workingMemory' have real tool consumers;
   // 'reflection' is registered + promised FORWARD-LOOKING (the route reaches Reflection via
   // buildReflection() directly today — no component requires it yet; a future Reflection Feature will).
-  hostProvides: ['memory.v2', 'search', 'serviceInfo', 'schedules', 'todo', 'todoStore', 'interaction', 'interactionStore', 'conversationSearch', 'reflection', 'workingMemory'],
+  // `ownMemory` (2026-08-19): what SHE has stored about herself. Late-bound per request like
+  // conversationSearch — see own-memory-host.js for why it exists and why it takes no arguments.
+  hostProvides: ['memory.v2', 'search', 'serviceInfo', 'schedules', 'todo', 'todoStore', 'interaction', 'interactionStore', 'conversationSearch', 'reflection', 'workingMemory', 'ownMemory'],
   resolver: resolverRegistry,
   baseDir: PERSONA_BASE_DIR,
   lockPath: path.join(PERSONA_BASE_DIR, 'persona.lock.json'),

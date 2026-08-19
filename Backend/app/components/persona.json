@@ -28,6 +28,11 @@
       "source": "../../../../../PortableComponents/Tools/ConversationSearch"
     },
     {
+      "name": "OwnMemory",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/OwnMemory"
+    },
+    {
       "name": "WorkingMemory",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/WorkingMemory"
