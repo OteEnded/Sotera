@@ -755,6 +755,39 @@
 
 ---
 
+### 2026-08-19 17:10
+
+- Summary: batch-1 finished (list_memories discoverability fix, origin ratified as a contract) and the
+  **agent-capability design pass** delivered. No new build; Reflection still off, tier B and skill
+  authoring unbuilt, no privacy boundary widened. **14/14 suites green.**
+- Files: PortableComponents/Packages/Memory/index.js (description only),
+  Reference/docs/RFC_SOTERA_AGENT_CAPABILITIES.md (new),
+  RFC_RELATIONAL_KNOWLEDGE_LIFECYCLE.md (origin contract), Reference/README.md, AI_CarryOn.md.
+- list_memories now states that it holds memories about the PERSON, that own-practice lives in a
+  SEPARATE store reached by recall_own_memory, and that an empty result means nothing of THIS kind is
+  stored - never nothing at all. That is the exact inference that made her retract a true statement.
+- The two stores stay separate on purpose. Merging would LEAK: a stance record in the broadcast identity
+  slice would let a stranger read "with Kavi I avoid hedging", which names Kavi. The identity slice has
+  no person dimension precisely because everything in it is world-readable.
+- origin is ratified as a required contract for every future relational writer: observed must clear the
+  floor, instructed may land immediately, instructed is sticky, and neither changes the record shape.
+- WARNING, and it reshaped the design pass: BACKGROUND ACTIVITY ALREADY EXISTS. create_schedule ships
+  with a /scheduler skill, a firing schedule resolves to a real conversation or creates one per run, and
+  ask_user is a real held-turn Feature. Proposing scheduling or delivery would have been proposing what
+  she already has. I surveyed every installed tool before writing a word of the proposal.
+- What she actually lacks: BODY is empty (every tool is read-only or writes only her own memory), there
+  is no continuity of purpose across the gap (a firing schedule has no state saying why), and no way to
+  observe an outcome (log_trigger_job_runs is for the operator, not for her).
+- RECOMMENDED NEXT BUILD: A1 persistent intention - not the flashier action seam. It makes machinery she
+  already has agentic, introduces no new boundary, and is the frozen self-model (persistent state,
+  discontinuous execution) actually implemented. Then A3 outcome-read, then A2 the gated action seam,
+  which is the first real side-effect boundary and is grounded in the measured finding that
+  model-authored infra needs an execution gate.
+- Next action: Ote to pick. A1 forces one decision first - does intention extend session-scoped Todo or
+  need a new store? Same shape as the two-store seam, and it deserves an explicit answer.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16

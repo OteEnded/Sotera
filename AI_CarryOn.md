@@ -115,7 +115,38 @@ did not honour; **I did not establish which**, and this is the exact shape that 
 report here once before.
 ⛔ **Nothing modified; all of it brought back to Ote per instruction.**
 
+## ⏭ NEXT PHASE: SOTERA AS AN AGENT — design done, nothing built
+
+`Reference/docs/RFC_SOTERA_AGENT_CAPABILITIES.md`. ⚠️ **The premise needed correcting first: background
+activity ALREADY EXISTS.** `create_schedule` ships with a `/scheduler` skill, a firing schedule resolves
+to a real conversation (or makes one per run), and `ask_user` is a real held-turn gate. **Do not propose
+scheduling or delivery — she has them.**
+🔑 **Self and Mind are strong; BODY IS EMPTY** — every installed tool is read-only or writes only her own
+memory. Nothing she can do changes anything outside her own stores.
+🔑 The two gaps that matter more than any single power: **no continuity of purpose across the gap** (a cron
+that talks is not an agent — a firing schedule has no state saying *why*) and **no way to observe an
+outcome** (`log_trigger_job_runs` is for the operator, not for her).
+⭐ **RECOMMENDED NEXT BUILD: A1 · persistent intention.** Not the flashier action seam — A1 makes machinery
+she already has agentic, introduces **no new boundary at all**, and is the frozen self-model's *persistent
+state + discontinuous execution* actually implemented. Then **A3** (outcome read, cheap) → **A2** (the
+gated action seam, first real side-effect boundary, grounded in the measured *model-authored infra needs an
+execution gate* finding).
+⚠️ **A1 forces one decision:** `txn_todo_sessions` is session-scoped — does intention **extend Todo** or
+need a **new store**? Same shape as the two-store seam we chose not to merge; answer it explicitly.
+
 ## ✅ SOTERA HAS HER OWN MEMORY — AND A TOOL TO CHECK IT (2026-08-19)
+
+⭐ **BATCH 1 COMPLETE:** `recall_own_memory` · `note_own_practice` · `retract_own_practice` (T3 reused
+`get_service_overview` rather than duplicating it — `serviceInfo` already reports `memoryEnabled` etc.;
+only its description needed the trigger phrasings).
+🔑 **`origin` IS NOW A RATIFIED CONTRACT** (migration 008): `observed` must clear the floor of 3;
+`instructed` lands immediately at n=1 from an explicit correction, and is **sticky**. Every future
+relational writer MUST declare it — *the floor is only meaningful if its exception is labelled.* Live:
+2 observed (n=5, n=4) + 1 instructed (n=1, from *"stop hedging with me"*).
+🔑 **The two stores stay SEPARATE, deliberately.** `list_memories`' description now says so. Merging would
+**leak**: a stance record in the broadcast identity slice would let a stranger read *"with Kavi I avoid
+hedging"* — which names Kavi. The identity slice has no person dimension precisely because it is
+world-readable.
 
 **`memory.relationalStance = true` · `memory.selfModel = true` · floor = 3 · Reflection still `off`.**
 Live records, derived from real conversations with Kavi:
