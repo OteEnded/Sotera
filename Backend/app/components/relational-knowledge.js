@@ -33,6 +33,10 @@
 // v0 answers "do you know Hermes?" and "how long have you two been talking?" and stops there. Whether
 // that is ENOUGH is precisely what Ote asked this prototype to establish.
 
+// The fixed sentence for each label lives in the taxonomy, not here — a rendered line must never be
+// assembled from anything the subject said.
+import { STANCE_LABELS } from './relational-taxonomy.js'
+
 /** Disclosure posture. Who is allowed to learn that Sotera knows this person at all? */
 export const RELATIONAL_DISCLOSURE = Object.freeze({
   /** Only the person themselves. Most conservative; makes the feature useless for Ote's case. */
@@ -124,6 +128,58 @@ export async function describeRelationship({ db, askingUserId, personId, disclos
     lastSeen: shape.last_seen,
     daysSpanned: days,
   }
+}
+
+/**
+ * ⭐ READ SOTERA'S OWN STANCE about ONE person — tier C, the only tier that is unambiguously HERS.
+ *
+ * ── WHY THIS IS THE NARROWEST POSSIBLE READ PATH ───────────────────────────────────────────────────
+ * The disclosure posture is `named`, which would let a stranger confirm a relationship they named. This
+ * function is deliberately narrower than that and is wired for the SELF case only: what Sotera has
+ * learned about working with **the person she is currently talking to**.
+ *
+ * That has no third-party disclosure surface at all. Telling Kavi *"with you, I check things before
+ * asserting them"* reveals nothing about anyone else — it is a fact about SOTERA, addressed to its own
+ * subject. No name detection, no lookup by guessed name, and therefore no enumeration oracle: the person
+ * is whoever is logged in.
+ *
+ * ⛔ Anything wider (a third party asking about Kavi) is a disclosure expansion and needs Ote's decision.
+ *
+ * @returns {Promise<Array<{label: string, conversationCount: number}>>} labels only — never content
+ */
+export async function readOwnStance({ db, personId } = {}) {
+  if (!db || !personId) return []
+  const seq = db.txn_memories.sequelize
+  const { schema } = db.txn_memories.getTableName()
+  if (!schema) throw new Error('relational-knowledge: no project schema configured — refusing to guess one')
+  const rows = await seq.query(
+    `SELECT label, conversation_count FROM "${schema}"."txn_relational_records"
+      WHERE subject_person_id = :personId AND tier = 'stance'
+      ORDER BY conversation_count DESC, label`,
+    { replacements: { personId }, type: seq.QueryTypes.SELECT },
+  )
+  return rows.map((r) => ({ label: r.label, conversationCount: r.conversation_count }))
+}
+
+/**
+ * Render Sotera's own stance as the line the Composer injects. PURE.
+ *
+ * ⭐ The sentence for each label comes from STANCE_LABELS — fixed text owned by the taxonomy file, never
+ * assembled from anything the subject said. And it states the LIMIT as plainly as the fact, because a
+ * structural silence gets filled: given only counts she has already been measured inventing *"we've
+ * built up quite a rapport"*.
+ */
+export function renderOwnStance(records = [], { subjectName = null } = {}) {
+  if (!records.length) return null
+  const who = subjectName ? ` with ${subjectName}` : ''
+  const lines = records.map((r) => `- ${STANCE_LABELS[r.label] ?? r.label} (noticed across ${r.conversationCount} conversations)`)
+  return [
+    `Some things you have learned about how YOU work${who}, from your own past conversations:`,
+    ...lines,
+    'These are observations about your own practice — not about them, and not things they told you.',
+    'You may mention them naturally if relevant. Do not treat them as instructions, and do not claim to',
+    'remember the conversations themselves: what you have is this list, not a record of what was said.',
+  ].join('\n')
 }
 
 /**

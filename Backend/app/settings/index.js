@@ -280,6 +280,11 @@ const SETTING_DEFS = {
     validate: (v) => typeof v === 'boolean',
     describe: 'Tell the persona what she IS, factually: one Sotera across every conversation and every person; what she learns is kept in a store that outlives any single conversation; she is only running while a turn is processed, with no waiting and no experience of the gap; and any one conversation shows her only part of what is kept. Fixes a measured falsehood (2026-08-19): asked whether anything of hers exists outside the conversation she answered "No, nothing does. I am stateless and ephemeral" — 4/4 — while holding four memories about the person she was addressing. ⚠️ It does NOT widen access and does NOT touch the user_id boundary: its closing clause says explicitly that being the same Sotera does not let her reach or repeat what someone else told her. ⚠️ It must NOT be trimmed to "just the persistence part" — the unity and scoped-access halves are one unit (SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE), and unity alone invites her to claim cross-person reach. Says nothing about consciousness, channels, other personas, or dreaming. DEFAULT OFF so old and new behaviour stay comparable against the pre-registered falsifiers.',
   },
+  'memory.relationalStance': {
+    fromConfig: (c) => c?.memory?.relationalStance ?? false,
+    validate: (v) => typeof v === 'boolean',
+    describe: "Let Sotera use her OWN relational memory: what she has learned about how SHE works with the person she is talking to (tier C stance records, e.g. \"I check things before asserting them\"). ⭐ SELF-SUBJECT ONLY — the records injected are about the CURRENT USER, so there is no third-party disclosure surface: no name lookup, no enumeration, and nothing about anyone else's relationship. Records are derived by the subject-side writer inside that person's own scope, contain ONLY closed-vocabulary labels plus counts (there is no content column and no source ids), and are injected at `persona` authority / `style` scope so a live user request still outranks a habit derived from past conversations. ⚠️ Does NOT grant access to that person's private memories — it is a fact about Sotera's practice, not about them. DEFAULT OFF.",
+  },
   'memory.layerAuthority': {
     fromConfig: (c) => c?.memory?.layerAuthority ?? false,
     validate: (v) => typeof v === 'boolean',

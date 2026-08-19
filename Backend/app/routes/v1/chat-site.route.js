@@ -26,6 +26,7 @@ import { initConversationSearch, buildConversationSearch, evidenceLine, hasRetri
 import { initReflection, buildReflection } from '../../components/reflection-host.js'
 import { normalizeWorkingMemory, renderWorkingMemory, extractIntent, initWorkingMemory } from '../../components/working-memory-host.js'
 import { makeEmbedder } from '../../components/memory-embed-host.js'
+import { readOwnStance, renderOwnStance } from '../../components/relational-knowledge.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 import { createSteerRegistry } from '../../chat/steer-registry.js'
@@ -1485,6 +1486,25 @@ export default async function chatSiteRoutes(fastify) {
       // Self-model: what she IS. Read per turn for the same reason — the falsifier run flips this arm
       // without a restart, and nobody mutates the live system between arms.
       selfModel: getSetting(fastify.config, 'memory.selfModel') === true,
+      // ⭐ HER OWN RELATIONAL MEMORY, self-subject only. The person is whoever is logged in — there is no
+      // name lookup and no way for the caller to point this at somebody else, so it carries no
+      // third-party disclosure. Fails soft: a missing person row or an empty table just means no block.
+      relationalStance: getSetting(fastify.config, 'memory.relationalStance') === true
+        ? await (async () => {
+          try {
+            const [me] = await fastify.db.txn_memories.sequelize.query(
+              'SELECT person_id::text AS pid FROM persona_sotera.mst_users WHERE id = :uid',
+              { replacements: { uid: request.user.id }, type: fastify.db.txn_memories.sequelize.QueryTypes.SELECT },
+            )
+            if (!me?.pid) return null
+            const stance = await readOwnStance({ db: fastify.db, personId: me.pid })
+            return renderOwnStance(stance, { subjectName: request.user.displayName || request.user.username })
+          } catch (e) {
+            fastify.log?.debug?.({ err: e?.message }, '[relational] stance read failed (non-fatal)')
+            return null
+          }
+        })()
+        : null,
     }
     const tailZone = userTz || 'UTC'
     let nowString

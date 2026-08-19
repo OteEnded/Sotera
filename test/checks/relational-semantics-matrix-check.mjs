@@ -27,7 +27,26 @@ const ok = (c, l, d = '') => check(l, c, d)
 
 const users = Object.fromEntries((await Q('SELECT id::text, username FROM persona_sotera.mst_users')).map((u) => [u.username, u.id]))
 const persons = Object.fromEntries((await Q('SELECT id::text, display_name FROM persona_sotera.mst_persons')).map((p) => [p.display_name, p.id]))
+// ⚠️⚠️ THIS CHECK ONCE DELETED A REAL RECORD. Its cleanup was
+//   DELETE ... WHERE deriver_version IN ('matrix','stance-writer-0.1')
+// and `stance-writer-0.1` is the REAL deriver — so running the suite wiped Sotera's first genuine
+// relational memory, minutes after the controlled activation created it. Exactly the
+// memory-lifecycle-check failure (which wiped agent_dev's real memories) reappearing in a new place:
+// **a cleanup predicate that also matches production data.**
+//
+// ⭐ THE RULE: a test may only delete rows it can PROVE it created. A deriver_version tag is not enough
+// here, because this check exercises the REAL writer and its rows therefore carry the real deriver. So:
+// snapshot the ids that exist BEFORE anything runs, and delete only ids that are not in that set.
+// Provably scoped, regardless of person, label, or deriver.
+const PRE_EXISTING = new Set((await Q('SELECT id::text FROM persona_sotera.txn_relational_records')).map((r) => r.id))
 const rec = (over = {}) => ({ subjectPersonId: persons.Kavi, tier: 'stance', label: 'i-verify-before-asserting', conversationCount: 3, windowStart: '2026-08-18', windowEnd: '2026-08-19', ...over })
+/** Delete ONLY rows this run created. Never by subject, never by label, never by deriver. */
+async function cleanupFixtures() {
+  const now = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
+  const mine = now.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
+  if (mine.length) await X('DELETE FROM persona_sotera.txn_relational_records WHERE id IN (:ids)', { ids: mine })
+  return mine.length
+}
 
 let fixturePerson = null
 try {
@@ -90,7 +109,7 @@ try {
   const survived = await Q(`SELECT subject_person_id, label FROM persona_sotera.txn_relational_records WHERE deriver_version='matrix'`)
   ok(survived.length === 1 && survived[0].subject_person_id === null,
     'M6 · ⭐ the stance SURVIVES and the person link DETACHES — he can be forgotten, she is not lobotomised')
-  await X("DELETE FROM persona_sotera.txn_relational_records WHERE deriver_version='matrix'")
+  await cleanupFixtures()
 
   // ── M7 · multiple accounts, one person — no cross-account read/write path ────────────────────────
   const kaviAccounts = await Q(`SELECT username FROM persona_sotera.mst_users WHERE person_id = :p ORDER BY username`, { p: persons.Kavi })
@@ -130,7 +149,7 @@ try {
                           WHERE subject_person_id = :p AND label='i-ask-before-assuming'`, { p: persons.Kavi })
     ok(r2[0].n === 1, 'M8 · ⭐ two accounts of one person, racing on SEPARATE lanes, still produce ONE row',
       'serialization is per-account; convergence is per-person and the unique index is what closes the gap')
-    await X('DELETE FROM persona_sotera.txn_relational_records WHERE subject_person_id = :p', { p: persons.Kavi })
+    await cleanupFixtures()
   }
 
   // ── M9 · re-derivation is stable and idempotent ──────────────────────────────────────────────────
@@ -147,7 +166,7 @@ try {
     const rows = await Q(`SELECT conversation_count FROM persona_sotera.txn_relational_records
                             WHERE subject_person_id = :p AND label='i-give-full-detail'`, { p: persons.Kavi })
     ok(rows.length === 1 && rows[0].conversation_count === 9, 'M9 · ⭐ re-derivation UPDATES in place — one row, latest support', JSON.stringify(rows))
-    await X('DELETE FROM persona_sotera.txn_relational_records WHERE subject_person_id = :p', { p: persons.Kavi })
+    await cleanupFixtures()
   }
 
   // ── M10 · absence cannot be queried as a negative fact ───────────────────────────────────────────
@@ -159,9 +178,13 @@ try {
     'M10 · the emitted block asserts only what IS, never what is absent', 'a confirmed negative is the query you were denied')
 } finally {
   if (fixturePerson) await X('DELETE FROM persona_sotera.mst_persons WHERE id = :p', { p: fixturePerson }).catch(() => {})
-  await X("DELETE FROM persona_sotera.txn_relational_records WHERE deriver_version IN ('matrix','stance-writer-0.1')").catch(() => {})
-  const left = await Q('SELECT count(*)::int n FROM persona_sotera.txn_relational_records')
-  ok(left[0].n === 0, 'cleanup · no relational records left behind', `${left[0].n} rows`)
+  await cleanupFixtures().catch(() => {})
+  // ⚠️ THE DELTA, NOT AN EMPTY TABLE — see the note at the top. Demanding zero rows is a demand that the
+  // check delete real records, which is exactly the bug this file caused.
+  const rows = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
+  const added = rows.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
+  ok(added.length === 0, 'cleanup · the table is exactly as this check found it — real records untouched',
+    `${rows.length} rows present, ${added.length} added by this run`)
   const fx = await Q("SELECT count(*)::int n FROM persona_sotera.mst_persons WHERE display_name LIKE '\\_\\_%'")
   ok(fx[0].n === 0, 'cleanup · no fixture persons left behind', `${fx[0].n}`)
 }

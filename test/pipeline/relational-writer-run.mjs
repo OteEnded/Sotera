@@ -26,7 +26,10 @@ if (!u) { console.error(`no such user: ${username}`); process.exit(2) }
 console.log(`\nsubject: ${u.username}   deriver=${DERIVER_VERSION}  taxonomy=${TAXONOMY_VERSION}  floor=${FREQUENCY_FLOOR}\n`)
 const t0 = Date.now()
 const out = await abstractStance({ db, subjectUserId: u.id })
-console.log(`scanned ${out.scanned} conversation(s) · ${out.contributed} contributed · ${out.skipped} skipped · ${((Date.now() - t0) / 1000).toFixed(1)}s\n`)
+console.log(`scanned ${out.scanned} conversation(s) · ${out.contributed} contributed · ${out.skipped} skipped · ${((Date.now() - t0) / 1000).toFixed(1)}s`)
+// ⚠️ WHY things were skipped matters: `no-labels` is a genuine no-op, but `model-error` or `unparseable`
+// means the pass UNDER-COUNTED and a label may be sitting below the floor for the wrong reason.
+console.log(`skip reasons: ${JSON.stringify(out.reasons)}\n`)
 
 if (!out.records.length) {
   console.log('  (no label reached the frequency floor — nothing would be recorded)')

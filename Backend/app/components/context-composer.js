@@ -263,6 +263,10 @@ export function composeSystemContext({
   // SELF-MODEL (2026-08-19): what she IS — one Sotera, many people, persistent state, discontinuous
   // execution, scoped access. L1 by Ote's ruling; default off so old and new are comparable.
   selfModel = false,
+  // RELATIONAL STANCE (2026-08-19): what SHE has learned about how she works with the person she is
+  // talking to. A pre-rendered block from relational-knowledge.js, or null. ⭐ SELF-SUBJECT ONLY — it is
+  // about the current user, so it carries no third-party disclosure. Anything wider needs Ote's decision.
+  relationalStance = null,
 } = {}) {
   // Parts are collected WITH A KEY, not as bare strings, so the assembled prompt can describe itself:
   // the context-usage breakdown reports real per-section token counts instead of one opaque "system
@@ -288,6 +292,12 @@ export function composeSystemContext({
   // ⚠️ Its fourth paragraph is the SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE counterweight and must not
   // be separated from the first — see SELF_MODEL's own note.
   if (selfModel) part('self-model', SELF_MODEL, AUTHORITY.foundational, SCOPE.identity)
+  // ⭐ HER OWN LEARNED PRACTICE. `persona` authority, not `foundational`: unlike the self-model this is
+  // something she LEARNED rather than something she IS, and `AUTHORITY_BY_SCOPE` lets the user outrank
+  // persona on style — which is right. If Kavi asks for something terser than her usual practice with
+  // him, the live request must win over a habit derived from three past conversations.
+  // `SCOPE.style` for the same reason: it describes how she works, not who she is or what is true.
+  if (relationalStance) part('relational-stance', relationalStance, AUTHORITY.persona, SCOPE.style)
   if (customInstructions && customInstructions.trim()) {
     // ⚠️ SCOPE IS AN APPROXIMATION HERE, and knowingly so. Custom instructions are free text and can
     // say anything — "be terse" (style) and "always start with a summary" (task) are both ordinary.

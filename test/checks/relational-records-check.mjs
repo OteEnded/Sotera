@@ -35,6 +35,18 @@ const ok = (c, l, d = '') => check(l, c, d)
 const users = Object.fromEntries((await Q('SELECT id::text, username FROM persona_sotera.mst_users')).map((u) => [u.username, u.id]))
 const persons = Object.fromEntries((await Q('SELECT id::text, display_name FROM persona_sotera.mst_persons')).map((p) => [p.display_name, p.id]))
 
+// ⚠️⚠️ THIS CHECK ONCE DELETED A REAL RECORD — `DELETE ... WHERE subject_person_id = Kavi` also matched
+// the row the controlled activation had just created. Same failure as memory-lifecycle-check wiping
+// agent_dev's real memories: **a cleanup predicate that also matches production data.**
+// ⭐ A test may only delete rows it can PROVE it created. Snapshot ids first; delete only what is new.
+const PRE_EXISTING = new Set((await Q('SELECT id::text FROM persona_sotera.txn_relational_records')).map((r) => r.id))
+async function cleanupFixtures() {
+  const now = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
+  const mine = now.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
+  if (mine.length) await X('DELETE FROM persona_sotera.txn_relational_records WHERE id IN (:ids)', { ids: mine })
+  return mine.length
+}
+
 let probePerson = null
 try {
   // ── G1 · no free-text / source-id escape hatch EXISTS in the schema ──────────────────────────────
@@ -149,7 +161,7 @@ try {
     const hermesRows = await Q(`SELECT count(*)::int n FROM persona_sotera.txn_relational_records WHERE subject_person_id = :p`, { p: persons.Hermes })
     ok(hermesRows[0].n === 0, 'G9 · …and nothing about that person was written')
 
-    await X(`DELETE FROM persona_sotera.txn_relational_records WHERE subject_person_id = :p`, { p: persons.Kavi })
+    await cleanupFixtures()
   }
 
   // ── G8 · absence cannot be queried ───────────────────────────────────────────────────────────────
@@ -164,8 +176,14 @@ try {
   if (probePerson) await X(`DELETE FROM persona_sotera.mst_persons WHERE id = :p`, { p: probePerson }).catch(() => {})
   const left = await Q(`SELECT count(*)::int n FROM persona_sotera.mst_persons WHERE display_name = '__reldel_probe__'`)
   ok(left[0].n === 0, 'cleanup · no fixture person left behind')
-  const rows = await Q(`SELECT count(*)::int n FROM persona_sotera.txn_relational_records`)
-  ok(rows[0].n === 0, 'cleanup · no relational records left behind — this check persists nothing', `${rows[0].n} rows`)
+  // ⚠️ ASSERT THE DELTA, NOT AN EMPTY TABLE. "Zero rows exist" was only ever true while the feature had
+  // never been activated; the moment a real record exists it becomes a demand that the check DESTROY it.
+  // The right invariant is that the check leaves the table exactly as it found it.
+  await cleanupFixtures().catch(() => {})
+  const rows = await Q('SELECT id::text FROM persona_sotera.txn_relational_records')
+  const added = rows.map((r) => r.id).filter((id) => !PRE_EXISTING.has(id))
+  ok(added.length === 0, 'cleanup · the table is exactly as this check found it — real records untouched',
+    `${rows.length} rows present, ${added.length} added by this run`)
 }
 
 
