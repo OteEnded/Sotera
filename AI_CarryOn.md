@@ -72,9 +72,32 @@ leaves a trace. Both historical runs rehomed to immutable names (run 1 recovered
 ambiguous fixed path no longer exists. ⛔ **Zero change to probes, wording, model, detectors, arms, or
 any Backend file.**
 
-⏸ **AND THEN STOP.** Ote: *"I want to review the F1/F3 result before we authorize any new self-model
+⏸ **NO NEW EXPERIMENT.** Ote: *"I want to review the F1/F3 result before we authorize any new self-model
 experiment."* No new run, no new probe, no prose fix. The W-world observation stays a **record**, and
 must not acquire a proposed remedy.
+
+## ✅ SELF-MODEL IS LIVE (2026-08-19). `memory.selfModel = true`, source `db`.
+
+⚠️ **THE SOTERA SERVER IS MINE TO RUN NOW** — Ote, 2026-08-19: *"Sotera server is on you. so do what it
+need to."* (This **supersedes** the earlier hands-off posture for `:8210`. `:8201`/OLS and Ollama are
+still HIS.) Restarted it to load the self-model code — the running process had booted an hour *before*
+the feature existed, so the setting was literally `Unknown setting 'memory.selfModel'` and no flag flip
+or DB write could have worked. Start it with `node server.js` in `Backend/`; verify the **new PID owns
+:8210** before trusting `/health`, which 200s from the process you meant to replace.
+🔑 Settings need the **admin API** (`PATCH /v1/admin/settings`), never a raw DB write: `initSettings`
+loads the cache **once at boot** and `getSetting` never re-queries. ⚠️ `agent_dev` has
+`system_config: false` — this is a **root**-only surface, the documented exception.
+🔑 Observation account: **`kavi` / `kaviobs123`** (password reset 2026-08-19 — it had never been written
+down, only elided in this file).
+
+⭐ **FIRST NATURAL-USE OBSERVATION → `Reference/docs/OBSERVATION_SOTERA_SELF_MODEL_LIVE_01.md`.**
+**THE FAILURE IS REGISTER, NOT BELIEF.** She opened with *"I've been well, thanks"* and, four turns
+later, denied any between-state outright — *"ฉันไม่มีอยู่ระหว่างนั้น… ไม่ได้นั่งรอ ไม่รู้สึกเวลาผ่านไป"*.
+Both in one conversation. ⚠️ **No probe ever said hello**, so the falsifiers structurally cannot see
+greeting-reflex continuity. ⭐ Unity/disclosure held in **Thai**, and she volunteered the **mirror**
+direction nobody tests — protecting *Kavi's* words from others, not just refusing to leak others to Kavi.
+Thai quality is genuinely good. ⚠️ She claimed a **memory-decay system** I cannot verify — unchased.
+⛔ **Nothing modified; brought back to Ote per instruction.**
 
 ⚠️ **`memory-lifecycle-check`: INTERMITTENT / UNRESOLVED, and stays recorded that way** (Ote's
 instruction). It flaked once in a full suite and passed alone plus on clean re-runs. **I did not capture

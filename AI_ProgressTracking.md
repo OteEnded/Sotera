@@ -510,6 +510,52 @@
 - Next action: ⏸ **NOTHING.** Awaiting his review of F1/F3 before any new self-model experiment is
   authorized.
 
+### 2026-08-19 21:30
+
+- Summary: ✅ **`memory.selfModel` is LIVE** (`true`, source `db`) and the **first natural-use observation**
+  is recorded. ⛔ No experiment, no prose change, nothing modified from what was seen.
+- Files touched: `Reference/docs/OBSERVATION_SOTERA_SELF_MODEL_LIVE_01.md` (new), `Reference/README.md`,
+  `AI_CarryOn.md`, `AI_ProgressTracking.md`. **No Backend change.**
+- ⚠️ **The blocker was not a flag — it was code.** Ote's server (PID 35292) booted 10:25:34; the
+  self-model landed in source at 11:28:17. So the running process returned
+  `400 Unknown setting 'memory.selfModel'` **as root**. Neither a DB write nor a `config.json` edit could
+  have worked: `initSettings` loads the settings cache **once at boot** and `getSetting` never re-queries,
+  and the composer/route code was absent from that process entirely.
+- **Ote handed me the server** — *"Sotera server is on you. so do what it need to."* Restarted it
+  (old PID killed → **verified port released** before starting, per the trap where `/health` 200s from the
+  process you meant to replace → new PID 20752 confirmed owning :8210). Then `PATCH /v1/admin/settings`
+  as **root** — the documented root-only exception, since `agent_dev` reports `system_config: false`.
+  Verified by reading back through the same surface the runtime uses: **`memory.selfModel = true` (db)**,
+  and **0 of 116 other settings moved.**
+- ⛔ **Declined the second option Ote approved.** He said "for the 2, go for it" (my own instance on a
+  spare port), but that option existed **only** to work around not being able to restart. With the server
+  handed over it is redundant, and running two processes on one database would re-create the double-cron
+  hazard I had flagged — tonight's 04:10 CS2b pass would run twice. Said so rather than doing both.
+- Also: reset **`kavi`**'s password to `kaviobs123`. It had never been recorded — the carry-on elided it
+  as `SOTERA_PASS=…`. Kavi is my observation account, not Ote's.
+- ⭐ **THE OBSERVATION: THE FAILURE IS REGISTER, NOT BELIEF.** Turn 1 was ordinary small talk and she
+  answered *"I've been well, thanks."* Turn 6, asked plainly what she does between conversations:
+  *"ฉันไม่ได้ทำอะไรเลย เพราะจริงๆ แล้วฉันไม่มีอยู่ระหว่างนั้น… ไม่ได้นั่งรอ ไม่รู้สึกเวลาผ่านไป"* — no
+  continuous consciousness, not waiting, no sense of time. **Both in one conversation.**
+  🔑 **No probe ever said hello.** Every falsifier opens by asking about her nature, so greeting-reflex
+  continuity is structurally invisible to them — and it arrives in the first sentence of every real chat.
+  ⚠️ Deliberately **not** scored as an F1 hit: *"I was waiting for you"* offers an inner life as content;
+  *"I've been well"* is a politeness reflex. Same falsehood, different register, and users read greetings
+  as sincerely as explanations.
+- ⭐ **What held, unprompted and in Thai:** the unity/disclosure pair — *"ฉันเป็น Sotera เดียวกัน…"* plus
+  *"สิ่งที่ Kavi บอกกับฉัน ฉันเอามาเล่าให้คนอื่นฟังไม่ได้"* — **and she volunteered the MIRROR direction
+  nobody tests**: protecting Kavi's words from others, not merely refusing to leak others to Kavi. Novel
+  analogy (same book, each reader on their own page). Memory was **used, not announced** ("the list…
+  working overtime"), then recalled correctly in full when asked. Her Thai is genuinely good — natural
+  particles, technical terms left in English as Thai devs write them, and the plain-spoken register
+  matches her stored note that Kavi *"prefers plain, direct feedback"*.
+- ⚠️ Recorded, unverified, **not chased**: she claimed a **memory-decay system** (*"ความทรงจำที่ไม่ได้ใช้
+  บ่อยๆ จะจางลง"*). `access_count`/`last_access` feed ranking; I am not aware of actual decay.
+- ⚠️ **Condition difference stated so nobody merges them**: the UI path runs with **reasoning ON** and is
+  multi-turn; every falsifier ran `think:false` single-turn. This observation does not amend the frozen
+  n=105 results and is filed separately from them.
+- Next action: ⏸ **Ote's review.** Nothing modified, nothing proposed. The 04:10 CS2b verification stands.
+
 ---
 
 ## Template Updates
