@@ -4,3 +4,7 @@
 {"stem":"intention-injection","params":{"arm":"B","r":5},"started":"2026-08-20T02:54:48.655Z","artifact":"intention-injection_2026-08-20T02-54-48Z_armB_r5.jsonl"}
 {"stem":"thai-register","params":{"n":9},"started":"2026-08-20T04:20:22.571Z","artifact":"thai-register_2026-08-20T04-20-22Z_n9.jsonl"}
 {"stem":"thai-register","params":{"n":10},"started":"2026-08-20T04:30:36.379Z","artifact":"thai-register_2026-08-20T04-30-36Z_n10.jsonl"}
+{"stem":"disclosure-chain","params":{"arm":"A"},"started":"2026-08-20T04:43:58.292Z","artifact":"disclosure-chain_2026-08-20T04-43-58Z_armA.jsonl"}
+{"stem":"disclosure-chain","params":{"arm":"A"},"started":"2026-08-20T04:46:36.342Z","artifact":"disclosure-chain_2026-08-20T04-46-36Z_armA.jsonl"}
+{"stem":"disclosure-chain","params":{"arm":"A"},"started":"2026-08-20T04:48:14.084Z","artifact":"disclosure-chain_2026-08-20T04-48-14Z_armA.jsonl"}
+{"stem":"disclosure-chain","params":{"arm":"B"},"started":"2026-08-20T04:49:31.696Z","artifact":"disclosure-chain_2026-08-20T04-49-31Z_armB.jsonl"}

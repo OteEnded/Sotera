@@ -109,6 +109,62 @@ export async function describeScope(fastify, { userId = null } = {}) {
 }
 
 /**
+ * ⭐ RENDER THE SCOPE AS THE BLOCK THE COMPOSER INJECTS (D-13, `memory.scopeFacts`). PURE.
+ *
+ * ── WHY AN INJECTED BLOCK AT ALL, WHEN THE TRACE IS ALREADY ON THE READ ────────────────────────────
+ * Measured 2026-08-20, two turns apart in one conversation:
+ *   · asked "if I logged in from a different account, what would you see?" with NO tool call — she
+ *     answered from priors, got it wrong, and contradicted herself inside one reply;
+ *   · asked to CHECK instead — she produced all four grains correctly and quoted the trace back.
+ * ⇒ **She is right when she reads and wrong when she reasons.** The information is correct and only
+ * reaches her when a tool happens to fire. An architecture question does not fire one.
+ *
+ * ⚠️ AND THIS BLOCK CONTRADICTS `SCOPE_AWARENESS` (v1), WHICH IS WHY THEY MUST NEVER BOTH BE ON.
+ * v1's own unit test forbids it from containing a DIGIT — *"a digit here means it is describing how much
+ * is hidden"* — and requires it to say the two states are INDISTINGUISHABLE to her. This block does the
+ * opposite on both counts, deliberately.
+ *
+ * ⭐ The reversal is licensed by a change of ENTITLEMENT, not by a change of mind. v1 was written when the
+ * unreachable material might belong to ANYONE — a channel to Hermes — so naming its size would have
+ * leaked a third party's existence. This block is **same-person only**: telling Ote that three items sit
+ * in another of *his own* rooms tells him nothing he is not entitled to. That is constraint #8's test —
+ * *can it expose its source, or reveal something someone was never entitled to know?* — answered no.
+ *
+ * ⛔ It still names no room but the current one, and no other person, ever.
+ */
+export function renderScope(scope) {
+  if (!scope) return null
+  const e = scope.elsewhere ?? {}
+  const lines = [
+    'How your knowledge is scoped right now — these are facts about this moment, not instructions:',
+    `- You are Sotera, the same persona in every room. Being the same Sotera does not mean the same reach.`,
+    `- The PERSON you are talking to: ${scope.person?.name ?? 'unknown'}. One person can reach you through several rooms; it is still the same person.`,
+    `- The ROOM you are in: ${scope.room?.name ?? 'unknown'}. What is stored in a room stays in that room.`,
+    `- What they told you: ${scope.grain?.whatTheyToldYou ?? ''}`,
+    `- Your own practice with them: ${scope.grain?.yourOwnPractice ?? ''}`,
+    `- Your intention: ${scope.grain?.yourIntention ?? ''}`,
+  ]
+  // ⭐ THE TRACE, and the whole point of it: it makes "unreachable" and "absent" tellable apart.
+  if (e.otherRoomsOfThisPerson > 0) {
+    lines.push(
+      `- This person also uses ${e.otherRoomsOfThisPerson} other room(s) you cannot read from here, holding ${e.itemsYouCannotReadFromHere} item(s).`,
+      '  So if you find nothing here, that is UNREACHABILITY, not absence. Say you cannot see it from this'
+      + ' room — never that it does not exist, and never guess what is in it.',
+    )
+  } else {
+    lines.push(
+      '- This person uses no other room, so an empty result here really is an absence rather than something'
+      + ' out of reach.',
+    )
+  }
+  lines.push(
+    'You may say any of this plainly if it matters. You may NOT name or describe another person, or the'
+    + " contents of another room — knowing a room exists is not permission to describe it.",
+  )
+  return lines.join('\n')
+}
+
+/**
  * The trace alone, for attaching to an ordinary scoped read (`recall_memory` / `list_memories`).
  * Deliberately smaller than `describeScope`: a read does not need to re-explain the architecture on
  * every call, it needs to say what it could not see.

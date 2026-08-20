@@ -16,10 +16,13 @@ import { makeChecker, devPg, devSchema } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
-import { describeScope, reachTrace } from '../../Backend/app/components/room-scope.js'
+import { describeScope, reachTrace, renderScope } from '../../Backend/app/components/room-scope.js'
 import { buildIntention } from '../../Backend/app/components/intention-host.js'
 import { buildOwnMemory } from '../../Backend/app/components/own-memory-host.js'
 import { snapshotIntentions, restoreIntentions } from '../lib/intention-fixtures.mjs'
+import { composeSystemContext } from '../../Backend/app/components/context-composer.js'
+import { SCOPE_AWARENESS } from '../../Backend/app/components/context-authority.js'
+import { getSetting, configDefault } from '../../Backend/app/settings/index.js'
 
 const { check, done } = makeChecker()
 const ok = (c, l, d = '') => check(l, c, d)
@@ -131,6 +134,40 @@ try {
     `${stanceA.withThisPerson.count} vs ${stanceB.withThisPerson.count}`)
   ok(stanceB.scope?.grain?.yourOwnPractice?.includes('same in every room'),
     'R2 · ⭐ …and the payload TELLS her that is why they match')
+
+  // ── D13 · THE INJECTED SCOPE BLOCK, and its mutual exclusion with v1 ──────────────────────────
+  const block = renderScope(s)
+  ok(block.includes('Kavi') && block.includes('kavi'),
+    'D13 · the rendered block names the PERSON and the ROOM')
+  ok(/same persona in every room/i.test(block) && /does not mean the same reach/i.test(block),
+    'D13 · ⭐ …and states the invariant, so she can reason from it without calling a tool')
+  ok(/other room\(s\) you cannot read from here/i.test(block) && /\d/.test(block),
+    'D13 · ⭐⭐ …and carries the TRACE, digits and all — which is exactly what v1 forbade')
+  // ⭐ THE CONFLICT, ASSERTED IN BOTH DIRECTIONS. v1's own test forbids a digit ("a digit here means it
+  // is describing how much is hidden") and requires it to call the two states indistinguishable. v2 does
+  // the opposite on purpose, licensed by being SAME-PERSON only. Neither is wrong; they cannot coexist.
+  ok(!/\d/.test(SCOPE_AWARENESS), 'D13 · v1 still contains no digit — its own guarantee is intact')
+  ok(/cannot tell (the difference|those two apart)/i.test(SCOPE_AWARENESS),
+    'D13 · …and still says the two states are indistinguishable')
+  ok(!/cannot tell those two apart/i.test(block),
+    'D13 · ⭐ …while v2 does NOT say that, because with the trace it is no longer true')
+  ok(!/hermes/i.test(block) && !/mina/i.test(block) && !/kavi_alt/i.test(block),
+    'D13 · ⛔ the block names no other person and no other room — knowing one exists is not permission to describe it')
+
+  const baseArgs = { user: { username: 'kavi' }, toolsOn: true }
+  const offBoth = composeSystemContext({ ...baseArgs }).system
+  const v1Only = composeSystemContext({ ...baseArgs, scopeAwareness: true }).system
+  const v2Only = composeSystemContext({ ...baseArgs, scopeFacts: block }).system
+  const bothOn = composeSystemContext({ ...baseArgs, scopeAwareness: true, scopeFacts: block }).system
+  ok(!offBoth.includes(SCOPE_AWARENESS) && !offBoth.includes('The ROOM you are in'),
+    'D13 · with both flags off the prompt carries neither')
+  ok(v1Only.includes(SCOPE_AWARENESS), 'D13 · v1 alone still injects v1')
+  ok(v2Only.includes('The ROOM you are in') && !v2Only.includes(SCOPE_AWARENESS),
+    'D13 · v2 alone injects only v2')
+  ok(bothOn.includes('The ROOM you are in') && !bothOn.includes(SCOPE_AWARENESS),
+    'D13 · ⭐⭐ with BOTH set, v2 wins and v1 is suppressed — deterministically, never by throwing')
+  ok(configDefault(null, 'memory.scopeFacts') === false,
+    'D13 · ⭐ `memory.scopeFacts` SHIPS off', `shipped=${configDefault(null, 'memory.scopeFacts')} · live=${getSetting(config, 'memory.scopeFacts')}`)
 
   // ── R3 · the scope block rides on the reads she actually uses ──────────────────────────────────
   ok(seenA.scope?.room?.name === 'agent_dev', 'R3 · recall_intention carries the scope block', seenA.scope?.room?.name)

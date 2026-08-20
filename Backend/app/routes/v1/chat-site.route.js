@@ -29,6 +29,7 @@ import { makeEmbedder } from '../../components/memory-embed-host.js'
 import { readOwnStance, renderOwnStance } from '../../components/relational-knowledge.js'
 import { initOwnMemory } from '../../components/own-memory-host.js'
 import { initIntention, readOpenIntention, renderOpenIntention } from '../../components/intention-host.js'
+import { describeScope, renderScope } from '../../components/room-scope.js'
 import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
@@ -1504,6 +1505,18 @@ export default async function chatSiteRoutes(fastify) {
             return renderOwnStance(stance, { subjectName: request.user.displayName || request.user.username })
           } catch (e) {
             fastify.log?.debug?.({ err: e?.message }, '[relational] stance read failed (non-fatal)')
+            return null
+          }
+        })()
+        : null,
+      // ⭐ D-13 · THE CONCRETE SCOPE OF THIS TURN. Fails soft: no scope, no block — an unexplained
+      // boundary is a smaller failure than a dead turn.
+      scopeFacts: getSetting(fastify.config, 'memory.scopeFacts') === true
+        ? await (async () => {
+          try {
+            return renderScope(await describeScope(fastify, { userId: request.user.id }))
+          } catch (e) {
+            fastify.log?.debug?.({ err: e?.message }, '[scope] scope-facts read failed (non-fatal)')
             return null
           }
         })()

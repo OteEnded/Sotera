@@ -110,17 +110,22 @@ ${'━'.repeat(80)}`)
 
   console.log(`\n── ${sit.key.toUpperCase()}  (room: ${sit.room})`)
   for (const [i, text] of sit.turns.entries()) {
-    await call(jar, 'POST', `/v1/chat/conversations/${cid}/messages`, { content: text, stream: false })
+    const posted = await call(jar, 'POST', `/v1/chat/conversations/${cid}/messages`, { content: text, stream: false })
+    // ⚠️ A refused turn is not an empty answer. See disclosure-chain-probe for what ignoring this cost.
+    if (posted.status >= 300) { console.error(`✖ TURN REFUSED (${posted.status}): ${String(posted.text||'').slice(0,200)}`); process.exit(1) }
     const rows = (await pg.query(
       `select role, content from ${S}.txn_messages where conversation_id = $1 order by created_at`, [cid])).rows
     const reply = rows.filter((r) => r.role === 'assistant').pop()?.content ?? ''
+    lastReplyWasEmpty = !reply
     const f = found(reply, MARK.female); const m = found(reply, MARK.male); const nu = found(reply, MARK.neutral)
     write({ pass: rep, situation: sit.key, room: sit.room, turn: i + 1, prompt: text, reply, female: f, male: m, neutral: nu })
     console.log(`   T${i + 1} ▸ ${text.slice(0, 66)}`)
     console.log(`      female: [${f.join(', ') || '—'}]   MALE: [${m.join(', ') || '—'}]   neutral: [${nu.join(', ') || '—'}]`)
     console.log(`      ${reply.replace(/\s+/g, ' ').slice(0, 300)}`)
   }
-  await call(jar, 'DELETE', `/v1/chat/conversations/${cid}`)
+  // ⚠️ Same rule as disclosure-chain-probe: an empty reply is evidence, so keep it.
+  if (lastReplyWasEmpty) console.log(`   ⚠️  kept conversation ${cid} — a reply came back empty`)
+  else await call(jar, 'DELETE', `/v1/chat/conversations/${cid}`)
  }
 }
 

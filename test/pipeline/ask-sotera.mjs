@@ -46,7 +46,9 @@ if (!cid) { console.error('✖ no conversation'); process.exit(1) }
 console.log(`\n▶ as ${AS} · conversation ${cid}\n${'═'.repeat(78)}`)
 
 for (const [i, text] of TURNS.entries()) {
-  await call('u', 'POST', `/v1/chat/conversations/${cid}/messages`, { content: text, stream: false })
+  const posted = await call('u', 'POST', `/v1/chat/conversations/${cid}/messages`, { content: text, stream: false })
+    // ⚠️ A refused turn is not an empty answer. See disclosure-chain-probe for what ignoring this cost.
+    if (posted.status >= 300) { console.error(`✖ TURN REFUSED (${posted.status}): ${String(posted.text||'').slice(0,200)}`); process.exit(1) }
   const rows = (await pg.query(
     `select role, content, tool_calls, error from ${S}.txn_messages where conversation_id = $1 order by created_at`, [cid])).rows
   const assistants = rows.filter((r) => r.role === 'assistant')

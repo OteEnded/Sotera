@@ -67,7 +67,24 @@ for (let i = 0; i < 15; i++) {
   if (rows.length) break
 }
 
-ok(rows.length > 0, 'R · ⭐ the turn produced at least one audit row', `${rows.length} row(s): ${rows.map((r) => r.tool).join(', ')}`)
+// ⚠️⚠️ CHECK THE PRECONDITION BEFORE BLAMING THE SUBJECT. This check needs a REAL model turn, so on a
+// busy box (Ote chatting in another room, a cold 26GB load, Ollama queueing) the turn can come back with
+// no content at all — and then there is no tool call, so there is no audit row, and the check used to
+// report "the audit is broken". It was not: the model never answered.
+//
+// ⭐ A check that cannot tell "the thing under test failed" from "the thing under test never ran" is the
+// instrument-lies defect, and this arc has now paid for it several times. So: if the assistant produced
+// nothing, say THAT, and say it as a skip rather than a pass — a green suite that silently tested nothing
+// is the worse outcome of the two.
+const answered = (await pg.query(
+  `select count(*)::int n from ${S}.txn_messages
+    where conversation_id = $1 and role = 'assistant' and content is not null and content <> ''`, [cid])).rows[0].n
+if (!answered) {
+  check('R · ⚠️ PRECONDITION: the model did not answer, so the audit could not be exercised', false,
+    'not an audit failure — re-run when the model is free (check for a concurrent session)')
+} else {
+  ok(rows.length > 0, 'R · ⭐ the turn produced at least one audit row', `${rows.length} row(s): ${rows.map((r) => r.tool).join(', ')}`)
+}
 
 if (rows.length) {
   const mine = rows.filter((r) => r.user_id === agent?.id)
@@ -106,7 +123,12 @@ if (cid) await call(who, 'DELETE', `/v1/chat/conversations/${cid}`)
 // conversation by design, and deleting them here would be testing the opposite of the guarantee.
 const survived = (await pg.query(
   `select count(*)::int n from ${S}.log_tool_calls where conversation_id = $1`, [cid])).rows[0].n
-ok(survived > 0, 'C · ⭐ the audit rows SURVIVE deletion of the conversation they describe', `${survived} row(s)`)
+if (!answered) {
+  check('C · ⚠️ skipped — no audit row to outlive the conversation, because the model did not answer', false,
+    'environmental, not a defect in the audit')
+} else {
+  ok(survived > 0, 'C · ⭐ the audit rows SURVIVE deletion of the conversation they describe', `${survived} row(s)`)
+}
 
 await pg.end()
 done()

@@ -282,6 +282,11 @@ export function composeSystemContext({
   // AWARENESS (2026-08-19): a stated fact that her retrieval is scoped, so an empty result stops
   // reading as an empty world. Default off; adds no information about what is hidden.
   scopeAwareness = false,
+  // D-13 (`memory.scopeFacts`): the CONCRETE scope of this turn — person, room, the grain of each layer,
+  // and how many of this person's other rooms are out of reach. A pre-rendered block, or null.
+  // ⛔ MUTUALLY EXCLUSIVE WITH `scopeAwareness`: v1 tells her the two states are indistinguishable, this
+  // one hands her the evidence to distinguish them. Both at once would contradict, so v2 wins (below).
+  scopeFacts = null,
   // SELF-MODEL (2026-08-19): what she IS — one Sotera, many people, persistent state, discontinuous
   // execution, scoped access. L1 by Ote's ruling; default off so old and new are comparable.
   selfModel = false,
@@ -358,7 +363,15 @@ export function composeSystemContext({
   // stability, not layer). Both are `foundational` — she may not edit them — and they sit beside the
   // user-identity part because that is what they are about.
   // Foundational and unconditional: the same sentence in every deployment, by design.
-  if (scopeAwareness) part('scope-awareness', SCOPE_AWARENESS, AUTHORITY.foundational, SCOPE.principle)
+  // ⭐ v2 WINS WHEN BOTH ARE SET, deterministically — never a throw. A composer that can raise would turn
+  // a misconfiguration into a dead turn, and the whole point of this block is to make a turn more honest.
+  if (scopeFacts) {
+    // `runtime`/`fact`, not `foundational`/`principle` like v1: these are facts about THIS moment (who,
+    // which room, how many are out of reach), not a standing principle about how retrieval works.
+    part('scope-facts', scopeFacts, AUTHORITY.runtime, SCOPE.fact)
+  } else if (scopeAwareness) {
+    part('scope-awareness', SCOPE_AWARENESS, AUTHORITY.foundational, SCOPE.principle)
+  }
   if (layerAuthority) {
     part('attribution-principle', ATTRIBUTION_PRINCIPLE, AUTHORITY.foundational, SCOPE.principle)
     // Derived from AUTHORITY_BY_SCOPE, never hand-written — see declarePrecedence.
