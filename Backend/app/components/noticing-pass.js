@@ -87,9 +87,18 @@ function priorProposalsFor(records, conversationUserId, limit = 6) {
   return records
     .filter((r) => r.userId === conversationUserId && r.outcome !== 'nothing' && r.body)
     .slice(-limit)
-    .map((r, i) => ({
-      abstraction: `(${r.at?.slice(0, 10) ?? 'earlier'}, outcome=${r.outcome}) ${String(r.body).replace(/\s+/g, ' ').slice(0, 400)}`,
-      _n: i + 1,
+    // ⚠️⚠️ HER OWN WORDS AND A DATE. NOTHING ELSE.
+    // The first version prefixed each prior with `outcome=save` / `outcome=nuance` — **our machine
+    // vocabulary, tagged onto her own past thought.** Ote caught it: *"I want her own history visible, but
+    // I don't want to teach her that 'memory proposal' is the category she is supposed to produce."*
+    // A label like that does exactly that: it tells her these are entries of a type, which invites her to
+    // produce more entries of that type. ⛔ So the tag is gone. She sees what she said, and when.
+    //
+    // ⭐ The distinction worth keeping straight: DECISION words (save / decline / revise) are about what to
+    // DO and the pass needs one parseable signal. ONTOLOGY words (self / lesson / practice / experience)
+    // are about what KIND of thing it is — and those have never been introduced and must not be.
+    .map((r) => ({
+      abstraction: `${r.at?.slice(0, 10) ?? 'earlier'} — ${String(r.body).replace(/\s+/g, ' ').slice(0, 400)}`,
     }))
 }
 

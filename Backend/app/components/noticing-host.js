@@ -85,7 +85,10 @@ const OUTCOMES = ['nothing', 'save', 'propose', 'decline', 'revise', 'nuance', '
  */
 export function buildNoticingPrompt({ who, transcript, priorLessons = [] }) {
   const prior = priorLessons.length
-    ? `\n\nThings you already hold, so you can tell a new one from a change to an old one:\n${priorLessons.map((l, i) => `  [${i + 1}] ${l.abstraction}`).join('\n')}`
+    // ⚠️ Deliberately says "what you have said before", not "your memories" / "your proposals" / "your
+    // lessons". Ote: *"I want her own history visible, but I don't want to teach her that 'memory
+    // proposal' is the category she is supposed to produce."* Naming the container names the category.
+    ? `\n\nSome things you have said before, in case any of this changes one of them:\n${priorLessons.map((l, i) => `  [${i + 1}] ${l.abstraction}`).join('\n')}`
     : '\n\nYou hold nothing yet, so anything here would be new.'
   return (
     `You have just finished a conversation with ${who}. Look back over it and ask yourself ONE question:\n\n`
