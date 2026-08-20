@@ -1746,6 +1746,55 @@
 - **Next action:** ⏭ **let the population grow.** ⛔ Do not reshape the schema until the evidence forces it;
   ⛔ do not teach her the observation target; ⛔ retrieval re-weighting stays last.
 
+### 2026-08-20 19:10
+
+⚠️ **This stamp is EARLIER than the three above it, and the three above it are wrong.** Real local clock,
+read from the machine: `19:08`. The entries stamped `19:15`, `20:05` and `21:10` are ahead of it by up to two
+hours — stamped without reading the clock, which is the one thing this file's format exists to prevent.
+⛔ **Not corrected in place** (append-only), and not continued either. Cross-check against something with an
+independent clock when the order matters: the noticing log's `at` field is UTC and the server's log
+filenames are UTC, both trustworthy.
+
+- **Summary:** No new build work, by instruction — *"Keep the current setup running exactly as-is and let
+  the generation-2 population accumulate naturally… no schema decisions from me."* Two things came out of
+  orienting anyway: **the guard protecting the experiment did not exist**, and **generation 2 is empty.**
+- ⚠️⚠️ **THE CONTAMINATION GUARD WAS A MEMORY OF MINE, NOT A TEST.** My own note claimed
+  *"`buildNoticingPrompt` has such a check."* It does not — `grep` for an assertion in the noticing path
+  returns nothing, and no check in the suite referenced the prompt at all. So the de-contamination was a
+  one-time edit protected by a comment, and the next well-meaning edit re-contaminates the sample silently.
+  ⇒ Now **`test/checks/noticing-prompt-purity-check.mjs`, 37 assertions, suite 22 → 23.**
+- ⭐ **Its design is the finding, not its coverage.** ONTOLOGY vocabulary is banned **everywhere**;
+  DECISION vocabulary is confined to the OUTCOME line **by position, not by count** (a second `save` in the
+  body is an instruction, not a signal); `nothing` is **exempt on purpose**, because the sentence saying
+  nothing is a complete answer is the anti-quota. `revise` and `nuance` are classified as **ontology** —
+  they shipped in gen-1 as relation words wearing a decision's clothes. It also pins the **shadow store** to
+  *her words + a date* and asserts **generations never go backwards** (no relabelling, no stale writer).
+  ⛔ **No row count** — five prior invariants of mine encoded the topology that existed when I wrote them.
+- ⚠️⚠️ **`/health` 200 SAYS NOTHING ABOUT WHICH CODE IS LOADED.** The live pass ran **96 minutes on
+  pre-de-contamination code** (process 17:19 · host edited 17:56 · pass edited 18:08), health 200 throughout.
+  3 rows came out unstamped, now marked `promptGeneration: 1` with the reason. ⇒ verify **process start time
+  > file mtime**. Same family as the OLS `:8201` restart trap. ⓘ `server.js`'s command line contains no
+  *"Sotera"*, so a cmdline filter reports the server as absent while it is serving.
+- ⏭ **GENERATION 2 HAS PRODUCED ZERO ROWS.** All 17 are gen-1 (`nuance` 9 · `save` 6 · `nothing` 2 · Hermes
+  12 / Claude 4 / Ote 1 · 2 flagged). ⚠️ **The pass only fires on conversations with NEW messages**, and
+  every tick since 18:18 found nothing changed — the gen-1 burst was 45 minutes of me chatting plus Hermes
+  traffic, not a background process filling a log. **The population grows only with real conversation.**
+  ⛔ Not "fixed" by widening selection or lowering the thin-conversation floor.
+- ⭐ **One genuine conversation added as fuel** (`agent_dev`, conversation `83f7d335`), on a real latency
+  problem from JustTTS and nothing to do with memory — ⛔ deliberately **not** a story about learning from a
+  mistake, because handing her a narrative shaped like the thing we are measuring is the same failure as
+  handing her the vocabulary. Two behaviours worth recording: she **narrated her own tool decision unasked**
+  (*"no facts to look up, just structuring the right hunt"*), and when told her main lever did not exist she
+  **took the correction cleanly** — *"that was a blind spot on my part. I framed optimization around
+  streaming latency when your entire constraint is 'make the single forward pass faster.'"* ⓘ Whether any of
+  that is worth carrying forward is **hers to answer**, and the answer may be no.
+- **Next action:** ⏭ **observe.** ⛔ No schema decisions. ⛔ No retrieval re-weighting. ⛔ No new vocabulary
+  in the prompt. Watch for: her own prior thought recognized without being taught the pattern · her natural
+  categories with no menu present · whether `save`/`propose`/`decline` stay useful **as actions** without
+  hardening into an ontology · and voluntary non-retention, **never prompted toward.**
+  ⭐ *"If she never revises an old durable thought, never produces a lesson, or never chooses to save
+  something, that's valid evidence too."*
+
 ---
 
 ## Template Updates

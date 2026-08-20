@@ -83,7 +83,11 @@ function readWatermarks(records) {
 // ⛔ SAME-ROOM ONLY, deliberately. Under the ratified model her memory is one space with the room as a
 // ranking signal — but the provenance/ownership CONSTRAINT stage is not built, so this holds the current
 // parity rule rather than quietly running ahead of it.
-function priorProposalsFor(records, conversationUserId, limit = 6) {
+// ⚠️ EXPORTED FOR THE PURITY CHECK, not for callers. `noticing-prompt-purity-check.mjs` asserts that what
+// this returns carries her words and a date and nothing of ours — an assertion that cannot be written
+// against a private function, and the leak it guards (`outcome=save` stapled to her past thought) already
+// shipped once.
+export function priorProposalsFor(records, conversationUserId, limit = 6) {
   return records
     .filter((r) => r.userId === conversationUserId && r.outcome !== 'nothing' && r.body)
     .slice(-limit)
