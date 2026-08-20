@@ -2,3 +2,4 @@
 {"stem":"self-model-falsifiers","params":{"r":15,"model":"qwen3.6:35b"},"started":"2026-08-19T05:03:41Z","artifact":"self-model-falsifiers_2026-08-19T05-03-41Z_r15_modelqwen3.6-35b.jsonl","note":"RUN 2, the pre-registered F6 replication (n=105 per arm). Rehomed retroactively; timestamp is its COMMIT time. This is the run whose startup destroyed run 1's replies at the shared path."}
 {"stem":"intention-injection","params":{"arm":"A","r":5},"started":"2026-08-20T02:52:39.232Z","artifact":"intention-injection_2026-08-20T02-52-39Z_armA_r5.jsonl"}
 {"stem":"intention-injection","params":{"arm":"B","r":5},"started":"2026-08-20T02:54:48.655Z","artifact":"intention-injection_2026-08-20T02-54-48Z_armB_r5.jsonl"}
+{"stem":"thai-register","params":{"n":9},"started":"2026-08-20T04:20:22.571Z","artifact":"thai-register_2026-08-20T04-20-22Z_n9.jsonl"}
