@@ -108,6 +108,46 @@ export default fp(async function (fastify, opts) {
     }
     cronManager.createJob('usage-retention', '0 10 4 * * *', () => retentionPass('daily'), { isLog: true })
 
+    // ── ⭐⭐ EVERY 5 MINUTES · MESSAGE EMBEDDING, SO A CONVERSATION IS SEARCHABLE WHILE IT MATTERS ────
+    // Measured 2026-08-20 and it broke the loop we are building: Sotera formed a lesson, and TWO HOURS
+    // LATER, in the same room, could not find the conversation that produced it. Conversation Search
+    // searched three times and missed it. Cause: the dense arm's embeddings rode ONLY the 04:00 pass
+    // above — newest embedding row 08-19 21:12 against a newest message of 08-20 09:00 — so **today's
+    // conversations were not densely searchable until tonight.**
+    //
+    // ⚠️ AND THE LEXICAL ARM CANNOT COVER FOR IT IN THAI: `to_tsvector` turns a whole Thai clause into one
+    // token, so for her 70 Thai messages the dense arm is not an improvement, it is the ONLY arm.
+    //
+    // Ote: *"Don't leave this as a later optimization. We need a conversation to become searchable soon
+    // enough that the next turn can actually use what happened."*
+    //
+    // ⭐ WHY THIS IS CHEAP ENOUGH TO RUN AT THIS RATE, which is the only reason it is safe:
+    //   · `drainPendingEmbeddings` is already **incremental, bounded per pass and resumable** — it was
+    //     built to be interrupted, so a short interval is the shape it was designed for;
+    //   · it is an EMBEDDER call, not an LLM call — no generation, and `memory.embeddingDevice` keeps it
+    //     on the CPU by default, so it never evicts the chat model from VRAM (a GPU-placed aux model costs
+    //     ~29s on the user's next turn — measured, and the reason every aux sibling runs at numGpu:0);
+    //   · with nothing pending it is one indexed query and returns `{embedded:0}`, which is not logged.
+    //
+    // ⚠️ IT IS THE SAME FUNCTION THE DAILY PASS CALLS, deliberately — not a second writer and not a copy.
+    // The daily tick stays as the catch-up for anything a restart or an error left behind.
+    // ⚠️ And it is gated by the SAME setting (`memory.embedMessagesEnabled`) checked inside the drain, so
+    // turning Conversation Search off still turns this off with it.
+    const embedIntervalMin = (() => {
+      const v = fastify.config?.memory?.embedIntervalMinutes
+      return Number.isInteger(v) && v >= 1 && v <= 1440 ? v : 5
+    })()
+    cronManager.createJob('message-embed-fresh', `0 */${embedIntervalMin} * * * *`, async () => {
+      try {
+        const emb = await drainPendingEmbeddings(fastify)
+        // ⛔ Log ONLY when it did something. At this rate a per-run line would bury every other signal in
+        // the log — which is how a noisy job gets switched off and takes its usefulness with it.
+        if (!emb.skipped && emb.embedded) await log(`[message-embed] (fresh) ${JSON.stringify(emb)}`, import.meta.url)
+      } catch (e) {
+        await log(`[message-embed] (fresh) error: ${e.message}`, import.meta.url)
+      }
+    }, { isLog: true })
+
     // ── 03:00 · THE HEALTH SUITE ────────────────────────────────────────────────────────────────────
     // OLS is FEATURE-FROZEN (2026-08-08) but still serving, and Sotera calls it as one of several API
     // providers — so a silent break shows up as HER behaving oddly, with the cause in a system nobody has

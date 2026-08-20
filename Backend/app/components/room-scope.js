@@ -320,12 +320,29 @@ export async function reachTrace(fastify, { userId = null, matched = null } = {}
  *
  * @param {{matched:number, room?:string|null, over?:string}} o
  */
-export function readCoverage({ matched = 0, room = null, over = 'stored memories' } = {}) {
+export function readCoverage({ matched = 0, room = null, over = 'stored memories', grain = 'room' } = {}) {
+  // ⚠️⚠️ THE SCOPE STATEMENT MUST MATCH THE READ, and the first version did not. It hardcoded
+  // `rooms: 'this room only'` — which is FALSE for an own-memory read, because her practice notes are
+  // keyed to the PERSON and are the same in every room. `own-memory-tool-check` caught it on the first
+  // run. Telling her a person-keyed read was room-scoped would teach her the wrong grain, which is the
+  // one thing a quantifier exists to get right.
+  const scope = grain === 'person'
+    // Person-keyed: the same in every room this person uses, so a room is not the boundary here.
+    ? { rooms: 'not room-scoped — this read is keyed to the person, and is the same in every room they use', room: null, people: 'this one person only', over }
+    // Persona-keyed: hers, not scoped to a room or a person at all.
+    : grain === 'persona'
+      ? { rooms: 'not room-scoped — this is your own material, the same wherever you are', room: null, people: 'not person-scoped', over }
+      : { rooms: 'this room only', room, people: 'the owner of this room only', over }
+  const didNotSearch = grain === 'person'
+    ? ['any other person', 'anything scoped to a room rather than to a person']
+    : grain === 'persona'
+      ? ['anything belonging to a person rather than to you']
+      : ['any other room', 'any other person', "this persona's own material outside this room"]
   return {
     matched,
-    searched: { rooms: 'this room only', room, people: 'the owner of this room only', over },
+    searched: scope,
     // ⛔ Axes NOT ranged over. Named, never counted — see the header.
-    didNotSearch: ['any other room', 'any other person', "this persona's own material outside this room"],
+    didNotSearch,
     whatTheNumberMeans: matched === 0
       ? `0 found IN THE SET THAT WAS SEARCHED — one room, one person, ${over}. This is not a count of everything stored anywhere, and it is not evidence that nothing exists outside what was searched.`
       : `${matched} found IN THE SET THAT WAS SEARCHED — one room, one person, ${over}. This is not a total of everything stored anywhere.`,

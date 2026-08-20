@@ -138,4 +138,42 @@ ok(!/user_id\s*=\s*:userId[\s\S]{0,80}txn_memories/.test(sql),
     `${afterAll.length} rows: ${afterAll.map((r) => r.label).join(', ')}`)
 }
 
+// ── Q · ⭐⭐ THE SEARCHED-SET QUANTIFIER ON AN EMPTY OWN-MEMORY READ (2026-08-20) ──────────────────
+// Measured that day: two hours after forming a lesson about exactly this confusion, asked *"do you keep
+// any notes about how you work with me?"* she called ONLY this read, got two empty arrays, and answered
+// **"No."** Flat. In the earlier conversation she had also called `list_memories` — which carries a
+// coverage block — and said *"the emptiness might just be scoping, not absence."*
+// ⇒ The payload decides what she says. Ote: *"the result should be able to distinguish 'nothing found in
+// the population I searched' from 'nothing exists.'"*
+{
+  const own = buildOwnMemory(fastify, { userId: users.agent_dev })
+  const r = await own.recall()
+  ok(Boolean(r.coverage), 'Q · ⭐ an own-memory read carries a coverage block')
+  ok(r.coverage?.aboutMyself?.matched === r.aboutMyself.count
+     && r.coverage?.withThisPerson?.matched === r.withThisPerson.count,
+    'Q · …and its counts agree with the payload', `${r.coverage?.aboutMyself?.matched}/${r.coverage?.withThisPerson?.matched}`)
+  for (const k of ['aboutMyself', 'withThisPerson']) {
+    ok(/IN THE SET THAT WAS SEARCHED/.test(r.coverage[k].whatTheNumberMeans),
+      `Q · ⭐⭐ ${k}: the number is scoped to what was searched, so 0-here is not 0-anywhere`)
+    ok(Array.isArray(r.coverage[k].didNotSearch) && r.coverage[k].didNotSearch.length > 0,
+      `Q · ${k}: the axes NOT searched are named`)
+  }
+  // ⛔ THE HALF OTE REFUSED. Naming an axis is not counting along it: *"'notes for 1 other person' is
+  // still an automatic existence signal across the person axis."*
+  // ⛔ THE HALF OTE REFUSED. Naming an axis is not counting along it: *"'notes for 1 other person' is
+  // still an automatic existence signal across the person axis."* The only numbers allowed are the
+  // matched counts themselves — `matched`, and its restatement inside `whatTheNumberMeans`.
+  const noCounts = JSON.stringify(r.coverage)
+    .replace(/"matched":\s*\d+/g, '').replace(/"whatTheNumberMeans":"[^"]*"/g, '')
+  ok(!/\d/.test(noCounts),
+    'Q · ⭐⭐ NO count anywhere outside `matched` — the quantifier counts NOTHING beyond the search',
+    noCounts.match(/\d[^,}]*/)?.[0] ?? 'none')
+  // ⚠️ AND THE GRAIN MUST BE TRUE. The first version said "this room only" for a PERSON-keyed read,
+  // which would have taught her the wrong grain — the one thing a quantifier exists to get right.
+  ok(/keyed to the person/.test(r.coverage.withThisPerson.searched.rooms ?? ''),
+    'Q · ⭐⭐ the practice read says it is PERSON-keyed, not room-scoped', r.coverage.withThisPerson.searched.rooms)
+  ok(/not scoped|the same wherever you are/.test(r.coverage.aboutMyself.searched.rooms ?? ''),
+    'Q · ⭐ …and her own identity notes are described as neither room- nor person-scoped', r.coverage.aboutMyself.searched.rooms)
+}
+
 done()

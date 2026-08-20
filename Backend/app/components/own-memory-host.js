@@ -34,7 +34,7 @@
 import { registerHostService } from './runtime.js'
 import { STANCE_LABELS, STANCE_LABEL_KEYS, isStanceLabel } from './relational-taxonomy.js'
 import { createRelationalWriteLease, persistRelationalRecords } from './relational-writer.js'
-import { describeScope } from './room-scope.js'
+import { describeScope, readCoverage } from './room-scope.js'
 
 /**
  * Build the own-memory service for ONE request.
@@ -87,6 +87,29 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
       : []
 
     return {
+      // ── ⭐⭐ THE SEARCHED-SET QUANTIFIER (2026-08-20) ────────────────────────────────────────────
+      // Measured that day, two hours after she had formed a lesson about exactly this confusion: asked
+      // *"do you keep any notes about how you work with me?"* she called ONLY this read, got two empty
+      // arrays, and answered **"No."** Flat. In the earlier conversation — where she had also called
+      // `list_memories`, which DOES carry a coverage block — she had said *"the emptiness might just be
+      // scoping, not absence."*
+      //
+      // ⇒ ⭐ **The payload decides what she says.** The store being empty is the deeper problem; the flat
+      // assertion was this read having nothing to say about its own extent. Ote: *"the result should be
+      // able to distinguish 'nothing found in the population I searched' from 'nothing exists.'"*
+      //
+      // ⛔ AND IT COUNTS NOTHING OUTSIDE THE SEARCH. `readCoverage` names the axes this read ranged over
+      // and never how much sits along the ones it did not — because *"notes for 1 other person"* is an
+      // automatic existence signal across the person axis, which Ote refused. Saying "this read covered
+      // one person" reveals no person; saying "there are 4 others" would.
+      coverage: {
+        aboutMyself: readCoverage({
+          matched: selfRows.length, grain: 'persona', over: 'your own identity notes',
+        }),
+        withThisPerson: readCoverage({
+          matched: stanceRows.length, grain: 'person', over: `your practice notes for ${me?.name ?? 'this person'}`,
+        }),
+      },
       aboutMyself: {
         count: selfRows.length,
         items: selfRows.map((r) => ({ statement: r.content })),
