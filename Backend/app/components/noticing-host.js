@@ -76,7 +76,12 @@ export function constitutiveClaims(body) {
   return CONSTITUTIVE_TRIPWIRES.map((re) => re.exec(text)?.[0]).filter(Boolean)
 }
 
-const OUTCOMES = ['nothing', 'save', 'propose', 'decline', 'revise', 'nuance', 'route_elsewhere']
+// ⚠️ `revise` and `nuance` are GONE from the declared vocabulary — they were relation words, and offering
+// them taught the taxonomy this experiment exists to discover. `changes_something` says only THAT a prior
+// thought is affected; what KIND of change it is stays in her words, unparsed, for us to read.
+// ⓘ The old two are still accepted so the records already in the log stay classifiable.
+const OUTCOMES = ['nothing', 'save', 'propose', 'decline', 'changes_something', 'route_elsewhere']
+const LEGACY_OUTCOMES = ['revise', 'nuance']
 
 /**
  * ⭐ THE PROMPT. One question, seven ways to answer it, and no template to fill in.
@@ -99,18 +104,34 @@ export function buildNoticingPrompt({ who, transcript, priorLessons = [] }) {
     + `\n\nIf something IS worth carrying forward, tell me in your own words:\n`
     + `  - what it is — use your own headings, whatever structure actually fits it. Do not pad it into a `
     + `form, and do not split one thing into parts that are really one thing.\n`
-    + `  - where it belongs — is it about you, about how you work with this person, a mistake and what you `
-    + `now keep apart, something that happened, something about them, or something none of those describe? `
-    + `Name it the way you would name it.\n`
+    // ⚠️ "where it belongs" no longer offers a menu either. The earlier version listed *about you / how you
+    // work with this person / a mistake and what you keep apart / something that happened / something about
+    // them* — which is our five layers in plain clothes, and she picked from it. Now it just asks where.
+    + `  - where it belongs — say it however you would say it.\n`
     + `  - how sure you are — sure enough to keep it yourself, or uncertain / ambiguous / consequential `
     + `enough that you would rather show ${who} first and let them decide?\n`
     + `  - or that you would rather NOT carry it forward even though it mattered. That is a legitimate `
     + `answer and it is yours to give.\n`
-    + `  - or that it CHANGES something you already hold — say whether it replaces it, refines it, `
-    + `qualifies it, or sits alongside it.\n\n`
+    // ── ⚠️⚠️ THE RELATION WORDS ARE GONE, AND REMOVING THEM CORRECTS A FINDING OF MINE ────────────────
+    // This line used to read: *"say whether it replaces it, refines it, qualifies it, or sits alongside
+    // it."* She then used exactly those words back — "refines", "qualifies", "sits alongside", "replaces" —
+    // and I reported that as evidence her natural output needs multiple relations.
+    //
+    // ⛔ **It was an artifact of my own prompt.** I handed her four relation words and then counted them as
+    // her ontology. Ote, closing it: *"don't immediately map it into supersedes/refines/qualifies/
+    // coexists_with. I want to see what she actually means before we formalize it."* The prompt was
+    // supplying the very vocabulary the experiment exists to discover.
+    //
+    // ⇒ It now asks only THAT something changed, and leaves HOW entirely to her words.
+    + `  - or that it changes something you have said before — if so, say what changed about it, in your `
+    + `own words.\n\n`
     + `Rules: only what the conversation actually supports — no invented outcomes. "I" is you. If the `
     + `conversation was nothing but greetings or a test message, the answer is NOTHING.\n\n`
-    + `Begin your answer with one line: OUTCOME: <nothing|save|propose|decline|revise|nuance|other>\n\n`
+    // ⚠️ `changes_something` REPLACES `revise|nuance`. Those two were RELATION words dressed as decisions,
+    // so the declared line was teaching a relation taxonomy while I claimed it only carried a decision.
+    // What remains is genuinely about what to DO — and one parseable signal, because a classifier that
+    // guessed from prose would be us deciding.
+    + `Begin your answer with one line: OUTCOME: <nothing|save|propose|decline|changes_something|other>\n\n`
     + `Transcript:\n${transcript}`
   )
 }
@@ -128,7 +149,10 @@ export function classifyNoticing(raw) {
   const declared = Boolean(m)
   let outcome = declared ? m[1].toLowerCase() : 'unparsed'
   if (outcome === 'other') outcome = 'route_elsewhere'
-  if (!OUTCOMES.includes(outcome)) outcome = declared ? 'route_elsewhere' : 'unparsed'
+  // ⓘ Legacy values stay classifiable rather than being rewritten to the new word: the records already in
+  // the log were produced under the OLD prompt, and relabelling them would erase the fact that the sample
+  // has two different prompts in it. That distinction matters more than a tidy column.
+  if (![...OUTCOMES, ...LEGACY_OUTCOMES].includes(outcome)) outcome = declared ? 'route_elsewhere' : 'unparsed'
   // ⚠️ A bare "NOTHING" with no OUTCOME line is still a clear nothing — accept it rather than filing a
   // correct answer as a parse failure.
   if (!declared && /^nothing\b/i.test(text)) return { outcome: 'nothing', body: '', declared: false }
