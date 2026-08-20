@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-20T14:39:52.641Z",
+  "resolvedAt": "2026-08-20T15:18:18.629Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -184,6 +184,19 @@
       "integrity": "sha256-815d340f63ed8cff58f6d8ad9d7be9f33ef4bc959580495a4c6d2dd3bfa927b3",
       "components": [
         "recall_own_history"
+      ],
+      "permissions": []
+    },
+    "../../../../../PortableComponents/Tools/Disclosure": {
+      "id": "@ote/tool-disclosure",
+      "name": "Disclosure",
+      "version": "0.1.0",
+      "type": "tool",
+      "sdk": "^0.6.0",
+      "trust": "first-party",
+      "integrity": "sha256-bc69a451d93b2da4ae04255740e057e5d671c096d1c733d7ddd9ce226ea2fab9",
+      "components": [
+        "inspect_around"
       ],
       "permissions": []
     },

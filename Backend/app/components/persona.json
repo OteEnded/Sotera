@@ -48,6 +48,11 @@
       "source": "../../../../../PortableComponents/Tools/SelfHistory"
     },
     {
+      "name": "Disclosure",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/Disclosure"
+    },
+    {
       "name": "WorkingMemory",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/WorkingMemory"

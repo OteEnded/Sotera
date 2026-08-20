@@ -32,6 +32,7 @@ import { initIntention, readOpenIntention, renderOpenIntention } from '../../com
 import { describeScope, renderScope } from '../../components/room-scope.js'
 import { initLesson } from '../../components/lesson-host.js'
 import { initSelfHistory } from '../../components/self-history-host.js'
+import { initDisclosure } from '../../components/disclosure-host.js'
 import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
@@ -3226,6 +3227,7 @@ export default async function chatSiteRoutes(fastify) {
   initOwnMemory() // `ownMemory` host service — what SHE has stored about herself (recall_own_memory)
   initIntention() // `intention` host service — what she is TRYING TO ACCOMPLISH with this person (A1)
   initLesson() // `lesson` host service — what she GOT WRONG and what generalizes from it (step 4)
+  initDisclosure() // `disclosure` — the only door between rooms, opened by a card a human answers.
   initSelfHistory() // `selfHistory` — her own sentences across every room. Existence cross-room, text same-room.
   // Tool-call audit: the EventBus already emitted every call; nothing kept them. See audit/tool-log.js.
   initToolLog(fastify, attachToolAudit)

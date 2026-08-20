@@ -92,7 +92,18 @@ try {
 
   // ── I · INERTNESS. The claim that makes this stage safe to apply ahead of the code ──────────────
   const [{ n: rows }] = await q(`SELECT count(*)::int n FROM ${S}.${TABLE}`)
-  ok(rows === 0, 'I · ⭐⭐ the table is EMPTY — nothing has written it', `${rows} row(s)`)
+  // ⭐ NOT "empty" any more — rows are the POINT now. What must still hold is that every row was
+  // authorized by a card and by nothing else, which is the invariant the enum exists to enforce.
+  // ⛔ A row with any other authority, or with no interaction behind it, means prose got in.
+  const { rows: authzRows } = await pg.query(`select authorized_via, count(*)::int n,
+      count(*) filter (where interaction_id is null)::int no_proof from ${S}.log_disclosure_events
+      group by authorized_via`)
+  ok(authzRows.every((r) => r.authorized_via === 'held_turn_card'),
+    'I · ⭐⭐ every row was authorized by a held-turn card — no other authority has ever written one',
+    authzRows.map((r) => `${r.authorized_via}:${r.n}`).join(' ') || 'no rows yet')
+  ok(authzRows.every((r) => r.no_proof === 0),
+    'I · ⭐ and every row names the interaction that proved it',
+    authzRows.map((r) => `${r.authorized_via} missing=${r.no_proof}`).join(' ') || 'no rows yet')
 
   // Walk Backend/ (excluding migrations, which are where the name is supposed to appear) and look for any
   // reference at all — a query, a model, a constant. Comments are stripped first.
@@ -111,9 +122,27 @@ try {
     }
   }
   walk(BACKEND)
-  ok(hits.length === 0,
-    'I · ⭐⭐ NOTHING in Backend/ outside migrations refers to the table — no writer, no reader, no model',
-    hits.join(', ') || 'no references')
+  // ── ⭐⭐ THE INERTNESS INVARIANT WAS RETIRED ON PURPOSE, AND REPLACED BY A NARROWER ONE ────────────
+  // Stage 2 required this table to be untouched: *"no writer, no reader, no authority change."* Ote
+  // authorized the writer on 2026-08-20 — *"Go ahead with inspect_around and the authorization/card path
+  // in the same pass… the next layer should actually be usable rather than shipping as an intentionally
+  // inert capability."* ⇒ asserting inertness now would assert a decision he reversed.
+  //
+  // ⛔ What replaces it is STRONGER than "nothing touches it": **exactly one file may, and it is the one
+  // that verifies a stored card.** A second writer anywhere is how authorization starts arriving from
+  // somewhere that never checked a human answered.
+  // ⚠️ Separator-agnostic on purpose: `relative()` yields backslashes on Windows, and a literal
+  // 'app\components\...' is not even the string it looks like — \c and \d are not escapes, so JS silently
+  // eats the backslashes and the comparison can never match.
+  const norm = (p) => p.replace(/\\/g, '/')
+  const ALLOWED = ['app/components/disclosure-host.js']
+  const stray = hits.filter((h) => !ALLOWED.includes(norm(h)))
+  ok(stray.length === 0,
+    'I · ⭐⭐ ONLY disclosure-host.js touches the table — one writer, and it is the one that verifies the card',
+    stray.join(', ') || `${hits.length} allowed reference(s)`)
+  ok(hits.length > 0,
+    'I · ⭐ …and it IS wired now — the capability is usable, not decoratively inert',
+    hits.join(', '))
 
   // A Sequelize model would be enough on its own to make it non-inert: `sync()` would touch it and any
   // route could read it without naming the table.
