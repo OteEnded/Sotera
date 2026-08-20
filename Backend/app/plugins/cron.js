@@ -166,8 +166,10 @@ export default fp(async function (fastify, opts) {
         try {
           const t = await noticeAll(fastify, { maxConvos: 5 })
           // Log only when it actually asked — a per-tick line at this rate buries every other signal.
+          // ⛔ `outcomes` is empty from generation 3 on and that is correct: nothing is classified, so there
+          // is nothing to count. `unclassified=N` means N rows are waiting for a human to read them.
           if (!t.skipped && t.asked) {
-            await log(`[noticing] asked=${t.asked} outcomes=${JSON.stringify(t.byOutcome)} flagged=${t.flagged}`, import.meta.url)
+            await log(`[noticing] asked=${t.asked} unclassified=${t.unclassified} outcomes=${JSON.stringify(t.byOutcome)} flagged=${t.flagged}`, import.meta.url)
           }
         } catch (e) {
           await log(`[noticing] error: ${e.message}`, import.meta.url)

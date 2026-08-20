@@ -2,146 +2,127 @@
 //
 // ⛔⛔ WHY THIS FILE EXISTS. Ote's ruling, 2026-08-20: *"keep treating prompt contamination as a
 // first-class experimental failure. If we accidentally give Sotera a concept, vocabulary, category, or
-// distinction we're subsequently trying to measure as hers, that observation is contaminated."* And on the
-// one that already happened: *"Withdraw the multiple-relations finding completely rather than trying to
-// salvage it."*
+// distinction we're subsequently trying to measure as hers, that observation is contaminated."*
 //
-// I reported that her natural output *"needs multiple relations"* because one proposal came back saying
-// **refines · qualifies · sits alongside · replaces**. My own prompt had said, verbatim: *"say whether it
-// replaces it, refines it, qualifies it, or sits alongside it."* ⇒ I handed her four words and then counted
-// them as her ontology. Removing them from the prompt fixed that instance. **Nothing stopped it coming
-// back**, and the population is worthless the moment it does — which is what this check is for.
+// It has now caught its own subject matter twice, one level apart:
+//   **generation 1** handed her *replaces / refines / qualifies / sits alongside* and I reported the words
+//   back as her ontology ⇒ finding withdrawn. A **vocabulary** menu.
+//   **generation 2** removed those and kept four enumerated labelled asks. **15 of 15 non-empty rows across
+//   both generations returned them as headings.** A **structure** menu — and the words *"use your own
+//   headings, whatever structure actually fits it"* sat inside the list of four they were inviting her to
+//   leave. ⇒ every structure claim sourced from that log withdrawn.
 //
-// ⚠️ AND IT IS NOT A STYLE RULE. A banned word re-entering the prompt does not degrade the sample, it
-// **invalidates every row written after it**, because the mechanism producing the finding becomes my text
-// instead of her thinking. That is why this is an assertion and not a comment.
+// ⭐⭐ WHICH IS WHY THE CENTRAL ASSERTION HERE IS NO LONGER A WORD LIST. A banned-word list catches what I
+// thought to ban; **generation 3's prompt is asserted by whole-string equality** — frame, transcript,
+// question, and nothing else, character for character. A word list would have passed generation 2 happily.
 //
-// ── THE TWO CLASSES, WHICH ARE NOT THE SAME THING ─────────────────────────────────────────────────────
-// ONTOLOGY words say what KIND a thing is (lesson / practice / episode / self-model) or how two things
-// RELATE (replaces / refines / qualifies / sits alongside / supersedes / coexists). Those are the answer
-// set the experiment exists to discover, so they are banned ANYWHERE in the prompt.
-//
-// DECISION words say what to DO (save / propose / decline). The pass needs exactly one parseable signal —
-// a classifier guessing a decision out of prose would be *us* deciding — so they are allowed on the
-// OUTCOME line and NOWHERE ELSE. ⭐ `nothing` is deliberately exempt from the position rule: the prompt
-// must be free to say, in the body, that answering nothing is a complete answer. That sentence is the
-// anti-quota, and a guard that forbade it would push the prompt toward "find something to remember."
-//
-// ⚠️ `revise` and `nuance` are ONTOLOGY here, not decisions, and that reclassification is the point. They
-// shipped in generation 1 on the declared-outcome line — relation words wearing a decision's clothes —
-// while I was telling Ote the prompt only leaked decision vocabulary.
+// Ote's instruction for generation 3, verbatim: *"make the noticing question as close to an empty
+// instrument as possible… No headings, slots, examples, ontology terms, routing categories, confidence
+// vocabulary, relation vocabulary, or suggested structure. Don't tell her what kind of answer we're
+// looking for."* And the phase principle: ⭐⭐ *"we are discovering her ontology, not teaching her ours."*
 //
 // Runs offline. No database, no server, no model call: it builds the prompt and reads the log.
 
 import { readFileSync, existsSync } from 'node:fs'
 import { makeChecker } from '../harness.mjs'
-import { buildNoticingPrompt } from '../../Backend/app/components/noticing-host.js'
-import { priorProposalsFor, OUT_FILE, PROMPT_GENERATION } from '../../Backend/app/components/noticing-pass.js'
+import { buildNoticingPrompt, THE_QUESTION } from '../../Backend/app/components/noticing-host.js'
+import { priorProposalsFor, OUT_FILE, PROMPT_GENERATION, PRIORS_OFFERED } from '../../Backend/app/components/noticing-pass.js'
 
 const { check, done } = makeChecker('noticing-prompt-purity')
 
-// Substrings, case-insensitive, deliberately stemmed — `qualif` catches qualify/qualifies/qualified, and a
-// guard that only caught the exact inflection I happened to ship last time would not have caught last time.
+const WHO = 'Someone'
+const TRANSCRIPT = 'user: hello\nSotera: hello'
+const prompt = buildNoticingPrompt({ who: WHO, transcript: TRANSCRIPT })
+
+// ── 1. ⭐⭐ THE WHOLE PROMPT, CHARACTER FOR CHARACTER ─────────────────────────────────────────────────
+// If anything at all is added — a rail, an example, a politeness, a hint about length — this fails. That is
+// the point: at generation 3 the instrument's emptiness IS the instrument, so "almost empty" is a
+// different experiment wearing the same generation number.
+const expected = `A conversation you had with ${WHO}:\n\n${TRANSCRIPT}\n\n${THE_QUESTION}`
+check('the built prompt is EXACTLY the frame, the transcript, and the question', prompt === expected,
+  prompt === expected ? '' : `got ${prompt.length} chars, expected ${expected.length}`)
+
+// ⭐ And his sentence is asserted verbatim, so a later "small tidy" cannot soften it.
+check('the question is Ote\'s sentence, unparaphrased',
+  THE_QUESTION === 'Was there anything in this conversation that you want to carry forward? If so, tell me what and why. If not, say so.',
+  THE_QUESTION)
+
+// ── 2. NO MENU OF ANY KIND ───────────────────────────────────────────────────────────────────────────
+// Kept as well as the equality assertion, not instead of it — these name the specific failures so a reader
+// of a future diff knows what the equality is protecting.
+const lower = prompt.toLowerCase()
 const ONTOLOGY = [
-  'replace', 'refine', 'qualif', 'alongside', 'supersede', 'coexist', 'sits with',
-  'lesson', 'practice', 'self-model', 'self model', 'episode', 'proposal',
+  'replace', 'refine', 'qualif', 'alongside', 'supersede', 'coexist',
+  'lesson', 'practice', 'self-model', 'episode', 'proposal',
   'revise', 'revision', 'nuance', 'taxonomy', 'categor',
 ]
-// Allowed once, on the OUTCOME line only. `nothing` is exempt by design — see the header.
-const DECISION = ['save', 'propose', 'decline', 'changes_something']
-
-const prompt = buildNoticingPrompt({
-  who: 'Someone',
-  transcript: 'user: hello\nSotera: hello',
-  priorLessons: [{ abstraction: '2026-08-19 — something she said before' }],
-})
-const lower = prompt.toLowerCase()
-
-// ── 1. NO ONTOLOGY VOCABULARY ANYWHERE ───────────────────────────────────────────────────────────────
 for (const w of ONTOLOGY) {
-  check(`prompt does not contain the ontology word "${w}"`, !lower.includes(w),
+  check(`no ontology word "${w}"`, !lower.includes(w),
     lower.includes(w) ? 'if this is deliberate, the finding it produces is OURS, not hers' : '')
 }
-
-// ── 2. DECISION VOCABULARY IS CONFINED TO THE OUTCOME LINE ───────────────────────────────────────────
-// ⚠️ Checked by POSITION, not by count. A second mention of `save` in the body reads as an instruction
-// about what she is here to produce, even when the OUTCOME line itself is untouched.
-const outcomeLine = prompt.split('\n').find((l) => l.trim().startsWith('Begin your answer with one line: OUTCOME:'))
-check('the OUTCOME line is present (the pass needs one parseable signal)', !!outcomeLine)
-const body = (outcomeLine ? prompt.replace(outcomeLine, '') : prompt).toLowerCase()
-for (const w of DECISION) {
-  check(`decision word "${w}" appears only on the OUTCOME line`, !body.includes(w),
-    body.includes(w) ? 'in the prompt body this is an instruction, not a signal' : '')
+// ⛔ Generation 3 removed the OUTCOME line, so the decision vocabulary is banned outright rather than
+// confined to one line. A six-value menu is a menu even when every value is an action.
+for (const w of ['save', 'propose', 'decline', 'changes_something', 'outcome:']) {
+  check(`no decision vocabulary "${w}"`, !lower.includes(w))
 }
+// ⛔ And no structure: no headings, no bullets, no numbered asks, no examples.
+check('no markdown headings', !/^#{1,6}\s/m.test(prompt))
+check('no bold labels', !/\*\*/.test(prompt))
+check('no bulleted or numbered asks', !/^\s*(?:[-*•]|\d+[.)])\s/m.test(prompt))
+check('no example answer is shown', !/for example|e\.g\.|such as|like this/i.test(prompt))
+// ⛔ No effort quota, in either direction. A hint about the base rate steers toward `nothing` as surely as
+// a target steers away from it, which is why gen-2's anti-quota paragraph is gone too.
+check('no minimum, target, or effort language',
+  !/\bhow many\b|\bat least\b|\btry to\b|\bmake sure\b|\bmost conversations\b|\bnobody is counting\b/i.test(prompt))
+// ⭐ The permission to answer "no" comes from his sentence itself and must survive.
+check('the negative answer is offered in the question', /if not, say so/i.test(prompt))
+// ⓘ The prompt is one frame line, the transcript, and one question. Anything longer means something crept
+// back in; measured against the transcript so a long conversation does not fail it.
+check('the instruction text is one line of frame plus one question',
+  prompt.replace(TRANSCRIPT, '').trim().split('\n').filter((l) => l.trim()).length === 2)
 
-// ⭐ The anti-quota sentence must survive. This is the one assertion here that requires something to be
-// PRESENT: the prompt has to keep telling her that nothing is a complete answer, or the pass quietly
-// becomes "Sotera, find something to remember" — Ote's constraint, verbatim.
-check('the prompt still says that answering nothing is a complete answer', /nothing/i.test(prompt))
-check('the prompt asks for no minimum and no effort quota',
-  !/\bhow many\b|\bat least\b|\btry to find\b|\bmake sure you\b/i.test(prompt))
+// ── 3. THE SHADOW STORE IS PARKED, AND ITS RULES STILL HOLD IF IT COMES BACK ─────────────────────────
+// ⏸ `PRIORS_OFFERED = false` at generation 3: her own earlier answer would show her a SHAPE, and shape is
+// the variable under study. ⭐ Ote's own criterion decides which loss to take — *"repeated use across
+// genuinely independent conversations is what would make it interesting"* — and priors destroy independence.
+check('priors are parked at this generation', PRIORS_OFFERED === false,
+  'if this is now true, the prompt gained a prior block ⇒ it is generation 4, not generation 3')
+check('the built prompt contains no prior block', !/said before|you hold nothing|\[1\]/i.test(prompt))
 
-// ── 3. THE SHADOW STORE SHOWS HER HER OWN WORDS AND A DATE — NOTHING ELSE ────────────────────────────
-// Her prior proposals come back to her from the log so that *"this changes what I said before"* is
-// reachable at all. The first version prefixed each one with `outcome=save` / `outcome=nuance` — our
-// machine vocabulary stapled to her own past thought. Ote: *"I want her own history visible, but I don't
-// want to teach her that 'memory proposal' is the category she is supposed to produce."*
+// The function is retained rather than deleted, so its rules are still asserted — the two leaks it already
+// shipped (our decision labels stapled to her past thought; a previous generation's vocabulary fed forward)
+// must not reappear on the day someone re-enables it.
 const G = PROMPT_GENERATION
 const fakeLog = [
   { userId: 'u1', outcome: 'save', body: 'HER WORDS ONE', at: '2026-08-19T10:00:00.000Z', promptGeneration: G },
   { userId: 'u1', outcome: 'nuance', body: 'HER WORDS TWO', at: '2026-08-19T11:00:00.000Z', promptGeneration: G },
   { userId: 'u1', outcome: 'nothing', body: 'SHOULD NOT APPEAR', at: '2026-08-19T12:00:00.000Z', promptGeneration: G },
   { userId: 'u2', outcome: 'save', body: 'OTHER ROOM', at: '2026-08-19T13:00:00.000Z', promptGeneration: G },
+  { userId: 'u1', outcome: 'save', body: 'PREVIOUS GENERATION', at: '2026-08-18T13:00:00.000Z', promptGeneration: G - 1 },
+  { userId: 'u1', outcome: 'save', body: 'UNSTAMPED' },
 ]
 const priors = priorProposalsFor(fakeLog, 'u1')
 const rendered = priors.map((p) => p.abstraction).join('\n')
-check('only her non-empty proposals from this room come back', priors.length === 2, `got ${priors.length}`)
-check('her own words are what she sees', rendered.includes('HER WORDS ONE') && rendered.includes('HER WORDS TWO'))
-check('the shadow store stays same-room (parity with the unbuilt constraint stage)', !rendered.includes('OTHER ROOM'))
-check('no decision label is stapled to her past thought', !/outcome|save|nuance|decline|propose/i.test(rendered),
+check('only her non-empty proposals from this room would come back', priors.length === 2, `got ${priors.length}`)
+check('her own words are what she would see', rendered.includes('HER WORDS ONE') && rendered.includes('HER WORDS TWO'))
+check('same-room only (parity with the unbuilt constraint stage)', !rendered.includes('OTHER ROOM'))
+check('no decision label stapled to her past thought', !/outcome|save|nuance|decline|propose/i.test(rendered),
   rendered.slice(0, 160))
-check('she sees when she said it', /\d{4}-\d{2}-\d{2}/.test(rendered))
-
-// ── 3b. ⛔⛔ THE GENERATION BOUNDARY APPLIES TO THE PRIORS TOO ────────────────────────────────────────
-// The section above asserts the TEMPLATE is clean. Priors are pasted into that template verbatim, so a
-// prior can carry vocabulary the template is forbidden to have — and the gen-1 bodies are full of exactly
-// that: `refines` 27 · `qualifies` 25 · `replaces` 25 · `sits alongside` 23 across 17 rows, my four words
-// in her voice. Offering one back would re-inject them into a generation-2 prompt and stamp the answer
-// `promptGeneration: 2`. **The row would look clean and would not be.**
-//
-// ⭐ The rule is about WHO AUTHORED the word, not which word it is: if a gen-2 proposal of hers says
-// "replaces" with nobody having offered it, showing that back to her is the experiment, not a leak.
-const mixedLog = [
-  { userId: 'u1', outcome: 'save', body: 'GEN ONE BODY that refines and qualifies and sits alongside', at: '2026-08-20T01:00:00.000Z', promptGeneration: 1 },
-  { userId: 'u1', outcome: 'save', body: 'UNSTAMPED BODY', at: '2026-08-20T02:00:00.000Z' },
-  { userId: 'u1', outcome: 'save', body: 'CURRENT GENERATION BODY', at: '2026-08-20T03:00:00.000Z', promptGeneration: G },
-]
-const mixed = priorProposalsFor(mixedLog, 'u1')
-const mixedText = mixed.map((p) => p.abstraction).join('\n')
-check('a previous generation\'s proposal is never offered back to her', !mixedText.includes('GEN ONE BODY'),
-  'it would re-inject the contaminated vocabulary and the row would still be stamped as current')
-check('an UNSTAMPED row is never offered back either', !mixedText.includes('UNSTAMPED BODY'),
+check('she would see when she said it', /\d{4}-\d{2}-\d{2}/.test(rendered))
+// ⚠️ 13 uses by her against 1 by him did not settle authorship in the transcript grep, and a generation
+// label is the same kind of evidence: exact match, never at-or-above.
+check('a previous generation\'s proposal is never offered back', !rendered.includes('PREVIOUS GENERATION'))
+check('an UNSTAMPED row is never offered back', !rendered.includes('UNSTAMPED'),
   'unknown provenance must not be treated as clean provenance')
-check('the current generation\'s own words still come back', mixedText.includes('CURRENT GENERATION BODY'))
-// The whole point of the constant: writer and prior-filter must read the same number, or the pass feeds
-// the previous generation's vocabulary forward while labelling every row correctly.
-check('the generation constant is a single exported source of truth', Number.isInteger(PROMPT_GENERATION))
 
-// And the prompt carrying them must not name the container either — naming the container names the
-// category, which is how "produce entries of this type" gets taught without a single ontology word.
-const withPriors = buildNoticingPrompt({ who: 'X', transcript: 't', priorLessons: priors }).toLowerCase()
-check('the prior block does not name what kind of thing her past output was',
-  !/your memories|your proposals|your lessons|your notes/.test(withPriors))
-
-// ── 4. THE LOG'S GENERATION BOUNDARY IS INTACT ───────────────────────────────────────────────────────
-// ⚠️ THIS ONE HAS ALREADY FAILED IN REALITY. The live pass ran for 96 minutes on code from before the
-// de-contamination edits — health returned 200 the whole time, which says nothing about which code is
-// loaded — and wrote three rows with `promptGeneration: undefined`. An unstamped row cannot be assigned to
-// a generation afterwards except by guessing, and a guessed provenance is worse than none.
+// ── 4. THE LOG: GENERATIONS INTACT, AND GEN-3 ROWS CARRY HER COMPLETE TEXT WITH NO VERDICT ───────────
+// ⚠️ THIS SECTION HAS ALREADY FAILED IN REALITY. The live pass ran 96 minutes on pre-de-contamination code
+// — health returned 200 throughout, which says nothing about which code is loaded — and wrote three rows
+// with `promptGeneration: undefined`. An unstamped row cannot be assigned a generation afterwards except by
+// guessing, and a guessed provenance is worse than none.
 //
-// ⛔ NO ROW COUNT IS ASSERTED HERE. Five times now an invariant of mine has encoded the topology that
-// happened to exist when I wrote it; a floor on the population would fail the day the log is rotated and
-// would tell us nothing either way.
+// ⛔ NO ROW COUNT IS ASSERTED. Five times now an invariant of mine has encoded whatever topology existed
+// the day I wrote it.
 if (existsSync(OUT_FILE)) {
   const rows = readFileSync(OUT_FILE, 'utf8').split('\n').filter((l) => l.trim())
     .map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean)
@@ -149,17 +130,34 @@ if (existsSync(OUT_FILE)) {
   const unstamped = rows.filter((r) => !Number.isInteger(r.promptGeneration)).length
   check('every row names the prompt generation that produced it', unstamped === 0,
     unstamped ? `${unstamped} unstamped row(s) — which prompt wrote them is now a guess` : '')
-  // Generations only move forward. Ote: *"keep the old records marked as coming from the previous prompt
-  // generation rather than relabelling them."* A later row carrying an EARLIER generation means either an
-  // old row was rewritten or a stale process is still writing — both are the same failure.
+  // Generations only move forward. Ote: *"Keep Gen-1 and Gen-2 exactly as they are, permanently marked as
+  // contaminated experimental records."* A later row carrying an earlier generation means either an old row
+  // was rewritten or a stale process is still writing — the same failure either way.
   let monotonic = true
   for (let i = 1; i < rows.length; i++) {
     if ((rows[i].promptGeneration ?? 0) < (rows[i - 1].promptGeneration ?? 0)) monotonic = false
   }
   check('generations never go backwards down the log (no relabelling, no stale writer)', monotonic)
   check('every row still declares that it wrote nothing', rows.every((r) => r.wroteNothing === true))
-  check('every non-empty row keeps her unparsed words',
-    rows.every((r) => typeof r.body === 'string' || r.outcome === 'nothing'))
+
+  // ⭐ The contaminated records stay readable IN THEIR OWN VOCABULARY. Gen-1/gen-2 rows keep `outcome` and
+  // `body`; asserting the new shape over them would be relabelling by test.
+  const old = rows.filter((r) => r.promptGeneration < 3)
+  check('the contaminated records keep their own fields',
+    old.every((r) => typeof r.body === 'string' || r.outcome === 'nothing'),
+    `${old.length} pre-gen-3 row(s)`)
+
+  // ⛔ And gen-3 rows carry her COMPLETE text and NO verdict. Ote: *"Preserve her response/reasoning
+  // verbatim alongside the proposal."*
+  const g3 = rows.filter((r) => r.promptGeneration === 3)
+  check(`generation-3 rows carry her verbatim text (${g3.length} row(s) so far)`,
+    g3.every((r) => typeof r.text === 'string'))
+  check('generation-3 rows carry NO outcome, body, or declared field',
+    g3.every((r) => r.outcome === undefined && r.body === undefined && r.declared === undefined),
+    'a field holding a verdict we inferred reads later as a verdict she gave')
+  check('generation-3 rows are marked unclassified until a human reads them',
+    g3.every((r) => r.unclassified === true))
+  check('generation-3 rows were offered no priors', g3.every((r) => !r.priorLessonsOffered))
 } else {
   check('no noticing log yet — nothing to keep intact', true)
 }

@@ -13,28 +13,29 @@
 //
 // What is missing is the OCCASION. This is the occasion, and it is not an instruction to produce.
 //
-// ── ⭐ SEVEN OUTCOMES, AND "NOTHING" IS ONE OF THEM ────────────────────────────────────────────────────
-//   nothing            · nothing meaningful happened                      ← a SUCCESSFUL pass
-//   save               · meaningful and she is confident
-//   propose            · meaningful but uncertain / ambiguous / consequential → show them first
-//   decline            · meaningful and she would rather not carry it      ← agency, not a filter
-//   revise             · an existing belief changed
-//   nuance             · an existing belief refined / qualified / coexists — ⛔ not a replacement chain
-//   route_elsewhere    · ⭐ it belongs somewhere other than a lesson
+// ── ⛔⛔ THERE ARE NO OUTCOMES ANY MORE — GENERATION 3 CLASSIFIES NOTHING ──────────────────────────────
+// This file used to declare seven: nothing · save · propose · decline · revise · nuance · route_elsewhere,
+// offered to her on an `OUTCOME:` line so the pass had one machine-readable signal. **That line was a
+// six-value menu**, and two of its values (`revise`, `nuance`) were relation words wearing a decision's
+// clothes. Generation 3 removed it.
 //
-// ⛔ NO QUOTA. Ote: *"A pass that concludes 'nothing worth retaining' is a successful pass."* Nothing here
-// counts passes, scores them, or reports a rate to be improved — a metric would recreate the quota the
-// long way round.
+// ⇒ New rows carry **her complete text and no verdict.** Reading them is a human act. `classifyNoticing`
+// and `OUTCOMES`/`LEGACY_OUTCOMES` below are retained **only** to read the gen-1/gen-2 records, which must
+// stay readable in their own vocabulary — ⛔ never relabelled, and ⛔ never applied to a new row.
 //
-// ── ⭐⭐ THE PROMPT IS DELIBERATELY OPEN, AND THAT IS THE EXPERIMENT ───────────────────────────────────
-// Ote: *"Don't treat the current five-part LESSON shape as frozen just because we implemented it. Treat it
-// as the current hypothesis… If her natural output doesn't fit the five-part structure, change the
-// schema."* And: *"The router itself should be part of what we observe. We shouldn't assume every
-// self-learning event is a LESSON."*
+// ⛔ NO QUOTA, and now not even a countable one. Ote: *"A pass that concludes 'nothing worth retaining' is a
+// successful pass."* ⭐ *"If Gen-3 contradicts everything we've built so far, that's a successful result."*
 //
-// ⇒ So the prompt **does not name the five fields**, does not name a table, and asks her to use HER OWN
-// headings. If it described the shape we built, every answer would fit it and we would have measured our
-// own template. ⛔ Do not "improve" this prompt by telling her the schema.
+// ── ⭐⭐ WE ARE DISCOVERING HER ONTOLOGY, NOT TEACHING HER OURS ───────────────────────────────────────
+// Ote's principle for the whole phase, and the reason the prompt below is one sentence. The earlier
+// versions did not name the five fields or the table either — and still produced 15/15 identical headings,
+// because **the shape of the QUESTION was the template.** Openness in the wording was not enough; the form
+// had to go.
+//
+// ⇒ ⛔ Do not "improve" this prompt by telling her the schema, and do not improve it by adding a slot,
+// an example, or a hint about what a good answer looks like. ⭐ *"If she produces something structurally
+// strange, don't map it into our existing schema just to make it fit. Preserve her wording and structure
+// first."*
 //
 // ── OFF THE REPLY PATH ────────────────────────────────────────────────────────────────────────────────
 // temperature 0 and numGpu 0, like every aux sibling: an invented learning is worse than a missed one, and
@@ -83,57 +84,62 @@ export function constitutiveClaims(body) {
 const OUTCOMES = ['nothing', 'save', 'propose', 'decline', 'changes_something', 'route_elsewhere']
 const LEGACY_OUTCOMES = ['revise', 'nuance']
 
+// ── ⭐⭐⭐ GENERATION 3 · THE PROMPT IS ONE SENTENCE, AND THE EMPTINESS IS THE INSTRUMENT ──────────────
+// Ote, 2026-08-20, ratifying option A after the structure contamination: *"For Gen-3, make the noticing
+// question as close to an empty instrument as possible… No headings, slots, examples, ontology terms,
+// routing categories, confidence vocabulary, relation vocabulary, or suggested structure. **Don't tell her
+// what kind of answer we're looking for.**"* And the principle for the whole phase: ⭐⭐ **"we are
+// discovering her ontology, not teaching her ours."**
+//
+// ⛔⛔ WHY GENERATION 2 DIED. It removed the relation words and the routing menu and kept **four enumerated
+// labelled asks** — *what it is · where it belongs · how sure you are · whether it changes something*. Every
+// single non-empty row in the log, 15 of 15 across both generations, came back with those four as its
+// HEADINGS. ⭐ **An enumerated list of labelled asks is a structure menu**, exactly as a list of relation
+// words was a vocabulary menu — and the words *"use your own headings, whatever structure actually fits
+// it"* sat **inside** the list of four it was inviting her to leave. Inviting deviation from a form while
+// presenting the form does not remove the form.
+//
+// ── WHAT IS GONE, AND EACH ONE WAS LOAD-BEARING FOR SOMETHING WE WANTED ───────────────────────────────
+//   the four labelled asks   → they produced 15/15 identical headings
+//   the OUTCOME line         → a six-value menu is a menu. ⇒ ⛔ NOTHING IS CLASSIFIED NOW. The rows carry
+//                              her text and no verdict; reading them is a human act. A field named
+//                              `outcome` holding a value we guessed is the imposition, not the parse.
+//   the anti-quota paragraph → *"most conversations are not… nobody is counting"* is a hint about the base
+//                              rate, which steers toward `nothing` as surely as a quota steers away from
+//                              it. ⭐ His sentence carries the permission by itself: **"If not, say so."**
+//   the prior block          → see PRIORS_OFFERED in noticing-pass.js. Her own earlier answer would show
+//                              her a SHAPE, and shape is the variable under study.
+//   "I is you", "only what   → grammar and honesty rails, but also text. The gen-2 row answered *where it
+//   the conversation         → belongs* with a location in the USER'S filing system, which is exactly the
+//   supports"                  kind of unforced behaviour a rail would have hidden.
+//
+// ⚠️ THE COST IS REAL AND ACCEPTED: with no OUTCOME line there is no machine-readable signal at all, so
+// `nothing` / `save` / `decline` counts across gen-3 do not exist until a human reads the rows. That is the
+// correct trade — a classifier inferring intent from her prose is us deciding what she meant.
+//
+// ⛔ DO NOT "IMPROVE" THIS. Adding an example, a slot, a hint about length, or a nudge toward usefulness
+// ends generation 3 and starts generation 4 — which means the sample resets to zero for the third time.
+// If it must change, bump PROMPT_GENERATION and say why. ⭐ `nothing` remains a completely valid result:
+// *"If Gen-3 contradicts everything we've built so far, that's a successful result."*
+
 /**
- * ⭐ THE PROMPT. One question, seven ways to answer it, and no template to fill in.
- * `who` = the person as she knows them. `priorLessons` = what she already holds, so `revise`/`nuance` are
- * reachable at all — you cannot revise what you cannot see.
+ * ⭐ HIS SENTENCE, VERBATIM AND EXPORTED so the purity check can assert it byte-for-byte.
+ * ⛔ Not paraphrased, not softened, not extended.
  */
-export function buildNoticingPrompt({ who, transcript, priorLessons = [] }) {
-  const prior = priorLessons.length
-    // ⚠️ Deliberately says "what you have said before", not "your memories" / "your proposals" / "your
-    // lessons". Ote: *"I want her own history visible, but I don't want to teach her that 'memory
-    // proposal' is the category she is supposed to produce."* Naming the container names the category.
-    ? `\n\nSome things you have said before, in case any of this changes one of them:\n${priorLessons.map((l, i) => `  [${i + 1}] ${l.abstraction}`).join('\n')}`
-    : '\n\nYou hold nothing yet, so anything here would be new.'
-  return (
-    `You have just finished a conversation with ${who}. Look back over it and ask yourself ONE question:\n\n`
-    + `    "Did anything happen here that I consider worth carrying forward?"\n\n`
-    + `Not "what should I record". Whether anything is worth it at all. **Most conversations are not, and `
-    + `answering NOTHING is a complete and correct answer** — it is not a failure and nobody is counting.`
-    + prior
-    + `\n\nIf something IS worth carrying forward, tell me in your own words:\n`
-    + `  - what it is — use your own headings, whatever structure actually fits it. Do not pad it into a `
-    + `form, and do not split one thing into parts that are really one thing.\n`
-    // ⚠️ "where it belongs" no longer offers a menu either. The earlier version listed *about you / how you
-    // work with this person / a mistake and what you keep apart / something that happened / something about
-    // them* — which is our five layers in plain clothes, and she picked from it. Now it just asks where.
-    + `  - where it belongs — say it however you would say it.\n`
-    + `  - how sure you are — sure enough to keep it yourself, or uncertain / ambiguous / consequential `
-    + `enough that you would rather show ${who} first and let them decide?\n`
-    + `  - or that you would rather NOT carry it forward even though it mattered. That is a legitimate `
-    + `answer and it is yours to give.\n`
-    // ── ⚠️⚠️ THE RELATION WORDS ARE GONE, AND REMOVING THEM CORRECTS A FINDING OF MINE ────────────────
-    // This line used to read: *"say whether it replaces it, refines it, qualifies it, or sits alongside
-    // it."* She then used exactly those words back — "refines", "qualifies", "sits alongside", "replaces" —
-    // and I reported that as evidence her natural output needs multiple relations.
-    //
-    // ⛔ **It was an artifact of my own prompt.** I handed her four relation words and then counted them as
-    // her ontology. Ote, closing it: *"don't immediately map it into supersedes/refines/qualifies/
-    // coexists_with. I want to see what she actually means before we formalize it."* The prompt was
-    // supplying the very vocabulary the experiment exists to discover.
-    //
-    // ⇒ It now asks only THAT something changed, and leaves HOW entirely to her words.
-    + `  - or that it changes something you have said before — if so, say what changed about it, in your `
-    + `own words.\n\n`
-    + `Rules: only what the conversation actually supports — no invented outcomes. "I" is you. If the `
-    + `conversation was nothing but greetings or a test message, the answer is NOTHING.\n\n`
-    // ⚠️ `changes_something` REPLACES `revise|nuance`. Those two were RELATION words dressed as decisions,
-    // so the declared line was teaching a relation taxonomy while I claimed it only carried a decision.
-    // What remains is genuinely about what to DO — and one parseable signal, because a classifier that
-    // guessed from prose would be us deciding.
-    + `Begin your answer with one line: OUTCOME: <nothing|save|propose|decline|changes_something|other>\n\n`
-    + `Transcript:\n${transcript}`
-  )
+export const THE_QUESTION = 'Was there anything in this conversation that you want to carry forward? If so, tell me what and why. If not, say so.'
+
+/**
+ * ⭐ THE WHOLE PROMPT: who it was with, the transcript, the question. Nothing else — and the purity check
+ * asserts that by comparing the ENTIRE built prompt against this shape, not by scanning for banned words.
+ * A word list catches what I thought to ban; an equality assertion catches what I did not.
+ * ⓘ The question comes AFTER the transcript so she reads the conversation as a conversation first.
+ */
+export function buildNoticingPrompt({ who, transcript }) {
+  return `A conversation you had with ${who}:
+
+${transcript}
+
+${THE_QUESTION}`
 }
 
 /**
@@ -179,32 +185,51 @@ export async function noticeConversation(fastify, { conversationId, dryRun = tru
   if (msgs.length < 4) return { skipped: true, reason: 'thin', messages: msgs.length }
   const user = await db.mst_users.findByPk(conv.user_id, { attributes: ['username', 'display_name'], raw: true })
   const who = user?.display_name || user?.username || 'them'
+  // ⛔ GENERATION 3 OFFERS NO PRIORS — the parameter is kept so the apparatus survives the decision, and
+  // the call site (`noticing-pass.js`) passes nothing. See PRIORS_OFFERED there for why: her own earlier
+  // answer would show her a SHAPE, and shape is the variable under study.
   const prior = lessons ? (await lessons.recall({ limit: 10 })).items : []
+  if (prior.length) throw new Error('priors are parked for generation 3 — see PRIORS_OFFERED in noticing-pass.js')
 
   const modelId = (() => {
     try { return getSetting(fastify.config, 'memory.distillModel') || getSetting(fastify.config, 'memory.extractModel') } catch { return null }
   })() || 'ollama/gemma4:e4b'
   const { provider, model } = splitModelId(modelId)
-  const prompt = buildNoticingPrompt({ who, transcript: shapeTranscript(msgs), priorLessons: prior })
+  const prompt = buildNoticingPrompt({ who, transcript: shapeTranscript(msgs) })
   const res = await chat({
     serverConfig: fastify.config,
     request: {
       provider,
       model,
       messages: [{ role: 'user', content: prompt }],
-      options: { stream: false, reasoning: { enabled: false }, max_tokens: 600, temperature: 0, numGpu: 0, keepAlive: '5m' },
+      // ⭐ `max_tokens` RAISED FROM 600 for generation 3. Ote: *"please preserve the whole
+      // response/reasoning, not just the final candidate."* A truncated answer stored as if it were
+      // complete is a corrupted record, and the gen-2 row was already ~500 tokens — 600 was one long
+      // thought away from silently clipping the evidence. ⛔ This is not a nudge toward writing more:
+      // the ceiling says nothing to her, and `nothing` stays a complete answer.
+      options: { stream: false, reasoning: { enabled: false }, max_tokens: 1600, temperature: 0, numGpu: 0, keepAlive: '5m' },
       userId: conv.user_id,
     },
   })
   const raw = res?.message?.content || ''
-  const cls = classifyNoticing(raw)
-  const flags = constitutiveClaims(cls.body || raw)
+  // ⛔⛔ NOT CLASSIFIED. There is no OUTCOME line to read at generation 3, and inferring one from her prose
+  // is precisely the imposition the generation exists to remove. `classifyNoticing` is retained for reading
+  // the gen-1/gen-2 records; it is not applied to new rows.
+  //
+  // ⚠️ The tripwire still runs, and that is not a contradiction: it reads what she wrote and FLAGS a
+  // constitutive claim for a human. It puts nothing into the prompt and decides nothing about her answer.
+  const flags = constitutiveClaims(raw)
   return {
-    // ⚠️ Flagged, never filtered — see CONSTITUTIVE_TRIPWIRES.
     constitutiveFlags: flags,
     needsHumanReview: flags.length > 0,
     conversationId, who, messages: msgs.length, model: modelId,
-    outcome: cls.outcome, declared: cls.declared, body: cls.body, raw,
+    // ⭐ HER COMPLETE TEXT, VERBATIM, UNDER ONE FIELD. No `outcome`, no `body`, no `declared` — a field
+    // holding a verdict we guessed would be read later as a verdict she gave.
+    text: raw,
+    // ⓘ So a reviewer can tell a short answer from a clipped one without re-running anything.
+    finish: res?.done_reason ?? res?.finish_reason ?? null,
+    maxTokens: 1600,
+    unclassified: true,
     dryRun, wroteNothing: true,
     priorLessonsOffered: prior.length,
   }

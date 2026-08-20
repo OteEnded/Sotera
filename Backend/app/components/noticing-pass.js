@@ -43,8 +43,15 @@ const OUT_FILE = path.join(OUT_DIR, 'noticing-proposals.jsonl')
 // still said 2, the pass would quietly feed the previous generation's vocabulary into the new one and every
 // row would still look correctly labelled. **Bump this whenever the prompt's vocabulary changes.**
 //   1 — supplied the relation words, a routing menu, and `revise|nuance` as declared outcomes.
-//   2 — no ontology vocabulary; decisions only; priors offered from the log.
-const PROMPT_GENERATION = 2
+//   2 — no ontology vocabulary; decisions only; priors offered from the log. ⛔ Died of the STRUCTURE menu:
+//       its four enumerated asks came back as headings in 15 of 15 non-empty rows across both generations.
+//   3 — ⭐ **one open question and nothing else.** No slots, no OUTCOME line, no priors, no classification.
+//       Her complete text is stored verbatim and a human reads it.
+const PROMPT_GENERATION = 3
+
+// ⛔ Parked at generation 3 — see the call site for the reasoning. Turning this on changes the prompt text,
+// which makes it generation 4, not a configuration change.
+const PRIORS_OFFERED = false
 
 /** Every parsable record in the log, oldest first. The log IS the state. */
 function readLog() {
@@ -68,6 +75,12 @@ function readWatermarks(records) {
   return marks
 }
 
+// ── ⏸⏸ THE SHADOW STORE — **PARKED AT GENERATION 3, NOT DELETED** ────────────────────────────────────
+// `PRIORS_OFFERED = false`, so none of the machinery below runs today. It is kept, with its reasoning and
+// its two hard-won corrections, because the decision to re-enable it is Ote's and the apparatus should be
+// waiting when he makes it. ⚠️ Re-enabling changes the prompt text ⇒ **generation 4, not a setting.**
+// Everything from here to `noticeAll` is the record of why it exists and what it already got wrong twice.
+//
 // ── ⭐⭐ THE SHADOW STORE: HER OWN EARLIER PROPOSALS, OFFERED BACK TO HER ──────────────────────────────
 // Ote, 2026-08-20, naming the next signal to watch: *"whether a later proposal references or revises an
 // earlier proposal in her own terms, rather than merely producing another isolated 'lesson.' That's
@@ -156,7 +169,7 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
     order: [['updated_at', 'DESC']], limit: maxConvos * 3, raw: true,
   })
 
-  const tally = { scanned: 0, asked: 0, thin: 0, unchanged: 0, flagged: 0, byOutcome: {} }
+  const tally = { scanned: 0, asked: 0, thin: 0, unchanged: 0, flagged: 0, unclassified: 0, byOutcome: {} }
   for (const c of convos) {
     if (tally.asked >= maxConvos) break
     tally.scanned++
@@ -167,14 +180,30 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
     const upTo = top?.rolling_id ?? 0
     if (!upTo || upTo <= (marks.get(c.id) ?? 0)) { tally.unchanged++; continue }
     try {
-      // ⭐ Her own earlier proposals, from the shadow store — NOT stored lessons, which are always empty
-      // in dry-run. This is what makes "does she build on herself?" observable at all.
-      const priors = priorProposalsFor(records, c.user_id)
-      const lessons = { recall: async () => ({ items: priors }) }
+      // ⛔⛔ NO PRIORS AT GENERATION 3 — and this is a deliberate loss, not an oversight.
+      // The shadow store exists so *"does she encounter her own prior thought and relate to it?"* is
+      // observable at all, and that is one of the four things Ote named as worth watching. It is parked
+      // anyway, because generation 3 exists to sample her STRUCTURE and **her own earlier answer shows her
+      // a structure.** One echo and "her natural shape" becomes "her first answer's shape, repeated" —
+      // the gen-2 failure with the template supplied by her instead of by me.
+      //
+      // ⭐ His own words settle which loss to take: *"Repeated use across genuinely independent
+      // conversations is what would make it interesting."* **Independence is the property we need**, and
+      // priors destroy it.
+      //
+      // ⏸ SO SELF-REFERENCE IS NOT OBSERVABLE IN THE PASS RIGHT NOW. That is a real gap and it is HIS to
+      // close — turning priors back on changes the prompt text, which makes it generation 4, not a setting.
+      // ⓘ Meanwhile it remains observable in ordinary conversation, where she reaches for her own history
+      // through `recall_own_memory` rather than being handed it.
+      const priors = PRIORS_OFFERED ? priorProposalsFor(records, c.user_id) : []
+      const lessons = priors.length ? { recall: async () => ({ items: priors }) } : null
       const r = await noticeConversation(fastify, { conversationId: c.id, dryRun: true, lessons })
       if (r.skipped) { tally.thin++; continue }
       tally.asked++
-      tally.byOutcome[r.outcome] = (tally.byOutcome[r.outcome] ?? 0) + 1
+      // ⛔ `byOutcome` stays EMPTY at generation 3 — there is no outcome to count. A tally that invented one
+      // would be the classifier we just removed, wearing a metric's clothes.
+      if (r.unclassified) tally.unclassified++
+      else tally.byOutcome[r.outcome] = (tally.byOutcome[r.outcome] ?? 0) + 1
       if (r.needsHumanReview) tally.flagged++
       mkdirSync(OUT_DIR, { recursive: true })
       appendFileSync(OUT_FILE, `${JSON.stringify({
@@ -190,12 +219,20 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
         // see WHAT she was shown when she produced this one — a proposal that references a prior is only
         // interesting if you know the prior was in front of her.
         userId: c.user_id,
-        outcome: r.outcome, declared: r.declared,
+        // ⛔⛔ NO `outcome`, NO `declared`, NO `body` AT GENERATION 3. There is no OUTCOME line to read, and
+        // a field named `outcome` holding a value we inferred would be read a week from now as a value she
+        // gave. `unclassified: true` is the honest record: **nobody has read this yet.**
+        unclassified: r.unclassified === true,
         constitutiveFlags: r.constitutiveFlags, needsHumanReview: r.needsHumanReview,
         priorLessonsOffered: r.priorLessonsOffered,
-        // ⭐ HER OWN WORDS AND HER OWN HEADINGS, unparsed. The point is the SHAPE she reaches for, so
-        // nothing here maps her answer onto our fields — that would destroy the only evidence we have.
-        body: r.body,
+        // ⭐⭐ HER COMPLETE ANSWER, VERBATIM — Ote: *"please preserve the whole response/reasoning, not just
+        // the final candidate. If she spontaneously invents a distinction like 'this isn't really a
+        // lesson…', that's exactly the evidence we're looking for."* ⇒ nothing is stripped, nothing is
+        // summarised, no leading line is cut off, and her structure survives whatever it turns out to be.
+        text: r.text,
+        // ⓘ So a reviewer can tell a SHORT answer from a CLIPPED one. A truncated reply stored as complete
+        // would read as her having stopped there.
+        finish: r.finish, maxTokens: r.maxTokens,
         wroteNothing: true,
       })}\n`, 'utf8')
     } catch (e) {
@@ -205,4 +242,4 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
   return tally
 }
 
-export { OUT_FILE, PROMPT_GENERATION }
+export { OUT_FILE, PROMPT_GENERATION, PRIORS_OFFERED }
