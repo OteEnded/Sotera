@@ -38,20 +38,59 @@ import { buildLesson } from './lesson-host.js'
 const OUT_DIR = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..', '..', '..', 'test', 'results')
 const OUT_FILE = path.join(OUT_DIR, 'noticing-proposals.jsonl')
 
-/** Watermarks from the log — the highest rolling_id already noticed per conversation. */
-function readWatermarks() {
-  if (!existsSync(OUT_FILE)) return new Map()
-  const marks = new Map()
+/** Every parsable record in the log, oldest first. The log IS the state. */
+function readLog() {
+  if (!existsSync(OUT_FILE)) return []
+  const out = []
   for (const line of readFileSync(OUT_FILE, 'utf8').split('\n')) {
     if (!line.trim()) continue
-    try {
-      const r = JSON.parse(line)
-      if (r.conversationId && Number.isInteger(r.upTo)) {
-        marks.set(r.conversationId, Math.max(marks.get(r.conversationId) ?? 0, r.upTo))
-      }
-    } catch { /* a truncated last line is not a reason to stop */ }
+    try { out.push(JSON.parse(line)) } catch { /* a truncated last line is not a reason to stop */ }
+  }
+  return out
+}
+
+/** Watermarks — the highest rolling_id already noticed per conversation. */
+function readWatermarks(records) {
+  const marks = new Map()
+  for (const r of records) {
+    if (r.conversationId && Number.isInteger(r.upTo)) {
+      marks.set(r.conversationId, Math.max(marks.get(r.conversationId) ?? 0, r.upTo))
+    }
   }
   return marks
+}
+
+// ── ⭐⭐ THE SHADOW STORE: HER OWN EARLIER PROPOSALS, OFFERED BACK TO HER ──────────────────────────────
+// Ote, 2026-08-20, naming the next signal to watch: *"whether a later proposal references or revises an
+// earlier proposal in her own terms, rather than merely producing another isolated 'lesson.' That's
+// probably the next big signal for whether we're actually getting a developing self-model rather than a
+// collection of notes."*
+//
+// ⚠️⚠️ THAT SIGNAL WAS UNOBSERVABLE. The pass offered priors from `lessons.recall()`, which reads STORED
+// lessons — and nothing is stored, because this is dry-run. So `priorLessonsOffered` was 0 on every pass
+// and she had literally never been shown a previous proposal. **She could not reference what she had never
+// seen.**
+//
+// ⇒ The log becomes the shadow store. Persistence stays off; her own prior output comes back to her from
+// the JSONL, so `revise` / `nuance` / *"this refines what I said before"* are reachable at all.
+//
+// ⚠️ AND THE CONFOUND IS REAL, SO IT IS NAMED RATHER THAN HIDDEN: showing her her own previous headings
+// may teach her a shape she then repeats, which would contaminate the very thing we are sampling. Two
+// reasons to accept it anyway — a self-model that cannot see its own history is not a self-model, and
+// there is no other way to test whether she BUILDS on herself. ⭐ What must never happen is us showing her
+// OUR schema; showing her HER OWN words is the experiment, not a leak.
+//
+// ⛔ SAME-ROOM ONLY, deliberately. Under the ratified model her memory is one space with the room as a
+// ranking signal — but the provenance/ownership CONSTRAINT stage is not built, so this holds the current
+// parity rule rather than quietly running ahead of it.
+function priorProposalsFor(records, conversationUserId, limit = 6) {
+  return records
+    .filter((r) => r.userId === conversationUserId && r.outcome !== 'nothing' && r.body)
+    .slice(-limit)
+    .map((r, i) => ({
+      abstraction: `(${r.at?.slice(0, 10) ?? 'earlier'}, outcome=${r.outcome}) ${String(r.body).replace(/\s+/g, ' ').slice(0, 400)}`,
+      _n: i + 1,
+    }))
 }
 
 /**
@@ -65,7 +104,8 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
   const db = fastify.db
   if (!db?.txn_conversations) return { skipped: true, reason: 'no-db' }
 
-  const marks = readWatermarks()
+  const records = readLog()
+  const marks = readWatermarks(records)
   const since = new Date(Date.now() - lookbackHours * 3600e3)
   const convos = await db.txn_conversations.findAll({
     where: { incognito: false, updated_at: { [Op.gte]: since } },
@@ -83,7 +123,10 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
     const upTo = top?.rolling_id ?? 0
     if (!upTo || upTo <= (marks.get(c.id) ?? 0)) { tally.unchanged++; continue }
     try {
-      const lessons = buildLesson(fastify, { userId: c.user_id, conversationId: c.id })
+      // ⭐ Her own earlier proposals, from the shadow store — NOT stored lessons, which are always empty
+      // in dry-run. This is what makes "does she build on herself?" observable at all.
+      const priors = priorProposalsFor(records, c.user_id)
+      const lessons = { recall: async () => ({ items: priors }) }
       const r = await noticeConversation(fastify, { conversationId: c.id, dryRun: true, lessons })
       if (r.skipped) { tally.thin++; continue }
       tally.asked++
@@ -93,6 +136,10 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
       appendFileSync(OUT_FILE, `${JSON.stringify({
         at: new Date().toISOString(),
         conversationId: c.id, upTo, who: r.who, messages: r.messages, model: r.model,
+        // ⭐ Recorded so the shadow store can find her earlier proposals next time, and so a reviewer can
+        // see WHAT she was shown when she produced this one — a proposal that references a prior is only
+        // interesting if you know the prior was in front of her.
+        userId: c.user_id,
         outcome: r.outcome, declared: r.declared,
         constitutiveFlags: r.constitutiveFlags, needsHumanReview: r.needsHumanReview,
         priorLessonsOffered: r.priorLessonsOffered,
