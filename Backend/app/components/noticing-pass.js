@@ -169,10 +169,19 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
     order: [['updated_at', 'DESC']], limit: maxConvos * 3, raw: true,
   })
 
-  const tally = { scanned: 0, asked: 0, thin: 0, unchanged: 0, flagged: 0, unclassified: 0, byOutcome: {} }
+  const tally = { scanned: 0, asked: 0, thin: 0, unchanged: 0, flagged: 0, unclassified: 0, probe: 0, byOutcome: {} }
   for (const c of convos) {
     if (tally.asked >= maxConvos) break
     tally.scanned++
+    // ⛔⛔ A CHECK'S FIXTURE IS NOT AN EXPERIENCE. `settings.probe` is stamped in ONE place — the test
+    // harness's HTTP client — so no check can forget it. Ote: *"If a fixture conversation can enter the
+    // population, that's contamination and should be treated as such rather than silently filtered after
+    // the fact."* ⇒ it is COUNTED and logged, never dropped quietly.
+    //
+    // ⚠️ Until now only the `messages >= 4` thin gate kept fixtures out, and one was sitting at 2 messages.
+    // ⛔ AND THIS IS NOT A TOPIC FILTER: a conversation of hers that is ABOUT memory stays in. Deciding
+    // which of her conversations count as real life would be a worse imposition than the prompt ever was.
+    if (c.settings?.probe === true) { tally.probe++; continue }
     const [top] = await db.txn_messages.findAll({
       where: { conversation_id: c.id }, attributes: ['rolling_id'],
       order: [['rolling_id', 'DESC']], limit: 1, raw: true,
@@ -209,6 +218,14 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
       appendFileSync(OUT_FILE, `${JSON.stringify({
         at: new Date().toISOString(),
         conversationId: c.id, upTo, who: r.who, messages: r.messages, model: r.model,
+        // ⭐⭐ THE CONVERSATION'S SUBJECT, RECORDED SO THE POPULATION CAN BE STRATIFIED WITHOUT ANYONE
+        // CLASSIFYING ANYTHING. Measured on the first 18 rows: **8 of them came from conversations whose
+        // subject is memory, rooms or retrieval** — 4 from *"Pin And Quote Four Specific Memory IDs"* and 4
+        // from my own memory probes. ⚠️ That is a topic bias invisible to a prompt grep: when she produces
+        // memory-flavoured output, part of the cause is that the conversation was about memory.
+        // ⛔ It is recorded, NOT filtered — the title is data we already have, so this costs no judgement,
+        // whereas excluding a subject would be us curating her life.
+        title: c.title ?? null,
         // ⭐ WHICH PROMPT PRODUCED THIS. Generation 1 supplied the relation words, a routing menu, and
         // `revise|nuance` as declared outcomes — so gen-1 records say more about our prompt than about her.
         // Ote: *"keep the old records marked as coming from the previous prompt generation rather than

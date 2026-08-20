@@ -79,9 +79,36 @@ export function makeChecker() {
 }
 
 // ---- HTTP client ------------------------------------------------------------------
+// ── ⛔⛔ EVERY CONVERSATION A CHECK CREATES IS MARKED `settings.probe = true` ──────────────────────────
+// The noticing pass samples live conversations, and a check's fixture is not an experience. A fixture in
+// that population is contamination, and Ote ruled on the shape of the fix: *"If a fixture conversation can
+// enter the population, that's contamination and should be treated as such rather than **silently filtered
+// after the fact**."*
+//
+// ⚠️ TODAY IT IS ONLY THE `messages >= 4` THIN GATE KEEPING THEM OUT — by accident. The eligibility query
+// was reproduced against the live database and one fixture sat at 2 messages, one message away from
+// entering the sample of what Sotera spontaneously wants to remember. An accident is not a boundary.
+//
+// ⭐ MARKED HERE, IN ONE PLACE, RATHER THAN IN EVERY CHECK. Seven times now an explicit per-caller field
+// has been silently dropped by someone adding a new call site — a flag a caller can forget to set is not a
+// guarantee. The pass counts and logs what it skips, so the exclusion is visible rather than silent.
+//
+// ⛔ THIS IS NOT A TOPIC FILTER, and it must never become one. A conversation of hers that happens to be
+// ABOUT memory stays in the population — deciding which of her conversations count as real life would be a
+// worse imposition than the prompt ever was. Stratify at review time; exclude only non-conversations.
+// ⓘ `pipeline/ask-sotera.mjs` opts out explicitly: it drives conversations, and a conversation is a
+// conversation whatever my reason for having it.
+function markProbeConversation(method, pathname, body) {
+  if (method !== 'POST' || pathname !== '/v1/chat/conversations' || !body || typeof body !== 'object') return body
+  const settings = { ...(body.settings ?? {}) }
+  if (settings.probe === undefined) settings.probe = true
+  return { ...body, settings }
+}
+
 export function makeClient(base = BASE) {
   const jars = {}
   return async function call(as, method, pathname, body, { key, raw } = {}) {
+    body = markProbeConversation(method, pathname, body)
     const headers = {}
     if (body !== undefined) headers['content-type'] = 'application/json'
     if (key) headers.authorization = `Bearer ${key}`

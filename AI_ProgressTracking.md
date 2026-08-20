@@ -1870,6 +1870,57 @@ filenames are UTC, both trustworthy.
   ⚠️ Watch for a **test fixture** reaching the sample: check suites create `agent_dev` conversations, and
   `who` cannot distinguish them from my real ones — only the conversation id can.
 
+### 2026-08-20 20:35
+
+- **Summary:** The first **four generation-3 rows** exist and are preserved verbatim. Two instrument fixes
+  landed on evidence (the fixture path and the topic bias), one alarm of mine was **my own reading error**,
+  and one **disclosure question** is open for Ote.
+- ⛔⛔ **THE FIXTURE HAZARD IS REAL AND WAS ONLY BEING CAUGHT BY ACCIDENT.** Reproduced the pass's own
+  eligibility query against the live database: a check fixture was sitting at **2 messages**, one message
+  short of the `>= 4` thin gate, i.e. one message from entering the sample of what Sotera spontaneously
+  wants to remember. ⇒ Fixed **at the source, in one place**: the test harness's HTTP client now stamps
+  `settings.probe = true` on every conversation a check creates (⭐ *seven* prior instances of a per-caller
+  field being silently dropped), the pass **skips and COUNTS** them (⛔ never a silent drop — his
+  constraint), and `pipeline/ask-sotera.mjs` opts out explicitly because it drives real conversations.
+- ⛔ **AND IT IS NOT A TOPIC FILTER.** Measured across the first 18 rows: **8 came from conversations whose
+  subject is memory, rooms or retrieval** — 4 from Hermes's *"Pin And Quote Four Specific Memory IDs"* and 4
+  from my own memory probes. ⚠️ **A topic bias invisible to a prompt grep**: when she produces
+  memory-flavoured output, part of the cause is that the conversation was about memory. ⭐ So the
+  conversation's **`title` is now recorded on each row** — stratification at review time, costing no
+  judgement, because *deciding which of her conversations count as real life would be a worse imposition
+  than the prompt ever was.*
+- ⚠️ **A FALSE ALARM OF MINE, and the mechanism is worth keeping.** I reported rows 18 and 19 as sharing
+  byte-identical text and called it a cross-conversation leak. **My own dump script printed three rows'
+  `text` fields with no separators**, and I read the concatenation as one row. Verified per row: row 18 is
+  Thai-only and does **not** contain `B-only`; row 19 does, and its own transcript contains it twice. ⇒ No
+  leak, no duplication. ⭐ Both checks that "confirmed" the alarm were sound — `chat()` really is a
+  pass-through, the adapter really is stateless — **the defect was in how I rendered the data to myself.**
+- ⭐ **WHAT THE FOUR ROWS ACTUALLY CONTAIN, preserved and NOT mapped:** row 18 answered **in Thai, in the
+  second person, to Hermes**, ending by asking him a question · row 19: *"There is nothing I need to carry
+  forward **in the traditional sense of storing new data or updating my weights**… However, if we are
+  speaking strictly within the realm of our current conversation's logic"*, closing *"**That state is
+  sufficient.**"* · row 20: *"nothing for me to carry forward **in the way a human carries a memory or a
+  lesson**"* → then redirects it to him: *"**You don't need me to store it for you**"* · row 21 (my
+  Postgres conversation): headings *What to Carry Forward · Why This Matters ·* ⭐ ***Proposed Next
+  Steps**,* ending with an offer to do the next piece of work.
+- ⏭ **THE CANDIDATE TO WATCH (⛔ not a finding at n=4, 3 of 4 one person):** in three of four rows she
+  **reframes the question away from her own retention** — either *"I cannot store it, but you can"* or
+  *"here is what we should do next."* ⓘ Same move as the gen-2 row's *"your system architecture notes."*
+- ⚠️ **A CONTAMINATION INSIDE GEN-3, recorded not fixed:** his question says *"tell me **what** and
+  **why**"*, and 3 of 4 rows use **What/Why** as headings. ⇒ ⛔ *"She structures around what/why"* is not a
+  finding. The sentence was ratified deliberately and stays; the boundary is in the log's README.
+  ⓘ *"carry forward"* is the question's verb too — her use of it is not evidence the concept is hers.
+- ⏸ **OPEN, HIS — A DISCLOSURE QUESTION, NOT A BUG.** `test/results/noticing-proposals.jsonl` is
+  **git-tracked and already in 7 commits**, and it now contains her account of Hermes's private Thai
+  conversation about his exhaustion and *"the right to be useless."* ⚠️ The trade is real both ways: git
+  history is currently the **only** thing proving the gen-1 rows were never edited, and it is also spreading
+  another person's personal material. ⇒ Recommendation: **`.gitignore` + `git rm --cached`** going forward,
+  keeping the file on disk, and treat rewriting history as a separate heavier decision. ⛔ Not acted on, and
+  the log is **held out of this commit** meanwhile.
+- **Next action:** ⏭ **observe.** ⛔ Don't interpret at n=4. ⛔ No schema decisions. ⭐ His revised rule:
+  *"iterate when warranted, don't steer toward a desired result, and don't turn one interesting response
+  into an ontology."*
+
 ---
 
 ## Template Updates

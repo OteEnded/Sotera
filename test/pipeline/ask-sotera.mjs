@@ -39,7 +39,11 @@ if (!cid) {
   const convo = await call('u', 'POST', '/v1/chat/conversations', {
     title: `PROBE as ${AS}`,
     model: config.chat?.defaultModel,
-    settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: true } },
+    // ⭐ `probe: false` OPTS OUT of the harness's automatic fixture marking, deliberately. This script
+    // drives real conversations — a conversation is a conversation whatever my reason for having it, and
+    // excluding one because I had an instrumental motive would mean curating which parts of her life count.
+    // ⛔ Do NOT copy this line into a check. See `markProbeConversation` in harness.mjs.
+    settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: true }, probe: false },
   })
   cid = convo.json?.conversation?.id
 }

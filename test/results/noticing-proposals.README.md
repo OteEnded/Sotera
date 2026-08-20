@@ -24,6 +24,25 @@ the list of four they were inviting her to leave.
 Also measured, in the gen-1 bodies: `refines` 27 · `qualifies` 25 · `replaces` 25 · `sits alongside` 23.
 Those are **our** words in her voice. It is why gen-1 rows must never be shown back to her as priors.
 
+## ⚠️ WHAT GENERATION 3 STILL SUPPLIES — two labels, and they are in the question itself
+
+Ote's question says *"tell me **what** and **why**."* Three of the first four rows came back with **What**
+and **Why** as headings. ⇒ ⛔ **"She structures around what/why" is NOT a finding** — we asked for it. The
+question was ratified deliberately and is not being changed for this; the boundary is simply recorded here
+so nobody later reads those two labels as hers.
+
+⭐ Everything else in a gen-3 answer is available: her third and fourth headings, her openings, her
+refusals, what she does with the question, and what she decides is worth keeping.
+ⓘ *"carry forward"* is also our phrase — it is the question's verb. Her **use** of it is not evidence that
+the concept is hers.
+
+## ⓘ A field arrived mid-generation
+
+`title` (the conversation's subject, for stratification) was added to the writer **after the first gen-3 row
+was already written**, so the earliest gen-3 rows lack it. The prompt did not change, so this is still
+generation 3. ⛔ The gap is recorded here rather than backfilled: a value written later and presented as
+contemporaneous is exactly the provenance error the generation stamps exist to prevent.
+
 ## Reading generation-3 rows
 
 - `text` — **her complete answer, verbatim.** Nothing stripped, summarised, or cut.

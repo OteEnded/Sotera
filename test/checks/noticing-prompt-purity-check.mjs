@@ -158,6 +158,20 @@ if (existsSync(OUT_FILE)) {
   check('generation-3 rows are marked unclassified until a human reads them',
     g3.every((r) => r.unclassified === true))
   check('generation-3 rows were offered no priors', g3.every((r) => !r.priorLessonsOffered))
+  // ⭐ The subject is recorded so the population can be stratified without anyone classifying. Measured on
+  // the first 18 rows: 8 came from conversations about memory, rooms or retrieval — a topic bias invisible
+  // to a prompt grep. ⛔ Recorded, never filtered.
+  //
+  // ⚠️ ASSERTED ON THE WRITER, NOT ON THE ROWS. The field was added after the first gen-3 row was already
+  // written, so a row-level assertion would either fail on a legitimately older row or quietly pass by
+  // being scoped until it meant nothing. The prompt did not change, so this is still generation 3 — ⓘ and
+  // the gap is recorded in `noticing-proposals.README.md` instead of being papered over.
+  const writer = readFileSync(new URL('../../Backend/app/components/noticing-pass.js', import.meta.url), 'utf8')
+  check('the writer records the conversation subject on every new row', /title:\s*c\.title/.test(writer),
+    'without it the topic bias cannot be seen at review time')
+  check('the writer skips probe conversations and counts them',
+    /settings\?\.probe === true/.test(writer) && /tally\.probe\+\+/.test(writer),
+    'a fixture in this population is contamination, and the skip must be visible')
 } else {
   check('no noticing log yet — nothing to keep intact', true)
 }
