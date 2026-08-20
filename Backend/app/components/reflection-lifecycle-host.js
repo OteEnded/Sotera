@@ -45,8 +45,20 @@ import {
 // must report the code that is LOADED, not the file on disk. The manual version of this check failed three
 // times in one day — twice the pass ran on stale code (once for 96 minutes) while `/health` returned 200
 // throughout, because health says a process is answering, not which modules it is holding.
+// ⭐⭐ BOTH HALVES, BECAUSE THE TOOLSET LIVES IN THE OTHER ONE. Ote's provenance requirement is
+// *"which generation, code, model, tools, and available context produced an observation"* — and the
+// **tools she was OFFERED** are `REFLECTION_TOOLS`, a constant in the PURE file. Stamping only this file's
+// mtime meant the offered set could change with the recorded provenance unmoved: a row would say which
+// code wrote it and not which code chose its tools. ⇒ `host=…|pure=…`, so one row pins both.
+// ⓘ `tools_used` is what she CALLED; this is how to recover what was AVAILABLE to call. The two are
+// different questions and `tools_used: []` cannot answer the second one.
+// ⚠ The format changed on 2026-08-21 — the first six rows carry a bare ISO timestamp (this file only).
+// That is visible rather than hidden, which is the point of stamping it at all.
 const CODE_MTIME = (() => {
-  try { return statSync(new URL(import.meta.url)).mtime.toISOString() } catch { return null }
+  const at = (u) => { try { return statSync(new URL(u, import.meta.url)).mtime.toISOString() } catch { return '?' } }
+  const host = at(import.meta.url)
+  const pure = at('./reflection-lifecycle.js')
+  return host === '?' && pure === '?' ? null : `host=${host}|pure=${pure}`
 })()
 
 // ── ⚠️ THE KNOBS ARE READ FROM `config.json`, NOT FROM `getSetting` ─────────────────────────────────

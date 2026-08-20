@@ -8,7 +8,7 @@ import { drainPendingEmbeddings } from '../components/conversation-search.js'
 import { reflectAll, reflectMode } from '../components/reflection-host.js'
 import { noticeAll, PROMPT_GENERATION, PRIORS_OFFERED } from '../components/noticing-pass.js'
 import { reflectAllQuiet } from '../components/reflection-lifecycle-host.js'
-import { REFLECTION_GENERATION } from '../components/reflection-lifecycle.js'
+import { REFLECTION_GENERATION, REFLECTION_TOOLS } from '../components/reflection-lifecycle.js'
 import { runHealthSuite } from '../maintenance/health-suite.js'
 import { decayWorkingMemory } from '../components/working-memory-host.js'
 
@@ -212,8 +212,17 @@ export default fp(async function (fastify, opts) {
       try {
         const { statSync } = await import('node:fs')
         const stamp = (p) => statSync(new URL(p, import.meta.url)).mtime.toISOString()
+        // ⭐ THE KNOBS GO IN THE BOOT LINE, NOT IN THE ROW. Ote's provenance list includes *available
+        // context*, and `numCtx` / `maxTokens` / the quiet window come from `config.json`, which no row can
+        // pin. ⇒ a row's `code_mtime` identifies the process generation and THIS line records what that
+        // process was running with, so the pair answers it — without adding a column to a schema he has
+        // already had to trim once.
+        const m = fastify.config?.memory ?? {}
         await log(`[reflection] loaded generation=${REFLECTION_GENERATION} `
-          + `pure=${stamp('../components/reflection-lifecycle.js')} host=${stamp('../components/reflection-lifecycle-host.js')}`, import.meta.url)
+          + `pure=${stamp('../components/reflection-lifecycle.js')} host=${stamp('../components/reflection-lifecycle-host.js')} `
+          + `toolsOffered=${REFLECTION_TOOLS.length} numCtx=${m.reflectionNumCtx ?? 16384} `
+          + `maxTokens=${m.reflectionMaxTokens ?? 1600} quietMin=${m.reflectionQuietMinutes ?? 30} `
+          + `minMessages=${m.reflectionMinMessages ?? 4} maxRounds=${m.reflectionMaxRounds ?? 4}`, import.meta.url)
       } catch { /* a missing mtime is not a reason to skip the job */ }
       cronManager.createJob('reflection', '0 */20 * * * *', async () => {
         try {

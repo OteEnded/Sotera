@@ -3,8 +3,11 @@
 Ote, 2026-08-20: *"capture a complete clean suite run to a file, including the previously missed
 memory-lifecycle-check, so we have an unambiguous baseline."*
 
-**Baseline run: `2026-08-20 23:58:50` (local). Exit code 0. `unit` + 25 checks, all PASS.**
-`109` node:test cases and `790` check assertions, `0` failures.
+**Baseline run: `2026-08-21 00:10:42` (local). Exit code 0. `unit` + 25 checks, all PASS.**
+`109` node:test cases and `792` check assertions, `0` failures.
+
+ⓘ Supersedes the `2026-08-20 23:58:50` run (790 assertions), which was green on the same code except for
+the two assertions added when the flake below was diagnosed.
 
 Reproduce: `cd test && node pipeline/test-all.mjs`
 Capture: `node pipeline/test-all.mjs > results/suite-baseline-<stamp>.log 2>&1`
@@ -17,9 +20,39 @@ one flake in this arc got away: `memory-lifecycle-check.mjs` reported FAIL insid
 time it was looked at, the terminal had been tailed past the assertion and the second full run was clean.
 ⇒ ⛔ Never diagnose a suite failure from the summary block. Redirect the **whole run** to a file.
 
-ⓘ That check is included and green in this baseline, and it has never been seen to fail standalone, nor
-when run immediately after its alphabetical predecessor (`memory-author-check`). **The flake is
-unexplained, not resolved** — if it recurs, the log will have it this time.
+## ✅✅ THE FLAKE IS EXPLAINED AND CLOSED — 2026-08-21
+
+`memory-lifecycle-check.mjs` failed once inside a full run, then passed standalone and passed when run by
+hand immediately after its alphabetical predecessor. ⭐ **That signature was the diagnosis, not a mystery.**
+
+**The cause:** the check's `live()` reader counted **every live memory `agent_dev` owned**, while both
+assertions it fed said *"exactly one live belief IN THE SLOT"*. So any concurrent writer for that account
+broke a claim about one `(entity, attribute)` pair.
+
+**Why only in a full run:** memory writes are **fire-and-forget on a background serial queue**
+(`enqueueWrite`). A check that drives the live server as `agent_dev` returns as soon as the HTTP call does,
+and its queued write lands *milliseconds later* — by which time the runner has already started the next
+check and that check's cleanup has already run. Run them by hand and the human-scale gap between two
+commands lets the write land first; run them back to back and it lands inside the next check's window.
+ⓘ And it was becoming **more** likely, not less: the reflection lifecycle can now write a memory for
+`agent_dev` whenever a 20-minute tick fires.
+
+**The fix, and it does not weaken the invariant:** `live()` and the audit read are scoped to the slot and
+the two memories this check seeds — the invariant its own comments always described.
+
+**⭐⭐ And it is self-proving now.** The check seeds a **decoy** live memory outside the slot — exactly what
+a queued capture or a reflection tick drops in — and asserts the slot count is unmoved, plus that the
+account-wide count really does differ (measured in this baseline: `account=2 slot=1`). ⛔ Against the old
+account-wide reader that assertion FAILS. A fix nobody can watch fail is a fix nobody can trust.
+
+**⚠ Two things this also fixed that were not the flake:**
+- the check's `cleanup()` used to `delete from txn_memories where user_id = agent_dev` — an **account-wide
+  wipe on every `npm test`**. That stopped being safe the moment reflections began writing real
+  persona-authored memories in `agent_dev`'s room; it is the incident this check's own header describes
+  (*"Sotera stored something real, `npm test` ran…"*) waiting to happen a second time, with her own
+  reflections as the casualty. Now scoped to the test slot.
+- the audit read was account-wide too, so a row written by a concurrent reflection could satisfy an
+  assertion about *this* check's deletion.
 
 ## ⛔ THE RAW LOG IS DELIBERATELY UNTRACKED
 
@@ -45,7 +78,7 @@ easier.
 | `intention-lifecycle-check` | 83 |
 | `interaction-answer-check` | 13 |
 | `memory-author-check` | 17 |
-| `memory-lifecycle-check` | **12** ← the one that flaked |
+| `memory-lifecycle-check` | **14** ← the one that flaked; +2 are the guard against it |
 | `memory-subject-write-check` | 13 |
 | `name-path-check` | 28 |
 | `noticing-prompt-purity-check` | 51 |
