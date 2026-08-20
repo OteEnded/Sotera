@@ -178,6 +178,30 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.UUID,
                 allowNull: true,
             },
+            // ⭐⭐ WHO AUTHORED this memory (migration 015). THE OWNERSHIP AXIS — Ote, 2026-08-20:
+            // *"Ownership follows authorship."* `account` = the human said it (extraction);
+            // `persona` = Sotera formed the understanding herself (episode / reflection / lesson /
+            // practice / self).
+            //
+            // ⚠️ IT IS INDEPENDENT OF THE OTHER TWO COLUMNS, and conflating them is the defect this whole
+            // axis exists to end:
+            //   · `subject_person_id` = who it is ABOUT — an INDEX, never ownership and never a visibility
+            //     grant. A memory SHE authored ABOUT Ote has author='persona', subject=Ote.
+            //   · `user_id` = the room. For an account-authored row that is also its owner; for a
+            //     persona-authored row it is the CONTEXT it was formed in, not its owner.
+            //
+            // ⚠️⚠️ AND THE COMMENT DIRECTLY ABOVE IS WHY THIS DECLARATION EXISTS AT ALL. `subject_person_id`
+            // sat in the database for half a day undeclared here, and every write silently dropped it —
+            // seven memories lost their subject with no error and no warning. **A column the ORM does not
+            // declare does not exist.** This one was checked before the first write rather than after.
+            //
+            // The DB default is 'account', so a writer that forgets gets the status-quo value; ⛔ nothing
+            // can become 'persona' by omission.
+            author: {
+                type: DataTypes.ENUM('account', 'persona'),
+                allowNull: false,
+                defaultValue: 'account',
+            },
             access_count: {
                 type: DataTypes.INTEGER,
                 allowNull: false,

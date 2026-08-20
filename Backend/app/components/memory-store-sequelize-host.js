@@ -43,11 +43,29 @@ const OWNED_KINDS = ['episodic', 'semantic', 'card'] // identity is persona-glob
  * @param {object|null} [deps.log]
  * @param {()=>number}  [deps.now]
  */
-export function createSequelizeMemoryStore({ db, persona = null, userId = null, log = null, now = () => Date.now() } = {}) {
+export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', log = null, now = () => Date.now() } = {}) {
   const txn_memories = db?.txn_memories
   if (!txn_memories) throw new TypeError('createSequelizeMemoryStore: db.txn_memories is required')
   const P = persona ?? null
   const U = userId ?? null
+
+  // ── ⭐⭐ OWNERSHIP FOLLOWS AUTHORSHIP (migration 015) ───────────────────────────────────────────
+  // Ote, 2026-08-20: *"Sotera is the owner of her own memories when she authored/formed the
+  // understanding, regardless of which room the conversation happened in."*
+  //
+  // ⭐ THE AUTHOR IS A PROPERTY OF THE WRITER, DECLARED ONCE AT CONSTRUCTION — not a per-row field a
+  // caller has to remember. A store built for extraction writes `account`; a store built for the
+  // distiller / Reflection / the lesson writer declares `persona`. That is the only shape that satisfies
+  // *"the author must arrive with the write, not be assigned by whoever remembers to"*: six times in this
+  // project an explicit field list has silently dropped a new field, and the last one was mine.
+  //
+  // ⚠️ AND THE DEFAULT IS THE STATUS QUO. Forgetting to declare gets `account`; ⛔ nothing can become
+  // `persona` by omission. An unknown value is a programming error and fails loudly rather than being
+  // coerced — a silently-corrected author is exactly the class of bug this column exists to end.
+  if (author !== 'account' && author !== 'persona') {
+    throw new TypeError(`createSequelizeMemoryStore: author must be 'account' or 'persona', got ${JSON.stringify(author)}`)
+  }
+  const AUTHOR = author
 
   // Capability latches. Set once, warned once — see the degradation contract above.
   let lexicalDisabled = false
@@ -336,7 +354,18 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       const created = await txn_memories.create({
         ...row,
         persona: P,
+        // ⚠️ `user_id` MEANS TWO DIFFERENT THINGS DEPENDING ON THE AUTHOR, and migration 015's comment on
+        // the column says so: for an account-authored row it is the owner; for a persona-authored one it is
+        // the CONTEXT the memory was formed in. Same value, different job — which is why 015 needed no
+        // data migration and why provenance came for free on all 35 existing rows.
         user_id: isPersonaGlobal ? null : U,
+        // ⭐ OWNERSHIP FOLLOWS AUTHORSHIP. Declared by the writer at construction (see the header), never
+        // inferred from `kind`, from the room, or from who happened to be logged in.
+        author: AUTHOR,
+        // ⛔ AND THE SUBJECT DEFAULT IS UNCHANGED, DELIBERATELY. It would be very easy to make a
+        // persona-authored row default to `subjects.persona` — and that would be `ABOUT = OWNER`, the exact
+        // error Ote corrected twice: *"a Sotera-owned lesson can absolutely be about Ote while still being
+        // Sotera's memory."* A memory she authored ABOUT Ote has subject = Ote and author = persona.
         subject_person_id: row.subject_person_id ?? subjectDefault,
       })
       return created.get ? created.get({ plain: true }) : created
