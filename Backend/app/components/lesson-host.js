@@ -39,6 +39,7 @@
 //   · EVIDENCE — message ids and conversation ids as REFERENCES. ⛔ Never the text (E-7). Following a
 //                reference goes through `getSource`, which authorizes the evidence separately (E-1).
 
+import { registerHostService } from './runtime.js'
 import { createRelationalWriteLease } from './relational-writer.js'
 
 /** Hard caps. A lesson is an abstraction; anything longer is a transcript wearing a hat. */
@@ -159,6 +160,7 @@ export function buildLesson(fastify, { userId = null, conversationId = null } = 
    * whatever the model chose to send.
    */
   async function commit(args = {}) {
+    const { relation = null, priorId = null } = args
     const dry = await propose(args)
     if (!dry.ok) return dry
     // ⭐ THE SAME LANE every other writer in this scope uses — `buildMemoryV2(...).enqueue`, reached
@@ -181,7 +183,11 @@ export function buildLesson(fastify, { userId = null, conversationId = null } = 
             content: dry.abstraction,
             source: conversationId ? `lesson:${conversationId}` : 'lesson',
             subject: args.subjectPersonId ?? null,
-            evidence: JSON.stringify({ ...dry.wouldWrite, references: dry.evidence.references }),
+            // ⭐ The relation she chose, and what it relates to. Decision 4: not a forced replacement chain.
+            evidence: JSON.stringify({
+              ...dry.wouldWrite, references: dry.evidence.references,
+              ...(relation ? { relation, priorLessonId: priorId } : {}),
+            }),
           },
           type: seq.QueryTypes.SELECT,
         })
@@ -215,5 +221,92 @@ export function buildLesson(fastify, { userId = null, conversationId = null } = 
     }
   }
 
-  return { propose, commit, recall }
+  /**
+   * ⭐⭐ DECLINE — a deliberate, RECORDED refusal to retain. Ote ratified this as an agency feature,
+   * 2026-08-20: *"If Sotera explicitly feels that she doesn't want something to become part of her
+   * long-term memory, she should be able to say so… her own memory formation can include a deliberate
+   * refusal to retain something."*
+   *
+   * ⭐ AND THE TWO REASONS ARE KEPT APART, because he asked for exactly that distinction to be
+   * OBSERVABLE rather than collapsed:
+   *
+   *     not_worth_keeping      — "I don't think this is worth remembering."   (a judgement about value)
+   *     do_not_want_to_remember— "I don't want to remember this."             (a self-directed preference)
+   *
+   * ⛔ A closed vocabulary of two, so the reason cannot become free text and this cannot turn into a
+   * second content store. ⛔ And it deletes NOTHING: it records that she chose not to retain, and never
+   * touches source material or anyone else's data.
+   */
+  const DECLINE_KINDS = { not_worth_keeping: 'I do not think this is worth remembering', do_not_want_to_remember: 'I do not want to remember this' }
+  async function decline({ about, kind = 'not_worth_keeping' } = {}) {
+    if (!userId || !seq || !schema) return { ok: false, reason: 'no scope' }
+    if (!DECLINE_KINDS[kind]) {
+      return { ok: false, reason: `kind must be one of: ${Object.keys(DECLINE_KINDS).join(', ')}`, allowed: Object.keys(DECLINE_KINDS) }
+    }
+    const what = clip(about, 300)
+    if (!what) return { ok: false, reason: 'say briefly what you are declining to retain' }
+    const lease = await createRelationalWriteLease({ fastify, subjectUserId: userId })
+    if (!lease) return { ok: false, reason: 'no write lease (this account has no person row)' }
+    return lease.enqueue('lesson.decline', async () => {
+      const [row] = await seq.query(
+        `INSERT INTO "${schema}"."txn_memories"
+           (id, persona, user_id, author, namespace, kind, content, entity, attribute, importance,
+            source, evidence, created_at, updated_at)
+         VALUES (gen_random_uuid(), :persona, :userId, 'persona', 'default', 'semantic', :content,
+                 'sotera', 'declined', 2, :source, :evidence::jsonb, now(), now())
+         RETURNING id::text`,
+        {
+          replacements: {
+            persona, userId, content: what,
+            source: conversationId ? `decline:${conversationId}` : 'decline',
+            evidence: JSON.stringify({ declineKind: kind, meaning: DECLINE_KINDS[kind] }),
+          },
+          type: seq.QueryTypes.SELECT,
+        })
+      return { ok: true, id: row.id, recorded: DECLINE_KINDS[kind], kind, deletedNothing: true }
+    })
+  }
+
+  /**
+   * ⭐ REVISE — and the RELATION is hers to choose. Ote, decision 4: *"C — Sotera decides. A new
+   * understanding may supersede an old one, refine it, coexist with it, or qualify it depending on what
+   * she actually learned. We should not force every change into a simple replacement chain."*
+   *
+   * ⛔ So this does NOT hard-supersede by default. `supersede` archives the prior row (`invalid_at`), the
+   * other three leave it live and RECORD the relation — which is what makes *"I used to think X"*
+   * recallable instead of replaced. ⚠️ And it needs no user approval, per decision 2: *"otherwise her
+   * learning is effectively just a user-maintained database."*
+   */
+  const RELATIONS = ['supersedes', 'refines', 'coexists_with', 'qualifies']
+  async function revise({ priorId, relation, ...args } = {}) {
+    if (!RELATIONS.includes(relation)) return { ok: false, reason: `relation must be one of: ${RELATIONS.join(', ')}`, allowed: RELATIONS }
+    if (typeof priorId !== 'string' || !UUID_RE.test(priorId)) return { ok: false, reason: 'priorId must be the id of one of your own lessons' }
+    const [prior] = await seq.query(
+      `SELECT id::text, content FROM "${schema}"."txn_memories"
+        WHERE id = :priorId AND author = 'persona' AND attribute = 'lesson'`,
+      { replacements: { priorId }, type: seq.QueryTypes.SELECT })
+    if (!prior) return { ok: false, reason: 'that is not one of your own lessons' }
+    const written = await commit({ ...args, relation, priorId })
+    if (!written.ok) return written
+    // ⛔ ONLY `supersedes` archives the prior. The other three keep it live ON PURPOSE — a refinement
+    // that deleted what it refined would leave no trace that she had changed her mind.
+    if (relation === 'supersedes') {
+      await seq.query(
+        `UPDATE "${schema}"."txn_memories" SET invalid_at = now(), supersedes_id = :newId, updated_at = now()
+          WHERE id = :priorId`, { replacements: { priorId, newId: written.id } })
+    }
+    return { ...written, relation, priorStillLive: relation !== 'supersedes', priorAbstraction: prior.content }
+  }
+
+  return { propose, commit, recall, decline, revise }
+}
+
+let initialized = false
+/** Register the `lesson` host service (idempotent). Mirrors initIntention / initOwnMemory. */
+export function initLesson() {
+  if (initialized) return
+  initialized = true
+  // ⚠️ userId and conversationId are THREADED from the request, never derived — see own-memory-host.
+  registerHostService('lesson', ({ fastify: f, user, extras }) =>
+    buildLesson(f, { userId: user?.id ?? null, conversationId: extras?.conversationId ?? null }))
 }

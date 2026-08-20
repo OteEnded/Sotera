@@ -94,7 +94,7 @@ const install = await installComponents(runtime, PERSONA_CONFIG, {
   // across turns and across gaps. Late-bound per request like ownMemory; see intention-host.js for the
   // boundaries, and note that its cross-person read (`intentionsDue`) is a module export and
   // deliberately NOT on the service, so no tool can reach it.
-  hostProvides: ['memory.v2', 'search', 'serviceInfo', 'schedules', 'todo', 'todoStore', 'interaction', 'interactionStore', 'conversationSearch', 'reflection', 'workingMemory', 'ownMemory', 'intention'],
+  hostProvides: ['memory.v2', 'search', 'serviceInfo', 'schedules', 'todo', 'todoStore', 'interaction', 'interactionStore', 'conversationSearch', 'reflection', 'workingMemory', 'ownMemory', 'intention', 'lesson'],
   resolver: resolverRegistry,
   baseDir: PERSONA_BASE_DIR,
   lockPath: path.join(PERSONA_BASE_DIR, 'persona.lock.json'),

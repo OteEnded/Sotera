@@ -30,6 +30,7 @@ import { readOwnStance, renderOwnStance } from '../../components/relational-know
 import { initOwnMemory } from '../../components/own-memory-host.js'
 import { initIntention, readOpenIntention, renderOpenIntention } from '../../components/intention-host.js'
 import { describeScope, renderScope } from '../../components/room-scope.js'
+import { initLesson } from '../../components/lesson-host.js'
 import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
@@ -3223,6 +3224,7 @@ export default async function chatSiteRoutes(fastify) {
   initConversationSearch() // `conversationSearch` host service (Conversation Search, step 4 CS1)
   initOwnMemory() // `ownMemory` host service — what SHE has stored about herself (recall_own_memory)
   initIntention() // `intention` host service — what she is TRYING TO ACCOMPLISH with this person (A1)
+  initLesson() // `lesson` host service — what she GOT WRONG and what generalizes from it (step 4)
   // Tool-call audit: the EventBus already emitted every call; nothing kept them. See audit/tool-log.js.
   initToolLog(fastify, attachToolAudit)
   initReflection() // `reflection` host service (L3 Persona Notes; the Reflection Host Adapter, step 5 R1)

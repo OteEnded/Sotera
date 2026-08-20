@@ -38,6 +38,11 @@
       "source": "../../../../../PortableComponents/Tools/Intention"
     },
     {
+      "name": "Lesson",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/Lesson"
+    },
+    {
       "name": "WorkingMemory",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/WorkingMemory"

@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-19T13:30:46.967Z",
+  "resolvedAt": "2026-08-20T09:25:56.992Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -155,6 +155,22 @@
         "set_intention",
         "update_intention",
         "close_intention"
+      ],
+      "permissions": []
+    },
+    "../../../../../PortableComponents/Tools/Lesson": {
+      "id": "@ote/tool-lesson",
+      "name": "Lesson",
+      "version": "0.1.0",
+      "type": "tool",
+      "sdk": "^0.6.0",
+      "trust": "first-party",
+      "integrity": "sha256-17a560937140064b8bf1675fa9e2fb4df948269028ebec08ab3b6eb6e8d33f14",
+      "components": [
+        "recall_lessons",
+        "propose_lesson",
+        "save_lesson",
+        "decline_to_remember"
       ],
       "permissions": []
     },
