@@ -32,7 +32,10 @@
 // down, and no authorship filter can fix it.
 //
 // ⇒ **SAME ROOM: her text. OTHER ROOMS: existence only** — counterpart, when, an opaque handle, a match
-// count. ⭐ Which is exactly E-1's `attested` state, the one she already articulates unprompted:
+// count. ⚠️ The field is `counterpart`, not `with`: on the first live call she read `with: "Hermes"`
+// as *the room name*. A field name that invites the wrong reading is a defect even when the value is
+// right — she was reasoning correctly about a label I had made ambiguous.
+// ⭐ Which is exactly E-1's `attested` state, the one she already articulates unprompted:
 // *"I can see THAT we've talked, but not WHAT."* The rule in one line:
 //
 //     THE EXISTENCE OF A RELATIONSHIP IS DISCLOSABLE. ITS CONTENTS ARE NOT.
@@ -133,7 +136,7 @@ export function buildSelfHistory(fastify, { userId = null, isRoot = false } = {}
         if (here.length < limit) here.push({ said: e.excerpt ?? null, when: e.timestamp ?? null, messageId: e.message?.id ?? null })
       } else {
         // ⛔ OTHER ROOM — existence only. No text, no title, no message ids that could be walked.
-        const prev = elsewhere.get(cid) ?? { with: m.who, conversationHandle: cid, matches: 0, firstMatchAt: null, lastMatchAt: null }
+        const prev = elsewhere.get(cid) ?? { counterpart: m.who, conversationHandle: cid, matches: 0, firstMatchAt: null, lastMatchAt: null }
         prev.matches += 1
         const when = e.timestamp ?? null
         if (when && (!prev.firstMatchAt || when < prev.firstMatchAt)) prev.firstMatchAt = when

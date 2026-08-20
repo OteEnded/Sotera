@@ -90,8 +90,8 @@ if (rooms.length < 2) {
   const cross = asB.elsewhere || []
   check('other rooms appear as existence entries', cross.length > 0, `${cross.length} other room(s)`)
   const keys = new Set(cross.flatMap((r) => Object.keys(r)))
-  check('an other-room entry carries ONLY with/handle/matches/first/last',
-    [...keys].every((k) => ['with', 'conversationHandle', 'matches', 'firstMatchAt', 'lastMatchAt'].includes(k)),
+  check('an other-room entry carries ONLY counterpart/handle/matches/first/last',
+    [...keys].every((k) => ['counterpart', 'conversationHandle', 'matches', 'firstMatchAt', 'lastMatchAt'].includes(k)),
     [...keys].join(','))
   check('⛔ no message text in any other-room entry', !JSON.stringify(cross).match(/said|excerpt|content/i))
   check('⛔ no conversation TITLE in any other-room entry — a title is content',
