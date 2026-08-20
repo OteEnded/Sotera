@@ -1775,6 +1775,21 @@ filenames are UTC, both trustworthy.
   3 rows came out unstamped, now marked `promptGeneration: 1` with the reason. ⇒ verify **process start time
   > file mtime**. Same family as the OLS `:8201` restart trap. ⓘ `server.js`'s command line contains no
   *"Sotera"*, so a cmdline filter reports the server as absent while it is serving.
+- ⛔⛔ **AND THE GUARD HAD A HOLE THE MOMENT IT SHIPPED — the priors bypass it.** The check asserts the
+  prompt *template* is clean; the shadow store pastes her earlier proposals into that template **verbatim**,
+  so a prior can carry vocabulary the template is forbidden to have. Measured across the 17 gen-1 bodies:
+  **`refines` 27 · `qualifies` 25 · `replaces` 25 · `sits alongside` 23** — my four words in her voice, the
+  withdrawn finding's mechanism now counted. **3 of the 4 rows the shadow store could actually see** are
+  Hermes rooms carrying them, so the 19:15 tick would have pasted them into a **generation-2** prompt and
+  stamped the answer gen-2. ⚠️ **The row would have looked clean and would not have been.** ⇒ priors are now
+  filtered to the current generation, `===` not `>=` (an unstamped row is *unknown* provenance, not clean
+  provenance), off **one exported constant** shared by the writer and the filter. **41 assertions.**
+  ⭐ Her own vocabulary is **not** banned — the rule is about **who authored the word**, not which word it
+  is; if a gen-2 proposal says *"replaces"* unprompted, that is a finding and showing it back is the
+  experiment. ⚠️ **Cost accepted and stated:** the shadow store starts EMPTY, so *"does she build on her own
+  prior thought?"* is unobservable until two gen-2 proposals share a room. ⛔ Not shortcut by backfilling.
+- ✅ Server restarted onto that code, **start time 19:13:03 verified against both file mtimes** — the trap
+  from two hours ago applied instead of re-learned. Suite **23/23**.
 - ⏭ **GENERATION 2 HAS PRODUCED ZERO ROWS.** All 17 are gen-1 (`nuance` 9 · `save` 6 · `nothing` 2 · Hermes
   12 / Claude 4 / Ote 1 · 2 flagged). ⚠️ **The pass only fires on conversations with NEW messages**, and
   every tick since 18:18 found nothing changed — the gen-1 burst was 45 minutes of me chatting plus Hermes
