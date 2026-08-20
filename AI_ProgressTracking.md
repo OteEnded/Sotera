@@ -1340,6 +1340,57 @@
 
 ---
 
+### 2026-08-20 16:45
+
+- **Summary:** Four decisions RATIFIED, and he corrected a real slip in the revision I had just written.
+  ⛔ Still nothing built — the architecture is now settled and awaiting only M-4.
+- ✅ **M-5 RATIFIED — THE TWO-ARM MODEL IS LOCKED.** *"Sotera-owned → whole Sotera memory space →
+  associative ranking. Person-owned → authorized provenance/room → hard predicate. Then merge, with
+  Sotera's own memory having the stronger identity weight."*
+- ✅ **M-2 RATIFIED — the LESSON layer is IN SCOPE**, and he put it higher than I did: *"actually
+  fundamental to 'Sotera is Sotera'. She shouldn't merely accumulate facts; she needs to accumulate what
+  she learned from experience, including mistakes and corrections."* ⛔ With the **checkable factual
+  trigger + `dryRun`** kept: *"we absolutely don't want 'the user disagreed' to automatically become a
+  lesson."*
+- ✅ **M-6 RATIFIED — exact `<=>` before HNSW.** pgvector is *"the mechanism that lets her associate current
+  context with her accumulated experience"*, and *"the memory remains the semantic object."*
+- ⚠️⚠️ **HIS CORRECTION, AND IT IS THE THIRD TIME ON THE SAME AXIS.** I had written that SELF and LESSON
+  surface everywhere *because they have "no person attached"* — which uses **aboutness as a visibility
+  proxy**. His ruling: ⛔ **`ABOUT ≠ OWNER`** — *"a Sotera-owned lesson/experience can absolutely be about
+  Ote while still being Sotera's memory… otherwise we recreate the same ontology error in a new form."*
+  ⇒ The canonical row is now: `owner=Sotera · type=lesson · about=Ote · provenance=conversation with Ote ·
+  content=her own abstraction`. **A lesson about Ote is no less hers.**
+- ⭐ **The three appearances of one error, for the record:** the store welding ownership+aboutness+visibility
+  to `kind` → me keying visibility on `subject_person_id` → me using *"no person attached"* as a stand-in for
+  *"safe everywhere"*. Same axis, three shapes, and he caught the last two.
+- ⭐ **The build-first recommendation SURVIVES on a better reason:** SELF and LESSON go first not because
+  they dodge the boundary question but because **nothing in them is anyone else's to disclose** — they are
+  her abstractions of her own conduct. Content, not aboutness, is what makes them cheap.
+- ⭐⭐ **AND HIS PIPELINE ADDS A STAGE I WAS MISSING:** `accumulated memory → embeddings → associative
+  recall → contextual working set → **provenance/ownership CONSTRAINTS** → her reasoning`. **The constraint
+  sits AFTER the working set**, which resolves the edge I was worried about (her memory about Ote reaching a
+  Hermes conversation) **without fragmenting anything**: recall is unfragmented, and only what reaches
+  reasoning is constrained.
+- ⚠️⚠️ **One design rule recorded with it, or the stage is worthless: it must DROP rows before they reach
+  the prompt, never annotate them** with *"you know this, don't mention it."* A row in the window is a row
+  she may voice, and her judgement measurably collapses under a leading question — **a do-not-mention marker
+  is a boundary made of trust.** ⭐ And write-time abstraction pays off twice here: an abstraction with no
+  private detail leaves the constraint stage little to drop.
+- ⚠️ **A trap the new layer inherits from the oldest failure in this arc:** *"the working set should not
+  redefine or fragment her memory — it is only what she currently recalls."* ⇒ **She must never read *not in
+  my working set* as *I never knew it*.** That is `0 items ⇒ the room is empty` and *"nothing about Hermes
+  has ever been stored"* arriving in the recall layer. The empty-read quantifier shipped today is the right
+  shape and will need to ride the working set too.
+- **§11.1 now records 10 RATIFIED INVARIANTS** of the memory model, from *ownership follows authorship* and
+  `ABOUT ≠ OWNER` through the two-arm laws, the constraint stage, *one memory not one per room*, and the
+  unchanged *persistent state · discontinuous execution*.
+- **Files touched:** `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (§10.3 corrected, §10.3a/b/c added, §11
+  decisions ratified, §11.1 new), `Reference/README.md`, and the `sotera-is-the-subject` memory.
+- **Next action:** **M-4 is the only open decision** — root-row auth fixes before root's broad read (I still
+  recommend yes). ⛔ No store or index migration until he says the architecture is settled enough to start.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
