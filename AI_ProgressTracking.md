@@ -1624,6 +1624,73 @@
 
 ---
 
+### 2026-08-20 20:05
+
+- **Summary:** Implementation started on his green light. **E-1 ✅ shipped · M-4 ✅ shipped · suite 20/20.**
+  Plus his *agency-not-a-quota* correction, and a commit-convention drift of mine that he caught.
+- ✅ **E-1 — the evidence is authorized separately from the memory.** `getSource` used to scope-check the
+  MEMORY and then fetch the message, the conversation title, and every message in that conversation **by id,
+  unfiltered** — sound only because of an invariant nobody had written down (*a memory's source message
+  belongs to the same room as the memory*), which is exactly what ownership-follows-authorship removes.
+  Now: memory check unchanged, and the **evidence needs its own** — the source conversation must belong to
+  this store's scope. ⭐ It **FAILS CLOSED**, deliberately opposite to the fail-open rule that governs
+  capability degradation elsewhere in that file, because this decision is about *disclosure*, not capability.
+- ⭐ **Four states, never two:** `verified` · **`attested`** (new — *"I learned this on the 18th and cannot
+  show you what was said from here"*) · `destroyed` · `unattested`. ⛔ The refused payload carries **no
+  content, no title, no conversation id** — a title is a fact about a person and an id is a handle to their
+  material — only **when** + **whether it was here** + a note saying the evidence is **unreachable**, never
+  absent. ⭐ **And it fetches the WINDOW, not the conversation** (measured before: 70 messages loaded to
+  return 5).
+- **`checks/evidence-authorization-check.mjs` — 22/22.** ⭐ Its central case **cannot occur naturally yet and
+  is built on purpose**: a memory in one scope sourced from another scope's conversation. That is the shape
+  the reframe creates, and the reason E-1 comes first in the order.
+- ✅ **M-4 — the three root-row fixes.** **R1** (`auth.route.js`): the DB login path refuses root's connected
+  row **before the bcrypt compare**, so the refusal does not depend on what the hash contains. **R2**
+  (`admin.route.js`): PATCH now refuses `password`/`username`/`roles`/`isActive` on that row with **409**,
+  ⛔ **root included** — after R1 a password there would authenticate nothing, so allowing it would only mint
+  a credential that looks live and is not — while harmless fields still work, so the guard is scoped rather
+  than a blanket lock. **R3**: the check asserts the hash is **not bcrypt-shaped**, so drift is *detected*
+  instead of assumed.
+- ⚠️ **And root still logs in from config — asserted, not assumed.** Config is step 1, checked before the
+  database, precisely so the owner can sign in to repair a broken DB. R1 removes a door root has never used.
+- ⭐⭐ **R1's assertion is STRUCTURAL as well as behavioural, and that mattered:** a 401 from bcrypt and a
+  401 from R1 are **indistinguishable in the response**, so the behavioural test proved almost nothing on its
+  own — *assert the state, not the answer*. Verified out of band via the WARN line, then asserted in the
+  check on comment-stripped source that **the guard precedes the compare**. `root-identity-check` **28/28**.
+- ⓘ **The service was restarted** (PID 26152 → 18624, new process confirmed rather than assumed — the
+  Windows restart trap 200s from the process you meant to replace). His browser had an open
+  `/v1/chat/events` SSE connection; it dropped and reconnected.
+- ⭐⭐ **HIS CORRECTION — "agency, not a quota."** My *"don't borrow 'be ACTIVE' on its own"* read as
+  *suppress her initiative*, and that is not the finding. She **should** act on her own: notice · remember
+  unasked · revise · retain a lesson from her own mistake · edit her **learned** layer · ⭐ **decide nothing
+  is worth retaining** · ask when uncertain. ⛔ What we refuse is the **mandatory-quota** reading: *"a pass
+  that does nothing"* is a **valid successful result**, never a target and never a metric. ⚠️ The two failure
+  modes are **opposite** — her current gate produced **0 self-writes ever**; a quota produces writes with
+  nothing behind them. Recorded as invariant 14a.
+- ⚠️⚠️ **AND A DEFECT OF MINE HE CAUGHT: the commit prefix.** The convention is **`OteEnded[type]:`** with
+  literal brackets and a lowercase one-word type. I wrote **10 consecutive commits** as `OteEndedFeature:` /
+  `OteEndedDocs:`. ⭐ **The memory file already listed both of those forms in a table row labelled "ALL MINE,
+  ALL RECENT", and already carried the lesson *"I had the right answer written down and overrode it."*** So
+  this is the **second instance of the same failure** — not ignorance of the rule, **failure to consult it.**
+  ⇒ Fixed by adding a **§0 mechanical pre-commit command** to that memory, because a prose warning demonstrably
+  cannot fix a not-reading problem and a four-second command can. ⓘ All 51 commits ahead of `origin/main` are
+  **unpushed**, so nothing was published; the 10 subjects are still wrong and rewriting them is offered, not
+  done — he said *"next time"*, and history rewriting is not mine to decide.
+- ⚠️ **Also flagged, not acted on:** `recall_memory_source`'s tool DESCRIPTION still promises *"the message
+  it was saved from plus the surrounding conversation"* unconditionally, which E-1 can now refuse. It lives
+  in `PortableComponents/Packages/Memory/index.js`, **shared with OLS**, so ⛔ not edited — a cross-project
+  change is his call. The payload's `note` carries the truth, and she is reliable when she READS.
+- **Files touched:** `Backend/app/components/memory-store-sequelize-host.js`,
+  `Backend/app/routes/v1/auth.route.js`, `Backend/app/routes/v1/admin.route.js`,
+  `test/checks/evidence-authorization-check.mjs` (new), `test/checks/root-identity-check.mjs`,
+  `AI_CarryOn.md`; workspace `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (§14.1c(6b) + invariant 14a),
+  `Reference/README.md`.
+- **Next action:** **ownership-follows-authorship** (step 3) — stop the store overriding the author. Then
+  SELF + LESSON storage/writing. ⛔ Not re-weighting retrieval; his explicit instruction is that actual
+  Sotera-owned memory has to exist first.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
