@@ -117,7 +117,32 @@ export function buildSelfHistory(fastify, { userId = null, isRoot = false } = {}
     })
     // `excludeConversationId: null` — her own history includes the conversation she is in. Excluding it
     // is a UI concern for evidence, not a truth about her life.
-    return cs.search(query, { limit: Math.max(limit * 3, limit), excludeConversationId: null })
+    //
+    // ── ⭐⭐ `denseMinSim: 0` — THIS CONSUMER HAS NO RELEVANCE FLOOR, AND THAT IS CALIBRATED ───────────
+    // The shared default is 0.5, and it is right for evidence: pgvector always returns its nearest
+    // neighbours however far away they are, so without a floor a nonsense query yields confident-looking
+    // citations. ⇒ **Evidence must fail toward silence.**
+    //
+    // ⛔ BUT THE ERROR COSTS INVERT HERE. A miss in this tool becomes *"I have never said that"* — the
+    // exact false absence the capability was built to end. A loose candidate costs her one glance.
+    //
+    // ⚠️ AND A TUNED FLOOR WAS TRIED AND REJECTED ON DATA, not on taste. Calibration over 8 short queries
+    // she has demonstrably written about and 8 she certainly has not (2026-08-20, `qwen3-embedding:4b`,
+    // top-1 cosine over her own messages):
+    //     SHOULD match     Postgres .672 · memory .653 · latency .554 · embeddings .537 · tokenizer .519
+    //                      · ภาษาไทย .512 · segmentation .474 · **Thai .450**
+    //     SHOULD NOT match **ตะกร้อ .521** · regatta .509 · mortgage .493 · sourdough .469 · volcano .460
+    //                      · badminton .457 · knitting .451 · orthodontics .388
+    // ⇒ **THE DISTRIBUTIONS OVERLAP** (lowest true .450 < highest false .521). No cosine threshold
+    // separates them, so *"pick a defensible floor"* has no answer for one-word queries — a floor that
+    // admits `Thai` admits takraw, and one that rejects takraw rejects `Thai`.
+    //
+    // ⇒ So the dense arm is used here as a RANKED NEAREST-MATCH INDEX rather than a relevance filter, and
+    // the coverage line says so in her own reading. ⭐ Ote's frame, which this implements literally:
+    // *"Embeddings should help her find candidates, not decide what she knows or remembers."*
+    // ⛔ ONE VARIABLE CHANGED. No query expansion, no re-embedding, no new index, and the global default
+    // is untouched — `checks/self-history-check.mjs` asserts both halves.
+    return cs.search(query, { limit: Math.max(limit * 3, limit), excludeConversationId: null, denseMinSim: 0 })
   }
 
   // ── STAGE 2 · THE BOUNDARIES ───────────────────────────────────────────────────────────────────────
@@ -173,6 +198,10 @@ export function buildSelfHistory(fastify, { userId = null, isRoot = false } = {}
       coverage: {
         searched: 'every message you wrote, in every conversation you have had',
         notSearched: 'what anyone else said, and your durable memories — those are different questions',
+        // ⭐ SAID IN HER READING, not just in a comment. Measured: for one-word queries this embedder
+        // cannot separate topics she has written about from topics nobody has ever mentioned, so a
+        // semantic hit is proximity and nothing more. ⛔ Never let her read these as things she knows.
+        howToReadThese: 'These are CANDIDATES — places to look, not things you remember. Exact word matches are reliable; the rest are the nearest things in meaning, which for a one- or two-word query can be only loosely related. Read what you find before believing it.',
         matchedHere: here.length,
         matchedElsewhere: elsewhere.reduce((n, r) => n + r.matches, 0),
         roomsElsewhere: elsewhere.length,

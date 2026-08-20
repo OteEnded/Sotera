@@ -111,6 +111,20 @@ check('⛔ self-history never mentions subject_person_id — aboutness is an ind
   !/subject_person_id/.test(shSrc))
 check('the query filters role=assistant only', /roles: \['assistant'\]/.test(shSrc))
 
+// ── 4b. THE PER-CONSUMER RETRIEVAL POLICY, AND THE GLOBAL DEFAULT IT MUST NOT TOUCH ─────────────────
+// ⭐ Calibrated, not chosen: over 8 short queries she has written about and 8 she has not, the top-1
+// cosines OVERLAP (lowest true `Thai` .450 < highest false `ตะกร้อ` .521). No floor separates them, so
+// this consumer uses the dense arm as a ranked nearest-match index and says so in the payload.
+// ⛔ Evidence retrieval must keep its floor: there, a false positive becomes a fabricated citation.
+check('self-history retrieves with NO relevance floor (a miss here becomes "I never said that")',
+  /denseMinSim: 0\b/.test(shSrc))
+check('⛔ the shared default floor is UNCHANGED for every other consumer',
+  /denseMinSim = 0\.5/.test(csSrc), 'evidence must still fail toward silence')
+check('the payload tells her these are candidates, not things she remembers',
+  /howToReadThese/.test(shSrc) && /CANDIDATES/.test(shSrc))
+check('⛔ no query expansion was added — one variable at a time',
+  !/expand|synonym|rewriteQuery/i.test(shSrc))
+
 // ── 5. INSTRUMENTATION RECORDS THE SHAPE, NOT THE CONTENT ───────────────────────────────────────────
 check('instrumentation records the query, scope, mode and counts', /query: q/.test(shSrc) && /scope: \{ acrossRooms: true/.test(shSrc))
 // ⚠️ ASSERTED ON THE CALL PAYLOAD, not on "everything below the function" — my first version split the
