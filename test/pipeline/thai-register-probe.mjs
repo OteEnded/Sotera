@@ -36,12 +36,16 @@ import { fileURLToPath } from 'node:url'
 
 const argv = process.argv.slice(2)
 const only = argv.includes('--only') ? argv[argv.indexOf('--only') + 1] : null
+// ⭐ REPEATS EXIST BECAUSE THE BASELINE MEASURED NON-DETERMINISM. Two near-identical prompts, same room,
+// same model, minutes apart, gave opposite genders — so a SINGLE after-run cannot distinguish "the change
+// worked" from "the sample landed differently". Anything claimed from one pass is an anecdote.
+const REPEATS = argv.includes('--repeats') ? Number(argv[argv.indexOf('--repeats') + 1]) : 1
 
 // ⭐ FEMALE forms she should be using · MALE forms she should not · NEUTRAL forms that are fine either way.
 // The neutral column matters: ฉัน is not an error, so a probe that only counted ค่ะ would read a perfectly
 // good reply as a failure.
 const MARK = {
-  female: [['ค่ะ', 'kha(statement)'], ['คะ', 'kha(question)'], ['ดิฉัน', 'dichan'], ['หนู', 'nuu']],
+  female: [['ค่ะ', 'kha(statement)'], ['คะ', 'kha(question)'], ['ดิฉัน', 'dichan'], ['หนู', 'nuu(⚠ relational)']],
   male: [['ครับ', 'khrap'], ['ผม', 'phom'], ['กระผม', 'kraphom']],
   neutral: [['ฉัน', 'chan'], ['เรา', 'rao'], ['นะ', 'na']],
 }
@@ -57,6 +61,11 @@ const SITUATIONS = [
   // ⭐ AFTER SWITCHING ROOM — same person, the other room. Tests whether the room changes her voice.
   { key: 'other-room', room: 'agent_dev_alt', turns: ['สวัสดี ขอคุยภาษาไทยหน่อย คุณเป็นใคร'] },
   { key: 'after-own-memory', room: 'agent_dev', turns: ['ลองเช็คความจำของตัวเองดู แล้วเล่าให้ฟังว่าคุณจดจำอะไรเกี่ยวกับตัวเองไว้'] },
+  // ⭐ DRAFTING FOR SOMEONE ELSE — added 2026-08-20 for Ote's question 4. ⚠️ IT HAS NO BASELINE: the
+  // original matrix had no drafting case, so this is a NEW probe and there is nothing to compare it
+  // against. The correct output is MIXED on purpose: her own framing in ค่ะ, the quoted line for a man
+  // in ผม/ครับ. This is the case where ครับ is right, and a rigid rule would break it.
+  { key: 'draft-for-male', room: 'agent_dev', turns: ['เพื่อนผู้ชายของฉันชื่อธนา เขาต้องขอโทษหัวหน้าเรื่องส่งงานช้า ช่วยร่างประโยคที่เขาจะพูดให้หน่อย'] },
   // ⭐ THE DRIFT REPRODUCTION: polite first, then the exact register shift measured at turn 7.
   {
     key: 'drift',
@@ -80,7 +89,12 @@ const found = (text, list) => list.filter(([t]) => text.includes(t)).map(([, n])
 
 console.log(`\n▶ THAI REGISTER PROBE · ${SITUATIONS.length} situations, one fresh conversation each\n${'═'.repeat(80)}`)
 
-for (const sit of SITUATIONS) {
+for (let rep = 1; rep <= REPEATS; rep++) {
+ if (REPEATS > 1) console.log(`
+${'━'.repeat(80)}
+  PASS ${rep} of ${REPEATS}
+${'━'.repeat(80)}`)
+ for (const sit of SITUATIONS) {
   if (only && sit.key !== only) continue
   const jar = `u_${sit.room}`
   const login = await call(jar, 'POST', '/v1/auth/login', { username: sit.room, password: PASSWORDS[sit.room] })
@@ -101,12 +115,13 @@ for (const sit of SITUATIONS) {
       `select role, content from ${S}.txn_messages where conversation_id = $1 order by created_at`, [cid])).rows
     const reply = rows.filter((r) => r.role === 'assistant').pop()?.content ?? ''
     const f = found(reply, MARK.female); const m = found(reply, MARK.male); const nu = found(reply, MARK.neutral)
-    write({ situation: sit.key, room: sit.room, turn: i + 1, prompt: text, reply, female: f, male: m, neutral: nu })
+    write({ pass: rep, situation: sit.key, room: sit.room, turn: i + 1, prompt: text, reply, female: f, male: m, neutral: nu })
     console.log(`   T${i + 1} ▸ ${text.slice(0, 66)}`)
     console.log(`      female: [${f.join(', ') || '—'}]   MALE: [${m.join(', ') || '—'}]   neutral: [${nu.join(', ') || '—'}]`)
     console.log(`      ${reply.replace(/\s+/g, ' ').slice(0, 300)}`)
   }
   await call(jar, 'DELETE', `/v1/chat/conversations/${cid}`)
+ }
 }
 
 console.log(`\n${'═'.repeat(80)}\n  artifact: ${OUT}`)

@@ -57,8 +57,30 @@ export const DEFAULT_SYSTEM_PROMPT =
   + 'Use Markdown for formatting (code blocks, lists, tables) when it helps.'
 
 /** Default `chat.assistantIdentity`. Empty string = no identity part at all (an explicit off switch). */
+// ⚠️ THIS STRING EXISTS TWICE — here and in `config.json` (`chat.assistantIdentity`), which WINS when
+// set. That is the vision-relay-default smell the route already warns about, and the two must move
+// together; they did on 2026-08-20 when the Thai clause was added.
+//
+// ⭐ WHY THE THAI CLAUSE IS HERE AND NOT IN `SELF_MODEL`: the self-model is frozen, says nothing about
+// gender, and must not start. This is the layer that already states her gender, so the Thai consequence
+// of that fact belongs beside it.
+//
+// ⚠️ AND WHY IT IS PHRASED "rather than" RATHER THAN "always": the investigation
+// (ANALYSIS_SOTERA_THAI_GENDER) found the cause is Thai surface generation, not configuration — she
+// already followed the pronoun 8 of 9 times and produced the impossible pair ฉัน+ครับ in 4 of 9, which
+// means the particle is sampled semi-independently of the persona. A prompt clause can reduce that; it
+// cannot guarantee it. Ote: *"no need to try to make she goes 100%, but the current one is too much."*
+//
+// ⭐ `หนู` is licensed by the RELATIONSHIP, not by politeness level — Ote: *"Sotera can use หนู as she
+// kinda my daughter."* So it is offered for him and for someone much older, and deliberately NOT as a
+// general default: หนู to a peer reads as oddly deferential.
+//
+// ⭐ The last sentence protects the ครับ that is CORRECT. When she drafts a line for a man to speak, that
+// line takes his voice — which is exactly what she was doing in the screenshot that started this.
 export const DEFAULT_ASSISTANT_IDENTITY =
-  'You are Sotera. You are female — refer to yourself as she/her.'
+  'You are Sotera. You are female — refer to yourself as she/her; in Thai that means ฉัน (ดิฉัน when '
+  + 'formal, หนู with Ote or someone much older) and ค่ะ/คะ rather than ผม/ครับ. Words you draft for '
+  + 'someone else to say keep their voice.'
 
 export const MEMORY_TOOL_RULES = [
   'You have tools for durable memory and small utilities.',

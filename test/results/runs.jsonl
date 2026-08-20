@@ -3,3 +3,4 @@
 {"stem":"intention-injection","params":{"arm":"A","r":5},"started":"2026-08-20T02:52:39.232Z","artifact":"intention-injection_2026-08-20T02-52-39Z_armA_r5.jsonl"}
 {"stem":"intention-injection","params":{"arm":"B","r":5},"started":"2026-08-20T02:54:48.655Z","artifact":"intention-injection_2026-08-20T02-54-48Z_armB_r5.jsonl"}
 {"stem":"thai-register","params":{"n":9},"started":"2026-08-20T04:20:22.571Z","artifact":"thai-register_2026-08-20T04-20-22Z_n9.jsonl"}
+{"stem":"thai-register","params":{"n":10},"started":"2026-08-20T04:30:36.379Z","artifact":"thai-register_2026-08-20T04-30-36Z_n10.jsonl"}
