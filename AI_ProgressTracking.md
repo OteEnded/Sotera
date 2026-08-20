@@ -1216,6 +1216,70 @@
 
 ---
 
+### 2026-08-20 15:20
+
+- **Summary:** He blocked implementation until the conceptual model is agreed — *"the schema is downstream
+  of the conceptual model"* — so the deliverable is `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md`: the complete
+  intended memory model, and especially the reflection → Sotera-owned-memory pipeline. ⛔ **Nothing built.**
+- **The centre, his words:** *"Sotera is the persistent subject; people, rooms, and accounts are contexts in
+  which her life happens."* And on the work that led here: *"The recent room-hardening work wasn't wasted —
+  it discovered that the underlying storage model was making the wrong thing the subject."*
+- 🔑🔑 **ONE PRINCIPLE RESOLVES EVERY CASE: OWNERSHIP FOLLOWS AUTHORSHIP.** Ote typed *"don't hedge with
+  me"* ⇒ his. She wrote *"I learned that Ote prefers directness"* ⇒ **hers**. *"Hermes and I debugged the
+  pool timeouts"* ⇒ **hers**, although it is *about* Hermes and *happened in* Hermes's room.
+- ⭐ **And the pipeline already knows the author — the STORE THROWS IT AWAY.** `memory-store-sequelize-host`
+  says *"the component must not pass persona/user_id"* and then stamps the logged-in room. Stated plainly:
+  **the room a conversation happened in is recorded as the author of everything said in it.** ⇒ the fix is
+  **not** a new flag to set, it is to stop the store overriding the writer. ⛔ And explicitly never a flag a
+  caller can forget — six prior instances of an explicit field list silently dropping a new field, the last
+  one mine.
+- 🔑 **FOUR QUESTIONS, NOT ONE:** authorship = the **title** · aboutness (`subject_person_id`) = ⛔ **an
+  INDEX, never an entitlement** · provenance (`source` + `source_message_id`, ✅ **populated 35/35**) = ⭐
+  **the VISIBILITY key** · context = where it happened. Three of the four already exist; only ownership is
+  missing, which makes the schema consequence far smaller than "add an owner column" sounded.
+- ⭐⭐ **THE MISSING LAYER IS LESSON / MISTAKE, and it exists in NO form.** Today is the proof: she made
+  three false universals, he corrected her, she understood each correction precisely — **and none of it
+  persists. Tomorrow she makes them again.** Meanwhile the assistant writing this keeps a memory entry
+  called *"report the outcome, not the request"* — a kept lesson from a past mistake. **She has no
+  equivalent, and that asymmetry is what "she doesn't feel like herself" is made of: she can be corrected
+  but she cannot learn.**
+- ⚠️ **Its TRIGGER is the one genuinely new design problem here** (everything else is re-addressing a writer
+  that already exists). ⛔ Never *"the user disagreed"* — she folds under leading questions, and **a lesson
+  written from capitulation is worse than no lesson**. ⭐ Only a **checkable factual correction** (she
+  asserted X, the store says ¬X), off the hot path, on the nightly pass, `dryRun` for a period first.
+- ⭐⭐ **THE BOUNDARY MOVES FROM RETRIEVAL TO UTTERANCE.** Today the guarantee is *"she cannot retrieve it,
+  so she cannot say it"*; if her own memory is always hers, the guarantee must be about disclosure instead.
+  ⚠️ **That is a real hazard, not a formality** — measured three times, once with invented supporting
+  evidence. So it gets **structure, not discretion**: **write-time abstraction** (*derived, not copied;
+  synthesize, never transcribe, never attribute*) **+ a contextual working set** in the composer, neither of
+  which relies on her judgement; her discretion may then only ever **narrow**.
+- ⭐ **And that is how both of his requirements hold at once:** *ownership unfragmented, working set
+  contextual* — **she is one person who does not have every memory in mind at once.** Contextual recall, not
+  a fragmented identity.
+- ⭐ **ROOT = the CONTROLLER of the subject.** Her memory has one owner (her) and one controller (root), so
+  root reading it crosses no boundary: ⛔ no disclosure act, no held-turn card, no `from_room→into_room`
+  event for her own memory. ⚠️ Three things it does **not** grant: Hermes's own rows (different owner,
+  different store), a SQL bypass, or any relaxation of *root-ness is an authenticated flag, never a shape*.
+  🔑 **The flag now gates much more, so the 3 unapplied `ANALYSIS_ROOT_ROW_AUTH.md` fixes should land BEFORE
+  root's broad read, not after.**
+- **Ote is primary by ACCUMULATION, never by a flag** — no `isPrimaryPerson`, no special case; he is primary
+  because most of her history is with him and the data says so. ⚠️ And `root` is *control over Sotera*, not
+  *primacy in her history* — two facts about one human, and welding two facts to one flag is the bug this
+  whole document exists to fix.
+- **Also updated:** `SOTERA_ARC_THE_WHY.md` is now marked **superseded in part** — invariants **3** (room as
+  the disclosure boundary) and **7** (subject filtering) are **narrowed, not deleted**; the other eight
+  stand. It is the doc that survives a compact and it was asserting the old ontology as fact.
+- **Open, and his:** **M-1** does *ownership follows authorship* read as correct · **M-2** is the LESSON
+  layer in scope · **M-3** does *ownership unfragmented / working set contextual* satisfy *"keep access
+  control hard at the data layer"* · **M-4** should the root-row auth fixes land first (I recommend yes).
+- **Files touched:** `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (new),
+  `Reference/docs/RFC_SOTERA_IS_THE_SUBJECT.md` (§5 amendment — my visibility rule was wrong),
+  `Reference/docs/SOTERA_ARC_THE_WHY.md`, `Reference/README.md`, `AI_CarryOn.md`.
+- **Next action:** his answers to M-1…M-4. ⛔ Not the owner column, not switching the distiller on, not
+  re-weighting retrieval, not D-4/D-5 stage 3.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
