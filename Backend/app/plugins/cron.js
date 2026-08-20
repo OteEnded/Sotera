@@ -6,7 +6,7 @@ import { consolidateAll } from '../components/memory-consolidate-host.js'
 import { distillAll } from '../components/memory-distill-host.js'
 import { drainPendingEmbeddings } from '../components/conversation-search.js'
 import { reflectAll, reflectMode } from '../components/reflection-host.js'
-import { noticeAll } from '../components/noticing-pass.js'
+import { noticeAll, PROMPT_GENERATION, PRIORS_OFFERED } from '../components/noticing-pass.js'
 import { runHealthSuite } from '../maintenance/health-suite.js'
 import { decayWorkingMemory } from '../components/working-memory-host.js'
 
@@ -162,6 +162,18 @@ export default fp(async function (fastify, opts) {
     // a pass that starts itself on every deployment is a cost decision nobody made. 15 minutes, not 5:
     // this is a generative call, unlike the embed drain above.
     if (fastify.config?.memory?.noticingEnabled === true) {
+      // ⭐⭐ WHICH CODE IS ACTUALLY LOADED, ANSWERED AT BOOT. This has now bitten twice in one day: the pass
+      // ran 96 minutes on a pre-de-contamination prompt, and later wrote four rows without a field that
+      // had already been added — both times `/health` returned 200 throughout, which says nothing about
+      // which module version the process holds. ⇒ the boot log states the generation and the file mtimes,
+      // so "was this row written by the code I am reading?" is answerable from the log instead of from a
+      // process-start-time check somebody has to remember to run.
+      try {
+        const { statSync } = await import('node:fs')
+        const stamp = (p) => statSync(new URL(p, import.meta.url)).mtime.toISOString()
+        await log(`[noticing] loaded generation=${PROMPT_GENERATION} priors=${PRIORS_OFFERED} `
+          + `pass=${stamp('../components/noticing-pass.js')} host=${stamp('../components/noticing-host.js')}`, import.meta.url)
+      } catch { /* a missing mtime is not a reason to skip the job */ }
       cronManager.createJob('noticing', '0 */15 * * * *', async () => {
         try {
           const t = await noticeAll(fastify, { maxConvos: 5 })
