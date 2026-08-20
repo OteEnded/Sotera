@@ -24,7 +24,8 @@ const TURNS = argv.filter((a, i) => a !== '--as' && a !== '--cid' && i !== asIdx
 if (AS === 'ote') { console.error('✖ refusing to run as root'); process.exit(1) }
 if (!TURNS.length) { console.error('usage: node pipeline/ask-sotera.mjs --as <user> "turn" ["turn" …]'); process.exit(1) }
 
-const PASSWORDS = { agent_dev: 'agentdev123', kavi: 'kaviobs123' }
+// agent_dev_alt is the second TEST ROOM (same person as agent_dev) — see room-scope-check.
+const PASSWORDS = { agent_dev: 'agentdev123', agent_dev_alt: 'agentdev123', kavi: 'kaviobs123' }
 const config = loadConfig()
 const pg = devPg(); await pg.connect()
 const S = devSchema()
