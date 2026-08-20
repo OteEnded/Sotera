@@ -19,7 +19,7 @@
 //
 // ── ⭐ THE BOUNDARIES, ALL STRUCTURAL ──────────────────────────────────────────────────────────────
 //   · no person parameter        — the person is the caller's, taken from the request context;
-//   · no id parameter ANYWHERE   — one open intention per person (a DB index) means inspect/update/
+//   · no id parameter ANYWHERE   — one open intention per ROOM (a DB index) means inspect/update/
 //                                  close already know which row they mean. An id is a handle, and a
 //                                  handle is the beginning of a database tool;
 //   · no listing across people   — no such function exists to expose;
@@ -32,6 +32,7 @@
 
 import { registerHostService } from './runtime.js'
 import { buildMemoryV2, DEFAULT_PERSONA } from './memory-v2-host.js'
+import { describeScope } from './room-scope.js'
 
 /** Bump when the shape or the semantics of a written row change. Stored on every row. */
 export const INTENTION_WRITER_VERSION = 'intention-writer-0.1'
@@ -82,19 +83,24 @@ export function buildIntention(fastify, { userId = null } = {}) {
     const empty = { open: null, recentlyClosed: [], provenance: PROVENANCE }
     if (!scoped()) return empty
     const pid = await personId()
-    if (!pid) return empty
+    // ⚠️ EVEN AN EMPTY READ CARRIES THE SCOPE. An empty result with no explanation is exactly what she
+    // reads as "nothing exists anywhere" — measured twice, in both directions.
+    if (!pid) return { ...empty, scope: await describeScope(fastify, { userId }) }
 
+    // ⭐ ROOM-GRAINED READ (D-2, migration 013). The key is the ROOM, not the person: a purpose taken on
+    // in one of this person's rooms is not this room's business, because an intention is free text about
+    // someone's work. `person_id` still records who it is WITH — it is not a read key.
     const [open] = await Q(
       `SELECT intent, why, progress, next_review_at, created_at, updated_at
          FROM "${schema}"."txn_intentions"
-        WHERE person_id = :pid AND state = 'open'`, { pid })
+        WHERE room_user_id = :userId AND state = 'open'`, { userId })
 
     // The closed ones are the honest record of what she finished versus dropped. Bounded, and no ids.
     const closed = await Q(
       `SELECT intent, outcome, state::text AS state, closed_at
          FROM "${schema}"."txn_intentions"
-        WHERE person_id = :pid AND state <> 'open'
-        ORDER BY closed_at DESC LIMIT 5`, { pid })
+        WHERE room_user_id = :userId AND state <> 'open'
+        ORDER BY closed_at DESC LIMIT 5`, { userId })
 
     return {
       open: open
@@ -119,11 +125,15 @@ export function buildIntention(fastify, { userId = null } = {}) {
         on: r.closed_at ? r.closed_at.toISOString().slice(0, 10) : null,
       })),
       provenance: PROVENANCE,
+      // ⭐ D-10 · WHO / WHICH PERSON / WHICH ROOM, and the GRAIN of each thing she can read. She could
+      // not derive the person layer from the data and said so: *"the value is my name for you, not an
+      // account ID… I don't see the mechanism in the data itself."* No ids — semantics only.
+      scope: await describeScope(fastify, { userId }),
     }
   }
 
   /**
-   * CREATE. ⚠️ At most one open intention per person, enforced by a partial unique index — so this
+   * CREATE. ⚠️ At most one open intention per ROOM, enforced by a partial unique index — so this
    * REFUSES rather than replacing, and hands back the one that already exists. Silently superseding a
    * purpose is how a store starts lying about what she is doing.
    */
@@ -153,11 +163,11 @@ export function buildIntention(fastify, { userId = null } = {}) {
     const lease = await lane()
     if (!lease) return { ok: false, reason: 'no write lane' }
     await lease('intention.set', async () => seq.query(
-      `INSERT INTO "${schema}"."txn_intentions" (person_id, intent, why, next_review_at, writer_version)
-       VALUES (:pid, :intent, :why,
+      `INSERT INTO "${schema}"."txn_intentions" (person_id, room_user_id, intent, why, next_review_at, writer_version)
+       VALUES (:pid, :userId, :intent, :why,
                CASE WHEN :days::int IS NULL THEN NULL ELSE now() + (:days::int * INTERVAL '1 day') END,
                :writer)`,
-      { replacements: { pid, intent: text, why: clean(why), days, writer: INTENTION_WRITER_VERSION }, type: seq.QueryTypes.INSERT },
+      { replacements: { pid, userId, intent: text, why: clean(why), days, writer: INTENTION_WRITER_VERSION }, type: seq.QueryTypes.INSERT },
     ))
     const after = await recall()
     return { ok: true, intention: after.open, note: 'This is stored. It will still be here in your next conversation with this person.' }
@@ -190,9 +200,9 @@ export function buildIntention(fastify, { userId = null } = {}) {
               progress = COALESCE(:progress, progress),
               next_review_at = CASE WHEN :days::int IS NULL THEN next_review_at
                                     ELSE now() + (:days::int * INTERVAL '1 day') END
-        WHERE person_id = :pid AND state = 'open'`,
+        WHERE room_user_id = :userId AND state = 'open'`,
       {
-        replacements: { pid, intent: clean(intent), why: clean(why), progress: clean(progress), days },
+        replacements: { userId, intent: clean(intent), why: clean(why), progress: clean(progress), days },
         type: seq.QueryTypes.UPDATE,
       },
     ))
@@ -225,8 +235,8 @@ export function buildIntention(fastify, { userId = null } = {}) {
           SET state = :as::persona_sotera.intention_state,
               outcome = COALESCE(:outcome, outcome),
               closed_at = now()
-        WHERE person_id = :pid AND state = 'open'`,
-      { replacements: { pid, as, outcome: clean(outcome) }, type: seq.QueryTypes.UPDATE },
+        WHERE room_user_id = :userId AND state = 'open'`,
+      { replacements: { userId, as, outcome: clean(outcome) }, type: seq.QueryTypes.UPDATE },
     ))
     return {
       ok: true,
@@ -277,7 +287,7 @@ export async function intentionsDue(fastify, { limit = 20 } = {}) {
   const { schema } = fastify?.db?.txn_memories?.getTableName?.() ?? {}
   if (!seq || !schema) return []
   return seq.query(
-    `SELECT person_id::text AS "personId", intent, why, progress, next_review_at AS "dueAt"
+    `SELECT person_id::text AS "personId", room_user_id::text AS "roomUserId", intent, why, progress, next_review_at AS "dueAt"
        FROM "${schema}"."txn_intentions"
       WHERE state = 'open' AND next_review_at IS NOT NULL AND next_review_at <= now()
       ORDER BY next_review_at ASC LIMIT :limit`,
@@ -324,15 +334,15 @@ export function describeStaleness({ created_at: created, updated_at: updated, ne
  * route reaching for the per-request service: the route must not be able to WRITE, and a read+render
  * pair cannot. It is also why the check can still assert the route never constructs the service.
  */
-export async function readOpenIntention({ db, personId } = {}) {
-  if (!db || !personId) return null
+export async function readOpenIntention({ db, userId } = {}) {
+  if (!db || !userId) return null
   const seq = db.txn_memories.sequelize
   const { schema } = db.txn_memories.getTableName()
   if (!schema) throw new Error('intention-host: no project schema configured — refusing to guess one')
   const [row] = await seq.query(
     `SELECT intent, why, progress, next_review_at, created_at, updated_at
-       FROM "${schema}"."txn_intentions" WHERE person_id = :personId AND state = 'open'`,
-    { replacements: { personId }, type: seq.QueryTypes.SELECT },
+       FROM "${schema}"."txn_intentions" WHERE room_user_id = :userId AND state = 'open'`,
+    { replacements: { userId }, type: seq.QueryTypes.SELECT },
   )
   return row ?? null
 }

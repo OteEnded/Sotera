@@ -107,15 +107,35 @@ try {
   // (1) account A → person A
   check('1 · an account points at a person', Boolean(agentDev?.person_id), `agent_dev → ${agentDev?.person_id?.slice(0, 8)}`)
 
-  // (2) account B → the SAME person, established explicitly
+  // (2) account B → the SAME person, established explicitly.
+  // Count BEFORE the write, so the assertion below is about what this write did rather than about how
+  // many rooms the world happens to contain today.
+  const before = await count(`select count(*)::int n from ${S}.mst_users where person_id=$1`, [agentDev.person_id])
   const acctB = await one(
     `insert into ${S}.mst_users (id, username, password_hash, person_id, created_at, updated_at)
      values (gen_random_uuid(), 'zz_test_second_login', 'x', $1, now(), now()) returning id`,
     [agentDev.person_id])
   MADE.accounts.push(acctB.id)
+  // ⚠️⚠️ THIS ASSERTED `=== 2` AND BROKE THE DAY A THIRD ROOM LEGITIMATELY APPEARED (`agent_dev_alt`,
+  // the rooms-model test fixture, 2026-08-20). Fourth instance of the shape the carry-on already names:
+  // *"an invariant that encoded a migration-time count, failing the system the moment two accounts
+  // legitimately shared a person."* A hardcoded total is a snapshot of the world at the moment somebody
+  // wrote the test, and under the ROOMS model the whole point is that one person accumulates rooms.
+  //
+  // ⇒ Assert the TRANSITION this write caused, which is the thing actually under test.
   check('2 · TWO accounts can point at ONE person — cross-account continuity is representable',
-    (await count(`select count(*)::int n from ${S}.mst_users where person_id=$1`, [agentDev.person_id])) === 2)
-  check('2 · ...and it took an explicit write; nothing derived it from name or email', true)
+    (await count(`select count(*)::int n from ${S}.mst_users where person_id=$1`, [agentDev.person_id])) === before + 1,
+    `${before} → ${await count(`select count(*)::int n from ${S}.mst_users where person_id=$1`, [agentDev.person_id])} accounts on that person`)
+  // ⚠️ There was a `check(…, true)` here — an assertion that cannot fail, which is the
+  // harness-asserts-its-own-success defect. Replaced with the real property: the link exists because a
+  // row SAYS so, and nothing in the schema could have derived it from a matching name or email.
+  check('2 · ...and it took an explicit write; nothing derived it from name or email',
+    (await count(
+      `select count(*)::int n from ${S}.mst_users u
+        where u.person_id = $1 and u.username <> 'zz_test_second_login'
+          and u.username = (select username from ${S}.mst_users where id = $2)`,
+      [agentDev.person_id, acctB.id])) === 0,
+    'the two accounts share a person while sharing no username')
 
   // (3) a person with no account — someone merely mentioned
   const personC = await mkPerson('human', 'zz_test_Shu')

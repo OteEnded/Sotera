@@ -63,7 +63,7 @@ try {
   // ── P · preconditions. Fail FAST rather than clobbering something real ──────────────────────────
   ok(Boolean(me?.pid), 'P · agent_dev has a person row to hold an intention with')
   const [{ n: preOpen }] = await Q(
-    "SELECT count(*)::int AS n FROM persona_sotera.txn_intentions WHERE person_id = :pid AND state = 'open'", { pid: me.pid })
+    "SELECT count(*)::int AS n FROM persona_sotera.txn_intentions WHERE room_user_id = :u AND state = 'open'", { u: users.agent_dev })
   ok(preOpen === 0, 'P · agent_dev starts with no open intention', 'a leftover open row would mean the previous run did not restore')
 
   // ── L1 · CREATE ─────────────────────────────────────────────────────────────────────────────────
@@ -97,8 +97,8 @@ try {
   ok(second.alreadyOpen?.intent === created.intention.intent,
     'L3 · …and it hands back the one that already exists rather than a bare error')
   const [{ n: openNow }] = await Q(
-    "SELECT count(*)::int AS n FROM persona_sotera.txn_intentions WHERE person_id = :pid AND state = 'open'", { pid: me.pid })
-  ok(openNow === 1, 'L3 · exactly one open row exists in the table', `${openNow}`)
+    "SELECT count(*)::int AS n FROM persona_sotera.txn_intentions WHERE room_user_id = :u AND state = 'open'", { u: users.agent_dev })
+  ok(openNow === 1, 'L3 · exactly one open row exists in this ROOM', `${openNow}`)
 
   // ── L4 · UPDATE ─────────────────────────────────────────────────────────────────────────────────
   const updated = await turn2.update({ progress: 'Ruled out the connection pool. It only happens on the first run after a restart.' })
@@ -114,17 +114,17 @@ try {
   ok(tooLong.ok === false && /limit is \d+/.test(tooLong.reason), 'L5 · an over-long field is refused with the actual limit', tooLong.reason)
   let dbRejected = false
   try {
-    await X(`UPDATE persona_sotera.txn_intentions SET intent = :v WHERE person_id = :pid AND state='open'`,
-      { v: 'y'.repeat(LIMITS.intent + 1), pid: me.pid })
+    await X(`UPDATE persona_sotera.txn_intentions SET intent = :v WHERE room_user_id = :u AND state='open'`,
+      { v: 'y'.repeat(LIMITS.intent + 1), u: users.agent_dev })
   } catch { dbRejected = true }
   ok(dbRejected, 'L5 · ⭐ …and the DATABASE refuses it too — the cap is a constraint, not a convention')
 
   // ── L6 · the scheduler seam: due-ness is a QUERY, and it is the intention that answers ──────────
-  await X("UPDATE persona_sotera.txn_intentions SET next_review_at = now() - INTERVAL '1 hour' WHERE person_id = :pid AND state='open'", { pid: me.pid })
+  await X("UPDATE persona_sotera.txn_intentions SET next_review_at = now() - INTERVAL '1 hour' WHERE room_user_id = :u AND state='open'", { u: users.agent_dev })
   const due = await intentionsDue(fastify)
   ok(due.some((d) => d.personId === me.pid), 'L6 · ⭐ intentionsDue() reports it once its review time has passed', `${due.length} due`)
   ok(due.every((d) => !('id' in d)), 'L6 · …and returns no row id')
-  await X("UPDATE persona_sotera.txn_intentions SET next_review_at = now() + INTERVAL '7 days' WHERE person_id = :pid AND state='open'", { pid: me.pid })
+  await X("UPDATE persona_sotera.txn_intentions SET next_review_at = now() + INTERVAL '7 days' WHERE room_user_id = :u AND state='open'", { u: users.agent_dev })
 
   // ── L7 · COMPLETE ───────────────────────────────────────────────────────────────────────────────
   const closed = await turn2.close({ as: 'completed', outcome: 'It was the cold page cache, not the pool.' })
@@ -144,7 +144,7 @@ try {
   ok(dropped.ok === true && dropped.closed.howItEnded === 'abandoned', 'L8 · ⭐ abandoning is a real outcome, recorded as one')
   let reopenRejected = false
   try {
-    await X("UPDATE persona_sotera.txn_intentions SET state='open' WHERE person_id = :pid AND state='abandoned'", { pid: me.pid })
+    await X("UPDATE persona_sotera.txn_intentions SET state='open' WHERE room_user_id = :u AND state='abandoned'", { u: users.agent_dev })
   } catch { reopenRejected = true }
   ok(reopenRejected, 'L8 · ⭐ a closed intention cannot be flipped back to open — the state and the clock must agree')
 
@@ -199,15 +199,15 @@ try {
     ok(!cols.includes(banned), `B5 · ⭐ there is no \`${banned}\` column — the guarantee is the schema's, not a writer's discipline`)
   }
   const [idx] = await Q(
-    "SELECT count(*)::int AS n FROM pg_indexes WHERE schemaname='persona_sotera' AND tablename='txn_intentions' AND indexname='txn_intentions_one_open_per_person'")
-  ok(idx.n === 1, 'B5 · the one-open-per-person index is present — the id-free tool surface depends on it')
+    "SELECT count(*)::int AS n FROM pg_indexes WHERE schemaname='persona_sotera' AND tablename='txn_intentions' AND indexname='txn_intentions_one_open_per_room'")
+  ok(idx.n === 1, 'B5 · the one-open-per-room index is present — the id-free tool surface depends on it')
 
   // ── B6 · ⭐ DE-IDENTIFICATION: an intention does not outlive the person ─────────────────────────
   // Deliberately the OPPOSITE of migration 007's SET NULL, because the payload differs: a stance label
   // carries no personal data and survives as HER practice; an intention's text can name someone's work.
   const [tmp] = await Q("INSERT INTO persona_sotera.mst_persons (display_name, kind) VALUES ('ZZ Test Person', 'human') RETURNING id::text")
   tempPersonId = tmp.id
-  await X("INSERT INTO persona_sotera.txn_intentions (person_id, intent, writer_version) VALUES (:pid, 'a throwaway intention', 'test')", { pid: tempPersonId })
+  await X("INSERT INTO persona_sotera.txn_intentions (person_id, room_user_id, intent, writer_version) VALUES (:pid, :u, 'a throwaway intention', 'test')", { pid: tempPersonId, u: users.mina })
   const [{ n: before }] = await Q('SELECT count(*)::int AS n FROM persona_sotera.txn_intentions WHERE person_id = :pid', { pid: tempPersonId })
   await X('DELETE FROM persona_sotera.mst_persons WHERE id = :pid', { pid: tempPersonId })
   const [{ n: gone }] = await Q('SELECT count(*)::int AS n FROM persona_sotera.txn_intentions WHERE person_id = :pid', { pid: tempPersonId })

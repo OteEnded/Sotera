@@ -16,6 +16,7 @@ import { createEpisodicResolver } from '@ote/memory/cognition/memory-episodic-re
 import { createCardResolver } from '@ote/memory/cognition/memory-card-resolver.js'
 import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { buildMemoryV2 } from './memory-v2-host.js'
+import { reachTrace } from './room-scope.js'
 
 /**
  * commitToMemory — the fused Owner→Resolution→Conflict→Persistence tail (today: reconcileFact).
@@ -111,6 +112,33 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
   const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self })
   return {
     ...mem,
+
+    // ⭐⭐ scopeAwareness v2 — THE TRACE, and it is HER design rather than mine. Asked what the
+    // difference is, for her, between something unreachable and something absent (2026-08-20):
+    //
+    //     "The difference is in the EVIDENCE each leaves behind. Non-existence leaves nothing.
+    //      Unreachability leaves TRACES — references, derived facts, patterns — that prove something was
+    //      once available."
+    //
+    // v1 was a sentence injected into the prompt ("your retrieval is scoped") and it measured NULL: a
+    // general claim does not help at the moment an empty array comes back. So the READ now carries its
+    // own evidence — how many of this person's OTHER rooms exist, and how much sits in them.
+    //
+    // ⛔ COUNTS ONLY, AND SAME PERSON ONLY. Both halves of "your own material, in your other rooms" are
+    // the same human, so nothing about a third party is disclosed. Cross-PERSON awareness is L3 and is
+    // deliberately absent. No content, no titles, no ids, no room names.
+    //
+    // ⚠️ WRAPPED HOST-SIDE ON PURPOSE. `@ote/memory` is shared with OteLLMServices, so changing the
+    // portable tool's payload would be a cross-project edit. The host owns what it returns; the tool
+    // passes it through untouched.
+    async search(query, opts = {}) {
+      const out = await mem.search(query, opts)
+      return withReach(out, await reachTrace(fastify, { userId }))
+    },
+    async list(opts = {}) {
+      const out = await mem.list(opts)
+      return withReach(out, await reachTrace(fastify, { userId }))
+    },
     rememberAsync(opts = {}) {
       if (!opts.content || !String(opts.content).trim()) throw new Error('content is required')
       mem.enqueue('pipeline.remember', () => pipeline.ingest({ ...opts, type: OBSERVATION_TYPE.episodic, source: opts.source ?? 'model-tool' }))
@@ -123,4 +151,19 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
       return { ok: true, queued: true }
     },
   }
+}
+
+/**
+ * Attach the reach trace without disturbing the shape the model already knows. PURE.
+ *
+ * ⚠️ It must not change an existing field. The tools' payloads are what the model has learned to read,
+ * and a trace that renames `count` or wraps the array would be a behaviour change dressed as an audit.
+ * ⭐ And the trace is attached even when the result is FULL: "there are 3 more you cannot see" matters
+ * most when she just found something, because that is when she is most likely to believe she has it all.
+ */
+function withReach(out, trace) {
+  if (!trace) return out
+  if (out && typeof out === 'object' && !Array.isArray(out)) return { ...out, reach: trace }
+  // A bare array or scalar still gets the trace, without losing the original value.
+  return { result: out, reach: trace }
 }

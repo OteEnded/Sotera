@@ -19,6 +19,7 @@ const COLS = [
   'next_review_at',
   'closed_at',
   'writer_version',
+  'room_user_id::text AS room_user_id',
 ].join(', ')
 
 /** Snapshot every intention before a test runs. */
@@ -34,6 +35,36 @@ export async function snapshotIntentions(Q) {
 export async function restoreIntentions(Q, X, snap) {
   const now = await Q(`SELECT ${COLS} FROM persona_sotera.txn_intentions`)
   const added = now.filter((r) => !snap.rows.has(r.id)).map((r) => r.id)
+
+  // ⚠️⚠️ THIRD TIME, SAME LESSON, AND THIS FILE IS THE ONE THAT WAS SUPPOSED TO END IT.
+  // "Leave the table exactly as I found it" was implemented as *delete what I added* + *undo mutations*.
+  // It never handled DELETION — so when `room-scope-check` cleared a room to get a clean state, it wiped
+  // Kavi's real intention and the restore reported success. The row was recoverable only because its text
+  // happened to be quoted in a transcript.
+  //
+  // ⭐ A restore that cannot put back what was removed is not a restore. Re-inserting is the missing third
+  // case, and it is why the snapshot captures every column rather than just the mutable ones.
+  const removed = [...snap.rows.values()].filter((was) => !now.some((r) => r.id === was.id))
+  for (const was of removed) {
+    await X(
+      `INSERT INTO persona_sotera.txn_intentions
+         (id, person_id, room_user_id, intent, why, progress, outcome, state, next_review_at, closed_at, writer_version)
+       VALUES (:id, :person, :room, :intent, :why, :progress, :outcome, :state::persona_sotera.intention_state, :nra, :closed, :writer)`,
+      {
+        id: was.id,
+        person: was.person_id ?? null,
+        room: was.room_user_id ?? null,
+        intent: was.intent,
+        why: was.why ?? null,
+        progress: was.progress ?? null,
+        outcome: was.outcome ?? null,
+        state: was.state,
+        nra: was.next_review_at ?? null,
+        closed: was.closed_at ?? null,
+        writer: was.writer_version,
+      },
+    )
+  }
   // ⚠️ Delete BEFORE restoring state, not after: the partial unique index allows only one open row per
   // person, so re-opening a snapshotted row while a test's open row still exists would fail the restore
   // and leave the real data changed — a cleanup that cannot run is worse than no cleanup.
@@ -66,5 +97,5 @@ export async function restoreIntentions(Q, X, snap) {
       },
     )
   }
-  return { deleted: added.length, restored: mutated.length }
+  return { deleted: added.length, restored: mutated.length, reinserted: removed.length }
 }

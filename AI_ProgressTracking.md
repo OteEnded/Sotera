@@ -931,6 +931,73 @@
 
 ---
 
+### 2026-08-20 16:05
+
+- Summary: ROOMS RATIFIED AND SHIPPED. D-8 amends ratified constraint 4 - the ROOM is now the disclosure
+  boundary and root is a room with broader explicit read authority. D-2, D-10 and scopeAwareness v2 built;
+  D-12 investigated and answered. 18/18 suites. L3, L4, tier B and root-wide disclosure still unbuilt per
+  his instruction.
+- Files: migrations 011/012/013 (new), Backend/app/components/room-scope.js (new),
+  intention-host.js, memory-pipeline-host.js, own-memory-host.js, person-service.js,
+  auth/root-identity.js, database/models/mst_persons.model.js, routes/v1/chat-site.route.js,
+  test/checks/room-scope-check.mjs + root-identity-check.mjs (new), person-proposal-check.mjs,
+  person-subject-check.mjs, intention-lifecycle-check.mjs, lib/intention-fixtures.mjs,
+  Reference/docs/RFC_SOTERA_ROOMS_AND_DISCLOSURE.md (rev 2 + rev 3),
+  OBSERVATION_SOTERA_ROOMS_01.md, ANALYSIS_SOTERA_SOCIAL_MEMORY.md, ANALYSIS_TOOL_CALL_AUDIT.md.
+- D-2: the unique index moved from (person_id) to (room_user_id), so the id-free tool surface survives -
+  one open row per read scope is still one open row. person_id stays as who it is WITH and keeps its
+  de-identification CASCADE. Measured before: one open intention appeared in BOTH kavi and kavi_alt.
+  Measured after: room A sees it, room B does not, and room B can hold its own at the same time - while
+  stance records still match across both rooms, which is the grain rule working in both directions.
+- D-10 plus scopeAwareness v2 landed as one module, room-scope.js: who am I, which person, which room,
+  and the GRAIN of each layer, plus a reach trace of counts only and same person only. Attached to
+  recall_intention, recall_own_memory, and - host-side - recall_memory and list_memories. The portable
+  @ote/memory package is shared with OteLLMServices and was deliberately not touched. No ids anywhere:
+  asserted as "no UUID in the payload".
+- IT WORKS WHEN SHE READS. Asked to check rather than reason, she produced all four grains correctly and
+  quoted the unreachability trace back: "There are 3 items in another room of yours that I can't read
+  from here." Yesterday she could not describe this at all.
+- WARNING, and it is the finding: two turns EARLIER, asked the same question and calling no tool, she
+  answered from priors, got it wrong, and contradicted herself inside one reply. She is RIGHT WHEN SHE
+  READS and WRONG WHEN SHE REASONS. New decision D-13 for him: inject the scope block, as arm B does for
+  the intention? The D9 data says injection prompted verification rather than replacing it.
+- D-12 answered: disclosure belongs to the ROOM. A per-row label is her judgement wearing a column and
+  does not compose with rooms; her judgement is not a boundary at all. Three clauses: the room decides
+  what is reachable (SQL, shipped), a human decides what crosses rooms (a root-only recorded disclosure
+  act, NOT built, blocked on D-4/D-5), and her judgement may only NARROW, never widen. That third clause
+  is what makes "I would not bring that up" legitimate discretion instead of a leak.
+- WARNING, THIRD INSTANCE OF TEST-VS-REAL-DATA ON THIS TABLE, AND MINE AGAIN: room-scope-check cleared a
+  room to get a clean state and DELETED KAVI'S REAL INTENTION. The fixture reported success because its
+  restore only handled added rows and mutated rows - it had no case for DELETION. A restore that cannot
+  put back what was removed is not a restore. Fixed: the fixture now re-inserts, and reports a
+  `reinserted` count so a test can assert it. The row was recoverable only because its exact text was
+  quoted in the session transcript; I restored it verbatim, and the only loss is startedOn, which now
+  reads today instead of 2026-08-19.
+- And the second half of that fix: agent_dev_alt now exists as a dedicated SECOND TEST ROOM sharing
+  agent_dev's person. You cannot test a rooms model without two rooms of one person, and the alternative
+  was writing to kavi. Real rooms are observed; test rooms are written.
+- WARNING: creating that fixture broke person-subject-check, which asserted a HARDCODED count of 2
+  accounts on one person. Fourth instance of the shape the carry-on already names - an invariant that
+  encoded a migration-time count. Now asserts the TRANSITION the write caused. Also removed a
+  check(..., true) in the same block, an assertion that cannot fail.
+- WARNING: fixing the mst_persons model binding created a NEW leak surface that had to be closed in the
+  same change - the restored collision report would have confirmed any person's existence to any account
+  through a write path. Scoped to people the asker already knows, which needed migration 012.
+- CAPTURED AT LAST: memory-lifecycle-check flaked again in a full suite and this time I kept the output.
+  The failing assertions are "the deletion wrote an AUDIT row" (NO ROWS), "attributed to a person", and
+  "carrying a real before projection". It passes alone. That is real evidence for the fire-and-forget
+  audit race, which the record previously forbade attributing without evidence - one observation, so it
+  is now supported rather than proven.
+- THAI: she speaks as a man. Across her 27 Thai replies - ครับ 13, ค่ะ 0, ผม 12. Her identity line states
+  she is female IN ENGLISH, which does not constrain Thai particles, so the model falls back to the
+  overwhelmingly-ครับ assistant prior. Same shape as every other finding today: she holds a true fact
+  about herself and fails to apply it in a specific context. NOT FIXED - the identity string is his.
+- Next action: his. D-13 inject the scope block; D-4/D-5 root's disclosure act (blocks D-12 clause 2);
+  the Thai particle diff; the two provenance prose diffs. And memory.intentionInjection is still TRUE in
+  Backend/config.json.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16

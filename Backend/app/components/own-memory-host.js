@@ -34,6 +34,7 @@
 import { registerHostService } from './runtime.js'
 import { STANCE_LABELS, STANCE_LABEL_KEYS, isStanceLabel } from './relational-taxonomy.js'
 import { createRelationalWriteLease, persistRelationalRecords } from './relational-writer.js'
+import { describeScope } from './room-scope.js'
 
 /**
  * Build the own-memory service for ONE request.
@@ -62,6 +63,8 @@ export function buildOwnMemory(fastify, { userId = null } = {}) {
       provenance: PROVENANCE,
     }
     if (!userId || !seq || !schema) return empty
+    // eslint-disable-next-line no-multi-assign
+    empty.scope = await describeScope(fastify, { userId })
 
     const [me] = await Q(
       `SELECT u.person_id::text AS pid, COALESCE(u.display_name, u.username) AS name
@@ -110,6 +113,11 @@ export function buildOwnMemory(fastify, { userId = null } = {}) {
         })),
       },
       provenance: PROVENANCE,
+      // ⭐ D-10. THIS is the payload she was reasoning about when she found the gap: *"the value is my
+      // NAME for you, not an account ID… I don't see the mechanism in the data itself."* The answer is
+      // not an id — it is the GRAIN: her practice is keyed to the PERSON, so it is the same in every room
+      // that person uses, while what they told her is keyed to the ROOM and is not.
+      scope: await describeScope(fastify, { userId }),
     }
   }
 

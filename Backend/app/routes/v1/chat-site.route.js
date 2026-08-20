@@ -1515,12 +1515,9 @@ export default async function chatSiteRoutes(fastify) {
       openIntention: getSetting(fastify.config, 'memory.intentionInjection') === true
         ? await (async () => {
           try {
-            const [me] = await fastify.db.txn_memories.sequelize.query(
-              'SELECT person_id::text AS pid FROM persona_sotera.mst_users WHERE id = :uid',
-              { replacements: { uid: request.user.id }, type: fastify.db.txn_memories.sequelize.QueryTypes.SELECT },
-            )
-            if (!me?.pid) return null
-            const row = await readOpenIntention({ db: fastify.db, personId: me.pid })
+            // ⭐ ROOM-GRAINED (D-2). No person lookup at all now: the room IS the read key, so injecting
+            // by person would be the very leak migration 013 closed.
+            const row = await readOpenIntention({ db: fastify.db, userId: request.user.id })
             return renderOpenIntention(row, { subjectName: request.user.displayName || request.user.username })
           } catch (e) {
             fastify.log?.debug?.({ err: e?.message }, '[intention] open-intention read failed (non-fatal)')
