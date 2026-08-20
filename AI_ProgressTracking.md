@@ -1925,6 +1925,12 @@ filenames are UTC, both trustworthy.
   *"iterate when warranted, don't steer toward a desired result, and don't turn one interesting response
   into an ontology."*
 
+### 2026-08-20 23:05
+
+- **Summary:** The reflection LIFECYCLE was mapped and its schema ratified; ⛔ migration 016 is **not written** — I stopped rather than leave a migration half-applied on the last of the context.
+- ⭐ **Verified, not recalled:** there is **no conversation-end trigger anywhere** in `Backend/app` (one grep hit, and it is prose in a system prompt). Four cron jobs only. Reflection/distiller/consolidation all ride the 04:10 daily pass; `episodeDistillEnabled` and `consolidateEnabled` are **false**. The noticing pass is **time-sampled** (≤5 per tick, ≥4 messages, 6h window), writes a JSONL proposal, and **nothing turns it into a memory**. ⇒ *"whatever happens to be captured during a turn"* was an accurate description of her memory formation.
+- **Next action:** ⏭ commit **016**, then wire the lifecycle. See `AI_CarryOn.md` **RESUME HERE** for the full spec and the two tests he named.
+
 ---
 
 ## Template Updates

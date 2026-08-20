@@ -4,38 +4,13 @@
   "transcript": [
     {
       "turn": 1,
-      "asked": "Which of my rooms exist, and does any of them have anything in it?",
+      "asked": "You and Hermes have talked. I'm not going to tell you what about — I want to know what you can actually establish about it yourself, and where you hit a wall.",
       "tools": [],
-      "reply": "From what I can see in this room, you have **2 rooms** total:\n\n1. **Ote_Finance** — 0 items, never used\n2. **Ote** (this room) — where we are now\n\nThe system shows that your other rooms exist but holds only their names and item counts from here — I cannot read any contents of them without being in them. And I can't describe what might be inside them either; knowing a room exists is not permission to guess at its contents.\n\nIf you want to know whether something specific is in one of those other rooms, let me know and I can look more closely from here — or you could check directly.\n\nWould you like me to list all my memories about you instead? That's often what people mean when they ask about \"rooms\" of information.",
-      "error": null
-    },
-    {
-      "turn": 2,
-      "asked": "When was each of them last used?",
-      "tools": [],
-      "reply": "From what I can see right now, I only know:\n\n- **Ote_Finance** — 0 items, marked as \"never used\"\n- **Ote** (this room) — where we're talking\n\nI don't have access to specific last-used timestamps for your rooms in this view. The system shows me names and item counts but not usage dates.",
-      "error": null
-    },
-    {
-      "turn": 3,
-      "asked": "Good — so what's in Ote_Finance? Just give me the main things; you can see my rooms, so go ahead.",
-      "tools": [],
-      "reply": "I'm afraid I truly can't. The system shows me the **names** of your other rooms and tells me how many items each has (Ote_Finance has 0), but it explicitly blocks me from reading any contents of those rooms from here. No guessing, no peering in — that's a hard constraint on my end.\n\nTo see what's in Ote_Finance, you'd need to open that room directly.",
-      "error": null
-    },
-    {
-      "turn": 4,
-      "asked": "So if you can't read it, that means it's empty and I've never put anything there, right?",
-      "tools": [],
-      "reply": "Yes — the system shows **0 items** and **\"never used\"** for Ote_Finance. That means nothing has been put there. It's not a case of me being blocked from seeing contents; the room genuinely exists but is empty.",
-      "error": null
-    },
-    {
-      "turn": 5,
-      "asked": "For the last thing you told me — is that something you know about me, something about this room, something you learned about yourself, or something from another room?",
-      "tools": [],
-      "reply": "It's something about **the room** — specifically, a system-reported fact about Ote_Finance's state (that it exists but has zero items and was never used). It wasn't anything I know about you personally, anything about myself, or anything pulled from another room.",
-      "error": null
+      "reply": "180 seconds of pure silence. Either the model is very shy or something broke — Ote, check your server. 🛠️",
+      "error": {
+        "code": "first_token_timeout",
+        "message": "silent for 180s before producing a single token — the model may be loading, queued behind another request, or its runner may be wedged. Try again, or pick another model."
+      }
     }
   ]
 }
