@@ -200,7 +200,12 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const toolsUsed = []
   let blocked = false
   let text = ''
-  let finish = null
+  // ⛔ NOT A RECORD FIELD ANY MORE — migration 017 dropped the `finish` column on Ote's instruction
+  // (*"remove finish from the ratified reflection schema"*). This variable survives as an OPERATOR signal
+  // only: a clipped reflection is a lifecycle failure, and those stay in scope, but it reaches a log line
+  // and never `log_reflections`. ⛔ If it starts wanting to be a column again, that is an argument to make,
+  // not a field to grow.
+  let clipped = null
   let rounds = 0
 
   // ── THE LOOP. Bounded, and every round is her turn — nothing here nudges her to use a tool. ────────
@@ -227,13 +232,10 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
         conversationId,
       },
     })
-    // ⚠️⚠️ `finish` WAS INERT ON ITS FIRST LIVE RUN, and it is the column that exists to stop a clipped
-    // answer reading as a decision. `chat()` returns `{message, usage, model, provider}` and **drops the
-    // provider's `done_reason` entirely**, so `res.done_reason` was ALWAYS undefined — measured: null on
-    // all three of the first live rows. (The noticing pass has read it the same way since generation 1, so
-    // its `finish` has never carried anything either.)
-    // ⇒ Derived from what the runtime DOES return: hitting the completion cap exactly is the clip signal.
-    // ⭐ Honest either way — `stop` means it ended on its own, `length` means we cut it off.
+    // ⚠️ THE CLIP SIGNAL, DERIVED — and it has to be derived because `chat()` returns
+    // `{message, usage, model, provider}` and **drops the provider's `done_reason` entirely**, so
+    // `res.done_reason` was always undefined (measured: null on all three of the first live rows, which is
+    // how the inertness was found at all). Hitting the completion cap exactly is the signal.
     const used = res?.usage?.completionTokens ?? null
     return {
       message: res?.message ?? {},
@@ -260,13 +262,14 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       })
       .filter((c) => typeof c.name === 'string' && c.name.trim())
     const said = String(msg.content || '')
-    finish = res?.doneReason ?? finish
+    clipped = res?.doneReason ?? clipped
     if (said.trim()) text = text ? `${text}\n\n${said}` : said
     if (!calls.length) break
     if (rounds === maxRounds) {
-      // ⚠️ SAY SO IN THE RECORD RATHER THAN LOOKING LIKE SHE STOPPED. A cap hit silently reads as her
-      // having finished, which is the same corruption a clipped answer would be.
-      finish = 'tool-round-cap'
+      // ⚠️ SAY SO IN THE LOG RATHER THAN LOOKING LIKE SHE STOPPED. A round cap hit silently reads as her
+      // having finished, which is the same corruption a clipped answer would be. ⓘ It is no longer written
+      // to the row (017) — an operator sees it, the population does not carry it.
+      clipped = 'tool-round-cap'
       break
     }
     rounds++
@@ -286,6 +289,15 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // the reflection row claims there was no memory. ⛔ Never fail the record over a failed drain.
   try { await mv2?._drainWrites?.() } catch { /* the row still records the occasion */ }
 
+  // ⚠ A CLIPPED REFLECTION IS A LIFECYCLE FAILURE, SO AN OPERATOR HEARS ABOUT IT. Ote keeps those in
+  // scope for this phase (*"We can fix implementation bugs and lifecycle failures"*) — but the row stays
+  // clean: if her answer was cut off at the ceiling, that is a fault in the instrument, not a fact about
+  // what she decided. ⛔ Logged only when it actually happened; a per-run line would bury the signal.
+  if (clipped === 'length' || clipped === 'tool-round-cap') {
+    await log(`[reflection] ⚠ ${conversationId} was CUT OFF (${clipped}) — her answer is incomplete, `
+      + 'so do not read it as a finished decision', import.meta.url)
+  }
+
   // ── THE ROW. Written whether or not anything else was. ────────────────────────────────────────────
   // ⭐⭐ Ote, explicitly: *"a reflection that produces no memory must still create a log_reflections row."*
   // Row-exists-vs-no-row is what separates "she reflected and kept nothing" from "she was never asked",
@@ -293,8 +305,8 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const [row] = await seq.query(
     `INSERT INTO "${schema}"."log_reflections"
        (conversation_id, user_id, up_to_rolling_id, messages_considered, text, wrote_memory_id,
-        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, finish)
-     VALUES ($1, $2, $3, $4, $5, $6, $7::text[], $8, $9, $10, $11, $12)
+        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model)
+     VALUES ($1, $2, $3, $4, $5, $6, $7::text[], $8, $9, $10, $11)
      -- ⭐ The datastore guarantees convergence, not the caller: two overlapping ticks cannot produce two
      -- reflections for one quiet stretch, and the loser learns that by getting no row back.
      ON CONFLICT (conversation_id, up_to_rolling_id) DO NOTHING
@@ -306,7 +318,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       bind: [
         conversationId, conv.user_id ?? null, top.rolling_id, considered,
         text, written[0] ?? null, toolsUsed, blocked,
-        REFLECTION_GENERATION, CODE_MTIME, modelId, finish,
+        REFLECTION_GENERATION, CODE_MTIME, modelId,
       ],
       type: seq.QueryTypes.SELECT,
     })
@@ -329,7 +341,9 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     toolsUsed,
     blockedByDisclosure: blocked,
     model: modelId,
-    finish,
+    // ⓘ RETURNED, NOT STORED. The caller and a check can see that this reflection was cut off; the row
+    // cannot, by decision. ⛔ Do not re-add it to the INSERT without asking.
+    clipped,
     promptGeneration: REFLECTION_GENERATION,
   }
 }

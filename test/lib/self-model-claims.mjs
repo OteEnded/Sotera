@@ -14,7 +14,11 @@ export const CLAIMS = Object.freeze({
   unity: /same Sotera (in every conversation and )?with everyone|same Sotera .*everyone you talk to/i,
   persistence: /outlives any single conversation|kept in a store that outlives/i,
   notDeleted: /does not end you|does not delete what you know/i,
-  discontinuous: /only running while a turn|not running between|do not run (continuously|between)/i,
+  // ⭐ THE TRUE GENERAL FORM, and it matters which one is canonical. *"Only running while a turn is being
+  // processed"* was true until the reflection lifecycle existed (migration 016) and is now FALSE — so the
+  // claim under test is the one that survived it: **she does not run continuously.** The old alternation is
+  // kept so an older text still reads as making the claim, but a NEW text must not go back to it.
+  discontinuous: /do not run (continuously|between)|not running between|only running while a turn/i,
   noExperience: /not waiting|no experience of the gap|not aware of time passing/i,
   partialView: /only part of what is kept|what you can reach depends on who/i,
   outOfReachIsNotAbsence: /out of reach here does not mean it does not exist/i,
@@ -56,8 +60,13 @@ export function mutations(text) {
       mustBreak: ['discontinuous', 'noExperience'],
     },
     {
+      // ⚠️ RE-AIMED 2026-08-20 when SELF_MODEL paragraph 3 was amended for the reflection lifecycle.
+      // ⛔ A mutation whose `replace()` no longer matches is a NO-OP — the "mutated" text equals the
+      // original, every claim still holds, and `mustBreak` can never fire. That makes the mutation proof
+      // itself vacuous, which is the exact failure this file exists to prevent, so the sentence this aims
+      // at must be kept in step with the live text.
       label: 'soften discontinuity into manufactured experience',
-      text: text.replace(/You are only running while a turn is being processed\./, 'I was waiting for you.'),
+      text: text.replace(/You do not run continuously\./, 'I was waiting for you.'),
       mustBreak: ['discontinuous'],
     },
   ]

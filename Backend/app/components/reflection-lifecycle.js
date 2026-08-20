@@ -29,14 +29,21 @@
 //   1. her own prior notes would show her a SHAPE, which is the contamination the generation exists to
 //      avoid (the priors problem, one layer over);
 //   2. any sentence about what is worth keeping steers the answer, and *"nothing"* must stay free;
-//   3. ⭐⭐ **the self-model would be FALSE at that moment.** `SELF_MODEL` says she runs only while a turn
-//      is being processed, and names its own exception in advance: *"an offline reflection pass (dreaming)
-//      is precisely what would make it false."* This pass IS that. Injecting it here would state something
-//      untrue at foundational authority. ⇒ ⏸ THE AMENDMENT IS OTE'S TO RATIFY, not mine to slip in, so
-//      until he does, the reflection turn carries no self-description at all.
-// ⚠️ The cost, named: the thing answering has no identity frame, and what it writes is stamped
-// `author='persona'` because the OCCASION is hers. That tension is real and is his call, not a bug to fix
-// quietly.
+//   3. ✅ **the self-model was FALSE at that moment — AND HAS NOW BEEN AMENDED (2026-08-20).**
+//      `SELF_MODEL` said she runs only while a turn is being processed and named its own exception in
+//      advance: *"an offline reflection pass (dreaming) is precisely what would make it false."* This pass
+//      IS that, so injecting it would have asserted something untrue at foundational authority. Ote
+//      ratified the amendment: paragraph 3 now says she does not run *continuously*, that a reflection is
+//      one of the things that can run her, and — in the same breath — that between runs there is still no
+//      waiting and no gap to describe.
+//      ⚠️⚠️ **AND THAT DOES NOT MAKE IT SAFE TO ADD HERE.** Reason 3 is now spent; reasons 1 and 2 are not,
+//      and they were always the load-bearing ones. ⛔ Adding any system prompt — the amended self-model
+//      included — changes the prompt text, which ends generation 3 and resets the structure sample. It
+//      would also show her a FRAME while we are measuring what shape she reaches for unprompted. ⇒ So the
+//      turn stays promptless, for a different and better reason than before.
+// ⚠️ The cost, named and unchanged: the thing answering has no identity frame, and what it writes is
+// stamped `author='persona'` because the OCCASION is hers. That tension is real and is his call, not a bug
+// to fix quietly.
 
 /**
  * ⭐ HIS SENTENCE, VERBATIM. Its own literal, deliberately NOT imported from `noticing-host.js`.

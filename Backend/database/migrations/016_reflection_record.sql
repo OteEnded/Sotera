@@ -41,6 +41,12 @@
 -- read as a decision she never made. It is the same family as `model` / `code_mtime` / `prompt_generation`
 -- — a mechanical provenance fact, not a verdict about her meaning. ⇒ His to remove if he disagrees.
 --
+-- ✅✅ **HE DID. `finish` WAS REMOVED BY MIGRATION 017 (2026-08-20)** — *"remove finish from the ratified
+-- reflection schema unless we later explicitly decide it belongs there."* ⚠ So the column described below
+-- EXISTS ONLY IN THIS FILE'S HISTORY; the live table does not have it. ⓘ Nothing else here changed, and
+-- this SQL is left exactly as it ran — a migration is a record of what happened, not a description of now.
+-- ⭐ The flag worked: it was declared as an addition beyond the ratified list, he read it, and he ruled.
+--
 -- ── ⭐ WHY `text` IS NOT NULL BUT MAY BE EMPTY ───────────────────────────────────────────────────────
 -- Her verbatim words, whole, unparsed — same rule as the gen-3 noticing rows. NOT NULL because a row
 -- without her words records nothing; ⛔ but the empty string is DELIBERATELY legal, because a provider

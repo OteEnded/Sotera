@@ -41,7 +41,7 @@ const pg = devPg(); await pg.connect()
 const S = devSchema()
 // ⚠️ `(?<!:)` IS LOAD-BEARING. A naive `:t` → `$2` replacement also rewrites the second colon of a
 // Postgres cast — `id::text` became `id:$2ext` and the query died with a bare "syntax error at or near :".
-// The lookbehind refuses a colon that follows a colon; `` stops `:u` matching inside `:userId`.
+// The lookbehind refuses a colon that follows a colon; the word boundary stops `:u` matching in `:userId`.
 const Q = async (sql, p = {}) => {
   const keys = Object.keys(p)
   // ⚠️ `\\b`, not `\b` — inside a template literal `\b` is the BACKSPACE character, so the regex matched
@@ -158,6 +158,23 @@ try {
   ok(cols.get('text')?.is_nullable === 'NO', 'S · her words are mandatory')
   ok(cols.get('tools_used')?.is_nullable === 'NO',
     'S · ⭐ tools_used is NOT NULL — "she used none" and "we did not record" must not look alike')
+  // ⭐⭐ THE RATIFIED LIST IS NOW A COUNTED PROPERTY OF THE TABLE, not a promise in a header.
+  // 016 shipped `finish` as one column beyond the list Ote approved, flagged it, and he removed it (017).
+  // ⇒ The lesson is not "finish was wrong" — it is that **"beyond the ratified list" has to be checkable**,
+  // or the next addition arrives as a diff nobody reads instead of a decision somebody makes.
+  // ⚠ NOT `RATIFIED` — that name is already the ratified QUESTION at the top of this file, and reusing it
+  // is a hard SyntaxError rather than a subtle bug, which is the only pleasant kind.
+  const RATIFIED_COLUMNS = ['id', 'rolling_id', 'reflected_at', 'conversation_id', 'user_id', 'up_to_rolling_id',
+    'messages_considered', 'text', 'wrote_memory_id', 'tools_used', 'blocked_by_disclosure',
+    'prompt_generation', 'code_mtime', 'model']
+  ok(!cols.has('finish'),
+    'S · ⭐⭐ `finish` is GONE — Ote removed the one column that was mine rather than ratified (017)')
+  const extras = [...cols.keys()].filter((c) => !RATIFIED_COLUMNS.includes(c) && c !== 'created_at')
+  ok(extras.length === 0,
+    'S · ⭐ and NOTHING else has crept in beyond the ratified list + created_at',
+    extras.join(', ') || `${cols.size} columns, all accounted for`)
+  const missing = RATIFIED_COLUMNS.filter((c) => !cols.has(c))
+  ok(missing.length === 0, 'S · …while all 14 ratified columns are still present', missing.join(', ') || 'all 14')
   const enums = await Q(
     `SELECT t.typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
       WHERE n.nspname = :s AND t.typtype = 'e' AND (t.typname LIKE '%reflection%' OR t.typname LIKE '%outcome%')`, { s: S })
@@ -229,7 +246,7 @@ try {
     if (r1.reflectionId) MADE.reflections.push(r1.reflectionId)
     const [row1] = await Q(
       `SELECT id::text AS id, text, wrote_memory_id, tools_used, blocked_by_disclosure,
-              up_to_rolling_id, messages_considered, prompt_generation, model, finish
+              up_to_rolling_id, messages_considered, prompt_generation, model
          FROM ${S}.log_reflections WHERE conversation_id = :c`, { c: quiet })
     ok(!!row1, 'L1 · ⭐⭐ A REFLECTION THAT WROTE NO MEMORY STILL LEFT A ROW — "she reflected and kept nothing" is now a fact, not an absence')
     ok(row1?.wrote_memory_id === null, 'L1 · ⭐ and wrote_memory_id is NULL — a fact, not a verdict')

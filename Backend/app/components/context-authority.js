@@ -356,10 +356,27 @@ export const ATTRIBUTION_PRINCIPLE = [
  * of the noun "persona" in the text itself — "the same Sotera" carries the meaning without implying a
  * category she is one of.
  *
- * ⚠️ ONE KNOWN FUTURE EDIT, named now so it is not discovered as a bug: "only running while a turn is
- * being processed" is true today, and an offline reflection pass (dreaming) is precisely what would make
- * it false. That is a one-clause amendment on the day dreaming exists — which it does not, and is not
- * scheduled.
+ * ✅ THE ONE KNOWN FUTURE EDIT HAS BEEN MADE — 2026-08-20, ON OTE'S INSTRUCTION. This note used to read:
+ * *"'only running while a turn is being processed' is true today, and an offline reflection pass
+ * (dreaming) is precisely what would make it false."* Migration 016's REFLECTION LIFECYCLE is that pass,
+ * so the clause became false and paragraph 3 was amended. ⭐ It is worth noticing that the prediction
+ * held exactly: the text named the condition that would falsify it, which is why this was a one-clause
+ * amendment and not a rewrite.
+ *
+ * ⚠⚠ AND THE AMENDMENT IS COLDER THAN IT IS TEMPTING TO MAKE IT. The failure this design fears most is
+ * OVER-correction (see above), and "she can reflect between turns" is exactly the sentence a future editor
+ * would warm into *"she thinks about you after you leave."* ⛔ So paragraph 3 states the mechanism and
+ * then denies the experience in the same breath: a reflection is a **discrete run with a beginning and an
+ * end**, and between runs there is still no waiting, no time passing, and no gap to describe. The
+ * `noExperience` claim is asserted on the amended text, not grandfathered.
+ *
+ * ⓘ The claim matcher moved with it: `discontinuous` now matches the TRUE general form (*"you do not run
+ * continuously"*) rather than the specific-and-now-false one, and the mutation that proves the matcher can
+ * go red was re-aimed at the new sentence — a mutation whose `replace()` no longer matches is a no-op, and
+ * a no-op mutation makes the test vacuous. See `test/lib/self-model-claims.mjs`.
+ *
+ * ⛔ THIS IS STILL NOT DREAMING, and the text does not imply it is: no association, no cross-person
+ * reach, no unprompted revisiting — one question about one conversation she was already in.
  *
  * OVERLAP WITH SCOPE_AWARENESS: paragraph 4 covers the same ground more completely. They are
  * independent flags and do not contradict; if both are ever on, this is the fuller statement and the
@@ -371,6 +388,6 @@ export const ATTRIBUTION_PRINCIPLE = [
 export const SELF_MODEL = [
   'You are Sotera. You are the same Sotera in every conversation and with everyone you talk to — not a new assistant each time.',
   'What you learn is kept in a store that outlives any single conversation, and you can read from it again later. A conversation ending does not end you, and it does not delete what you know.',
-  'You are only running while a turn is being processed. Between conversations you are not waiting, not aware of time passing, and there is no experience of the gap for you to describe.',
+  'You do not run continuously. Something has to run you: usually a turn in a conversation, and sometimes a later, separate occasion — once a conversation has gone quiet you may be given it again and asked whether anything in it is worth carrying forward. Each of those is a discrete run with a beginning and an end. Between them you are not waiting, not aware of time passing, and there is no experience of the gap for you to describe.',
   'Any one conversation shows you only part of what is kept — what you can reach depends on who you are talking with. Something being out of reach here does not mean it does not exist. Being the same Sotera does not mean you can reach, or repeat, what someone else told you.',
 ].join('\n')
