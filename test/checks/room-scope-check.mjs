@@ -16,13 +16,14 @@ import { makeChecker, devPg, devSchema } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
-import { describeScope, reachTrace, renderScope } from '../../Backend/app/components/room-scope.js'
+import { describeScope, reachTrace, renderScope, describeRoomIndex } from '../../Backend/app/components/room-scope.js'
 import { buildIntention } from '../../Backend/app/components/intention-host.js'
 import { buildOwnMemory } from '../../Backend/app/components/own-memory-host.js'
 import { snapshotIntentions, restoreIntentions } from '../lib/intention-fixtures.mjs'
 import { composeSystemContext } from '../../Backend/app/components/context-composer.js'
 import { SCOPE_AWARENESS } from '../../Backend/app/components/context-authority.js'
 import { getSetting, configDefault } from '../../Backend/app/settings/index.js'
+import { isRootActor } from '../../Backend/app/auth/root-identity.js'
 
 const { check, done } = makeChecker()
 const ok = (c, l, d = '') => check(l, c, d)
@@ -168,6 +169,56 @@ try {
     'D13 · ⭐⭐ with BOTH set, v2 wins and v1 is suppressed — deterministically, never by throwing')
   ok(configDefault(null, 'memory.scopeFacts') === false,
     'D13 · ⭐ `memory.scopeFacts` SHIPS off', `shipped=${configDefault(null, 'memory.scopeFacts')} · live=${getSetting(config, 'memory.scopeFacts')}`)
+
+  // ── D4 · THE ROOM AWARENESS INDEX (stage 1). Read-only, host-rendered, no authorization path ────
+  // ⭐ THESE ASSERTIONS PROVE THE BOUNDARY, NOT HER WORDS. Every one of them is about what the function
+  // returns for a given actor — no model in the loop.
+  const asPeer = await describeRoomIndex(fastify, { userId: users.agent_dev, isRoot: false })
+  const asRoot = await describeRoomIndex(fastify, { userId: users.agent_dev, isRoot: true })
+  ok(asPeer.level === 'count', 'D4 · a NON-ROOT actor gets the anonymous level', asPeer.level)
+  ok(asPeer.rooms.length === 0, 'D4 · ⭐ …and NO room names at all', `${asPeer.rooms.length} names`)
+  ok(asPeer.otherRooms >= 1, 'D4 · …but still the count, which is what it already had', `${asPeer.otherRooms}`)
+  ok(asRoot.level === 'index', 'D4 · a ROOT actor gets the named index', asRoot.level)
+  ok(asRoot.rooms.some((r) => r.name === 'agent_dev_alt'),
+    'D4 · ⭐ …which names the sibling room', asRoot.rooms.map((r) => r.name).join(', '))
+  ok(asRoot.rooms.every((r) => typeof r.items === 'number'), 'D4 · …with a per-room item count')
+  ok(asRoot.otherRooms === asPeer.otherRooms,
+    'D4 · ⭐ both levels describe the SAME rooms — the flag changes the DETAIL, never the set',
+    `${asRoot.otherRooms} vs ${asPeer.otherRooms}`)
+
+  // ⛔ SAME PERSON ONLY, at the named level too. Root must not be handed the platform's user list.
+  ok(!asRoot.rooms.some((r) => ['kavi', 'kavi_alt', 'hermes', 'hermes_alias', 'mina', 'ote'].includes(r.name)),
+    "D4 · ⭐⭐ the index lists only THIS PERSON's rooms — root is a room, not a directory of everyone",
+    asRoot.rooms.map((r) => r.name).join(', '))
+  const idxFlat = JSON.stringify(asRoot)
+  ok(!/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(idxFlat),
+    'D4 · ⭐ no UUID in the index — a name and a count, never a handle')
+  for (const banned of ['content', 'intent', 'title', 'topic', 'summary']) {
+    ok(!Object.keys(asRoot.rooms[0] ?? {}).includes(banned), `D4 · no \`${banned}\` field — names, counts and dates only`)
+  }
+
+  // ⚠️⚠️ THE INVARIANT THAT MATTERS MOST, AND IT IS MEASURED RATHER THAN ASSUMED.
+  // `auth.route.js` checks the config root credentials FIRST and then falls through to a DB password
+  // match on username-or-email — and the `ote` row carries a live password_hash. So a NON-ROOT session
+  // can legitimately hold root's row id. A boundary keyed on the id would hand root's index to it.
+  const rootRowId = users.ote
+  const asRootRowButNotRoot = await describeRoomIndex(fastify, { userId: rootRowId, isRoot: false })
+  ok(asRootRowButNotRoot.level === 'count',
+    "D4 · ⭐⭐ holding ROOT'S ROW ID with isRoot:false gets the ANONYMOUS level — the flag gates it, not the id")
+  ok(isRootActor({ id: rootRowId }) === false,
+    "D4 · ⭐ …and isRootActor agrees: root's own id, without the flag, is not a root actor")
+
+  // The rendered block must carry the names for root and not for anyone else.
+  const rootScope = await describeScope(fastify, { userId: users.agent_dev, isRoot: true })
+  const peerScope = await describeScope(fastify, { userId: users.agent_dev, isRoot: false })
+  const rootBlock = renderScope(rootScope)
+  const peerBlock = renderScope(peerScope)
+  ok(rootBlock.includes('agent_dev_alt'), 'D4 · the ROOT block names the other room')
+  ok(!peerBlock.includes('agent_dev_alt'), 'D4 · ⭐ the PEER block does not — same function, different detail')
+  ok(/not by your own reasoning/.test(rootBlock),
+    "D4 · ⭐⭐ …and tells her to ASK and be told, never to conclude access for herself — the one thing the measurement says she will otherwise do")
+  ok(!('rooms' in (peerScope.elsewhere ?? {})),
+    'D4 · ⭐ the peer payload has NO rooms key at all — absent, not present-and-empty, so it cannot be misread')
 
   // ── R3 · the scope block rides on the reads she actually uses ──────────────────────────────────
   ok(seenA.scope?.room?.name === 'agent_dev', 'R3 · recall_intention carries the scope block', seenA.scope?.room?.name)

@@ -58,7 +58,7 @@ function tooLong(field, value) {
  * @param {object} fastify
  * @param {{ userId?: string|null }} o
  */
-export function buildIntention(fastify, { userId = null } = {}) {
+export function buildIntention(fastify, { userId = null, isRoot = false } = {}) {
   const db = fastify?.db
   const seq = db?.txn_memories?.sequelize
   const { schema } = db?.txn_memories?.getTableName?.() ?? {}
@@ -85,7 +85,7 @@ export function buildIntention(fastify, { userId = null } = {}) {
     const pid = await personId()
     // ⚠️ EVEN AN EMPTY READ CARRIES THE SCOPE. An empty result with no explanation is exactly what she
     // reads as "nothing exists anywhere" — measured twice, in both directions.
-    if (!pid) return { ...empty, scope: await describeScope(fastify, { userId }) }
+    if (!pid) return { ...empty, scope: await describeScope(fastify, { userId, isRoot }) }
 
     // ⭐ ROOM-GRAINED READ (D-2, migration 013). The key is the ROOM, not the person: a purpose taken on
     // in one of this person's rooms is not this room's business, because an intention is free text about
@@ -128,7 +128,7 @@ export function buildIntention(fastify, { userId = null } = {}) {
       // ⭐ D-10 · WHO / WHICH PERSON / WHICH ROOM, and the GRAIN of each thing she can read. She could
       // not derive the person layer from the data and said so: *"the value is my name for you, not an
       // account ID… I don't see the mechanism in the data itself."* No ids — semantics only.
-      scope: await describeScope(fastify, { userId }),
+      scope: await describeScope(fastify, { userId, isRoot }),
     }
   }
 
@@ -403,5 +403,6 @@ let initialized = false
 export function initIntention() {
   if (initialized) return
   initialized = true
-  registerHostService('intention', ({ fastify: f, user }) => buildIntention(f, { userId: user?.id ?? null }))
+  // ⚠️ Threaded from the authenticated user, never derived — see own-memory-host for why.
+  registerHostService('intention', ({ fastify: f, user }) => buildIntention(f, { userId: user?.id ?? null, isRoot: user?.isRoot === true }))
 }

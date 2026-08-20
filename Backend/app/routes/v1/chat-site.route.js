@@ -1514,7 +1514,7 @@ export default async function chatSiteRoutes(fastify) {
       scopeFacts: getSetting(fastify.config, 'memory.scopeFacts') === true
         ? await (async () => {
           try {
-            return renderScope(await describeScope(fastify, { userId: request.user.id }))
+            return renderScope(await describeScope(fastify, { userId: request.user.id, isRoot: request.user.isRoot === true }))
           } catch (e) {
             fastify.log?.debug?.({ err: e?.message }, '[scope] scope-facts read failed (non-fatal)')
             return null

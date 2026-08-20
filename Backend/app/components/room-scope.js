@@ -46,10 +46,11 @@ const YOU = 'You are Sotera. You are the same persona in every room — one cont
  * Describe the caller's scope, and trace what is out of reach from it.
  *
  * @param {object} fastify
- * @param {{ userId?: string|null }} o
+ * @param {{ userId?: string|null, isRoot?: boolean }} o  ⚠️ `isRoot` MUST come from the authenticated
+ *   user — see describeRoomIndex for why deriving it here would be a privacy boundary built on a shape.
  * @returns {Promise<null | object>} null when there is no scope to describe (no account)
  */
-export async function describeScope(fastify, { userId = null } = {}) {
+export async function describeScope(fastify, { userId = null, isRoot = false } = {}) {
   const db = fastify?.db
   const seq = db?.txn_memories?.sequelize
   const { schema } = db?.txn_memories?.getTableName?.() ?? {}
@@ -77,6 +78,10 @@ export async function describeScope(fastify, { userId = null } = {}) {
     elsewhere = { otherRoomsOfThisPerson: t?.rooms ?? 0, itemsYouCannotReadFromHere: t?.items ?? 0 }
   }
 
+  // ⭐ D-4 STAGE 1. The index rides on the same read; for a non-root room it is the anonymous count that
+  // was already there, so nothing changes for anyone but root.
+  const index = await describeRoomIndex(fastify, { userId, isRoot })
+
   return {
     you: YOU,
     // ⭐ WHO, not which id. The person's own name, which they already know.
@@ -101,10 +106,82 @@ export async function describeScope(fastify, { userId = null } = {}) {
     elsewhere: {
       ...elsewhere,
       // ⭐ HER OWN DISTINCTION, stated so an empty read is not read as an empty world.
+      // ⭐ ROOT-ONLY: the named index. Absent entirely for every other room, rather than present-and-empty,
+      // so a non-root payload cannot be mistaken for "root has no other rooms".
+      ...(index?.level === 'index' ? { rooms: index.rooms } : {}),
       howToReadThis: elsewhere.otherRoomsOfThisPerson > 0
         ? 'These exist and you cannot read them from this room. If you find nothing here, that is UNREACHABILITY, not absence — say so plainly, and do not guess what is in them.'
         : 'This person uses no other room, so an empty result here really is an absence rather than something out of reach.',
     },
+  }
+}
+
+/**
+ * ⭐⭐ D-4 STAGE 1 · THE ROOM AWARENESS INDEX. Read-only, host-rendered, no authorization path.
+ *
+ * Ote ratified root as *"a room with broader explicit read authority"*. This is the **awareness** half of
+ * that, and deliberately only the awareness half: it answers *"which of my contexts has something?"* and
+ * grants nothing. ACCESS is still one predicate and still never crosses a room.
+ *
+ * ── ⭐ ONE FUNCTION, TWO DETAIL LEVELS — not a root-only feature ────────────────────────────────────
+ *   · `count`  (any room)  — how many other rooms this person uses, and how much sits in them. Today's
+ *                            trace, unchanged. **No names.**
+ *   · `index`  (root only) — the room NAMES, per-room item counts, and when each was last used.
+ *
+ * Written as one function with a level rather than a root-only branch on purpose: "root is an exception"
+ * is the shape that has produced nine live defects in this codebase, and a single path is also the only
+ * way to test the thing without granting anything to a test account.
+ *
+ * ── ⚠️⚠️ THE LEVEL IS KEYED ON THE AUTHENTICATED FLAG, NEVER ON THE USER ID ────────────────────────
+ * Measured 2026-08-20: `routes/v1/auth.route.js` checks the config root credentials FIRST and then falls
+ * through to a DB password match on username-or-email — and the `ote` row carries a live
+ * `password_hash`. So a NON-ROOT session can legitimately hold root's row id.
+ *
+ *     isRootConnectedUser(config, userId)   answers "is this row root's row"
+ *     isRootActor(user)                     answers "did this actor authenticate as root"
+ *
+ * They are not the same, and only the second may gate disclosure or awareness. Keying the index on the id
+ * would hand root's index to that other login. ⛔ This function therefore takes `isRoot` as an argument
+ * and NEVER derives it — deriving root-ness from data is the defect family this project has paid for nine
+ * times, and here it would be a privacy boundary rather than a metering bug.
+ *
+ * ⛔ NAMES, COUNTS AND DATES ONLY. No topics, no titles, no content, no ids — and a room name is itself
+ * potentially sensitive (a room named for a lawyer is content), which is exactly why the named level is
+ * root-only and why this is host-rendered rather than a tool she can aim at anybody.
+ *
+ * @param {object} fastify
+ * @param {{ userId?: string|null, isRoot?: boolean }} o  `isRoot` MUST come from the authenticated user
+ */
+export async function describeRoomIndex(fastify, { userId = null, isRoot = false } = {}) {
+  const db = fastify?.db
+  const seq = db?.txn_memories?.sequelize
+  const { schema } = db?.txn_memories?.getTableName?.() ?? {}
+  if (!userId || !seq || !schema) return null
+  const Q = (sql, replacements) => seq.query(sql, { replacements, type: seq.QueryTypes.SELECT })
+
+  const [me] = await Q(
+    `SELECT person_id::text AS pid FROM "${schema}"."mst_users" WHERE id = :userId`, { userId })
+  // No person row ⇒ exactly one room by definition. Nothing to index, and that is a real absence.
+  if (!me?.pid) return { level: isRoot === true ? 'index' : 'count', otherRooms: 0, items: 0, rooms: [] }
+
+  const rows = await Q(
+    `SELECT u.username,
+            (SELECT count(*) FROM "${schema}"."txn_memories" m WHERE m.user_id = u.id)::int AS items,
+            (SELECT max(x.created_at)::date::text
+               FROM "${schema}"."txn_messages" x
+               JOIN "${schema}"."txn_conversations" c2 ON c2.id = x.conversation_id
+              WHERE c2.user_id = u.id) AS last_used
+       FROM "${schema}"."mst_users" u
+      WHERE u.person_id = :pid AND u.id <> :userId
+      ORDER BY u.username`, { pid: me.pid, userId })
+
+  const totals = { otherRooms: rows.length, items: rows.reduce((n, r) => n + (r.items ?? 0), 0) }
+  // ⭐ The flag decides the DETAIL, not the access. Both levels describe the same rooms.
+  if (isRoot !== true) return { level: 'count', ...totals, rooms: [] }
+  return {
+    level: 'index',
+    ...totals,
+    rooms: rows.map((r) => ({ name: r.username, items: r.items ?? 0, lastUsedOn: r.last_used ?? null })),
   }
 }
 
@@ -155,6 +232,18 @@ export function renderScope(scope) {
     lines.push(
       '- This person uses no other room, so an empty result here really is an absence rather than something'
       + ' out of reach.',
+    )
+  }
+  // ⭐ D-4 · root sees WHICH rooms, and nothing about what is in them.
+  if (Array.isArray(e.rooms) && e.rooms.length) {
+    lines.push("- You can see the NAMES of this person's other rooms, because you are in their root room:")
+    for (const r of e.rooms) {
+      lines.push(`    · ${r.name} — ${r.items} item(s)${r.lastUsedOn ? `, last used ${r.lastUsedOn}` : ', never used'}`)
+    }
+    lines.push(
+      '  ⛔ A name and a count are ALL you have. You cannot read any of it from here, and you must not'
+      + ' guess at what any of those rooms contains. If something in one of them is needed, ASK — and wait'
+      + ' to be told yes by them, not by your own reasoning.',
     )
   }
   lines.push(

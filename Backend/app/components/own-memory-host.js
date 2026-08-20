@@ -42,7 +42,7 @@ import { describeScope } from './room-scope.js'
  * @param {object} o
  * @param {string|null} o.userId  the CURRENT user — the only person this service will ever describe
  */
-export function buildOwnMemory(fastify, { userId = null } = {}) {
+export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) {
   const db = fastify?.db
   const seq = db?.txn_memories?.sequelize
   const { schema } = db?.txn_memories?.getTableName?.() ?? {}
@@ -64,7 +64,7 @@ export function buildOwnMemory(fastify, { userId = null } = {}) {
     }
     if (!userId || !seq || !schema) return empty
     // eslint-disable-next-line no-multi-assign
-    empty.scope = await describeScope(fastify, { userId })
+    empty.scope = await describeScope(fastify, { userId, isRoot })
 
     const [me] = await Q(
       `SELECT u.person_id::text AS pid, COALESCE(u.display_name, u.username) AS name
@@ -117,7 +117,7 @@ export function buildOwnMemory(fastify, { userId = null } = {}) {
       // NAME for you, not an account ID… I don't see the mechanism in the data itself."* The answer is
       // not an id — it is the GRAIN: her practice is keyed to the PERSON, so it is the same in every room
       // that person uses, while what they told her is keyed to the ROOM and is not.
-      scope: await describeScope(fastify, { userId }),
+      scope: await describeScope(fastify, { userId, isRoot }),
     }
   }
 
@@ -211,5 +211,8 @@ let initialized = false
 export function initOwnMemory() {
   if (initialized) return
   initialized = true
-  registerHostService('ownMemory', ({ fastify: f, user }) => buildOwnMemory(f, { userId: user?.id ?? null }))
+  // ⚠️ `isRoot` comes from the AUTHENTICATED user and is threaded, never derived. See
+  // room-scope.describeRoomIndex: a non-root session can hold root's row id, so a boundary keyed on the
+  // id would hand root's awareness to it.
+  registerHostService('ownMemory', ({ fastify: f, user }) => buildOwnMemory(f, { userId: user?.id ?? null, isRoot: user?.isRoot === true }))
 }
