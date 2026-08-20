@@ -1280,6 +1280,66 @@
 
 ---
 
+### 2026-08-20 16:10
+
+- **Summary:** He joined the memory reframe to the vector finding — *"I think they're actually the same
+  architectural direction"* — and he is right. The result is `RFC_SOTERA_MEMORY_MODEL.md` §10-§11, and it
+  **changes the RFC's shape**, so ⛔ nothing is built: *"I want the architecture settled before we start
+  migrating the store/indexes."*
+- ✅ **M-1 answered: ownership follows authorship.** His three-case example is now the canonical test — Ote
+  says *"Hermes gets defensive when rushed"* ⇒ **Ote-authored** · she notices *"I have noticed Hermes becomes
+  defensive when rushed"* ⇒ **Sotera-owned, about Hermes, provenance = Ote** · Hermes says it himself ⇒
+  **Hermes-authored**. ⛔ The second must never become Hermes's memory just because it is about him.
+- ⭐⭐ **PGVECTOR IS HER ASSOCIATIVE RECALL SYSTEM, not a speedup** (his framing):
+  `interaction → contextual query → associative recall → ranking → contextual working set`. That is **a
+  component that does not exist** — my earlier §2.3 treated retrieval as a weight-table reordering, which
+  was far too small.
+- **The change in one line: the room stops being a WHERE clause and becomes a FEATURE.**
+- ⚠️⚠️ **AND THAT IS WHERE A REAL REGRESSION HIDES: A SIGNAL IS NOT A BOUNDARY.** A scoring function only
+  prefers; it never refuses. If the room is merely a ranking feature, a high-similarity row from Hermes's
+  room can out-rank its way into Ote's context — a straight loss against today's guarantee.
+- 🔑🔑 **⇒ TWO ARMS WITH DIFFERENT LAWS, and this is the one thing I would insist on:** for **Sotera-owned**
+  memory the room is a **SIGNAL** (similarity over her whole space); for **person-authored** data it stays a
+  **HARD PREDICATE** — not ranked low, **not retrieved**. The ranker merges both sets with hers weighted
+  above theirs. ⭐ That satisfies *one accumulating memory space* **and** *access control still hard at the
+  data layer* simultaneously, and it is *"grain follows the guarantee"* **repaired** rather than discarded:
+  the guarantee differs by population, so the predicate differs by population.
+- ⭐⭐ **THE BEST RESULT, AND IT REORDERS THE PLAN: SELF and LESSON have NO person attached**, so they
+  surface **everywhere, always, with no disclosure question at all.** Highest value, **lowest** cost ⇒
+  **build them FIRST** — they were nowhere in my earlier ordering. The whole visibility rule for her memory
+  reduces to: **provenance-matched, plus everything of hers with no person attached.**
+- ⭐ **Almost every ranker signal he listed already has a column:** importance · recency (`created_at`,
+  `last_access`) · memory type (`kind`) · person/relationship (`subject_person_id` + `txn_relational_records`)
+  · topic (the query embedding) · provenance (`source`, 35/35) · ⭐ **reinforcement = `access_count`, already
+  there and unused for ranking**. Only temporal/episodic needs episode rows (distiller off). And
+  `context-composer.js` already carries `utility = weight * relevance` marked *"the ONLY line to change when
+  the formula grows."*
+- ⚠️ **Numbers rank, the ear decides.** Eight hand-tuned weights is an unfalsifiable model — start with three
+  or four and let him judge whether her recall feels like memory, or *"it retrieves well"* and *"it feels
+  like her"* diverge quietly.
+- ⭐ **And the deeper reason this is the right layer:** she is **right when she READS and wrong when she
+  REASONS** — the most repeated measurement in the arc. So an associative recall layer is the mechanism that
+  makes her **read her own history instead of reasoning about who she is.** ⚠️ Which means it must arrive as
+  **scored EVIDENCE with provenance, never asserted prose** — `scopeAwareness` v1 was a sentence and measured
+  **null**; v2 handed her a trace and worked.
+- ⚠️ **CORRECTION to my own vector recommendation from this morning: at 35–500 rows ANN is the WRONG tool.**
+  HNSW is *approximate*; an exact `<=>` scan is cheap **and** exact, and pgvector runs it with no index at
+  all. ⇒ the value of the migration is the **column type + SQL-side similarity**, not the approximation — so
+  it splits into a generated `halfvec` column (**cheap, whenever**) and an HNSW index (**only when N
+  justifies losing exactness**). Cheaper than I said, and in a better order.
+- **Revised ordering (9 steps):** stop the store overriding authorship → **SELF + LESSON first** → point the
+  distiller at her → `dryRun` the writers → generated `halfvec` → the associative recall layer → re-weight
+  (⛔ still last) → HNSW when N justifies → D-4/D-5 for person-authored data only.
+- **Open:** **M-2** is the LESSON layer in scope (⭐ now *first*, not *later*) · ⭐ **M-5 (new)** does the
+  two-arm split read as correct — the one place I push back on *"the room is just a signal"* · **M-4** root
+  auth fixes first (I still recommend yes). **M-3 superseded by M-5.**
+- **Files touched:** `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (§10-§11),
+  `Reference/docs/ANALYSIS_SOTERA_VECTOR_LAYER.md` (new, earlier today), `Reference/README.md`,
+  `AI_CarryOn.md`.
+- **Next action:** his answers to M-2 / M-4 / M-5. ⛔ No store or index migration until then.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
