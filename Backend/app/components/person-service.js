@@ -66,9 +66,30 @@ export async function proposePerson(fastify, user = {}, rawName, { confirm = fal
   // ⚠️ EXISTING PEOPLE ARE REPORTED, NEVER REUSED. A name match is not an identity match — "Priya" is
   // not one human. Surfacing the collision lets a person decide; picking one silently is the invented-
   // identity failure this project has already been corrected on.
-  const existing = await fastify.db.mst_persons.findAll({
-    where: { display_name: name }, attributes: ['id', 'display_name', 'kind', 'origin'], raw: true,
-  })
+  //
+  // ⭐⭐ AND THE REPORT IS SCOPED TO PEOPLE THE ASKER CAN ALREADY BE SAID TO KNOW. This became necessary
+  // the moment the model's schema binding was fixed (2026-08-20): for months this query ran against an
+  // empty `public.mst_persons` and reported nothing, so pointing it at the real table would have
+  // ACCIDENTALLY SHIPPED A CROSS-PERSON EXISTENCE ORACLE — ask to record "Hermes" from any account and
+  // the reply confirms a Hermes is on file, with his id.
+  //
+  // Awareness of other people is a DELIBERATE capability (L3, undecided) and must not arrive as a side
+  // effect of a write path. So "existing" means: the asker's OWN person, plus anyone the asker has
+  // already told her about inside their own scope. That is both narrower AND more correct — merging two
+  // accounts' people is a linking decision only a human may make (ratified constraint #5), so a
+  // stranger's row was never a legitimate collision to begin with.
+  const { schema: pSchema } = fastify.db.mst_persons.getTableName()
+  const seqP = fastify.db.mst_persons.sequelize
+  const existing = await seqP.query(
+    `SELECT p.id::text AS id, p.display_name, p.kind, p.origin
+       FROM "${pSchema}"."mst_persons" p
+      WHERE p.display_name = :name
+        AND ( p.id = (SELECT u.person_id FROM "${pSchema}"."mst_users" u WHERE u.id = :askerId)
+              OR p.created_by_user_id = :askerId
+              OR EXISTS (SELECT 1 FROM "${pSchema}"."txn_memories" m
+                          WHERE m.subject_person_id = p.id AND m.user_id = :askerId) )`,
+    { replacements: { name, askerId: user?.id ?? null }, type: seqP.QueryTypes.SELECT },
+  )
 
   const key = keyFor(user?.id, name)
   const now = Date.now()
@@ -106,6 +127,11 @@ export async function proposePerson(fastify, user = {}, rawName, { confirm = fal
     kind: 'human',
     display_name: name,
     origin: origin || `proposed in conversation by ${user?.username || 'the persona'} and confirmed`,
+    // ⭐ WHICH ACCOUNT RECORDED THEM (migration 012). Without this, "people I know about" could not
+    // include "people I myself wrote down" — so she would propose "Priya", record her, and then create a
+    // DUPLICATE Priya on the next turn because the scoped collision report could not see her own work.
+    // It is also the disclosure key a person record needs under the rooms model.
+    created_by_user_id: user?.id ?? null,
   })
   const plain = created.get ? created.get({ plain: true }) : created
   return { ok: true, created: true, person: { id: plain.id, display_name: plain.display_name, kind: plain.kind } }

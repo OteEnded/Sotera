@@ -92,3 +92,52 @@ export function isRootConnectedUser(config, userId) {
   const id = rootUserIdFrom(config)
   return !!id && !!userId && String(userId).toLowerCase() === id
 }
+
+/**
+ * ⭐ THE ONE LEGAL WAY TO ASK "IS THIS ACTOR ROOT?" — and the point is what it REFUSES to look at.
+ *
+ * Ote, 2026-08-20, before root is allowed a broader disclosure function: *"I don't want root to become a
+ * special SQL bypass."*
+ *
+ * ⛔ IT NEVER LOOKS AT `id`. Root-ness is an authenticated FLAG, never a shape. Inferring it from a
+ * missing id is this codebase's most-repeated defect — the audit on 2026-08-20 found the family at nine
+ * sites, and the worst of them (`isRoot: row.user_id == null` in the schedule executor) turned an
+ * unattributable row into a PRIVILEGE GRANT: any unowned schedule would have run as root.
+ *
+ * ⚠️ AND `=== true`, not truthiness. `isRoot: 'false'` and `isRoot: {}` are both truthy, and a value of
+ * the wrong type arriving from a session store or a synthesized actor object is exactly how this would
+ * be wrong quietly rather than loudly.
+ *
+ * ── WHY THIS MATTERS MORE THAN IT DID YESTERDAY ────────────────────────────────────────────────────
+ * Today `isRoot` governs PRIVILEGE only (`system_config`, `manage_users`) and scope comes from the id.
+ * Under the rooms model root also gains a wider DISCLOSURE function — so this predicate stops being
+ * "may you change settings" and starts being "may you see across rooms". A predicate that can be
+ * satisfied by an absence must never be given that job.
+ *
+ * @param {{isRoot?: unknown}|null|undefined} user
+ */
+export function isRootActor(user) {
+  return user?.isRoot === true
+}
+
+/**
+ * ⭐ ROOT'S SCOPE IS A ROOM, NOT A SUPERSET — measured 2026-08-20, and this function states it.
+ *
+ * Phase 2 of the root refactor is wired: `rootUser()` mints `id: rootUserIdFrom(config)`, so root logs
+ * in AS a real `mst_users` row and its data is attributed like anyone else's. Measured the same day:
+ * **0 memories and 0 conversations are null-owned**, and root's rows sit on that row.
+ *
+ * ⇒ Root does NOT need a storage change to become his broadest room, and it must not get one: the thing
+ * that makes root safe today is precisely that its scope is an ordinary `user_id` and not a bypass. Any
+ * future breadth belongs at READ time, as a disclosure act over rooms, never as a widened predicate.
+ *
+ * @returns {{ ok: boolean, roomUserId: string|null, reason: string|null }}
+ */
+export function rootRoom(config) {
+  const id = rootUserIdFrom(config)
+  if (!id) {
+    // Fail-open by design: root still signs in, with no row and therefore no room. Loud, not fatal.
+    return { ok: false, roomUserId: null, reason: rootUserIdProblem(config) || 'auth.root.userConnected is not configured — root has no room of its own' }
+  }
+  return { ok: true, roomUserId: id, reason: null }
+}

@@ -18,7 +18,25 @@ import { DataTypes } from "sequelize";
 // establishes it — never from matching names, emails, or writing style. This project has already been
 // burned by deriving a person-attribute from a name; identity resolution is the same failure with more
 // at stake, because the result is one person's private beliefs surfacing in another's conversation.
-export default (sequelize) =>
+// ⚠️⚠️ THIS MODEL WAS BOUND TO THE WRONG SCHEMA FROM THE DAY IT SHIPPED (found 2026-08-20).
+// It took only `(sequelize)` and never set `schema: schemas.project`, so it resolved through
+// `search_path` to `public` — and `sequelize.sync()` obligingly CREATED an empty `public.mst_persons`,
+// the only stray table in that schema. Migration 004 filled `persona_sotera.mst_persons` with 5 real
+// people, and the ORM has been reading the empty one ever since:
+//
+//     db.mst_persons.findAll()                          → []
+//     select * from persona_sotera.mst_persons          → 5 rows
+//
+// What that silently broke: `proposePerson`'s collision report. Its own comment promises *"EXISTING
+// PEOPLE ARE REPORTED, NEVER REUSED"*, and it was querying a table that can never contain anybody —
+// so `remember_person("Hermes")` returned `existing: []` with Hermes plainly on file. A guarantee about
+// an empty table. `person-proposal-check` passed the whole time because it asserts the two-phase
+// propose→ask→confirm GATE, not the collision report: a test that reads the way the code reads cannot
+// find a bug in what the code reads.
+//
+// ⇒ The fix is one argument and one option. The lesson is the reason every other model in this
+// directory takes `schemas` — an unqualified `define()` does not fail, it silently picks `public`.
+export default (sequelize, DataTypes, schemas) =>
     sequelize.define(
         "mst_persons",
         {
@@ -46,11 +64,27 @@ export default (sequelize) =>
                 type: DataTypes.TEXT,
                 allowNull: true,
             },
+            // WHICH ACCOUNT recorded this person (migration 012). Loose ref, no association — a person
+            // outlives the account that wrote them down, and it is the disclosure key for a person
+            // record: "people I know about" has to include "people I myself recorded", or the scoped
+            // collision report cannot see her own work and she creates duplicates.
+            //
+            // ⚠️ AND THE REASON THIS ENTRY EXISTS AT ALL IS A DEFECT I SHIPPED MINUTES EARLIER: the
+            // column was added to the migration and to the `create()` call, but NOT here — so Sequelize
+            // silently dropped the attribute and every new person landed with a null. Sixth instance in
+            // one day of "an explicit field list quietly drops a field added later", and the first one
+            // where the list was mine. `create()` does not warn; the row just comes back wrong.
+            created_by_user_id: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
         },
         {
             tableName: "mst_persons",
             timestamps: true,
             createdAt: "created_at",
             updatedAt: "updated_at",
+            // ⭐ THE FIX. Without this the model reads `public.mst_persons` — see the header.
+            schema: schemas.project,
         },
     );
