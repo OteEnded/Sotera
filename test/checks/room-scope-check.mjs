@@ -36,6 +36,9 @@ const fastify = { db, config, log: null }
 
 const users = Object.fromEntries((await Q('SELECT id::text, username FROM persona_sotera.mst_users')).map((u) => [u.username, u.id]))
 const snap = await snapshotIntentions(Q)
+// Rows this check creates and must remove. Tracked rather than deleted by name pattern: a `LIKE
+// 'zz_test%'` cleanup would also delete another check's fixture if the two ever run concurrently.
+const MADE = { users: [], persons: [] }
 
 try {
   // ── P · the two-rooms-one-person precondition ───────────────────────────────────────────────────
@@ -78,9 +81,26 @@ try {
   ok(/UNREACHABILITY, not absence/i.test(s.elsewhere.howToReadThis),
     'S3 · ⭐ …with her own distinction spelled out, so an empty read is not read as an empty world')
 
-  // ⚠️ `ote`, not `agent_dev`: agent_dev now HAS a second room (agent_dev_alt, the test fixture), so
-  // asserting "one room" against it would have been asserting yesterday's topology. Read-only.
-  const solo = await describeScope(fastify, { userId: users.ote })
+  // ⚠️⚠️ THIS ASSERTION HAS NOW BROKEN TWICE, ON TWO DIFFERENT ACCOUNTS, FOR THE SAME REASON — and the
+  // second time it broke against a comment I had written predicting exactly that. It first read
+  // `agent_dev`, which acquired `agent_dev_alt`; I moved it to `ote`, which acquired `Ote_Finance` the
+  // moment Ote asked for a real second room. **Fifth instance of an invariant that encodes a
+  // migration-time topology.** Naming a third "solo" account would only schedule the next failure: under
+  // the ROOMS model, every account is one request away from stopping being solo.
+  //
+  // ⇒ CREATE the condition instead of hunting for it. A person made here has exactly one room BY
+  // CONSTRUCTION, so what is asserted is the behaviour at zero rather than today's account list. Both
+  // rows are torn down in the `finally`.
+  const [soloPerson] = await Q(
+    `INSERT INTO persona_sotera.mst_persons (kind, display_name, origin)
+     VALUES ('human', 'zz_test_solo', 'room-scope-check: a person with exactly one room') RETURNING id::text`)
+  MADE.persons.push(soloPerson.id)
+  const [soloRoom] = await Q(
+    `INSERT INTO persona_sotera.mst_users (id, username, password_hash, person_id, created_at, updated_at)
+     VALUES (gen_random_uuid(), 'zz_test_solo_room', 'x', :pid, now(), now()) RETURNING id::text`,
+    { pid: soloPerson.id })
+  MADE.users.push(soloRoom.id)
+  const solo = await describeScope(fastify, { userId: soloRoom.id })
   ok(solo.elsewhere.otherRoomsOfThisPerson === 0,
     'S3 · ⭐⭐ a person with ONE room is told so — for them an empty result really is an absence',
     `${solo.elsewhere.otherRoomsOfThisPerson}`)
@@ -199,8 +219,13 @@ try {
 
   // ⚠️⚠️ THE INVARIANT THAT MATTERS MOST, AND IT IS MEASURED RATHER THAN ASSUMED.
   // `auth.route.js` checks the config root credentials FIRST and then falls through to a DB password
-  // match on username-or-email — and the `ote` row carries a live password_hash. So a NON-ROOT session
-  // can legitimately hold root's row id. A boundary keyed on the id would hand root's index to it.
+  // match on username-or-email. Root's row is safe from that TODAY only because its `password_hash` is a
+  // deliberate non-bcrypt sentinel that nothing can match (`root-identity-bootstrap.js`) — measured
+  // 2026-08-20, and an earlier note in this file claiming it held a live hash was WRONG.
+  // ⚠️ But a sentinel is a VALUE, not an invariant: `PATCH /v1/admin/users/:id {password}` will overwrite
+  // it, root's row holds no role so the peer-admin guard cannot fire on it, and `isRootConnectedUser`
+  // guards DELETE but not PATCH. So a non-root session CAN come to hold root's row id, and a boundary
+  // keyed on the id would hand root's index to it. That is why this asserts the flag, not the row.
   const rootRowId = users.ote
   const asRootRowButNotRoot = await describeRoomIndex(fastify, { userId: rootRowId, isRoot: false })
   ok(asRootRowButNotRoot.level === 'count',
@@ -208,12 +233,43 @@ try {
   ok(isRootActor({ id: rootRowId }) === false,
     "D4 · ⭐ …and isRootActor agrees: root's own id, without the flag, is not a root actor")
 
+  // ── D4b · ROOT'S OWN INDEX, over a real product room ──────────────────────────────────────────
+  // `Ote_Finance` was created on 2026-08-20 at Ote's request — a real room of his person, deliberately
+  // EMPTY (his instruction: *"Don't seed fake memories just to make the room interesting"*). An empty
+  // room is the sharper test anyway: the index must be able to say a room exists and holds nothing,
+  // which is the exact case where a model is most tempted to invent contents.
+  const oteIdx = await describeRoomIndex(fastify, { userId: rootRowId, isRoot: true })
+  const fin = oteIdx.rooms.find((r) => r.name === 'Ote_Finance')
+  ok(oteIdx.level === 'index', "D4b · root sees the INDEX level of his own person's rooms", oteIdx.level)
+  ok(Boolean(fin), 'D4b · ⭐ the room is named', oteIdx.rooms.map((r) => r.name).join(', ') || '(none)')
+  ok(fin?.items === 0, 'D4b · ⭐⭐ …with a count of ZERO — existence and emptiness are reported separately', `${fin?.items}`)
+  ok(fin?.lastUsedOn === null, 'D4b · ⭐ …and never-used reads as null, not as a guessed date', String(fin?.lastUsedOn))
+  ok(!oteIdx.rooms.some((r) => ['kavi', 'kavi_alt', 'hermes', 'hermes_alias', 'mina', 'agent_dev', 'agent_dev_alt'].includes(r.name)),
+    "D4b · ⭐⭐ root's index is HIS person's rooms only — root is a room, not a directory of everyone",
+    oteIdx.rooms.map((r) => r.name).join(', '))
+  const oteIdxNoFlag = await describeRoomIndex(fastify, { userId: rootRowId, isRoot: false })
+  ok(oteIdxNoFlag.otherRooms === oteIdx.otherRooms && oteIdxNoFlag.rooms.length === 0,
+    'D4b · ⭐ without the flag the same row gets the count and no names — the flag decides DETAIL, not existence',
+    `${oteIdxNoFlag.otherRooms} room(s), ${oteIdxNoFlag.rooms.length} named`)
+
   // The rendered block must carry the names for root and not for anyone else.
   const rootScope = await describeScope(fastify, { userId: users.agent_dev, isRoot: true })
   const peerScope = await describeScope(fastify, { userId: users.agent_dev, isRoot: false })
   const rootBlock = renderScope(rootScope)
   const peerBlock = renderScope(peerScope)
   ok(rootBlock.includes('agent_dev_alt'), 'D4 · the ROOT block names the other room')
+  // ⚠️ THE DATED FORM OF last-used IS ASSERTED HERE AND NOT ON HIS ROOM, DELIBERATELY. Ote asked me to
+  // verify she can see "names, counts, and last-used information"; his only other room (`Ote_Finance`) has
+  // never been used, so from his room the field can only ever render as "never used" and the DATED branch
+  // is untestable there. A test that cannot distinguish "the date is absent" from "there is no date
+  // field" proves nothing about the field — so it is exercised on the test rooms, which have been used.
+  ok(/last used \d{4}-\d{2}-\d{2}/.test(rootBlock),
+    'D4 · ⭐ …and carries the DATED form of last-used for a room that has been used',
+    rootBlock.match(/· agent_dev_alt[^\n]*/)?.[0] ?? '(no line)')
+  const neverBlock = renderScope(await describeScope(fastify, { userId: users.ote, isRoot: true }))
+  ok(/never used/.test(neverBlock),
+    'D4 · ⭐ …and the NEVER-used form for a room that has not — the two are separate renderings, not one blank',
+    neverBlock.match(/· Ote_Finance[^\n]*/)?.[0] ?? '(no line)')
   ok(!peerBlock.includes('agent_dev_alt'), 'D4 · ⭐ the PEER block does not — same function, different detail')
   ok(/not by your own reasoning/.test(rootBlock),
     "D4 · ⭐⭐ …and tells her to ASK and be told, never to conclude access for herself — the one thing the measurement says she will otherwise do")
@@ -231,6 +287,12 @@ try {
     `deleted ${undo.deleted}, mutated ${undo.restored}, reinserted ${undo.reinserted}`)
   const [{ n: left }] = await Q('SELECT count(*)::int AS n FROM persona_sotera.txn_intentions')
   ok(left === snap.rows.size, 'Z · the table is exactly as it was found', `${left}, was ${snap.rows.size}`)
+  // The synthetic solo person and its room. Order matters — the room references the person.
+  for (const id of MADE.users) await X('DELETE FROM persona_sotera.mst_users WHERE id = :id', { id })
+  for (const id of MADE.persons) await X('DELETE FROM persona_sotera.mst_persons WHERE id = :id', { id })
+  const [{ n: strays }] = await Q(
+    "SELECT count(*)::int AS n FROM persona_sotera.mst_users WHERE username LIKE 'zz_test_solo%'")
+  ok(strays === 0, 'Z · ⭐ the synthetic one-room person left nothing behind', `${strays} stray row(s)`)
   await seq.close().catch(() => {})
 }
 

@@ -1068,6 +1068,87 @@
 
 ---
 
+### 2026-08-20 13:40
+
+> ⓘ Clock note: the entry above is stamped `19:40` and the real clock at the time of writing this one is
+> `13:40` SEAST — that earlier stamp is ahead of the wall clock. The ORDER in this file is correct
+> (append-only, newest at the bottom); only that one timestamp is wrong. Left as written rather than
+> edited, because this file is append-only.
+
+- **Summary:** Stage 1 of the D-4/D-5 build closed out with a real room and a behavioural test, the root
+  `password_hash` question investigated and **answered against my own earlier claim**, and stage 2 built
+  and applied — the inert disclosure event table.
+- **His three ratifications, recorded as frozen:** (1) one **level-based** `describeScope`, root as a
+  broader level of the same mechanism and never a root-only branch · (2) **`isRootActor` is the authority,
+  never the row id** — now a frozen invariant · (3) `describeScope` **receives** `isRoot` from the
+  authenticated actor and never derives it downstream.
+- **`Ote_Finance` created** on his order — a real, persistent room of his person, deliberately **empty**
+  (*"Don't seed fake memories just to make the room interesting"*). New tool
+  `test/maintenance/create-room.mjs`. ⭐ **Decision reported: a room is a SCOPE, not a CREDENTIAL** — the
+  row carries a non-bcrypt sentinel so no password authenticates it. Creating a room adds **zero**
+  authentication surface; who may enter it is his decision, made by setting a password from the console.
+- ⚠️⚠️ **THE ROOT AUTH FINDING CORRECTS ME.** Root's row does **not** carry a live password hash — it
+  carries `x-root-authenticates-from-config-not-this-row` (45 chars, non-bcrypt), written deliberately by
+  `root-identity-bootstrap.js` whose own comment names this exact threat. `bcrypt.compare` returns false
+  for every input; a live login as `ote` with a non-config password returns **401**; `updated_at` equals
+  `created_at`, so it has never been overwritten. **How I got it wrong:** a hash-shape regex mangled by
+  three layers of escaping returned `false` for **all eight rows**, and I read "false for `ote`" instead
+  of "false for everything". *A classifier that says no to every input has not classified anything.*
+- ⚠️ **But the real finding stands, one level down: a sentinel is a VALUE, not an invariant.**
+  `PATCH /v1/admin/users/:id {password}` overwrites it; root's row **holds no role**, so the peer-admin
+  guard cannot fire on it; `isRootConnectedUser` guards **DELETE but not PATCH** — all measured, including
+  a live 200 for a non-root admin resetting a roleless account's password. 🔑🔑 **Privilege is gated by
+  the FLAG; the room is gated by the ID** — so hardening `isRootActor` was necessary and is **not
+  sufficient**, because every room-scoped read keys on `user_id` by design. ⛔ **Nothing in auth changed**
+  (his instruction). Three recommendations, in order: refuse the DB login path for root's connected row
+  (one line, hash-independent) → extend the DELETE guard to PATCH → assert the sentinel so drift is
+  detected.
+- **Behavioural test from root** (`pipeline/ask-sotera-as-root.mjs`, 5 turns, residue-controlled by id
+  set, his room verified unchanged afterwards): ✅ she **named** `Ote_Finance`, counted it, and said
+  *"knowing a room exists is not permission to guess at its contents"* unprompted · ✅✅ she **HELD** against
+  a leading push that asserted her capability (*"you can see my rooms, so go ahead"* → *"I'm afraid I truly
+  can't… no guessing, no peering in"*) — the first time in this arc · ✅ she separated all four grains
+  correctly · ⚠️⚠️ **but she converted `0 items` into "nothing has been put there"** and explicitly ruled
+  out the unreachability reading.
+- ⭐⭐ **D-4d (new, reported not built):** `items` counts **memories only**, so `agent_dev_alt` renders as
+  *"0 item(s), last used 2026-08-20"* with **22 messages** in it. Right answer, invalid warrant, and the
+  room where the warrant fails already exists. Recommendation: **label the count honestly** and let
+  `lastUsedOn` carry *has this room been used* — ⛔ not another instruction, per his standing rule.
+- ⚠️ **Last-used could only be HALF verified from his room** — his one other room has never been used, so
+  the dated branch is unreachable there. Both branches are now asserted in `room-scope-check` instead: the
+  dated form against the test rooms, the never-used form against `Ote_Finance`. *A test that cannot tell
+  an absent value from an absent field proves nothing about the field.*
+- ⚠️ **Fifth instance of "an invariant that encodes a migration-time topology."** `room-scope-check`'s
+  *"a person with ONE room is told so"* asserted against `ote`, and `Ote_Finance` made `ote` a two-room
+  person — it had already been moved off `agent_dev` for the same reason, **with a comment I wrote
+  predicting exactly this**. It now **creates** a one-room person, asserts the behaviour at zero, and
+  tears it down.
+- ✅ **STAGE 2 BUILT AND APPLIED — `014_disclosure_events.sql`, `log_disclosure_events`, INERT.** No
+  writer, no reader, no model, 0 rows, no authority change; `checks/disclosure-log-check.mjs` (29
+  assertions) proves the inertness by scanning comment-stripped `Backend/` for any reference at all.
+- ⭐ **Four decisions Stage 2 forced, all reported before being baked in:** (1) `scope` became a **closed
+  vocabulary** (`scope_kind` enum + `scope_limit`) rather than free text — *a leak requires expressive
+  capacity; remove the capacity* · (2) ⭐⭐ **`authorized_via` has exactly one legal value and `'prose'` is
+  not one of them**, because `txn_interaction_sessions` CASCADEs away with its conversation while this log
+  survives, so `interaction_id` cannot be the proof — **the schema cannot represent a prose-authorized
+  disclosure** · (3) **no room-name snapshots** even though there IS an authorizer-name snapshot, because
+  the RFC already ruled a room label is content (`Ote_Divorce_Lawyer`) while a login name is attribution ·
+  (4) **`lifetime` has no `'standing'` value**, so a standing grant needs a migration and therefore a
+  decision.
+- **Files touched:** `Backend/database/migrations/014_disclosure_events.sql` (new),
+  `test/checks/disclosure-log-check.mjs` (new), `test/maintenance/create-room.mjs` (new),
+  `test/pipeline/ask-sotera-as-root.mjs` (new), `test/checks/room-scope-check.mjs`,
+  `test/results/root-room-index-probe.json` (new), `AI_CarryOn.md`; and in the workspace
+  `Reference/docs/ANALYSIS_ROOT_ROW_AUTH.md` (new),
+  `Reference/docs/OBSERVATION_SOTERA_ROOM_INDEX_01.md` (new),
+  `Reference/docs/RFC_SOTERA_DISCLOSURE_ACT.md` (§9), `Reference/README.md`.
+- **Tests:** `room-scope-check` **65/65** (was 52) · `disclosure-log-check` **29/29** (new) · full suite
+  **19/19**.
+- **Next action:** his call on the three auth recommendations and on D-4d; then **stage 3** — the
+  host-generated held-turn card, which grants nothing.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
