@@ -24,7 +24,7 @@
 // highest `rolling_id` seen, stored in the JSONL itself — so the log IS the state, and losing the log only
 // costs a repeat, never a double write (there are no writes).
 
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { Op } from 'sequelize'
 import { log } from '../../lib/utility.js'
@@ -52,6 +52,26 @@ const PROMPT_GENERATION = 3
 // ⛔ Parked at generation 3 — see the call site for the reasoning. Turning this on changes the prompt text,
 // which makes it generation 4, not a configuration change.
 const PRIORS_OFFERED = false
+
+// ── ⭐⭐ WHICH CODE WROTE THIS ROW, ANSWERABLE FROM THE ROW ITSELF ─────────────────────────────────────
+// Ote, 2026-08-20: *"If a future observation matters, I want to be able to answer afterward: Which
+// generation produced this? Were priors enabled? Which code was actually loaded? **without relying on
+// somebody remembering to check manually.**"*
+//
+// The first two already live on every row. The third did not: it required correlating the row's timestamp
+// against a boot log and a file mtime — which is exactly the manual step that failed **three times in one
+// day**. Twice the pass ran on code older than the edits it was supposed to be running (once for 96
+// minutes), and `/health` returned 200 throughout, because health reports that a process is answering, not
+// which version of a module it holds.
+//
+// ⇒ The module's own mtime is read ONCE at load and stamped on each row. A row is now self-describing:
+// generation, priors, and the code that produced it. ⛔ Do not compute this per row — it would report the
+// file on disk, not the code in memory, which is the very confusion it exists to end.
+const CODE_MTIME = (() => {
+  try {
+    return statSync(new URL(import.meta.url)).mtime.toISOString()
+  } catch { return null } // an unreadable mtime is worth a null, never a crash in a dry-run observer
+})()
 
 /** Every parsable record in the log, oldest first. The log IS the state. */
 function readLog() {
@@ -232,6 +252,8 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
         // relabelling them. I want the history of the experiment preserved, including where we accidentally
         // taught her the vocabulary."* ⛔ Never rewrite an old row to the new vocabulary.
         promptGeneration: PROMPT_GENERATION,
+        // ⭐ The loaded code, not the code on disk — see CODE_MTIME.
+        codeMtime: CODE_MTIME, priorsOffered: PRIORS_OFFERED,
         // ⭐ Recorded so the shadow store can find her earlier proposals next time, and so a reviewer can
         // see WHAT she was shown when she produced this one — a proposal that references a prior is only
         // interesting if you know the prior was in front of her.

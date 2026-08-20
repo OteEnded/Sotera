@@ -169,6 +169,13 @@ if (existsSync(OUT_FILE)) {
   const writer = readFileSync(new URL('../../Backend/app/components/noticing-pass.js', import.meta.url), 'utf8')
   check('the writer records the conversation subject on every new row', /title:\s*c\.title/.test(writer),
     'without it the topic bias cannot be seen at review time')
+  // ⭐ Ote: a future observation must answer *which generation · were priors enabled · which code was
+  // loaded* "without relying on somebody remembering to check manually." The first two are on the row
+  // already; `codeMtime` is the third, read once at module load — ⛔ never per row, which would report the
+  // file on disk rather than the code in memory.
+  check('the writer stamps the loaded code on every new row',
+    /const CODE_MTIME/.test(writer) && /codeMtime: CODE_MTIME/.test(writer),
+    'three stale-code incidents in one day, all while /health returned 200')
   check('the writer skips probe conversations and counts them',
     /settings\?\.probe === true/.test(writer) && /tally\.probe\+\+/.test(writer),
     'a fixture in this population is contamination, and the skip must be visible')
