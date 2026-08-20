@@ -213,6 +213,32 @@ export default async function adminRoutes(fastify) {
       return reply.code(403).send({ error: { code: 'root_only', message: 'Only root can modify admin accounts or grant the admin role' } })
     }
 
+    // ── ⭐ R2 · ROOT'S OWN CONNECTED ROW IS NOT AN ORDINARY ACCOUNT ────────────────────────────────
+    // The DELETE handler below has said so since 2026-08-06 (*"undeletable — by anyone, including root"*).
+    // This half was missing, and the asymmetry was measured on 2026-08-20: `isRootConnectedUser` guarded
+    // DELETE and not PATCH, root's row holds NO role so the peer-admin guard above cannot fire on it, and
+    // a non-root admin resetting a roleless account's password returned **200**.
+    //
+    // ⚠️ WHAT THAT BOUGHT AN ATTACKER, precisely: not root's PRIVILEGES — those are gated by the
+    // authenticated `isRoot` flag, which `isRootActor()` refuses to infer from an id — but root's ROOM,
+    // because every room-scoped read keys on `user_id`. Set a password on this row, log in with it, and
+    // the session holds root's id with `isRoot: false`.
+    //
+    // ⇒ R1 in `auth.route.js` already closes the login door, so this is defence in depth rather than the
+    // fix. It is here because the identity fields on THIS row are load-bearing for attribution across the
+    // whole store, and an admin has no legitimate reason to edit them: root's credentials live in
+    // config.json, and disconnecting root from a row is done by removing the config key — reversibly.
+    //
+    // ⛔ ROOT IS REFUSED TOO, exactly as with DELETE. A password set here would authenticate nothing (R1),
+    // so allowing it would only create a credential that looks live and is not.
+    if (isRootConnectedUser(fastify.config, user.id)
+        && (password !== undefined || username !== undefined || roles !== undefined || isActive !== undefined)) {
+      return reply.code(409).send({ error: {
+        code: 'root_connected_user',
+        message: "This is root's connected user record (auth.root.userConnected in config.json). Root authenticates from config, not from this row, so a password here would authenticate nothing — and its username, roles and active state are load-bearing for attribution. Change root's credentials in config.json; to disconnect root from a user row, remove the config key.",
+      } })
+    }
+
     if (typeof username === 'string' && username.trim() && username.trim() !== user.username) {
       const next = username.trim()
       const taken = await fastify.db.mst_users.findOne({ where: { username: next }, paranoid: false }) // soft-deleted names stay reserved

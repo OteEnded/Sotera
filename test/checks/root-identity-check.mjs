@@ -84,5 +84,75 @@ const [{ n: rootRows }] = (await pg.query(
   `select count(*)::int n from ${S}.txn_memories where user_id = $1`, [rootUser.id])).rows
 ok(rootRows >= 0, 'I4 · root\'s own memories are attributed to that row like any other account\'s', `${rootRows} row(s)`)
 
+// ── M-4 · THE THREE ROOT-AUTH FIXES (approved 2026-08-20) ────────────────────────────────────────
+// From `ANALYSIS_ROOT_ROW_AUTH.md`. The finding they answer: root's row carries a deliberate NON-bcrypt
+// sentinel so `bcrypt.compare` can never match it — but **a sentinel is a VALUE, not an invariant**.
+// `PATCH /v1/admin/users/:id {password}` overwrote it, root's row holds NO role so the peer-admin guard
+// could not fire, and `isRootConnectedUser` guarded DELETE and not PATCH.
+//
+// ⭐ Privilege is gated by the FLAG; the ROOM is gated by the ID. So hardening `isRootActor` was necessary
+// and not sufficient — and under the ratified memory model that flag now gates far more than settings.
+const { makeClient } = await import('../harness.mjs')
+const call = makeClient()
+const rootUsername = config.auth?.root?.username
+const rootPassword = config.auth?.root?.password
+
+// ── R3 · DETECT DRIFT. The sentinel was written carefully in 2026-08 and never verified again, which is
+// how a wrong claim about it survived in two files for a day. This is the check that would have caught it.
+const [row] = (await pg.query(
+  `select (password_hash like '$2%') as bcrypt_shaped, length(password_hash) as len
+     from ${S}.mst_users where id = $1`, [rootUser.id])).rows
+ok(row?.bcrypt_shaped === false,
+  "M4/R3 · ⭐⭐ root's connected row carries a NON-bcrypt sentinel — no password can authenticate it",
+  `bcrypt-shaped=${row?.bcrypt_shaped}, length=${row?.len}`)
+
+// ── R1 · the DB login path refuses root's row, whatever the hash contains ────────────────────────
+// ⚠️ Uses a deliberately wrong password. A correct one would take step 1 (config) and prove nothing.
+const dbLogin = await call('r1', 'POST', '/v1/auth/login',
+  { username: rootUsername, password: 'zz-not-the-config-password-4471' })
+ok(dbLogin.status === 401,
+  'M4/R1 · ⭐⭐ a non-config password for root is refused — the DB door is shut on root\'s row',
+  `${dbLogin.status} ${dbLogin.json?.error?.code ?? ''}`)
+// ⚠️⚠️ THE 401 ABOVE PROVES ALMOST NOTHING ON ITS OWN, and that is the trap this project keeps hitting:
+// bcrypt failing against the sentinel returns the SAME 401 as R1 refusing. Behaviourally identical, so the
+// response cannot tell you which line answered — *assert the state, not the answer.* Verified out of band
+// (the WARN fires once per attempt), and asserted here structurally: the guard must exist AND precede the
+// compare, because after it the refusal would be bcrypt's again and R1 would be decoration.
+const loginSrc = (await (await import('node:fs/promises')).readFile(
+  new URL('../../Backend/app/routes/v1/auth.route.js', import.meta.url), 'utf8'))
+  .replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1')
+const iGuard = loginSrc.indexOf('isRootConnectedUser(fastify.config, user.id)')
+const iCompare = loginSrc.indexOf('bcrypt.compare(password, user.password_hash)')
+ok(iGuard !== -1, 'M4/R1 · ⭐ the guard is present in the login path (comment-stripped source)')
+ok(iGuard !== -1 && iCompare !== -1 && iGuard < iCompare,
+  'M4/R1 · ⭐⭐ …and it runs BEFORE the bcrypt compare, so the refusal does not depend on the hash\'s value',
+  `guard@${iGuard} < compare@${iCompare}`)
+// ⚠️ AND ROOT CAN STILL SIGN IN. The one thing R1 must never do is lock the owner out: config is step 1,
+// checked before the database, precisely so root can log in to repair a broken DB.
+if (rootUsername && rootPassword) {
+  const cfgLogin = await call('r1b', 'POST', '/v1/auth/login', { username: rootUsername, password: rootPassword })
+  ok(cfgLogin.status === 200 && cfgLogin.json?.user?.isRoot === true,
+    'M4/R1 · ⭐⭐ …and root STILL logs in from config — the fix removes a door root never used, not root\'s own',
+    `${cfgLogin.status} isRoot=${cfgLogin.json?.user?.isRoot}`)
+}
+
+// ── R2 · PATCH refuses the identity/credential fields on root's row ──────────────────────────────
+// ⛔ Asserted as ROOT, so a 409 cannot be mistaken for ordinary peer-admin protection — and because the
+// guard refuses root too, deliberately: a password here would authenticate nothing after R1.
+const asRoot = await call('r2', 'POST', '/v1/auth/login', { username: rootUsername, password: rootPassword })
+if (asRoot.status === 200) {
+  const patch = await call('r2', 'PATCH', `/v1/admin/users/${rootUser.id}`, { password: 'zz-should-never-be-set-9931' })
+  ok(patch.status === 409 && patch.json?.error?.code === 'root_connected_user',
+    "M4/R2 · ⭐⭐ setting a password on root's row is REFUSED, even for root — the DELETE guard's missing half",
+    `${patch.status} ${patch.json?.error?.code ?? ''}`)
+  // ⭐ And the sentinel is still there afterwards — the refusal happened before any write.
+  const [after] = (await pg.query(
+    `select (password_hash like '$2%') as bcrypt_shaped from ${S}.mst_users where id = $1`, [rootUser.id])).rows
+  ok(after?.bcrypt_shaped === false, 'M4/R2 · …and the row is untouched — refused before the write, not after')
+  // A harmless field is still editable, so the guard is narrow rather than a blanket lock on the row.
+  const soft = await call('r2', 'PATCH', `/v1/admin/users/${rootUser.id}`, { systemNote: null })
+  ok(soft.status === 200, 'M4/R2 · ⭐ non-identity fields still work — the guard is scoped to credentials and identity', `${soft.status}`)
+}
+
 await pg.end()
 done()

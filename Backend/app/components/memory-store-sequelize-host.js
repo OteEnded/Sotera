@@ -211,29 +211,102 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       }
     })(),
 
+    /**
+     * ⭐⭐ E-1 — PROVENANCE BACK-REFERENCE, WITH THE EVIDENCE AUTHORIZED SEPARATELY FROM THE MEMORY.
+     *
+     * Ote, 2026-08-20, ratifying the memory model: **"Memory ownership ≠ evidence ownership ≠ evidence
+     * access."** · *"A memory can be Sotera's while the original conversation/message remains someone
+     * else's material."*
+     *
+     * ── ⚠️⚠️ WHY THIS CHANGED, AND WHY IT HAD TO CHANGE FIRST ──────────────────────────────────────
+     * Audited 2026-08-20 (`AUDIT_SOTERA_MEMORY_EVIDENCE_CHAIN.md`): this method scope-checked the MEMORY
+     * and then fetched the message, the conversation title, and every message in that conversation **by
+     * id, unfiltered.** That was sound only because of an invariant nobody had written down —
+     *
+     *     a memory's source message belongs to the same room as the memory
+     *
+     * — which held while `user_id` owned every memory. **The ratified reframe removes it**: memory
+     * ownership follows AUTHORSHIP, so a Sotera-owned memory is in scope from every room while its source
+     * message stays wherever it was said. Unchanged, this method would have returned another person's
+     * actual words, plus two messages either side, through a tool marked `isReadOnly: true`.
+     *
+     * ⇒ **The memory being hers does not make its evidence hers.** So there are now TWO authorizations:
+     *   1. the MEMORY  — `inScope()`, as before;
+     *   2. the EVIDENCE — the source conversation must belong to THIS store's scope.
+     *
+     * ── ⭐ AND IT RETURNS FOUR STATES, NEVER TWO ───────────────────────────────────────────────────
+     * `evidenceState`: `verified` · `attested` · `destroyed` · `unattested`. The one that did not exist
+     * before is **`attested`** — *"I learned this on the 18th, and I cannot show you what was said from
+     * here."* ⛔ *"Cannot inspect"* must never collapse into *"there was no evidence"*, which is this
+     * project's oldest failure arriving in the evidence layer.
+     *
+     * ⚠️ THE REFUSED PAYLOAD CARRIES NO CONTENT AND NO TITLE. A conversation title is content — the RFC
+     * already ruled that a *room* name can be (`Ote_Divorce_Lawyer`), and a title like "Kavi Prefers Plain
+     * Truths Over Reassurance" is a fact about a person. So when evidence is refused the caller gets the
+     * DATE and whether it was this room or another, and no names at all.
+     *
+     * ⚠️ AND IT FETCHES THE WINDOW, NOT THE CONVERSATION. It used to `findAll` every message and slice in
+     * JS — measured at **70 messages loaded to return 5**. The blast radius of an authorization mistake
+     * should be the window, and the window should not be in process memory before the check.
+     */
     async getSource({ id, context = 2 } = {}) {
-      // PROVENANCE back-reference: the message a memory was saved from, plus neighbours.
-      // ⚠️ The only method that reads outside the memory tables — kept here deliberately (Ote,
-      // 2026-08-11) because it has one caller and already degrades, and extracting a SourceReader for
-      // a host with memory but no conversations would be an abstraction for a hypothetical.
       if (!id) throw new Error('id is required')
       const m = await txn_memories.findOne({ where: { id, persona: P }, raw: true })
+      // (1) THE MEMORY. Unchanged.
       if (!inScope(m)) return { found: false }
       const res = { found: true, memory: m, source: m.source ?? null, sourceMessageId: m.source_message_id ?? null }
-      // CONTRACT: no source message, or a host without conversations → return the memory, no context.
-      // This is SUCCESS. Callers render what they got; nothing here may throw for a missing capability.
-      if (!m.source_message_id || !db.txn_messages) return res
-      const msg = await db.txn_messages.findOne({ where: { id: m.source_message_id }, raw: true })
-      if (!msg) { res.note = 'source message no longer exists (deleted)'; return res }
-      res.conversationId = msg.conversation_id
-      if (db.txn_conversations) {
-        const conv = await db.txn_conversations.findOne({ where: { id: msg.conversation_id }, raw: true })
-        res.conversationTitle = conv?.title ?? null
+
+      // ⛔ UNATTESTED — no reference was ever recorded. Distinct from `destroyed`, and the distinction is
+      // only preservable because a deleted source leaves the pointer DANGLING rather than nulled. See the
+      // audit: an FK with ON DELETE SET NULL here would collapse the two.
+      if (!m.source_message_id || !db.txn_messages) { res.evidenceState = 'unattested'; return res }
+
+      const msg = await db.txn_messages.findOne({
+        where: { id: m.source_message_id }, attributes: ['id', 'conversation_id', 'rolling_id', 'created_at'], raw: true,
+      })
+      // DESTROYED — the reference resolves to nothing. The memory survives; the loss is reported.
+      if (!msg) {
+        res.evidenceState = 'destroyed'
+        res.note = 'source message no longer exists (deleted)'
+        return res
       }
-      const all = await db.txn_messages.findAll({ where: { conversation_id: msg.conversation_id }, order: [['rolling_id', 'ASC']], raw: true })
-      const idx = all.findIndex((n) => n.id === msg.id)
+
+      // (2) ⭐ THE EVIDENCE — a SECOND, INDEPENDENT authorization. Owner of the source conversation, not
+      // owner of the memory. Attributes are narrowed to the two columns the decision needs, so no title
+      // and no content is loaded before the check that decides whether it may be seen.
+      const conv = db.txn_conversations
+        ? await db.txn_conversations.findOne({ where: { id: msg.conversation_id }, attributes: ['id', 'user_id', 'title'], raw: true })
+        : null
+      const sameScope = !!conv && conv.user_id === U
+      // ⚠️ FAIL CLOSED. No conversation table, or a conversation whose owner cannot be established, means
+      // NOT AUTHORIZED — the opposite of the fail-open rule that governs capability degradation
+      // elsewhere in this file, and deliberately so: this decision is about disclosure, not capability.
+      if (!sameScope) {
+        res.evidenceState = 'attested'
+        // Safe provenance only: WHEN, and whether it was here. ⛔ No title, no room name, no person name,
+        // no content, no conversation id — an id is a handle to somebody else's material.
+        res.learnedOn = msg.created_at
+        res.learnedHere = false
+        res.note = 'the original conversation is not readable from here — the memory stands, its evidence cannot be inspected from this context'
+        return res
+      }
+
+      // (3) AUTHORIZED. Now — and only now — content may be read, and only the window around the source.
+      res.evidenceState = 'verified'
+      res.learnedOn = msg.created_at
+      res.learnedHere = true
+      res.conversationId = msg.conversation_id
+      res.conversationTitle = conv?.title ?? null
       const c = Math.max(0, Math.min(10, context))
-      res.context = all.slice(Math.max(0, idx - c), idx + c + 1).map((n) => ({
+      const window = await db.txn_messages.findAll({
+        where: {
+          conversation_id: msg.conversation_id,
+          rolling_id: { [Op.between]: [msg.rolling_id - c, msg.rolling_id + c] },
+        },
+        order: [['rolling_id', 'ASC']],
+        raw: true,
+      })
+      res.context = window.map((n) => ({
         role: n.role, content: String(n.content || '').slice(0, 600), at: n.created_at, isSource: n.id === msg.id,
       }))
       return res

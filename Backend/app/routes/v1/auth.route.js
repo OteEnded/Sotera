@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { Op } from 'sequelize'
-import { rootUserIdFrom, rootDisplayName } from '../../auth/root-identity.js'
+import { rootUserIdFrom, rootDisplayName, isRootConnectedUser } from '../../auth/root-identity.js'
 import { requireLogin, safeEqual } from '../../auth/index.js'
 import { checkPasswordStrength } from '../../auth/password-policy.js'
 import { capabilitiesFor } from '../../auth/permissions.js'
@@ -94,6 +94,31 @@ export default async function authRoutes(fastify) {
       include: [{ association: 'roles' }],
     })
     if (!user || !user.is_active) return authFailed()
+
+    // ── ⭐⭐ R1 · ROOT'S CONNECTED ROW MAY NEVER AUTHENTICATE THROUGH THIS PATH ────────────────────
+    // Root logs in at step 1, from config, and ONLY from config. This closes the DB door on root's row
+    // regardless of what its `password_hash` happens to contain.
+    //
+    // ⚠️ WHY IT IS NOT ENOUGH THAT THE HASH IS A SENTINEL. `root-identity-bootstrap.js` writes a
+    // deliberate non-bcrypt string (`x-root-authenticates-from-config-not-this-row`) so `bcrypt.compare`
+    // can never match — and that comment names this exact threat. But a sentinel is a VALUE, not an
+    // invariant. Measured 2026-08-20: `PATCH /v1/admin/users/:id {password}` overwrites it, root's row
+    // holds NO role so the peer-admin guard cannot fire on it, and `isRootConnectedUser` guarded DELETE
+    // but not PATCH. A non-root admin could therefore mint a session holding ROOT'S ROW ID.
+    //
+    // ⭐ AND THE STAKES ROSE ON 2026-08-20. Privilege is gated by the FLAG (`isRootActor`), but the ROOM
+    // is gated by the ID — every room-scoped read keys on `user_id`. Under the ratified memory model root
+    // becomes the authority over Sotera's own memory space, so a session holding root's id without root's
+    // flag is a much larger problem than it was when it only meant "root's four memories".
+    //
+    // ⇒ One line, one place, and it does not care about the hash. ⚠️ It CANNOT lock root out: config is
+    // step 1, checked before the database, precisely so the owner can sign in to repair a broken DB.
+    // This removes a door root has never used.
+    if (isRootConnectedUser(fastify.config, user.id)) {
+      request.log?.warn?.(`[auth] refused DB login for root's connected row (${user.username}) — root authenticates from config only`)
+      return authFailed()
+    }
+
     const ok = await bcrypt.compare(password, user.password_hash)
     if (!ok) return authFailed()
 
