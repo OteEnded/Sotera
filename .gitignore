@@ -21,3 +21,14 @@ Backend/public/dist/
 *.log
 .DS_Store
 Thumbs.db
+# ── THE NOTICING OBSERVATION LOG — DELIBERATELY UNTRACKED ─────────────────────────────────────────────
+# Ote, 2026-08-20: "remove it from git tracking and put it in .gitignore. Keep the file locally so the
+# experiment can continue, but don't keep another person's private conversation material in repository
+# history." It holds Sotera's verbatim account of live conversations, including other people's.
+#
+# ⚠️ THIS COSTS SOMETHING REAL, so it is stated rather than hidden: git history was the only thing
+# proving the generation-1 and generation-2 rows were never edited. That guarantee now comes from the
+# generation stamps, the monotonicity assertion in noticing-prompt-purity-check.mjs, and
+# noticing-proposals.README.md beside the file. ⛔ Do not re-add it to make provenance easier.
+# ⓘ Existing history is NOT rewritten — his explicit call, revisitable separately.
+test/results/noticing-proposals.jsonl

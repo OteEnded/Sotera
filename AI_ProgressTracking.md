@@ -1911,12 +1911,16 @@ filenames are UTC, both trustworthy.
   finding. The sentence was ratified deliberately and stays; the boundary is in the log's README.
   ⓘ *"carry forward"* is the question's verb too — her use of it is not evidence the concept is hers.
 - ⏸ **OPEN, HIS — A DISCLOSURE QUESTION, NOT A BUG.** `test/results/noticing-proposals.jsonl` is
-  **git-tracked and already in 7 commits**, and it now contains her account of Hermes's private Thai
-  conversation about his exhaustion and *"the right to be useless."* ⚠️ The trade is real both ways: git
+  **git-tracked and already in 7 commits**, and it now contains her verbatim account of a third party's
+  private conversation — personal material, not technical content. ⚠️ The trade is real both ways: git
   history is currently the **only** thing proving the gen-1 rows were never edited, and it is also spreading
-  another person's personal material. ⇒ Recommendation: **`.gitignore` + `git rm --cached`** going forward,
+  someone else's personal material. ⇒ Recommendation: **`.gitignore` + `git rm --cached`** going forward,
   keeping the file on disk, and treat rewriting history as a separate heavier decision. ⛔ Not acted on, and
   the log is **held out of this commit** meanwhile.
+  ⓘ **Described, not quoted, on purpose** — an earlier version of this entry named the topic and repeated a
+  phrase from it, which is the same disclosure in a smaller package. ⭐ Same rule as E-1's refused payload:
+  say **that** it exists, never **what** it says. ⚠️ The earlier wording is already in commit `8959a6a` and
+  is **not** being rewritten out (his call); this is about not adding more.
 - **Next action:** ⏭ **observe.** ⛔ Don't interpret at n=4. ⛔ No schema decisions. ⭐ His revised rule:
   *"iterate when warranted, don't steer toward a desired result, and don't turn one interesting response
   into an ontology."*
