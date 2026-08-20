@@ -1832,6 +1832,44 @@ filenames are UTC, both trustworthy.
   ⭐ *"If she never revises an old durable thought, never produces a lesson, or never chooses to save
   something, that's valid evidence too."*
 
+### 2026-08-20 20:05
+
+- **Summary:** He ratified **option A**. **Generation 3 is live**: the noticing prompt is the frame line,
+  the transcript, and his question verbatim — *"Was there anything in this conversation that you want to
+  carry forward? If so, tell me what and why. If not, say so."* **169 characters against gen-1's 4308.**
+  ⭐⭐ The phase principle he added: *"we are discovering her ontology, not teaching her ours."*
+- ⛔⛔ **NOTHING IS CLASSIFIED ANY MORE.** The `OUTCOME:` line was a six-value menu — a menu even when every
+  value is an action — so it is gone, and with it the machine-readable signal. Rows now carry her
+  **complete text verbatim** and `unclassified: true`, with **no `outcome`, `body`, or `declared` field**:
+  ⭐ *a field holding a verdict we inferred is read a week later as a verdict she gave.* Reading the rows is
+  a human act. `byOutcome` stays empty by design; the cron line reports `unclassified=N` instead.
+- **Also removed, each load-bearing for something we wanted:** the four labelled asks (they produced 15/15
+  identical headings) · the anti-quota paragraph (*"most conversations are not… nobody is counting"* steers
+  toward `nothing` as surely as a target steers away from it; ⭐ *"If not, say so"* carries the permission)
+  · the grammar rails, because the gen-2 row answering *"where it belongs"* with **the user's filing
+  system** is exactly the unforced behaviour a rail hides. ⭐ `max_tokens` **600 → 1600** with `finish`
+  recorded — *"preserve the whole response/reasoning"*, and a truncated reply stored as complete would read
+  as her having stopped there.
+- ⏸ **PRIORS PARKED, AND IT COSTS ONE OF HIS FOUR OBSERVATION TARGETS.** Her own earlier answer shows her a
+  **shape**, and shape is the variable under study — one echo and *"her natural structure"* becomes *"her
+  first answer's structure, repeated."* ⭐ His own criterion picked the loss: *"repeated use across genuinely
+  independent conversations is what would make it interesting"* ⇒ **independence is the property we need,
+  and priors destroy it.** ⚠️ Self-reference is therefore **not observable in the pass** right now; it stays
+  observable in ordinary conversation. ⛔ Re-enabling changes the prompt text ⇒ **generation 4, his call.**
+- ⭐⭐ **The guard's central assertion is now WHOLE-STRING EQUALITY on the built prompt, not a word list** —
+  ⚠️ **a word list would have passed generation 2 happily**, since every banned word was absent and the
+  structure menu was the entire problem. *A word list catches what I thought to ban.* Plus: his sentence
+  byte-for-byte · no headings/bold/bullets/examples · no target language in either direction · gen-1/gen-2
+  rows keep their own fields (⛔ asserting the new shape over them would be **relabelling by test**).
+  **41 assertions.** ⓘ `test/results/noticing-proposals.README.md` now sits beside the log as the pointer to
+  the contamination boundary.
+- ✅ Restarted onto gen-3 at **20:00:18**, verified against all three file mtimes. Two genuine independent
+  conversations added as fuel (JustTTS latency; Postgres maintenance on a shared box) — real questions of
+  mine, ⛔ neither shaped like the thing we are measuring.
+- **Next action:** ⏭ **let the clean population accumulate, then read it with him.** ⛔ No schema decisions.
+  ⚠️ Watch for a **test fixture** reaching the sample: check suites create `agent_dev` conversations, and
+  `who` cannot distinguish them from my real ones — only the conversation id can.
+
 ---
 
 ## Template Updates
