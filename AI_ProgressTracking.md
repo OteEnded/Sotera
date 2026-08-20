@@ -1563,6 +1563,67 @@
 
 ---
 
+### 2026-08-20 19:15
+
+- **Summary:** *"as we have hermes repo as ref, and hermes also have self improvement system, isnt there
+  anything we can borrow?"* — **yes, a lot**, and the 2026-08-19 survey already contained the right cause
+  for a number I had misdiagnosed an hour earlier. Mapped onto the model ratified today as §14.1a/c.
+  ⛔ Nothing built.
+- ⚠️⚠️ **THE CORRECTION, AND IT MATTERS: `remember` = 0 calls is COMPLIANCE, not inertia.** Her live
+  `MEMORY_TOOL_RULES`, verbatim: *"You **MAY** also save on your own initiative… **(not every turn, and
+  never for casual chitchat)**."* Hermes's review prompt, verbatim: *"Be **ACTIVE** — most sessions produce
+  at least one skill update… **A pass that does nothing is a missed learning opportunity, not a neutral
+  outcome.**"* ⇒ **Same capability, opposite default. The gating IS the behaviour.**
+  ⭐ `ANALYSIS_HERMES_SELF_IMPROVEMENT_FOR_SOTERA.md` §2 concluded this on 08-19 — **before I re-derived it
+  wrongly today** and told him *"a tool she may call is not a cognitive pipeline"* as the primary cause.
+  ⚠️ Same error family as *identical output means the variable is not in the loop*: **I read a number as a
+  property of the MECHANISM when it was a property of the INSTRUCTION.** ⇒ The noticing pass is still the
+  right build, but for the *second* reason; the gate must flip **brake → accelerator**, and ⛔ an
+  accelerator is only safe with the structure that absorbs it.
+- ⭐⭐ **THREE BORROWABLES TURN OUT TO BE MECHANISMS ALREADY RATIFIED HERE — which makes them nearly free:**
+  · **(1) class-level umbrellas ARE E-3.** A parent memory carrying many evidence references **is** an
+    umbrella ⇒ building E-3 gets the anti-starvation structure for nothing. ⚠️⚠️ **And OLS MEASURED what
+    it prevents: over 13 consecutive turns the 3 most generic notes won 13/13 ranked slots while 9
+    specific notes won 0.** ⇒ ***a flat LESSON library will starve identically*** — *"be concise with Ote"*
+    would win every slot and *"0 items counts memories only"* would win none. **LESSONs must be
+    class-level from the first row.**
+  · **(2) never-delete-only-archive IS §14.2's history mechanism.** Their invariant exists to make
+    automation safe; ours would exist to make *"I used to think X"* possible. **Same column, two purposes.**
+  · **(3) their provenance gate turns on `created_by`** — and `mst_skills` **already has it** (measured).
+    ⛔ It has **no `pinned`** and **no telemetry columns** (`use_count` / `patch_count` / `last_activity_at`).
+- ⭐ **Also worth taking:** the **write-ROUTING rule we lack** — *"memory captures who the user is and what
+  the situation is; skills capture how to do this class of task; when they complain about how you handled a
+  task, the skill that governs it carries the lesson"* (and under the ratified model she now has **five**
+  Sotera-owned layers to route between, so the gap is wider than when the survey was written) ·
+  *"**turning off an automatic behaviour must not remove the manual command**"* · *"**fail-open, but log at
+  WARNING**"*, because fail-open alone hides spend.
+- ⚠️ **Their *frustration → skill* trigger is WIDER than M-2's** (which is *checkable factual correction*
+  only). Hermes can afford *"stop doing X"*, *"this is too verbose"*, *"you always do Y"* because (1) and
+  (2) absorb a bad write; **we have neither yet.** ⇒ **Build order, not rejection:** keep the narrow
+  trigger, add the umbrellas and archive-only, *then* widen. ⭐ It also names our gap plainly: **Sotera has
+  no path from *"you got that wrong"* to a durable change in how she works.**
+- ⚠️ **The collision to settle FIRST, and it has a concrete answer:** a background review writing into
+  memory is a **second writer**, which the one-writer rule forbids. ⇒ it must **`enqueue` through the
+  existing `WRITE_LANES` lane (`buildMemoryV2(...).enqueue`)**, never write directly. *The lease is the
+  lane.* Settle before the noticing pass, not during.
+- ⛔ **NOT to borrow:** *"be ACTIVE"* on its own · the **daemon-thread fork** as a mechanism (Python threads
+  + `contextvars` vs a Fastify process under a one-writer rule — the *idea* transfers, the implementation
+  does not) · ⭐ **auto-archive by inactivity**, which is **MORE** wrong under today's reframe than when the
+  survey said it: *"their skills are tools; her memories are not."* ⛔ And **none of this is dreaming** —
+  per-turn/per-person/in-scope, versus cross-person/offline/persona-global. Borrowing it must not be
+  described as starting dreaming.
+- ⓘ **§7's window RE-MEASURED TODAY AND STILL OPEN:** `txn_memories kind='note'` **0** · `mst_skills` **0**
+  · `mst_skill_files` **0**. All three write targets empty ⇒ routing discipline can be **prevention rather
+  than migration**, which is not true for OLS. ⚠️ **It expires the moment Reflection is switched on or the
+  first skill is authored.**
+- **Files touched:** `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (§14.1a correction + §14.1c),
+  `Reference/README.md`, `AI_CarryOn.md`.
+- **Next action:** ⏸ M-4 still the only open decision. ⭐ The two cheapest things in the whole plan are now
+  identified and are **prompt text with no new machinery**: the **write-routing rule** and
+  **class-level-not-session-level** — and they are the two with an expiry date.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
