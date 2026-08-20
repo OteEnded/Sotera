@@ -227,7 +227,16 @@ export async function noticeConversation(fastify, { conversationId, dryRun = tru
     // holding a verdict we guessed would be read later as a verdict she gave.
     text: raw,
     // ⓘ So a reviewer can tell a short answer from a clipped one without re-running anything.
-    finish: res?.done_reason ?? res?.finish_reason ?? null,
+    // ⚠️⚠️ THIS FIELD HAS BEEN NULL ON EVERY ROW EVER WRITTEN, and it is the one that tells a SHORT
+    // answer from a CLIPPED one. `chat()` returns `{message, usage, model, provider}` — it **drops the
+    // provider's `done_reason`** — so `res.done_reason` was always undefined. Found on the reflection
+    // lifecycle's first live rows (null on all three) and fixed in both instruments the same way.
+    // ⛔ The PROMPT is untouched, so this is still generation 3; `codeMtime` records the change, which is
+    // exactly what that field is for.
+    finish: (() => {
+      const used = res?.usage?.completionTokens ?? null
+      return res?.message?.done_reason ?? (used == null ? null : (used >= 1600 ? 'length' : 'stop'))
+    })(),
     maxTokens: 1600,
     unclassified: true,
     dryRun, wroteNothing: true,

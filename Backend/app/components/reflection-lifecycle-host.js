@@ -227,7 +227,19 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
         conversationId,
       },
     })
-    return { message: res?.message ?? {}, doneReason: res?.done_reason ?? res?.finish_reason ?? null }
+    // ⚠️⚠️ `finish` WAS INERT ON ITS FIRST LIVE RUN, and it is the column that exists to stop a clipped
+    // answer reading as a decision. `chat()` returns `{message, usage, model, provider}` and **drops the
+    // provider's `done_reason` entirely**, so `res.done_reason` was ALWAYS undefined — measured: null on
+    // all three of the first live rows. (The noticing pass has read it the same way since generation 1, so
+    // its `finish` has never carried anything either.)
+    // ⇒ Derived from what the runtime DOES return: hitting the completion cap exactly is the clip signal.
+    // ⭐ Honest either way — `stop` means it ended on its own, `length` means we cut it off.
+    const used = res?.usage?.completionTokens ?? null
+    return {
+      message: res?.message ?? {},
+      doneReason: res?.message?.done_reason
+        ?? (used == null ? null : (used >= maxTokens ? 'length' : 'stop')),
+    }
   })
 
   while (rounds <= maxRounds) {
