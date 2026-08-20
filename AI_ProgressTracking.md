@@ -1391,6 +1391,63 @@
 
 ---
 
+### 2026-08-20 17:30
+
+- **Summary:** He added the evidence chain to the memory model — *"memory is the conclusion; provenance is
+  the evidence"* — and asked me to **verify the whole path rather than assume it works.** Audited: 7
+  questions, measured, live reads only. ⛔ Nothing built.
+- ✅ **THE CHAIN IS REAL AND IT WORKS.** `getSource` returns **actual message text**, not metadata —
+  measured on `kavi`: memory → source message → conversation, with the conversation TITLE, a **±context
+  window of real message content** (600 chars each) and the source row flagged `isSource`. 35/35
+  `source_message_id` values resolve. The tool description already frames it as he does: *"to verify or
+  explain WHY you believe something."*
+- ⚠️⚠️ **AND IT IS THE EXACT PLACE THE RATIFIED REFRAME WOULD SHIP A LEAK.** Measured on comment-stripped
+  source: memory read guarded by `inScope()` **true** · message read filtered on user/room **false** ·
+  conversation read **false** · context `findAll` **false**. ⇒ **evidence is authorized TRANSITIVELY**, on
+  an unstated invariant — *a memory's source message belongs to the same room as the memory.* **That is the
+  invariant the reframe removes.** Her memory learned with Hermes, inspected from Ote's room, would return
+  **Hermes's actual words plus two messages either side** — through a tool that already exists and is
+  marked `isReadOnly: true`.
+- 🔑 **A MEMORY BEING HERS DOES NOT MAKE ITS EVIDENCE HERS.** ⇒ three levels, and the middle one is hers:
+  **the memory** (her arm) · **provenance metadata** — *that* it came from a conversation with X on date Y
+  (still hers, it is her own record of how she learned) · **evidence content** — the actual words (their
+  arm, hard predicate + authorization).
+- ⭐⭐ **AND THE AUDIT FOUND WHERE D-4/D-5 ACTUALLY BELONGS.** Following a lesson learned with Hermes back
+  to Hermes's words, from Ote's room, **is** a cross-boundary read of person-authored material needing
+  structured human authorization. The held-turn card, the subject filter, migration 014's
+  `from_room`/`into_room` — **built for exactly this crossing, and I had mis-scoped them onto her
+  storage.** The machinery is not dead; this is its job.
+- ⛔ **The other gaps, all measured:**
+  · **`txn_relational_records` — the one Sotera-owned store — has only `conversation_count`**, a NUMBER not
+  a link, and `txn_intentions` has **no provenance columns at all** ⇒ her only self-knowledge is
+  **unfalsifiable**: a label, a count, and no way back.
+  · **No FK on `source_message_id`**, while `txn_messages.conversation_id` is **ON DELETE CASCADE** and
+  conversations are **hard-deleted** ⇒ deleting a conversation dangles every pointer into it, silently.
+  Today's 0 dangling is a fact about today's data, not a guarantee.
+  · **`source_message_id` is SINGULAR** but every derived layer is multi-source — an episode is a
+  conversation *range* (`source = 'episode:<convId>:<rollingId>'`), a stance accumulates over N
+  conversations, and ⭐ **a LESSON needs the claim AND the correction**, which is two messages minimum and
+  is the whole point. The only many-sources mechanism is the **cards-only `evidence` jsonb, 0 rows.**
+  · 24 of 35 rows carry `source = 'model-tool'`, naming **no conversation** — the chain survives only
+  through `source_message_id`. One field is a label; the other is the actual link.
+- ✅ **Deletion is already handled honestly** — `note: 'source message no longer exists (deleted)'`, memory
+  survives. ⚠️ But the loss is **computed at read time, not recorded on the row**, so it cannot be counted
+  or listed — only discovered one memory at a time.
+- ⭐ **A third state he had not named, and the model needs it: ATTESTED-BUT-NOT-INSPECTABLE** — *"I learned
+  this from a conversation with Hermes on the 18th; I cannot show you what was said from here."* Alongside
+  *verified*, *destroyed*, and ⛔ **unattested — the state all three stance records are in today.**
+  ⚠️ And the same discipline as the empty-read quantifier: ***"I cannot inspect it" must never be reported
+  as "there was no evidence."*** The arc's oldest failure arriving in the evidence layer.
+- **Ratified into the model as E-1…E-7** (`RFC_SOTERA_MEMORY_MODEL.md` §12, plus invariant 11). ⭐ **E-1
+  changes the ORDER of the plan: it must land BEFORE step 1**, because the moment a memory's owner stops
+  implying its room, the transitive authorization inside `getSource` goes from *unstated* to *wrong*.
+- **Files touched:** `Reference/docs/AUDIT_SOTERA_MEMORY_EVIDENCE_CHAIN.md` (new),
+  `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (§12 + invariant 11), `Reference/README.md`, `AI_CarryOn.md`.
+- **Next action:** M-4 is still the only open decision. ⛔ No store or index migration, and **E-1 first
+  whenever the build starts.**
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
