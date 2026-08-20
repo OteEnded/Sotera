@@ -32,6 +32,101 @@ import { IDENTITY_ATTR } from '@ote/memory/cognition/memory-identity.js'
 
 const MAX_NAME = 100 // matches the display_name column + the /me and admin schemas
 
+// ── ⭐⭐ IS THIS EVEN NAME-SHAPED? Three instances said no, and nothing checked. ────────────────────
+// Measured 2026-08-20 (`DEFECT_MEMORY_NAME_FRAGMENT_CAPTURE.md`), all on this one path:
+//   1. `preferred_name: "Being Your"`            — STORED, importance 9, in root's own room
+//   2. a card offering `"กระบวนการ ไม่ใช่แก่น"`  — *"process, not essence"*, a phrase from the discussion
+//   3. a card offering `"โอเต้"`                 — a THIRD PARTY's name (see the subject note below)
+//
+// #1 and #2 are shape failures: neither is a name by any test, and there was no test. The rename gate
+// caught all three — `set_display_name` has been called ZERO times ever — but it caught them by asking
+// the user a question built on a false premise, which is a defect of its own.
+//
+// ⚠️ THIS REFUSES, IT DOES NOT SANITISE. A rejected name comes back with a reason the model can relay, and
+// the card still offers a free-text option, so a legitimate unusual name is one sentence away rather than
+// silently mangled. Refusing loudly beats guessing quietly — and guessing quietly is how "Being Your"
+// reached importance 9.
+
+// Sentence punctuation. A display name does not contain a comma or a full stop; a clause does.
+const NOT_IN_A_NAME = /[,.!?;:•]|\s{2,}/
+
+// Words that cannot END a name, because they open or join a phrase. "Being Your" ends in a possessive
+// determiner — which is the whole reason it is a fragment and not a name.
+const CANNOT_END_A_NAME = new Set([
+  'a', 'an', 'the', 'my', 'your', 'our', 'their', 'his', 'her', 'its',
+  'of', 'to', 'in', 'on', 'at', 'for', 'with', 'and', 'or', 'but', 'not', 'no',
+  'is', 'are', 'was', 'were', 'be', 'being', 'been', 'am',
+])
+
+// Thai negation/copula particles. Their presence means a CLAUSE, never a name — "ไม่ใช่" is literally
+// "is not", and it is what made #2 a sentence. ⚠️ Kept to a short explicit list rather than a clever
+// tokeniser: Thai has no spaces, so a broad rule would false-positive inside real names.
+const THAI_CLAUSE_MARKERS = ['ไม่ใช่', 'ไม่ได้', 'คือ', 'แต่', 'และ', 'หรือ', 'ครับ', 'ค่ะ', 'นะ']
+
+/**
+ * ⭐ Is this name already on file as SOMEONE ELSE's? Returns their label, or null.
+ *
+ * The computable half of the subject problem. It looks at the two places a name is ASSERTED rather than
+ * inferred — other accounts' `display_name`/`username`, and other persons' `display_name` — and never at
+ * prose. ⚠️ It is deliberately NOT a similarity match: a fuzzy name comparison across people is the
+ * identity-resolution mistake this project has already been corrected on, and the blast radius here is
+ * "someone's account gets renamed to another human's name".
+ *
+ * ⚠️ Best-effort: a DB failure returns null (no false refusal) — the two-phase confirm still stands behind
+ * it, so this is defence in depth rather than the gate.
+ */
+async function nameBelongsToSomeoneElse(fastify, selfUserId, name) {
+  const needle = String(name || '').trim().toLowerCase()
+  if (!needle) return null
+  try {
+    const { Op } = await import('sequelize')
+    const other = await fastify.db.mst_users.findOne({
+      where: {
+        id: { [Op.ne]: selfUserId },
+        [Op.or]: [
+          fastify.db.mst_users.sequelize.where(
+            fastify.db.mst_users.sequelize.fn('lower', fastify.db.mst_users.sequelize.col('display_name')), needle),
+          fastify.db.mst_users.sequelize.where(
+            fastify.db.mst_users.sequelize.fn('lower', fastify.db.mst_users.sequelize.col('username')), needle),
+        ],
+      },
+      attributes: ['display_name', 'username'],
+    })
+    if (other) return other.display_name || other.username
+    if (fastify.db.mst_persons) {
+      const selfRow = await fastify.db.mst_users.findByPk(selfUserId, { attributes: ['person_id'] })
+      const seq = fastify.db.mst_persons.sequelize
+      const person = await fastify.db.mst_persons.findOne({
+        where: {
+          ...(selfRow?.person_id ? { id: { [Op.ne]: selfRow.person_id } } : {}),
+          [Op.and]: [seq.where(seq.fn('lower', seq.col('display_name')), needle)],
+        },
+        attributes: ['display_name'],
+      })
+      if (person) return person.display_name
+    }
+  } catch { /* best-effort — the confirm gate is the real guard */ }
+  return null
+}
+
+/**
+ * Is `name` plausibly a name rather than a fragment of a sentence? PURE.
+ * @returns {{ok:true} | {ok:false, why:string}}
+ */
+export function looksLikeAName(name) {
+  const s = String(name || '').trim()
+  if (!s) return { ok: false, why: 'it is empty' }
+  if (NOT_IN_A_NAME.test(s)) return { ok: false, why: 'it contains sentence punctuation, so it reads as a phrase rather than a name' }
+  const words = s.split(/\s+/)
+  // 5 is generous — it admits "María José de la Cruz" and rejects a sentence.
+  if (words.length > 5) return { ok: false, why: `it is ${words.length} words long, which is a phrase rather than a name` }
+  const last = words[words.length - 1].toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, '')
+  if (CANNOT_END_A_NAME.has(last)) return { ok: false, why: `it ends with "${last}", which opens or joins a phrase and cannot end a name` }
+  const marker = THAI_CLAUSE_MARKERS.find((m) => s.includes(m))
+  if (marker) return { ok: false, why: `it contains "${marker}", which makes it a clause rather than a name` }
+  return { ok: true }
+}
+
 // ── CONSENT LEDGER for the two-phase rename ──────────────────────────────────────────────────────
 // Rename proposals awaiting the user's answer, keyed by user id.
 //
@@ -188,6 +283,15 @@ export async function setDisplayName(fastify, user = {}, rawName, { confirm = fa
   if (name.length > MAX_NAME) {
     return { ok: false, reason: 'name_too_long', message: `Display name must be ${MAX_NAME} characters or fewer.` }
   }
+  // ── FIX 2 · SHAPE. See `looksLikeAName` for the three instances that made this necessary. ────────
+  const shape = looksLikeAName(name)
+  if (!shape.ok) {
+    return {
+      ok: false,
+      reason: 'not_name_shaped',
+      message: `"${name}" does not look like a name — ${shape.why}. If they really are called that, say so and it can be set; otherwise you have probably picked up a phrase from the conversation rather than a name.`,
+    }
+  }
   if (user?.isRoot || user?.id == null) {
     return {
       ok: false,
@@ -211,6 +315,25 @@ export async function setDisplayName(fastify, user = {}, rawName, { confirm = fa
   // gate lives HERE, in the service: the FIRST call (confirm falsy) never writes — it returns
   // needs_confirmation so the model asks the user; only a follow-up call with confirm:true applies it.
   if (!confirm) {
+    // ── FIX 1 · SUBJECT, as far as the SERVICE can honestly check it ───────────────────────────────
+    // ⚠️⚠️ AND THE LIMIT IS WORTH STATING RATHER THAN PAPERING OVER. Instance 3 was Hermes writing
+    // *"แก้ชื่อโอเต้ด้วยนะ… ชื่อเจ้าของแชทนี้"* — *"correct OTE's name… the name of this chat's owner"* —
+    // naming a third party twice, explicitly. **This service never sees that sentence.** It receives a
+    // string. So a reliable subject check CANNOT live here: the subject is in the prose, and inferring
+    // from prose is exactly what this project refuses to do.
+    //
+    // ⇒ What IS computable is whether the proposed name is ALREADY ATTESTED AS SOMEONE ELSE'S. That
+    // catches a real class ("set my name to Ote" from Hermes's room) and it would NOT have caught
+    // instance 3, whose Thai spelling was not on any other row at the time. The honest remedy for
+    // instance 3 is the CARD below, which stops the question being asked with a false premise.
+    const claimed = await nameBelongsToSomeoneElse(fastify, user.id, name)
+    if (claimed) {
+      return {
+        ok: false,
+        reason: 'name_belongs_to_another_person',
+        message: `"${name}" is already on file as someone else's name, so this would rename THIS account to another person's name. If they were telling you about ${claimed}'s name rather than their own, do not set it here — a name you learn about a third party is not this account's display name.`,
+      }
+    }
     // remember WHEN and in WHICH turn this was proposed — the confirm below is checked against it
     if (turnId) rememberProposal(String(user.id), { name, turnId, at: Date.now() })
     return {
@@ -218,7 +341,34 @@ export async function setDisplayName(fastify, user = {}, rawName, { confirm = fa
       needs_confirmation: true,
       proposed: name,
       current: row.display_name ?? null,
-      message: `Not changed yet. First ASK THE USER (ask_user, or plain text) and wait for their answer — then, only if they said yes, call set_display_name again with { "name": "${name}", "confirm": true }. Confirming in this same reply will be refused: your own confirmation is not the user's.`,
+      // ── ⭐⭐ FIX 3 · THE CARD IS BUILT HERE, NOT BY HER ────────────────────────────────────────
+      // The card she raised for instance 3 said *"You've just given your name as 'โอเต้'"* — which he had
+      // not — and offered exactly two options, **both wrong**. ⛔ A structured card with a false premise is
+      // worse than no card, because the entire value of the mechanism is that it is trustworthy.
+      //
+      // ⭐ The premise is now a QUESTION rather than an assertion, and there is a THIRD option that names
+      // the actual failure. That matters more than it looks: the subject cannot be checked in code (see
+      // above), so the human has to be able to correct it — and they can only correct what they are
+      // offered. Her judgement is not the authority here; the answer is.
+      //
+      // ⚠️ Still a template the model passes on, not a host-raised interaction, so it is a MITIGATION and
+      // not the host-generated card that D-4/D-5 ratifies. Recorded as such.
+      ask: {
+        header: 'Display name',
+        // ⚠️ The question comes LAST. First draft put the current-name statement after it, so the prompt
+        // ended on a full stop — and a card that trails off into a statement is the same kind of small
+        // wrongness as asserting the premise. End on the question mark.
+        question: row.display_name
+          ? `I currently have you as "${row.display_name}". Did you mean that YOUR name is "${name}"?`
+          : `Did you mean that YOUR name is "${name}"?`,
+        options: [
+          { label: `Yes — call me "${name}"`, description: 'Set it as my display name from now on.' },
+          ...(row.display_name ? [{ label: `No — keep "${row.display_name}"`, description: 'Leave my display name unchanged.' }] : []),
+          { label: 'No — that is someone else\'s name', description: 'I was telling you about another person, not renaming myself.' },
+        ],
+        allowCustom: true,
+      },
+      message: `Not changed yet. ASK THE USER using the \`ask\` object above EXACTLY as given — do not rewrite the question and do not drop the "someone else's name" option; you may have picked up a name they were telling you ABOUT rather than their own. Then, only if they chose to set it, call set_display_name again with { "name": "${name}", "confirm": true }. Confirming in this same reply will be refused: your own confirmation is not the user's.`,
     }
   }
   // CONSENT CHECK — narrow on purpose. It rejects exactly one thing: a confirm arriving in the SAME turn
