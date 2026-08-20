@@ -225,7 +225,7 @@ async function runToolAction(fastify, row) {
       isRoot: isRootConnectedUser(fastify.config, row.user_id),
       capabilities: [],
     },
-  }, { timezone })
+  }, { timezone, origin: 'schedule' })
   const result = await runTool(toolId, args || {}, ctx)
   // runTool reports failures as { error } instead of throwing — surface them as run failures
   if (result && typeof result === 'object' && result.error) {

@@ -10,7 +10,7 @@ import { adapters, effectiveProvidersFor } from '../../adapters/index.js'
 import { capsOf, inferCapsFromName } from '../../adapters/model-caps.js'
 import { capsForModel, capsVerdictForModel, mergeCapVerdict, SPECIALIST_CAPS } from '../../adapters/capabilities.js'
 import { extractFile, MAX_FILES } from '../../files/extract.js'
-import { toolDefinitions, runTool, buildToolContext, resolveSkill, listSkills, memoryToolNames, attachLogger } from '../../components/runtime.js'
+import { toolDefinitions, runTool, buildToolContext, resolveSkill, listSkills, memoryToolNames, attachLogger, attachToolAudit } from '../../components/runtime.js'
 import { readSkillFile } from '../../components/skill-store.js'
 import { ownerIdOf, ownedBy } from '../../auth/owner.js'
 import { buildMemoryV2 } from '../../components/memory-v2-host.js'
@@ -29,6 +29,7 @@ import { makeEmbedder } from '../../components/memory-embed-host.js'
 import { readOwnStance, renderOwnStance } from '../../components/relational-knowledge.js'
 import { initOwnMemory } from '../../components/own-memory-host.js'
 import { initIntention, readOpenIntention, renderOpenIntention } from '../../components/intention-host.js'
+import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 import { createSteerRegistry } from '../../chat/steer-registry.js'
@@ -2028,7 +2029,7 @@ export default async function chatSiteRoutes(fastify) {
       reasoningEnabled: settings.reasoning?.enabled === true,
       capabilities: capGate.caps ?? null,
     }
-    const toolCtx = buildToolContext(fastify, request, { model: modelId, timezone: userTz, conversationId: convo.id, interactive: interactiveTurn, messageId: lastUserMsg?.id ?? null, turn: turnShape })
+    const toolCtx = buildToolContext(fastify, request, { origin: 'chat', model: modelId, timezone: userTz, conversationId: convo.id, interactive: interactiveTurn, messageId: lastUserMsg?.id ?? null, turn: turnShape })
     const maxRounds = getSetting(fastify.config, 'chat.toolsMaxCalls') ?? 8
 
     // ---- token-budget guard (visible, never silent) ----
@@ -3212,6 +3213,8 @@ export default async function chatSiteRoutes(fastify) {
   initConversationSearch() // `conversationSearch` host service (Conversation Search, step 4 CS1)
   initOwnMemory() // `ownMemory` host service — what SHE has stored about herself (recall_own_memory)
   initIntention() // `intention` host service — what she is TRYING TO ACCOMPLISH with this person (A1)
+  // Tool-call audit: the EventBus already emitted every call; nothing kept them. See audit/tool-log.js.
+  initToolLog(fastify, attachToolAudit)
   initReflection() // `reflection` host service (L3 Persona Notes; the Reflection Host Adapter, step 5 R1)
   initWorkingMemory() // `workingMemory` host service (L4 active session state; the update_working_memory tool, step 6 WM2)
   // Recover turns the server was killed mid-generation on — a conversation ending in an

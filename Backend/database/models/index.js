@@ -64,6 +64,11 @@ import define_log_memory_changes from "./log_memory_changes.model.js";
 //   · txn_intentions           (app/components/intention-host.js) — same reason: the guarantees are
 //                               "these columns do not exist" and "one open row per person", both of
 //                               which live in the DDL, not in a model
+//   · log_tool_calls           (app/audit/tool-log.js) — one INSERT, one reader. ⚠️ And deliberately NO
+//                               model after 2026-08-20: `mst_persons.model.js` omits `schema:
+//                               schemas.project`, so `sync()` created an EMPTY `public.mst_persons` and
+//                               the ORM has been reading that instead of the real table. A model is a
+//                               liability for a table whose writer does not need one.
 // ⚠️ A wrong table name in raw SQL fails SOFT — the dense search arm simply returns no evidence — so
 // each one needs a check that touches the REAL table. `checks/thai-dense-retrieval-check.mjs`,
 // `checks/relational-records-check.mjs` and `checks/intention-lifecycle-check.mjs` are those checks.

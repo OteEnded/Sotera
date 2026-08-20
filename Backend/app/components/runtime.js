@@ -39,9 +39,19 @@ export { resolverRegistry }
 
 // Subscribe to the spine (proves host-side pub/sub; future Features/Tasks subscribe here too).
 let logger = null
+// ⭐ The audit sink. It is a LATE-BOUND FUNCTION rather than an import because this module top-level
+// awaits its component install — importing the audit (which needs the db) would risk a cycle through
+// boot. `app/audit/tool-log.js` attaches itself here at boot instead.
+// ⚠️ Until 2026-08-20 this subscriber wrote a debug line and DISCARDED `e.caller`, so "which account
+// called remember_fact" was unanswerable even though the event carried the answer the whole time.
+let toolAudit = null
+export function attachToolAudit(sink) { toolAudit = typeof sink === 'function' ? sink : null }
+
 runtime.events.on('tool.executed', (e) => {
   const status = e.ok ? 'ok' : `error: ${e.error}`
   logger?.debug?.(`[tool.executed] ${e.name} (${e.durationMs}ms) ${status}`)
+  // An audit failure must never reach the turn that produced the event.
+  try { toolAudit?.(e) } catch { /* the sink logs its own failures */ }
 })
 // Skill runs trace the same way tool runs do (both narrate on the EventBus spine).
 runtime.events.on('skill.used', (e) => {
@@ -142,13 +152,53 @@ export function buildToolContext(fastify, request, extras = {}) {
     currentModel: extras.model ?? null,
     turn: extras.turn ?? {}, // placement / window / tools / memory / reasoning / caps for THIS turn
   })
-  return createRuntimeContext({
+  const ctx = createRuntimeContext({
     services,
     events: runtime.events,
     logger,
-    caller: { userId, capabilities: request.user?.capabilities ?? [], timezone: extras.timezone ?? null },
+    // ⭐ THE CALLER IS THE AUDIT RECORD. Every field below rides through the EventBus on
+    // `tool.executed { caller }` and lands in `log_tool_calls`.
+    //   · `origin` is set by the CALL SITE ('chat' / 'schedule') and defaults to null — an emitter that
+    //     did not say records unknown, because the plausible guess ('chat') is exactly wrong for a
+    //     scheduled run.
+    //   · `isRoot` is READ from the authenticated user, never derived from a null id. That inference is
+    //     this codebase's most-repeated defect (nine sites, one of which turned a missing owner into a
+    //     privilege grant) and an audit trail must not reproduce it.
+    //   · `username` is an attribution snapshot, so a deleted account degrades the record rather than
+    //     orphaning it — the same split `ownerIdOrNull` makes between attribution and ownership.
+    caller: {
+      userId,
+      username: request.user?.username ?? null,
+      isRoot: request.user?.isRoot === true,
+      capabilities: request.user?.capabilities ?? [],
+      timezone: extras.timezone ?? null,
+      origin: extras.origin ?? null,
+      conversationId: extras.conversationId ?? null,
+    },
     config: fastify.config,
   })
+  // ⚠️⚠️ RE-ATTACHED AFTER CONSTRUCTION, AND THIS IS NOT A STYLE CHOICE.
+  // `createRuntimeContext` rebuilds `caller` from a THREE-FIELD ALLOWLIST — `userId`, `capabilities`,
+  // `timezone` — so `username`, `isRoot`, `origin` and `conversationId` were **silently dropped** and the
+  // first audit rows landed with three null columns. Measured, not guessed: attribution appeared,
+  // origin/conversation/username did not.
+  //
+  // This is the FIFTH instance of the family `context-authority.js` warns about in its own header —
+  // *"three times in this arc an explicit field list has silently dropped a field added later"* — now
+  // inside the SDK. Mutating the returned object is safe (it is a plain object, not frozen) and the
+  // EventBus carries the SAME object reference, so both the SDK's `runTool` emit and the route's four
+  // hand-emitted host tools see these fields.
+  //
+  // ⛔ The better fix is in the SDK, and it is deliberately NOT made here: `OteAIComponentSDK` is a
+  // shared `file:` dependency and OteLLMServices resolves the same directory, so widening its caller
+  // contract is a cross-project change and Ote's call.
+  Object.assign(ctx.caller, {
+    username: request.user?.username ?? null,
+    isRoot: request.user?.isRoot === true,
+    origin: extras.origin ?? null,
+    conversationId: extras.conversationId ?? null,
+  })
+  return ctx
 }
 
 /** OpenAI-style tool defs (drop-in replacement for the old tools registry export). */
