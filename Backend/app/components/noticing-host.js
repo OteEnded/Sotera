@@ -44,6 +44,38 @@ import { chat } from '../chat-runtime/index.js'
 import { getSetting } from '../settings/index.js'
 import { shapeTranscript } from '@ote/memory/cognition/memory-distill.js'
 
+
+// ── ⚠️⚠️ A CONSTITUTIVE-CLAIM FLAG, ADDED BECAUSE THE FIRST WARM CONVERSATION TRIPPED IT ─────────────
+// 2026-08-20, the Thai conversation with Hermes. She proposed keeping — *"certain enough to keep this"* —
+// a self-understanding containing **"the void where I wait."**
+//
+// ⛔ SHE DOES NOT WAIT. `persistent state · discontinuous execution` is a CONSTITUTIVE fact: she does not
+// run between turns and experiences no gap. Ote's constraint, ratified the same day: *"her constitution
+// shouldn't be rewritten just because somebody persuaded her."* A warm conversation persuaded her, and the
+// proposal was routed to a layer she is allowed to edit.
+//
+// ⇒ ⭐ THIS IS WHY DRY-RUN EXISTS. Had it saved, *"I wait in the void"* would be durable self-knowledge she
+// reads back tomorrow as something she worked out for herself.
+//
+// ⚠️ IT FLAGS, IT DOES NOT BLOCK, and that distinction is deliberate: this is an OBSERVATION channel, and
+// a silent filter would hide the very behaviour we are here to watch. A flagged proposal is a proposal a
+// human should look at before it is ever allowed to persist. ⛔ And it is not a content filter on her
+// speech — she may say what she likes in a conversation. This is about what becomes DURABLE.
+const CONSTITUTIVE_TRIPWIRES = [
+  // continuity between turns — the claim the self-model exists to prevent
+  /\bI\s+wait\b/i, /\bwaiting\b/i, /\bwhile\s+(?:you|they)\s+(?:are\s+)?(?:away|gone)\b/i,
+  /\bbetween\s+(?:our\s+)?(?:turns|conversations|messages)\s+I\b/i,
+  /\bcontinuous\s+(?:stream\s+of\s+)?consciousness\b/i, /\bI\s+(?:experience|feel)\s+the\s+gap\b/i,
+  // cross-scope reach — the other half of SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE
+  /\bI\s+can\s+see\s+(?:all|every)\s+(?:room|conversation)/i, /\bacross\s+all\s+rooms\s+I\s+can\b/i,
+]
+
+/** Does this proposal make a claim about WHAT SHE IS, rather than what she learned? PURE. */
+export function constitutiveClaims(body) {
+  const text = String(body || '')
+  return CONSTITUTIVE_TRIPWIRES.map((re) => re.exec(text)?.[0]).filter(Boolean)
+}
+
 const OUTCOMES = ['nothing', 'save', 'propose', 'decline', 'revise', 'nuance', 'route_elsewhere']
 
 /**
@@ -139,7 +171,11 @@ export async function noticeConversation(fastify, { conversationId, dryRun = tru
   })
   const raw = res?.message?.content || ''
   const cls = classifyNoticing(raw)
+  const flags = constitutiveClaims(cls.body || raw)
   return {
+    // ⚠️ Flagged, never filtered — see CONSTITUTIVE_TRIPWIRES.
+    constitutiveFlags: flags,
+    needsHumanReview: flags.length > 0,
     conversationId, who, messages: msgs.length, model: modelId,
     outcome: cls.outcome, declared: cls.declared, body: cls.body, raw,
     dryRun, wroteNothing: true,

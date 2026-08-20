@@ -6,6 +6,7 @@ import { consolidateAll } from '../components/memory-consolidate-host.js'
 import { distillAll } from '../components/memory-distill-host.js'
 import { drainPendingEmbeddings } from '../components/conversation-search.js'
 import { reflectAll, reflectMode } from '../components/reflection-host.js'
+import { noticeAll } from '../components/noticing-pass.js'
 import { runHealthSuite } from '../maintenance/health-suite.js'
 import { decayWorkingMemory } from '../components/working-memory-host.js'
 
@@ -147,6 +148,32 @@ export default fp(async function (fastify, opts) {
         await log(`[message-embed] (fresh) error: ${e.message}`, import.meta.url)
       }
     }, { isLog: true })
+
+    // ── ⭐ EVERY 15 MINUTES · THE NOTICING PASS, DRY-RUN ONLY ────────────────────────────────────────
+    // Ote: *"wire it to live conversations, dry-run only… I want the sample to grow from Sotera herself
+    // rather than from us predicting her structure."*
+    //
+    // ⛔ IT WRITES NO MEMORY. Proposals append to `test/results/noticing-proposals.jsonl` for review, and
+    // the schema is decided AFTER reading the population, not before.
+    // ⛔ AND IT IS NOT A QUOTA. `nothing` is a successful outcome; nothing here reports a hit rate,
+    // because a rate is a quota with a nicer name.
+    //
+    // ⚠️ DEFAULTS OFF (`memory.noticingEnabled`). It makes one aux LLM call per changed conversation, and
+    // a pass that starts itself on every deployment is a cost decision nobody made. 15 minutes, not 5:
+    // this is a generative call, unlike the embed drain above.
+    if (fastify.config?.memory?.noticingEnabled === true) {
+      cronManager.createJob('noticing', '0 */15 * * * *', async () => {
+        try {
+          const t = await noticeAll(fastify, { maxConvos: 5 })
+          // Log only when it actually asked — a per-tick line at this rate buries every other signal.
+          if (!t.skipped && t.asked) {
+            await log(`[noticing] asked=${t.asked} outcomes=${JSON.stringify(t.byOutcome)} flagged=${t.flagged}`, import.meta.url)
+          }
+        } catch (e) {
+          await log(`[noticing] error: ${e.message}`, import.meta.url)
+        }
+      }, { isLog: true })
+    }
 
     // ── 03:00 · THE HEALTH SUITE ────────────────────────────────────────────────────────────────────
     // OLS is FEATURE-FROZEN (2026-08-08) but still serving, and Sotera calls it as one of several API
