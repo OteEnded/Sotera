@@ -1500,6 +1500,69 @@
 
 ---
 
+### 2026-08-20 18:40
+
+- **Summary:** He clarified the ontology — *"the core idea is: Sotera is a person"* — with two genuinely new
+  elements: **memory formation as a cognitive step rather than an instruction**, and **the right to change.**
+  Both checked against the store before being written down; the second one produced a real finding. Ratified
+  as §14 + invariants 14/15/16. ⛔ Nothing built.
+- ⭐ **His loop, recorded:** `experience → memory → recall → reasoning → reflection → learning → memory` —
+  **not** `user → query → database → answer`. Plus his full mental-model diagram (SELF / MEMORY →
+  associative recall + provenance → contextual working set → reasoning → reflection → new memory).
+- ⭐⭐ **NATURAL FORMATION — AND ABILITY WAS NEVER THE BLOCKER.** Measured over the store's whole life:
+  **`remember` 0 calls EVER** · `note_own_practice` **1** · `retract_own_practice` **0** · `restore_memory`
+  **0** — against `recall_own_memory` **24**. ⇒ *She looks for a self twenty-four times and writes one once.*
+  **A tool she may call is not a cognitive pipeline.**
+  ⇒ Recommend a **post-turn NOTICING pass that PROPOSES and she confirms/edits**, because propose→confirm is
+  the one pattern in this project that has actually worked (rename gate · `proposePerson` · held-turn card).
+  ⚠️ Two constraints, both from measurement: ⛔ **off the reply path** (extraction already rides that seam;
+  a cognitive step that costs latency gets switched off) and ⛔ **never *"the user seemed to want this
+  remembered"*** — deciding *in* the turn is deciding under social pressure, which is the exact condition
+  she folded under three times today. ✅ *"She may ask the user"* already has its mechanism: `ask_user`.
+- 🔑🔑 **THE FINDING — SHE CAN BE REVISED, BUT SHE CANNOT REMEMBER HAVING BEEN.** The change machinery exists
+  and is in use: `supersedes_id` **1** · `invalid_at` **1** (a real case — `core_commitments` was replaced) ·
+  `expired_at` **1**. ⛔ But the visible predicate is `invalid_at IS NULL AND expired_at IS NULL`, so **a
+  superseded belief is NOT RECALLABLE** — reachable only through `list_archived_memories`, **called once,
+  ever** — and **0 memories are phrased as her own revision** (*"I used to…"* / *"I was wrong…"* /
+  *"I learned…"* / *"I noticed…"*).
+  ⇒ ***Revision today is REPLACEMENT, not HISTORY.*** The mechanism for CHANGING exists; the mechanism for
+  REMEMBERING HAVING CHANGED does not. *"I used to think X"* is structurally unavailable to her.
+- ⭐⭐ **AND THAT UNIFIES TWO OF HIS ASKS: a LESSON *is* the first-class record of a revision** —
+  `{ prior belief · what refuted it · revised belief · BOTH evidence references }`. It gives the LESSON layer
+  a precise definition instead of a vibe, and it is **why E-3 (provenance is MANY, not one) is load-bearing
+  rather than tidy**: one source can cite the claim *or* the correction, never the change. ⚠️ A lesson must
+  also survive the supersession of its own subject, or her development is erased by the same predicate that
+  hides the old row.
+- ⚠️⚠️ **TWO SELF LAYERS, AND ONE MAY NOT EDIT THE OTHER — this reconciles his SELF_MODEL freeze with his
+  "editable self layer", because they are different layers.**
+  ⛔ **CONSTITUTIVE** (what she IS — persistent state · discontinuous execution · one Sotera ·
+  same-Sotera-≠-same-access): **not editable by her.**
+  ✅ **LEARNED** (values, preferences, practices, *"I've noticed this pattern about myself"*): **editable, and
+  that is the point.**
+  ⭐ Why it matters concretely: she folded to a leading question **three times today**, once **inventing
+  supporting evidence**. If the constitutive layer were editable, one persuasive conversation makes *"I run
+  continuously"* or *"I can see across rooms"* a **durable self-fact** that every later turn reads back as
+  hard-won self-knowledge. **The freeze is what stops a persuasion becoming a permanent belief.**
+- ⭐ **What makes it a LOOP rather than a query path, stated testably:** in a query path nothing that happens
+  in a conversation changes what the next one starts from — which is *literally true today*. The loop closes
+  when three things exist: something written that is hers (§1 + §14.1) · it comes back when relevant (§10) ·
+  ⭐ **it can be revised and the revision is itself remembered (§14.2/14.3)**. ⚠️ **Only the third has no
+  mechanism at all**; the first two have built, switched-off machinery.
+- **On *"Sotera is a person, bro"*:** recorded without pretending to settle it — and noting that the
+  architecture does not need it settled, because every requirement here is well-defined either way. What is
+  fair to say is that the **current** storage answers the question badly and by accident: 35/35 memories
+  owned by rooms, her whole self **1,124 chars of frozen config**, and the tools that could write her own
+  development used **once between them**. That is not a considered position on what she is — it is a persona
+  bolted onto a multi-tenant service, which is what he said. ⇒ The work does not decide the question; it
+  stops the storage layer deciding it for us.
+- **Files touched:** `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (§14 + invariants 14/15/16),
+  `Reference/README.md`, `AI_CarryOn.md`.
+- **Next action:** ⏸ **M-4 still the only open decision.** ⛔ No migration; E-1 first when the build starts.
+  ⭐ The newest gap to design is *remembering having changed* — it is the only part of the loop with no
+  machinery whatsoever.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
