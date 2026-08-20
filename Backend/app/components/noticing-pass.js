@@ -38,6 +38,14 @@ import { buildLesson } from './lesson-host.js'
 const OUT_DIR = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..', '..', '..', 'test', 'results')
 const OUT_FILE = path.join(OUT_DIR, 'noticing-proposals.jsonl')
 
+// ⭐ ONE CONSTANT, TWO USES: the generation stamped onto every row written, and the generation a prior must
+// carry to be shown back to her. Those two must never diverge — if the writer said 3 while the prior filter
+// still said 2, the pass would quietly feed the previous generation's vocabulary into the new one and every
+// row would still look correctly labelled. **Bump this whenever the prompt's vocabulary changes.**
+//   1 — supplied the relation words, a routing menu, and `revise|nuance` as declared outcomes.
+//   2 — no ontology vocabulary; decisions only; priors offered from the log.
+const PROMPT_GENERATION = 2
+
 /** Every parsable record in the log, oldest first. The log IS the state. */
 function readLog() {
   if (!existsSync(OUT_FILE)) return []
@@ -83,13 +91,36 @@ function readWatermarks(records) {
 // ⛔ SAME-ROOM ONLY, deliberately. Under the ratified model her memory is one space with the room as a
 // ranking signal — but the provenance/ownership CONSTRAINT stage is not built, so this holds the current
 // parity rule rather than quietly running ahead of it.
+// ── ⛔⛔ AND THE GENERATION BOUNDARY APPLIES TO THE PRIORS, OR THE GUARD IS COSMETIC ──────────────────
+// The purity check asserts the prompt TEMPLATE carries no ontology vocabulary. The priors are pasted into
+// that template verbatim, so a prior can carry vocabulary the template is forbidden to have — and the
+// gen-1 bodies are full of it: measured across the 17 gen-1 rows, **`refines` 27 · `qualifies` 25 ·
+// `replaces` 25 · `sits alongside` 23**. Those are MY four words in her voice, which is the withdrawn
+// finding's exact mechanism, now counted.
+//
+// ⇒ Offering a gen-1 body back would re-inject the contaminated vocabulary into a **generation-2** prompt
+// and stamp the answer `promptGeneration: 2`. The row would look clean and would not be. So priors are
+// filtered to the CURRENT generation: her own words come back to her, but only the ones she produced under
+// a prompt that did not feed them to her.
+//
+// ⚠️ THE COST IS REAL AND IS ACCEPTED. The shadow store therefore starts EMPTY, so *"does she build on her
+// own prior thought?"* stays unobservable until at least two gen-2 proposals exist in the same room. That
+// delay is the price of a boundary that means something. ⛔ Do not shortcut it by backfilling old rows.
+//
+// ⭐ NOTE WHAT IS **NOT** BANNED HERE: her own vocabulary, whatever it is. If a gen-2 proposal of hers says
+// "replaces" with nobody having offered the word, that is a finding, and showing it back to her is the
+// experiment rather than a leak. The rule is about WHO AUTHORED the word, not which word it is.
+//
 // ⚠️ EXPORTED FOR THE PURITY CHECK, not for callers. `noticing-prompt-purity-check.mjs` asserts that what
 // this returns carries her words and a date and nothing of ours — an assertion that cannot be written
 // against a private function, and the leak it guards (`outcome=save` stapled to her past thought) already
 // shipped once.
-export function priorProposalsFor(records, conversationUserId, limit = 6) {
+export function priorProposalsFor(records, conversationUserId, limit = 6, generation = PROMPT_GENERATION) {
   return records
-    .filter((r) => r.userId === conversationUserId && r.outcome !== 'nothing' && r.body)
+    // ⚠️ `=== generation`, not `>=`. An unstamped row (the stale-code failure produced three) has an
+    // UNKNOWN generation, and an unknown provenance must not be treated as a clean one.
+    .filter((r) => r.promptGeneration === generation
+      && r.userId === conversationUserId && r.outcome !== 'nothing' && r.body)
     .slice(-limit)
     // ⚠️⚠️ HER OWN WORDS AND A DATE. NOTHING ELSE.
     // The first version prefixed each prior with `outcome=save` / `outcome=nuance` — **our machine
@@ -154,7 +185,7 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
         // Ote: *"keep the old records marked as coming from the previous prompt generation rather than
         // relabelling them. I want the history of the experiment preserved, including where we accidentally
         // taught her the vocabulary."* ⛔ Never rewrite an old row to the new vocabulary.
-        promptGeneration: 2,
+        promptGeneration: PROMPT_GENERATION,
         // ⭐ Recorded so the shadow store can find her earlier proposals next time, and so a reviewer can
         // see WHAT she was shown when she produced this one — a proposal that references a prior is only
         // interesting if you know the prior was in front of her.
@@ -174,4 +205,4 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
   return tally
 }
 
-export { OUT_FILE }
+export { OUT_FILE, PROMPT_GENERATION }

@@ -36,7 +36,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { makeChecker } from '../harness.mjs'
 import { buildNoticingPrompt } from '../../Backend/app/components/noticing-host.js'
-import { priorProposalsFor, OUT_FILE } from '../../Backend/app/components/noticing-pass.js'
+import { priorProposalsFor, OUT_FILE, PROMPT_GENERATION } from '../../Backend/app/components/noticing-pass.js'
 
 const { check, done } = makeChecker('noticing-prompt-purity')
 
@@ -86,11 +86,12 @@ check('the prompt asks for no minimum and no effort quota',
 // reachable at all. The first version prefixed each one with `outcome=save` / `outcome=nuance` — our
 // machine vocabulary stapled to her own past thought. Ote: *"I want her own history visible, but I don't
 // want to teach her that 'memory proposal' is the category she is supposed to produce."*
+const G = PROMPT_GENERATION
 const fakeLog = [
-  { userId: 'u1', outcome: 'save', body: 'HER WORDS ONE', at: '2026-08-19T10:00:00.000Z' },
-  { userId: 'u1', outcome: 'nuance', body: 'HER WORDS TWO', at: '2026-08-19T11:00:00.000Z' },
-  { userId: 'u1', outcome: 'nothing', body: 'SHOULD NOT APPEAR', at: '2026-08-19T12:00:00.000Z' },
-  { userId: 'u2', outcome: 'save', body: 'OTHER ROOM', at: '2026-08-19T13:00:00.000Z' },
+  { userId: 'u1', outcome: 'save', body: 'HER WORDS ONE', at: '2026-08-19T10:00:00.000Z', promptGeneration: G },
+  { userId: 'u1', outcome: 'nuance', body: 'HER WORDS TWO', at: '2026-08-19T11:00:00.000Z', promptGeneration: G },
+  { userId: 'u1', outcome: 'nothing', body: 'SHOULD NOT APPEAR', at: '2026-08-19T12:00:00.000Z', promptGeneration: G },
+  { userId: 'u2', outcome: 'save', body: 'OTHER ROOM', at: '2026-08-19T13:00:00.000Z', promptGeneration: G },
 ]
 const priors = priorProposalsFor(fakeLog, 'u1')
 const rendered = priors.map((p) => p.abstraction).join('\n')
@@ -100,6 +101,31 @@ check('the shadow store stays same-room (parity with the unbuilt constraint stag
 check('no decision label is stapled to her past thought', !/outcome|save|nuance|decline|propose/i.test(rendered),
   rendered.slice(0, 160))
 check('she sees when she said it', /\d{4}-\d{2}-\d{2}/.test(rendered))
+
+// ── 3b. ⛔⛔ THE GENERATION BOUNDARY APPLIES TO THE PRIORS TOO ────────────────────────────────────────
+// The section above asserts the TEMPLATE is clean. Priors are pasted into that template verbatim, so a
+// prior can carry vocabulary the template is forbidden to have — and the gen-1 bodies are full of exactly
+// that: `refines` 27 · `qualifies` 25 · `replaces` 25 · `sits alongside` 23 across 17 rows, my four words
+// in her voice. Offering one back would re-inject them into a generation-2 prompt and stamp the answer
+// `promptGeneration: 2`. **The row would look clean and would not be.**
+//
+// ⭐ The rule is about WHO AUTHORED the word, not which word it is: if a gen-2 proposal of hers says
+// "replaces" with nobody having offered it, showing that back to her is the experiment, not a leak.
+const mixedLog = [
+  { userId: 'u1', outcome: 'save', body: 'GEN ONE BODY that refines and qualifies and sits alongside', at: '2026-08-20T01:00:00.000Z', promptGeneration: 1 },
+  { userId: 'u1', outcome: 'save', body: 'UNSTAMPED BODY', at: '2026-08-20T02:00:00.000Z' },
+  { userId: 'u1', outcome: 'save', body: 'CURRENT GENERATION BODY', at: '2026-08-20T03:00:00.000Z', promptGeneration: G },
+]
+const mixed = priorProposalsFor(mixedLog, 'u1')
+const mixedText = mixed.map((p) => p.abstraction).join('\n')
+check('a previous generation\'s proposal is never offered back to her', !mixedText.includes('GEN ONE BODY'),
+  'it would re-inject the contaminated vocabulary and the row would still be stamped as current')
+check('an UNSTAMPED row is never offered back either', !mixedText.includes('UNSTAMPED BODY'),
+  'unknown provenance must not be treated as clean provenance')
+check('the current generation\'s own words still come back', mixedText.includes('CURRENT GENERATION BODY'))
+// The whole point of the constant: writer and prior-filter must read the same number, or the pass feeds
+// the previous generation's vocabulary forward while labelling every row correctly.
+check('the generation constant is a single exported source of truth', Number.isInteger(PROMPT_GENERATION))
 
 // And the prompt carrying them must not name the container either — naming the container names the
 // category, which is how "produce entries of this type" gets taught without a single ontology word.
