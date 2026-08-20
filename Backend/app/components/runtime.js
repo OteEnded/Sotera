@@ -132,7 +132,10 @@ export function buildToolContext(fastify, request, extras = {}) {
   const userId = request.user?.id ?? null
   const services = {
     ...runtime.defaultServices, // component-provided defaults
-    'memory.v2': buildMemoryToolService(fastify, { userId, sourceMessageId: extras.messageId ?? null, self: { username: request.user?.username, displayName: request.user?.displayName } }), // v2 via the OBSERVATION PIPELINE (Phase 5.5: the model's remember_fact is typed+routed like any other observer, so identity converges on the IdentityResolver); provenance-bound to this turn's source message; `self` lets the store canonicalize the fact owner
+    // ⭐ `author` comes from `extras.memoryAuthor` and defaults to 'account' — see buildMemoryV2:
+    // authorship follows the OCCASION, not the tool. An ordinary chat turn leaves it unset (the human is
+    // speaking); the reflection pass declares 'persona' (she is deciding). ⛔ Never inferred here.
+    'memory.v2': buildMemoryToolService(fastify, { userId, sourceMessageId: extras.messageId ?? null, author: extras.memoryAuthor === 'persona' ? 'persona' : 'account', self: { username: request.user?.username, displayName: request.user?.displayName } }), // v2 via the OBSERVATION PIPELINE (Phase 5.5: the model's remember_fact is typed+routed like any other observer, so identity converges on the IdentityResolver); provenance-bound to this turn's source message; `self` lets the store canonicalize the fact owner
     search: searchServiceFromConfig(fastify.config),
   }
   // Late-bound host services (see registerHostService above) — built per request, bound

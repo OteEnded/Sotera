@@ -7,6 +7,8 @@ import { distillAll } from '../components/memory-distill-host.js'
 import { drainPendingEmbeddings } from '../components/conversation-search.js'
 import { reflectAll, reflectMode } from '../components/reflection-host.js'
 import { noticeAll, PROMPT_GENERATION, PRIORS_OFFERED } from '../components/noticing-pass.js'
+import { reflectAllQuiet } from '../components/reflection-lifecycle-host.js'
+import { REFLECTION_GENERATION } from '../components/reflection-lifecycle.js'
 import { runHealthSuite } from '../maintenance/health-suite.js'
 import { decayWorkingMemory } from '../components/working-memory-host.js'
 
@@ -185,6 +187,44 @@ export default fp(async function (fastify, opts) {
           }
         } catch (e) {
           await log(`[noticing] error: ${e.message}`, import.meta.url)
+        }
+      }, { isLog: true })
+    }
+
+    // ── ⭐⭐ EVERY 20 MINUTES · THE REFLECTION LIFECYCLE ─────────────────────────────────────────────
+    // Ote, ratifying the phase: *"conversation → reflection opportunity → Sotera decides whether anything
+    // matters → if yes, decide what to retain and why → save through the normal memory system."* And the
+    // reason it exists: *"I don't want Sotera's memory architecture to accidentally become 'whatever
+    // happens to be captured during a turn.'"*
+    //
+    // ⛔⛔ THIS IS NOT THE NOTICING JOB ABOVE, and it must not be folded into it. Noticing is a DRY-RUN
+    // observation channel with no tools that writes a JSONL; reflection is a real occasion with her
+    // ordinary tools in reach, the ordinary memory write lane live, and a persisted row either way.
+    // ⚠️ They also ask the same sentence and are still DIFFERENT INSTRUMENTS — a reflection turn carries a
+    // tool list, and a tool list is a menu — so their rows must never be pooled when reading her structure.
+    //
+    // ⚠️ DEFAULTS OFF (`memory.reflectionEnabled`), and this switch is heavier than noticing's: this calls
+    // HER CHAT MODEL and can write durable memory. 20 minutes is a poll interval, not a rate — the real
+    // gate is quiet+changed per conversation, so a quiet day produces nothing at all.
+    if (fastify.config?.memory?.reflectionEnabled === true) {
+      // ⭐ Same boot stamp as noticing, for the same reason: which code is loaded is a question `/health`
+      // cannot answer, and the manual version of this check failed three times in one day.
+      try {
+        const { statSync } = await import('node:fs')
+        const stamp = (p) => statSync(new URL(p, import.meta.url)).mtime.toISOString()
+        await log(`[reflection] loaded generation=${REFLECTION_GENERATION} `
+          + `pure=${stamp('../components/reflection-lifecycle.js')} host=${stamp('../components/reflection-lifecycle-host.js')}`, import.meta.url)
+      } catch { /* a missing mtime is not a reason to skip the job */ }
+      cronManager.createJob('reflection', '0 */20 * * * *', async () => {
+        try {
+          const t = await reflectAllQuiet(fastify, { maxConvos: 3 })
+          // Log only when an occasion actually happened. ⛔ No hit rate: a tick that reflects on nothing is
+          // a correct tick, and a rate would turn "did she keep something?" into a number to move.
+          if (!t.skipped && t.reflected) {
+            await log(`[reflection] reflected=${t.reflected} wroteMemory=${t.wroteMemory} blocked=${t.blocked}`, import.meta.url)
+          }
+        } catch (e) {
+          await log(`[reflection] error: ${e.message}`, import.meta.url)
         }
       }, { isLog: true })
     }

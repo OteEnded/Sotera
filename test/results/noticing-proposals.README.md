@@ -98,3 +98,29 @@ contemporaneous is exactly the provenance error the generation stamps exist to p
    settle authorship — order did.
 2. ⭐ Surviving that grep means the term is **not ours**. It does not make it a meaningful concept for her.
    Ote: *"Repeated use across genuinely independent conversations is what would make it interesting."*
+
+---
+
+## ⛔⛔ AND THERE IS NOW A SECOND, SEPARATE POPULATION — DO NOT POOL THEM
+
+From 2026-08-20 the **reflection lifecycle** (migration 016, `log_reflections`) asks Sotera the **same
+sentence** this log's generation 3 asks. It is **not the same instrument** and its rows are not part of
+this sample:
+
+|                | `noticing-proposals.jsonl`            | `log_reflections`                          |
+|----------------|---------------------------------------|--------------------------------------------|
+| what it is     | a dry-run **observation** channel     | a real **occasion**                         |
+| tools          | ⛔ none                                | 11 of her ordinary tools, offered           |
+| persistence    | ⛔ nothing — writes this file only     | her memory, through the ordinary write lane |
+| the record     | her text, `unclassified: true`        | her text **+ what came of it**              |
+| trigger        | time-sampled, every 15 min            | quiet(30 min) + changed, every 20 min       |
+
+⭐⭐ **THE REASON THIS MATTERS FOR STRUCTURE CLAIMS:** a reflection turn carries a **TOOL LIST** in its
+context, and a list of named actions is a menu in exactly the way `revise|nuance` was a vocabulary menu and
+four labelled asks were a structure menu. ⇒ If her reflections come back shaped like her tools, **the tools
+are a candidate cause**, and pooling those rows with these would launder that contamination into the clean
+sample. ⛔ Count them separately, always, and say which population a claim comes from.
+
+ⓘ Ote's instruction that this separation exists to protect: *"keep the distinction between reflection and
+noticing. I don't want the existing contaminated noticing mechanism quietly becoming the reflection system
+just because it already exists."*

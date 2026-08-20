@@ -23,7 +23,19 @@ export const DEFAULT_PERSONA = null
 // and "you asked me to forget it" are different answers to "where did my fact go?". Callers that know
 // better should say so ('model' from a tool call, 'system:decay' from cron); the default is honest about
 // not knowing rather than guessing.
-export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSONA, sourceMessageId = null, self = null, actor = null } = {}) {
+// ⭐⭐ `author` — WHOSE WRITE THIS IS, AND IT FOLLOWS THE OCCASION RATHER THAN THE TOOL.
+// Migration 015 put the ownership axis on the table and `createSequelizeMemoryStore` has taken an `author`
+// since; this factory never passed one, so EVERY write through it was 'account' — the axis existed and no
+// caller could reach it. (`save_lesson` sidesteps this with its own INSERT, which is why lessons are the
+// only persona-authored rows.)
+//
+// ⭐ The rule the reflection lifecycle establishes: a tool call in an ordinary turn is a response to a
+// person speaking, so 'account' is right; a tool call in a REFLECTION is her own decision about what to
+// carry forward, so 'persona' is right — for the same tool, the same content, the same room. Authorship is
+// a property of the occasion. ⛔ It is declared by the caller and never inferred from kind, room, or login.
+// ⚠️ Default stays 'account': six times in this project an omitted field has silently changed meaning, so
+// a caller that does not say gets the status quo and nothing can drift into being hers.
+export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSONA, sourceMessageId = null, self = null, actor = null, author = 'account' } = {}) {
   const embed = makeEmbedder(fastify, { userId })
   // RESOLUTION comes from the host so the CHAIN is assembled from settings (cosine → gray-zone → …).
   // With `memory.resolver.grayZoneMode` off (the default) this is exactly the cosine resolver: no added
@@ -35,7 +47,7 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
   //   store     REQUIRED — memory is broken without it. Owns scope + every query.
   //   slotStore OPTIONAL — absent means facts write with slot_id null, as before Phase 6.
   //   auditLog  OPTIONAL — absent means beliefs still change, the trail is missing.
-  const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, log })
+  const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, author, log })
   const slotStore = createSlotStore({ db: fastify.db, persona, userId, log })
   // Bind the writer to THIS host's storage. The cognition calls `auditLog(entry)` and never learns that
   // a database was involved. ⚠️ It used to call `logMemoryChange(db, …)` directly with a `db` the

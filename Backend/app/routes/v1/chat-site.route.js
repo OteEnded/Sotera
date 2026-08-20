@@ -183,6 +183,16 @@ function sanitizeSettings(s) {
     stream: s.stream !== false,
     markdown: s.markdown !== false,
     showStats: s.showStats !== false,
+    // ⭐⭐ `probe` — THE FIXTURE MARK, AND IT WAS INERT UNTIL NOW. `test/harness.mjs` stamps
+    // `settings.probe = true` on every conversation a check creates, in one place, precisely so no check
+    // can forget. This allowlist dropped it — measured: 0 of 76 conversations carried the flag — so the
+    // guard existed on paper and the only thing keeping fixtures out of the experimental population was
+    // the `messages >= 4` thin gate, by accident.
+    // ⛔ IT MATTERS MORE NOW THAN IT DID: the noticing pass only read fixtures, the reflection lifecycle
+    // WRITES MEMORIES. A fixture that earns a reflection puts a test artefact into her durable memory.
+    // ⓘ A real client may set it too. That is not a privilege — it excludes the conversation from the
+    // experimental passes and nothing else, which is a legitimate "don't study this one".
+    probe: s.probe === true,
   }
 }
 
@@ -705,7 +715,10 @@ export default async function chatSiteRoutes(fastify) {
     }
     if (request.body?.settings && typeof request.body.settings === 'object') {
       if (can(request.user, 'select_model')) {
-        patch.settings = sanitizeSettings(request.body.settings) // full control
+        // ⚠️ `probe` IS STICKY. It records what a conversation IS (a check's fixture), not a preference, and
+        // a full-control settings PATCH that omitted it would silently un-mark a fixture — putting it back
+        // into the population the mark exists to keep it out of.
+        patch.settings = { ...sanitizeSettings(request.body.settings), probe: convo.settings?.probe === true || request.body.settings?.probe === true }
       } else {
         // members may only change view/transport prefs (stream/markdown/showStats)
         const current = sanitizeSettings(convo.settings || effectiveDefaultSettings(fastify.config))

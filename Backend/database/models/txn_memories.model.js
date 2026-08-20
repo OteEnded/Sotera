@@ -67,11 +67,18 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 defaultValue: "default",
             },
             // --- content ---
+            // ⭐ NULLABLE, AND WITH NO DEFAULT — migration 016. Ote: *"make txn_memories.kind nullable.
+            // Readers must treat NULL as 'no kind was supplied', not silently invent a default."*
+            // ⛔ THE DEFAULT IS GONE ON PURPOSE, here as well as in the database: a nullable column that
+            // still defaults is not optional — a writer declining to classify would get 'semantic'
+            // stamped on it, and a week later that reads as her word rather than as our guess. Sotera's
+            // own retention should not have to fit our tier vocabulary to be storable.
+            // ⓘ Sequelize skips validators for a null value when allowNull is true, so `isIn` still
+            // governs every non-null kind and permits none of its own.
             kind: {
-                type: DataTypes.STRING, // choices.memory_kind
+                type: DataTypes.STRING, // choices.memory_kind, or null = the writer did not say
                 validate: { isIn: [choices.memory_kind] },
-                allowNull: false,
-                defaultValue: "semantic", // episodic | semantic | identity
+                allowNull: true,
             },
             content: {
                 type: DataTypes.TEXT,

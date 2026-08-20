@@ -54,9 +54,11 @@ export function commitToMemory(mem, obs) {
  * would make that function wait on its own queue slot: a deadlock, not a slowdown.
  * @returns {{ mem: object, pipeline: { ingest:Function, observe:Function }, router: object }}
  */
-export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMessageId = null, self = null, serializeCommits = false, ask = null } = {}) {
+export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMessageId = null, self = null, serializeCommits = false, ask = null, author = 'account' } = {}) {
   const log = fastify?.log ?? null
-  const mem = buildMemoryV2(fastify, { userId, persona, sourceMessageId, self })
+  // `author` rides through untouched — see buildMemoryV2: authorship follows the OCCASION, so the caller
+  // that knows what occasion this is declares it, and everything below stays unaware.
+  const mem = buildMemoryV2(fastify, { userId, persona, sourceMessageId, self, author })
   // `ask` is the Identity Resolver's OPTIONAL port for the one case it must not decide alone: a name
   // that would REPLACE a name she already has. Null is the ordinary state — most callers (the model's
   // remember_fact, the fact extractor, a maintenance pass) have no conversation and no human attached,
@@ -108,8 +110,8 @@ export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMes
  * and the write stays fire-and-forget on the store's SERIAL queue — validation is still synchronous so a
  * bad tool call returns a retryable error to the model.
  */
-export function buildMemoryToolService(fastify, { userId = null, persona, sourceMessageId = null, self = null } = {}) {
-  const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self })
+export function buildMemoryToolService(fastify, { userId = null, persona, sourceMessageId = null, self = null, author = 'account' } = {}) {
+  const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self, author })
   return {
     ...mem,
 

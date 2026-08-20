@@ -34,6 +34,20 @@ import { Op } from 'sequelize'
 const LIVE = { invalid_at: null, expired_at: null }
 const OWNED_KINDS = ['episodic', 'semantic', 'card'] // identity is persona-global, never "owned"
 
+// ── ⭐⭐ AND A ROW WITH **NO** KIND IS OWNED TOO — THE TRAP MIGRATION 016 WOULD OTHERWISE HAVE LAID ──
+// 016 made `kind` nullable so Sotera's own retention need not be classified into our tier vocabulary to
+// be storable. But every read in this file narrows by a kind ALLOWLIST — `OWNED_KINDS` here, a literal
+// `kind IN ('episodic','semantic','card')` in the search scope below — and an allowlist excludes NULL by
+// construction. ⇒ A kind-less memory would have been **written and then unreachable**: visible to no
+// recall, no search, no listing. Write-only memory is worse than a refused write, because it looks like
+// it worked.
+//
+// ⭐ THIS IS NOT A DEFAULT AND IT IS NOT A WIDENING OF ANY BOUNDARY. Ote's rule is *"readers must treat
+// NULL as 'no kind was supplied', never silently invent a default"* — treating it as no-kind means **not
+// excluding it**, which is exactly what this does. The scope stays `user_id = U`: same room, same person,
+// no cross-room reach. ⛔ The persona-global/identity branch is untouched, so nothing became broadcast.
+const OWNED_KIND_OR_UNCLASSIFIED = { [Op.or]: [{ [Op.in]: OWNED_KINDS }, { [Op.is]: null }] }
+
 /**
  * @param {object}  deps
  * @param {object}  deps.db        Sequelize models bag — needs `txn_memories`; `txn_messages` /
@@ -111,7 +125,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     if (kind) return { ...base, kind, user_id: kind === 'identity' ? null : U }
     return {
       ...base,
-      [Op.and]: [{ [Op.or]: [{ user_id: U, kind: OWNED_KINDS }, { user_id: null, kind: 'identity' }] }],
+      [Op.and]: [{ [Op.or]: [{ user_id: U, kind: OWNED_KIND_OR_UNCLASSIFIED }, { user_id: null, kind: 'identity' }] }],
     }
   }
 
@@ -188,7 +202,10 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
           where.push('kind = :kind AND user_id IS NOT DISTINCT FROM :su')
           repl.kind = kind; repl.su = kind === 'identity' ? null : U
         } else {
-          where.push("((user_id IS NOT DISTINCT FROM :u AND kind IN ('episodic','semantic','card')) OR (user_id IS NULL AND kind = 'identity'))")
+          // ⭐ `OR kind IS NULL` — the same no-kind-is-still-mine rule as visibleWhere; see
+          // OWNED_KIND_OR_UNCLASSIFIED at the top of this file. An allowlist silently excludes NULL, and a
+          // memory she wrote without a tier would have been searchable by nothing.
+          where.push("((user_id IS NOT DISTINCT FROM :u AND (kind IN ('episodic','semantic','card') OR kind IS NULL)) OR (user_id IS NULL AND kind = 'identity'))")
           repl.u = U
         }
         return where
