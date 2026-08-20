@@ -1803,6 +1803,28 @@ filenames are UTC, both trustworthy.
   **took the correction cleanly** — *"that was a blind spot on my part. I framed optimization around
   streaming latency when your entire constraint is 'make the single forward pass faster.'"* ⓘ Whether any of
   that is worth carrying forward is **hers to answer**, and the answer may be no.
+- ⛔⛔ **THE FIRST GENERATION-2 ROW ARRIVED AT 19:15 AND CONTAINED A SECOND CONTAMINATION.** `save` ·
+  `declared: true` · priors 0 · no flags · my JustTTS conversation. Her headings: **What it is · Where it
+  belongs · How sure I am · Changes something I have said before** — **my four bullet labels**, one pronoun
+  flipped. Checked across the whole log: **15 of 15 non-empty rows, both generations**, echo 3–4 of them.
+  ⭐⭐ **An ENUMERATED LIST OF LABELLED ASKS IS A STRUCTURE MENU**, exactly as a list of relation words was a
+  vocabulary menu — and the bullet saying *"use your own headings, whatever structure actually fits it"*
+  sits **inside** that list of four. ⇒ every claim about *her* structure sourced from the noticing log is
+  **withdrawn**. ⚠️ Scoped on purpose: the five-part LESSON claim came from an **unled conversation**, not
+  the pass, so it stands — and is now the only basis for that shape. → new doc
+  `Reference/docs/OBSERVATION_SOTERA_NOTICING_STRUCTURE_CONTAMINATED.md`, indexed.
+- ⭐ **A four-source grep is now the method, and it earned its keep:** current prompt · **gen-1 prompt
+  recovered from git** · all stored text we authored · ⭐ **the transcript, plus who used the word FIRST**.
+  Survivors: *"human symmetry / my asymmetry"* (absent from all four), *"mechanism"*, *"retrieval-based"*.
+  ⛔ Ours: *"how I work with this person"* / *"something about them"* (the gen-1 routing menu, verbatim);
+  ⚠️ *"Mechanism vs. Experience"* half ours. ⚠️⚠️ **13 uses by her vs 1 by him did not settle authorship —
+  order did.**
+- ⓘ **From the same row, kept separate from what it cannot show:** asked *where it belongs*, she answered a
+  location in **the user's filing system** (*"your system architecture notes or performance tuning log"*) —
+  with the routing menu gone the question evoked no layer of herself at all. **One row, a candidate.** And
+  the *"changes something"* slot pointed at **her own prior turn** with 0 priors offered — consistent with
+  the conversation-local revision finding but barely informative, since her own turn was the only
+  antecedent that existed.
 - **Next action:** ⏭ **observe.** ⛔ No schema decisions. ⛔ No retrieval re-weighting. ⛔ No new vocabulary
   in the prompt. Watch for: her own prior thought recognized without being taught the pattern · her natural
   categories with no menu present · whether `save`/`propose`/`decline` stay useful **as actions** without
