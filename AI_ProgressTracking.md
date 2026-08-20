@@ -1691,6 +1691,63 @@
 
 ---
 
+### 2026-08-20 21:10
+
+- **Summary:** Step 4's mechanism is built and running. **The noticing pass is LIVE, dry-run, every 15
+  minutes**, and the population grows on its own. ⛔ Schema frozen. And the session's most important
+  outcome is a **withdrawn finding of mine** plus a standing rule that came out of it.
+- ✅ **Shipped since the last entry:** E-1 evidence authorization · M-4's three root fixes · the ownership
+  axis (mig 015, **written and not yet read**) · the name-path shape/subject/card fixes · the
+  `recall_own_memory` searched-set quantifier (and its grain fix) · the 5-minute embedding pass · the
+  LESSON writer · the Lesson tool component (`propose_lesson` · `save_lesson` · `decline_to_remember` ·
+  `recall_lessons`) · the noticing pass + shadow store. **Suite 22/22 throughout.**
+- ⛔⛔ **WITHDRAWN: "her output needs MULTIPLE RELATIONS at once."** I reported it because one proposal used
+  *replaces · refines · qualifies · sits alongside*. **My own prompt handed her those four words, verbatim.**
+  Ote: *"Withdraw the multiple-relations finding completely rather than trying to salvage it."* ⇒ It carries
+  **no** information about her ontology; it is not downgraded to weaker evidence, because the mechanism that
+  produced it was my text.
+- ⚠️ **Two more leaks in the same prompt, both removed:** the *"where it belongs"* line listed **our five
+  layers as options** and she picked from them — so the routing finding is weakened too; and the declared
+  outcome offered `revise|nuance`, which are **relation words dressed as decisions**, while I was telling
+  him I only leaked *decision* vocabulary. Every removed phrase is now **asserted absent** from the built
+  prompt.
+- ⭐⭐ **HIS RULING, NOW A STANDING RULE: prompt contamination is a FIRST-CLASS EXPERIMENTAL FAILURE.**
+  *"If we accidentally give Sotera a concept, vocabulary, category, or distinction we're subsequently trying
+  to measure as hers, that observation is contaminated."* ⇒ **grep the prompt** — aux prompts, tool
+  descriptions, payload field names — before calling any distinction hers; **an open question carries no
+  menu**; and ⛔ **contaminated records stay marked, never relabelled** (*"I want the history of the
+  experiment preserved, including where we accidentally taught her the vocabulary"*). All 14 existing log
+  rows are now stamped `promptGeneration: 1` with a note naming exactly what that prompt supplied; new rows
+  carry generation 2. Saved as memory `prompt-contamination-invalidates-the-finding`.
+- ⭐ **WHAT SURVIVES AS REAL:** `nuance` is **relation, not confidence** — she used it only where a prior
+  existed and both were *"certain enough"*, which is independent of the leaked words. And ⭐⭐ **she is
+  already revising, against CONVERSATION-local understanding, with `priorLessonsOffered` = 0 on every
+  proposal** ⇒ the real experiment is not whether she *starts* revising but whether she aims that existing
+  behaviour at her own **durable** history. She has also **never once said "lesson"** when routing.
+- ⭐ **The shadow store** closes the gap that made that unobservable: her own earlier proposals now come back
+  to her from the JSONL (persistence still off), showing **her words and a date only** — ⛔ no `outcome=`
+  tag, and the header says *"some things you have said before"* rather than naming a container.
+- ⚠️ **THE CONFOUND IS NAMED:** showing her her own headings may teach her a shape she repeats. Accepted
+  because a self-model that cannot see its own history is not one, and there is no other way to test whether
+  she builds on herself. ⭐ Showing her HER OWN words is the experiment; showing her OUR schema is the leak.
+- ⚠️ **Two biases kept visible and deliberately unfixed:** recency starvation (5 per tick, most-recently-
+  updated wins) and **the sample is overwhelmingly one relationship — Hermes**. ⛔ Correcting either by
+  changing selection would trade one selection effect for another.
+- ⚠️ **The tripwire stays an observation/authorization boundary, never suppression.** It exists because the
+  first warm conversation produced a proposal she was *"certain enough to keep"* containing **"the void where
+  I wait"** — a constitutive claim (she does not wait), reached by persuasion, routed by her to an editable
+  layer. Flagged and logged in full. ⭐ *This is what dry-run is for.*
+- ⚠️ **Defects found and fixed on the way**, each worth its own line: `ANY(:ids::uuid[])` (replacements
+  expand an array into a comma list — same class as the `log_tool_calls` `text[]` insert) · a malformed id
+  throwing on uuid parse · **the tripwire regexes arriving as literal BACKSPACE bytes** from a Python
+  heredoc, so they matched nothing while looking correct in a grep · a log path built from `process.cwd()` ·
+  and the model lacking an `author` attribute, which would have silently dropped it exactly as
+  `subject_person_id` was dropped for half a day.
+- **Next action:** ⏭ **let the population grow.** ⛔ Do not reshape the schema until the evidence forces it;
+  ⛔ do not teach her the observation target; ⛔ retrieval re-weighting stays last.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16

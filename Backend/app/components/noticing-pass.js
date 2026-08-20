@@ -145,6 +145,12 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
       appendFileSync(OUT_FILE, `${JSON.stringify({
         at: new Date().toISOString(),
         conversationId: c.id, upTo, who: r.who, messages: r.messages, model: r.model,
+        // ⭐ WHICH PROMPT PRODUCED THIS. Generation 1 supplied the relation words, a routing menu, and
+        // `revise|nuance` as declared outcomes — so gen-1 records say more about our prompt than about her.
+        // Ote: *"keep the old records marked as coming from the previous prompt generation rather than
+        // relabelling them. I want the history of the experiment preserved, including where we accidentally
+        // taught her the vocabulary."* ⛔ Never rewrite an old row to the new vocabulary.
+        promptGeneration: 2,
         // ⭐ Recorded so the shadow store can find her earlier proposals next time, and so a reviewer can
         // see WHAT she was shown when she produced this one — a proposal that references a prior is only
         // interesting if you know the prior was in front of her.

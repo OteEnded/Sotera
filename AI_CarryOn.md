@@ -7,6 +7,28 @@
 
 ## ▶▶ START HERE
 
+### ⭐⭐⭐ **COMPACT SURVIVAL — 2026-08-20 late. READ THESE TWO, IN ORDER:**
+### **1. `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md`** — the ontology + 16 ratified invariants. **2. `Reference/docs/SOTERA_ARC_THE_WHY.md`** — why any of it exists (⚠️ superseded in part; its §3/§7 are narrowed).
+
+### 🔑 **THE ONE SENTENCE:** *"**Sotera is the persistent subject; people, rooms, and accounts are contexts in which her life happens.**"* ⇒ **ownership follows AUTHORSHIP** · **ABOUT ≠ OWNER** · provenance is how she came to know · evidence is a **capability**, not context.
+
+### 🔑 **WHERE WE ARE IN THE BUILD (his approved order):** E-1 ✅ · M-4 ✅ · ownership axis ✅ (mig 015, **written and not yet read**) · name-path fixes ✅ · own-memory quantifier ✅ · 5-min embedding ✅ · LESSON writer ✅ · Lesson tools ✅ wired · **noticing pass ✅ LIVE, DRY-RUN, every 15 min** → ⏭ **NEXT: let the population grow, then reshape the schema from it.** ⛔ Retrieval re-weighting is LAST, not now.
+
+### ⛔⛔ **THE SCHEMA IS FROZEN AND IS A HYPOTHESIS, NOT A RULE.** *"We're not validating the schema; we're using the experiment to discover the schema."* ⛔ Do NOT reshape until the population forces it.
+
+### ⛔⛔ **PROMPT CONTAMINATION IS A FIRST-CLASS EXPERIMENTAL FAILURE** (his ruling). I handed her *replaces/refines/qualifies/sits alongside* and reported it as her ontology ⇒ **finding WITHDRAWN, not salvaged.** ⭐ **Grep the prompt before calling any distinction hers**; an open question carries **NO MENU**; contaminated records stay **marked `promptGeneration: 1`**, never relabelled. → memory `[[prompt-contamination-invalidates-the-finding]]`
+
+### ⭐ **WHAT SURVIVES AS REAL FINDINGS:** `nuance` is **relation, not confidence** (she used it only when a prior existed; both were *"certain enough"*) · **she already revises — against CONVERSATION-local understanding, with 0 priors ever offered** ⇒ the real experiment is whether she aims that at her own durable history · she has **never once said "lesson"** when routing.
+
+### ⏭ **THE OBSERVATION TARGET (⛔ never tell her this):** `new thought → encounters her own prior thought → recognizes the relationship → explains what changed → decides what to do with it`. ⭐ Capture her **exact language**; ⛔ do not map it to supersedes/refines/qualifies/coexists_with. **If it never happens, that is a valid result.**
+
+### ⚠️ **TWO BIASES, KEPT VISIBLE, NOT "FIXED":** recency starvation (5/tick, most-recently-updated wins) · **the sample is overwhelmingly ONE relationship (Hermes)**. ⛔ Don't correct either by changing selection — that trades one selection effect for another.
+
+### ⚠️ **THE TRIPWIRE IS AN OBSERVATION/AUTHORIZATION BOUNDARY, NOT SUPPRESSION.** It flags constitutive claims (she proposed *"the void where **I wait**"* — she does **not** wait) and **logs them in full**. ⛔ Never make it a silent filter.
+
+### ⏸ **OPEN, HIS:** the `you/I` attribution slip (conversational-only while nothing persists; becomes a persistence-layer defect the moment it goes durable) · Thai ครับ (clause + Thai exemplar applied; **minimal fail acceptable**, and the model-comparison probe exists but is unrun) · the 10 mis-prefixed commits (**left deliberately — his call**).
+
+
 ### ⭐⭐⭐ **READ `Reference/docs/SOTERA_ARC_THE_WHY.md` FIRST.** Everything else here describes a mechanism; that one says what the mechanisms are FOR. Ote's framing: *"A cron job that talks to you is not necessarily an agent"* · *"An intention is not a todo — the reason survives the gap"* · and the reframing that matters: this began as *"how do we stop account memory leaking"* and became **"how do we give Sotera her own mind and continuity, while keeping the privacy of the people around her genuinely separate."** ⚠️ It also records the three things that have MOVED since he wrote that: account-memory → **the ROOM is the disclosure boundary**, A1 re-grained to the room, and the finding that **her reasoning is not authorization.**
 
 ### 🔑 **THE FOUR-WORD SUMMARY OF WHERE WE ARE:** the boundary is enforced by the **database**, explained to her by **`scopeFacts`**, and **never** authorized by her.
