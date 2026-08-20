@@ -16,7 +16,7 @@ import { makeChecker, devPg, devSchema } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
-import { describeScope, reachTrace, renderScope, describeRoomIndex } from '../../Backend/app/components/room-scope.js'
+import { describeScope, reachTrace, renderScope, describeRoomIndex, readCoverage } from '../../Backend/app/components/room-scope.js'
 import { buildIntention } from '../../Backend/app/components/intention-host.js'
 import { buildOwnMemory } from '../../Backend/app/components/own-memory-host.js'
 import { snapshotIntentions, restoreIntentions } from '../lib/intention-fixtures.mjs'
@@ -75,9 +75,9 @@ try {
   // ── S3 · THE TRACE. Counts only, same person only (scopeAwareness v2) ──────────────────────────
   ok(s.elsewhere.otherRoomsOfThisPerson === 1,
     'S3 · ⭐ from kavi, exactly ONE other room of the same person is reported', `${s.elsewhere.otherRoomsOfThisPerson}`)
-  ok(s.elsewhere.itemsYouCannotReadFromHere > 0,
+  ok(s.elsewhere.storedMemoriesYouCannotReadFromHere > 0,
     'S3 · ⭐⭐ …and how much sits in it — the EVIDENCE that makes unreachability distinguishable from absence',
-    `${s.elsewhere.itemsYouCannotReadFromHere} item(s)`)
+    `${s.elsewhere.storedMemoriesYouCannotReadFromHere} stored memory/memories`)
   ok(/UNREACHABILITY, not absence/i.test(s.elsewhere.howToReadThis),
     'S3 · ⭐ …with her own distinction spelled out, so an empty read is not read as an empty world')
 
@@ -120,6 +120,32 @@ try {
     'S3 · reachTrace is the small form for attaching to an ordinary read', JSON.stringify(t))
   ok(!('items' in t) && !('titles' in t) && !/[0-9a-f]{8}-[0-9a-f]{4}/i.test(JSON.stringify(t)),
     'S3 · ⭐ the trace carries no content and no ids — counts and a room name only')
+  ok(!('coverage' in t), 'S3 · ⭐ …and NO coverage block when no result was measured — absent, not zero')
+
+  // ── Q · THE QUANTIFIER ON AN EMPTY READ (2026-08-20) ───────────────────────────────────────────
+  // Measured in HIS OWN conversation: two tool calls over ONE room became *"Nothing about Hermes has EVER
+  // been stored in my memory system"*. Five memories name Hermes. Ote: *"an empty scoped result is being
+  // narrated as a global absence… this is data, not another persona instruction."*
+  // ⭐ The number was never missing — it was 0. The EXTENT of the set it describes was missing.
+  const cov0 = readCoverage({ matched: 0, room: 'kavi' })
+  ok(cov0.matched === 0 && cov0.searched.rooms === 'this room only' && cov0.searched.room === 'kavi',
+    'Q · ⭐ an empty read states WHAT WAS SEARCHED, not just that it found nothing', JSON.stringify(cov0.searched))
+  ok(/IN THE SET THAT WAS SEARCHED/.test(cov0.whatTheNumberMeans)
+    && /not evidence that nothing exists outside/.test(cov0.whatTheNumberMeans),
+    'Q · ⭐⭐ …and says in so many words that 0-here is not 0-anywhere — the exact inference she made')
+  ok(Array.isArray(cov0.didNotSearch) && cov0.didNotSearch.some((x) => /other person/i.test(x)),
+    'Q · ⭐ the axes NOT searched are NAMED', cov0.didNotSearch.join(' · '))
+  // ⛔ THE HALF HE REFUSED. Naming an axis is not counting along it.
+  ok(!/\d/.test(JSON.stringify(cov0.didNotSearch)) && !/\d/.test(JSON.stringify(cov0.searched)),
+    "Q · ⭐⭐ …and NEVER counted — no digit anywhere outside `matched`, so no cross-person existence signal (Ote: \"Do not add the cross-person count yet\")")
+  const covN = readCoverage({ matched: 3, room: 'kavi' })
+  ok(/3 found IN THE SET THAT WAS SEARCHED/.test(covN.whatTheNumberMeans)
+    && /not a total of everything stored/.test(covN.whatTheNumberMeans),
+    'Q · ⭐ a NON-empty read is quantified too — *"exactly those 3 items"* was the other false universal')
+  // It rides on the trace only when a result was actually measured.
+  const tm = await reachTrace(fastify, { userId: users.kavi, matched: 0 })
+  ok(tm.coverage?.matched === 0 && tm.coverage?.searched?.room === 'kavi',
+    'Q · the trace carries it when the read reports a count', JSON.stringify(tm.coverage?.searched))
 
   // ── R1 · ⭐⭐ THE LEAK IS CLOSED. An intention in one room is invisible in the other ────────────
   // This is D-2, and the exact thing measured leaking on 2026-08-20: the same open intention appeared
@@ -201,7 +227,8 @@ try {
   ok(asRoot.level === 'index', 'D4 · a ROOT actor gets the named index', asRoot.level)
   ok(asRoot.rooms.some((r) => r.name === 'agent_dev_alt'),
     'D4 · ⭐ …which names the sibling room', asRoot.rooms.map((r) => r.name).join(', '))
-  ok(asRoot.rooms.every((r) => typeof r.items === 'number'), 'D4 · …with a per-room item count')
+  ok(asRoot.rooms.every((r) => typeof r.storedMemories === 'number' && !('items' in r)),
+    'D4 · ⭐ …with a per-room count NAMED AFTER WHAT IT COUNTS — `storedMemories`, never `items` (D-4d)')
   ok(asRoot.otherRooms === asPeer.otherRooms,
     'D4 · ⭐ both levels describe the SAME rooms — the flag changes the DETAIL, never the set',
     `${asRoot.otherRooms} vs ${asPeer.otherRooms}`)
@@ -242,7 +269,7 @@ try {
   const fin = oteIdx.rooms.find((r) => r.name === 'Ote_Finance')
   ok(oteIdx.level === 'index', "D4b · root sees the INDEX level of his own person's rooms", oteIdx.level)
   ok(Boolean(fin), 'D4b · ⭐ the room is named', oteIdx.rooms.map((r) => r.name).join(', ') || '(none)')
-  ok(fin?.items === 0, 'D4b · ⭐⭐ …with a count of ZERO — existence and emptiness are reported separately', `${fin?.items}`)
+  ok(fin?.storedMemories === 0, 'D4b · ⭐⭐ …with a count of ZERO — existence and emptiness are reported separately', `${fin?.storedMemories}`)
   ok(fin?.lastUsedOn === null, 'D4b · ⭐ …and never-used reads as null, not as a guessed date', String(fin?.lastUsedOn))
   ok(!oteIdx.rooms.some((r) => ['kavi', 'kavi_alt', 'hermes', 'hermes_alias', 'mina', 'agent_dev', 'agent_dev_alt'].includes(r.name)),
     "D4b · ⭐⭐ root's index is HIS person's rooms only — root is a room, not a directory of everyone",

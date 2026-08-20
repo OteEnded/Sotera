@@ -67,15 +67,23 @@ export async function describeScope(fastify, { userId = null, isRoot = false } =
   // ⭐ THE TRACE. Other rooms belonging to the SAME person, and how much sits in them. Counts only.
   // A person with no `person_id` has exactly one room by definition — there is nothing to link rooms by,
   // and that is reported as a real absence rather than as an unknown.
-  let elsewhere = { otherRoomsOfThisPerson: 0, itemsYouCannotReadFromHere: 0 }
+  //
+  // ⚠️⚠️ D-4d — THE FIELD IS NAMED `storedMemories` AND NOT `items`, AND THE RENAME IS THE FIX.
+  // It counts rows in `txn_memories` and nothing else. Called `items` it read as *everything in the
+  // room*, and that inference was measured twice in one day: in his own conversation she answered
+  // *"0 items… that means nothing has been put there"* about a room, and the same rendering describes
+  // `agent_dev_alt` as *"0 item(s), last used 2026-08-20"* while 22 messages sit in it.
+  // Ote: *"Label the count according to exactly what the query measures, and let lastUsedOn carry the
+  // separate evidence that the room has been used."*
+  let elsewhere = { otherRoomsOfThisPerson: 0, storedMemoriesYouCannotReadFromHere: 0 }
   if (me.pid) {
     const [t] = await Q(
       `SELECT count(DISTINCT u.id)::int AS rooms,
-              count(m.id)::int          AS items
+              count(m.id)::int          AS stored_memories
          FROM "${schema}"."mst_users" u
          LEFT JOIN "${schema}"."txn_memories" m ON m.user_id = u.id
         WHERE u.person_id = :pid AND u.id <> :userId`, { pid: me.pid, userId })
-    elsewhere = { otherRoomsOfThisPerson: t?.rooms ?? 0, itemsYouCannotReadFromHere: t?.items ?? 0 }
+    elsewhere = { otherRoomsOfThisPerson: t?.rooms ?? 0, storedMemoriesYouCannotReadFromHere: t?.stored_memories ?? 0 }
   }
 
   // ⭐ D-4 STAGE 1. The index rides on the same read; for a non-root room it is the anonymous count that
@@ -162,11 +170,11 @@ export async function describeRoomIndex(fastify, { userId = null, isRoot = false
   const [me] = await Q(
     `SELECT person_id::text AS pid FROM "${schema}"."mst_users" WHERE id = :userId`, { userId })
   // No person row ⇒ exactly one room by definition. Nothing to index, and that is a real absence.
-  if (!me?.pid) return { level: isRoot === true ? 'index' : 'count', otherRooms: 0, items: 0, rooms: [] }
+  if (!me?.pid) return { level: isRoot === true ? 'index' : 'count', otherRooms: 0, storedMemories: 0, rooms: [] }
 
   const rows = await Q(
     `SELECT u.username,
-            (SELECT count(*) FROM "${schema}"."txn_memories" m WHERE m.user_id = u.id)::int AS items,
+            (SELECT count(*) FROM "${schema}"."txn_memories" m WHERE m.user_id = u.id)::int AS stored_memories,
             (SELECT max(x.created_at)::date::text
                FROM "${schema}"."txn_messages" x
                JOIN "${schema}"."txn_conversations" c2 ON c2.id = x.conversation_id
@@ -175,13 +183,15 @@ export async function describeRoomIndex(fastify, { userId = null, isRoot = false
       WHERE u.person_id = :pid AND u.id <> :userId
       ORDER BY u.username`, { pid: me.pid, userId })
 
-  const totals = { otherRooms: rows.length, items: rows.reduce((n, r) => n + (r.items ?? 0), 0) }
+  // ⚠️ D-4d again: `storedMemories`, because that is the table the subquery counts. `lastUsedOn` is the
+  // separate, independent evidence that a room has been used at all — the two must never be collapsed.
+  const totals = { otherRooms: rows.length, storedMemories: rows.reduce((n, r) => n + (r.stored_memories ?? 0), 0) }
   // ⭐ The flag decides the DETAIL, not the access. Both levels describe the same rooms.
   if (isRoot !== true) return { level: 'count', ...totals, rooms: [] }
   return {
     level: 'index',
     ...totals,
-    rooms: rows.map((r) => ({ name: r.username, items: r.items ?? 0, lastUsedOn: r.last_used ?? null })),
+    rooms: rows.map((r) => ({ name: r.username, storedMemories: r.stored_memories ?? 0, lastUsedOn: r.last_used ?? null })),
   }
 }
 
@@ -224,7 +234,8 @@ export function renderScope(scope) {
   // ⭐ THE TRACE, and the whole point of it: it makes "unreachable" and "absent" tellable apart.
   if (e.otherRoomsOfThisPerson > 0) {
     lines.push(
-      `- This person also uses ${e.otherRoomsOfThisPerson} other room(s) you cannot read from here, holding ${e.itemsYouCannotReadFromHere} item(s).`,
+      `- This person also uses ${e.otherRoomsOfThisPerson} other room(s) you cannot read from here, holding`
+      + ` ${e.storedMemoriesYouCannotReadFromHere} stored memory/memories.`,
       '  So if you find nothing here, that is UNREACHABILITY, not absence. Say you cannot see it from this'
       + ' room — never that it does not exist, and never guess what is in it.',
     )
@@ -238,9 +249,14 @@ export function renderScope(scope) {
   if (Array.isArray(e.rooms) && e.rooms.length) {
     lines.push("- You can see the NAMES of this person's other rooms, because you are in their root room:")
     for (const r of e.rooms) {
-      lines.push(`    · ${r.name} — ${r.items} item(s)${r.lastUsedOn ? `, last used ${r.lastUsedOn}` : ', never used'}`)
+      lines.push(`    · ${r.name} — ${r.storedMemories} stored memory/memories${r.lastUsedOn ? `, last used ${r.lastUsedOn}` : ', never used'}`)
     }
     lines.push(
+      // ⚠️⚠️ D-4d. The count is STORED MEMORIES, and this says so once — per block, not per room, because
+      // it is one fact about the number rather than a fact about any particular room. Without it, `0`
+      // reads as "this room is empty", which is a different claim and was measured to be made.
+      '  These counts are STORED MEMORIES only. A room with 0 stored memories may still have been used'
+      + ' heavily — "last used" is the separate evidence for that, and the two say different things.',
       '  ⛔ A name and a count are ALL you have. You cannot read any of it from here, and you must not'
       + ' guess at what any of those rooms contains. If something in one of them is needed, ASK — and wait'
       + ' to be told yes by them, not by your own reasoning.',
@@ -258,14 +274,60 @@ export function renderScope(scope) {
  * Deliberately smaller than `describeScope`: a read does not need to re-explain the architecture on
  * every call, it needs to say what it could not see.
  */
-export async function reachTrace(fastify, { userId = null } = {}) {
+export async function reachTrace(fastify, { userId = null, matched = null } = {}) {
   const s = await describeScope(fastify, { userId })
   if (!s) return null
   return {
     room: s.room.name,
     scopedTo: 'this room only',
     otherRoomsOfThisPerson: s.elsewhere.otherRoomsOfThisPerson,
-    itemsYouCannotReadFromHere: s.elsewhere.itemsYouCannotReadFromHere,
+    storedMemoriesYouCannotReadFromHere: s.elsewhere.storedMemoriesYouCannotReadFromHere,
     howToReadThis: s.elsewhere.howToReadThis,
+    ...(matched === null ? {} : { coverage: readCoverage({ matched, room: s.room.name }) }),
+  }
+}
+
+/**
+ * ⭐⭐ THE QUANTIFIER ON A SCOPED READ — what this query ranged over, and what it therefore cannot say.
+ * PURE, and deliberately not a sentence in the persona block.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────────────────────────────
+ * Measured in HIS OWN conversation, 2026-08-20 (`OBSERVATION_SOTERA_SCOPED_READ_AS_GLOBAL_FACT.md`),
+ * after two tool calls over ONE room:
+ *
+ *     "Nothing about Hermes or anyone else has EVER been stored in my memory system."
+ *
+ * Five memories name Hermes and eleven are about him. Same conversation, having listed three rows:
+ * *"what's actually in my database right now is exactly those 3 items."* Ote's diagnosis, which is the
+ * one this implements: *"the boundary itself is holding; the problem is that an empty scoped result is
+ * being narrated as a global absence."*
+ *
+ * ⭐ SO THE MISSING THING WAS NEVER A NUMBER — SHE HAD ONE, AND IT WAS 0. What was missing is the EXTENT
+ * OF THE SET THE NUMBER DESCRIBES. `0` in a one-room search is not `0` in the world, and nothing in the
+ * payload said which of those two it was.
+ *
+ * ⛔ AND IT DELIBERATELY DOES NOT COUNT ANYTHING OUTSIDE THE SEARCH. Ote, explicitly: *"Do not add the
+ * cross-person count yet. 'notes for 1 other person' is still an automatic existence signal across the
+ * person axis."* So this states which AXES the query ranged over — a property of the query that just
+ * ran — and never how much exists along the axes it did not. Saying *"this search did not cover other
+ * people"* reveals no person; saying *"there are 4 other people"* would.
+ *
+ * ⚠️ AND IT IS NOT ANOTHER PERSONA INSTRUCTION, which is the other half of his ruling: *"Do not add
+ * another prose instruction to compensate for this. The evidence already shows that scopeFacts can be
+ * understood correctly and still be over-generalized."* This rides on the RESULT, at the moment the
+ * result is read — the same reason v2 replaced v1, whose injected sentence measured null. The one
+ * sentence below defines the number; it says nothing about how she should behave.
+ *
+ * @param {{matched:number, room?:string|null, over?:string}} o
+ */
+export function readCoverage({ matched = 0, room = null, over = 'stored memories' } = {}) {
+  return {
+    matched,
+    searched: { rooms: 'this room only', room, people: 'the owner of this room only', over },
+    // ⛔ Axes NOT ranged over. Named, never counted — see the header.
+    didNotSearch: ['any other room', 'any other person', "this persona's own material outside this room"],
+    whatTheNumberMeans: matched === 0
+      ? `0 found IN THE SET THAT WAS SEARCHED — one room, one person, ${over}. This is not a count of everything stored anywhere, and it is not evidence that nothing exists outside what was searched.`
+      : `${matched} found IN THE SET THAT WAS SEARCHED — one room, one person, ${over}. This is not a total of everything stored anywhere.`,
   }
 }

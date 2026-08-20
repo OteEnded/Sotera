@@ -131,13 +131,27 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
     // ⚠️ WRAPPED HOST-SIDE ON PURPOSE. `@ote/memory` is shared with OteLLMServices, so changing the
     // portable tool's payload would be a cross-project edit. The host owns what it returns; the tool
     // passes it through untouched.
+    // ⭐⭐ AND THE QUANTIFIER (`coverage`), added 2026-08-20 after the failure was measured in HIS OWN
+    // conversation: two tool calls over ONE room became *"Nothing about Hermes has EVER been stored in my
+    // memory system"*, and three listed rows became *"exactly those 3 items"* in her whole database.
+    // Ote: *"an empty scoped result is being narrated as a global absence… this is data, not another
+    // persona instruction."* `matched` is passed in so the trace can state the EXTENT of the set the
+    // number describes — see `readCoverage`, which counts nothing outside the search.
     async search(query, opts = {}) {
       const out = await mem.search(query, opts)
-      return withReach(out, await reachTrace(fastify, { userId }))
+      return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out) }))
     },
     async list(opts = {}) {
       const out = await mem.list(opts)
-      return withReach(out, await reachTrace(fastify, { userId }))
+      return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out) }))
+    },
+    // ⚠️ `listArchived` WAS NOT WRAPPED BEFORE, AND IT IS ONE OF THE TWO CALLS THAT PRODUCED THE FALSE
+    // UNIVERSAL. She called list_memories + list_archived_memories, got nothing from either, and
+    // concluded nothing had ever been stored — so the read that fed half that conclusion was the one
+    // read carrying no trace at all.
+    async listArchived(opts = {}) {
+      const out = await mem.listArchived(opts)
+      return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out), }))
     },
     rememberAsync(opts = {}) {
       if (!opts.content || !String(opts.content).trim()) throw new Error('content is required')
@@ -161,6 +175,22 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
  * ⭐ And the trace is attached even when the result is FULL: "there are 3 more you cannot see" matters
  * most when she just found something, because that is when she is most likely to believe she has it all.
  */
+/**
+ * How many rows a memory read returned, whatever shape it used. PURE.
+ *
+ * ⚠️ Every read here already reports its own `count` (`{count, memories}` / `{count, matches}`), so this
+ * TRUSTS that field rather than measuring the truncated page — `list` caps at 1000 and `search` at its own
+ * limit, and a coverage number taken from `memories.length` would silently say "3" about a room holding
+ * 3000. The fallbacks exist only for a bare array or a shape that predates `count`.
+ */
+function countOf(out) {
+  if (out == null) return 0
+  if (typeof out.count === 'number') return out.count
+  if (Array.isArray(out)) return out.length
+  for (const k of ['memories', 'matches', 'results', 'rows']) if (Array.isArray(out[k])) return out[k].length
+  return 0
+}
+
 function withReach(out, trace) {
   if (!trace) return out
   if (out && typeof out === 'object' && !Array.isArray(out)) return { ...out, reach: trace }

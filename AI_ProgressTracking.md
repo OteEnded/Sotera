@@ -1149,6 +1149,73 @@
 
 ---
 
+### 2026-08-20 14:35
+
+- **Summary:** Two approved code changes shipped (the empty-read quantifier and the D-4d terminology
+  correction), and then the direction changed: he reframed the whole ontology, so the architectural
+  investigation is the real deliverable of this session.
+- ✅ **The empty-read QUANTIFIER — `readCoverage()` in `room-scope.js`, attached to `search`/`list`/and
+  now `listArchived`.** ⭐ The insight is that **the number was never missing — it was 0.** What was
+  missing is the EXTENT of the set the number describes. So the read now states which axes it ranged over
+  and which it did not, and says in words that `0` here is not `0` anywhere. ⛔ **It counts nothing outside
+  the search** — no digit appears anywhere except `matched`, asserted — because *"'notes for 1 other
+  person' is still an automatic existence signal across the person axis."* ⚠️ `listArchived` was NOT
+  wrapped before, and it was one of the two reads that produced the false universal.
+- ✅ **D-4d — the count is now named after what the query measures.** `items` → `storedMemories`
+  everywhere (`describeRoomIndex`, the trace, the rendered block), and the block says once that a room
+  with 0 stored memories may still have been used heavily, with `lastUsedOn` as the separate evidence.
+  ⛔ No new persona instruction, per his ruling.
+- **Tests:** `room-scope-check` **80/80** (was 65 — seven new `Q ·` assertions for the quantifier, plus the D-4d renames), full
+  suite **19/19**.
+- ⭐⭐⭐ **THEN THE REFRAME, and it is the important part of the day.** Ote: *"The user_id / rooms model is
+  largely infrastructure inherited from OLS. Sotera is not OLS… **Sotera is the persistent subject. Users,
+  people, conversations and rooms are contexts in Sotera's world — they are not the containers that define
+  Sotera.**"* And the diagnosis: *"if her effective self is reconstructed primarily from current user +
+  current room + accessible memories, then she becomes context-dependent."*
+- 🔑🔑 **THE ROOT CAUSE IS ONE BOOLEAN, and I traced it to the line.** `memory-store-sequelize-host.js:249`
+  — `isPersonaGlobal = row.kind === 'identity'` decides **ownership** (`user_id NULL` vs the room),
+  **aboutness** (Sotera vs the account holder) and **visibility** (broadcast vs room-only) **all at once**.
+  So exactly two memories are representable: *a fact about the user owned by their room*, and *a fact about
+  Sotera broadcast to every account*. The thing he asked for — hers, about her experience with one person,
+  readable where appropriate — has **no representation at all.** Not policy. One flag.
+- **Measured:** 35/35 memories are `semantic` and room-owned · 0 episodic · 0 cards · 0 notes · 0
+  persona-global · 0 memories whose subject is the Sotera person row · `recall_own_memory` **24 calls** vs
+  `note_own_practice` **1 call, ever**.
+- ⭐⭐ **The episode distiller is HIS OWN IDEA FROM 2026-08-03** — its header says *"gives the persona event
+  memory in its own right… which is the substance of an individual, which is the point (Ote)"* and its
+  prompt is already first-person past-tense. It is **OFF**, and it **could not deliver anyway**: it writes
+  through `buildMemoryPipeline({ userId: c.user_id })`, so an episode is `kind='episodic'` and the store
+  stamps the room — *her memory of an evening becomes a row in Ote's room.* Reflection is worse-shaped
+  still: capped **per `(persona,user)` scope**, i.e. her operational self is sharded per user by design.
+- ⭐ **`txn_relational_records` is the one Sotera-owned store that exists** — no `user_id`, no room column,
+  keyed only by `subject_person_id`. 3 rows, all about Kavi, none about Ote. It is the existence proof that
+  the shape is buildable. ⓘ And his own example lands here: he told her *"don't hedge with me"*, and the
+  version of that which belongs to HER (`i-avoid-hedging`) is on file **for Kavi**, from another room.
+- **The inversion, in one line:** `WHERE user_id = :room` (the room is the subject, Sotera is the view) →
+  `WHERE owner = sotera AND visible_from(:room)` (Sotera is the subject, the room is the view).
+- ⚠️ **Eight conflicts flagged, including two I wrote TODAY:** migration 014 assumes every crossing is
+  room→room (`from_room_user_id NOT NULL` + the crosses-rooms CHECK), and its `scope_kind` closed
+  vocabulary has **no term for a Sotera-owned memory**. ⓘ Both are inert with 0 rows and no writer —
+  **building stage 2 inert is exactly what makes this free to reshape**, and it would not have been once
+  anything wrote it. Also: invariant #3 ("root is a room, not an exception") is true of *storage* and no
+  longer of *authority*; invariant #7 (subject filtering) is now the rule for **ordinary rooms**, not a
+  ceiling on root. ✅ Ratified constraint #8 survives intact — a root authorization IS a human saying so.
+- ⭐ **Root becomes coherent under the reframe:** ordinary actor → may read what their context permits;
+  root → may **authorize Sotera to read her own memory**, whole subject, all contexts. Root is not the
+  union of the containers; root is the supervisory relationship with the subject.
+- ⏸ **THE FORK IS HIS AND IS UNANSWERED:** *is "Sotera's knowledge of a person" a MEMORY or a DERIVATION?*
+  A memory can be learned and needs a new stored scope; a derivation is computed at read time and means she
+  can only ever summarise a relationship, never accumulate one. Nothing sensible can be designed before it.
+- ⛔ **Nothing built for the reframe. Room-model hardening PAUSED at his instruction**, and stage 3 of
+  D-4/D-5 is on hold — *"please don't build another privacy/disclosure layer yet."*
+- **Files touched:** `Backend/app/components/room-scope.js`, `Backend/app/components/memory-pipeline-host.js`,
+  `test/checks/room-scope-check.mjs`; workspace `Reference/docs/ANALYSIS_SOTERA_AS_THE_SUBJECT.md` (new),
+  `Reference/docs/DEFECT_MEMORY_NAME_FRAGMENT_CAPTURE.md` (new), `Reference/README.md`.
+- **Next action:** his answer to the memory-vs-derivation fork. Then split the one flag into its three
+  axes — the pipelines are already written and have been off for five weeks for want of a destination.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
