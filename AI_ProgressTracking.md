@@ -1448,6 +1448,58 @@
 
 ---
 
+### 2026-08-20 18:05
+
+- **Summary:** He locked one more principle — **`memory ownership ≠ evidence ownership ≠ evidence access`**
+  — and with it that **evidence is a capability, not context**. Ratified as §13 + invariants 12/13. ⛔ Still
+  nothing built. Two things I measured before writing it down, and one of them corrects my own audit.
+- ⭐⭐ **EVIDENCE IS A CAPABILITY:** `memory → evidence reference → authorization check → source retrieval →
+  evidence`. His line: *"Having `message_123` attached to a memory must not mean message 123 is injected
+  whenever that memory is recalled."* ⇒ three rules that make "a capability" mean something in code:
+  · ⛔ **the recall query must never JOIN to message text** — if the retrieval path can reach it, evidence
+    IS context whatever the docs say;
+  · the working set carries **exactly four things**: the memory · a provenance **summary** · the evidence
+    **state** · an **opaque reference** — a handle to follow, not a value to read;
+  · ⚠️ **retrieval fetches the WINDOW, not the conversation.** Measured: `getSource` does
+    `findAll({where:{conversation_id}})` and *then* slices, so today's largest conversation would load
+    **70 messages to return 5.** The blast radius of an authorization mistake should be the window.
+- **Four concepts kept apart:** MEMORY (hers, recalled) · PROVENANCE (hers, a summary — never content) ·
+  EVIDENCE (theirs, a reference only) · AUTHORIZATION (evaluated on request, never assumed).
+- ⚠️⚠️ **MEASURED — E-7 IS ALREADY VIOLATED. 2 of 35 memories contain an 8+ word verbatim run from their own
+  source message**, longest **12 words**: *"testing the other side to see if it'll hold a real
+  disagreement."* ⭐ **No authorization layer can fix that** — the text is already inside the memory, the
+  memory is hers, and it is recalled freely, so every gate is bypassed because the evidence never needed the
+  evidence path. ⇒ **E-7 is a WRITE-TIME GUARD, not a policy sentence**, and it is the same mechanism as
+  §2.4's abstraction rule seen from the other end: *what gets written decides what can be gated.*
+  ⓘ Scale, honestly: 2/35, twelve words, memories averaging 142 chars against sources averaging 354 — **the
+  mechanism is missing, not a store full of transcripts.** The cheap moment to fix it.
+- ⭐⭐ **AND A CORRECTION TO MY OWN AUDIT, from the same measurement: the missing FK on `source_message_id`
+  is LOAD-BEARING.** I filed it as a gap this afternoon. But `destroyed` vs `unattested` is distinguishable
+  **only** because a deleted source leaves the pointer **dangling** — and an `ON DELETE SET NULL` (the
+  pattern both existing FKs on that table use) would erase the evidence that evidence ever existed,
+  collapsing *"I can no longer check this"* into *"I never had a reason."* ⛔ **Never add one.** The real
+  half of the gap is that the loss is not *recorded* — which is **E-4**, not referential integrity.
+  ⭐ Same lesson as *never infer identity from a value's shape*, in a new place: **an absence is not
+  self-describing.**
+- **FOUR evidence states, never two:** verified (resolves + authorized here) · ⭐
+  **attested-but-not-inspectable** (resolves, not authorized here) · destroyed (had a reference, no longer
+  resolves) · ⛔ **unattested** (never had one — **the state all three stance records are in**). ⛔ *"Cannot
+  inspect"* must never collapse into *"no evidence."*
+- ⭐ **pgvector's job as a boundary:** it may answer *what is associated with what I am thinking about* —
+  ⛔ never *is this true* (the evidence chain answers that), ⛔ never *may I read the source* (authorization
+  does), and ⛔ never *does this exist* — **a similarity search returning nothing is not absence**, which is
+  this arc's oldest failure pre-empted in its newest layer.
+- ✅ **He confirmed E-1 belongs before the authorship migration**, and stated the reason in his own words:
+  *"the old safety property depended on memory and source sharing a room; once memory becomes Sotera-owned,
+  that implicit relationship is gone."*
+- **Files touched:** `Reference/docs/RFC_SOTERA_MEMORY_MODEL.md` (§13 + invariants 12/13),
+  `Reference/docs/AUDIT_SOTERA_MEMORY_EVIDENCE_CHAIN.md` (Q2 corrected), `Reference/README.md`,
+  `AI_CarryOn.md`.
+- **Next action:** ⏸ **M-4 is still the only open decision — he has explicitly not answered it yet.** ⛔ No
+  store or index migration; E-1 first whenever the build starts.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16
