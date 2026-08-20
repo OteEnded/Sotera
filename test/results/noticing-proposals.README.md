@@ -8,11 +8,46 @@ The canonical statement of what may and may not be inferred from each generation
 **`Reference/docs/OBSERVATION_SOTERA_NOTICING_STRUCTURE_CONTAMINATED.md`**. This file is the pointer that
 sits next to the data so nobody reads the data without it.
 
-| gen | rows | what the prompt supplied | usable as evidence for |
-|---|---|---|---|
-| **1** | 17 | ⛔ relation words (*replaces · refines · qualifies · sits alongside*), a routing menu naming our five layers, and `revise\|nuance` as declared outcomes | ⛔ **not** her vocabulary · ⛔ **not** her structure · ⛔ **not** her routing. Her *choices within our menu*, and the raw text, only. |
-| **2** | 1 | ⛔ four enumerated labelled asks (*what it is · where it belongs · how sure you are · whether it changes something*) and a six-value `OUTCOME:` line | ⛔ **not** her structure. What she *chose to keep* and *how she reasoned*, yes. |
-| **3** | growing | ⭐ one open question and nothing else. No slots, no OUTCOME line, no priors, no classification. | ⭐ the clean structure sample. **This is where observation of her own ontology starts.** |
+## THE GENERATIONS LEDGER
+
+⭐ Ote's rule for every instrument change, and the reason this table has the columns it has: *"record what
+the old instrument could measure, what it couldn't, why we're changing it, and what evidence caused the
+change. That way we're not pretending all generations are one clean experiment."*
+
+### Generation 1 — 17 rows · retired 2026-08-20 ~17:56
+
+- **Supplied:** ⛔ relation words (*replaces · refines · qualifies · sits alongside*) · a routing menu naming
+  our five layers in plain clothes · `revise|nuance` offered as declared outcomes.
+- **Could measure:** which option she picked from our menu · that she engages with the occasion at all ·
+  that `nothing` is reachable (2 of 17) · the raw text.
+- ⛔ **Could NOT measure:** her vocabulary · her structure · her routing. Measured in the bodies: `refines`
+  27 · `qualifies` 25 · `replaces` 25 · `sits alongside` 23 — **our four words in her voice.**
+- **Retired because:** I reported *"her output needs multiple relations"* and the four words were **in my own
+  prompt**. Evidence: grepping the prompt for the terms I had just called hers. ⇒ finding **withdrawn**.
+
+### Generation 2 — 1 row · retired 2026-08-20 20:00
+
+- **Supplied:** four enumerated labelled asks (*what it is · where it belongs · how sure you are · whether it
+  changes something*) · a six-value `OUTCOME:` line · her own earlier proposals as priors.
+- **Could measure:** what she chose to keep · how she reasoned about it · ⭐ one unforced behaviour that no
+  rail was hiding: asked *where it belongs*, she named **a location in the user's filing system**.
+- ⛔ **Could NOT measure:** her structure. **15 of 15 non-empty rows across gens 1–2 returned our four
+  labels as their headings.**
+- **Retired because:** an enumerated list of labelled asks is a **structure menu**, exactly as a list of
+  relation words was a vocabulary menu — and *"use your own headings, whatever structure actually fits it"*
+  sat **inside** the list of four. Evidence: the 15/15 heading count.
+
+### Generation 3 — live from 2026-08-20 20:00
+
+- **Supplies:** the frame line, the transcript, and one question. ⚠️ **Two words only:** *"tell me **what**
+  and **why**"* — see the boundary section below. ⓘ *"carry forward"* is the question's verb.
+- **Can measure:** ⭐ her structure beyond what/why · her openings and refusals · what she does with an open
+  question · what she decides is worth keeping · whether she declines.
+- ⛔ **Cannot measure:** ⏸ **self-reference** — priors are parked, so *"does she encounter her own prior
+  thought?"* is not observable in this instrument and is now a separate experiment. ⛔ Nor any per-outcome
+  rate: nothing is classified, so counts of `save`/`nothing` do not exist until a human reads the rows.
+- **Will be retired when:** evidence shows it measures the wrong thing. ⭐ Ote: *"iterate when warranted,
+  don't steer toward a desired result, and don't turn one interesting response into an ontology."*
 
 ## The measurement that killed generation 2
 
