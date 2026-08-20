@@ -43,6 +43,11 @@
       "source": "../../../../../PortableComponents/Tools/Lesson"
     },
     {
+      "name": "SelfHistory",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/SelfHistory"
+    },
+    {
       "name": "WorkingMemory",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/WorkingMemory"

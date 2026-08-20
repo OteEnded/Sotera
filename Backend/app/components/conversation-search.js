@@ -140,7 +140,17 @@ export function filterEvidence(items = [], { minLength = 20, roles = ['user', 'a
  * @param {*} fastify  needs fastify.db.txn_messages (Sequelize) for the raw tsvector query
  * @param {{userId?:string|null}} scope
  */
-export function buildConversationSearch(fastify, { userId = null, currentConversationId = null, embed = null } = {}) {
+// ── ⭐⭐ TWO SCOPES, ONE QUERY — AND THE DEFAULT IS UNCHANGED ─────────────────────────────────────────
+// `acrossRooms` + `roles` exist so `recall_own_history` can reuse this exact lexical⊕dense⊕RRF pipeline
+// instead of growing a second copy that drifts from it. ⛔ Both default to TODAY'S behaviour: one room,
+// both roles. `checks/self-history-check.mjs` asserts the default is still room-scoped, because this is
+// the single line that separates "search this room" from "search everything" and a silent flip here would
+// be the largest disclosure defect in the project.
+//
+// ⚠️ `roles` is INTERPOLATED into SQL, so it is whitelisted rather than escaped — a role list that can
+// carry arbitrary text into a WHERE clause is an injection, and `replacements` cannot parameterise an
+// IN-list (the `ANY(:ids::uuid[])` lesson: replacements expand an array into a comma list).
+export function buildConversationSearch(fastify, { userId = null, currentConversationId = null, embed = null, acrossRooms = false, roles = ['user', 'assistant'] } = {}) {
   const { txn_messages } = fastify.db
   const seq = txn_messages.sequelize
   const { tableName: MT, schema } = txn_messages.getTableName()
@@ -161,9 +171,19 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
   const ME = `"${schema}"."txn_message_embeddings"`
   // shared scope + projection for both arms (role user/assistant, this user, not the current convo,
   // NEVER incognito — off-the-record chats are excluded from evidence, matching the index exclusion).
-  const SCOPE = `c.user_id IS NOT DISTINCT FROM :userId
+  // ⛔ WHITELIST, NOT ESCAPE. Anything not in this set throws rather than reaching the WHERE clause.
+  const ALLOWED_ROLES = ['user', 'assistant']
+  const asked = Array.isArray(roles) ? roles : [roles]
+  if (!asked.length || asked.some((r) => !ALLOWED_ROLES.includes(r))) {
+    throw new Error(`conversation-search: roles must be a subset of ${ALLOWED_ROLES.join('/')} — got ${JSON.stringify(roles)}`)
+  }
+  const ROLE_IN = `m.role IN (${asked.map((r) => `'${r}'`).join(',')})`
+  // ⭐ THE ROOM PREDICATE, AND IT IS THE WHOLE BOUNDARY. Room-scoped by default; `acrossRooms` drops it
+  // for persona-level self-history, where the ROLE filter is what makes the result hers.
+  const ROOM = acrossRooms ? 'TRUE' : 'c.user_id IS NOT DISTINCT FROM :userId'
+  const SCOPE = `${ROOM}
           AND c.incognito = false
-          AND m.role IN ('user','assistant')
+          AND ${ROLE_IN}
           AND (:excludeConversationId::uuid IS NULL OR m.conversation_id <> :excludeConversationId::uuid)`
   const COLS = `m.id AS message_id, m.conversation_id, m.role, m.content, m.created_at, c.title AS conversation_title`
 

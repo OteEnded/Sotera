@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-20T09:25:56.992Z",
+  "resolvedAt": "2026-08-20T14:39:52.641Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -171,6 +171,19 @@
         "propose_lesson",
         "save_lesson",
         "decline_to_remember"
+      ],
+      "permissions": []
+    },
+    "../../../../../PortableComponents/Tools/SelfHistory": {
+      "id": "@ote/tool-self-history",
+      "name": "SelfHistory",
+      "version": "0.1.0",
+      "type": "tool",
+      "sdk": "^0.6.0",
+      "trust": "first-party",
+      "integrity": "sha256-815d340f63ed8cff58f6d8ad9d7be9f33ef4bc959580495a4c6d2dd3bfa927b3",
+      "components": [
+        "recall_own_history"
       ],
       "permissions": []
     },
