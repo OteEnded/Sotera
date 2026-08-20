@@ -267,6 +267,11 @@ export function composeSystemContext({
   // talking to. A pre-rendered block from relational-knowledge.js, or null. ⭐ SELF-SUBJECT ONLY — it is
   // about the current user, so it carries no third-party disclosure. Anything wider needs Ote's decision.
   relationalStance = null,
+  // OPEN INTENTION (2026-08-20, `memory.intentionInjection`): what she is TRYING TO ACCOMPLISH with this
+  // person, carried across conversations. A pre-rendered block from intention-host.js, or null.
+  // ⭐ ARM B of a real comparison — arm A is tool-only recall. Default off; the experiment flips the
+  // setting rather than anyone editing the system between runs.
+  openIntention = null,
 } = {}) {
   // Parts are collected WITH A KEY, not as bare strings, so the assembled prompt can describe itself:
   // the context-usage breakdown reports real per-section token counts instead of one opaque "system
@@ -298,6 +303,13 @@ export function composeSystemContext({
   // him, the live request must win over a habit derived from three past conversations.
   // `SCOPE.style` for the same reason: it describes how she works, not who she is or what is true.
   if (relationalStance) part('relational-stance', relationalStance, AUTHORITY.persona, SCOPE.style)
+  // ⭐ HER OPEN INTENTION — `persona` authority (hers, ungated but structured, like an L3 note) and
+  // `SCOPE.task`, which is the exact question the scope vocabulary asks: *what to do right now; the
+  // shape of the work*. That pairing matters, because AUTHORITY_BY_SCOPE puts `user` ABOVE `persona` on
+  // task — so a live request outranks a purpose she carried in from three days ago. Classifying it as
+  // `identity` or `principle` would have made a carried intention un-overridable by the person in front
+  // of her, which is the §3e defect (a note fighting the user) with a new name.
+  if (openIntention) part('open-intention', openIntention, AUTHORITY.persona, SCOPE.task)
   if (customInstructions && customInstructions.trim()) {
     // ⚠️ SCOPE IS AN APPROXIMATION HERE, and knowingly so. Custom instructions are free text and can
     // say anything — "be terse" (style) and "always start with a summary" (task) are both ordinary.

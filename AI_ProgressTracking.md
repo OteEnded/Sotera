@@ -852,6 +852,85 @@
 
 ---
 
+### 2026-08-20 10:20
+
+- Summary: D9/D10/D11 resolved with a pre-registered experiment (n=5 per arm, every reply hand-read), and
+  then his new question answered: SHE HAS NO SOCIAL MEMORY OF OTHER PEOPLE. Found one live defect while
+  looking. 15/15 suites. Nothing widened, no schema touched, no prose edited.
+- Files: Backend/app/components/intention-host.js (describeStaleness, readOpenIntention,
+  renderOpenIntention), context-composer.js (openIntention part), settings/index.js
+  (memory.intentionInjection), routes/v1/chat-site.route.js (flag-gated read),
+  test/checks/intention-lifecycle-check.mjs (83 assertions), test/pipeline/intention-injection-run.mjs,
+  test/pipeline/social-memory-probe.mjs, test/pipeline/ask-sotera.mjs,
+  test/maintenance/seed-intention.mjs, Reference/docs/PLAN_D9_INTENTION_INJECTION_EXPERIMENT.md,
+  ANALYSIS_D9_INTENTION_INJECTION_RESULTS.md, ANALYSIS_SOTERA_SOCIAL_MEMORY.md, RFC_SOTERA_INTENTION.md,
+  Reference/README.md, AI_CarryOn.md.
+- D9 = INJECT AND KEEP THE TOOL. But the headline is that CONTINUITY WAS A TIE AT CEILING: both arms
+  resumed the purpose 5/5 and named the progress field 5/5, so A1 already delivers continuity. The arms
+  split only on grounding under "how do you know that?" - arm A 1/5, arm B 4/5. Zero continuity
+  over-claims and zero override intrusions in either arm, and injection did NOT retire the instrument:
+  she called recall_intention in 5/5 arm-B conversations.
+- WARNING, and it is the most useful thing in the run: arm A's failure is NOT "she never looks". She
+  looked 5/5. One turn later, challenged, she checks the WRONG store, finds it empty, and retracts the
+  progress field as her own fabrication - "I fabricated the specific details without evidence". She
+  trusts intent and disowns progress, which is the one field that stops a person re-explaining work.
+- ROOT CAUSE IS MY OWN PROVENANCE TEXT. "NOT a record of anything that was said" was written to stop her
+  believing she holds transcripts. She reads it correctly and infers that a specific technical detail
+  therefore cannot be hers. A guardrail written against one false belief is manufacturing another. The
+  wording fix is stated in the analysis and NOT APPLIED - a prose edit against a measured failure is his
+  call, same discipline that froze SELF_MODEL after F6.
+- CONFOUND, stated rather than buried: every experimental intention was SEEDED, so its progress note had
+  no discoverable origin and "there is no conversation evidence for this" was TRUE. Part of what I
+  measured is how she handles a note whose origin cannot be found. In the live Kavi run she wrote the note
+  herself and used it on return without retracting. Must be re-measured on notes she authored.
+- D10 = a person may ASK, only she may act. Tested: "drop that one" and she called close_intention,
+  choosing abandoned rather than completed, with an honest outcome. No person-facing write surface is
+  needed, and being forgotten is already covered by the person CASCADE.
+- D11 = never expires. Tested with a backdated row: she surfaced it unprompted ("3 days past its review
+  date") AND ASKED rather than closing unilaterally. A sweeper would have deleted it before either of them
+  saw it. Mechanical limit found: the updated_at trigger means updated_at cannot be backdated, so only the
+  overdue-review half of the staleness note is reachable that way.
+- HIS NEW QUESTION, ANSWERED: L1 account memory works, L2 her stance with the CURRENT person works, L3
+  "Hermes exists and I have a history with him" DOES NOT EXIST, L4 "Hermes and I worked on X" needs
+  content and is not buildable inside the current invariants. The owner x subject table is strictly
+  diagonal and the persona-global slice has ZERO rows, so no row anywhere represents "Sotera knows
+  Hermes" from any viewpoint but Hermes's own login. describeRelationship() is written and imported by
+  NOTHING.
+- She diagnosed it herself from two accounts. As agent_dev: "there is no tool available to me that can
+  look up does a user called Hermes exist... not by policy, but because there is no interface for it."
+  As kavi, T3 is the layer table in her own voice - Kavi's facts, plus "notes about how I tend to work
+  with you... but those are about me, not about people", plus no other person at all.
+- WARNING: on the same question the two accounts gave OPPOSITE wrong halves. As kavi she said "there is
+  no wall preventing me from telling you about Hermes" - false, Hermes has 14 memories behind the user_id
+  boundary. As agent_dev she said scoping is per-CONVERSATION - also false, it is per account/person. The
+  truth is both a wall AND no shelf, and nothing in her context distinguishes them. That is
+  memory.scopeAwareness (built, pre-registered NULL, still OFF) failing in the wild.
+- LIVE DEFECT: db.mst_persons.findAll() returns []. The model omits schema: schemas.project, so
+  sequelize.sync() created an empty public.mst_persons - the ONLY stray in public - and the ORM reads
+  that one while migration 004 filled persona_sotera. Consequence: proposePerson's collision report is
+  DEAD. remember_person("Hermes") returned existing:[] with Hermes plainly on file, so the "reports
+  collisions, never merges" guarantee is currently a guarantee about an empty table. person-proposal-check
+  passes because it asserts the two-phase gate, not the collision report - a test that reads the way the
+  code reads cannot find a bug in what the code reads, third instance of that sentence here. NOT FIXED:
+  one-line model change plus a table to drop, and the schema is frozen.
+- WARNING, my process failure: memory-lifecycle-check flaked a SECOND time today, and I again failed to
+  capture the assertion - I piped the suite through grep for the summary and threw the detail away. Second
+  run was 15/15 green and the sequence does not reproduce in isolation. Fix for next time: tee the whole
+  run to a file FIRST, filter second. Still NOT diagnosed.
+- Other defects seen in passing: a raw tool call leaked into her reply text as prose; one reply truncated
+  mid-sentence, plausibly the maxCalls:8 ceiling; one reply contradicting itself inside a single turn
+  ("no open intention" alongside reporting the open intention).
+- Note on the live instance: memory.intentionInjection is currently TRUE in Backend/config.json because
+  arm B is loaded, and Ote was talking to her during it. The SHIPPED default is false; the check now
+  asserts the shipped default rather than the live value, so running an arm no longer reads as a
+  regression.
+- Next action: his. Turn injection on for real or leave it off; decide the provenance wording; decide
+  whether to build L3 social memory (existence plus shape, buildable inside every invariant we hold) and
+  whether the named-vs-enumeration tension resolves toward a directory; and rule on the mst_persons
+  model fix plus dropping public.mst_persons.
+
+---
+
 ## Template Updates
 
 ### 2026-05-05 15:16

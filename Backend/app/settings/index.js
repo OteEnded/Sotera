@@ -285,6 +285,11 @@ const SETTING_DEFS = {
     validate: (v) => typeof v === 'boolean',
     describe: "Let Sotera use her OWN relational memory: what she has learned about how SHE works with the person she is talking to (tier C stance records, e.g. \"I check things before asserting them\"). ⭐ SELF-SUBJECT ONLY — the records injected are about the CURRENT USER, so there is no third-party disclosure surface: no name lookup, no enumeration, and nothing about anyone else's relationship. Records are derived by the subject-side writer inside that person's own scope, contain ONLY closed-vocabulary labels plus counts (there is no content column and no source ids), and are injected at `persona` authority / `style` scope so a live user request still outranks a habit derived from past conversations. ⚠️ Does NOT grant access to that person's private memories — it is a fact about Sotera's practice, not about them. DEFAULT OFF.",
   },
+  'memory.intentionInjection': {
+    fromConfig: (c) => c?.memory?.intentionInjection ?? false,
+    validate: (v) => typeof v === 'boolean',
+    describe: "Put her OPEN INTENTION with the current person into every turn's context automatically, instead of waiting for her to call recall_intention. ⭐ THIS IS ARM B OF A REAL COMPARISON, not a convenience: tool-only recall risks her never looking (measured 2026-08-19 — she asserted her own model with no tool call and was wrong), while automatic injection risks the failure that produced recall_own_memory in the first place — a persistent thing described to her as prose she cannot verify, which she once retracted as her own fabrication and later called \"an illusion of continuity\". The block is rendered from her own stored fields (intent/why/progress), states that it came from a store rather than from experience, and says outright that she did not run between conversations, because the over-correction to guard against is \"I have been thinking about this\". Injected at `persona` authority / `task` scope, so a live user request outranks a carried purpose (AUTHORITY_BY_SCOPE puts `user` above `persona` on task). Adds no new access: the intention is hers, about the person she is already talking to. DEFAULT OFF.",
+  },
   'memory.layerAuthority': {
     fromConfig: (c) => c?.memory?.layerAuthority ?? false,
     validate: (v) => typeof v === 'boolean',

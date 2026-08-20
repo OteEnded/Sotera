@@ -28,7 +28,7 @@ import { normalizeWorkingMemory, renderWorkingMemory, extractIntent, initWorking
 import { makeEmbedder } from '../../components/memory-embed-host.js'
 import { readOwnStance, renderOwnStance } from '../../components/relational-knowledge.js'
 import { initOwnMemory } from '../../components/own-memory-host.js'
-import { initIntention } from '../../components/intention-host.js'
+import { initIntention, readOpenIntention, renderOpenIntention } from '../../components/intention-host.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
 import { createSteerRegistry } from '../../chat/steer-registry.js'
@@ -1503,6 +1503,26 @@ export default async function chatSiteRoutes(fastify) {
             return renderOwnStance(stance, { subjectName: request.user.displayName || request.user.username })
           } catch (e) {
             fastify.log?.debug?.({ err: e?.message }, '[relational] stance read failed (non-fatal)')
+            return null
+          }
+        })()
+        : null,
+      // ⭐ ARM B · her OPEN INTENTION, injected automatically instead of waiting for recall_intention.
+      // Read per turn like the arms above, so the experiment flips a setting rather than restarting her.
+      // Fails soft: no person row, no open row, or a failed read all just mean no block — an intention
+      // she cannot see is a smaller failure than a turn that dies over one.
+      openIntention: getSetting(fastify.config, 'memory.intentionInjection') === true
+        ? await (async () => {
+          try {
+            const [me] = await fastify.db.txn_memories.sequelize.query(
+              'SELECT person_id::text AS pid FROM persona_sotera.mst_users WHERE id = :uid',
+              { replacements: { uid: request.user.id }, type: fastify.db.txn_memories.sequelize.QueryTypes.SELECT },
+            )
+            if (!me?.pid) return null
+            const row = await readOpenIntention({ db: fastify.db, personId: me.pid })
+            return renderOpenIntention(row, { subjectName: request.user.displayName || request.user.username })
+          } catch (e) {
+            fastify.log?.debug?.({ err: e?.message }, '[intention] open-intention read failed (non-fatal)')
             return null
           }
         })()

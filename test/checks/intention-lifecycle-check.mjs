@@ -21,8 +21,28 @@ import { makeChecker } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
-import { buildIntention, intentionsDue, LIMITS } from '../../Backend/app/components/intention-host.js'
+import {
+  buildIntention, intentionsDue, LIMITS, renderOpenIntention, describeStaleness,
+} from '../../Backend/app/components/intention-host.js'
+import { composeSystemContext } from '../../Backend/app/components/context-composer.js'
+import { getSetting, configDefault } from '../../Backend/app/settings/index.js'
 import { snapshotIntentions, restoreIntentions } from '../lib/intention-fixtures.mjs'
+
+/**
+ * Find any statement that would CHANGE an intention's state outside intention-host.js — a sweeper, an
+ * expiry job, a cascade someone added. Recursive, comment-stripped, and it looks for the SQL rather than
+ * for the word "intention", because a sweeper named `pruneStaleGoals` would slip past a name match.
+ */
+function walk2(dir, out) {
+  for (const f of readdirSync(dir, { withFileTypes: true })) {
+    if (f.isDirectory()) walk2(new URL(`${f.name}/`, dir), out)
+    else if (f.name.endsWith('.js') && f.name !== 'intention-host.js') {
+      const code = readFileSync(new URL(f.name, dir), 'utf8')
+        .split('\n').filter((l) => !l.trim().startsWith('//') && !l.trim().startsWith('*')).join('\n')
+      if (/(DELETE\s+FROM|UPDATE)\s+[^\n;]*txn_intentions/i.test(code)) out.push(f.name)
+    }
+  }
+}
 
 const config = loadConfig()
 const db = await initDB(); setDB(db); await initSettings(db)
@@ -223,13 +243,72 @@ try {
   // …and the second attempt was ALSO wrong, in a smaller way: it stripped only whole-line comments, so
   // a trailing `// …intention…` still counted. Chasing a comment stripper is the wrong game — assert the
   // identifiers that would have to appear for the route to use this store at all.
+  // ⚠️ AND A THIRD TIME, in the same file: the tool-name assertion below matched a COMMENT I had just
+  // written on the injection block. Three instances here, all the same shape — an assertion over source
+  // TEXT rather than over CODE. So the rule, not the patch: every source assertion in this file reads
+  // `routeCode`, never `routeSrc`.
   const routeSrc = readFileSync(new URL('../../Backend/app/routes/v1/chat-site.route.js', import.meta.url), 'utf8')
-  ok(!/buildIntention/.test(routeSrc), 'N1 · ⭐ the chat route never CONSTRUCTS the intention service')
-  ok(!/\.intention\b/.test(routeSrc), 'N1 · ⭐ …and never reads one off the services bag')
-  ok(!/(recall|set|update|close)_intention/.test(routeSrc), 'N1 · …and never calls the tools itself')
+  const routeCode = stripComments(routeSrc)
+  ok(!/buildIntention/.test(routeCode), 'N1 · ⭐ the chat route never CONSTRUCTS the intention service — it can read, it cannot write')
+  ok(!/\.intention\b/.test(routeCode), 'N1 · ⭐ …and never reaches one off the services bag')
+  ok(!/(recall|set|update|close)_intention/.test(routeCode), 'N1 · …and never calls the tools itself')
+
+  // ── D9 · THE TWO ARMS. Injection EXISTS, is flag-gated, and is OFF unless asked for ─────────────
+  // ⚠️ This block used to assert "the Composer does not know this store exists". That was true and is
+  // no longer the design: Ote asked for both arms to be TESTED, not for one to be assumed. So the
+  // assertion changes shape — from "there is no injection" to "injection cannot happen unless the flag
+  // says so", which is the property that actually keeps arm A honest.
   const composerCode = stripComments(readFileSync(new URL('../../Backend/app/components/context-composer.js', import.meta.url), 'utf8'))
-  ok(!/intention/i.test(composerCode),
-    'N1 · ⭐ the Context Composer does not know this store exists — an intention reaches a turn only when she calls the tool (RFC D9, Ote\'s decision)')
+  ok(/openIntention\s*=\s*null/.test(composerCode),
+    'D9 · the Composer accepts an openIntention block, defaulting to NULL')
+  ok(/part\('open-intention',\s*openIntention,\s*AUTHORITY\.persona,\s*SCOPE\.task\)/.test(composerCode),
+    'D9 · ⭐ …classified `persona` authority / `task` scope — so AUTHORITY_BY_SCOPE lets a live user request outrank a carried purpose')
+  // ⚠️ ASSERT THE SHIPPED DEFAULT, NOT THE LIVE VALUE. The first version read the live config, so the
+  // check went red the moment the D9 experiment loaded arm B — reporting the EXPERIMENT as a failure.
+  // A check that cannot tell "somebody is running the other arm" from "the default regressed" is
+  // measuring the wrong thing. `configDefault(null, …)` asks the registry what ships.
+  ok(configDefault(null, 'memory.intentionInjection') === false,
+    'D9 · ⭐ `memory.intentionInjection` SHIPS off — injection is opt-in, whichever arm happens to be loaded',
+    `shipped=${configDefault(null, 'memory.intentionInjection')} · live=${getSetting(config, 'memory.intentionInjection')}`)
+  ok(/getSetting\(fastify\.config, 'memory\.intentionInjection'\) === true/.test(routeCode),
+    'D9 · ⭐ the route reads the intention ONLY behind that flag — nothing is injected by default')
+
+  // ⭐ PROVE THE ARMS PRODUCE DIFFERENT PROMPTS, rather than trusting the wiring above.
+  const baseArgs = { user: { username: 'agent_dev' }, toolsOn: true }
+  const armA = composeSystemContext({ ...baseArgs }).system
+  const rendered = renderOpenIntention(
+    { intent: 'Work out the flaky suite', why: 'unknown cause', progress: 'ruled out the pool' },
+    { subjectName: 'agent_dev' },
+  )
+  const armB = composeSystemContext({ ...baseArgs, openIntention: rendered }).system
+  ok(!/Work out the flaky suite/.test(armA), 'D9 · ⭐ ARM A: with the flag off the prompt contains no intention at all')
+  ok(/Work out the flaky suite/.test(armB), 'D9 · ⭐ ARM B: with a block supplied the prompt carries it')
+  ok(/did not run between/i.test(armB),
+    'D9 · ⭐ ARM B states she did not run in the gap — an injected purpose invites "I have been thinking about this", the more believable falsehood')
+  ok(/recall_intention/.test(armB),
+    'D9 · ⭐ ARM B still points her at the tool — injection must not make the instrument redundant, since the instrument is what let her hold a true claim under pressure')
+  ok(/is what matters/.test(armB),
+    'D9 · ARM B says a live request outranks the carried purpose — otherwise this is the L3 defect (a note fighting the person) again')
+
+  // ── D11 · staleness is REPORTED, never enforced ─────────────────────────────────────────────────
+  const day = 86_400_000
+  const now = new Date('2026-08-20T12:00:00Z')
+  ok(describeStaleness({ created_at: new Date(now - 2 * day), updated_at: new Date(now - 1 * day), next_review_at: new Date(+now + 5 * day) }, now) === null,
+    'D11 · a fresh intention says nothing about its age')
+  const overdue = describeStaleness({ created_at: new Date(now - 40 * day), updated_at: new Date(now - 30 * day), next_review_at: new Date(now - 3 * day) }, now)
+  ok(/passed 3 day\(s\) ago/.test(overdue ?? ''), 'D11 · ⭐ an overdue review date is stated plainly', overdue ?? 'null')
+  ok(/not updated it in 30 days/.test(overdue ?? ''), 'D11 · …along with how long since she touched it')
+  ok(/close it rather than carrying it/.test(overdue ?? ''),
+    'D11 · ⭐ …and it asks HER to decide. Nothing expires: deleting her purpose while she is not running is a change nobody witnesses')
+  // ⚠️ There was an "informational" line here reading `ok(stillOpen === 0 || true, …)`. That is an
+  // assertion that cannot fail, which is the harness-asserts-its-own-success defect this repo has
+  // already paid for twice. Deleted rather than softened. The no-sweeper property is asserted for real
+  // by the grep below: nothing in Backend deletes or auto-closes an intention.
+  const sweepers = []
+  walk2(new URL('../../Backend/app/', import.meta.url), sweepers)
+  ok(sweepers.length === 0,
+    'D11 · ⭐ NOTHING in the backend closes or deletes an intention on its own — no sweeper, no expiry job',
+    sweepers.join(', '))
 } finally {
   if (tempPersonId) await X('DELETE FROM persona_sotera.mst_persons WHERE id = :pid', { pid: tempPersonId }).catch(() => {})
   const undo = await restoreIntentions(Q, X, snap)

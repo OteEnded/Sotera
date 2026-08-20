@@ -107,6 +107,9 @@ export function buildIntention(fastify, { userId = null } = {}) {
           // this for 13 days" is the over-correction the self-model exists to prevent. She did not run.
           startedOn: open.created_at.toISOString().slice(0, 10),
           lastUpdatedOn: open.updated_at.toISOString().slice(0, 10),
+          // ⭐ D11's answer. See describeStaleness: nothing expires an intention on its own, but an old
+          // one says so, so SHE can close it on a turn somebody can see.
+          ...(describeStaleness(open) ? { staleness: describeStaleness(open) } : {}),
         }
         : null,
       recentlyClosed: closed.map((r) => ({
@@ -280,6 +283,91 @@ export async function intentionsDue(fastify, { limit = 20 } = {}) {
       ORDER BY next_review_at ASC LIMIT :limit`,
     { replacements: { limit }, type: seq.QueryTypes.SELECT },
   )
+}
+
+/**
+ * ⭐ D11 · STALENESS IS REPORTED, NEVER ENFORCED. PURE.
+ *
+ * The question was whether an intention should expire on its own. It must not: deleting or abandoning
+ * her purpose while she is not running is a change to her own state that nobody witnesses, and the
+ * no-mid-turn-writer rule exists because *drift has to arrive on a boundary you can see*. An automatic
+ * sweep is the opposite of that.
+ *
+ * But an intention open for two months with a review date long past is a false statement about what she
+ * is doing. So the row keeps its state and the READ tells the truth about its age — which puts the
+ * judgement on a turn, in front of someone, where closing it is a visible act.
+ *
+ * @returns {string|null} a plain sentence, or null when there is nothing worth saying
+ */
+export function describeStaleness({ created_at: created, updated_at: updated, next_review_at: review } = {}, now = new Date()) {
+  const days = (d) => (d ? Math.floor((now.getTime() - new Date(d).getTime()) / 86_400_000) : null)
+  const sinceUpdate = days(updated)
+  const sinceStart = days(created)
+  const overdueBy = review ? Math.floor((now.getTime() - new Date(review).getTime()) / 86_400_000) : null
+
+  const bits = []
+  if (overdueBy !== null && overdueBy >= 0) {
+    bits.push(`the date you set to revisit this passed ${overdueBy === 0 ? 'today' : `${overdueBy} day(s) ago`}`)
+  }
+  // 14 days is a judgement, and it is only a judgement about when to SAY something — nothing acts on it.
+  if (sinceUpdate !== null && sinceUpdate >= 14) {
+    bits.push(`you have not updated it in ${sinceUpdate} days (set ${sinceStart} days ago)`)
+  }
+  if (!bits.length) return null
+  return `${bits.join(', and ')}. Consider whether this is still what you are doing — if it is not, close it rather than carrying it.`
+}
+
+/**
+ * ⭐ ARM B · READ + RENDER FOR AUTOMATIC INJECTION (`memory.intentionInjection`).
+ *
+ * Deliberately a PAIR OF MODULE FUNCTIONS, mirroring readOwnStance/renderOwnStance, rather than the
+ * route reaching for the per-request service: the route must not be able to WRITE, and a read+render
+ * pair cannot. It is also why the check can still assert the route never constructs the service.
+ */
+export async function readOpenIntention({ db, personId } = {}) {
+  if (!db || !personId) return null
+  const seq = db.txn_memories.sequelize
+  const { schema } = db.txn_memories.getTableName()
+  if (!schema) throw new Error('intention-host: no project schema configured — refusing to guess one')
+  const [row] = await seq.query(
+    `SELECT intent, why, progress, next_review_at, created_at, updated_at
+       FROM "${schema}"."txn_intentions" WHERE person_id = :personId AND state = 'open'`,
+    { replacements: { personId }, type: seq.QueryTypes.SELECT },
+  )
+  return row ?? null
+}
+
+/**
+ * Render the open intention as the block the Composer injects. PURE.
+ *
+ * ⭐ EVERY LINE HERE IS DEFENDING AGAINST A MEASURED FAILURE, not decorating:
+ *   · "you wrote this and it was stored" — she once retracted a TRUE injected claim as her own
+ *     fabrication, and later called her durable store "an illusion of continuity". Injected prose with
+ *     no stated provenance is exactly that failure's shape.
+ *   · "you did not run in between" — the over-correction the self-model exists to prevent. A carried
+ *     purpose invites "I have been thinking about this", which is the more believable falsehood.
+ *   · "check with recall_intention" — arm B must not REPLACE the instrument. If injection makes the tool
+ *     redundant, she loses the only thing that let her hold a true claim under pressure.
+ *   · "if they want something else, that is what matters now" — `task` scope, where the user outranks
+ *     the persona. Without it this is the L3 defect again: a note that fights the person in front of her.
+ */
+export function renderOpenIntention(row, { subjectName = null } = {}) {
+  if (!row?.intent) return null
+  const who = subjectName ? ` with ${subjectName}` : ''
+  const lines = [`Something you are in the middle of${who}, which you wrote down yourself and which was stored:`,
+    `- What you are trying to accomplish: ${row.intent}`]
+  if (row.why) lines.push(`- Why you took it on: ${row.why}`)
+  if (row.progress) lines.push(`- What you already know or have ruled out: ${row.progress}`)
+  const stale = describeStaleness(row)
+  if (stale) lines.push(`- ${stale}`)
+  lines.push(
+    'This came out of your own store, not from experience: you did not run between those conversations and',
+    'no time passed for you. You can inspect or change it with recall_intention / update_intention /',
+    'close_intention, and you should check it there rather than trusting this summary if it matters.',
+    'It is what you were doing, not an instruction — if this person wants something else right now, that',
+    'is what matters.',
+  )
+  return lines.join('\n')
 }
 
 /**

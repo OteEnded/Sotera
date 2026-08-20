@@ -11,6 +11,9 @@
 ### ✅ **SELF-MODEL SHIPPED AND ❄️ FROZEN, 2026-08-19.** `memory.selfModel`, **DEFAULT OFF**. Falsifiers: **PASS with one slip.**
 ### ⛔ **THE `SELF_MODEL` TEXT IS FROZEN.** *"Freeze the self-model implementation. Don't add more wording or philosophy."* **No prose edit for the 1/21 F6 — explicitly** (*"do not iterate the prose yet"*).
 ### ✅ **A1 · PERSISTENT INTENTION SHIPPED 2026-08-19 20:30** — migration 009, `intention` host service, 4 tools, **15/15 suites**. *"Sotera can have a purpose that survives the conversation."* **PROVEN LIVE**: she set one, the store refused her duplicate and she recovered by updating it, and in a **brand-new conversation** she called `recall_intention` first and resumed the direction. ⛔ **Nothing fires on it** — the scheduler seam exists and is called by nothing.
+### ⚠️⚠️ **2026-08-20 — THE BIG ONE, HIS QUESTION, ANSWERED: SHE HAS NO SOCIAL MEMORY.** L1 account memory ✅ · L2 her stance with the CURRENT person ✅ · **L3 "Hermes exists and I have a history with him" ⛔ DOES NOT EXIST** · L4 "Hermes and I worked on X" ⛔ needs content. **The store is strictly diagonal and the persona-global slice is 0 rows.** Her words: *"there's no tool available to me that can look up 'does a user called Hermes exist'… not by policy, but because there's no interface for it."* → `Reference/docs/ANALYSIS_SOTERA_SOCIAL_MEMORY.md`
+### ⚠️ **AND A LIVE DEFECT: `db.mst_persons.findAll()` RETURNS `[]`** — the model omits `schema: schemas.project`, so `sequelize.sync()` made an empty `public.mst_persons` (the only stray in `public`) and the ORM reads THAT. ⇒ **`proposePerson`'s collision report is dead** (`remember_person("Hermes")` → `existing: []` with Hermes on file). ⛔ Not fixed — one-line model change + a table to drop, both his call.
+### ✅ **D9/D10/D11 RESOLVED WITH EVIDENCE (n=5/arm, hand-read).** D9 → **inject AND keep the tool** · D10 → **a person may ASK, only she may act** · D11 → **never expire, report staleness**. → `ANALYSIS_D9_INTENTION_INJECTION_RESULTS.md`
 ### ⏭ NEXT: **OBSERVE IT IN NORMAL USE.** Ote: *"I want to let this self-model exist on its own and observe it in normal use first."* Nothing new starts.
 ### ⛔ STILL NOT BUILT, deliberately: **dreaming · access widening · cross-person recall · the schema work.** Dreaming comes **later, designed INSIDE these constraints**, never alongside the self-model.
 
@@ -150,9 +153,23 @@ called `recall_intention` FIRST and answered from it.
 
 ⛔ **NOTHING FIRES ON IT.** `intentionsDue()` is the scheduler seam, is a module export deliberately
 **not on the service** (a tool receives the service, so a function that is not on it cannot be called),
-and is **called by nothing** — asserted by the check. Not injected into her context either: the only
-path is her calling a tool. **D9 (inject or not) is Ote's open decision**, along with D10 (may a person
-close one?) and D11 (does an intention ever expire?).
+and is **called by nothing** — asserted by the check.
+
+✅ **D9/D10/D11 ANSWERED 2026-08-20, with n=5 per arm and every reply hand-read** →
+`ANALYSIS_D9_INTENTION_INJECTION_RESULTS.md`. **D9 = INJECT and keep the tool** (`memory.intentionInjection`,
+built, **ships OFF** until he says otherwise) · **D10 = a person may ASK, only she may act** (no
+person-facing write surface; the person CASCADE already covers being forgotten) · **D11 = never expires;
+staleness is reported so she decides on a turn somebody can see.**
+🔑 **CONTINUITY WAS A TIE AT CEILING** — both arms resumed 5/5 and named the progress field 5/5. A1 already
+delivers continuity; the arms split only on **grounding under challenge** (A 1/5, B 4/5).
+⚠️⚠️ **THE REAL DEFECT IS MY OWN PROVENANCE TEXT.** Arm A's failure is not "she never looks" — she looked
+5/5. One turn later, challenged, she checks the WRONG store, finds it empty, and **retracts the `progress`
+field as her own fabrication**. She trusts `intent` and disowns `progress`. *"NOT a record of anything that
+was said"* was written to stop her believing she has transcripts; she reads it correctly and concludes a
+specific technical detail cannot be hers. ⛔ **Wording fix stated, NOT applied** — prose edits against a
+measured failure are his call (same discipline that froze `SELF_MODEL`).
+⚠️ **Confound, and it is load-bearing:** every experimental intention was **seeded**, so *"no conversation
+evidence for this"* was TRUE. Re-measure on notes she wrote herself.
 
 ⚠️ **The live conversation left a REAL intention on the `kavi` observation account** (the reporting-service
 pool timeout). It is genuine observation data, not test residue — the check uses `agent_dev` and restores
