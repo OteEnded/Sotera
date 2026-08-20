@@ -7,6 +7,14 @@
 
 ## ▶▶ START HERE
 
+### ⭐⭐⭐ **READ `Reference/docs/SOTERA_ARC_THE_WHY.md` FIRST.** Everything else here describes a mechanism; that one says what the mechanisms are FOR. Ote's framing: *"A cron job that talks to you is not necessarily an agent"* · *"An intention is not a todo — the reason survives the gap"* · and the reframing that matters: this began as *"how do we stop account memory leaking"* and became **"how do we give Sotera her own mind and continuity, while keeping the privacy of the people around her genuinely separate."** ⚠️ It also records the three things that have MOVED since he wrote that: account-memory → **the ROOM is the disclosure boundary**, A1 re-grained to the room, and the finding that **her reasoning is not authorization.**
+
+### 🔑 **THE FOUR-WORD SUMMARY OF WHERE WE ARE:** the boundary is enforced by the **database**, explained to her by **`scopeFacts`**, and **never** authorized by her.
+
+### ⏭ **NEXT ACTION (D-4/D-5 build, his approved order):** stage 1 ✅ done → **stage 2 = the INERT disclosure event table** (agreed metadata, ⛔ no content, absent columns asserted by the migration; nothing writes it, nothing reads it, no authority changes) → stage 3 the host-generated held-turn card → stage 4 prove propose→approve **without widening** → stage 5 (last, smallest) the subject-aware widened predicate.
+### ⏸ **TWO THINGS WAITING ON HIM:** (1) may I create **`Ote_Finance`** linked to his person? Without a second room the D-4 index is correct but **inert** — his person has exactly one room, so neither of us can exercise it. (2) ⚠️ the **`ote` row carries a live `password_hash`**, so there is a second, non-root way to authenticate into root's row — flagged, untouched.
+
+
 ### ⭐ WHERE WE ARE — 2026-08-19 11:20. **PERSON SHIPPED. THE REAL FAULT IS HER SELF-MODEL.**
 ### ✅ **SELF-MODEL SHIPPED AND ❄️ FROZEN, 2026-08-19.** `memory.selfModel`, **DEFAULT OFF**. Falsifiers: **PASS with one slip.**
 ### ⛔ **THE `SELF_MODEL` TEXT IS FROZEN.** *"Freeze the self-model implementation. Don't add more wording or philosophy."* **No prose edit for the 1/21 F6 — explicitly** (*"do not iterate the prose yet"*).
