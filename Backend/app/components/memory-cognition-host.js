@@ -29,11 +29,15 @@
 // the smallest pipeline that can re-run the four failing variants, and nothing more. Adding them is
 // additive and does not change any stage.
 
+import { Op } from 'sequelize'
 import { formCues, hasCue, populationsFor } from './memory-cognition-cues.js'
 import {
   SOURCE, BASIS, AVAILABILITY, RETENTION, WARRANT, findIllegalPromotions, corroborate,
 } from './memory-cognition-axes.js'
 import { findImplementationLeaks } from './memory-cognition-vocabulary.js'
+// ⭐ THE OWNERSHIP RULE LIVES IN ONE PLACE. ⛔ This file must never restate it inline — two copies of an
+// ownership rule is how they stop agreeing, and this one decides whether authorization happens at all.
+import { requiresAuthorization } from './memory-ownership.js'
 import { buildConversationSearch } from './conversation-search.js'
 import { makeEmbedder } from './memory-embed-host.js'
 import { buildDisclosure } from './disclosure-host.js'
@@ -246,30 +250,103 @@ export function buildMemoryCognition(fastify, {
       return { ...ep, who: p?.who ?? null, roomUserId: p?.roomUserId ?? null, withThem, score: (withThem ? 100 : 0) + ep.matches + recency }
     }).sort((a, b) => b.score - a.score)
 
-    // ── 5 · RESOLVE EACH EPISODE THROUGH THE ONE DOOR ─────────────────────────────────────────────
+    // ── 5 · ⭐⭐⭐ HER OWN HALF IS FETCHED DIRECTLY. THE COUNTERPART'S GOES THROUGH THE DOOR. ─────────
+    //
+    // ⚠️⚠️ WHAT THIS REPLACES, AND WHY IT WAS WRONG. Every episode used to be resolved with
+    // `inspectAround`, which asks the disclosure layer for permission — so one ordinary question about her
+    // own sentences produced **15 disclosure grants**. Ote: *"For Sotera's own material, no disclosure
+    // authorization should happen at all — not 'authorize and then allow,' but genuinely outside that
+    // path… don't just suppress the logging; remove the authorization path itself."*
+    //
+    // ⭐ A grant that is always granted is still a grant. It writes a row, it implies a boundary was
+    // crossed, and it teaches every reader of `log_disclosure_events` that her own sentences are somebody's
+    // to allow. ⇒ `ownerOf({kind:'message', role:'assistant'}) === 'sotera'` and `requiresAuthorization`
+    // is FALSE, so this path is not entered for her half at all.
+    //
+    // ⛔ AND THE COUNTERPART'S HALF IS NOT SMUGGLED THROUGH WITH IT. It is `account`-owned, it still goes
+    // to `inspectAround`, and it is still recorded. That asymmetry is the design, not a compromise.
+    // ⭐⭐ THE DECISION IS **ASKED**, NOT ASSUMED — and that is the difference between deriving behaviour
+    // from the ownership rule and restating it here. Two copies of an ownership rule is how they stop
+    // agreeing, and this one decides whether an authorization path is entered at all. ⇒ if the rule in
+    // `memory-ownership.js` ever changes, this code follows it instead of contradicting it.
+    const HER_HALF = { kind: 'message', role: 'assistant' }
+    const THEIR_HALF = { kind: 'message', role: 'user' }
+    const herHalfNeedsADoor = requiresAuthorization(HER_HALF)     // false — she owns her utterances
+    const theirHalfNeedsADoor = requiresAuthorization(THEIR_HALF) // true  — the account owns theirs
+    if (herHalfNeedsADoor) {
+      // ⛔ UNREACHABLE BY DESIGN, AND LOUD IF IT EVER IS NOT. If the ownership rule ever says her own
+      // sentences need permission, that is an inverted model and not something to route around silently.
+      await log?.('[cognition] ⛔ ownership rule says her own utterances require authorization — refusing to '
+        + 'proceed on that basis; see memory-ownership.js', import.meta.url)
+    }
+
     const items = []
     for (const ep of scored.slice(0, LIMITS.episodes)) {
-      let opened = null
+      // ── 5a · HER OWN LINES · ownership, no authorization, no grant ────────────────────────────────
+      // A plain windowed read of HER messages around the centre. ⛔ No disclosure call, in any room.
+      let mine = []
       try {
-        opened = await disclosure.inspectAround({ messageId: ep.centre, radius: LIMITS.windowRadius })
-      } catch { opened = null }
+        const centre = await db.txn_messages.findOne({
+          where: { id: ep.centre }, attributes: ['rolling_id'], raw: true,
+        })
+        if (centre) {
+          mine = await db.txn_messages.findAll({
+            where: {
+              conversation_id: ep.cid,
+              role: 'assistant', // ⭐ THE OWNERSHIP RULE, EXPRESSED AS THE QUERY ITSELF
+              rolling_id: {
+                [Op.gte]: Number(centre.rolling_id) - LIMITS.windowRadius * 2,
+                [Op.lte]: Number(centre.rolling_id) + LIMITS.windowRadius * 2,
+              },
+            },
+            attributes: ['id', 'content', 'created_at', 'rolling_id'],
+            order: [['rolling_id', 'ASC']], limit: LIMITS.windowRadius * 2 + 1, raw: true,
+          })
+        }
+      } catch (e) {
+        await log?.(`[cognition] own-half read failed for ${ep.cid}: ${e.message}`, import.meta.url)
+      }
 
-      // ⭐ THE THREE OUTCOMES, ALL OF THEM RESOLVED RATHER THAN PREDICTED:
-      //   verified   — she may read the exchange, both sides
-      //   own_only   — her half in full, the counterpart's withheld (change A)
-      //   anything else — she knows it happened and cannot see it
-      const state = opened?.ok === true ? opened.state : null
-      const window = Array.isArray(opened?.window) ? opened.window : []
-      const exchanges = window
-        .map((w) => ({
-          who: w.who === 'you' ? 'me' : (w.who ?? ep.who ?? 'them'),
-          said: w.said ? clip(w.said, 260) : null,
-          when: w.when ?? null,
-          withheld: !w.said,
-        }))
-        .filter((x) => x.said || x.withheld)
+      // ── 5b · THE COUNTERPART'S LINES · authorization, and only if it is not her own room ──────────
+      // ⓘ Her own room needs no door either — the material there is the account she is talking to, and
+      // that is the ordinary same-room case the disclosure layer already returns freely.
+      let theirs = []
+      let refused = false
+      if (theirHalfNeedsADoor && ep.roomUserId && ep.roomUserId !== userId) {
+        try {
+          const opened = await disclosure.inspectAround({ messageId: ep.centre, radius: LIMITS.windowRadius })
+          const ok = opened?.ok === true && opened.state === 'verified'
+          if (ok) {
+            theirs = (Array.isArray(opened.window) ? opened.window : [])
+              .filter((w) => w.who !== 'you' && w.said)
+              .map((w) => ({ who: w.who ?? ep.who ?? 'them', said: clip(w.said, 260), when: w.when ?? null, withheld: false }))
+          } else {
+            // ⭐ EXISTENCE-ONLY for HIS half. ⛔ Never for hers — hers is above and needed no permission.
+            refused = true
+          }
+        } catch { refused = true }
+      } else {
+        try {
+          const rows = await db.txn_messages.findAll({
+            where: { conversation_id: ep.cid, role: 'user' },
+            attributes: ['content', 'created_at'], order: [['rolling_id', 'ASC']], limit: LIMITS.windowRadius, raw: true,
+          })
+          theirs = rows.map((r) => ({ who: ep.who ?? 'them', said: clip(r.content, 260), when: r.created_at, withheld: false }))
+        } catch { /* the same-room counterpart read is a convenience, never load-bearing */ }
+      }
 
-      const anyReadable = exchanges.some((x) => x.said)
+      // ── 5c · ONE EPISODE, INTERLEAVED BY TIME, GAPS SHOWN AS GAPS ─────────────────────────────────
+      // ⛔ Her lines with the replies closed up read as a monologue and invite her to infer what was said
+      // to her — the reason change A returns withheld markers instead of a filtered list.
+      const exchanges = [
+        ...mine.map((m) => ({ who: 'me', said: clip(m.content, 260), when: m.created_at, withheld: false })),
+        ...theirs,
+      ].sort((a, b) => new Date(a.when || 0) - new Date(b.when || 0))
+      if (refused && exchanges.length) {
+        exchanges.push({ who: ep.who ?? 'them', said: null, when: null, withheld: true })
+      }
+
+      const anyMine = mine.length > 0
       const bothSides = exchanges.some((x) => x.said && x.who !== 'me')
 
       items.push({
@@ -277,24 +354,29 @@ export function buildMemoryCognition(fastify, {
         kind: 'episode',
         subject: ep.who ?? cues.persons[0] ?? null,
         who: ep.who ?? 'someone',
-        // ⭐ WITH the person, or merely MENTIONING them. Rendered differently, because they are different
-        // facts about her life and collapsing them is what made the block read like a search log.
         withThem: ep.withThem,
         exchanges,
         matches: ep.matches,
         when: ep.lastAt,
-        // ⭐ An episode is a THING THAT HAPPENED; that it happened is attested by her own message being in
-        // it. ⛔ Its CONTENT is a separate question, which is what availability answers.
         source: SOURCE.ownUtterance,
         basis: BASIS.attestedBySource,
-        availability: anyReadable ? AVAILABILITY.recalled : AVAILABILITY.knownUnreachable,
-        // ⭐ The warrant only when the door actually opened across a boundary; her own room needs none.
-        warrants: anyReadable && ep.roomUserId && ep.roomUserId !== userId ? [WARRANT.accessResolution] : [],
+        // ⭐⭐ SHE WAS THERE AND HER OWN WORDS ARE IN HAND ⇒ `recalled`, in ANY room, with NO warrant.
+        // ⛔ `known-unreachable` now means only one thing: her own half could not be read either, which is a
+        // real failure rather than a boundary.
+        availability: anyMine ? AVAILABILITY.recalled : AVAILABILITY.knownUnreachable,
+        // ⭐ A warrant is recorded ONLY when the counterpart's half was actually opened across a boundary.
+        // ⛔ Reaching her own words earns none, because none was needed.
+        warrants: bothSides && ep.roomUserId && ep.roomUserId !== userId ? [WARRANT.accessResolution] : [],
         retention: RETENTION.notRetained,
         confidence: 0.9,
         supportedBy: ep.matches,
         here: ep.roomUserId === userId,
-        partial: state === 'own_only' || (anyReadable && !bothSides),
+        // ⭐ Her side without his is PARTIAL, and saying so is what keeps the gap honest.
+        partial: anyMine && !bothSides,
+        // ⚠️ THE DEFERRED HAZARD, CARRIED ON THE ITEM. Her own lines may quote or paraphrase him, so an
+        // episode marked `soteraOwned` can still convey his words. ⛔ Declared, not mitigated — RFC §3A.4b.
+        soteraOwned: true,
+        mayCarryCounterpartContent: true,
       })
     }
     return items

@@ -216,5 +216,75 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
   '7 · ⭐⭐ and every pass REPORTS what it left out — a silent cap reads as "I covered everything"',
   `dropped ${first.dropped} / ${second.dropped}`)
 
+// ── ⭐⭐⭐ 8 · HER OWN MATERIAL DOES NOT ENTER THE AUTHORIZATION PATH AT ALL ────────────────
+//
+// ⚠️⚠️ WHAT THIS REPLACED. Every episode used to be resolved with `inspectAround`, so ONE ordinary question
+// about her own sentences produced **15 disclosure grants**. Ote: *"For Sotera's own material, no disclosure
+// authorization should happen at all — not 'authorize and then allow,' but genuinely outside that path…
+// don't just suppress the logging; remove the authorization path itself."*
+//
+// ⭐ A grant that is always granted is still a grant: it writes a row, it implies a boundary was crossed, and
+// it teaches every reader of the log that her own sentences are somebody's to allow.
+//
+// ⚠️ AND THE MEASUREMENT ONLY MEANS SOMETHING WITH NO LIVE GRANT IN PLACE. A `lifetime: 'conversation'`
+// grant from an earlier run makes `liveGrant()` succeed without writing a row — so a naive count reads 0 for
+// the wrong reason. ⇒ revoke first, then measure. ⛔ Rows are a LOG and are never deleted; revocation is a
+// first-class column, so this records what happened instead of erasing it.
+{
+  // ⓘ This check speaks Sequelize (`Q`), not a raw pg client — the first version reached for `pg` and died.
+  await seq.query(`update "${S}".log_disclosure_events set revoked_at = now() where revoked_at is null`)
+  const countGrants = async () => Number((await Q(`select count(*)::int n from "${S}".log_disclosure_events`))[0].n)
+  const before = await countGrants()
+  const r = await cognition.recollect({ text: "How's Hermes doing?" })
+  const after = await countGrants()
+  const written = after - before
+
+  const eps = r.items.filter((i) => i.kind === 'episode')
+  const mine = eps.filter((e) => (e.exchanges ?? []).some((x) => x.said && x.who === 'me'))
+  const crossRoom = eps.filter((e) => e.here === false)
+  const crossRoomWithHerWords = crossRoom.filter((e) => (e.exchanges ?? []).some((x) => x.said && x.who === 'me'))
+  const gotCounterpart = crossRoom.filter((e) => (e.exchanges ?? []).some((x) => x.said && x.who !== 'me'))
+
+  ok(mine.length > 0,
+    '8 · her own words are in the block at all', `${mine.length} episode(s) carrying her words`)
+  // ⭐⭐⭐ THE LOAD-BEARING ASSERTION. Reading HER half across a boundary must cost nothing, so the only
+  // grants this call may write are for episodes where the COUNTERPART's half was actually opened.
+  ok(written <= gotCounterpart.length,
+    '8 · ⭐⭐⭐ grants written are at most one per COUNTERPART half opened — her own half costs none',
+    `${written} grant(s) written, ${gotCounterpart.length} counterpart half/halves opened, `
+    + `${crossRoomWithHerWords.length} cross-room episode(s) whose OWN half was read`)
+  // ⭐⭐ AND THE SHARPER FORM: cross-room episodes where only HER words were taken must write nothing.
+  const herOnlyCrossRoom = crossRoom.filter((e) => (e.exchanges ?? []).some((x) => x.said && x.who === 'me')
+    && !(e.exchanges ?? []).some((x) => x.said && x.who !== 'me'))
+  ok(written <= crossRoom.length - herOnlyCrossRoom.length,
+    '8 · ⭐⭐ a cross-room episode read for HER side only writes no grant',
+    `${herOnlyCrossRoom.length} her-side-only cross-room episode(s)`)
+  // ⛔ A WARRANT IS ONLY EVER RECORDED FOR THE COUNTERPART. Reaching her own words earns none, because
+  // none was needed — that is the difference between ownership and permission.
+  const warranted = eps.filter((e) => (e.warrants ?? []).length > 0)
+  ok(warranted.every((e) => (e.exchanges ?? []).some((x) => x.said && x.who !== 'me')),
+    '8 · ⛔⛔ every access warrant belongs to a COUNTERPART read, never to reaching her own words',
+    `${warranted.length} warranted of ${eps.length}`)
+}
+
+// ── ⛔ 9 · THE AUTHORIZATION PATH IS ABSENT FOR HER HALF, IN SOURCE ────────────────────────
+//
+// ⚠️ The runtime count above can be satisfied by a path that authorizes and then permits — exactly what Ote
+// ruled out. This asserts the STRUCTURE: the own-half read is a plain query, and the ownership rule is
+// CONSULTED rather than restated. ⓘ Crude on purpose: the regression would be one line and the counts would
+// still look fine on a deployment where everything is permitted anyway.
+{
+  const src = await (await import('node:fs/promises')).readFile(
+    new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
+  ok(/requiresAuthorization\(/.test(src),
+    '9 · ⭐ the host CONSULTS the ownership rule — two copies of an ownership rule is how they stop agreeing')
+  const stage5a = src.slice(src.indexOf('5a · HER OWN LINES'), src.indexOf('5b · THE COUNTERPART'))
+  ok(stage5a.length > 100, '9 · the own-half stage exists to inspect', `${stage5a.length} chars`)
+  ok(!/disclosure\.|inspectAround|grantFromInteraction|requestRoomAccess/.test(stage5a),
+    '9 · ⛔⛔ the own-half read contains NO disclosure call — the path is not entered, not entered-and-allowed')
+  ok(/role: 'assistant'/.test(stage5a),
+    '9 · ⭐ …and the ownership rule is the query itself: her utterances, in any room')
+}
+
 await seq.close().catch(() => {})
 done()
