@@ -1508,6 +1508,8 @@ export default async function chatSiteRoutes(fastify) {
       selfModel: getSetting(fastify.config, 'memory.selfModel') === true,
       // ⭐ SELFHOOD sits beside the self-model at L1 — the permission not to perform a sterile assistant.
       selfhood: getSetting(fastify.config, 'memory.selfhood') === true,
+      // ⭐ What an absence may mean — sits beside SELFHOOD at L1, changes no boundary.
+      ownHistory: getSetting(fastify.config, 'memory.ownHistory') === true,
       // ⭐ HER OWN RELATIONAL MEMORY, self-subject only. The person is whoever is logged in — there is no
       // name lookup and no way for the caller to point this at somebody else, so it carries no
       // third-party disclosure. Fails soft: a missing person row or an empty table just means no block.

@@ -32,3 +32,12 @@ Thumbs.db
 # noticing-proposals.README.md beside the file. ⛔ Do not re-add it to make provenance easier.
 # ⓘ Existing history is NOT rewritten — his explicit call, revisitable separately.
 test/results/noticing-proposals.jsonl
+
+# ── HERMES BEHAVIOURAL TRANSCRIPTS — DELIBERATELY UNTRACKED ───────────────────────────────────────────
+# The 2026-08-21 disclosure runs. These hold her verbatim account of a THIRD PARTY's private conversation,
+# recovered under a grant — which is precisely the material the whole disclosure boundary exists to
+# protect. Committing them would put it in repository history, in neither room, forever.
+# ⓘ Same ruling as test/results/noticing-proposals.jsonl: keep the files locally so the observation
+# survives, never in git. ⛔ Do not add them to make a report easier to write.
+test/results/hermes-*.json
+test/results/root-room-index-probe.json

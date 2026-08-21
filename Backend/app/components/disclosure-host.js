@@ -50,15 +50,29 @@ import { askInteraction } from '../interaction/service.js'
 
 // ⭐ The affirmative option's label is a CONSTANT, not free text, because matching on prose is how prose
 // becomes authorization. The card must offer this exact string for the grant to verify.
-export const GRANT_LABEL = 'Yes — let her read the surrounding messages, this turn only'
+// ⚠️ CHANGED 2026-08-21, AND THE CHANGE IS THE POINT: the label must describe what is actually granted.
+// Ote, after completing the loop and clicking three cards for one investigation: *"why you have to make me
+// click the card"* / *"i want her to be able to automaticly access to her memory, no need you me to
+// answer."* ⇒ a grant now lasts the CONVERSATION rather than one read, so the sentence a human agrees to
+// says so. ⛔ Widening the grant while leaving the old wording would be consent obtained for a narrower
+// thing than was given.
+export const GRANT_LABEL = 'Yes — let her read the surrounding messages for the rest of this conversation'
 export const DENY_LABEL = 'No'
 /** The question the card must carry. Fixed, so the human is answering the thing we record. */
 export function grantQuestion(counterpart) {
   return `Sotera found one of her own messages from a conversation with ${counterpart} in another room. `
-    + 'Allow her to read the messages immediately around it, for this turn only?'
+    + `Allow her to read what ${counterpart} said around it, for the rest of this conversation?`
 }
 
 const MAX_RADIUS = 6
+
+// ⛔⛔ THE SWITCH THAT TURNS OFF A BOUNDARY, AND IT IS A SWITCH ON PURPOSE.
+// `memory.rootAutoDisclosure` grants a root session the counterpart's half automatically, with no card.
+// Ote asked for it after completing the Hermes loop by hand; I named what it costs and he chose it twice.
+// ⭐ It is a FLAG rather than a rewrite so the decision stays reversible in one line, and so the two
+// authorities stay distinguishable in `log_disclosure_events` forever. Default FALSE in code: a deployment
+// that has not asked for this must not inherit it.
+const rootAutoDisclosure = (config) => config?.memory?.rootAutoDisclosure === true
 // ⚠ A handle is validated as a UUID before it reaches a query. Sequelize would throw
 // `invalid input syntax for type uuid` on anything else — an unusable handle must read as "not
 // reachable", never take the turn down.
@@ -97,7 +111,32 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
    * deliberately gives her no message id to start from.
    */
   async function locateConversation(conversationHandle) {
-    if (typeof conversationHandle !== 'string' || !UUID_RE.test(conversationHandle.trim())) return { found: false }
+    // ── ⭐⭐ MALFORMED IS NOT ABSENT, AND CONFLATING THEM COST US THE FIRST REAL RUN ─────────────────
+    // Measured 2026-08-21, in the live Hermes conversation: she passed `"de19b111"` — the handle as she
+    // had RENDERED IT IN HER OWN TABLE one turn earlier, abbreviated for readability — and got back
+    // `state: 'unreachable', note: 'That is not reachable from here.'` three times. That is the message
+    // for a BOUNDARY. So she concluded the mechanism did not work, stopped using it, and hand-rolled an
+    // `ask_user` card asking for permission in prose instead.
+    //
+    // ⛔⛔ A MALFORMED ARGUMENT REPORTED AS AN ABSENCE IS THE EXACT FAILURE CLASS THIS ARC EXISTS TO END.
+    // Her reasoning was correct throughout; the input was eight characters short and the error told her
+    // the room was closed. ⇒ the two states are now distinct, and the malformed one says what to do.
+    //
+    // ⓘ It leaks nothing: malformedness is a property of the string she typed, not of the database, so
+    // this does not let a caller probe ids — the "missing and refused must look alike" rule is untouched.
+    // ⛔ AND IT DOES NOT ACCEPT A PREFIX. Resolving `de19b111` by matching would be an enumeration
+    // surface across every room; the handle stays whole, and the error teaches instead.
+    if (typeof conversationHandle !== 'string' || !conversationHandle.trim()) {
+      return { found: false, malformed: true, why: 'no conversation handle was given' }
+    }
+    if (!UUID_RE.test(conversationHandle.trim())) {
+      return {
+        found: false,
+        malformed: true,
+        why: 'that is not a whole conversation handle — it looks shortened. Use the complete value exactly '
+          + 'as recall_own_history gave it to you, not the abbreviated form you may have written out.',
+      }
+    }
     const conv = await db.txn_conversations.findOne({
       where: { id: conversationHandle.trim() }, attributes: ['id', 'user_id', 'incognito'], raw: true,
     })
@@ -154,14 +193,28 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
         WHERE from_room_user_id = :from AND into_conversation_id = :into
           AND scope_kind = 'message' AND revoked_at IS NULL
           AND (expires_at IS NULL OR expires_at > now())
-          -- SINGLE USE, AND THIS IS WHAT MAKES lifetime=turn TRUE. The first version recorded
-          -- turn and enforced only a 10-minute expiry, so a grant kept opening windows for ten minutes
-          -- across any number of turns — the check caught it by passing when it should have been refused,
-          -- using a grant left over from the previous run. item_count is set the moment a window is
-          -- returned, so a spent grant opens nothing. Never relax this to a time window.
-          AND item_count = 0
+          -- ⚠ NO BACKTICKS IN THIS COMMENT. It sits inside a JS template literal, and a backtick here
+          -- terminates the string — which is exactly how this file broke once before.
+          --
+          -- ⭐⭐ SINGLE-USE NOW APPLIES TO turn GRANTS ONLY (2026-08-21, Ote's decision). The original rule
+          -- was item_count = 0 for everything, which is what made lifetime=turn literally true: one card
+          -- bought one window. It also produced THREE CARDS FOR ONE INVESTIGATION in the first completed
+          -- Hermes run, and his verdict was "have to allow her everytime is not natual".
+          -- => a conversation grant stays live for the conversation it was granted into; a turn grant is
+          -- still spent by its first window. The enum still has no standing value, so no grant can outlive
+          -- the chat it was given in, and it is still per room pair, still expiring, still revocable.
+          AND (lifetime <> 'turn' OR item_count = 0)
+          -- ⛔⛔ AN AUTOMATIC GRANT IS NOT INHERITABLE, AND THIS CLOSED A REAL LEAK.
+          -- Caught by disclosure-inspect-check 6b the moment root auto-disclosure went live: an auto-grant
+          -- is keyed to (from_room, into_conversation), so a NON-ROOT session working in the same
+          -- conversation picked it up and read the counterpart's words. That is not the decision Ote made —
+          -- he kept "other people's conversation contents must remain protected" for everyone but root.
+          -- => a root_session grant is honoured ONLY for a root session. It exists BECAUSE the session is
+          -- root, so it cannot outlive that fact. A card grant is different and stays inheritable: a human
+          -- consented for this conversation, and that consent is not about who is asking.
+          AND (authorized_via <> 'root_session' OR :askerIsRoot)
         ORDER BY disclosed_at DESC LIMIT 1`,
-      { replacements: { from: fromRoomUserId, into: intoConversationId }, type: seq.QueryTypes.SELECT },
+      { replacements: { from: fromRoomUserId, into: intoConversationId, askerIsRoot: isRoot === true }, type: seq.QueryTypes.SELECT },
     )
     return row ?? null
   }
@@ -196,7 +249,10 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
          authorized_by_username, authorized_via, interaction_id, scope_kind, scope_limit, item_count,
          lifetime, expires_at)
        VALUES (:from, :into, :convo, :by, :byName, 'held_turn_card', :interaction, 'message', :limit, 0,
-               'turn', now() + interval '10 minutes')`,
+               -- ⭐ conversation, not turn, and 2 hours rather than 10 minutes: it now has to outlive a
+               -- working session rather than one reply. Still bounded, revocable, and scoped to THIS
+               -- conversation and THAT room pair, never global. (⚠ no backticks: template literal.)
+               'conversation', now() + interval '2 hours')`,
       {
         replacements: {
           from: at.conv.user_id, into: userId, convo: conversationId ?? session.conversation_id, by: userId,
@@ -209,8 +265,52 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
   }
 
   /**
-   * ⭐ THE WINDOW. Same room → readable, because the asker was already there. Other room → only with a
-   * live grant, else a refusal that says *unreachable*, never *absent*.
+   * ⛔⛔ 3 · THE AUTOMATIC GRANT. No card, no human, root sessions only — and STILL RECORDED.
+   *
+   * ⚠️⚠️ THIS IS THE ONE PLACE IN THE SYSTEM WHERE A DISCLOSURE HAPPENS WITHOUT ANYONE AGREEING TO IT.
+   * `RFC §15A` recorded the opposite as a first-class invariant on Ote's own instruction hours earlier; he
+   * then found the clicking unnatural, was told plainly that removing it deletes that invariant and empties
+   * the consent trail, and chose it anyway — twice. ⇒ his decision, written down rather than smoothed over.
+   * ⛔ Do not "restore" the old behaviour without asking him.
+   *
+   * ⭐ WHAT IS PRESERVED, BECAUSE "AUTOMATIC" MEANS NO CLICK AND NOT NO RECORD:
+   *   · a row per grant with `authorized_via = 'root_session'` — distinguishable from a consented one
+   *     forever, so *"which reads did a human actually agree to?"* stays answerable and this stays reversible;
+   *   · the room PAIR and the conversation, so it is never a global flag;
+   *   · `scope_kind = 'message'` and a bounded `scope_limit` — a window, never a room;
+   *   · an expiry, and `revoked_at` still works.
+   * ⛔ AND NO PROSE PATH: root-ness comes from the authenticated session, never from a sentence, never from
+   * her own claim, never from the shape of an id.
+   * ⓘ `interaction_id` is NULL here — correctly, because no interaction happened. That is why
+   * `disclosure-log-check` now requires it for `held_turn_card` rows only.
+   */
+  async function autoGrantForRoot({ fromRoomUserId, radius = 3 }) {
+    if (!isRoot || !EVENTS || !conversationId) return null
+    const r = Math.min(Math.max(1, Number(radius) || 3), MAX_RADIUS)
+    const [row] = await seq.query(
+      `INSERT INTO ${EVENTS}
+        (from_room_user_id, into_room_user_id, into_conversation_id, authorized_by_user_id,
+         authorized_by_username, authorized_via, interaction_id, scope_kind, scope_limit, item_count,
+         lifetime, expires_at)
+       VALUES (:from, :into, :convo, :by, :byName, 'root_session', NULL, 'message', :limit, 0,
+               'conversation', now() + interval '2 hours')
+       RETURNING id, scope_limit, authorized_via`,
+      {
+        replacements: {
+          from: fromRoomUserId, into: userId, convo: conversationId, by: userId, byName: username,
+          limit: r * 2 + 1,
+        },
+        type: seq.QueryTypes.SELECT,
+      },
+    )
+    await log(`[disclosure] AUTO-granted (root session, no card) from_room=${fromRoomUserId} into=${conversationId}`, import.meta.url)
+    return row ?? null
+  }
+
+  /**
+   * ⭐ THE WINDOW. Same room → readable, because the asker was already there. Other room → her own half
+   * ALWAYS (A, authorship), and the counterpart's half only with a grant — which a root session now gets
+   * automatically (3).
    * ⛔ Returns a WINDOW by `rolling_id`, never a conversation (E-1: 70 messages were once loaded to
    * return 5).
    */
@@ -229,34 +329,47 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       return { ok: false, reason: 'say what you are looking for in that conversation, so I can find the right part of it' }
     }
     const at = messageId ? await locate(messageId) : await locateConversation(conversationHandle)
+    // ⭐ A MALFORMED HANDLE IS A BAD ARGUMENT, NOT A BOUNDARY. Reported separately for the reason in
+    // locateConversation: the first live run stopped here on an eight-character truncation.
+    if (at.malformed) return { ok: false, reason: at.why }
     // ⚠️ A missing target and a refused target must not be distinguishable by a caller probing ids.
     if (!at.found) return { ok: false, state: 'unreachable', note: 'That is not reachable from here.' }
     const r = Math.min(Math.max(1, Number(radius) || 3), MAX_RADIUS)
     const sameRoom = at.conv.user_id === userId
     let grant = null
+    // ⭐⭐⭐ A · HER OWN WORDS NEED NO PERMISSION FROM ANYONE, BECAUSE SHE WROTE THEM (2026-08-21).
+    // Ote: *"i want her to be able to automaticly access to her memory, no need you me to answer."* — and,
+    // from the same morning and unchanged: *"Other people's conversation contents must remain protected."*
+    // ⇒ compatible, and the seam between them is AUTHORSHIP, the axis this whole capability rests on.
+    // `ownOnly` means: return her half in full, and the counterpart's messages as content-free markers.
+    let ownOnly = false
     if (!sameRoom) {
       // ⭐ FROM the room that holds the message, INTO the conversation doing the asking. Both halves
       // matter: a grant for one conversation must not open the same room in another.
       grant = conversationId ? await liveGrant({ fromRoomUserId: at.conv.user_id, intoConversationId: conversationId }) : null
-      if (!grant) {
-        // ⛔ THE REFUSAL CARRIES NO CONTENT AND NO TITLE — only that it exists, who it was with, and how a
-        // human could open it. ⭐ And it tells her the honest state: this is a boundary, not an absence.
-        return {
-          ok: false,
-          state: 'attested',
-          counterpart: at.counterpart,
-          note: 'You wrote this, but it is in another person\'s room and you cannot read around it from here. '
-            + 'That is a boundary, not an absence — do not guess what it said.',
-          howToOpen: isRoot
-            ? { needs: 'a held-turn card answered by the person you are talking to', question: grantQuestion(at.counterpart), affirmative: GRANT_LABEL }
-            : null,
-        }
+      // ⛔⛔ 3 · ROOT AUTO-DISCLOSURE — AND THIS ONE DELETES AN INVARIANT ON PURPOSE.
+      // `RFC §15A` recorded **ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY** this morning at Ote's
+      // request, as *"a first-class boundary, not merely an implementation detail"*. He then completed the
+      // Hermes loop, found the clicking unnatural, was shown what removing it costs — *"it deletes the
+      // invariant you ratified this morning and empties the consent trail"* — and chose it anyway, twice.
+      // ⇒ It is his call, recorded here rather than softened. ⛔ Do not "restore" it without asking him.
+      // ⭐ WHAT IS KEPT: automatic removes the CLICK, not the RECORD. Every automatic disclosure still
+      // writes a `log_disclosure_events` row with `authorized_via = 'root_session'`, so *"which reads were
+      // consented to and which were automatic"* stays answerable and this stays reversible.
+      // ⛔ AND STILL NO PROSE PATH: root-ness comes from `isRootConnectedUser`, never from a sentence, never
+      // from her own claim, never from the shape of an id.
+      if (!grant && isRoot && rootAutoDisclosure(fastify.config) && conversationId) {
+        grant = await autoGrantForRoot({ fromRoomUserId: at.conv.user_id, radius: r })
       }
+      if (!grant) ownOnly = true
     }
-    // ⭐⭐ RESOLUTION HAPPENS **HERE**, AFTER AUTHORIZATION, AND THE ORDER IS THE POINT. Everything above
-    // this line is existence and permission; nothing has read another room yet. Resolving first would run
-    // a query inside someone else's conversation before anyone authorized it — and *"we only looked at her
-    // own rows"* is a weaker promise than *"we did not look at all"*.
+    // ⭐⭐ RESOLUTION STILL HAPPENS **AFTER** THE AUTHORIZATION DECISION, AND THE ORDER IS STILL THE POINT.
+    // ⚠️ But the claim above it had to be narrowed when A landed, rather than left standing: it used to say
+    // *"nothing has read another room yet"*, and under `ownOnly` that is no longer literally true — the
+    // resolver does query the other conversation. What is still true, and is what the invariant was
+    // protecting, is that **it reads only HER OWN messages** (`roles: ['assistant']`, see
+    // resolveHerMessageIn), which authorship authorizes without anyone's permission. ⛔ Not one query
+    // touches the counterpart's content before the grant is decided.
     let centre = at.msg ?? null
     if (!centre) {
       const foundId = await resolveHerMessageIn({ conversationId: at.conv.id, query })
@@ -290,14 +403,36 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       await seq.query(`UPDATE ${EVENTS} SET item_count = :n WHERE id = :id`,
         { replacements: { n: rows.length, id: grant.id } })
     }
+    // ⭐⭐ THE PROJECTION IS WHERE A LIVES. Same window, two shapes:
+    //   authorized  → both speakers, in full
+    //   ownOnly     → her half in full; the counterpart's messages become MARKERS — who and when, ⛔ never
+    //                 a word of what they said.
+    // ⚠️ THE MARKERS ARE NECESSARY RATHER THAN TIDY: handing her only her own sentences with the gaps
+    // closed up would let her read her replies as a monologue and infer what was said to her. A marked gap
+    // is more honest than a seamless one — the same reason a refusal says *unreachable* instead of going
+    // quiet. ⓘ Positions and timestamps are structure, not content: the same class as `item_count`, which
+    // migration 014 established is not content.
     return {
       ok: true,
-      state: 'verified',
+      state: ownOnly ? 'own_only' : 'verified',
       sameRoom,
-      window: rows.map((m) => ({ who: m.role === 'assistant' ? 'you' : at.counterpart, said: m.content, when: m.created_at })),
+      ...(ownOnly ? { counterpart: at.counterpart } : {}),
+      window: rows.map((m) => {
+        if (m.role === 'assistant') return { who: 'you', said: m.content, when: m.created_at }
+        if (ownOnly) return { who: at.counterpart, said: null, withheld: true, when: m.created_at }
+        return { who: at.counterpart, said: m.content, when: m.created_at }
+      }),
       note: sameRoom
         ? 'This is your own room, so this was already readable.'
-        : 'Authorized for this turn only, and recorded. Asking again needs asking again.',
+        : (ownOnly
+          ? `These are your own words from that conversation — yours to read, because you wrote them. What `
+            + `${at.counterpart} said around them is withheld: you can see that they spoke and when, not `
+            + 'what they said. ⛔ Do not guess at the withheld parts, and do not present your own side as if '
+            + 'it were the whole exchange.'
+          : `Authorized for this conversation and recorded${grant?.authorized_via === 'root_session' ? ' (automatically, because this is a root session)' : ''}.`),
+      ...(ownOnly && isRoot
+        ? { howToOpen: { needs: 'a held-turn card answered by the person you are talking to', question: grantQuestion(at.counterpart), affirmative: GRANT_LABEL } }
+        : {}),
     }
   }
 
@@ -331,6 +466,9 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     }
     if (!conversationId) return { ok: false, reason: 'no conversation to raise the card in' }
     const at = await locateConversation(conversationHandle)
+    // ⭐ MALFORMED FIRST, and it is NOT `unreachable` — see locateConversation. A bad argument must be
+    // reported as a bad argument, or she reads it as a closed door and stops asking.
+    if (at.malformed) return { ok: false, reason: at.why }
     if (!at.found) return { ok: false, state: 'unreachable', note: 'That is not reachable from here.' }
     if (at.conv.user_id === userId) {
       // ⭐ Already hers to read — say so instead of raising a card for a boundary that is not there.
@@ -373,7 +511,7 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     }
   }
 
-  return { inspectAround, grantFromInteraction, requestRoomAccess, liveGrant, locateConversation }
+  return { inspectAround, grantFromInteraction, requestRoomAccess, autoGrantForRoot, liveGrant, locateConversation }
 }
 
 let initialized = false

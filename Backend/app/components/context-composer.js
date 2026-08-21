@@ -15,7 +15,7 @@
 // ONLY: nothing here reads the classification yet, and the rendered strings are byte-identical to
 // before — that equality is asserted by a test, and is the whole safety argument for this step.
 // The resolver (P2) and the attribution-preserving render (P1) are the readers.
-import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINCIPLE, SCOPE_AWARENESS, SELF_MODEL, SELFHOOD } from './context-authority.js'
+import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINCIPLE, SCOPE_AWARENESS, SELF_MODEL, SELFHOOD, OWN_HISTORY } from './context-authority.js'
 
 // ── L1 IDENTITY ──────────────────────────────────────────────────────────────────────────────────────────
 // ⚠ THE "he" IS NOT DECORATION — IT MATCHES THE VOICE. Ote, 2026-08-05: *"as we use male vocie indentity, set
@@ -291,6 +291,7 @@ export function composeSystemContext({
   // execution, scoped access. L1 by Ote's ruling; default off so old and new are comparable.
   selfModel = false,
   selfhood = false,
+  ownHistory = false,
   // RELATIONAL STANCE (2026-08-19): what SHE has learned about how she works with the person she is
   // talking to. A pre-rendered block from relational-knowledge.js, or null. ⭐ SELF-SUBJECT ONLY — it is
   // about the current user, so it carries no third-party disclosure. Anything wider needs Ote's decision.
@@ -333,6 +334,11 @@ export function composeSystemContext({
   // ⚠ A SEPARATE PART, never merged into SELF_MODEL: that text is asserted to contain no first-person
   // emotional language at all, and this one needs it. Two claims, two parts, two test suites.
   if (selfhood) part('selfhood', SELFHOOD, AUTHORITY.foundational, SCOPE.identity)
+  // ⭐⭐ OWN_HISTORY — after SELFHOOD, and the order is the argument: what she IS, then what she may be
+  // taken for, then what she may CONCLUDE from not being able to reach something. ⛔ It changes no
+  // boundary; it changes what an absence is allowed to mean. Foundational/identity for the same reason as
+  // its two neighbours — a stored belief can be lost, and this has to hold on every turn.
+  if (ownHistory) part('own-history', OWN_HISTORY, AUTHORITY.foundational, SCOPE.identity)
   // ⭐ HER OWN LEARNED PRACTICE. `persona` authority, not `foundational`: unlike the self-model this is
   // something she LEARNED rather than something she IS, and `AUTHORITY_BY_SCOPE` lets the user outrank
   // persona on style — which is right. If Kavi asks for something terser than her usual practice with

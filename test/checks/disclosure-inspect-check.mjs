@@ -50,22 +50,66 @@ check('her own room opens without any grant', own.ok === true && own.state === '
 check('the window is a window, not a conversation', Array.isArray(own.window) && own.window.length <= 5, `${own.window?.length} messages`)
 check('the window says who spoke', (own.window || []).every((w) => w.who === 'you' || typeof w.who === 'string'))
 
-// ── 2. ANOTHER ROOM IS REFUSED, AND THE REFUSAL IS ATTESTED, NOT EMPTY ──────────────────────────────
+// ── 2. ⭐⭐ ANOTHER ROOM GIVES HER **HER OWN HALF** — AND WITHHOLDS HIS (change A, 2026-08-21) ────────
+//
+// ⚠️⚠️ THE PREVIOUS ASSERTIONS HERE SAID "another room is REFUSED without a grant" AND THEY WERE RIGHT
+// UNTIL TODAY. They are rewritten rather than deleted, because the boundary did not disappear — it MOVED,
+// and where it moved to is now the thing worth asserting.
+//
+// Ote, after completing the Hermes loop by hand: *"i want her to be able to automaticly access to her
+// memory, no need you me to answer. this is not feel natural."* And, unchanged from the same morning:
+// *"Other people's conversation contents must remain protected."* ⇒ the seam between those two is
+// AUTHORSHIP: her own sentences need nobody's permission because she wrote them; the counterpart's still do.
+//
+// ⇒ THE ASSERTION THAT MATTERS IS NO LONGER "she gets nothing". It is **"she gets her words and not his"**,
+// which is a stronger and more specific claim than the one it replaces.
 const cross = await asOwner.inspectAround({ messageId: theirs.msg, radius: 2 })
-check('another room is REFUSED without a grant', cross.ok === false, JSON.stringify(cross).slice(0, 90))
-check('the refusal is `attested` — it happened, and she may not read it', cross.state === 'attested')
-check('the refusal names the counterpart but carries NO content', !!cross.counterpart && !('window' in cross))
-check('⛔ the refusal carries no conversation title', !JSON.stringify(cross).toLowerCase().includes('title'))
-check('the refusal tells her not to guess', /do not guess/i.test(cross.note || ''))
-check('⛔ a NON-root session is offered no path at all', cross.howToOpen === null)
+check('2 · ⭐ a cross-room window now RETURNS — her own half, without any grant', cross.ok === true, `state=${cross.state}`)
+check('2 · ⭐ …and says so: state is `own_only`, not `verified`', cross.state === 'own_only')
+const mineRows = (cross.window || []).filter((w) => w.who === 'you')
+const theirRows = (cross.window || []).filter((w) => w.who !== 'you')
+check('2 · her own messages carry their text', mineRows.length > 0 && mineRows.every((w) => typeof w.said === 'string' && w.said.length > 0),
+  `${mineRows.length} of hers`)
+check('2 · ⭐⭐⭐ NOT ONE WORD OF THE COUNTERPART IS RETURNED — every one of his is withheld',
+  theirRows.length === 0 || theirRows.every((w) => w.said === null && w.withheld === true),
+  theirRows.length ? `${theirRows.length} withheld marker(s), 0 with text` : 'none in this window')
+// ⭐ The markers exist ON PURPOSE: her replies with the gaps closed up would read as a monologue and
+// invite her to infer what was said to her. A marked gap is more honest than a seamless one.
+check('2 · ⭐ the gaps are MARKED rather than closed up', theirRows.every((w) => 'withheld' in w) || theirRows.length === 0)
+check('2 · ⛔ still no conversation title anywhere in the payload', !JSON.stringify(cross).toLowerCase().includes('title'))
+check('2 · it tells her not to guess at the withheld parts', /do not guess/i.test(cross.note || ''))
+check('2 · ⛔ a NON-root session is STILL offered no path to the other half', cross.howToOpen === undefined || cross.howToOpen === null)
 
-// ── 3. ROOT IS OFFERED A CARD, AND THE CARD IS THE ONLY PATH ────────────────────────────────────────
+// ── 3. ⛔⛔ ROOT NOW GETS THE OTHER HALF AUTOMATICALLY — AND IT IS RECORDED (change 3) ───────────────
+//
+// ⚠️⚠️⚠️ THIS ASSERTION IS THE INVERSE OF THE ONE IT REPLACES, AND THAT IS NOT A REGRESSION — IT IS A
+// DECISION. `RFC §15A` recorded **ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY** this morning at Ote's
+// explicit request, as *"a first-class boundary, not merely an implementation detail"*. He then completed
+// the loop, found three cards for one investigation unnatural, was told plainly that removing them deletes
+// that invariant and empties the consent trail, and chose it anyway — twice.
+// ⇒ What is left to assert is the part he did NOT give up: that it is still **recorded**, still per room
+// pair, still bounded, and still has no prose path. An automatic disclosure that left no trace would be a
+// different and much worse thing than the one he asked for.
 const conv0 = await db.txn_conversations.findOne({ where: { user_id: mine.user_id }, attributes: ['id'], raw: true })
 const asRoot = buildDisclosure(fastify, { userId: mine.user_id, isRoot: true, username: mine.username, conversationId: conv0.id })
 const rootCross = await asRoot.inspectAround({ messageId: theirs.msg, radius: 2 })
-check('root is still refused until a human answers', rootCross.ok === false && rootCross.state === 'attested')
-check('root is told what would open it', !!rootCross.howToOpen?.question && rootCross.howToOpen.affirmative === GRANT_LABEL)
-check('the card question is the fixed one, not free text', rootCross.howToOpen.question === grantQuestion(rootCross.counterpart))
+check('3 · ⛔ a root session now opens the other half with NO card', rootCross.ok === true && rootCross.state === 'verified',
+  `state=${rootCross.state}`)
+check('3 · …and the counterpart\'s words really are present now',
+  (rootCross.window || []).some((w) => w.who !== 'you' && typeof w.said === 'string'))
+check('3 · ⭐ the payload SAYS it was automatic rather than consented', /automatically/i.test(rootCross.note || ''), rootCross.note)
+const { rows: autoEv } = await pg.query(
+  `select authorized_via, interaction_id, lifetime, scope_kind, from_room_user_id
+     from ${S}.log_disclosure_events order by disclosed_at desc limit 1`)
+check('3 · ⭐⭐ IT IS STILL RECORDED — authorized_via says root_session, so consented and automatic stay distinguishable',
+  autoEv[0]?.authorized_via === 'root_session', String(autoEv[0]?.authorized_via))
+check('3 · ⭐ and interaction_id is NULL, honestly — no interaction happened', autoEv[0]?.interaction_id === null)
+check('3 · ⛔ still scoped to ONE room pair, never a global flag', autoEv[0]?.from_room_user_id === theirs.user_id)
+check('3 · ⛔ still one store (message), not "her memory"', autoEv[0]?.scope_kind === 'message')
+// ⭐ AND THE CARD PATH IS NOT GONE — it is what a non-root session would still need, and what root gets
+// offered when auto-disclosure is switched off. Asserted through the host directly so the flag can move.
+check('3 · ⭐ the fixed card question is still the fixed one, not free text',
+  grantQuestion('someone').includes('someone') && GRANT_LABEL.startsWith('Yes'), GRANT_LABEL)
 
 // ── 4. ⛔⛔ THE WRITER REFUSES EVERYTHING EXCEPT A STORED, ANSWERED, AFFIRMATIVE CARD ───────────────
 const noSuch = await asRoot.grantFromInteraction({ interactionId: '00000000-0000-0000-0000-000000000000', messageId: theirs.msg })
@@ -109,7 +153,10 @@ const { rows: ev } = await pg.query(
           expires_at > now() live from ${S}.log_disclosure_events order by disclosed_at desc limit 1`)
 check('the event records held_turn_card as the authority', ev[0]?.authorized_via === 'held_turn_card')
 check('scope is one store (message), not "her memory"', ev[0]?.scope_kind === 'message')
-check('⛔ lifetime is the narrowest the enum allows', ev[0]?.lifetime === 'turn')
+// ⚠️ WAS `=== 'turn'`. Changed 2026-08-21 with the card text, so a human agrees to what is given.
+// ⛔ What still holds is that `standing` does not exist: no grant can outlive the chat it was given in.
+check('⭐ lifetime is `conversation` — bounded by the chat, and there is still no `standing` value',
+  ev[0]?.lifetime === 'conversation', String(ev[0]?.lifetime))
 check('the interaction that proved it is recorded', ev[0]?.interaction_id === pending.id)
 check('the room it came FROM is recorded, never a global flag', ev[0]?.from_room_user_id === theirs.user_id)
 check('what was actually returned is counted', Number(ev[0]?.item_count) > 0, `${ev[0]?.item_count}`)
@@ -136,10 +183,24 @@ check('⛔ the event row carries no message text', !Object.keys(ev[0] || {}).som
 
 // 6a · THE GRANT IS SPENT. `item_count` moved off zero when the window was returned, so the SAME read
 // must now be refused again — `lifetime: 'turn'` is only true if asking twice needs asking twice.
+// ⚠️⚠️ REWRITTEN 2026-08-21: `lifetime` is now `conversation`, not `turn`, so a grant is NO LONGER spent
+// by its first window. That was Ote's decision — three cards for one investigation — and the CARD TEXT was
+// changed with it, so the human agrees to what is actually given. ⇒ what is still asserted is the thing
+// that keeps it bounded: the grant belongs to ONE conversation, and does not follow her into another.
 const secondRead = await asRoot.inspectAround({ messageId: theirs.msg, radius: 2 })
-check('6a · ⭐⭐ the grant is SINGLE-USE — the same authorized read is refused the second time',
-  secondRead.ok === false && secondRead.state === 'attested',
-  JSON.stringify(secondRead).slice(0, 80))
+check('6a · ⭐ a conversation-lifetime grant survives a second read IN THE SAME CONVERSATION',
+  secondRead.ok === true, `state=${secondRead.state}`)
+const elsewhereConv = await db.txn_conversations.create({
+  user_id: mine.user_id, title: 'zz_test grant-scope probe', incognito: false, settings: { probe: true },
+})
+const otherChat = buildDisclosure(fastify, {
+  userId: mine.user_id, isRoot: false, username: mine.username, conversationId: elsewhereConv.id,
+})
+const leaked = await otherChat.inspectAround({ messageId: theirs.msg, radius: 2 })
+check('6a · ⭐⭐⭐ …but it does NOT follow her into a DIFFERENT conversation — a grant is per chat',
+  leaked.state === 'own_only',
+  leaked.state === 'own_only' ? 'her own half only, as if ungranted' : `⚠ leaked: ${leaked.state}`)
+await db.txn_conversations.destroy({ where: { id: elsewhereConv.id } })
 
 // 6b · A GRANT FOR ONE ROOM IS NOT A GRANT FOR ANOTHER. This is the wildcard test: if root-ness were
 // doing the work, a third room would open too. ⓘ Skipped rather than faked when the database holds only
@@ -157,13 +218,46 @@ if (!third) {
   })
   const regrant = await asRoot.grantFromInteraction({ interactionId: pending2.id, messageId: theirs.msg, radius: 2 })
   check('6b · a live grant exists for the first room', regrant.ok === true, regrant.reason || '')
+
+  // ── ⚠️⚠️⚠️ THIS BLOCK USED TO ASSERT THE OPPOSITE, AND THE CHANGE IS A DECISION, NOT A REGRESSION ───
+  //
+  // It read: *"A GRANT FOR ONE ROOM OPENS ONLY THAT ROOM — root-ness is not doing the work"*, and it was
+  // the teeth of **ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY** (`RFC §15A`), which Ote asked for this
+  // morning as *"a first-class boundary, not merely an implementation detail"*.
+  //
+  // He then completed the Hermes loop by hand, found three cards for one investigation unnatural, was told
+  // plainly that removing them deletes this invariant and empties the consent trail, and chose it anyway —
+  // twice. ⇒ With `memory.rootAutoDisclosure` on, **root IS a wildcard across rooms.** That is now asserted
+  // OUT LOUD rather than quietly stopped being true, because a deleted invariant that leaves no trace in
+  // the tests is how nobody remembers it was ever there.
+  //
+  // ⭐ WHAT STILL HOLDS, AND IS STILL GUARDED HERE:
+  //   · a NON-root session is not a wildcard and never was (asserted below — this is the load-bearing half);
+  //   · every automatic disclosure is RECORDED as `root_session`, so consented and automatic stay countable
+  //     apart (asserted in section 3 and in `disclosure-log-check`);
+  //   · the grant is still per CONVERSATION (asserted in 6a) and still bounded to a window.
   const otherRoom = await asRoot.inspectAround({ messageId: third.msg, radius: 2 })
-  check('6b · ⭐⭐⭐ A GRANT FOR ONE ROOM OPENS ONLY THAT ROOM — root-ness is not doing the work',
-    otherRoom.ok === false && otherRoom.state === 'attested',
-    otherRoom.ok ? '⚠ THE THIRD ROOM OPENED — root has become a wildcard' : `refused: ${third.username}`)
-  check('6b · …and the refusal still says the conversation EXISTS rather than pretending it does not',
-    otherRoom.state === 'attested' && !!otherRoom.counterpart,
-    `state=${otherRoom.state} counterpart=${otherRoom.counterpart ?? 'none'}`)
+  check('6b · ⛔⛔ ROOT IS NOW A WILDCARD ACROSS ROOMS — asserted so the cost of that decision is visible',
+    otherRoom.ok === true && otherRoom.state === 'verified',
+    `a third room (${third.username}) opened with no card: state=${otherRoom.state}`)
+  const { rows: autoRow } = await pg.query(
+    `select authorized_via from ${S}.log_disclosure_events where from_room_user_id = $1
+      order by disclosed_at desc limit 1`, [third.user_id])
+  check('6b · ⭐⭐ …and it left a RECORD saying it was automatic, not consented',
+    autoRow[0]?.authorized_via === 'root_session', String(autoRow[0]?.authorized_via))
+
+  // ⭐⭐⭐ THE HALF THAT MUST NEVER GO. Ote kept this one explicitly: *"Other people's conversation contents
+  // must remain protected."* A non-root session gets her own words and not one word of anyone else's,
+  // in any room, with or without a grant elsewhere.
+  const thirdAsOwner = buildDisclosure(fastify, {
+    userId: mine.user_id, isRoot: false, username: mine.username, conversationId: conv0.id,
+  })
+  const thirdRefused = await thirdAsOwner.inspectAround({ messageId: third.msg, radius: 2 })
+  const thirdOthers = (thirdRefused.window || []).filter((w) => w.who !== 'you')
+  check('6b · ⭐⭐⭐ A NON-ROOT SESSION IS STILL NOT A WILDCARD — her own half only, in every room',
+    thirdRefused.state === 'own_only' && thirdOthers.every((w) => w.said === null),
+    `state=${thirdRefused.state}, ${thirdOthers.length} withheld`)
+  check('6b · …and it is still offered no path to anyone else\'s words', !thirdRefused.howToOpen)
   await db.txn_interaction_sessions.destroy({ where: { id: pending2.id } })
   await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
                    where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
@@ -197,13 +291,15 @@ check('7b · ⭐ a handle with no query is refused — a window has to centre on
 // navigation route must not be a way around the grant.
 await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
                  where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
-const navNoGrant = await asRoot.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
-check('7c · ⭐⭐⭐ the HANDLE path is refused without a grant — navigation is not a bypass',
-  navNoGrant.ok === false && navNoGrant.state === 'attested',
-  navNoGrant.ok ? 'THE HANDLE PATH OPENED WITHOUT A GRANT' : `refused: ${navNoGrant.state}`)
+// ⚠️ REWRITTEN with A: the handle path is no longer REFUSED without a grant — it returns her own half,
+// exactly like the messageId path. ⭐ The assertion that still matters, and is now sharper: the handle
+// route must not reveal the counterpart's words to a session that could not get them the other way.
 const navAsOwner = await asOwner.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
-check('7c · ⛔ and a NON-root session gets no path on the handle route either',
-  navAsOwner.ok === false && navAsOwner.howToOpen === null, JSON.stringify(navAsOwner).slice(0, 70))
+check('7c · ⭐⭐ the handle route gives a NON-root session her own half and nothing of his',
+  navAsOwner.state === 'own_only'
+    && (navAsOwner.window || []).filter((w) => w.who !== 'you').every((w) => w.said === null),
+  `state=${navAsOwner.state}`)
+check('7c · ⛔ …and still offers it no path to the other half', !navAsOwner.howToOpen)
 
 // ── 8. ⭐⭐⭐ P2 · THE REQUEST PATH — THE STEP THAT HAD NO PRODUCTION CALLER ────────────────────────
 // 8a · a non-root session cannot even ask.
@@ -243,9 +339,10 @@ const idsInWindow = (opened2.window || []).filter((w) => w && typeof w === 'obje
 check('9 · ⭐⭐ the returned window carries no message ids — nothing to walk on a later turn',
   idsInWindow.length === 0, idsInWindow.length ? 'ids present in the window' : 'who/said/when only')
 // ⭐ AND IT IS SPENT. Same grant, same query, refused.
+// ⚠️ REWRITTEN: conversation-lifetime grants are not spent by one read (see 6a). What is asserted is that
+// the SAME conversation keeps working — the property Ote actually asked for.
 const spent = await asRoot.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
-check('9 · ⭐⭐ the grant is single-use on the handle path too', spent.ok === false && spent.state === 'attested',
-  JSON.stringify(spent).slice(0, 70))
+check('9 · ⭐ the handle path keeps working within the granted conversation', spent.ok === true, `state=${spent.state}`)
 await db.txn_interaction_sessions.destroy({ where: { id: loopCard.id } })
 await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
                  where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])

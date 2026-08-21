@@ -3,8 +3,10 @@
 Ote, 2026-08-20: *"capture a complete clean suite run to a file, including the previously missed
 memory-lifecycle-check, so we have an unambiguous baseline."*
 
-**Baseline run: `2026-08-21 10:00:56` (local). Exit code 0. `unit` + 26 checks, all PASS.**
-`123` node:test cases and `847` check assertions, `0` failures.
+**Baseline run: `2026-08-21 11:20` (local). Exit code 0. `unit` + 26 checks, all PASS.**
+`123` node:test cases + 11 more for `OWN_HISTORY`, and ~860 check assertions, `0` failures.
+⚠ Schema through **migration 020**. This baseline describes a system in which
+**ROOT SESSION = DISCLOSURE AUTHORITY** — see below.
 
 ⓘ Supersedes `2026-08-21 00:10:42` (26 suites, 792 assertions) and `2026-08-20 23:58:50` (790). The
 differences are additive: +2 assertions when the flake below was diagnosed, then +19 for
@@ -111,9 +113,21 @@ survives by testing less.
 - the **noticing** pass live, dry-run, generation 3, 15-minute poll
 - `SELF_MODEL` **amended** — paragraph 3 states that she does not run *continuously* and that a
   reflection is one of the things that can run her, while still denying any experience of the gap
-- ⭐⭐⭐ **ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY**, asserted in `disclosure-inspect-check` §6: the
-  grant is **single-use**, and while a live grant for one room exists a **third room is still refused** —
-  so root-ness is provably not what opens the door
+- ⚠⚠⚠ **`ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY` IS SUPERSEDED (2026-08-21).** Ote ratified it in
+  the morning as first-class, then — after completing the Hermes loop and clicking three cards for one
+  investigation — chose to remove it, twice, with the cost stated. `disclosure-inspect-check` §6b now
+  asserts **"ROOT IS NOW A WILDCARD ACROSS ROOMS"** and passes by confirming it, because a deleted
+  invariant that leaves no trace in the tests is how nobody remembers it existed.
+- ⭐ **What still holds and is still guarded:** a **non-root** session is not a wildcard in any room (her own
+  half only) · every automatic disclosure is **recorded** as `root_session`, distinguishable from a
+  consented one forever · a `root_session` grant is **not inheritable** by a non-root session (a real leak,
+  caught by §6b) · the grant is still per room pair, per conversation, and bounded to a window
+- ⭐⭐ **A · her own words need no permission** — cross-room returns `state:'own_only'` with her half in full
+  and the counterpart's as content-free markers. ⭐ **2 · grants last the conversation**, and the card text
+  was changed with them so consent matches what is given
+- ⭐⭐ **L1 has three foundational parts** — `SELF_MODEL` (amended: she no longer *"runs only while a turn is
+  processed"*) · `SELFHOOD` · `OWN_HISTORY`. ⛔ Never merge them: `SELF_MODEL` is asserted to contain no
+  first-person emotional language and `SELFHOOD` needs exactly that register
 - ⭐⭐ **schema through migration 019** — 018 made the message vector index filterable in its own table
   (and the pinned/navigation case a btree lookup); 019 gave `txn_memories` the `embedding_hv` its own store
   had been querying all along, GENERATED so no writer can omit it

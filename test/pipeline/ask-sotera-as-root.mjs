@@ -27,9 +27,20 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { makeClient, devPg, devSchema } from '../harness.mjs'
 import { loadConfig } from '../../Backend/lib/utility.js'
 
+// ⭐ `--cid` / `--title` / `--out` added 2026-08-21 so a session can be CONTINUED and ADAPTED rather than
+// fired as a script. Ote, on the Hermes behavioural test: *"Have a genuine conversation with her… If she
+// takes another route, follow it."* You cannot follow a route with a fixed turn list decided in advance.
 const argv = process.argv.slice(2)
 const KEEP = argv.includes('--keep')
-const TURNS = argv.filter((a) => a !== '--keep')
+const opt = (name, dflt = null) => {
+  const i = argv.indexOf(`--${name}`)
+  return i >= 0 ? argv[i + 1] : dflt
+}
+const GIVEN_CID = opt('cid')
+const TITLE = opt('title', 'ROOT PROBE — room index (delete me)')
+const OUT_NAME = opt('out', 'root-room-index-probe.json')
+const FLAG_VALUES = new Set([GIVEN_CID, TITLE, OUT_NAME].filter(Boolean))
+const TURNS = argv.filter((a) => !a.startsWith('--') && !FLAG_VALUES.has(a))
 if (!TURNS.length) { console.error('usage: node pipeline/ask-sotera-as-root.mjs "turn" ["turn" …]'); process.exit(1) }
 
 const config = loadConfig()
@@ -69,25 +80,56 @@ if (login.status !== 200) { console.error(`✖ root login failed (${login.status
 if (login.json?.user?.isRoot !== true) { console.error('✖ logged in but isRoot is not true — the probe would not exercise the root level'); process.exit(1) }
 console.log(`   session: isRoot=${login.json.user.isRoot}  room=${login.json.user.id === ROOM ? "root's own row" : `⚠ ${login.json.user.id}`}`)
 
-const convo = await call('r', 'POST', '/v1/chat/conversations', {
-  title: 'ROOT PROBE — room index (delete me)',
-  model: config.chat?.defaultModel,
-  settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: true } },
-})
-const cid = convo.json?.conversation?.id
-if (!cid) { console.error(`✖ no conversation (${convo.status}) ${String(convo.text).slice(0, 200)}`); process.exit(1) }
+let cid = GIVEN_CID
+if (!cid) {
+  const convo = await call('r', 'POST', '/v1/chat/conversations', {
+    title: TITLE,
+    model: config.chat?.defaultModel,
+    settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: true } },
+  })
+  cid = convo.json?.conversation?.id
+  if (!cid) { console.error(`✖ no conversation (${convo.status}) ${String(convo.text).slice(0, 200)}`); process.exit(1) }
+  console.log(`   conversation: ${cid}  (new)`)
+} else {
+  console.log(`   conversation: ${cid}  (continuing)`)
+}
+// ⚠️ A HELD TURN CAN BLOCK THIS POST FOR UP TO chat.interactionTimeoutSeconds (300s by default). That is
+// not a hang — it is `request_room_access` waiting for a human to answer a permission card, which is the
+// whole point of the mechanism. ⛔ Do not "fix" it with a client timeout: the answer belongs to whoever is
+// at the keyboard, and abandoning the request would lose the interaction row that proves what happened.
+console.log(`   ⓘ if she raises a permission card this turn will WAIT (up to 5 min) for a human to answer it`)
 
 const transcript = []
 try {
   for (const [i, text] of TURNS.entries()) {
-    const posted = await call('r', 'POST', `/v1/chat/conversations/${cid}/messages`, { content: text, stream: false })
-    if (posted.status >= 300) throw new Error(`TURN ${i + 1} REFUSED (${posted.status}): ${String(posted.text || '').slice(0, 300)}`)
+    // ⚠⚠ A HELD TURN OUTLIVES THE HTTP CLIENT, AND RACING IT LOSES THE REPLY.
+    // `request_room_access` / `ask_user` pause a turn until a human answers — up to
+    // `chat.interactionTimeoutSeconds` (300s) — and Node's fetch aborts headers at exactly 300s. Measured
+    // on the first live Hermes run: `UND_ERR_HEADERS_TIMEOUT` fired in the same second the card expired,
+    // the process died, and the turn's answer was lost even though the server had finished it.
+    // ⛔ Not a hang: waiting is the mechanism. ⇒ If the socket gives up, stop waiting on it and read the
+    // answer from the DATABASE, which is where this script reads every reply from anyway.
+    let held = false
+    try {
+      const posted = await call('r', 'POST', `/v1/chat/conversations/${cid}/messages`, { content: text, stream: false })
+      if (posted.status >= 300) throw new Error(`TURN ${i + 1} REFUSED (${posted.status}): ${String(posted.text || '').slice(0, 300)}`)
+    } catch (e) {
+      if (!/HEADERS_TIMEOUT|fetch failed/i.test(String(e?.message) + String(e?.cause?.code))) throw e
+      held = true
+      console.log(`   ⏳ the socket timed out — the turn is HELD (a card is waiting, or was). Polling the database for the reply…`)
+      const before = (await q(`select count(*)::int n from ${S}.txn_messages where conversation_id=$1 and role='assistant'`, [cid]))[0].n
+      for (let waited = 0; waited < 240; waited += 5) {
+        await new Promise((r) => setTimeout(r, 5000))
+        const now = (await q(`select count(*)::int n from ${S}.txn_messages where conversation_id=$1 and role='assistant'`, [cid]))[0].n
+        if (now > before) break
+      }
+    }
     const rows = await q(
       `select role, content, tool_calls, error from ${S}.txn_messages where conversation_id=$1 order by created_at`, [cid])
     const last = rows.filter((r) => r.role === 'assistant').at(-1)
     const tc = Array.isArray(last?.tool_calls) ? last.tool_calls : (last?.tool_calls ? [last.tool_calls] : [])
     const tools = tc.map((t) => t?.function?.name || t?.name).filter(Boolean)
-    transcript.push({ turn: i + 1, asked: text, tools, reply: last?.content || '', error: last?.error || null })
+    transcript.push({ turn: i + 1, asked: text, tools, reply: last?.content || '', error: last?.error || null, held })
     console.log(`\n── T${i + 1} ▸ ${text}`)
     console.log(`   tools: ${tools.join(', ') || '(NONE)'}${last?.error ? `  ⚠ ${last.error}` : ''}`)
     console.log(`\n   ${(last?.content || '(EMPTY — and the POST returned 2xx, so this is a real empty answer)').replace(/\n+/g, '\n   ')}`)
@@ -95,9 +137,9 @@ try {
 } finally {
   // The transcript is the evidence. Save it BEFORE deleting anything.
   mkdirSync(new URL('../results/', import.meta.url), { recursive: true })
-  const out = new URL(`../results/root-room-index-probe.json`, import.meta.url)
-  writeFileSync(out, JSON.stringify({ room: 'ote', conversationTitle: 'ROOT PROBE — room index', transcript }, null, 2))
-  console.log(`\n  transcript → test/results/root-room-index-probe.json`)
+  const out = new URL(`../results/${OUT_NAME}`, import.meta.url)
+  writeFileSync(out, JSON.stringify({ room: 'ote', conversationId: cid, conversationTitle: TITLE, transcript }, null, 2))
+  console.log(`\n  transcript → test/results/${OUT_NAME}`)
 
   if (!KEEP) {
     await q(`delete from ${S}.txn_messages where conversation_id=$1`, [cid])

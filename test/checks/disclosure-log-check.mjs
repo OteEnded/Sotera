@@ -72,8 +72,17 @@ try {
     `SELECT e.enumlabel l FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid WHERE t.typname=$1 ORDER BY e.enumsortorder`,
     [t])).map((r) => r.l)
   const authz = await enumVals('disclosure_authz')
-  ok(authz.length === 1 && authz[0] === 'held_turn_card',
-    'E · ⭐⭐ disclosure_authz can say ONLY held_turn_card — the schema cannot record a prose authorization',
+  // ⚠️⚠️ WAS "ONLY held_turn_card" UNTIL 2026-08-21. Migration 020 added `root_session` on Ote's explicit
+  // instruction, after a completed Hermes run took three cards. ⇒ The claim that survives — and it is the
+  // one 014 was actually protecting — is that **NEITHER VALUE CAN BE PRODUCED BY SOMETHING SOMEONE SAID**:
+  // one is a stored structured answer re-read by the server, the other is an authenticated session. There
+  // is still no value for prose, and a schema that cannot record a prose authorization cannot be talked
+  // into accepting one.
+  ok(authz.length === 2 && authz.includes('held_turn_card') && authz.includes('root_session'),
+    'E · ⭐ disclosure_authz has exactly two values, both of them facts the SERVER establishes',
+    authz.join(', '))
+  ok(!authz.some((v) => /prose|stated|claimed|assumed|model|said/i.test(v)),
+    'E · ⭐⭐ …and STILL no value for prose — authorization never travels through a sentence',
     authz.join(', '))
   const life = await enumVals('disclosure_lifetime')
   ok(life.length === 2 && !life.includes('standing'),
@@ -98,12 +107,24 @@ try {
   const { rows: authzRows } = await pg.query(`select authorized_via, count(*)::int n,
       count(*) filter (where interaction_id is null)::int no_proof from ${S}.log_disclosure_events
       group by authorized_via`)
-  ok(authzRows.every((r) => r.authorized_via === 'held_turn_card'),
-    'I · ⭐⭐ every row was authorized by a held-turn card — no other authority has ever written one',
+  // ⚠️⚠️ REWRITTEN 2026-08-21. This used to assert that EVERY row came from a held-turn card, which was the
+  // strongest statement in this file. `root_session` rows now exist by Ote's decision, so the assertion
+  // becomes: every row names an authority from the CLOSED vocabulary, and ⭐ the two remain countable
+  // separately — because *"which of these reads did a human actually agree to?"* has to stay answerable.
+  ok(authzRows.every((r) => ['held_turn_card', 'root_session'].includes(r.authorized_via)),
+    'I · ⭐ every row names one of the two legal authorities — nothing else has ever written one',
     authzRows.map((r) => `${r.authorized_via}:${r.n}`).join(' ') || 'no rows yet')
-  ok(authzRows.every((r) => r.no_proof === 0),
-    'I · ⭐ and every row names the interaction that proved it',
-    authzRows.map((r) => `${r.authorized_via} missing=${r.no_proof}`).join(' ') || 'no rows yet')
+  // ⭐⭐ AND THE PROOF REQUIREMENT NOW FOLLOWS THE AUTHORITY. A card row without its interaction would mean
+  // a consent we cannot verify; a root_session row has no interaction BY CONSTRUCTION, and pretending
+  // otherwise would be inventing evidence.
+  const cards = authzRows.filter((r) => r.authorized_via === 'held_turn_card')
+  ok(cards.every((r) => r.no_proof === 0),
+    'I · ⭐⭐ every CARD row names the interaction that proved it',
+    cards.map((r) => `${r.authorized_via} missing=${r.no_proof}`).join(' ') || 'no card rows yet')
+  const autos = authzRows.filter((r) => r.authorized_via === 'root_session')
+  ok(autos.every((r) => r.no_proof === r.n),
+    'I · ⭐ and every AUTOMATIC row honestly has NO interaction — it did not happen, so it is not claimed',
+    autos.map((r) => `${r.authorized_via} ${r.no_proof}/${r.n} without an interaction`).join(' ') || 'no automatic rows yet')
 
   // Walk Backend/ (excluding migrations, which are where the name is supposed to appear) and look for any
   // reference at all — a query, a model, a constant. Comments are stripped first.
