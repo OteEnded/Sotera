@@ -475,7 +475,26 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       return { ok: false, reason: 'that conversation is already in this room — you can inspect it directly', alreadyReadable: true }
     }
     const live = await liveGrant({ fromRoomUserId: at.conv.user_id, intoConversationId: conversationId })
-    if (live) return { ok: true, granted: true, alreadyGranted: true, scope: 'the messages immediately around the part you are looking for', lifetime: 'this turn' }
+    if (live) return { ok: true, granted: true, alreadyGranted: true, scope: 'the messages immediately around the part you are looking for', lifetime: 'this conversation' }
+    // ⭐⭐ ROOT AUTO-DISCLOSURE APPLIES HERE TOO — AND MISSING IT WAS A REAL BUG, CAUGHT LIVE.
+    // I wired the automatic grant into `inspectAround` only. So when she did the POLITE thing — ask first,
+    // which is what she actually does — `request_room_access` still raised a card and it timed out
+    // unanswered: two cards, ten minutes of a held turn with zero model load, and nothing authorized.
+    // ⇒ Asking must not be worse than not asking. If a root session would be granted this automatically on
+    // inspection, then asking for it returns the same grant immediately rather than summoning a human who
+    // does not need to be summoned.
+    if (rootAutoDisclosure(fastify.config)) {
+      const auto = await autoGrantForRoot({ fromRoomUserId: at.conv.user_id, radius })
+      if (auto) {
+        return {
+          ok: true, granted: true, automatic: true, counterpart: at.counterpart,
+          scope: 'the messages around the part you are looking for',
+          lifetime: 'this conversation',
+          note: 'Granted automatically because this is a root session, and recorded as such. No one was asked.',
+          next: 'call inspect_around with the same conversationHandle and what you are looking for',
+        }
+      }
+    }
 
     await log(`[disclosure] access requested from_room=${at.conv.user_id} into=${conversationId}`, import.meta.url)
     // ⛔ THE QUESTION IS NOT THE MODEL'S TO WRITE. A card whose text came from the caller is a card that

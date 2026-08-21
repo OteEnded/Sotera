@@ -318,6 +318,64 @@ const askOwn = await buildDisclosure(fastify, {
 check('8c · ⭐ her own room raises no card — there is no boundary to authorize',
   askOwn.ok === false && askOwn.alreadyReadable === true, JSON.stringify(askOwn).slice(0, 80))
 
+// 8d · ⭐⭐⭐ ASKING MUST NEVER BE WORSE THAN NOT ASKING — AND FOR TEN MINUTES IT WAS.
+//
+// ⚠️⚠️ THE BUG THIS PINS, OBSERVED LIVE: root auto-disclosure (change 3) was wired into
+// `inspectAround` only. So the POLITE path — ask first, which is what she actually does — still raised a
+// card, and in Hermes's room two of them TIMED OUT unanswered: a held turn, zero model load, nothing
+// authorized, and she read it as a refusal. ⇒ If a root session would be granted this automatically on
+// inspection, then ASKING for it returns the same grant immediately.
+//
+// ⭐ THE ASSERTION IS SYMMETRY, not a message: for one room and one session, `inspect_around` returning
+// `verified` and `request_room_access` returning `granted` must both hold. A version that only checked the
+// wording would have passed while the card still went up.
+//
+// ⛔ AND THE PROOF THAT NO CARD WENT UP IS A ROW COUNT, not the absence of a hang. `askInteraction` HOLDS
+// the turn, so a regression here does not fail this check — it makes the suite sit for five minutes. The
+// count is what distinguishes "granted without asking a human" from "asked a human and got lucky".
+if (config?.memory?.rootAutoDisclosure === true) {
+  await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
+                   where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
+  const asRootLive = buildDisclosure(fastify, {
+    userId: mine.user_id, isRoot: true, username: mine.username, conversationId: conv0.id, interactive: true,
+  })
+  const { rows: before } = await pg.query(
+    `select count(*)::int n from ${S}.txn_interaction_sessions where conversation_id = $1`, [conv0.id])
+  const asked = await asRootLive.requestRoomAccess({ conversationHandle: theirs.conversation_id, radius: 2 })
+  const { rows: after } = await pg.query(
+    `select count(*)::int n from ${S}.txn_interaction_sessions where conversation_id = $1`, [conv0.id])
+  check('8d · ⭐⭐⭐ a root session that ASKS is granted straight away — asking is not worse than inspecting',
+    asked.ok === true && asked.granted === true && asked.automatic === true,
+    asked.ok ? `lifetime=${asked.lifetime}` : `⚠ ${asked.reason || asked.state}`)
+  check('8d · ⭐⭐ …and NO card was raised — no human was summoned who did not need to be',
+    after[0].n === before[0].n, `interaction rows ${before[0].n} → ${after[0].n}`)
+  const { rows: viaRow } = await pg.query(
+    `select authorized_via from ${S}.log_disclosure_events
+      where from_room_user_id = $1 and revoked_at is null order by disclosed_at desc limit 1`, [theirs.user_id])
+  check('8d · ⭐ …and the automatic grant is RECORDED as automatic, exactly as the inspect path records it',
+    viaRow[0]?.authorized_via === 'root_session', String(viaRow[0]?.authorized_via))
+  // ⭐⭐ THE SYMMETRY ITSELF. Same room, same session: the door the request opened is the door inspection
+  // would have opened. ⛔ If these two ever disagree, one of the paths has its own authorization logic.
+  const afterAsking = await asRootLive.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
+  check('8d · ⭐⭐⭐ THE TWO PATHS AGREE — what asking grants is exactly what inspecting grants',
+    afterAsking.ok === true && afterAsking.state === 'verified',
+    `state=${afterAsking.state}`)
+  // ⛔ AND THE ROOT-ONLY GATE IS STILL IN FRONT OF IT. The automatic path must not have become a way for a
+  // non-root session to obtain what change A deliberately withholds.
+  const askedNonRoot = await buildDisclosure(fastify, {
+    userId: mine.user_id, isRoot: false, username: mine.username, conversationId: conv0.id, interactive: true,
+  }).requestRoomAccess({ conversationHandle: theirs.conversation_id, radius: 2 })
+  check('8d · ⛔⛔ the automatic path is still ROOT-ONLY — a non-root session is refused before it starts',
+    askedNonRoot.ok === false && askedNonRoot.granted !== true, askedNonRoot.reason || '')
+  await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
+                   where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
+} else {
+  // ⛔ NOT SILENTLY SKIPPED. With the flag off the request path is SUPPOSED to raise a card, and calling
+  // it here would hold the suite for the full card timeout rather than fail.
+  check('8d · ⓘ root auto-disclosure is OFF in config — the automatic request path is unasserted here',
+    true, 'memory.rootAutoDisclosure !== true')
+}
+
 // ── 9. ⭐⭐ THE WHOLE LOOP, END TO END, ON THE HANDLE PATH ─────────────────────────────────────────
 // search → handle → authorization → bounded window. The card is pre-answered here because
 // `askInteraction` HOLDS the turn for a live human; what is under test is everything either side of it.
