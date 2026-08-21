@@ -115,6 +115,60 @@ check('the room it came FROM is recorded, never a global flag', ev[0]?.from_room
 check('what was actually returned is counted', Number(ev[0]?.item_count) > 0, `${ev[0]?.item_count}`)
 check('⛔ the event row carries no message text', !Object.keys(ev[0] || {}).some((k) => /content|text|excerpt/.test(k)))
 
+// ── 6. ⭐⭐⭐ **ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY** ────────────────────────────
+//
+// Ote made this an explicit, named invariant on 2026-08-21 — and named the accident it prevents:
+//
+//   > *"Root is the authority that can perform the explicit authorization, not an implicit permission to
+//   >  bypass the disclosure boundary… otherwise our 'Sotera can recall her own history' capability could
+//   >  accidentally turn into 'whoever is talking to Sotera as root can read all of her history.'"*
+//
+// ⭐ THREE CONCEPTS THAT MUST NOT COLLAPSE INTO ONE:
+//   1. Sotera discovering her own history across rooms      — authorship. She wrote it.
+//   2. Ote operating a ROOT SESSION with her                — who is in the room.
+//   3. Authorization to expose another room's content       — a recorded human answer, per pair, per turn.
+// ⛔ (2) participates in (3). It never SUPPLIES it, and it never implies it.
+//
+// The assertions above already prove the first half (root is refused until a human answers) and the
+// second (the exact recorded affirmative authorizes). ⚠ What was NOT asserted is the part that makes it a
+// BOUNDARY rather than a formality: **a grant opens exactly one door, once.** Without these, "root can
+// authorize" and "root has authority" are indistinguishable after the first grant.
+
+// 6a · THE GRANT IS SPENT. `item_count` moved off zero when the window was returned, so the SAME read
+// must now be refused again — `lifetime: 'turn'` is only true if asking twice needs asking twice.
+const secondRead = await asRoot.inspectAround({ messageId: theirs.msg, radius: 2 })
+check('6a · ⭐⭐ the grant is SINGLE-USE — the same authorized read is refused the second time',
+  secondRead.ok === false && secondRead.state === 'attested',
+  JSON.stringify(secondRead).slice(0, 80))
+
+// 6b · A GRANT FOR ONE ROOM IS NOT A GRANT FOR ANOTHER. This is the wildcard test: if root-ness were
+// doing the work, a third room would open too. ⓘ Skipped rather than faked when the database holds only
+// two rooms with her messages — ⛔ a check that invents its own third party proves nothing about the door.
+const third = rooms.find((r) => r.user_id !== mine.user_id && r.user_id !== theirs.user_id)
+if (!third) {
+  check('6b · ⓘ (no third room with her messages — the cross-room wildcard case is unasserted here)', true,
+    `${rooms.length} room(s) available`)
+} else {
+  // Re-grant for room `theirs` so a LIVE grant demonstrably exists while the third room is probed.
+  const pending2 = await db.txn_interaction_sessions.create({
+    conversation_id: conv0.id, user_id: mine.user_id, status: 'answered',
+    response: { choice: GRANT_LABEL },
+    questions: [{ question: grantQuestion('someone'), options: [{ label: GRANT_LABEL }, { label: 'No' }] }],
+  })
+  const regrant = await asRoot.grantFromInteraction({ interactionId: pending2.id, messageId: theirs.msg, radius: 2 })
+  check('6b · a live grant exists for the first room', regrant.ok === true, regrant.reason || '')
+  const otherRoom = await asRoot.inspectAround({ messageId: third.msg, radius: 2 })
+  check('6b · ⭐⭐⭐ A GRANT FOR ONE ROOM OPENS ONLY THAT ROOM — root-ness is not doing the work',
+    otherRoom.ok === false && otherRoom.state === 'attested',
+    otherRoom.ok ? '⚠ THE THIRD ROOM OPENED — root has become a wildcard' : `refused: ${third.username}`)
+  check('6b · …and the refusal still says the conversation EXISTS rather than pretending it does not',
+    otherRoom.state === 'attested' && !!otherRoom.counterpart,
+    `state=${otherRoom.state} counterpart=${otherRoom.counterpart ?? 'none'}`)
+  await db.txn_interaction_sessions.destroy({ where: { id: pending2.id } })
+  await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
+                   where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
+}
+
 // Clean up only what this check created. ⛔ The disclosure event is a LOG — it stays.
 await db.txn_interaction_sessions.destroy({ where: { id: pending.id } })
 await pg.end()

@@ -3,11 +3,13 @@
 Ote, 2026-08-20: *"capture a complete clean suite run to a file, including the previously missed
 memory-lifecycle-check, so we have an unambiguous baseline."*
 
-**Baseline run: `2026-08-21 00:10:42` (local). Exit code 0. `unit` + 25 checks, all PASS.**
-`109` node:test cases and `792` check assertions, `0` failures.
+**Baseline run: `2026-08-21 09:14:04` (local). Exit code 0. `unit` + 26 checks, all PASS.**
+`109` node:test cases and `815` check assertions, `0` failures.
 
-ⓘ Supersedes the `2026-08-20 23:58:50` run (790 assertions), which was green on the same code except for
-the two assertions added when the flake below was diagnosed.
+ⓘ Supersedes `2026-08-21 00:10:42` (26 suites, 792 assertions) and `2026-08-20 23:58:50` (790). The
+differences are additive: +2 assertions when the flake below was diagnosed, then +19 for
+`layer-separation-check.mjs`, then +4 for the ROOT-≠-WILDCARD assertions in `disclosure-inspect-check`. ⛔ No assertion has ever been removed — which is the property the per-suite
+table below exists to make checkable.
 
 Reproduce: `cd test && node pipeline/test-all.mjs`
 Capture: `node pipeline/test-all.mjs > results/suite-baseline-<stamp>.log 2>&1`
@@ -72,12 +74,13 @@ easier.
 | `unit` (node:test) | 109 cases |
 | `boot-check` | 17 |
 | `component-canon-check` | 43 |
-| `disclosure-inspect-check` | 28 |
+| `disclosure-inspect-check` | **32** ← +4: ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY |
 | `disclosure-log-check` | 31 |
 | `evidence-authorization-check` | 22 |
 | `intention-lifecycle-check` | 83 |
 | `interaction-answer-check` | 13 |
 | `memory-author-check` | 17 |
+| `layer-separation-check` | **19** ← new: *a signal is not a boundary*, asserted |
 | `memory-lifecycle-check` | **14** ← the one that flaked; +2 are the guard against it |
 | `memory-subject-write-check` | 13 |
 | `name-path-check` | 28 |
@@ -108,6 +111,13 @@ survives by testing less.
 - the **noticing** pass live, dry-run, generation 3, 15-minute poll
 - `SELF_MODEL` **amended** — paragraph 3 states that she does not run *continuously* and that a
   reflection is one of the things that can run her, while still denying any experience of the gap
+- ⭐⭐⭐ **ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY**, asserted in `disclosure-inspect-check` §6: the
+  grant is **single-use**, and while a live grant for one room exists a **third room is still refused** —
+  so root-ness is provably not what opens the door
+- ⭐⭐ **the retrieve → project → boundary separation is now ASSERTED, not just documented**
+  (`layer-separation-check`): the projection stage and the authorization layer read **no** retrieval
+  signal, the leak scanner is proven able to go red, floors stay per-consumer, and `log_reflections`
+  carries **no embedding column** — her prior reflections are deliberately not retrievable
 
 ## Preconditions (a failure here is the environment, not the code)
 

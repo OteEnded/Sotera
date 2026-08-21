@@ -54,6 +54,10 @@ import {
 // different questions and `tools_used: []` cannot answer the second one.
 // ⚠ The format changed on 2026-08-21 — the first six rows carry a bare ISO timestamp (this file only).
 // That is visible rather than hidden, which is the point of stamping it at all.
+// Ticks since this process started — for the heartbeat below. ⛔ Not persisted: it exists to prove the
+// job is alive in THIS process, and a restart legitimately resets it.
+let ticks = 0
+
 const CODE_MTIME = (() => {
   const at = (u) => { try { return statSync(new URL(u, import.meta.url)).mtime.toISOString() } catch { return '?' } }
   const host = at(import.meta.url)
@@ -372,13 +376,33 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
   if (!db?.txn_conversations) return { skipped: true, reason: 'no-db' }
   const quietMinutes = intCfg(fastify.config, 'reflectionQuietMinutes', 30)
 
-  // Candidates only: quiet enough by `updated_at`, recent enough to be worth reading. The real gate is
-  // `isReadyToReflect` per conversation — this query just keeps the scan small.
+  // ── ⚠⚠ A STARVATION BUG LIVED HERE, AND IT STOPPED THE PASS DEAD FOR ~8 HOURS ───────────────
+  // The old query was `order: updated_at DESC, limit: maxConvos * 6` — i.e. **the cap was applied by
+  // RECENCY, BEFORE the eligibility gate.** Measured 2026-08-21: the pass could see 18 candidates, of which
+  // **0 were ready** (14 already reflected at their watermark, 2 thin, 2 fixtures) while **23 eligible
+  // conversations sat below the cut and could never be reached.** 17 reflections happened, then nothing for
+  // seven and three quarter hours, and the log looked exactly like a quiet system.
+  //
+  // ⭐ THE RULE THIS BROKE: **a cap must bound the WORK, never the SEARCH FOR work.** A LIMIT above a
+  // filter silently converts "do at most 3 per tick" into "do at most 3 of the newest 18, forever."
+  //
+  // ⇒ The window is now the whole lookback (bounded by `lookbackHours`, ~70–80 rows in practice, so the
+  // scan is cheap) and the cap applies where it belongs: `tally.reflected >= maxConvos` breaks the loop.
+  // ⛔ The gate is STILL `isReadyToReflect` inside `reflectOnConversation` — this query deliberately does
+  // NOT reimplement it, because two copies of an eligibility rule is how they stop agreeing.
+  //
+  // ⭐ AND OLDEST-QUIET-FIRST, not newest. A fresh conversation will still be there in twenty minutes; a
+  // conversation that has been waiting all night is the one whose occasion is overdue. Newest-first is also
+  // what let the backlog starve in the first place — a busy day would permanently outrank it.
+  //
+  // ⚠ KNOWN AND DELIBERATE BOUND: a conversation whose last activity is older than `lookbackHours` is
+  // never reflected on, even if it never has been. The backlog is bounded by the lookback, not drained
+  // forever. That is a cost decision, not an oversight.
   const until = new Date(Date.now() - quietMinutes * 60000)
   const since = new Date(Date.now() - lookbackHours * 3600e3)
   const convos = await db.txn_conversations.findAll({
     where: { incognito: false, updated_at: { [Op.lte]: until, [Op.gte]: since } },
-    order: [['updated_at', 'DESC']], limit: maxConvos * 6, raw: true,
+    order: [['updated_at', 'ASC']], raw: true,
   })
 
   const tally = { scanned: 0, reflected: 0, wroteMemory: 0, blocked: 0, skipped: {} }
@@ -397,6 +421,17 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
       await log(`[reflection] ${c.id} failed: ${e.message}`, import.meta.url)
       tally.skipped.error = (tally.skipped.error ?? 0) + 1
     }
+  }
+  // ── ⭐⭐ A HEARTBEAT, BECAUSE A DEAD PASS AND A QUIET PASS LOOKED IDENTICAL ─────────────────
+  // The starvation above was invisible for eight hours for one reason: the job logs only when it REFLECTS,
+  // so silence meant either "nothing was eligible" or "the pass is broken" and nothing could tell them
+  // apart. ⇒ every third tick (hourly at the 20-minute cadence) emits the scan tally even when it did
+  // nothing, so "scanned=73 reflected=0 unchanged=70" is distinguishable from no line at all.
+  // ⛔ Every tick would be noise — and a noisy job gets switched off and takes its usefulness with it.
+  ticks++
+  if (tally.reflected === 0 && ticks % 3 === 0) {
+    await log(`[reflection] heartbeat: scanned=${tally.scanned} reflected=0 `
+      + `skipped=${JSON.stringify(tally.skipped)}`, import.meta.url)
   }
   return { ...tally, details }
 }
