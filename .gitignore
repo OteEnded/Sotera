@@ -41,3 +41,4 @@ test/results/noticing-proposals.jsonl
 # survives, never in git. ⛔ Do not add them to make a report easier to write.
 test/results/hermes-*.json
 test/results/root-room-index-probe.json
+cognition-debug.log

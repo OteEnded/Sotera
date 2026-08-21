@@ -287,6 +287,11 @@ export function composeSystemContext({
   // ⛔ MUTUALLY EXCLUSIVE WITH `scopeAwareness`: v1 tells her the two states are indistinguishable, this
   // one hands her the evidence to distinguish them. Both at once would contradict, so v2 wins (below).
   scopeFacts = null,
+  // ⭐⭐⭐ THE MEMORY COGNITION LAYER'S OUTPUT — one already-fused, already-typed block, or null.
+  // ⛔ NOT another retrieval input. Everything else on this list is raw material the composer arranges;
+  // this arrives assembled, because the whole point is that SHE does not do the assembling. See
+  // `memory-cognition-host.js` and `RFC_MEMORY_COGNITION_LAYER.md`.
+  cognition = null,
   // SELF-MODEL (2026-08-19): what she IS — one Sotera, many people, persistent state, discontinuous
   // execution, scoped access. L1 by Ote's ruling; default off so old and new are comparable.
   selfModel = false,
@@ -380,6 +385,14 @@ export function composeSystemContext({
   // Foundational and unconditional: the same sentence in every deployment, by design.
   // ⭐ v2 WINS WHEN BOTH ARE SET, deterministically — never a throw. A composer that can raise would turn
   // a misconfiguration into a dead turn, and the whole point of this block is to make a turn more honest.
+  // ⭐⭐⭐ WHAT SHE ACTUALLY REMEMBERS ABOUT WHAT WAS JUST ASKED.
+  //
+  // `runtime`/`fact` — it is a report about THIS moment, not a standing principle, and it must lose to a
+  // live user statement exactly the way any other fact does.
+  // ⛔ PLACED BEFORE `scope-facts` DELIBERATELY: the concrete recollection comes first, and the abstract
+  // statement about reach comes after it. The other order taught her to explain the boundary before saying
+  // what she remembers — which is the behaviour this whole layer exists to remove.
+  if (cognition) part('cognition', cognition, AUTHORITY.runtime, SCOPE.fact)
   if (scopeFacts) {
     // `runtime`/`fact`, not `foundational`/`principle` like v1: these are facts about THIS moment (who,
     // which room, how many are out of reach), not a standing principle about how retrieval works.

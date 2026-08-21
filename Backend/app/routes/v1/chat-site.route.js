@@ -18,6 +18,8 @@ import { captureFacts } from '../../components/memory-extract-host.js'
 import { recordTurn, recordCapture, recordAuto } from '@ote/memory/cognition/memory-capture-telemetry.js'
 import { captureIdentity } from '../../components/memory-identity-host.js'
 import { composeSystemContext, composeRuntimeTail, composeAdaptiveContext, rankRelevance } from '../../components/context-composer.js'
+import { buildMemoryCognition } from '../../components/memory-cognition-host.js'
+import { plainSpokenToolResult } from '../../components/memory-cognition-projection.js'
 import { classifySection } from '../../components/context-authority.js'
 import { contextBreakdown, rememberContextUsage, lastContextUsage } from '../../components/context-usage.js'
 import { resolveProfile, setDisplayName } from '../../components/profile-service.js'
@@ -1531,6 +1533,68 @@ export default async function chatSiteRoutes(fastify) {
         : null,
       // ⭐ D-13 · THE CONCRETE SCOPE OF THIS TURN. Fails soft: no scope, no block — an unexplained
       // boundary is a smaller failure than a dead turn.
+      // ── ⭐⭐⭐ THE MEMORY COGNITION LAYER ──────────────────────────────────────────────
+      //
+      // ⭐ ALWAYS-ON, and that is Ote's decision: *"For every normal conversational turn, the Memory
+      // Cognition Layer is allowed to activate her memory automatically. I don't want a rule like
+      // 'Remember to search your history when relevant.' That makes memory another task she has to
+      // remember to perform."*
+      //
+      // ⛔ IT IS NOT ANOTHER RETRIEVAL INPUT. Every other block on this list is raw material; this one
+      // arrives already fused, already access-resolved and already epistemically typed, because the
+      // measured failure was that SHE was doing the assembling: four phrasings of one ordinary question
+      // produced 4/5/6/8 tool calls, two incompatible beliefs about her own access, and three untested
+      // access claims — while the door was open every time.
+      //
+      // ⚠️ FAILS SOFT, like every block here. No cognition, no block — a dead turn is a worse failure
+      // than a quiet one, and the layer withholds ITSELF if its own guards trip (an illegal promotion or a
+      // vocabulary leak in what it wrote).
+      cognition: fastify.config?.memory?.cognitionEnabled === true && lastUserText
+        ? await (async () => {
+          try {
+            const cog = buildMemoryCognition(fastify, {
+              userId: request.user.id,
+              isRoot: request.user.isRoot === true,
+              username: request.user.username,
+              conversationId: convo.id,
+              interactive: true,
+            })
+            const out = await cog.recollect({ text: lastUserText })
+            // ⓘ OBSERVABILITY FOR THE FIRST LIVE RUNS. Off by default; when on, the exact injected block
+            // and the stage-by-stage counts are appended to a file, so a failure can be attributed to
+            // discovery / activation / access / fusion / typing / injection rather than guessed at.
+            if (fastify.config?.memory?.cognitionDebug === true) {
+              try {
+                const { appendFileSync } = await import('node:fs')
+                appendFileSync(new URL('../../../../cognition-debug.log', import.meta.url), `${JSON.stringify({
+                  at: new Date().toISOString(), conversationId: convo.id, asked: lastUserText,
+                  activated: out.activated, cues: out.cues, plan: out.plan,
+                  counts: {
+                    items: out.items?.length ?? 0,
+                    episodes: out.items?.filter((i) => i.kind === 'episode').length ?? 0,
+                    withThem: out.items?.filter((i) => i.withThem).length ?? 0,
+                    filtered: out.filtered ?? 0, dropped: out.dropped ?? 0,
+                  },
+                  withheldBecause: out.leaks ? `leaks:${out.leaks.map((l) => l.word).join(',')}`
+                    : (out.illegal ? 'illegal-promotion' : null),
+                  items: (out.items ?? []).map((i) => ({
+                    kind: i.kind ?? 'item', who: i.who, withThem: i.withThem ?? null,
+                    availability: i.availability, basis: i.basis, retention: i.retention,
+                    warrants: i.warrants ?? [], here: i.here, partial: i.partial ?? null,
+                    exchanges: (i.exchanges ?? []).length,
+                  })),
+                  context: out.context,
+                })}
+`)
+              } catch { /* observability must never break a turn */ }
+            }
+            return out.activated ? out.context : null
+          } catch (e) {
+            fastify.log?.debug?.({ err: e?.message }, '[cognition] recollect failed (non-fatal)')
+            return null
+          }
+        })()
+        : null,
       scopeFacts: getSetting(fastify.config, 'memory.scopeFacts') === true
         ? await (async () => {
           try {
@@ -2491,9 +2555,34 @@ export default async function chatSiteRoutes(fastify) {
           // ctxWindow numerically), with an absolute backstop for remote models where
           // verbatim tokens are money. The clip is VISIBLE to the model, never silent.
           const maxResultChars = ctxWindow > 0 ? Math.max(8_000, ctxWindow) : 120_000
-          const forModel = resultStr.length > maxResultChars
+          const forModelRaw = resultStr.length > maxResultChars
             ? resultStr.slice(0, maxResultChars) + `\n…[tool result clipped: ${resultStr.length - maxResultChars} of ${resultStr.length} characters dropped — too large for the context window]`
             : resultStr
+          // ── ⭐⭐ LEAK 1 · THE TOOL-RESULT VOCABULARY PROJECTION ──────────────────────────────────────
+          //
+          // Measured over five live runs: the cognition block was clean every time and she still answered
+          // in our words — *"my memory stores are scoped to this room"*, *"reachability, not absence"*,
+          // *"conversationHandle: a9ce46…"*. ⇒ the block does not outvote the tool payload; `recall_memory`
+          // said "0 in this room" and that framing won.
+          //
+          // Ote: *"solve that at the interface between the cognition layer and the tools, not by adding
+          // another L1 instruction telling her not to say 'room'."*
+          //
+          // ⛔⛔ AND IT IS NOT THE FIX FOR THE FALSE CLAIM, which Ote named before it could be mistaken for
+          // one: *"I also don't want this solved by simply hiding tool output. The underlying ownership
+          // model needs to be correct first."* This changes the WORDS she is handed. The reason she believes
+          // she cannot reach her own memory is that the system currently makes that true room-by-room, and
+          // only the ownership model fixes that. ⇒ two leaks, two levels, and this is the smaller one.
+          //
+          // ⛔ ONLY THE MODEL-FACING COPY. `write()`, `toolActivity`, `segments` and the audit trail keep the
+          // RAW payload — that is the evidence. ⛔ And it suppresses nothing: she may call any tool as often
+          // as she likes. V3 gave the best answer of the five while calling the MOST tools.
+          const forModel = plainSpokenToolResult(tc.name, forModelRaw, {
+            enabled: fastify.config?.memory?.cognitionEnabled === true,
+            // ⚠️ A TERM LIST CATCHES ONLY WHAT IT WAS TOLD ABOUT — this repo's most-repeated defect. The
+            // residue is LOGGED rather than assumed to be zero, so the next word we missed leaves a trail.
+            onLeak: (words) => fastify.log?.debug?.({ tool: tc.name, words }, '[cognition] tool vocabulary residue'),
+          })
           working.push({ role: 'tool', tool_call_id: tc.id, name: tc.name, content: forModel })
         }
         // Mid-turn overflow surface: tool results just grew the working context. If the
