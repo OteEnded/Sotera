@@ -209,6 +209,12 @@ async function loadInternalUser(request) {
     email: user.email,
     displayName: user.display_name,
     roles: (user.roles || []).map((r) => r.name),
+    // ⭐⭐ CARRIED ONTO THE SESSION USER **DELIBERATELY**, because this object is an ALLOWLIST and a new
+    // column does not arrive by itself — the model's own comment says so, and this repo's most-repeated
+    // defect (8+ instances) is a field no reader accepts.
+    // ⛔ It answers *"may this ACCOUNT be given Sotera's memory?"* — NEVER *"may Sotera reach her own?"*,
+    // which is intrinsic and ungated. Read it only through `can(user, 'access_sotera_memory')`.
+    memoryAccessScope: user.memory_access_scope ?? 'none',
     isRoot: false,
   }
 }
@@ -236,6 +242,12 @@ async function loadSessionUser(request) {
     email: user.email,
     displayName: user.display_name,
     roles: (user.roles || []).map((r) => r.name),
+    // ⭐⭐ CARRIED ONTO THE SESSION USER **DELIBERATELY**, because this object is an ALLOWLIST and a new
+    // column does not arrive by itself — the model's own comment says so, and this repo's most-repeated
+    // defect (8+ instances) is a field no reader accepts.
+    // ⛔ It answers *"may this ACCOUNT be given Sotera's memory?"* — NEVER *"may Sotera reach her own?"*,
+    // which is intrinsic and ungated. Read it only through `can(user, 'access_sotera_memory')`.
+    memoryAccessScope: user.memory_access_scope ?? 'none',
     isRoot: false,
   }
 }

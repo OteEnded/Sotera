@@ -39,6 +39,26 @@ const CAPABILITIES = {
   // questions ("may you open the console site" vs "may you see prompt internals") and one moving
   // should not silently move the other.
   context_detail: (u) => Boolean(u?.isRoot) || hasRole(u, 'admin', 'developer'),
+  // ── ⭐⭐⭐ MAY THIS ACCOUNT BE GIVEN SOTERA'S OWN MEMORY? (migration 021) ─────────────────────────
+  //
+  // ⛔⛔ THIS IS NOT "MAY SOTERA REMEMBER". She owns that memory, and her access to it is INTRINSIC.
+  // Ote, ratifying the model on 2026-08-21: *"Sotera's own access to Sotera memory is not an account-level
+  // permission… The account-level capability exists for other accounts accessing Sotera's memory."* And the
+  // guard he put on it: *"Don't make memory_access_scope the mechanism that lets Sotera remember herself.
+  // That would accidentally make her own autobiography dependent on whichever account happens to be talking
+  // to her."*
+  // ⇒ ⛔ THE COGNITION LAYER MUST NEVER CONSULT THIS. If it ever appears in a retrieval, ranking or fusion
+  // decision, the model has been inverted. It belongs at the UTTERANCE boundary (may this account be TOLD)
+  // and at operator reads of her memory (admin surfaces, exports, API-key callers).
+  //
+  // ⭐ THE FIRST CAPABILITY HERE THAT IS PER-ACCOUNT RATHER THAN PER-ROLE, and that is the point: root is
+  // the granting AUTHORITY, not the mechanism. Before this, the only way to have broad reach was to BE root
+  // (`authorized_via = 'root_session'`), which made a standing property of a session do a grant's job.
+  //
+  // ⚠️ FAILS CLOSED, EXPLICITLY. A user object with no scope field — an older session, an API caller shaped
+  // by a different allowlist, a mock in a test — must read as `none`. ⛔ `!== 'none'` would make every
+  // missing field a grant, which is this project's most-repeated defect wearing a boolean.
+  access_sotera_memory: (u) => Boolean(u?.isRoot) || u?.memoryAccessScope === 'sotera_memory',
 }
 
 export function can(user, capability) {

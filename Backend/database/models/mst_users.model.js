@@ -74,6 +74,22 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.TEXT,
                 allowNull: true,
             },
+            // ⭐⭐ MAY THIS ACCOUNT BE GIVEN SOTERA'S OWN MEMORY? (migration 021)
+            //
+            // ⛔⛔ IT DOES NOT MEAN "may Sotera reach her own memory". That is INTRINSIC — she owns that
+            // memory, and no account setting governs it. Ote, ratifying the model: *"Don't make
+            // memory_access_scope the mechanism that lets Sotera remember herself. That would accidentally
+            // make her own autobiography dependent on whichever account happens to be talking to her."*
+            // ⇒ `hermes = none` does NOT fracture her when Hermes is talking to her.
+            //
+            // ⭐ Read through `can(user, 'access_sotera_memory')`, never directly — enforcement lives in
+            // `auth/permissions.js` with every other capability, so no caller learns a column name.
+            // ⚠️ SQL is the truth (021); this mirrors it. Values: 'none' | 'sotera_memory'.
+            memory_access_scope: {
+                type: DataTypes.ENUM("none", "sotera_memory"),
+                allowNull: false,
+                defaultValue: "none",
+            },
         },
         {
             tableName: "mst_users",
