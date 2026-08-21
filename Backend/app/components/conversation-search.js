@@ -150,7 +150,12 @@ export function filterEvidence(items = [], { minLength = 20, roles = ['user', 'a
 // ⚠️ `roles` is INTERPOLATED into SQL, so it is whitelisted rather than escaped — a role list that can
 // carry arbitrary text into a WHERE clause is an injection, and `replacements` cannot parameterise an
 // IN-list (the `ANY(:ids::uuid[])` lesson: replacements expand an array into a comma list).
-export function buildConversationSearch(fastify, { userId = null, currentConversationId = null, embed = null, acrossRooms = false, roles = ['user', 'assistant'] } = {}) {
+// ⭐⭐ `onlyConversationId` — PIN THE SEARCH TO ONE CONVERSATION. Added for self-history NAVIGATION
+// (P1): once a disclosure grant has been verified for one room, the host resolves WHICH of her messages
+// in that conversation the query refers to — server-side, so a cross-room message id never has to be
+// handed to her to be handed back. ⛔ It NARROWS; it can never widen the room predicate, and it is a
+// builder-level SCOPE rather than a per-call tweak because that is what it is.
+export function buildConversationSearch(fastify, { userId = null, currentConversationId = null, embed = null, acrossRooms = false, roles = ['user', 'assistant'], onlyConversationId = null } = {}) {
   const { txn_messages } = fastify.db
   const seq = txn_messages.sequelize
   const { tableName: MT, schema } = txn_messages.getTableName()
@@ -184,7 +189,8 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
   const SCOPE = `${ROOM}
           AND c.incognito = false
           AND ${ROLE_IN}
-          AND (:excludeConversationId::uuid IS NULL OR m.conversation_id <> :excludeConversationId::uuid)`
+          AND (:excludeConversationId::uuid IS NULL OR m.conversation_id <> :excludeConversationId::uuid)
+          AND (:onlyConversationId::uuid IS NULL OR m.conversation_id = :onlyConversationId::uuid)`
   const COLS = `m.id AS message_id, m.conversation_id, m.role, m.content, m.created_at, c.title AS conversation_title`
 
   async function lexical(q, pool, excludeConversationId) {
@@ -193,7 +199,7 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
          FROM ${MSG} m JOIN ${CONV} c ON c.id = m.conversation_id
         WHERE ${SCOPE} AND m.content_tsv @@ plainto_tsquery('english', :q)
         ORDER BY score DESC, m.created_at DESC LIMIT :pool`,
-      { replacements: { q, userId, excludeConversationId, pool }, type: seq.QueryTypes.SELECT },
+      { replacements: { q, userId, excludeConversationId, onlyConversationId, pool }, type: seq.QueryTypes.SELECT },
     )
   }
   // dense arm (CS2): pgvector cosine over message_embeddings.embedding_hv (HNSW). Same scope.
@@ -206,7 +212,7 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
          JOIN ${CONV} c ON c.id = m.conversation_id
         WHERE ${SCOPE} AND me.embedding_hv IS NOT NULL
         ORDER BY me.embedding_hv <=> :qvec::halfvec(2048) LIMIT :pool`,
-      { replacements: { qvec, userId, excludeConversationId, pool }, type: seq.QueryTypes.SELECT },
+      { replacements: { qvec, userId, excludeConversationId, onlyConversationId, pool }, type: seq.QueryTypes.SELECT },
     )
   }
 

@@ -20,7 +20,11 @@ export {
 // the other end (scheduled runs, digests, internal side-calls). The service also guards
 // (belt + suspenders), but absent-from-the-toolset is the honest headless behavior (RFC:
 // requiresHuman → the tool is simply unavailable).
-export const INTERACTIVE_TOOL_NAMES = new Set(['ask_user'])
+// ⭐⭐ `request_room_access` IS INTERACTIVE IN THE SAME SENSE `ask_user` IS: it raises a held-turn card and
+// waits for a human. ⛔ In a run with nobody watching it must be ABSENT from the toolset rather than a
+// five-minute hang — the reflection pass is headless by construction, and the disclosure host also refuses
+// when `interactive` is false, but absent-from-the-toolset is the honest headless behaviour.
+export const INTERACTIVE_TOOL_NAMES = new Set(['ask_user', 'request_room_access'])
 
 let initialized = false
 

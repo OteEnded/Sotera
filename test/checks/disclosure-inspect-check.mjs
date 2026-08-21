@@ -11,7 +11,7 @@ import { makeChecker, devPg, devSchema } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
-import { buildDisclosure, GRANT_LABEL, grantQuestion } from '../../Backend/app/components/disclosure-host.js'
+import { buildDisclosure, GRANT_LABEL, DENY_LABEL as DENY_LABEL_TEXT, grantQuestion } from '../../Backend/app/components/disclosure-host.js'
 
 const { check, done } = makeChecker('disclosure-inspect')
 const config = loadConfig()
@@ -22,7 +22,7 @@ const S = devSchema()
 
 // Two rooms and one of HER messages in each.
 const { rows: pick } = await pg.query(
-  `select c.user_id, u.username, m.id msg, m.rolling_id
+  `select c.user_id, u.username, m.id msg, m.rolling_id, c.id conversation_id
      from ${S}.txn_messages m
      join ${S}.txn_conversations c on c.id = m.conversation_id
      join ${S}.mst_users u on u.id = c.user_id
@@ -168,6 +168,87 @@ if (!third) {
   await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
                    where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
 }
+
+// ── 7. ⭐⭐⭐ P1 · NAVIGATION — CONTINUING FROM A CROSS-ROOM RESULT WITH NO MESSAGE ID ─────────────
+//
+// ⚠⚠ THE GAP THIS CLOSES, MEASURED: `applyBoundaries` gives other-room hits existence only and
+// deliberately **no message id** ("none that could be walked"), while `inspect_around` used to *require*
+// `messageId`. ⇒ the tool she was told to use accepted an input the cross-room result never contains, so
+// the loop was impossible — and in root's own room she reached exactly that dead end.
+// ⇒ She now continues from the opaque handle plus what she is looking for, and the id is resolved
+// **inside the server, after authorization**.
+const { rows: probe } = await pg.query(
+  `select m.content from ${S}.txn_messages m where m.id = $1`, [theirs.msg])
+// A query built from her own words in that room, so resolution has something real to find.
+const navQuery = String(probe[0]?.content || '').split(/\s+/).filter((w) => w.length > 5).slice(0, 4).join(' ')
+check('7 · a resolvable query could be formed from her own message', navQuery.length > 5, navQuery.slice(0, 50))
+
+// 7a · NO HANDLE, NO ID → a sentence saying which piece is missing, never a crash.
+const neither = await asRoot.inspectAround({ radius: 2 })
+check('7a · neither a messageId nor a handle is a clear refusal, not an exception',
+  neither.ok === false && /messageId|conversationHandle/.test(neither.reason || ''), neither.reason)
+// 7b · A HANDLE WITH NO QUERY IS NOT A REQUEST — otherwise "show me the latest thing I said there" is
+// browsing by another name.
+const noQuery = await asRoot.inspectAround({ conversationHandle: theirs.conversation_id, radius: 2 })
+check('7b · ⭐ a handle with no query is refused — a window has to centre on something',
+  noQuery.ok === false && /looking for/.test(noQuery.reason || ''), noQuery.reason)
+
+// 7c · ⭐⭐ THE BOUNDARY STILL HOLDS ON THE NEW PATH. This is the assertion that matters most: the
+// navigation route must not be a way around the grant.
+await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
+                 where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
+const navNoGrant = await asRoot.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
+check('7c · ⭐⭐⭐ the HANDLE path is refused without a grant — navigation is not a bypass',
+  navNoGrant.ok === false && navNoGrant.state === 'attested',
+  navNoGrant.ok ? 'THE HANDLE PATH OPENED WITHOUT A GRANT' : `refused: ${navNoGrant.state}`)
+const navAsOwner = await asOwner.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
+check('7c · ⛔ and a NON-root session gets no path on the handle route either',
+  navAsOwner.ok === false && navAsOwner.howToOpen === null, JSON.stringify(navAsOwner).slice(0, 70))
+
+// ── 8. ⭐⭐⭐ P2 · THE REQUEST PATH — THE STEP THAT HAD NO PRODUCTION CALLER ────────────────────────
+// 8a · a non-root session cannot even ask.
+const askNonRoot = await asOwner.requestRoomAccess({ conversationHandle: theirs.conversation_id })
+check('8a · ⛔ a non-root session cannot request access at all',
+  askNonRoot.ok === false && /root/.test(askNonRoot.reason || ''), askNonRoot.reason)
+// 8b · ⚠ A HEADLESS RUN SAYS SO INSTEAD OF HANGING FOR FIVE MINUTES. `asRoot` was built without
+// `interactive`, which is what a reflection or a scheduled run looks like.
+const askHeadless = await asRoot.requestRoomAccess({ conversationHandle: theirs.conversation_id })
+check('8b · ⭐⭐ a run with no human REFUSES rather than raising a card nobody can answer',
+  askHeadless.ok === false && /no human/.test(askHeadless.reason || ''), askHeadless.reason)
+// 8c · her own room needs no card, and says so rather than raising one.
+const askOwn = await buildDisclosure(fastify, {
+  userId: mine.user_id, isRoot: true, username: mine.username, conversationId: conv0.id, interactive: true,
+}).requestRoomAccess({ conversationHandle: mine.conversation_id })
+check('8c · ⭐ her own room raises no card — there is no boundary to authorize',
+  askOwn.ok === false && askOwn.alreadyReadable === true, JSON.stringify(askOwn).slice(0, 80))
+
+// ── 9. ⭐⭐ THE WHOLE LOOP, END TO END, ON THE HANDLE PATH ─────────────────────────────────────────
+// search → handle → authorization → bounded window. The card is pre-answered here because
+// `askInteraction` HOLDS the turn for a live human; what is under test is everything either side of it.
+const loopCard = await db.txn_interaction_sessions.create({
+  conversation_id: conv0.id, user_id: mine.user_id, status: 'answered',
+  response: { choice: GRANT_LABEL },
+  questions: [{ question: grantQuestion('someone'), options: [{ label: GRANT_LABEL }, { label: DENY_LABEL_TEXT }] }],
+})
+const loopGrant = await asRoot.grantFromInteraction({ interactionId: loopCard.id, conversationHandle: theirs.conversation_id, radius: 2 })
+check('9 · ⭐ a grant can be recorded from a HANDLE, not only from a message id', loopGrant.ok === true, loopGrant.reason || '')
+const opened2 = await asRoot.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
+check('9 · ⭐⭐⭐ THE LOOP CLOSES — handle + query + grant returns a bounded window from another room',
+  opened2.ok === true && opened2.state === 'verified' && Array.isArray(opened2.window) && opened2.window.length > 0,
+  opened2.ok ? `${opened2.window.length} message(s)` : JSON.stringify(opened2).slice(0, 110))
+check('9 · …and it is still a WINDOW, not a conversation', (opened2.window || []).length <= 5, `${opened2.window?.length}`)
+// ⛔ THE PAYLOAD SHE RECEIVES STILL CARRIES NO CROSS-ROOM MESSAGE IDS. The window is content she was
+// authorized to read; ids would let her walk outward from it on a later turn without asking again.
+const idsInWindow = (opened2.window || []).filter((w) => w && typeof w === 'object' && 'id' in w)
+check('9 · ⭐⭐ the returned window carries no message ids — nothing to walk on a later turn',
+  idsInWindow.length === 0, idsInWindow.length ? 'ids present in the window' : 'who/said/when only')
+// ⭐ AND IT IS SPENT. Same grant, same query, refused.
+const spent = await asRoot.inspectAround({ conversationHandle: theirs.conversation_id, query: navQuery, radius: 2 })
+check('9 · ⭐⭐ the grant is single-use on the handle path too', spent.ok === false && spent.state === 'attested',
+  JSON.stringify(spent).slice(0, 70))
+await db.txn_interaction_sessions.destroy({ where: { id: loopCard.id } })
+await pg.query(`update ${S}.log_disclosure_events set revoked_at = now()
+                 where revoked_at is null and from_room_user_id = $1`, [theirs.user_id])
 
 // Clean up only what this check created. ⛔ The disclosure event is a LOG — it stays.
 await db.txn_interaction_sessions.destroy({ where: { id: pending.id } })
