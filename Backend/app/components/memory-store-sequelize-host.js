@@ -289,7 +289,14 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       const m = await txn_memories.findOne({ where: { id, persona: P }, raw: true })
       // (1) THE MEMORY. Unchanged.
       if (!inScope(m)) return { found: false }
-      const res = { found: true, memory: m, source: m.source ?? null, sourceMessageId: m.source_message_id ?? null }
+      // ⚠️⚠️ PROJECTED, NOT THE RAW ROW — measured at **119,000 bytes per memory**, of which ~45,700 is
+      // the `embedding` jsonb (and migration 019 has just added `embedding_hv` beside it, which would make
+      // it worse). This object goes back to the MODEL as a tool result, so the raw row was spending a
+      // large slice of her context window on float arrays she cannot use and did not ask for.
+      // ⛔ Nothing downstream wanted them: the vectors are what the STORE searches with, never what a
+      // reader reads. ⓘ The projection keeps every field a caller or a check actually reads.
+      const { embedding, embedding_hv: _hv, slot_embedding: _slotVec, ...memoryView } = m
+      const res = { found: true, memory: memoryView, source: m.source ?? null, sourceMessageId: m.source_message_id ?? null }
 
       // ⛔ UNATTESTED — no reference was ever recorded. Distinct from `destroyed`, and the distinction is
       // only preservable because a deleted source leaves the pointer DANGLING rather than nulled. See the
@@ -319,10 +326,42 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       if (!sameScope) {
         res.evidenceState = 'attested'
         // Safe provenance only: WHEN, and whether it was here. ⛔ No title, no room name, no person name,
-        // no content, no conversation id — an id is a handle to somebody else's material.
+        // and no content.
         res.learnedOn = msg.created_at
         res.learnedHere = false
-        res.note = 'the original conversation is not readable from here — the memory stands, its evidence cannot be inspected from this context'
+        // ── ⭐⭐⭐ P4 · THE HANDLE, AND ONLY THE HANDLE (2026-08-21) ────────────────────────────────
+        //
+        // ⚠️⚠️ THE GAP THIS CLOSES, AND IT IS THE THIRD TIME THIS EXACT SHAPE HAS APPEARED. This refusal
+        // was correct, honest, and a DEAD END: it said the evidence exists and cannot be read, and gave
+        // her nothing that could be authorized. So `recall_memory_source` could establish that a memory
+        // came from somewhere unreadable and could go no further — the same G1 (no target) + G2 (no
+        // request path) that stopped self-history before P1/P2. **A correct boundary, a correct refusal,
+        // and no door.**
+        //
+        // Ote's direction, 2026-08-21: *"memory → source conversation handle → request_room_access →
+        // inspect_around. Reuse the same navigation and authorization mechanism we already built for
+        // self-history. Do not create a second memory-specific authorization system. The memory provenance
+        // should tell her where the memory came from, but it must not automatically authorize access to
+        // that source conversation."*
+        //
+        // ⭐ SO THIS IS ONE FIELD, NOT A SYSTEM. The handle is the same opaque conversation id the
+        // self-history projection already hands out, so `request_room_access` and `inspect_around` serve
+        // this direction with **no new code and no second grant type**.
+        //
+        // ⛔⛔ AND IT AUTHORIZES NOTHING. Holding a handle is the ability to ASK — the grant is still a
+        // stored human answer to a fixed card, still root-only, still single-use, still scoped
+        // from-room → into-conversation, and `inspectAround` still refuses without it. What changed is
+        // that asking is now possible; what she may READ did not change at all.
+        //
+        // ⓘ AND IT WAS ALREADY LEAKING, INCONSISTENTLY — which is why "no conversation id" left this
+        // comment rather than staying true. `res.memory` is the raw row, and `memory.source` literally
+        // reads `conversation:<uuid>` for 11 of 36 memories (the extraction path writes it that way).
+        // ⇒ P4 makes the handle DELIBERATE and uniform instead of an accident of which writer produced
+        // the memory. That is a smaller change than it first looks, and a more honest one.
+        res.sourceConversationHandle = msg.conversation_id
+        res.note = 'the original conversation is not readable from here — the memory stands, its evidence '
+          + 'cannot be inspected from this context. This is a boundary, not an absence: do not guess what it '
+          + 'said. The handle identifies where it happened; reading it has to be authorized separately.'
         return res
       }
 

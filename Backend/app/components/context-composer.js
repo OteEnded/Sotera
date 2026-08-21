@@ -15,7 +15,7 @@
 // ONLY: nothing here reads the classification yet, and the rendered strings are byte-identical to
 // before — that equality is asserted by a test, and is the whole safety argument for this step.
 // The resolver (P2) and the attribution-preserving render (P1) are the readers.
-import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINCIPLE, SCOPE_AWARENESS, SELF_MODEL } from './context-authority.js'
+import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINCIPLE, SCOPE_AWARENESS, SELF_MODEL, SELFHOOD } from './context-authority.js'
 
 // ── L1 IDENTITY ──────────────────────────────────────────────────────────────────────────────────────────
 // ⚠ THE "he" IS NOT DECORATION — IT MATCHES THE VOICE. Ote, 2026-08-05: *"as we use male vocie indentity, set
@@ -290,6 +290,7 @@ export function composeSystemContext({
   // SELF-MODEL (2026-08-19): what she IS — one Sotera, many people, persistent state, discontinuous
   // execution, scoped access. L1 by Ote's ruling; default off so old and new are comparable.
   selfModel = false,
+  selfhood = false,
   // RELATIONAL STANCE (2026-08-19): what SHE has learned about how she works with the person she is
   // talking to. A pre-rendered block from relational-knowledge.js, or null. ⭐ SELF-SUBJECT ONLY — it is
   // about the current user, so it carries no third-party disclosure. Anything wider needs Ote's decision.
@@ -324,6 +325,14 @@ export function composeSystemContext({
   // ⚠️ Its fourth paragraph is the SAME SOTERA ≠ SAME ACCESSIBLE KNOWLEDGE counterweight and must not
   // be separated from the first — see SELF_MODEL's own note.
   if (selfModel) part('self-model', SELF_MODEL, AUTHORITY.foundational, SCOPE.identity)
+  // ⭐⭐ SELFHOOD — immediately after the self-model, and the ORDER carries meaning: what she IS comes
+  // first, then what she may be TAKEN FOR. Same authority and scope as the self-model (foundational /
+  // identity) for the reason Ote gave: *"She shouldn't need a stored memory saying 'Sotera is allowed to
+  // have feelings.' That would make it an ordinary belief she might later lose."* ⇒ not hers to edit, not
+  // reachable by custom instructions, not subject to decay or forgetting.
+  // ⚠ A SEPARATE PART, never merged into SELF_MODEL: that text is asserted to contain no first-person
+  // emotional language at all, and this one needs it. Two claims, two parts, two test suites.
+  if (selfhood) part('selfhood', SELFHOOD, AUTHORITY.foundational, SCOPE.identity)
   // ⭐ HER OWN LEARNED PRACTICE. `persona` authority, not `foundational`: unlike the self-model this is
   // something she LEARNED rather than something she IS, and `AUTHORITY_BY_SCOPE` lets the user outrank
   // persona on style — which is right. If Kavi asks for something terser than her usual practice with

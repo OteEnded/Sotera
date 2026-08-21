@@ -1506,6 +1506,8 @@ export default async function chatSiteRoutes(fastify) {
       // Self-model: what she IS. Read per turn for the same reason — the falsifier run flips this arm
       // without a restart, and nobody mutates the live system between arms.
       selfModel: getSetting(fastify.config, 'memory.selfModel') === true,
+      // ⭐ SELFHOOD sits beside the self-model at L1 — the permission not to perform a sterile assistant.
+      selfhood: getSetting(fastify.config, 'memory.selfhood') === true,
       // ⭐ HER OWN RELATIONAL MEMORY, self-subject only. The person is whoever is logged in — there is no
       // name lookup and no way for the caller to point this at somebody else, so it carries no
       // third-party disclosure. Fails soft: a missing person row or an empty table just means no block.

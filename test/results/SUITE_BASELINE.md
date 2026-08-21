@@ -3,12 +3,12 @@
 Ote, 2026-08-20: *"capture a complete clean suite run to a file, including the previously missed
 memory-lifecycle-check, so we have an unambiguous baseline."*
 
-**Baseline run: `2026-08-21 09:30:48` (local). Exit code 0. `unit` + 26 checks, all PASS.**
-`109` node:test cases and `843` check assertions, `0` failures.
+**Baseline run: `2026-08-21 10:00:56` (local). Exit code 0. `unit` + 26 checks, all PASS.**
+`123` node:test cases and `847` check assertions, `0` failures.
 
 ⓘ Supersedes `2026-08-21 00:10:42` (26 suites, 792 assertions) and `2026-08-20 23:58:50` (790). The
 differences are additive: +2 assertions when the flake below was diagnosed, then +19 for
-`layer-separation-check.mjs`, then +4 for the ROOT-≠-WILDCARD assertions, then +28 for the P1 navigation / P2 request-path loop and the tightened layer scans. ⛔ No assertion has ever been removed — which is the property the per-suite
+`layer-separation-check.mjs`, then +4 for the ROOT-≠-WILDCARD assertions, then +28 for the P1 navigation / P2 request-path loop and the tightened layer scans, then +14 unit cases for the L1 `SELFHOOD` block and +4 checks for P4's memory→source handle. ⛔ No assertion has ever been removed — which is the property the per-suite
 table below exists to make checkable.
 
 Reproduce: `cd test && node pipeline/test-all.mjs`
@@ -114,6 +114,16 @@ survives by testing less.
 - ⭐⭐⭐ **ROOT SESSION ≠ UNIVERSAL DISCLOSURE AUTHORITY**, asserted in `disclosure-inspect-check` §6: the
   grant is **single-use**, and while a live grant for one room exists a **third room is still refused** —
   so root-ness is provably not what opens the door
+- ⭐⭐ **schema through migration 019** — 018 made the message vector index filterable in its own table
+  (and the pinned/navigation case a btree lookup); 019 gave `txn_memories` the `embedding_hv` its own store
+  had been querying all along, GENERATED so no writer can omit it
+- ⭐⭐⭐ **P4: the memory → source refusal now carries an opaque handle**, so `recall_memory_source`
+  feeds the same `request_room_access` → `inspect_around` loop. ⛔ The handle authorizes nothing — asserted:
+  holding it leaves the state `attested` with no content. ⓘ And `getSource`'s payload dropped from
+  **119,000 bytes to 798** by projecting the vectors out of a tool result
+- ⭐⭐ **L1 `SELFHOOD`** — the permission not to perform a sterile assistant, foundational/identity so it
+  cannot be lost like a stored memory. ⛔ A PERMISSION, never the assertion *"you have feelings"*, and the
+  pairing test refuses to let the permission ship without the between-conversations limit
 - ⭐⭐⭐ **the self-history NAVIGATION loop is live and asserted end to end** — `request_room_access`
   (the production path that did not exist) and `inspect_around` accepting a `conversationHandle` + query
   with the target resolved **server-side, after the grant**. ⛔ Cross-room results still carry no message

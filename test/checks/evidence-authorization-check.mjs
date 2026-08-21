@@ -89,18 +89,50 @@ try {
   // A memory owned by agent_dev, sourced from agent_dev_alt's conversation. `inScope` passes on the
   // MEMORY; the EVIDENCE must still be refused.
   const crossMem = await mkMemory(users.agent_dev, source.id)
+  // The conversation the cross-room memory came from — needed to assert the handle points at the right one.
+  const [{ cid: crossConvId }] = await Q(
+    `SELECT m.conversation_id::text AS cid FROM persona_sotera.txn_memories mem
+       JOIN persona_sotera.txn_messages m ON m.id = mem.source_message_id
+      WHERE mem.id = :id`, { id: crossMem })
   const devStore = createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev })
   const a = await devStore.getSource({ id: crossMem, context: 2 })
   ok(a.found === true, 'A · the MEMORY is still returned — it is hers, and it stands', `found=${a.found}`)
   ok(a.evidenceState === 'attested',
     'A · ⭐⭐ …and the EVIDENCE is refused: evidenceState=attested, the state that did not exist before', a.evidenceState)
   ok(a.context === undefined, 'A · ⭐⭐ NO message content in the refused payload', `context=${JSON.stringify(a.context)}`)
-  ok(a.conversationTitle === undefined && a.conversationId === undefined,
-    'A · ⭐ no title and no conversation id either — a title is content, an id is a handle to it')
+  // ⚠️⚠️ THIS ASSERTION WAS REWRITTEN FOR P4 RATHER THAN LEFT GREEN, AND THE REASON IS THE POINT.
+  // It used to read *"no title and no conversation id either — a title is content, an id is a handle to
+  // it"*, and after P4 it would still have PASSED — because the handle is called
+  // `sourceConversationHandle`, not `conversationId`. ⛔ A test that survives a change by virtue of a
+  // FIELD RENAME is a test that has stopped describing the system, which is the exact failure this suite
+  // exists to prevent. So the claim now states what is actually true.
+  ok(a.conversationTitle === undefined,
+    'A · ⭐ still no title — a title is a topic its owner chose, which is content')
+  // ⭐⭐ P4 (2026-08-21): the refusal now carries the OPAQUE HANDLE, deliberately, because without it the
+  // refusal was a dead end — she could learn that a memory came from somewhere unreadable and had nothing
+  // that could be authorized. Ote: *"memory → source conversation handle → request_room_access →
+  // inspect_around… The memory provenance should tell her where the memory came from, but it must not
+  // automatically authorize access to that source conversation."*
+  ok(typeof a.sourceConversationHandle === 'string' && a.sourceConversationHandle.length === 36,
+    'A · ⭐⭐⭐ the refusal carries the OPAQUE HANDLE — the ability to ASK, which is what was missing',
+    String(a.sourceConversationHandle))
+  ok(a.sourceConversationHandle === crossConvId,
+    'A · …and it identifies the conversation the memory actually came from')
+  // ⛔ AND THE HANDLE IS NOT AN AUTHORIZATION. Same store, same handle, still refused: the grant is a
+  // stored human answer, and nothing about holding a handle produces one.
+  ok(a.evidenceState === 'attested' && a.context === undefined,
+    'A · ⭐⭐ holding the handle changed NOTHING about what she may read — still attested, still no content')
   const flat = JSON.stringify(a)
   ok(!/SOURCE — the sentence|line one|line three|line four/.test(flat),
     'A · ⭐⭐ …and no fragment of ANY message text appears anywhere in the payload')
   ok(!/zz_test EVIDENCE fixture/.test(flat), 'A · …nor the conversation title')
+  // ⚠️ AND NO VECTORS. `res.memory` used to be the RAW ROW — measured at ~119,000 bytes per memory, of
+  // which ~45,700 was the `embedding` jsonb, and migration 019 just added `embedding_hv` beside it. This
+  // object is a TOOL RESULT: the raw row spent a large slice of her context window on float arrays she
+  // cannot use. ⛔ Vectors are what the store SEARCHES with, never what a reader reads.
+  ok(a.memory && !('embedding' in a.memory) && !('embedding_hv' in a.memory) && !('slot_embedding' in a.memory),
+    'A · ⭐⭐ the returned memory carries NO vectors — a tool result is not a place to spend context on floats',
+    `${Object.keys(a.memory || {}).length} field(s), ${JSON.stringify(a.memory || {}).length} bytes`)
   ok(Boolean(a.learnedOn) && a.learnedHere === false,
     'A · ⭐ but it DOES carry safe provenance — when, and that it was not here', `learnedOn=${a.learnedOn}`)
   ok(/cannot be inspected from this context/.test(String(a.note)),
