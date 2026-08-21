@@ -155,6 +155,9 @@
     "memory": {
         "extractModel": "ollama/qwen3.5:9b — aux models run on CPU (memory.extractDevice), so this is a RAM choice not VRAM. ⚠ A BIGGER MODEL DOES NOT FIX BAD CAPTURE: qwen3.5:9b produced byte-identical junk to gemma4:e4b on the same sentence. Chosen on cost (6.1GB/4.8s vs 9.4GB/13.2s).",
         "consolidateModel": "(optional — falls back to the default)",
-        "reflectModel": "(optional — falls back to the default)"
+        "reflectModel": "(optional — falls back to the default)",
+        "disclosure": {
+            "mode": "shared — WHO HAS TO BE ASKED before she may read another room's content. 'shared' (the default, and what an absent or unrecognised value means) requires a stored, answered, affirmative card for every cross-room read. 'personal' means one human owns this deployment and is the root session: a root session is authorized automatically and no disclosure card is ever raised. ⛔ 'personal' does NOT widen anything for a non-root session, does not stop the disclosure being RECORDED (authorized_via='root_session', countable apart from a consented one forever), and does not remove the per-room-pair, per-conversation, bounded, revocable shape of a grant. Tightening a deployment is this one value — see Backend/app/components/disclosure-policy.js."
+        }
     }
 }

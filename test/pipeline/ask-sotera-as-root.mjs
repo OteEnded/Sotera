@@ -99,6 +99,99 @@ if (!cid) {
 // at the keyboard, and abandoning the request would lose the interaction row that proves what happened.
 console.log(`   ⓘ if she raises a permission card this turn will WAIT (up to 5 min) for a human to answer it`)
 
+// ══ WAITING, OUT LOUD ═══════════════════════════════════════════════════════════════════════════════
+//
+// ⚠️⚠️ THE DEFECT THIS REPLACES, AND OTE SAW IT FROM THE OTHER SIDE BEFORE I DID:
+// *"there's many time that there's no load on my side, but you waiting for your script."*
+// The old loop slept 5s at a time for up to 240s and printed NOTHING, so from outside the box these three
+// were one indistinguishable silence:
+//
+//   (a) a permission card is up, and a HUMAN has to answer it   → waiting is right, and someone must be TOLD
+//   (b) the turn is alive and slow — tools running, tokens flowing → waiting is right, say what it is doing
+//   (c) the turn is DEAD — the socket is gone and nothing is coming → waiting is pure waste
+//
+// ⛔ AND THE SILENT FAILURE UNDERNEATH IT WAS WORSE THAN THE SILENCE. On exhaustion the old code fell
+// through and read `assistant rows .at(-1)` — the PREVIOUS turn's reply — and reported it as this turn's
+// answer. A stale answer presented as an answer is the same failure class as a malformed argument
+// reported as an absence: the instrument said something confident about nothing.
+// ⇒ Every reply is now accepted only if its `rolling_id` is ABOVE the baseline taken before the POST.
+//
+// ⭐ EACH TICK PRINTS WHAT IT OBSERVED, and the states come from evidence in the database rather than from
+// a clock: a pending interaction row (a), new `log_tool_calls` rows (b), neither (c).
+const CARD_TIMEOUT_S = Number(config?.chat?.interactionTimeoutSeconds ?? 300)
+// ⚠️ THE OLD BUDGET WAS SHORTER THAN THE THING IT WAS WAITING FOR: 240s of polling against a 300s card.
+// A card answered at 280s was structurally unobservable — the loop had already given up. The budget now
+// starts from the card's own timeout and adds room for the turn to finish after the answer arrives.
+const TICK_S = 5
+const QUIET_LIMIT_S = 180   // no card, no tool call, no reply, for this long ⇒ report it dead rather than wait on
+const GRACE_AFTER_CARD_S = 120
+
+async function awaitReply({ label, sinceRolling }) {
+  const t0 = Date.now()
+  const el = () => Math.round((Date.now() - t0) / 1000)
+  let lastToolCount = (await q(`select count(*)::int n from ${S}.log_tool_calls where conversation_id=$1`, [cid]))[0].n
+  let quietFor = 0
+  let cardSeen = false
+  let deadline = CARD_TIMEOUT_S + GRACE_AFTER_CARD_S
+  let lastPrinted = ''
+  const say = (s) => { if (s !== lastPrinted) { console.log(s); lastPrinted = s } }
+
+  for (;;) {
+    await new Promise((r) => setTimeout(r, TICK_S * 1000))
+
+    // ── done? Only a row NEWER than the baseline counts. ──────────────────────────────────────────
+    const [fresh] = await q(
+      `select rolling_id from ${S}.txn_messages
+        where conversation_id=$1 and role='assistant' and rolling_id > $2 order by rolling_id desc limit 1`,
+      [cid, sinceRolling])
+    if (fresh) { console.log(`   ✓ ${label}: her reply landed after ${el()}s`); return { verdict: 'answered', waitedS: el() } }
+
+    // ── (a) is a human being asked something? ─────────────────────────────────────────────────────
+    const [card] = await q(
+      `select id::text, status, expires_at, questions,
+              greatest(0, round(extract(epoch from (expires_at - now()))))::int left_s
+         from ${S}.txn_interaction_sessions
+        where conversation_id=$1 order by created_at desc limit 1`, [cid])
+    if (card?.status === 'pending') {
+      cardSeen = true; quietFor = 0
+      deadline = Math.max(deadline, el() + card.left_s + GRACE_AFTER_CARD_S)
+      const qtext = String(card.questions?.[0]?.question || '(no question text)').replace(/\s+/g, ' ').slice(0, 120)
+      // ⛔ LOUD, AND ADDRESSED TO A PERSON. The whole mechanism is that a human decides — a card nobody
+      // is told about is a card that times out, which is exactly what happened twice in Hermes's room.
+      say(`   ⏸  A PERMISSION CARD IS WAITING FOR YOU in the browser — ${card.left_s}s left to answer it.\n`
+        + `      "${qtext}"\n`
+        + `      ⓘ This script must NOT answer it: the authorization has to be genuine.`)
+      continue
+    }
+    if (cardSeen && card && card.status !== 'pending') {
+      say(`   ▸ the card is ${card.status} — the turn has resumed; waiting for the answer it produces`)
+      deadline = Math.max(deadline, el() + GRACE_AFTER_CARD_S)
+    }
+
+    // ── (b) is she working? New tool-call rows are the only load this script can see from outside. ──
+    const nowTools = (await q(`select count(*)::int n from ${S}.log_tool_calls where conversation_id=$1`, [cid]))[0].n
+    if (nowTools > lastToolCount) {
+      const names = await q(
+        `select tool from ${S}.log_tool_calls where conversation_id=$1 order by rolling_id desc limit $2`,
+        [cid, nowTools - lastToolCount])
+      console.log(`   ⚙  ${el()}s — working: ${names.map((r) => r.tool).reverse().join(' → ')}  (${nowTools} tool calls this conversation)`)
+      lastToolCount = nowTools; quietFor = 0; continue
+    }
+
+    // ── (c) nothing at all. Say so every tick, and stop calling it waiting after QUIET_LIMIT. ──────
+    quietFor += TICK_S
+    say(`   … ${el()}s — no card, no tool call, no reply: either she is composing the final answer, or the turn is gone`)
+    if (quietFor >= QUIET_LIMIT_S) {
+      console.log(`   ✖ ${label}: ${quietFor}s with no observable activity — reporting NO ANSWER rather than waiting on it`)
+      return { verdict: 'dead', waitedS: el() }
+    }
+    if (el() >= deadline) {
+      console.log(`   ✖ ${label}: gave up after ${el()}s (budget ${deadline}s)`)
+      return { verdict: 'timeout', waitedS: el() }
+    }
+  }
+}
+
 const transcript = []
 try {
   for (const [i, text] of TURNS.entries()) {
@@ -109,30 +202,45 @@ try {
     // the process died, and the turn's answer was lost even though the server had finished it.
     // ⛔ Not a hang: waiting is the mechanism. ⇒ If the socket gives up, stop waiting on it and read the
     // answer from the DATABASE, which is where this script reads every reply from anyway.
+    //
+    // ⭐ THE BASELINE IS TAKEN BEFORE THE POST, AND IT IS WHAT MAKES A MISSING ANSWER LEGIBLE. Without it
+    // "her reply" is whatever assistant row happens to be last, which after a lost turn is the previous
+    // one — a stale answer reported as an answer.
+    const [base] = await q(
+      `select coalesce(max(rolling_id), 0) rid from ${S}.txn_messages where conversation_id=$1 and role='assistant'`, [cid])
+    const sinceRolling = Number(base.rid)
     let held = false
+    let wait = { verdict: 'direct', waitedS: null }
+    console.log(`\n── T${i + 1} ▸ ${text}`)
     try {
       const posted = await call('r', 'POST', `/v1/chat/conversations/${cid}/messages`, { content: text, stream: false })
       if (posted.status >= 300) throw new Error(`TURN ${i + 1} REFUSED (${posted.status}): ${String(posted.text || '').slice(0, 300)}`)
     } catch (e) {
       if (!/HEADERS_TIMEOUT|fetch failed/i.test(String(e?.message) + String(e?.cause?.code))) throw e
       held = true
-      console.log(`   ⏳ the socket timed out — the turn is HELD (a card is waiting, or was). Polling the database for the reply…`)
-      const before = (await q(`select count(*)::int n from ${S}.txn_messages where conversation_id=$1 and role='assistant'`, [cid]))[0].n
-      for (let waited = 0; waited < 240; waited += 5) {
-        await new Promise((r) => setTimeout(r, 5000))
-        const now = (await q(`select count(*)::int n from ${S}.txn_messages where conversation_id=$1 and role='assistant'`, [cid]))[0].n
-        if (now > before) break
-      }
+      console.log(`   ⏳ the socket gave up on this turn — the server may still be finishing it. Watching the database:`)
+      wait = await awaitReply({ label: `T${i + 1}`, sinceRolling })
     }
-    const rows = await q(
-      `select role, content, tool_calls, error from ${S}.txn_messages where conversation_id=$1 order by created_at`, [cid])
-    const last = rows.filter((r) => r.role === 'assistant').at(-1)
+    // ⭐ ONLY A ROW ABOVE THE BASELINE IS THIS TURN'S ANSWER. If there isn't one, that is reported as an
+    // absence with the reason — never as an empty reply, and never as the previous turn's text.
+    const [last] = await q(
+      `select role, content, tool_calls, error from ${S}.txn_messages
+        where conversation_id=$1 and role='assistant' and rolling_id > $2 order by rolling_id desc limit 1`,
+      [cid, sinceRolling])
     const tc = Array.isArray(last?.tool_calls) ? last.tool_calls : (last?.tool_calls ? [last.tool_calls] : [])
     const tools = tc.map((t) => t?.function?.name || t?.name).filter(Boolean)
-    transcript.push({ turn: i + 1, asked: text, tools, reply: last?.content || '', error: last?.error || null, held })
-    console.log(`\n── T${i + 1} ▸ ${text}`)
+    transcript.push({
+      turn: i + 1, asked: text, tools, reply: last?.content ?? null,
+      error: last?.error || null, held, wait: wait.verdict, waitedS: wait.waitedS,
+      answered: Boolean(last),
+    })
     console.log(`   tools: ${tools.join(', ') || '(NONE)'}${last?.error ? `  ⚠ ${last.error}` : ''}`)
-    console.log(`\n   ${(last?.content || '(EMPTY — and the POST returned 2xx, so this is a real empty answer)').replace(/\n+/g, '\n   ')}`)
+    if (!last) {
+      console.log(`\n   ✖✖ NO ANSWER FOR THIS TURN (${wait.verdict}). Nothing was written above the pre-POST`
+        + ` baseline, so there is no reply to report — ⛔ and the previous turn's text is deliberately not shown here.`)
+    } else {
+      console.log(`\n   ${(last.content || '(EMPTY — a row exists and its content is empty, which is a real empty answer)').replace(/\n+/g, '\n   ')}`)
+    }
   }
 } finally {
   // The transcript is the evidence. Save it BEFORE deleting anything.

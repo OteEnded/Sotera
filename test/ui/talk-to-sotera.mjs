@@ -71,14 +71,25 @@ try {
   // disconnected before the first token"` and it looked exactly like she had failed to answer.
   // Same family as the F6 regex and `dense` matching inside `empty-dense`: KEYED ON WORDS, NOT ON WHAT
   // THE THING IS. Extending the list to 17 strings would just be a bigger guess with a longer half-life.
+  // ⚠️⚠️ AND THE SAME DEFECT CAME BACK THROUGH A DIFFERENT DOOR ON 2026-08-21, COSTING HER ANSWER TO A
+  // CORRECTION. The shimmer was stripped, so the placeholder no longer fooled it — but the TOOL-CALL and
+  // REASONING blocks are ordinary text inside the same bubble. On a turn with a >4s gap between tool calls
+  // (13 calls, a cold 35B model) that text sat perfectly still, `realReply()` read it as her answer, the
+  // stability counter reached 4, the browser closed, and the stream aborted. The row landed at 131 chars,
+  // mid-sentence, with `error: null` — so nothing anywhere said it had been truncated.
+  // ⇒ ⭐ HER ANSWER IS WHAT IS LEFT AFTER EVERY MACHINE-GENERATED BLOCK IS REMOVED, and the removal is
+  // STRUCTURAL: `.chat-tool(s)` for calls, `.chat-think`/`.chat-reasoning` for thinking, `.animate-shimmer`
+  // and `[data-ui="live-note"]` for status. ⛔ Same lesson as the phrase list it replaced: key on WHAT THE
+  // THING IS, never on what it happens to say.
+  const NOT_HER_WORDS = '.animate-shimmer, [data-ui="live-note"], .chat-tools, .chat-tool, .chat-think, .chat-reasoning'
   const lastReply = async () => {
     const n = await assistant().count()
     if (!n) return ''
-    return (await assistant().nth(n - 1).evaluate((el) => {
+    return (await assistant().nth(n - 1).evaluate((el, sel) => {
       const clone = el.cloneNode(true)
-      clone.querySelectorAll('.animate-shimmer, [data-ui="live-note"]').forEach((x) => x.remove())
+      clone.querySelectorAll(sel).forEach((x) => x.remove())
       return clone.innerText
-    })).trim()
+    }, NOT_HER_WORDS)).trim()
   }
   // The ASK card is a chat-msg-assistant too, so it is excluded from "her reply" by its own marker.
   const askCard = async () => {
@@ -169,13 +180,73 @@ try {
       const body = t.replace(/^SOTERA\s*/i, '').trim()
       return PLACEHOLDER.test(body) || !body ? '' : t
     }
+    // ⚠️⚠️ AND IT WAITED UP TO SEVEN MINUTES IN COMPLETE SILENCE, WHICH OTE SAW BEFORE I DID:
+    // *"there's many time that there's no load on my side, but you waiting for your script."*
+    // He was right, and it is the same defect on both drivers: from outside, a card waiting for a human,
+    // a turn that is streaming slowly, and a turn that has died all look like one blank pause.
+    // ⇒ Heartbeat every 10s naming which of the three it observed. ⛔ It reports the OBSERVATION, never a
+    // conclusion — a placeholder that has stopped changing is *"quiet"*, not *"finished"*.
+    const HEARTBEAT_S = 10
+    const QUIET_LIMIT_S = 150 // nothing growing, no card, no indicator — stop calling it waiting
+    const indicator = async () => {
+      const n = await assistant().count()
+      if (!n) return ''
+      return (await assistant().nth(n - 1).evaluate((el) => {
+        const x = el.querySelector('.animate-shimmer, [data-ui="live-note"]')
+        return x ? String(x.innerText || '').trim().replace(/\s+/g, ' ').slice(0, 80) : ''
+      }))
+    }
+    // ⭐⭐ AND THE FINISH LINE IS NOW THE UI'S OWN GENERATING FLAG, NOT TEXT THAT HAS STOPPED MOVING.
+    // `.chat-stop` (the ■ button) exists if and only if THIS chat is generating — ChatApp renders it from
+    // `sending`. ⇒ "still going" is a fact the app already knows, and asking it is not a guess.
+    // ⛔ TEXT STABILITY CANNOT BE THE PRIMARY SIGNAL, and this is why: her prose before a tool call
+    // ("Let me check what's in my store…") is real text, and it sits perfectly still for as long as the
+    // tool takes. Every version of a stability rule declares that turn finished. Stability is now only
+    // used to settle the last few tokens AFTER the app says it has stopped.
+    const generating = async () => (await page.locator('.chat-stop').count()) > 0
     let prev = ''
     let stable = 0
+    let quiet = 0
+    let lastLen = -1
+    let sawGenerating = false
+    let doneFor = 0
     for (let i = 0; i < 420; i++) { // up to ~7 min: a cold model plus a long reply
       await page.waitForTimeout(1000)
       const now = await realReply()
-      if (now && now === prev) { if (++stable >= 4) break } else stable = 0
+      const busy = await generating()
+      if (busy) { sawGenerating = true; stable = 0; doneFor = 0 } else {
+        doneFor++
+        // ⓘ The flag can lag the send by a moment; before it has ever been seen, an absence proves nothing.
+        if (sawGenerating || doneFor > 15) {
+          if (now && now === prev) { if (++stable >= 2) break } else stable = 0
+          if (!now && doneFor > 25) { console.log('   ✖ the app is no longer generating and there is no reply text on screen'); break }
+        }
+      }
       prev = now
+
+      if (i % HEARTBEAT_S !== HEARTBEAT_S - 1) continue
+      const [card, ind] = [await askCard(), await indicator()]
+      if (card) {
+        // ⛔ LOUD, AND ADDRESSED TO A PERSON. A card nobody is told about is a card that times out —
+        // which is exactly what happened twice in Hermes's room, ten minutes of zero load.
+        console.log(`   ⏸  ${i + 1}s — A CARD IS ON SCREEN AND IS WAITING FOR YOU: ${card.slice(0, 140)}`)
+        quiet = 0
+      } else if (now.length !== lastLen) {
+        console.log(`   ⚙  ${i + 1}s — writing (${now.length} chars so far)`)
+        quiet = 0
+      } else if (ind) {
+        console.log(`   ⚙  ${i + 1}s — busy: "${ind}"`)
+        quiet = 0
+      } else {
+        quiet += HEARTBEAT_S
+        console.log(`   …  ${i + 1}s — no card, no indicator, nothing new on screen (${quiet}s quiet)`)
+        if (quiet >= QUIET_LIMIT_S) {
+          console.log(`   ✖  giving up watching after ${quiet}s of no observable activity — reporting what is on`
+            + ` screen, whatever that is, rather than waiting out the remaining budget`)
+          break
+        }
+      }
+      lastLen = now.length
     }
   }
 

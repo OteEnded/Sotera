@@ -306,11 +306,27 @@ check('7c · ⛔ …and still offers it no path to the other half', !navAsOwner.
 const askNonRoot = await asOwner.requestRoomAccess({ conversationHandle: theirs.conversation_id })
 check('8a · ⛔ a non-root session cannot request access at all',
   askNonRoot.ok === false && /root/.test(askNonRoot.reason || ''), askNonRoot.reason)
-// 8b · ⚠ A HEADLESS RUN SAYS SO INSTEAD OF HANGING FOR FIVE MINUTES. `asRoot` was built without
+// 8b · ⚠ A HEADLESS RUN MUST NOT HANG FOR FIVE MINUTES WAITING FOR A HUMAN. `asRoot` was built without
 // `interactive`, which is what a reflection or a scheduled run looks like.
+//
+// ── ⚠️⚠️ THIS ASSERTION CHANGED SHAPE ON 2026-08-21, AND THE CHANGE IS THE POINT ────────────────────
+// It used to read *"a run with no human REFUSES rather than raising a card nobody can answer"* — full stop,
+// in every deployment. That was the `interactive` gate sitting in FRONT of the policy question, and it made
+// the two paths disagree AGAIN: `inspect_around` never consulted `interactive` at all, so a headless root
+// run was GRANTED by the inspect path and REFUSED by the request path, in the same deployment, for the
+// same room. The same bug that cost ten minutes of held turn, wearing a different costume.
+// ⇒ ⭐ WHETHER A HUMAN IS PRESENT ONLY MATTERS IF A HUMAN IS GOING TO BE ASKED. The refusal is now a
+// property of the STRICT deployment, not of headlessness — and it is asserted there, in
+// `disclosure-policy-check` §4, on a config built for the purpose. ⛔ Both halves are still tested; what
+// moved is which file owns which half.
 const askHeadless = await asRoot.requestRoomAccess({ conversationHandle: theirs.conversation_id })
-check('8b · ⭐⭐ a run with no human REFUSES rather than raising a card nobody can answer',
-  askHeadless.ok === false && /no human/.test(askHeadless.reason || ''), askHeadless.reason)
+if (config?.memory?.disclosure?.mode === 'personal' || config?.memory?.rootAutoDisclosure === true) {
+  check('8b · ⭐⭐ a headless root run is GRANTED under a personal policy — nobody needed asking, so nobody was',
+    askHeadless.ok === true && askHeadless.granted === true, askHeadless.reason || `granted=${askHeadless.granted}`)
+} else {
+  check('8b · ⭐⭐ a run with no human REFUSES rather than raising a card nobody can answer',
+    askHeadless.ok === false && /no human/.test(askHeadless.reason || ''), askHeadless.reason)
+}
 // 8c · her own room needs no card, and says so rather than raising one.
 const askOwn = await buildDisclosure(fastify, {
   userId: mine.user_id, isRoot: true, username: mine.username, conversationId: conv0.id, interactive: true,

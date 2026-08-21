@@ -47,6 +47,9 @@ import { makeEmbedder } from './memory-embed-host.js'
 // time) and does not re-export this operation. Importing the service module directly keeps this a
 // one-way edge and avoids a cycle back through the runtime.
 import { askInteraction } from '../interaction/service.js'
+// ⭐ THE DEPLOYMENT'S POLICY LIVES IN ONE PLACE, NOT INLINE AT EACH SITE. See disclosure-policy.js for
+// why: two inline reads of the same flag is how ASKING ended up worse than not asking.
+import { autoAuthorizes, mayRaiseDisclosureCard, disclosureMode } from './disclosure-policy.js'
 
 // ⭐ The affirmative option's label is a CONSTANT, not free text, because matching on prose is how prose
 // becomes authorization. The card must offer this exact string for the grant to verify.
@@ -67,12 +70,15 @@ export function grantQuestion(counterpart) {
 const MAX_RADIUS = 6
 
 // ⛔⛔ THE SWITCH THAT TURNS OFF A BOUNDARY, AND IT IS A SWITCH ON PURPOSE.
-// `memory.rootAutoDisclosure` grants a root session the counterpart's half automatically, with no card.
+// A root session gets the counterpart's half automatically, with no card, when the DEPLOYMENT says so.
 // Ote asked for it after completing the Hermes loop by hand; I named what it costs and he chose it twice.
-// ⭐ It is a FLAG rather than a rewrite so the decision stays reversible in one line, and so the two
-// authorities stay distinguishable in `log_disclosure_events` forever. Default FALSE in code: a deployment
-// that has not asked for this must not inherit it.
-const rootAutoDisclosure = (config) => config?.memory?.rootAutoDisclosure === true
+// ⭐ It is POLICY rather than a rewrite so the decision stays reversible in one config value, and so the
+// two authorities stay distinguishable in `log_disclosure_events` forever. Strict by default in code: a
+// deployment that has not asked for this must not inherit it.
+// ⇒ ⭐⭐ THE QUESTION IS NOW ASKED IN ONE PLACE — `disclosure-policy.js`. It used to be an inline
+// `config?.memory?.rootAutoDisclosure === true` at each site, and the second site was added a day late,
+// which is precisely how asking became worse than not asking. Anything else that ever needs to know
+// imports the policy; ⛔ nothing reads the raw config key again.
 // ⚠ A handle is validated as a UUID before it reaches a query. Sequelize would throw
 // `invalid input syntax for type uuid` on anything else — an unusable handle must read as "not
 // reachable", never take the turn down.
@@ -358,7 +364,7 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       // consented to and which were automatic"* stays answerable and this stays reversible.
       // ⛔ AND STILL NO PROSE PATH: root-ness comes from `isRootConnectedUser`, never from a sentence, never
       // from her own claim, never from the shape of an id.
-      if (!grant && isRoot && rootAutoDisclosure(fastify.config) && conversationId) {
+      if (!grant && autoAuthorizes(fastify.config, { isRoot }) && conversationId) {
         grant = await autoGrantForRoot({ fromRoomUserId: at.conv.user_id, radius: r })
       }
       if (!grant) ownOnly = true
@@ -458,12 +464,6 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     if (!isRoot) {
       return { ok: false, reason: 'only a root session can authorize reading another room', howToOpen: null }
     }
-    // ⚠️ HELD TURNS NEED A HUMAN, AND A HEADLESS RUN MUST SAY SO RATHER THAN HANG FOR FIVE MINUTES.
-    // The reflection pass is headless by construction, which is exactly why this tool is NOT in
-    // REFLECTION_TOOLS — belt and braces, since the route also strips interactive tools.
-    if (!interactive) {
-      return { ok: false, reason: 'there is no human in this run to answer a permission card, so nothing can be authorized here' }
-    }
     if (!conversationId) return { ok: false, reason: 'no conversation to raise the card in' }
     const at = await locateConversation(conversationHandle)
     // ⭐ MALFORMED FIRST, and it is NOT `unreachable` — see locateConversation. A bad argument must be
@@ -483,7 +483,13 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     // ⇒ Asking must not be worse than not asking. If a root session would be granted this automatically on
     // inspection, then asking for it returns the same grant immediately rather than summoning a human who
     // does not need to be summoned.
-    if (rootAutoDisclosure(fastify.config)) {
+    //
+    // ⚠️⚠️ AND THIS CHECK MOVED **IN FRONT OF** THE `interactive` GATE, WHICH IS ITS OWN VERSION OF THE
+    // SAME MISTAKE. The gate refused with *"there is no human in this run"* — but `inspect_around` never
+    // consulted `interactive` at all, so under a personal deployment a headless root run was refused by the
+    // request path and granted by the inspect path. ⇒ ⭐ WHETHER A HUMAN IS PRESENT ONLY MATTERS IF A HUMAN
+    // IS GOING TO BE ASKED. Establish the policy answer first; reach for a person only if it says to.
+    if (autoAuthorizes(fastify.config, { isRoot })) {
       const auto = await autoGrantForRoot({ fromRoomUserId: at.conv.user_id, radius })
       if (auto) {
         return {
@@ -496,7 +502,29 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       }
     }
 
-    await log(`[disclosure] access requested from_room=${at.conv.user_id} into=${conversationId}`, import.meta.url)
+    // ⚠️ HELD TURNS NEED A HUMAN, AND A HEADLESS RUN MUST SAY SO RATHER THAN HANG FOR FIVE MINUTES.
+    // The reflection pass is headless by construction, which is exactly why this tool is NOT in
+    // REFLECTION_TOOLS — belt and braces, since the route also strips interactive tools.
+    // ⓘ Reached only when the policy did NOT authorize this session, i.e. a `shared` deployment.
+    if (!interactive) {
+      return { ok: false, reason: 'there is no human in this run to answer a permission card, so nothing can be authorized here' }
+    }
+
+    await log(`[disclosure] access requested from_room=${at.conv.user_id} into=${conversationId}`
+      + ` policy=${disclosureMode(fastify.config)}`, import.meta.url)
+    // ⛔⛔ BELT AND BRACES ON THE POLICY, AT THE ONE LINE THAT COSTS A HUMAN THEIR ATTENTION.
+    // `autoAuthorizes` returning true should already have returned above — unless the grant WRITE failed
+    // (no events table, a degraded store). ⇒ In a deployment whose policy is that no card is needed, a
+    // failed automatic grant must not silently become a card: that is how *"you never have to click"*
+    // turns back into a click at exactly the moment nobody is expecting one. Refuse and say why.
+    if (!mayRaiseDisclosureCard(fastify.config, { isRoot })) {
+      return {
+        ok: false,
+        reason: 'this deployment authorizes a root session automatically, so no card is raised here —'
+          + ' but the automatic grant could not be recorded, and an unrecorded disclosure is not one',
+        policy: disclosureMode(fastify.config),
+      }
+    }
     // ⛔ THE QUESTION IS NOT THE MODEL'S TO WRITE. A card whose text came from the caller is a card that
     // can be phrased into a yes, so both the question and the affirmative label are fixed constants.
     const asked = await askInteraction(fastify, { id: userId, username }, conversationId, {
