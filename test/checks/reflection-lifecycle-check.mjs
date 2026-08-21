@@ -315,6 +315,65 @@ try {
       'L2 · ⭐ …and user_id still records the ROOM it was formed in — context, not ownership (migration 015)')
     ok(Array.isArray(row2?.tools_used) && row2.tools_used.includes('remember'),
       'L2 · the tool she reached for is recorded', (row2?.tools_used ?? []).join(', '))
+
+    // ── ⭐⭐⭐ L4 · THE SOURCE ANCHOR. A MEMORY SHE FORMED FROM A CONVERSATION MUST POINT BACK AT IT ───
+    //
+    // ⚠️ MEASURED MISSING, 2026-08-21: a reflection-written memory came out with `source_message_id: NULL`
+    // while all 38 account-authored rows in the store carried one. ⇒ anything she retained in a reflection
+    // was UNWALKABLE — `recall_memory_source` had nothing to resolve, so she could not get back to the
+    // conversation that produced her own conclusion. Ote had asked for exactly that capability of ordinary
+    // memories: *"so sotera can go back and check what happen from source when she need more context."*
+    // ⛔ NO SCHEMA COLUMN WAS ADDED. `buildToolContext` already threads `extras.messageId`; the host simply
+    // never passed it.
+    const [anchor] = mem
+      ? await Q(`SELECT m.source_message_id::text AS smid, x.conversation_id::text AS cid
+                   FROM ${S}.txn_memories m
+                   LEFT JOIN ${S}.txn_messages x ON x.id = m.source_message_id
+                  WHERE m.id = :id`, { id: mem.id })
+      : [null]
+    ok(!!anchor?.smid,
+      'L4 · ⭐⭐⭐ the memory she formed in a reflection carries a SOURCE MESSAGE — it is walkable',
+      anchor?.smid ? 'anchored' : '⛔ NULL — she could never get back to where this came from')
+    // ⭐ AND THE ANCHOR RESOLVES TO THE RIGHT CONVERSATION, which is the half that makes it useful. A
+    // message id that pointed anywhere else would satisfy "not null" and be worse than null.
+    ok(anchor?.cid === saving,
+      'L4 · ⭐⭐ …and it resolves to the conversation she was reflecting on, not merely to some message',
+      `${anchor?.cid} vs ${saving}`)
+
+    // ── ⭐⭐⭐ L5 · A DURABLE WRITE CANNOT ESCAPE THE LEDGER ──────────────────────────────────────────
+    //
+    // ⚠️⚠️ OBSERVED, NOT REASONED ABOUT: the INSERT used to run AFTER the tool loop, so when
+    // `ON CONFLICT DO NOTHING` refused the row the memory was already written — an `author='persona'` row
+    // existed with NO reflection row pointing at it. Ote: *"A durable write must not be able to disappear
+    // from the reflection ledger."*
+    // ⇒ The row is claimed BEFORE the model call. This asserts the consequence: a second reflection at the
+    // SAME watermark is refused, and refused WITHOUT writing anything.
+    const memsBefore = (await Q(`SELECT count(*)::int AS n FROM ${S}.txn_memories WHERE content LIKE 'zz\\_test %'`))[0].n
+    let secondRan = false
+    // ⚠️ `force: true` ON PURPOSE, and the first version of this test was wrong without it. Un-forced, the
+    // `quiet + changed` predicate refuses first with `unchanged` — correct, and an even earlier defence,
+    // but it means the UNIQUE index never gets exercised and this test would pass while asserting nothing
+    // about the claim. ⇒ force past the timing gate so the DATASTORE is what refuses.
+    const dup = await reflectOnConversation(fastify, {
+      conversationId: saving,
+      force: true,
+      turn: async () => {
+        secondRan = true
+        return { message: { content: '', tool_calls: [{ function: { name: 'remember', arguments: { content: 'zz_test SECOND WRITE THAT MUST NEVER HAPPEN', importance: 9 } } }] }, doneReason: 'tool_calls' }
+      },
+    })
+    ok(dup.skipped === true && dup.reason === 'already-reflected',
+      'L5 · ⭐ a second reflection at the same watermark is refused by the DATASTORE, not by the caller',
+      `${dup.skipped ? dup.reason : 'IT RAN'}`)
+    // ⭐⭐ THE TEETH: it was refused BEFORE the model was called, so it could not have written anything.
+    // The old ordering would have called the model, executed `remember`, and only then discovered the
+    // conflict — leaving the row it wrote with no ledger entry.
+    ok(secondRan === false,
+      'L5 · ⭐⭐⭐ …and refused BEFORE the model call, so no orphan write is even possible',
+      secondRan ? '⛔ the model ran, which means a write could have landed' : 'no generation spent, no tool executed')
+    const memsAfter = (await Q(`SELECT count(*)::int AS n FROM ${S}.txn_memories WHERE content LIKE 'zz\\_test %'`))[0].n
+    ok(memsAfter === memsBefore,
+      'L5 · ⭐ and nothing durable appeared from the refused run', `${memsBefore} → ${memsAfter}`)
   }
 } finally {
   // ⛔ CLEAN UP EVERYTHING. Residue from my testing has appeared in Ote's own panels before.

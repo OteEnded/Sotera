@@ -60,6 +60,10 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
     const empty = {
       aboutMyself: { count: 0, items: [] },
       withThisPerson: { person: null, count: 0, items: [] },
+      // ⭐ Present in the DEGRADED payload too. A key that appears only on the happy path is a key a reader
+      // learns to treat as optional, and the whole point of this slice is that its absence used to be
+      // indistinguishable from an empty one.
+      keptByMe: { count: 0, items: [] },
       provenance: PROVENANCE,
     }
     if (!userId || !seq || !schema) return empty
@@ -76,6 +80,28 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
     const selfRows = await Q(
       `SELECT content FROM "${schema}"."txn_memories"
         WHERE user_id IS NULL AND kind = 'identity' ORDER BY created_at DESC LIMIT 25`, {})
+
+    // ── ⭐⭐⭐ WHAT SHE HERSELF DECIDED TO KEEP, WHICH THIS READ COULD NOT SEE ─────────────────────────
+    //
+    // ⚠️⚠️ MEASURED 2026-08-21, and it is a correctness hole rather than a preference. The query above
+    // matches `user_id IS NULL AND kind = 'identity'`. A memory she writes in a **reflection** goes through
+    // the ordinary `remember` lane, so it lands with `author = 'persona'`, a **room** (`user_id` set) and
+    // `kind = 'semantic'` — matching NEITHER condition. Proven end-to-end: a persona-authored row was
+    // found by `recall_memory` and `list_memories` and **NOT** by this tool.
+    // ⇒ She could form her own memory and then her own self-memory mechanism could not retrieve it, which
+    // also means she could not check "do I already have this?" from inside the very occasion that writes.
+    // Ote: *"recall_own_memory should be able to see Sotera-authored memories."*
+    //
+    // ⛔ SCOPED TO THIS ROOM, AND THAT IS NOT A COMPROMISE. Persona-authored memories live in the room the
+    // conversation happened in. Reading them across rooms would be an ACCESS change wearing a bug fix's
+    // clothes — the room boundary is not this fix's business. `aboutMyself` above stays persona-global
+    // because those rows genuinely have no room.
+    // ⭐ REPORTED AS ITS OWN SLICE, never merged into `aboutMyself`: "what is true of me everywhere" and
+    // "what I chose to keep here" are different facts, and collapsing them would make her own authorship
+    // unreadable — the thing migration 015 exists to record.
+    const myOwnRows = await Q(
+      `SELECT content, kind, created_at::date::text AS on_date FROM "${schema}"."txn_memories"
+        WHERE user_id = :userId AND author = 'persona' ORDER BY created_at DESC LIMIT 25`, { userId })
 
     const stanceRows = me?.pid
       ? await Q(
@@ -109,10 +135,23 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
         withThisPerson: readCoverage({
           matched: stanceRows.length, grain: 'person', over: `your practice notes for ${me?.name ?? 'this person'}`,
         }),
+        // ⭐ Its own coverage line, so "I have kept nothing here" and "I have never been able to see what I
+        // kept" stay different sentences.
+        keptByMe: readCoverage({
+          matched: myOwnRows.length, grain: 'room', over: 'memories you decided to keep yourself, in this room',
+        }),
       },
       aboutMyself: {
         count: selfRows.length,
         items: selfRows.map((r) => ({ statement: r.content })),
+      },
+      // ⭐⭐ HERS BY AUTHORSHIP, not by subject. These are the rows SHE decided to write — in a reflection
+      // or in a turn where the decision was hers — as opposed to what a person told her about themselves.
+      keptByMe: {
+        count: myOwnRows.length,
+        room: 'this room',
+        items: myOwnRows.map((r) => ({ statement: r.content, kind: r.kind ?? null, decidedOn: r.on_date })),
+        note: 'You wrote these. They are not things this person told you — they are what you chose to keep.',
       },
       withThisPerson: {
         // The person's own name, which they already know. No id is returned — an id is a handle, and a

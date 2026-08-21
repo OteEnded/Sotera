@@ -176,4 +176,55 @@ ok(!/user_id\s*=\s*:userId[\s\S]{0,80}txn_memories/.test(sql),
     'Q · ⭐ …and her own identity notes are described as neither room- nor person-scoped', r.coverage.aboutMyself.searched.rooms)
 }
 
+// ── ⭐⭐⭐ K · WHAT SHE HERSELF DECIDED TO KEEP MUST BE VISIBLE TO HER OWN-MEMORY READ ─────────────
+//
+// ⚠️⚠️ THE HOLE THIS CLOSES WAS MEASURED, 2026-08-21. `aboutMyself` matches `user_id IS NULL AND
+// kind = 'identity'`. A memory she writes in a REFLECTION goes down the ordinary `remember` lane, so it
+// lands with `author='persona'`, a ROOM (`user_id` set) and `kind='semantic'` — matching NEITHER condition.
+// Proven end to end: a persona-authored row was found by `recall_memory` and `list_memories` and NOT by
+// this tool. ⇒ she could form her own memory and her own self-memory mechanism could not retrieve it,
+// which also means she could not check *"do I already have this?"* from inside the occasion that writes.
+// Ote: *"recall_own_memory should be able to see Sotera-authored memories."*
+{
+  const room = users.agent_dev
+  const other = users.agent_dev_alt
+  const MARK = 'zz_test kept-by-me — a memory Sotera decided to keep herself.'
+  const mk = (uid, content) => Q(
+    `INSERT INTO persona_sotera.txn_memories (id, user_id, persona, kind, content, author, importance, confidence, created_at, updated_at)
+     VALUES (gen_random_uuid(), :uid, 'sotera', 'semantic', :content, 'persona', 5, 0.9, now(), now())
+     RETURNING id::text AS id`, { uid, content })
+  const [mine] = await mk(room, MARK)
+  // ⭐ A DECOY IN ANOTHER ROOM, and it is what makes the next assertion mean anything. Persona-authored
+  // memories live in rooms; a read that returned them all would be an ACCESS change wearing a bug fix's
+  // clothes. Without this row, "scoped to this room" is untested and would pass on an empty database.
+  const [elsewhere] = await mk(other, 'zz_test kept-by-me DECOY — another room, must never appear here.')
+  try {
+    const svc = buildOwnMemory(fastify, { userId: room })
+    const r = await svc.recall()
+    ok(r.keptByMe?.count >= 1,
+      'K · ⭐⭐⭐ a memory SHE authored is visible to her own-memory read', `${r.keptByMe?.count} item(s)`)
+    ok((r.keptByMe?.items ?? []).some((i) => i.statement === MARK),
+      'K · …and it is the row she wrote, verbatim')
+    ok(!(r.keptByMe?.items ?? []).some((i) => String(i.statement).includes('DECOY')),
+      'K · ⛔⛔ …and the other room\'s persona memory does NOT appear — this fix adds no access')
+    // ⭐ ITS OWN SLICE, NEVER MERGED. "What is true of me everywhere" and "what I chose to keep here" are
+    // different facts; collapsing them would make her own authorship unreadable, which is the thing
+    // migration 015 exists to record.
+    ok(!(r.aboutMyself?.items ?? []).some((i) => i.statement === MARK),
+      'K · ⭐⭐ …and it did NOT leak into `aboutMyself` — persona-global and kept-here stay separate')
+    ok(r.coverage?.keptByMe?.matched === r.keptByMe.count,
+      'K · ⭐ the coverage line agrees with the payload, so "kept nothing" and "could not see" stay different sentences',
+      `${r.coverage?.keptByMe?.matched}/${r.keptByMe.count}`)
+    // ⛔ AND THE OTHER ROOM'S READ SEES ITS OWN, which proves the scoping is per-room rather than a
+    // hardcoded room. A filter that only ever matched `agent_dev` would pass every assertion above.
+    const rOther = await buildOwnMemory(fastify, { userId: other }).recall()
+    ok((rOther.keptByMe?.items ?? []).some((i) => String(i.statement).includes('DECOY')),
+      'K · ⭐ the other room sees ITS own kept memory — the scoping is per-room, not a hardcoded room')
+  } finally {
+    for (const id of [mine?.id, elsewhere?.id]) {
+      if (id) await Q('DELETE FROM persona_sotera.txn_memories WHERE id = :id', { id })
+    }
+  }
+}
+
 done()

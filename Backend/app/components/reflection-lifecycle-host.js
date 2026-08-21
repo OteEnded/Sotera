@@ -164,6 +164,38 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const { transcript, considered, elided } = shapeReflectionTranscript(msgs)
   const prompt = buildReflectionTurnPrompt({ who, transcript })
 
+  // ── ⭐⭐⭐ CLAIM THE LEDGER ROW **BEFORE** ANYTHING CAN BE WRITTEN ─────────────────────────────────
+  //
+  // ⚠️⚠️ THE DEFECT THIS FIXES WAS OBSERVED, NOT REASONED ABOUT. The INSERT used to happen at the END,
+  // after the tool loop. So when `ON CONFLICT (conversation_id, up_to_rolling_id) DO NOTHING` refused the
+  // row — a concurrent tick, or a re-run at the same watermark — the tool had ALREADY WRITTEN a durable
+  // memory. Measured 2026-08-21: an `author='persona'` row existed in the store with **no reflection row
+  // pointing at it**, which is the exact inverse of the guarantee this table was built to give.
+  // Ote: *"A durable write must not be able to disappear from the reflection ledger."*
+  //
+  // ⇒ The row is claimed FIRST and filled in afterwards. The UNIQUE index still does the arbitration —
+  // *"the datastore guarantees convergence, not the caller"* — but now the loser learns it **before** it
+  // spends a 35B model call and before it can write anything. ⭐ That is strictly better than the old
+  // ordering on cost too: an already-reflected conversation no longer burns a generation to find out.
+  //
+  // ⚠️ KNOWN CONSEQUENCE, STATED RATHER THAN DISCOVERED: if the process dies mid-loop the row survives
+  // with empty text, and the UNIQUE index will not let that watermark be retried. That is the right trade —
+  // an occasion recorded as incomplete is honest, and a durable memory with no ledger row is not — and an
+  // empty `text` with `tools_used = {}` is identifiable as exactly that.
+  const [claim] = await seq.query(
+    `INSERT INTO "${schema}"."log_reflections"
+       (conversation_id, user_id, up_to_rolling_id, messages_considered, text,
+        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model)
+     VALUES ($1, $2, $3, $4, '', ARRAY[]::text[], false, $5, $6, $7)
+     ON CONFLICT (conversation_id, up_to_rolling_id) DO NOTHING
+     RETURNING id::text AS id, rolling_id`,
+    {
+      bind: [conversationId, conv.user_id ?? null, top.rolling_id, considered,
+        REFLECTION_GENERATION, CODE_MTIME, reflectionModel(fastify.config)],
+      type: seq.QueryTypes.SELECT,
+    })
+  if (!claim) return { skipped: true, reason: 'already-reflected', upTo: top.rolling_id }
+
   // ── THE TOOL CONTEXT ────────────────────────────────────────────────────────────────────────────
   // ⚠️ `isRoot` comes from `isRootConnectedUser`, never from the shape of the owner id. That inference is
   // this codebase's most-repeated defect (nine sites; one turned a missing owner into a privilege grant).
@@ -175,7 +207,17 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       isRoot: isRootConnectedUser(fastify.config, conv.user_id),
       capabilities: [],
     },
-  }, { origin: 'reflection', conversationId, memoryAuthor: 'persona' })
+    // ⭐⭐ THE SOURCE ANCHOR, AND IT WAS MISSING — MEASURED 2026-08-21, NOT SUSPECTED.
+    // A reflection-written memory came out with `source_message_id: NULL` and `source: NULL`, while all 38
+    // account-authored memories in the store carry a source. ⇒ anything she retained in a reflection was
+    // UNWALKABLE: `recall_memory_source` had nothing to resolve, so she could never get back to the
+    // conversation that produced her own conclusion — the exact capability Ote asked for of ordinary
+    // memories (*"so sotera can go back and check what happen from source when she need more context"*).
+    // ⛔ NO NEW COLUMN AND NO NEW PLUMBING: `buildToolContext` already threads `extras.messageId` into
+    // `buildMemoryToolService({ sourceMessageId })`. The reflection host simply never passed it.
+    // ⭐ `top.id` is the LAST message considered — the end of the stretch she was reflecting on, which is
+    // the anchor that makes the whole conversation reachable from the memory.
+  }, { origin: 'reflection', conversationId, messageId: top.id, memoryAuthor: 'persona' })
 
   // ⭐⭐ CAPTURING THE MEMORY ID WITHOUT BECOMING A SECOND WRITER.
   // `remember` is fire-and-forget by design — `rememberAsync` validates, enqueues, and returns
@@ -318,27 +360,23 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // ⭐⭐ Ote, explicitly: *"a reflection that produces no memory must still create a log_reflections row."*
   // Row-exists-vs-no-row is what separates "she reflected and kept nothing" from "she was never asked",
   // and those are opposite facts that used to look identical.
+  // ⭐ FILLING IN THE ROW THIS RUN ALREADY CLAIMED. The claim above is what makes a durable write
+  // impossible to lose; this is where what came of it is recorded. ⛔ Keyed by the claimed id, so it cannot
+  // touch another run's row even if the watermark moved underneath it.
   const [row] = await seq.query(
-    `INSERT INTO "${schema}"."log_reflections"
-       (conversation_id, user_id, up_to_rolling_id, messages_considered, text, wrote_memory_id,
-        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model)
-     VALUES ($1, $2, $3, $4, $5, $6, $7::text[], $8, $9, $10, $11)
-     -- ⭐ The datastore guarantees convergence, not the caller: two overlapping ticks cannot produce two
-     -- reflections for one quiet stretch, and the loser learns that by getting no row back.
-     ON CONFLICT (conversation_id, up_to_rolling_id) DO NOTHING
+    `UPDATE "${schema}"."log_reflections"
+        SET text = $2, wrote_memory_id = $3, tools_used = $4::text[], blocked_by_disclosure = $5,
+            model = $6, messages_considered = $7
+      WHERE id = $1::uuid
      RETURNING id::text AS id, rolling_id`,
     {
       // ⚠️ `bind`, NOT `replacements`. Sequelize expands an array in `replacements` into a comma-separated
       // list, which turns a text[] parameter into a syntax error — the `log_tool_calls` insert had to move
       // for exactly this.
-      bind: [
-        conversationId, conv.user_id ?? null, top.rolling_id, considered,
-        text, written[0] ?? null, toolsUsed, blocked,
-        REFLECTION_GENERATION, CODE_MTIME, modelId,
-      ],
+      bind: [claim.id, text, written[0] ?? null, toolsUsed, blocked, modelId, considered],
       type: seq.QueryTypes.SELECT,
     })
-  if (!row) return { skipped: true, reason: 'already-reflected', upTo: top.rolling_id }
+  if (!row) return { skipped: true, reason: 'claimed-row-vanished', upTo: top.rolling_id }
 
   await log(`[reflection] ${conversationId} upTo=${top.rolling_id} tools=${toolsUsed.join(',') || 'none'} `
     + `memory=${written[0] ? 'yes' : 'no'}${blocked ? ' blocked' : ''}`, import.meta.url)
