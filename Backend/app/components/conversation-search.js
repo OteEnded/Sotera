@@ -193,6 +193,21 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
           AND (:onlyConversationId::uuid IS NULL OR m.conversation_id = :onlyConversationId::uuid)`
   const COLS = `m.id AS message_id, m.conversation_id, m.role, m.content, m.created_at, c.title AS conversation_title`
 
+  // ⭐⭐ THE SAME SCOPE, EXPRESSED AGAINST THE EMBEDDING TABLE (migration 018) — so the vector index can
+  // apply it, instead of a join above the index applying it afterwards.
+  //   · `me.role` / `me.conversation_id` / `me.room_user_id` are denormalised copies, asserted equal to
+  //     their sources by 018's proof block and re-asserted by `message-embedding-scope-check`.
+  //   · ⛔ `c.incognito` is ABSENT ON PURPOSE: off the record means NOT INDEXED. The writer has always
+  //     refused to embed those, `incognito` is set at create and never patched, and 018 deletes any that
+  //     slipped in. **Absence is a stronger guarantee than a filter**, because a filter can be forgotten
+  //     by the next query and an absent row cannot be found by any of them.
+  const V_ROOM = acrossRooms ? 'TRUE' : 'me.room_user_id IS NOT DISTINCT FROM :userId'
+  const V_ROLE_IN = `me.role IN (${asked.map((r) => `'${r}'`).join(',')})`
+  const VECTOR_SCOPE = `${V_ROOM}
+          AND ${V_ROLE_IN}
+          AND (:excludeConversationId::uuid IS NULL OR me.conversation_id <> :excludeConversationId::uuid)
+          AND (:onlyConversationId::uuid IS NULL OR me.conversation_id = :onlyConversationId::uuid)`
+
   async function lexical(q, pool, excludeConversationId) {
     return seq.query(
       `SELECT ${COLS}, ts_rank(m.content_tsv, plainto_tsquery('english', :q)) AS score
@@ -202,7 +217,32 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
       { replacements: { q, userId, excludeConversationId, onlyConversationId, pool }, type: seq.QueryTypes.SELECT },
     )
   }
-  // dense arm (CS2): pgvector cosine over message_embeddings.embedding_hv (HNSW). Same scope.
+  // ── ⭐⭐ THE DENSE ARM FILTERS **IN THE VECTOR'S OWN TABLE** (migration 018) ────────────────────────
+  // It used to reach its predicates through `JOIN txn_messages JOIN txn_conversations`, which meant the
+  // HNSW scan could only ever be POST-filtered: the index returned ~ef_search global neighbours and the
+  // join discarded the ones out of scope. Recall therefore degraded with the SELECTIVITY of the filter,
+  // and P1's `onlyConversationId` is the most selective filter in the system — so at scale it would have
+  // returned nothing and read as `not_located`: **a false absence manufactured by an index.**
+  //
+  // ⇒ `role`, `conversation_id` and `room_user_id` now live beside the vector, so the predicate is
+  // applied AT the index scan. The messages/conversations join remains only to PROJECT the row (content,
+  // title) — it no longer decides what is in scope.
+  //
+  // ⏸ `hnsw.iterative_scan` (pgvector 0.8, and it IS available here) is deliberately NOT enabled, and the
+  // reason is worth recording because the obvious line is a trap: `SET LOCAL` outside a transaction block
+  // is a **silent no-op** — Postgres warns and carries on — and plain `SET` would leak the setting into
+  // every later statement on a pooled connection. Enabling it properly means wrapping each search in an
+  // explicit transaction.
+  // ⭐ AND THE TWO WINS THAT MATTER DO NOT NEED IT: the PARTIAL index (`WHERE role = 'assistant'`) contains
+  // only her own sentences, so that scan is pre-filtered by construction; and a pinned conversation is a
+  // btree lookup plus an exact sort, which never touches the graph. Iterative scan would additionally help
+  // the ROOM-scoped case at scale — ⏸ left until that is measured, rather than shipped as a line that
+  // reads like it is doing something.
+  //
+  // ⛔⛔ AND NONE OF THIS IS AN AUTHORIZATION CHANGE. These columns are a retrieval SCOPE; what she may
+  // read is decided later, by the projection and the grant, neither of which can see this table. Ote:
+  // *"A vector score must never become an authorization signal. Don't let the optimization for 018
+  // accidentally collapse those layers."*
   async function dense(vector, pool, excludeConversationId) {
     const qvec = `[${vector.join(',')}]`
     return seq.query(
@@ -210,7 +250,7 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
          FROM ${ME} me
          JOIN ${MSG} m ON m.id = me.message_id
          JOIN ${CONV} c ON c.id = m.conversation_id
-        WHERE ${SCOPE} AND me.embedding_hv IS NOT NULL
+        WHERE ${VECTOR_SCOPE} AND me.embedding_hv IS NOT NULL
         ORDER BY me.embedding_hv <=> :qvec::halfvec(2048) LIMIT :pool`,
       { replacements: { qvec, userId, excludeConversationId, onlyConversationId, pool }, type: seq.QueryTypes.SELECT },
     )
@@ -299,9 +339,21 @@ export async function embedPendingMessages(fastify, { userId = null, limit = 200
     try {
       const { vector, model } = await embed(r.content)
       if (!vector) continue
+      // ⭐⭐ THE SCOPE COLUMNS ARE WRITTEN HERE, FROM THE SOURCE ROWS, IN THE SAME STATEMENT (migration
+      // 018). ⛔ A denormalised column that only the backfill ever populated is the
+      // `allowlist-drops-what-it-was-not-told` failure with a new name — and `conversation_id`/`role` are
+      // NOT NULL precisely so a forgetful writer fails loudly instead of quietly writing unscoped vectors.
+      // ⓘ Read back from txn_messages/txn_conversations rather than trusted from the candidate row, so the
+      // copy can never disagree with its source.
       await seq.query(
-        `INSERT INTO ${ME} (message_id, embedding, embedding_model) VALUES (:id, :emb::jsonb, :model)
-           ON CONFLICT (message_id) DO UPDATE SET embedding = EXCLUDED.embedding, embedding_model = EXCLUDED.embedding_model`,
+        `INSERT INTO ${ME} (message_id, embedding, embedding_model, conversation_id, role, room_user_id)
+         SELECT m.id, :emb::jsonb, :model, m.conversation_id, m.role, c.user_id
+           FROM ${MSG} m JOIN ${CONV} c ON c.id = m.conversation_id
+          WHERE m.id = :id
+         ON CONFLICT (message_id) DO UPDATE SET
+           embedding = EXCLUDED.embedding, embedding_model = EXCLUDED.embedding_model,
+           conversation_id = EXCLUDED.conversation_id, role = EXCLUDED.role,
+           room_user_id = EXCLUDED.room_user_id`,
         { replacements: { id: r.id, emb: JSON.stringify(vector), model } },
       )
       embedded++
