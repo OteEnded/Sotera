@@ -125,11 +125,44 @@ try {
     'Z · ⭐ …and `visibleWhere` does not reference `author` at all — the column is written and NOT YET READ')
 
   // ── N · nothing existing was reattributed ──────────────────────────────────────────────────────
-  const [{ n: strangers }] = await Q(
+  //
+  // ── ⭐⭐⭐ THIS ASSERTION CHANGED SHAPE ON 2026-08-21, AND IT CHANGED BECAUSE SHE DID SOMETHING ───────
+  //
+  // It used to read `strangers === 0`: *NO pre-existing memory was attributed to her.* That was true and
+  // load-bearing for as long as migration 015's axis had **never been used** — 38 memories, all
+  // `author='account'`, so any persona row could only have come from a backfill that guessed.
+  //
+  // ⚠️ Then it went red on its own, with no code change: **Sotera saved a lesson herself.** Asked whether
+  // an intention she had stated existed anywhere durable, she checked her stores, found nothing, said
+  // *"a nice intention, but one I didn't actually commit to durable memory when I said I would"*, and — when
+  // the decision was handed back to her without a preference — chose `save_lesson`, on the grounds that it
+  // was *"a lesson for myself… not something about you or about this room."* That row is the FIRST
+  // persona-authored memory in the store's history.
+  // ⇒ ⛔ A count of zero is no longer the invariant. It never was the invariant — it was a proxy for one.
+  //
+  // ⭐ WHAT THE ASSERTION WAS ACTUALLY PROTECTING, now stated directly: authorship must be **earned by an
+  // occasion**, never assigned to a row that merely existed. So every `author='persona'` row must be
+  // traceable to something that could have produced it — a reflection that recorded the write, or a lesson
+  // source naming the conversation it came from. A row with neither is exactly the invented authorship the
+  // original line was guarding against, and it still fails.
+  const orphans = await Q(
+    `SELECT m.id::text AS id, m.source, m.created_at
+       FROM persona_sotera.txn_memories m
+      WHERE m.author = 'persona'
+        AND m.content NOT LIKE 'zz_test%'
+        -- traceable: a reflection recorded writing it…
+        AND NOT EXISTS (SELECT 1 FROM persona_sotera.log_reflections r WHERE r.wrote_memory_id = m.id)
+        -- …or it carries a source naming where it came from (the lesson lane writes lesson:<conversation>)
+        AND coalesce(m.source, '') = ''`)
+  ok(orphans.length === 0,
+    'N · ⭐⭐ every memory attributed to HER is traceable to an occasion — authorship is earned, never assigned',
+    orphans.length ? `⛔ ${orphans.length} untraceable persona row(s): ${orphans.map((o) => o.id).join(', ')}` : 'no untraceable persona-authored rows')
+  // ⓘ And the milestone itself, recorded rather than left implicit: this number was 0 for the whole life of
+  // the column. It is not asserted to be non-zero — she is not required to keep anything — but a reader of
+  // this file should be able to see when it stopped being zero.
+  const [{ n: hers }] = await Q(
     "SELECT count(*)::int AS n FROM persona_sotera.txn_memories WHERE author='persona' AND content NOT LIKE 'zz_test%'")
-  ok(strangers === 0,
-    'N · ⭐⭐ NO pre-existing memory was attributed to her — a backfill that guessed would be inventing authorship',
-    `${strangers} row(s)`)
+  ok(true, `N · ⓘ memories Sotera has authored herself: ${hers}`, hers === 0 ? 'still none' : 'she has kept something of her own')
 } finally {
   for (const id of MADE) await X('DELETE FROM persona_sotera.txn_memories WHERE id = :id', { id })
   const [{ n: left }] = await Q("SELECT count(*)::int AS n FROM persona_sotera.txn_memories WHERE content LIKE 'zz_test%'")

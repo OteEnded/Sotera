@@ -12,7 +12,10 @@ import { makeChecker } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
-import { buildOwnMemory } from '../../Backend/app/components/own-memory-host.js'
+import { buildOwnMemory, initOwnMemory } from '../../Backend/app/components/own-memory-host.js'
+// ⭐ The READER path. See K2: asserting the host alone cannot tell a dropped projection from an
+// unregistered service, and both look like "the field is missing".
+import { buildToolContext, runTool } from '../../Backend/app/components/runtime.js'
 import { readFileSync } from 'node:fs'
 
 const config = loadConfig()
@@ -220,6 +223,29 @@ ok(!/user_id\s*=\s*:userId[\s\S]{0,80}txn_memories/.test(sql),
     const rOther = await buildOwnMemory(fastify, { userId: other }).recall()
     ok((rOther.keptByMe?.items ?? []).some((i) => String(i.statement).includes('DECOY')),
       'K · ⭐ the other room sees ITS own kept memory — the scoping is per-room, not a hardcoded room')
+
+    // ── ⭐⭐⭐ K2 · THROUGH THE READER, NOT THE HOST — AND THIS GAP NEARLY COST A FALSE BUG REPORT ────
+    //
+    // ⚠️⚠️ Every assertion above calls `buildOwnMemory(...).recall()` directly. That is the HOST. She never
+    // touches the host — she calls a TOOL, and a tool that projects an explicit field list drops silently
+    // whatever it was not told about. That is this codebase's most-repeated defect (8+ recorded instances:
+    // a marker 0-for-76, a nullable column no reader could see), and the recorded rule is exactly this:
+    // ⭐ **a field is not added until a READER accepts it.**
+    // ⓘ On 2026-08-21 a probe reported `keptByMe: undefined` through `runTool` and I nearly filed it as a
+    // dropped field. The real cause was that the probe never called `initOwnMemory()`, so the tool fell
+    // back to the component default — which is its own lesson: a check that only exercises the host cannot
+    // tell a projection bug from an unregistered service.
+    // ⇒ assert the whole path, with the service registered the way the route registers it.
+    initOwnMemory()
+    const rctx = buildToolContext(fastify, {
+      user: { id: room, username: 'agent_dev', displayName: 'Claude', isRoot: false, capabilities: [] },
+    }, { origin: 'own-memory-check' })
+    const viaTool = await runTool('recall_own_memory', {}, rctx)
+    ok(viaTool?.keptByMe?.count >= 1,
+      'K2 · ⭐⭐⭐ the slice survives to the READER — `recall_own_memory` itself returns it, not just the host',
+      viaTool?.keptByMe === undefined ? '⛔ undefined at the tool boundary' : `${viaTool.keptByMe.count} item(s)`)
+    ok((viaTool?.keptByMe?.items ?? []).some((i) => i.statement === MARK),
+      'K2 · …and it is her row, intact through the projection')
   } finally {
     for (const id of [mine?.id, elsewhere?.id]) {
       if (id) await Q('DELETE FROM persona_sotera.txn_memories WHERE id = :id', { id })
