@@ -536,7 +536,7 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     if (asked?.error) return { ok: false, reason: asked.error }
     if (asked.status !== 'answered') {
       await log(`[disclosure] card ${asked.interactionId} ended ${asked.status}`, import.meta.url)
-      return { ok: false, state: 'attested', counterpart: at.counterpart, reason: `nobody answered (${asked.status}) — nothing was authorized` }
+      return { ok: false, state: 'existence-only', counterpart: at.counterpart, reason: `nobody answered (${asked.status}) — nothing was authorized` }
     }
     // ⭐⭐ AND THE PROOF IS STILL THE STORED ROW, NOT THIS RESULT. `grantFromInteraction` re-reads the
     // interaction from the database and checks the exact label itself. ⛔ Passing `asked.response` through
@@ -545,7 +545,7 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     const granted = await grantFromInteraction({ interactionId: asked.interactionId, conversationHandle: at.conv.id, radius })
     if (!granted.ok) {
       await log(`[disclosure] card ${asked.interactionId} refused: ${granted.reason}`, import.meta.url)
-      return { ok: false, state: 'attested', counterpart: at.counterpart, reason: granted.reason }
+      return { ok: false, state: 'existence-only', counterpart: at.counterpart, reason: granted.reason }
     }
     await log(`[disclosure] granted via card ${asked.interactionId} from_room=${at.conv.user_id}`, import.meta.url)
     return {

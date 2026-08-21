@@ -74,7 +74,7 @@ try {
   const ownMem = await mkMemory(users.agent_dev_alt, source.id)
   const altStore = createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev_alt })
   const v = await altStore.getSource({ id: ownMem, context: 1 })
-  ok(v.found === true && v.evidenceState === 'verified', 'V · same scope ⇒ evidenceState=verified', v.evidenceState)
+  ok(v.found === true && v.evidenceState === 'source-readable', 'V · same scope ⇒ evidenceState=source-readable', v.evidenceState)
   ok(Array.isArray(v.context) && v.context.some((c) => c.isSource), 'V · the source message is returned and flagged', `${v.context?.length} message(s)`)
   ok(v.context.some((c) => /SOURCE — the sentence/.test(c.content)), 'V · ⭐ and it is REAL evidence — the actual text, not metadata')
   ok(v.learnedHere === true && Boolean(v.learnedOn), 'V · provenance carries when, and that it was here', String(v.learnedOn))
@@ -97,8 +97,8 @@ try {
   const devStore = createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev })
   const a = await devStore.getSource({ id: crossMem, context: 2 })
   ok(a.found === true, 'A · the MEMORY is still returned — it is hers, and it stands', `found=${a.found}`)
-  ok(a.evidenceState === 'attested',
-    'A · ⭐⭐ …and the EVIDENCE is refused: evidenceState=attested, the state that did not exist before', a.evidenceState)
+  ok(a.evidenceState === 'source-unreadable',
+    'A · ⭐⭐ …and the EVIDENCE is refused: evidenceState=source-unreadable, the state that did not exist before', a.evidenceState)
   ok(a.context === undefined, 'A · ⭐⭐ NO message content in the refused payload', `context=${JSON.stringify(a.context)}`)
   // ⚠️⚠️ THIS ASSERTION WAS REWRITTEN FOR P4 RATHER THAN LEFT GREEN, AND THE REASON IS THE POINT.
   // It used to read *"no title and no conversation id either — a title is content, an id is a handle to
@@ -120,7 +120,7 @@ try {
     'A · …and it identifies the conversation the memory actually came from')
   // ⛔ AND THE HANDLE IS NOT AN AUTHORIZATION. Same store, same handle, still refused: the grant is a
   // stored human answer, and nothing about holding a handle produces one.
-  ok(a.evidenceState === 'attested' && a.context === undefined,
+  ok(a.evidenceState === 'source-unreadable' && a.context === undefined,
     'A · ⭐⭐ holding the handle changed NOTHING about what she may read — still attested, still no content')
   const flat = JSON.stringify(a)
   ok(!/SOURCE — the sentence|line one|line three|line four/.test(flat),
@@ -142,7 +142,7 @@ try {
   const goneId = '00000000-0000-4000-8000-0000000000ff'
   const danglingMem = await mkMemory(users.agent_dev, goneId)
   const d = await devStore.getSource({ id: danglingMem })
-  ok(d.found === true && d.evidenceState === 'destroyed', 'D · a dangling reference ⇒ evidenceState=destroyed', d.evidenceState)
+  ok(d.found === true && d.evidenceState === 'source-destroyed', 'D · a dangling reference ⇒ evidenceState=source-destroyed', d.evidenceState)
   ok(/no longer exists/.test(String(d.note)), 'D · …and says so', d.note)
   ok(d.sourceMessageId === goneId,
     'D · ⭐ the dangling pointer is RETAINED — it is the attestation, and what keeps `destroyed` distinguishable from `unattested`')
@@ -150,7 +150,7 @@ try {
   // ── U · UNATTESTED — no reference was ever recorded. ────────────────────────────────────────────
   const bareMem = await mkMemory(users.agent_dev, null)
   const u = await devStore.getSource({ id: bareMem })
-  ok(u.found === true && u.evidenceState === 'unattested', 'U · no reference ⇒ evidenceState=unattested', u.evidenceState)
+  ok(u.found === true && u.evidenceState === 'source-never-recorded', 'U · no reference ⇒ evidenceState=source-never-recorded', u.evidenceState)
   ok(u.note === undefined, 'U · ⭐ and NO "deleted" note — never knowing is not the same as having lost it')
 
   // ── S · the four states are distinct values, so a caller cannot collapse them ───────────────────

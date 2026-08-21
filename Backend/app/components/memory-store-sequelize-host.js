@@ -270,7 +270,17 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
      *   2. the EVIDENCE — the source conversation must belong to THIS store's scope.
      *
      * ── ⭐ AND IT RETURNS FOUR STATES, NEVER TWO ───────────────────────────────────────────────────
-     * `evidenceState`: `verified` · `attested` · `destroyed` · `unattested`. The one that did not exist
+     * ── ⭐ RENAMED 2026-08-21, AND THE NEW NAMES SAY WHAT THEY MEAN ─────────────────────────────────
+     * These were `verified` · `attested` · `destroyed` · `unattested`. The word `attested` here meant *"the
+     * reference exists and the content is NOT readable from here"* — which is the **opposite** of the sense
+     * the Memory Cognition Layer needs for `attested-by-source` (*"an accessible source directly supports
+     * this"*). One name, two contradictory meanings, is a defect this repo has already paid for.
+     * Ote's ruling: *"keep attested-by-source for the cognition layer… Don't bend the cognition vocabulary
+     * around an old storage enum."* ⓘ Safe to rename because this value is **computed at read time and
+     * never persisted** — no column, no enum type, no stored rows to migrate.
+     *
+     * `evidenceState`: `source-readable` · `source-unreadable` · `source-destroyed` ·
+     * `source-never-recorded`. The one that did not exist
      * before is **`attested`** — *"I learned this on the 18th, and I cannot show you what was said from
      * here."* ⛔ *"Cannot inspect"* must never collapse into *"there was no evidence"*, which is this
      * project's oldest failure arriving in the evidence layer.
@@ -301,14 +311,14 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // ⛔ UNATTESTED — no reference was ever recorded. Distinct from `destroyed`, and the distinction is
       // only preservable because a deleted source leaves the pointer DANGLING rather than nulled. See the
       // audit: an FK with ON DELETE SET NULL here would collapse the two.
-      if (!m.source_message_id || !db.txn_messages) { res.evidenceState = 'unattested'; return res }
+      if (!m.source_message_id || !db.txn_messages) { res.evidenceState = 'source-never-recorded'; return res }
 
       const msg = await db.txn_messages.findOne({
         where: { id: m.source_message_id }, attributes: ['id', 'conversation_id', 'rolling_id', 'created_at'], raw: true,
       })
       // DESTROYED — the reference resolves to nothing. The memory survives; the loss is reported.
       if (!msg) {
-        res.evidenceState = 'destroyed'
+        res.evidenceState = 'source-destroyed'
         res.note = 'source message no longer exists (deleted)'
         return res
       }
@@ -324,7 +334,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // NOT AUTHORIZED — the opposite of the fail-open rule that governs capability degradation
       // elsewhere in this file, and deliberately so: this decision is about disclosure, not capability.
       if (!sameScope) {
-        res.evidenceState = 'attested'
+        res.evidenceState = 'source-unreadable'
         // Safe provenance only: WHEN, and whether it was here. ⛔ No title, no room name, no person name,
         // and no content.
         res.learnedOn = msg.created_at
@@ -366,7 +376,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       }
 
       // (3) AUTHORIZED. Now — and only now — content may be read, and only the window around the source.
-      res.evidenceState = 'verified'
+      res.evidenceState = 'source-readable'
       res.learnedOn = msg.created_at
       res.learnedHere = true
       res.conversationId = msg.conversation_id

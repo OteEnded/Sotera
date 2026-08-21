@@ -114,7 +114,7 @@ try {
   ok(REFLECTION_WRITE_TOOLS.every((t) => REFLECTION_TOOLS.includes(t)), 'T · the write tools are part of the offered set')
 
   // ── D · `blocked_by_disclosure` IS NARROW ────────────────────────────────────────────────────────
-  ok(isDisclosureRefusal('inspect_around', { ok: false, state: 'attested' }) === true,
+  ok(isDisclosureRefusal('inspect_around', { ok: false, state: 'existence-only' }) === true,
     'D · ⭐ a refused cross-room read IS a disclosure block — found but not authorized')
   ok(isDisclosureRefusal('inspect_around', { ok: false, state: 'unreachable' }) === false,
     'D · ⛔ "unreachable" is absence, not a boundary — it must not count')

@@ -182,12 +182,12 @@ export function readWrittenMemoryId(toolName, result) {
 /**
  * ⭐ DID A ROOM BOUNDARY REFUSE HER? PURE, and NARROW ON PURPOSE.
  *
- * Only `inspect_around` returning `state: 'attested'` counts — she asked to read across a boundary and was
+ * Only `inspect_around` returning `state: 'existence-only'` counts — she asked to read across a boundary and was
  * told the material exists and is not readable from here. ⛔ NOT `recall_own_history` returning
  * existence-only handles: that is the boundary working as designed, not a request being refused, and
  * counting it would make `blocked_by_disclosure` true for almost every cross-room search she ever runs.
  * ⛔ And not `unreachable`, which means the message could not be found at all — absence, not a boundary.
  */
 export function isDisclosureRefusal(toolName, result) {
-  return toolName === 'inspect_around' && result?.state === 'attested'
+  return toolName === 'inspect_around' && result?.state === 'existence-only'
 }
