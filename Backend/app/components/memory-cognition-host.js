@@ -34,7 +34,8 @@ import {
   SOURCE, BASIS, AVAILABILITY, RETENTION, WARRANT, findIllegalPromotions, corroborate,
 } from './memory-cognition-axes.js'
 import { findImplementationLeaks } from './memory-cognition-vocabulary.js'
-import { buildSelfHistory } from './self-history-host.js'
+import { buildConversationSearch } from './conversation-search.js'
+import { makeEmbedder } from './memory-embed-host.js'
 import { buildDisclosure } from './disclosure-host.js'
 import { buildMemoryToolService } from './memory-pipeline-host.js'
 import { log } from '../../lib/utility.js'
@@ -43,9 +44,9 @@ import { log } from '../../lib/utility.js'
 const LIMITS = Object.freeze({
   workingSet: 12,     // recent turns of this conversation
   semantic: 8,
-  ownHistory: 8,
+  episodeCandidates: 40, // discovery pool over HER OWN messages
+  episodes: 5,           // ⚠️ the expensive stage: each is an access resolution plus a windowed read
   windowRadius: 2,    // messages either side, when a cross-room read is authorized
-  crossRoomReads: 3,  // ⚠️ the expensive stage: each is an access resolution plus a windowed read
   items: 14,          // what reaches her
 })
 
@@ -155,109 +156,146 @@ export function buildMemoryCognition(fastify, {
     }))
   }
 
-  // ── POPULATION · OWN HISTORY / EPISODES, WITH ACCESS RESOLVED IN-LINE ─────────────────────────────
-  // ⭐⭐⭐ THE STAGE THAT FIXES THE MEASURED BUG. She used to PREDICT whether she could read across, and got
-  // it wrong three times in four. Here it is ATTEMPTED, once per candidate, before she says anything.
-  async function activateOwnHistory(cues) {
-    const selfHistory = buildSelfHistory(fastify, { userId, isRoot })
+  // ── POPULATION · EPISODIC HISTORY. ⭐⭐⭐ EPISODES, NOT A PILE OF SEARCH HITS ───────────────────────
+  //
+  // ⚠️⚠️ WHY THIS WAS REWRITTEN, AND THE MEASUREMENT THAT FORCED IT. v1 returned her matching ASSISTANT
+  // messages, because that is what `recall_own_history` means. Asked *"How's Hermes doing?"* it handed back
+  // twelve quotations of herself saying *"From this room, I don't have any direct memories about Hermes"* —
+  // a search log, not a relationship. The strongest signal in her own context would have been her own
+  // previous false claim.
+  //
+  // ⭐ Ote's correction: *"own-history shouldn't fundamentally mean my assistant messages. It should mean my
+  // episodic history. When the cue is relational — Hermes + me, what we talked about, how she's doing — the
+  // relevant episode includes the counterpart's side too… Don't make Sotera reconstruct an episode from a
+  // pile of search hits if the cognition layer can do that work underneath her."*
+  //
+  // ⇒ THE SHAPE IS: **episode → participants → relevant exchanges → provenance → availability → state.**
+  //
+  // ── ⛔ AND THE BOUNDARY IS NOT WIDENED TO GET THERE, WHICH IS THE WHOLE TRICK ─────────────────────
+  // DISCOVERY still runs over HER OWN messages only (`roles: ['assistant']`) — authorship is what authorizes
+  // finding them, and that rule is ratified. The counterpart's half is then obtained ONLY through
+  // `inspectAround`, the one authorized door, which decides per episode whether she may read it.
+  // ⇒ ⛔ Nothing here queries another person's messages directly. The layer gets both sides by ASKING, not
+  // by widening a predicate — so a non-root session still receives `own_only` and the counterpart stays
+  // withheld, exactly as change A specifies.
+  async function activateEpisodes(cues) {
     const disclosure = buildDisclosure(fastify, { userId, isRoot, username, conversationId, interactive })
     const query = [cues.persons.join(' '), cues.raw].filter(Boolean).join(' ').trim()
 
-    let res
+    // ── 1 · DISCOVER CANDIDATE EPISODES, from her own sentences ───────────────────────────────────
+    let raw
     try {
-      // ⚠️⚠️ ONE OBJECT, NOT (query, opts) — AND GETTING THIS WRONG KILLED THE ARM SILENTLY.
-      // `buildSelfHistory().search({ query, limit })` destructures its FIRST argument. Called as
-      // `search(query, { limit })` the string lands where the options object belongs, `query` is
-      // `undefined`, and it returns `{ ok: false, reason: 'a query is required' }` — so this whole
-      // population contributed nothing while the pipeline reported success. Measured: the underlying
-      // `conversation-search` returned 8 candidates for "Hermes" and `selfHistory` returned here=0,
-      // elsewhere=0.
-      // ⛔ `mirror-needs-a-mechanism` for the fourth time in this project: correct code, no live path.
-      res = await selfHistory.search({ query, limit: LIMITS.ownHistory })
+      const cs = buildConversationSearch(fastify, {
+        userId, acrossRooms: true, roles: ['assistant'], embed: makeEmbedder(fastify, { userId }),
+      })
+      // `denseMinSim: 0` matches `self-history`'s deliberate choice: a ranked nearest-match index, not a
+      // relevance filter. ⚠️ Which is exactly why the relevance floor downstream is load-bearing.
+      raw = await cs.search(query, { limit: LIMITS.episodeCandidates, excludeConversationId: null, denseMinSim: 0 })
     } catch (e) {
-      await log?.(`[cognition] history arm unavailable: ${e.message}`, import.meta.url)
+      await log?.(`[cognition] episode discovery unavailable: ${e.message}`, import.meta.url)
       return []
     }
-    // ⓘ It does return `ok: true` on success — and `ok === false` on both failure paths, which is what this
-    // tests. ⛔ Not `!res?.ok`: that would also discard a future success payload that stops carrying the flag.
-    if (res?.ok === false) {
-      await log?.(`[cognition] history arm refused: ${res.reason}`, import.meta.url)
-      return []
+    const evidence = Array.isArray(raw?.evidence) ? raw.evidence : []
+    if (!evidence.length) return []
+
+    // ── 2 · GROUP INTO EPISODES. One entry per conversation, keeping the best-matching centre. ─────
+    const episodes = new Map()
+    for (const e of evidence) {
+      const cid = e.conversation?.id
+      const mid = e.message?.id
+      if (!cid || !mid) continue
+      const at = e.timestamp ?? null
+      const prev = episodes.get(cid)
+      if (!prev) {
+        episodes.set(cid, { cid, centre: mid, matches: 1, firstAt: at, lastAt: at })
+      } else {
+        prev.matches += 1
+        if (at && (!prev.firstAt || at < prev.firstAt)) prev.firstAt = at
+        if (at && (!prev.lastAt || at > prev.lastAt)) { prev.lastAt = at; prev.centre = mid }
+      }
     }
 
+    // ── 3 · WHO WAS IN EACH ONE. ⛔ The room owner's NAME, never their messages. ───────────────────
+    const ids = [...episodes.keys()]
+    const participants = new Map()
+    try {
+      const convs = await db.txn_conversations.findAll({
+        where: { id: ids }, attributes: ['id', 'user_id'], raw: true,
+      })
+      const uids = [...new Set(convs.map((c) => c.user_id).filter(Boolean))]
+      const users = uids.length
+        ? await db.mst_users.findAll({ where: { id: uids }, attributes: ['id', 'username', 'display_name'], raw: true })
+        : []
+      const nameOf = new Map(users.map((u) => [u.id, u.display_name || u.username]))
+      for (const c of convs) participants.set(c.id, { roomUserId: c.user_id, who: nameOf.get(c.user_id) ?? null })
+    } catch (e) {
+      await log?.(`[cognition] participants unavailable: ${e.message}`, import.meta.url)
+    }
+
+    // ── 4 · RANK. ⭐⭐ AN EPISODE **WITH** THE PERSON OUTRANKS AN EPISODE **MENTIONING** THEM ───────
+    //
+    // ⭐ This is the fix for the contamination, and it is a ranking change rather than a weaker filter.
+    // *"How's Hermes doing?"* means the episodes she and Hermes were IN. Her conversations with Ote where
+    // she happened to say the word "Hermes" are about the TOPIC — legitimate, and second. The floor is
+    // unchanged; what changed is which relevant thing comes first.
+    const cueNames = cues.persons.map((p) => p.toLowerCase())
+    const scored = [...episodes.values()].map((ep) => {
+      const p = participants.get(ep.cid)
+      const withThem = Boolean(p?.who && cueNames.includes(String(p.who).toLowerCase()))
+      const recency = ep.lastAt ? Math.max(0, 1 - (Date.now() - new Date(ep.lastAt).getTime()) / (30 * 864e5)) : 0.2
+      return { ...ep, who: p?.who ?? null, roomUserId: p?.roomUserId ?? null, withThem, score: (withThem ? 100 : 0) + ep.matches + recency }
+    }).sort((a, b) => b.score - a.score)
+
+    // ── 5 · RESOLVE EACH EPISODE THROUGH THE ONE DOOR ─────────────────────────────────────────────
     const items = []
-    // ⭐ Her own messages in THIS room: readable, no resolution needed. Shape from `applyBoundaries`:
-    // `{ said, when, messageId }`.
-    for (const h of (res.here ?? [])) {
-      if (!h?.said) continue
+    for (const ep of scored.slice(0, LIMITS.episodes)) {
+      let opened = null
+      try {
+        opened = await disclosure.inspectAround({ messageId: ep.centre, radius: LIMITS.windowRadius })
+      } catch { opened = null }
+
+      // ⭐ THE THREE OUTCOMES, ALL OF THEM RESOLVED RATHER THAN PREDICTED:
+      //   verified   — she may read the exchange, both sides
+      //   own_only   — her half in full, the counterpart's withheld (change A)
+      //   anything else — she knows it happened and cannot see it
+      const state = opened?.ok === true ? opened.state : null
+      const window = Array.isArray(opened?.window) ? opened.window : []
+      const exchanges = window
+        .map((w) => ({
+          who: w.who === 'you' ? 'me' : (w.who ?? ep.who ?? 'them'),
+          said: w.said ? clip(w.said, 260) : null,
+          when: w.when ?? null,
+          withheld: !w.said,
+        }))
+        .filter((x) => x.said || x.withheld)
+
+      const anyReadable = exchanges.some((x) => x.said)
+      const bothSides = exchanges.some((x) => x.said && x.who !== 'me')
+
       items.push({
-        id: `own:${h.messageId ?? items.length}`,
-        subject: cues.persons[0] ?? null,
-        said: clip(h.said, 320),
-        who: 'me',
-        when: h.when ?? null,
+        id: `ep:${ep.cid}`,
+        kind: 'episode',
+        subject: ep.who ?? cues.persons[0] ?? null,
+        who: ep.who ?? 'someone',
+        // ⭐ WITH the person, or merely MENTIONING them. Rendered differently, because they are different
+        // facts about her life and collapsing them is what made the block read like a search log.
+        withThem: ep.withThem,
+        exchanges,
+        matches: ep.matches,
+        when: ep.lastAt,
+        // ⭐ An episode is a THING THAT HAPPENED; that it happened is attested by her own message being in
+        // it. ⛔ Its CONTENT is a separate question, which is what availability answers.
         source: SOURCE.ownUtterance,
         basis: BASIS.attestedBySource,
-        availability: AVAILABILITY.recalled,
+        availability: anyReadable ? AVAILABILITY.recalled : AVAILABILITY.knownUnreachable,
+        // ⭐ The warrant only when the door actually opened across a boundary; her own room needs none.
+        warrants: anyReadable && ep.roomUserId && ep.roomUserId !== userId ? [WARRANT.accessResolution] : [],
         retention: RETENTION.notRetained,
-        confidence: 0.9, supportedBy: 1, here: true,
+        confidence: 0.9,
+        supportedBy: ep.matches,
+        here: ep.roomUserId === userId,
+        partial: state === 'own_only' || (anyReadable && !bothSides),
       })
-    }
-
-    // ── ⭐ CROSS-ROOM: RESOLVE, DO NOT PREDICT ───────────────────────────────────────────────────────
-    // Shape from `applyBoundaries`: `{ counterpart, conversationHandle, matches, firstMatchAt, lastMatchAt }`
-    // — one entry per ROOM, never per message, so the volume of another room's material is never implied.
-    const others = (res.elsewhere ?? []).slice(0, LIMITS.crossRoomReads)
-    for (const o of others) {
-      const handle = o.conversationHandle ?? null
-      const counterpart = o.counterpart ?? null
-      let opened = null
-      if (handle) {
-        try {
-          opened = await disclosure.inspectAround({
-            conversationHandle: handle,
-            query: cues.persons[0] ?? cues.raw,
-            radius: LIMITS.windowRadius,
-          })
-        } catch { opened = null }
-      }
-      const readable = opened?.ok === true && opened?.state === 'verified' && Array.isArray(opened.window)
-      if (readable) {
-        for (const w of opened.window) {
-          if (!w?.said) continue // her own half arrives full; a withheld counterpart line has said:null
-          items.push({
-            id: `x:${handle}:${w.when ?? items.length}`,
-            subject: counterpart ?? cues.persons[0] ?? null,
-            said: clip(w.said, 320),
-            who: w.who === 'you' ? 'me' : (counterpart ?? 'them'),
-            when: w.when ?? null,
-            source: w.who === 'you' ? SOURCE.ownUtterance : SOURCE.counterpartUtterance,
-            basis: BASIS.attestedBySource,
-            availability: AVAILABILITY.recalled,
-            // ⭐ THE WARRANT. Availability reached the top because access was resolved and recorded — and
-            // the lattice check will demand exactly this. ⛔ It licenses availability and nothing else.
-            warrants: [WARRANT.accessResolution],
-            retention: RETENTION.notRetained,
-            confidence: 0.9, supportedBy: 1, here: false,
-          })
-        }
-      } else {
-        // ⭐ EXISTENCE, HONESTLY. She knows it happened; the content is not available. ⛔ And she is NOT
-        // handed a handle plus an invitation to ask — that is what produced *"Would you like me to request
-        // access to pull up the actual conversation logs?"*
-        items.push({
-          id: `x:${handle ?? items.length}:existence`,
-          subject: counterpart ?? cues.persons[0] ?? null,
-          said: null,
-          who: counterpart ?? 'someone',
-          when: o.lastMatchAt ?? o.firstMatchAt ?? null,
-          source: SOURCE.ownUtterance,
-          basis: BASIS.attestedBySource, // that the conversation HAPPENED is attested; its content is absent
-          availability: AVAILABILITY.knownUnreachable,
-          retention: RETENTION.notRetained,
-          confidence: 0.8, supportedBy: 1, here: false,
-        })
-      }
     }
     return items
   }
@@ -279,7 +317,12 @@ export function buildMemoryCognition(fastify, {
     const score = (it) => {
       const avail = it.availability === AVAILABILITY.recalled ? 2 : (it.availability === AVAILABILITY.knownUnreachable ? 1 : 0)
       const recency = it.when ? Math.max(0, 1 - (Date.now() - new Date(it.when).getTime()) / (30 * 864e5)) : 0.2
-      return avail * 2 + recency + (it.confidence ?? 0)
+      // ⭐⭐ AN EPISODE SHE WAS IN **WITH** THE PERSON IS THE ANSWER TO A QUESTION ABOUT THAT PERSON, and it
+      // must outrank her own passing mentions of them. Measured: without this the block was twelve
+      // quotations of her searching for Hermes and nothing Hermes ever said.
+      const relational = it.kind === 'episode' && it.withThem ? 20 : 0
+      const isEpisode = it.kind === 'episode' ? 4 : 0
+      return relational + isEpisode + avail * 2 + recency + (it.confidence ?? 0)
     }
     const ranked = [...byId.values()].sort((a, b) => score(b) - score(a))
     const kept = ranked.slice(0, LIMITS.items)
@@ -294,6 +337,8 @@ export function buildMemoryCognition(fastify, {
    * ⛔ NO population names, NO tool names, NO room names, NO ids, NO axis tokens. Human-facing provenance
    * only: *"I said this"*, *"they said this to me"*, *"I know we talked, I can't see it"*.
    */
+  const about0 = (cues) => (cues.persons.length ? cues.persons.join(' and ') : (cues.topics[0] ?? 'this'))
+
   function render({ cues, kept, dropped, searched }) {
     // ⭐⭐ TWO RENDERS: the real one, and a FRAME with every quotation replaced by a token.
     //
@@ -312,8 +357,27 @@ export function buildMemoryCognition(fastify, {
       lines.push(`${before}${quote ?? ''}${after}`)
       frame.push(`${before}${quote == null ? '' : QUOTE}${after}`)
     }
-    const said = kept.filter((i) => i.said)
-    const unreachable = kept.filter((i) => !i.said && i.availability === AVAILABILITY.knownUnreachable)
+    const episodes = kept.filter((i) => i.kind === 'episode')
+    const said = kept.filter((i) => i.kind !== 'episode' && i.said)
+    const unreachable = kept.filter((i) => i.kind !== 'episode' && !i.said && i.availability === AVAILABILITY.knownUnreachable)
+
+    // ⭐⭐ EPISODES FIRST, AND AS CONVERSATIONS RATHER THAN HITS. *"episode → participants → relevant
+    // exchanges."* An exchange she may not read is shown as a gap with a name on it — ⛔ never closed up,
+    // because her own lines with the replies removed read as a monologue and invite her to infer what was
+    // said to her.
+    for (const ep of episodes) {
+      const when = ep.when ? new Date(ep.when).toISOString().slice(0, 10) : 'at some point'
+      if (ep.availability !== AVAILABILITY.recalled) {
+        push(`- I talked with ${ep.who} on ${when}, and I can't see that conversation`, null)
+        continue
+      }
+      push(`- ${ep.withThem ? `With ${ep.who}` : `Talking about ${about0(cues)}`}, ${when}:`, null)
+      for (const x of ep.exchanges) {
+        if (x.said) push(`    ${x.who === 'me' ? 'me' : x.who}: `, x.said)
+        else push(`    ${x.who === 'me' ? 'me' : x.who}: (I can't see this part)`, null)
+      }
+      if (ep.partial) push('    (I can only see my own side of this one)', null)
+    }
 
     for (const i of said) {
       const when = i.when ? new Date(i.when).toISOString().slice(0, 10) : 'at some point'
@@ -330,7 +394,7 @@ export function buildMemoryCognition(fastify, {
       push(`- I know I talked with ${i.who}${when}, and I can't see that conversation`, null)
     }
 
-    const about = cues.persons.length ? cues.persons.join(' and ') : (cues.topics[0] ?? 'this')
+    const about = about0(cues)
     if (!lines.length) {
       // ⭐ THE ABSENCE, AS A RESULT RATHER THAN AN EXPLANATION. Ote: *"give her the result of the search,
       // not an architectural explanation… That's very different from 'I don't have X in this room.'"*
@@ -360,7 +424,7 @@ export function buildMemoryCognition(fastify, {
     const rawGroups = await Promise.all([
       plan.includes('working-set') ? activateWorkingSet(cues) : [],
       plan.includes('semantic') ? activateSemantic(cues) : [],
-      plan.includes('own-history') ? activateOwnHistory(cues) : [],
+      plan.includes('own-history') ? activateEpisodes(cues) : [],
     ])
 
     // ── ⭐⭐⭐ THE RELEVANCE FLOOR, AND IT GUARDS THIS LAYER'S OWN WORST FAILURE ─────────────────────
@@ -391,6 +455,13 @@ export function buildMemoryCognition(fastify, {
     // *"What I have about <name>"* — the same false *"I do"* through the other door.
     const terms = (cues.persons.length ? cues.persons : cues.topics).map((t) => t.toLowerCase())
     const mentionsCue = (it) => {
+      // ⭐ AN EPISODE IS RELEVANT IF THE PERSON WAS **IN** IT, or if something actually said in it mentions
+      // the cue. ⛔ Never by `it.subject`, which this file stamps — see below.
+      if (it.kind === 'episode') {
+        if (it.withThem) return true
+        const spoken = (it.exchanges ?? []).map((x) => x.said ?? '').join(' ').toLowerCase()
+        return terms.some((t) => t.length >= 3 && (spoken.includes(t) || String(it.who ?? '').toLowerCase().includes(t)))
+      }
       const hay = `${it.said ?? ''} ${it.who ?? ''}`.toLowerCase()
       return terms.some((t) => t.length >= 3 && hay.includes(t))
     }

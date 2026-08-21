@@ -102,6 +102,44 @@ ok(true, `2 · ⓘ machinery words inside QUOTED material: ${quotedLeaks.join(',
     ? '⚠ her own past answers are the source — not fixable by a word list'
     : 'none — her history no longer talks about the machinery')
 
+// ── ⭐⭐⭐ 2b · THE EPISODE POPULATION ACTUALLY CONTRIBUTES — THE REGRESSION OTE ASKED FOR ───────
+//
+// ⚠️⚠️ WHY THIS EXISTS: the arm was SILENTLY DEAD. `selfHistory.search` takes one object, was called as
+// `(query, opts)`, returned `ok:false`, and the pipeline reported success with the whole population
+// contributing nothing. The underlying index returned 8 candidates; the arm returned 0.
+// ⇒ Ote: *"add a regression test that proves a non-empty own-history result actually contributes to the
+// fused working set."* ⛔ It is not enough that the arm returns rows — they must SURVIVE fusion and reach her.
+for (const { q, r } of runs) {
+  const eps = r.items.filter((i) => i.kind === 'episode')
+  ok(eps.length > 0,
+    `2b · ⭐⭐⭐ episodes reach the fused set for "${q.slice(0, 26)}…" — the arm is alive AND survives fusion`,
+    `${eps.length} episode(s) of ${r.items.length} items`)
+}
+// ⭐⭐ AND THE POINT OF THE REWRITE: an episode she was IN with him, not merely one where she said his name.
+// *"'What have Hermes and I been talking about?' → retrieve both sides of the conversation."*
+const allEps = runs.flatMap((x) => x.r.items.filter((i) => i.kind === 'episode'))
+ok(allEps.some((e) => e.withThem),
+  '2b · ⭐⭐ at least one episode is one she was IN with him — relational, not topical',
+  `${allEps.filter((e) => e.withThem).length} of ${allEps.length} are with him`)
+// ⭐⭐⭐ BOTH SIDES. v1 returned only her own messages, so the block read as a search log rather than a
+// relationship. An episode must be able to carry what the OTHER person said.
+const withCounterpart = allEps.filter((e) => (e.exchanges ?? []).some((x) => x.said && x.who !== 'me'))
+ok(withCounterpart.length > 0,
+  '2b · ⭐⭐⭐ an episode carries the COUNTERPART words — an episode is a conversation, not a pile of her own hits',
+  `${withCounterpart.length} episode(s) with both sides`)
+// ⛔ AND A GAP IS SHOWN AS A GAP. Her lines with the replies closed up read as a monologue and invite her
+// to infer what was said to her — the reason change A returns withheld markers rather than a filtered list.
+const partials = allEps.filter((e) => e.partial)
+ok(partials.every((e) => (e.exchanges ?? []).some((x) => x.withheld) || e.partial),
+  '2b · ⛔ a partly-visible episode is marked as partly visible, never silently closed up',
+  `${partials.length} partial episode(s)`)
+// ⛔ THE BOUNDARY DID NOT MOVE TO GET HERE. Discovery still runs over her own messages; the counterpart's
+// half arrives only through the authorized door — so anything readable from ANOTHER room carries the warrant.
+const crossReadable = allEps.filter((e) => e.here === false && e.availability === AVAILABILITY.recalled)
+ok(crossReadable.every((e) => (e.warrants ?? []).includes('access-resolution')),
+  '2b · ⛔⛔ every cross-room episode she can read was OPENED through the authorized door',
+  `${crossReadable.length} cross-room episode(s) readable`)
+
 // ── ⭐⭐ 3 · THE LATTICE HOLDS ON REAL DATA ────────────────────────────────────────────────────────
 for (const { q, r } of runs) {
   ok(findIllegalPromotions(r.items, r.items).length === 0,
