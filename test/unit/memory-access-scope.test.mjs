@@ -86,8 +86,11 @@ test('⛔⛔ no cognition-layer file reads the capability or the column', () => 
     'memory-cognition-host.js', 'memory-cognition-cues.js', 'memory-cognition-axes.js',
     'memory-cognition-projection.js', 'memory-cognition-vocabulary.js',
   ]
+    // ⚠️ CODE ONLY — a cognition file QUOTES Ote's constraint in a comment, and penalising a file for
+    // citing the rule it obeys is backwards. The constraint is about CODE.
+    const code = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*/g, '$1')
   for (const f of files) {
-    const src = readFileSync(new URL(`../../Backend/app/components/${f}`, import.meta.url), 'utf8')
+    const src = code(readFileSync(new URL(`../../Backend/app/components/${f}`, import.meta.url), 'utf8'))
     assert.ok(!/access_sotera_memory/.test(src),
       `${f} references the capability — cognition must never ask whether she is allowed to remember`)
     assert.ok(!/memory_access_scope|memoryAccessScope/.test(src),

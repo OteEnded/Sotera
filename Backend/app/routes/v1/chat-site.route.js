@@ -20,6 +20,7 @@ import { captureIdentity } from '../../components/memory-identity-host.js'
 import { composeSystemContext, composeRuntimeTail, composeAdaptiveContext, rankRelevance } from '../../components/context-composer.js'
 import { buildMemoryCognition } from '../../components/memory-cognition-host.js'
 import { plainSpokenToolResult } from '../../components/memory-cognition-projection.js'
+import { applyUtteranceBoundary, findWithheldLeak } from '../../components/memory-utterance-boundary.js'
 import { classifySection } from '../../components/context-authority.js'
 import { contextBreakdown, rememberContextUsage, lastContextUsage } from '../../components/context-usage.js'
 import { resolveProfile, setDisplayName } from '../../components/profile-service.js'
@@ -1560,6 +1561,42 @@ export default async function chatSiteRoutes(fastify) {
               interactive: true,
             })
             const out = await cog.recollect({ text: lastUserText })
+            // ── ⭐⭐⭐ THE UTTERANCE BOUNDARY ─────────────────────────────────────────────────────────
+            //
+            // Cognition has just retrieved her whole memory, unfractured, without asking anyone's
+            // permission — because she owns it. THIS is where we ask the other question: may THIS ACCOUNT
+            // be told any of it?
+            //
+            // ⛔⛔ A HARD BOUNDARY. Protected content is removed BEFORE the block is rendered, so it never
+            // enters the prompt and cannot leak through a slip. ⛔ The alternative — hand her the content
+            // plus a sentence asking her not to repeat it — is a request, not a boundary.
+            //
+            // ⭐⭐ AND IT IS NOT AN ABSENCE. Ote: *"The response must never convert lack of authorization
+            // into lack of knowledge."* ⇒ when anything is withheld, a fixed sentence goes in saying that
+            // something exists and is not hers to share here. She can decline; she cannot claim not to know.
+            const boundary = applyUtteranceBoundary({
+              items: out.items ?? [],
+              user: request.user,
+              currentAccountId: request.user?.id ?? null,
+            })
+            if (out.activated && boundary.withheld.length) {
+              const rebuilt = cog.renderFor(boundary.sayable, {
+                cues: out.cues, dropped: out.dropped ?? 0, searched: out.searched, note: boundary.statement,
+              })
+              // ⚠️ THE BACKSTOP, NOT THE MECHANISM. The mechanism is the removal above; this catches a
+              // renderer or a future edit putting a fragment back. A hit costs the whole block rather than
+              // shipping a leak.
+              const leaked = findWithheldLeak(rebuilt.text, boundary.withheld)
+              if (leaked.length) {
+                fastify.log?.warn?.({ ids: leaked.map((l) => l.id) },
+                  '[utterance] ⛔ a withheld fragment survived into the rendered block — withholding the block')
+                out.activated = false
+                out.context = null
+              } else {
+                out.context = rebuilt.text
+                out.frame = rebuilt.frame
+              }
+            }
             // ⓘ OBSERVABILITY FOR THE FIRST LIVE RUNS. Off by default; when on, the exact injected block
             // and the stage-by-stage counts are appended to a file, so a failure can be attributed to
             // discovery / activation / access / fusion / typing / injection rather than guessed at.
@@ -1575,6 +1612,7 @@ export default async function chatSiteRoutes(fastify) {
                     withThem: out.items?.filter((i) => i.withThem).length ?? 0,
                     filtered: out.filtered ?? 0, dropped: out.dropped ?? 0,
                   },
+                  utterance: { entitled: boundary.entitled, withheld: boundary.withheld.length, sayable: boundary.sayable.length },
                   withheldBecause: out.leaks ? `leaks:${out.leaks.map((l) => l.word).join(',')}`
                     : (out.illegal ? 'illegal-promotion' : null),
                   items: (out.items ?? []).map((i) => ({

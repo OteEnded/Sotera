@@ -37,7 +37,7 @@ import {
 import { findImplementationLeaks } from './memory-cognition-vocabulary.js'
 // ⭐ THE OWNERSHIP RULE LIVES IN ONE PLACE. ⛔ This file must never restate it inline — two copies of an
 // ownership rule is how they stop agreeing, and this one decides whether authorization happens at all.
-import { requiresAuthorization } from './memory-ownership.js'
+import { requiresAuthorization, ownerOf, OWNER } from './memory-ownership.js'
 import { buildConversationSearch } from './conversation-search.js'
 import { makeEmbedder } from './memory-embed-host.js'
 import { buildDisclosure } from './disclosure-host.js'
@@ -118,6 +118,13 @@ export function buildMemoryCognition(fastify, {
         who: m.role === 'assistant' ? 'me' : 'them',
         when: m.created_at,
         source: m.role === 'assistant' ? SOURCE.ownUtterance : SOURCE.counterpartUtterance,
+        // ⭐ OWNERSHIP IS STAMPED HERE, ONCE, BY THE RULE — so no downstream stage recomputes it from an
+        // item's shape. ⛔ Ownership is not authorization: cognition is allowed to know whose a thing is, and
+        // must never know whether an account is entitled to hear it.
+        owner: ownerOf({ kind: 'message', role: m.role }),
+        // ⓘ PROVENANCE, for the utterance boundary only — whose conversation it came out of. The working
+        // set IS this conversation, so it is always this account's.
+        provenanceAccountId: userId,
         // ⭐ She can see it. That is what attestation means on this axis.
         basis: BASIS.attestedBySource,
         availability: AVAILABILITY.recalled,
@@ -147,6 +154,8 @@ export function buildMemoryCognition(fastify, {
       who: null,
       when: m.created_at ?? m.createdAt ?? null,
       source: SOURCE.storedMemory,
+      owner: ownerOf({ kind: 'memory', author: m.author }),
+      provenanceAccountId: m.user_id ?? m.userId ?? userId,
       // ⭐⭐ THE AXIS THAT MATTERS. A stored memory is not automatically attested — it is a claim someone
       // recorded. It becomes `attested-by-source` only if its own source is readable, and that is a
       // separate lookup this v1 does not do. ⇒ `told` for account-authored (someone said it),
@@ -373,9 +382,13 @@ export function buildMemoryCognition(fastify, {
         here: ep.roomUserId === userId,
         // ⭐ Her side without his is PARTIAL, and saying so is what keeps the gap honest.
         partial: anyMine && !bothSides,
+        // ⭐ STAMPED BY THE RULE. She participated, so the episode is hers to recall — in any room.
+        owner: ownerOf({ kind: 'episode', participated: anyMine }),
+        // ⓘ WHOSE CONVERSATION IT CAME OUT OF. Used ONLY by the utterance boundary, and ⛔ never to decide
+        // whose memory it is: that answer is `owner` above and does not depend on where it happened.
+        provenanceAccountId: ep.roomUserId ?? null,
         // ⚠️ THE DEFERRED HAZARD, CARRIED ON THE ITEM. Her own lines may quote or paraphrase him, so an
-        // episode marked `soteraOwned` can still convey his words. ⛔ Declared, not mitigated — RFC §3A.4b.
-        soteraOwned: true,
+        // episode owned by her can still convey his words. ⛔ Declared, not mitigated — RFC §3A.4b.
         mayCarryCounterpartContent: true,
       })
     }
@@ -586,5 +599,26 @@ export function buildMemoryCognition(fastify, {
     return { activated: true, cues, plan, context, frame, items: kept, dropped, searched, filtered }
   }
 
-  return { recollect }
+  /**
+   * ⭐⭐ RE-RENDER A FILTERED SET. Exposed so the UTTERANCE BOUNDARY can remove what an account may not be
+   * told and the block can be rebuilt from what is left.
+   *
+   * ⛔ THIS IS HOW COGNITION STAYS BLIND. It does not know why items were removed, who removed them, or that
+   * a capability exists — it is handed a list and a sentence to append. The alternative (passing an
+   * `entitled` flag into `recollect`) would put account authorization inside cognition, which Ote ruled out:
+   * *"Cognition must remain completely unaware of access_sotera_memory and must continue treating Sotera's
+   * memory as hers."*
+   */
+  function renderFor(items = [], { cues, dropped = 0, searched = 'everything I currently have available', note = null } = {}) {
+    const out = render({ cues, kept: items, dropped, searched })
+    // ⚠️ The note is appended to BOTH, and it must be — the frame is what the vocabulary guard scans, and a
+    // sentence exempted from that scan is a hole in it.
+    return note
+      ? { text: `${out.text}
+${note}`, frame: `${out.frame}
+${note}` }
+      : out
+  }
+
+  return { recollect, renderFor }
 }

@@ -107,8 +107,11 @@ ok(occurrences >= 2,
 // memory."* ⇒ the cognition layer must not reference the capability or the column at all.
 const cognitionFiles = ['memory-cognition-host.js', 'memory-cognition-cues.js', 'memory-cognition-axes.js']
 for (const f of cognitionFiles) {
-  const src = await (await import('node:fs/promises')).readFile(
+  const raw = await (await import('node:fs/promises')).readFile(
     new URL(`../../Backend/app/components/${f}`, import.meta.url), 'utf8')
+  // ⚠️ CODE ONLY — a cognition file quotes Ote's constraint in a comment; citing the rule it obeys must
+  // not be a failure.
+  const src = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*/g, '$1')
   ok(!/access_sotera_memory|memory_access_scope|memoryAccessScope/.test(src),
     `5 · ⛔⛔ ${f} never asks whether she is allowed to remember`)
 }
