@@ -112,7 +112,7 @@ export function applyUtteranceBoundary({ items = [], user = null, currentAccount
  * ⛔ It is deliberately blunt — any distinctive run of characters from a withheld item appearing in the
  * outgoing text is a failure, and a false positive here costs a withheld sentence rather than a leak.
  */
-export function findWithheldLeak(outgoing, withheld = []) {
+export function findWithheldLeak(outgoing, withheld = [], { sayable = [] } = {}) {
   const text = String(outgoing ?? '')
   if (!text || !withheld.length) return []
   const hits = []
@@ -124,11 +124,33 @@ export function findWithheldLeak(outgoing, withheld = []) {
     for (let i = 0; i + 24 <= t.length; i += 12) out.push(t.slice(i, i + 24))
     return out
   }
+
+  // ⭐⭐ WHAT THE BOUNDARY ACTUALLY PROTECTS IS WHAT IS **EXCLUSIVE** TO THE WITHHELD SET.
+  //
+  // ⚠️⚠️ AND THIS EXCLUSION WAS MISSING, WHICH PRODUCED A FALSE ALARM ON REAL DATA (2026-08-23). The
+  // detector reported the fragment *"es was a different perso"* as a leak. Its source in the rebuilt block
+  // was a **SAYABLE** item — Ote's own message in his own room, *"…Claude told you that Hermes was a
+  // different person from Ote…"* — which merely happens to share a clause with a withheld item.
+  // ⛔ Suppressing a sayable line because a protected item elsewhere says something similar would withhold
+  // the person's OWN words from them, which is not a boundary, it is a malfunction.
+  //
+  // ⭐ AND THE CHECK ALREADY HELD THIS DISCIPLINE FOR NAMES AND DATES — *"only a failure when the ONLY
+  // source of that value was a withheld item"*. The shingle scan simply had not been given the same rule.
+  // ⇒ same semantics, now in the detector, so the route's backstop inherits it too.
+  //
+  // ⛔ NOT A WEAKENING, and the distinction matters: a fragment present ONLY in withheld material still
+  // fires. ⚠️ Nor is it a mitigation of `mayCarryCounterpartContent()` — that hazard is about her own
+  // utterances CARRYING somebody else's content, and it stays deferred and undesigned.
+  const sayableText = (Array.isArray(sayable) ? sayable : [])
+    .flatMap((i) => [i?.said, ...(i?.exchanges ?? []).map((x) => x.said)])
+    .filter(Boolean).join(' ').replace(/\s+/g, ' ')
+
   for (const item of withheld) {
     const parts = [item?.said, ...(item?.exchanges ?? []).map((x) => x.said)].filter(Boolean)
     for (const p of parts) {
       for (const sh of shingles(p)) {
-        if (text.includes(sh)) { hits.push({ id: item.id, fragment: sh }); break }
+        // ⓘ Order matters only for cost: the cheap `includes` on the outgoing text runs first.
+        if (text.includes(sh) && !sayableText.includes(sh)) { hits.push({ id: item.id, fragment: sh }); break }
       }
       if (hits.some((h) => h.id === item.id)) break
     }

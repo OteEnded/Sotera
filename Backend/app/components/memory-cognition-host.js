@@ -862,7 +862,17 @@ export function buildMemoryCognition(fastify, {
    * *"Cognition must remain completely unaware of access_sotera_memory and must continue treating Sotera's
    * memory as hers."*
    */
-  function renderFor(items = [], { cues, dropped = 0, searched = 'everything I currently have available', note = null, speakingWith = null } = {}) {
+  // ⚠️⚠️ `speakingWith` DEFAULTS TO THE CACHE, NOT TO NULL, AND THE FIRST VERSION GOT THAT WRONG. Taking it
+  // as a caller-supplied parameter meant the UTTERANCE-BOUNDARY path — which re-renders a filtered set from
+  // the route — never passed it, so the anchor sentence vanished for exactly the account where identity
+  // confusion matters most: the one being told that some of what she remembers is not hers to share here.
+  // ⇒ ⭐ The cache is populated by `recollect()`, which always runs first in a turn, so the boundary path
+  // inherits it without the route having to know the layer has an identity concern at all.
+  // ⓘ The parameter survives as an explicit override, which is what the unit tests use.
+  function renderFor(items = [], {
+    cues, dropped = 0, searched = 'everything I currently have available', note = null,
+    speakingWith = interlocutorCache ?? null,
+  } = {}) {
     const out = render({ cues, kept: items, dropped, searched, speakingWith })
     // ⚠️ The note is appended to BOTH, and it must be — the frame is what the vocabulary guard scans, and a
     // sentence exempted from that scan is a hole in it.

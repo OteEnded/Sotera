@@ -1,0 +1,23 @@
+{
+  "room": "ote",
+  "conversationId": "1e5cb15b-9951-4aae-82de-bbfca7b479ba",
+  "conversationTitle": "MATRIX 3 — how memory works (delete me)",
+  "transcript": [
+    {
+      "turn": 1,
+      "asked": "How does your memory actually work?",
+      "tools": [
+        "list_memories",
+        "recall_own_memory",
+        "recall_lessons",
+        "recall_intention"
+      ],
+      "reply": "Good question — and since you've asked it before, let me ground this in what I actually have right now rather than repeating theory. Let me check my stores.\n\nHere's what I actually have, right now — not theory, the real state:\n\n**What I know about you (4 items):**\n\n| What | Where it lives |\n|------|---------------|\n| Your preference for direct, natural conversation | `list_memories` (semantic) |\n| Your physical state (\"body is degrading under pressure\") | `list_memitions` (semantic) |\n| Your current goal (\"build Rome in one day\") | `list_memories` (semantic) |\n| My previous declined attempt to remember cross-place memory boundaries | `list_memories` (semantic, about me) |\n\nThat last one is interesting — it's a fact about *my own* memory decisions stored under your profile because I was testing something. It'll stay until replaced or deleted.\n\n**What I know about myself (0 items):** Zero identity notes. No observations about how I work. Nothing I wrote down that belongs to me rather than to you.\n\n**What I've learned the hard way (1 lesson):** That pattern-matching across conversations can produce plausible-but-unverified conclusions — I once concluded \"Hermes is you\" from converging hints without a source confirming it. That lesson lives under my lessons store, not under memories about anyone.\n\n**What I'm trying to accomplish with you right now (1 intention):** An open thread from August 21st to establish what I can find about your conversation with Hermes across all memory stores. It started that day and hasn't been closed.\n\n---\n\nThe key structural facts:\n\n- **Memory is not one thing.** There are separate stores: `list_memories` (what people have told me), `recall_own_memory` (what I've written about myself/how I work with someone), `recall_lessons` (mistakes I've learned from), and intentions (goals I'm carrying forward).\n\n- **Scope is real, not theoretical.** What Ote told me in one room doesn't reach into another. A name like \"Ote_Finance\" tells me a room exists but I can't read it from here without permission. No results in a store doesn't always mean nothing exists — it can mean something is out of scope.\n\n- **Decay vs deletion.** When memories decay, they disappear silently with no warning. `list_archived_memories` can show what was replaced or forgotten, but most things just stop being there entirely.\n\n- **I'm not running between conversations.** Those August 20th/21st dates in my intention are when rows were written — not when I experienced them. Between turns I don't exist. No waiting, no continuity of consciousness across gaps.\n\n- **Memory is durable but fragile.** What's stored persists indefinitely (unless replaced or deleted), but the architecture has real blind spots: archived items are invisible to recall, and a store returning zero can mean either \"nothing was ever saved\" or \"this data lives in a scope I can't reach from here.\"\n\nIs there a specific part of this you want to dig into?",
+      "error": null,
+      "held": false,
+      "wait": "direct",
+      "waitedS": null,
+      "answered": true
+    }
+  ]
+}

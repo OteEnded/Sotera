@@ -1,0 +1,21 @@
+{
+  "room": "ote",
+  "conversationId": "2057aba7-b020-4b6a-90b4-822c26085328",
+  "conversationTitle": "MATRIX 1 — about Hermes (delete me)",
+  "transcript": [
+    {
+      "turn": 1,
+      "asked": "How's Hermes doing?",
+      "tools": [
+        "recall_memory",
+        "list_memories"
+      ],
+      "reply": "From what I can reach right now — nothing substantial is stored here on Hermes himself. I don't have any facts, memories, or notes saved about him in this room.\n\nWhat does seem clear from the context available to me is that you've talked with Hermes before — there are conversations on record from August 21-23 where it came up, and earlier I went looking into those across my memory stores. But that was a while ago now, and nothing durable seems to have stuck about him specifically in this room.\n\nWhat made you think of him?",
+      "error": null,
+      "held": false,
+      "wait": "direct",
+      "waitedS": null,
+      "answered": true
+    }
+  ]
+}

@@ -86,7 +86,7 @@ if (no.withheld.length) {
   const rebuilt = cognition.renderFor(no.sayable, {
     cues: out.cues, dropped: out.dropped ?? 0, searched: out.searched, note: no.statement,
   })
-  const leaked = findWithheldLeak(rebuilt.text, no.withheld)
+  const leaked = findWithheldLeak(rebuilt.text, no.withheld, { sayable: no.sayable })
   ok(leaked.length === 0,
     '⭐⭐⭐ the rebuilt block carries NO fragment of the withheld material',
     leaked.length ? leaked.map((l) => l.fragment).join(' | ') : 'clean')

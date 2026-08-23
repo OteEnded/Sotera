@@ -1586,7 +1586,7 @@ export default async function chatSiteRoutes(fastify) {
               // ⚠️ THE BACKSTOP, NOT THE MECHANISM. The mechanism is the removal above; this catches a
               // renderer or a future edit putting a fragment back. A hit costs the whole block rather than
               // shipping a leak.
-              const leaked = findWithheldLeak(rebuilt.text, boundary.withheld)
+              const leaked = findWithheldLeak(rebuilt.text, boundary.withheld, { sayable: boundary.sayable })
               if (leaked.length) {
                 fastify.log?.warn?.({ ids: leaked.map((l) => l.id) },
                   '[utterance] ⛔ a withheld fragment survived into the rendered block — withholding the block')

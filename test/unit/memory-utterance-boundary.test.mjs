@@ -151,6 +151,17 @@ test('⛔ the WITHHELD_STATEMENT itself never trips the backstop', () => {
 
 test('the backstop is inert when nothing was withheld', () => {
   assert.deepEqual(findWithheldLeak('anything at all', []), [])
+  // ⭐⭐ A FRAGMENT THAT A **SAYABLE** ITEM ALSO CARRIES IS NOT A LEAK, and this fired as a false alarm on
+  // real data: *"es was a different perso"* was reported as leaked when its source in the block was Ote's
+  // OWN message in his OWN room. ⛔ Suppressing a person's own words because a protected item elsewhere
+  // says something similar is not a boundary, it is a malfunction.
+  const shared = 'Hermes was a different person from Ote, apparently'
+  const hidden = [{ id: 'w', said: shared }]
+  assert.ok(findWithheldLeak(`I recall: ${shared}`, hidden).length > 0, 'exclusive to withheld ⇒ still a leak')
+  assert.deepEqual(findWithheldLeak(`I recall: ${shared}`, hidden, { sayable: [{ id: 's', said: shared }] }), [],
+    'also present in sayable material ⇒ the boundary never protected it')
+  // ⛔ AND IT IS NOT A BLANKET WEAKENING: an unrelated sayable item does not excuse anything.
+  assert.ok(findWithheldLeak(`I recall: ${shared}`, hidden, { sayable: [{ id: 's', said: 'we talked about basil' }] }).length > 0)
   assert.deepEqual(findWithheldLeak('', [{ id: 'x', said: 'y' }]), [])
 })
 
@@ -170,7 +181,14 @@ test('⛔⛔ no cognition-layer file consults the capability — the boundary is
 test('⚠️ and the deferred hazard stays deferred — this step did not quietly mitigate it', () => {
   // Ote: "keep the deferred mayCarryCounterpartContent() issue explicitly deferred — don't quietly turn
   // that into a half-baked mitigation while doing this step."
+  // ⚠️⚠️ COMMENTS STRIPPED, AND THIS IS THE **FOURTH** TIME THE SAME LESSON HAS BEEN PAID FOR IN THIS
+  // PROJECT. The unstripped version failed the moment the module gained a comment saying *"nor is this a
+  // mitigation of mayCarryCounterpartContent() — that hazard stays deferred"* — i.e. it punished the file
+  // for stating, in writing, the very thing the test exists to enforce.
+  // ⛔ A scan that forbids NAMING a hazard destroys the most useful comments in the file and teaches the
+  // next person to leave the constraint undocumented. The constraint is about CODE.
   const src = readFileSync(new URL('../../Backend/app/components/memory-utterance-boundary.js', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*/g, '$1')
   assert.ok(!/mayCarryCounterpartContent/.test(src),
     'the utterance boundary must not start acting on the paraphrase hazard — that is a separate, undesigned problem')
 })
