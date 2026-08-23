@@ -81,3 +81,24 @@ test('⛔⛔ the D2 top-hit term ships OFF, and the baseline arm is unaffected b
   // future edit cannot make the baseline arm depend on it.
   assert.match(CODE_ALL, /bestRank: rank/, 'bestRank must still be recorded while grouping')
 })
+
+// ── ⭐⭐ D4 CANDIDATE · `episodeCentreCueMatch` MUST DEFAULT OFF, AND MUST FALL BACK ────────────────
+//
+// ⚠️ Measured prevalence BEFORE it was built: the defect applies to **2 of 82** holder conversations across
+// the ten-case set — 2%. Measured effect: **0 alone, +1 on top of top-hit** (the notebook case), because a
+// centre fix can only pay off on a conversation that ranking has already promoted into the top-5.
+// ⛔ Two flags, never bundled — Ote: *"Treat it as its own measured change."*
+test('⛔⛔ the D4 cue-centre term ships OFF, and it FALLS BACK rather than filtering', () => {
+  assert.match(SRC, /episodeCentreCueMatch = false,/, 'the D4 candidate must default to false')
+  // ⭐⭐ THE LOAD-BEARING ASSERTION. `?? ep.centre` is what keeps this a CENTRE choice rather than a second
+  // relevance floor upstream of the real one: a conversation with no cue-matching candidate keeps its
+  // best-ranked centre and stays in the running.
+  assert.match(CODE_ALL, /const centreId = episodeCentreCueMatch \? \(ep\.cueCentre \?\? ep\.centre\) : ep\.centre/,
+    'the cue centre must FALL BACK to the best-ranked centre — without the fallback this drops conversations')
+  // ⛔ And it must be the two consumers, not one: the own-half read AND the counterpart's disclosure call.
+  assert.equal((CODE_ALL.match(/centreId/g) ?? []).length, 3,
+    'centreId must be resolved once and used by BOTH the own-half window and inspectAround')
+  // ⓘ The two candidate flags are independent, so neither can be credited with the other's effect.
+  assert.ok(!/episodeTopHit && episodeCentreCueMatch|episodeCentreCueMatch && episodeTopHit/.test(CODE_ALL),
+    'the two D2/D4 flags must stay independent — bundling them makes the 2x2 impossible')
+})

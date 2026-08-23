@@ -100,6 +100,14 @@ export function buildMemoryCognition(fastify, {
   // experiment whose arms require editing a file is an experiment that can be mislabelled — which is
   // exactly what happened in the P5 round.
   episodeTopHit = false,
+  // ⭐⭐ D4 CANDIDATE · `episodeCentreCueMatch` · ⛔ DEFAULT OFF. Centre the window on a conversation's best
+  // CUE-MATCHING candidate rather than blindly on its best-RANKED one.
+  // ⚠️⚠️ NAME NOTE: `D3` is already taken (the floor's `terms.some` disjunction). This is the "third defect"
+  // Ote named after the D2 run, so it is **D4** to keep the two from being conflated.
+  // ⭐ MEASURED PREVALENCE BEFORE IT WAS BUILT: it applies to **2 of 82** holder conversations across the
+  // ten-case set — **2%** — with rank gaps of 4 and 12. ⇒ real, and RARE. It is built as an arm precisely
+  // because a 2% defect has to earn its coupling.
+  episodeCentreCueMatch = false,
 } = {}) {
   const db = fastify?.db
 
@@ -342,6 +350,15 @@ export function buildMemoryCognition(fastify, {
 
     // ── 2 · GROUP INTO EPISODES. One entry per conversation, keeping the best-matching centre. ─────
     const episodes = new Map()
+    // ⭐ D4 · the floor's own predicate, applied to the candidate EXCERPT so the centre can prefer a message
+    // that actually mentions the cue. ⚠️ The excerpt is the first 300 characters, so this is a PROXY for what
+    // the floor will later test against the rebuilt window — a match here is good evidence, a miss is not
+    // proof. ⛔ Persons when any resolved, else topics: identical to `mentionsCue`, deliberately.
+    const centreTerms = (cues.persons.length ? cues.persons : cues.topics).map((t) => t.toLowerCase())
+    const cueMatches = (e) => {
+      const t = String(e?.excerpt ?? '').toLowerCase()
+      return centreTerms.some((w) => w.length >= 3 && t.includes(w))
+    }
     let rank = -1
     for (const e of evidence) {
       rank += 1   // ⓘ position in the RANKED list; `evidence` arrives best-first
@@ -349,14 +366,21 @@ export function buildMemoryCognition(fastify, {
       const mid = e.message?.id
       if (!cid || !mid) continue
       const at = e.timestamp ?? null
+      const hit = cueMatches(e)
       const prev = episodes.get(cid)
       if (!prev) {
         // ⓘ `bestRank` is the position of this conversation's best candidate in the RANKED evidence list, so
         // 0 means "this conversation holds the retriever's top hit". ⛔ Recorded unconditionally and used only
         // when `episodeTopHit` is on, so the baseline arm is byte-identical in behaviour to before.
-        episodes.set(cid, { cid, centre: mid, matches: 1, firstAt: at, lastAt: at, bestRank: rank })
+        // ⓘ `cueCentre` is the best-ranked candidate that MENTIONS the cue, or null when none does. Recorded
+        // unconditionally and consumed only when `episodeCentreCueMatch` is on, so the baseline arm is
+        // behaviourally identical.
+        episodes.set(cid, { cid, centre: mid, cueCentre: hit ? mid : null, matches: 1, firstAt: at, lastAt: at, bestRank: rank })
       } else {
         prev.matches += 1
+        // ⭐ D4 · first come, best ranked: the evidence arrives ordered, so the FIRST cue-matching candidate
+        // in a conversation is its best-ranked one. ⛔ Never overwritten afterwards.
+        if (!prev.cueCentre && hit) prev.cueCentre = mid
         if (at && (!prev.firstAt || at < prev.firstAt)) prev.firstAt = at
         // ⭐⭐⭐ D1 (2026-08-23) · THE CENTRE STAYS THE BEST-MATCHING MESSAGE. `prev.centre = mid` used to
         // ride along with `lastAt`, so the centre became whichever candidate was most RECENT — and the
@@ -454,11 +478,16 @@ export function buildMemoryCognition(fastify, {
     const items = []
     for (const ep of scored.slice(0, LIMITS.episodes)) {
       // ── 5a · HER OWN LINES · ownership, no authorization, no grant ────────────────────────────────
+      // ⭐⭐ D4 · WHICH MESSAGE THE WINDOW IS BUILT AROUND. ⛔ FALLS BACK, ALWAYS: a conversation with no
+      // cue-matching candidate keeps its best-ranked centre and stays in the running. This changes which
+      // MESSAGE a window centres on; it must never change which CONVERSATIONS survive, or it becomes a
+      // second relevance floor upstream of the real one — which Ote has ruled out repeatedly.
+      const centreId = episodeCentreCueMatch ? (ep.cueCentre ?? ep.centre) : ep.centre
       // A plain windowed read of HER messages around the centre. ⛔ No disclosure call, in any room.
       let mine = []
       try {
         const centre = await db.txn_messages.findOne({
-          where: { id: ep.centre }, attributes: ['rolling_id'], raw: true,
+          where: { id: centreId }, attributes: ['rolling_id'], raw: true,
         })
         if (centre) {
           mine = await db.txn_messages.findAll({
@@ -485,7 +514,7 @@ export function buildMemoryCognition(fastify, {
       let refused = false
       if (theirHalfNeedsADoor && ep.roomUserId && ep.roomUserId !== userId) {
         try {
-          const opened = await disclosure.inspectAround({ messageId: ep.centre, radius: LIMITS.windowRadius })
+          const opened = await disclosure.inspectAround({ messageId: centreId, radius: LIMITS.windowRadius })
           const ok = opened?.ok === true && opened.state === 'verified'
           if (ok) {
             theirs = (Array.isArray(opened.window) ? opened.window : [])

@@ -83,10 +83,15 @@ if (opt('compare')) {
   console.log(`\n${'═'.repeat(104)}`)
   console.log(`  D1 · ${a}  →  ${b}      ⛔ MECHANISM ONLY — what the floor is shown, not what she says`)
   console.log(`${'═'.repeat(104)}`)
-  const arm = (x) => `D1 ${x.centreAssignmentPresent ? 'pre-fix' : 'fixed'} · topHit ${x.episodeTopHit ? 'ON' : 'off'}`
+  const arm = (x) => `D1 ${x.centreAssignmentPresent ? 'pre-fix' : 'fixed'} · topHit `
+    + `${x.episodeTopHit ? 'ON ' : 'off'} · cueCentre ${x.episodeCentreCueMatch ? 'ON' : 'off'}`
   console.log(`  arms: ${arm(A)}   →   ${arm(B)}`)
-  if (A.centreAssignmentPresent !== B.centreAssignmentPresent && A.episodeTopHit !== B.episodeTopHit) {
-    console.log('  ⛔⛔ TWO THINGS DIFFER BETWEEN THESE ARMS — the comparison is unattributable. Re-run.')
+  // ⛔ REFUSE TO LET TWO THINGS MOVE AT ONCE. A comparison across two changed flags cannot attribute either.
+  const diffs = ['centreAssignmentPresent', 'episodeTopHit', 'episodeCentreCueMatch']
+    .filter((k) => Boolean(A[k]) !== Boolean(B[k]))
+  if (diffs.length > 1) {
+    console.log(`  ⛔⛔ ${diffs.length} THINGS DIFFER BETWEEN THESE ARMS (${diffs.join(', ')}) — the comparison`)
+    console.log('     is unattributable. Compare one flag at a time.')
   }
   console.log(`\n  ${'case'.padEnd(26)}${'kept'.padEnd(12)}${'ON-SUBJECT'.padEnd(14)}${'filtered'.padEnd(12)}verdict`)
   let gained = 0; let lost = 0
@@ -114,6 +119,11 @@ const label = opt('label')
 // ⭐⭐ `--topHit` runs the D2 CANDIDATE ARM. Both arms are options on the host, so ONE process can measure
 // both deterministically — no restart, no source edit between runs, and no way to mislabel which arm ran.
 const topHit = argv.includes('--topHit')
+// ⭐⭐ `--cueCentre` runs the D4 CANDIDATE ARM. ⛔ A SEPARATE FLAG, not bundled with topHit — Ote: *"Don't
+// bundle this with top-hit. Treat it as its own measured change."* ⓘ Keeping them separate is also what makes
+// the 2×2 possible, which is how the INTERACTION gets measured without either being credited with the other's
+// effect: D4 can only pay off on a conversation that ranking has already promoted into the top-5.
+const cueCentre = argv.includes('--cueCentre')
 if (!label) { console.error('✖ --label <name> (or --compare <a> <b>)'); process.exit(1) }
 
 const db = await initDB(); setDB(db); await initSettings(db)
@@ -135,17 +145,17 @@ console.log(`\n${'═'.repeat(104)}`)
 console.log(`  D1 MEASUREMENT · ${label}`)
 console.log(`${'═'.repeat(104)}`)
 console.log(`  D1 (\`prev.centre = mid\`): ${centreAssignmentPresent ? 'PRESENT — pre-fix' : 'REMOVED — fixed'}`
-  + `   ·   D2 episodeTopHit: ${topHit ? 'ON (candidate arm)' : 'off (production)'}`)
+  + `   ·   D2 topHit: ${topHit ? 'ON' : 'off'}   ·   D4 cueCentre: ${cueCentre ? 'ON' : 'off'}`)
 console.log(`  corpus: ${corpus.harness} harness conversation(s) of ${corpus.total}`
   + `${corpus.harness ? ' ⚠️ CONTAMINATED' : ' ✓ clean'}`)
 console.log(`\n  ${'case'.padEnd(26)}${'kept'.padEnd(6)}${'onSubj'.padEnd(8)}${'filtered'.padEnd(10)}${'eps'.padEnd(5)}${'withThem'.padEnd(10)}subject named`)
 
-const out = { label, at: new Date().toISOString(), centreAssignmentPresent, episodeTopHit: topHit, corpus, cases: [] }
+const out = { label, at: new Date().toISOString(), centreAssignmentPresent, episodeTopHit: topHit, episodeCentreCueMatch: cueCentre, corpus, cases: [] }
 for (const c of CASES) {
   // ⓘ A FRESH HOST PER CASE, so nothing accumulates between them.
   const cog = buildMemoryCognition(fastify, {
     userId: me.id, isRoot: false, username: me.username, conversationId: null, interactive: false,
-    episodeTopHit: topHit,
+    episodeTopHit: topHit, episodeCentreCueMatch: cueCentre,
   })
   let row = { key: c.key, ask: c.ask, why: c.why, expectNothing: c.expectNothing === true,
     mustMention: String(c.mustMention), activated: false, kept: 0, onSubject: 0, filtered: 0, episodes: 0,
