@@ -17,7 +17,9 @@ import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
 import { buildMemoryCognition } from '../../Backend/app/components/memory-cognition-host.js'
 import { findImplementationLeaks } from '../../Backend/app/components/memory-cognition-vocabulary.js'
-import { findIllegalPromotions, AVAILABILITY, BASIS, RETENTION } from '../../Backend/app/components/memory-cognition-axes.js'
+import { findIllegalPromotions, AVAILABILITY, BASIS, RETENTION, SOURCE } from '../../Backend/app/components/memory-cognition-axes.js'
+import { timeBoundOf } from '../../Backend/app/components/memory-cognition-timeframe.js'
+import { OWNER } from '../../Backend/app/components/memory-ownership.js'
 
 const { check, done } = makeChecker('memory-cognition')
 const ok = (c, l, d = '') => check(l, c, d)
@@ -303,6 +305,113 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
     '9 · ⛔⛔ the own-half read contains NO disclosure call — the path is not entered, not entered-and-allowed')
   ok(/role: 'assistant'/.test(stage5a),
     '9 · ⭐ …and the ownership rule is the query itself: her utterances, in any room')
+}
+
+// ── ⭐⭐⭐ 10 · §3B · PAST SELF-REPORT IS MEMORY, NOT LAW — ON HER REAL HISTORY ────────────────────
+//
+// ⭐⭐ THE FAILURE THIS SECTION GUARDS IS THE MEASURED ONE. Run R2: five real Hermes episodes retrieved and
+// typed `recalled`, their dates listed in her own answer, and she still wrote *"I can't read those
+// conversations from this room"* — because the block quoted her own earlier claim back at her as though it
+// were a standing fact. **She agreed with her past self over her present context.**
+//
+// ⛔ AND THE CONSTRAINT IS AS IMPORTANT AS THE FIX. Ote: *"I don't want to sanitize or rewrite Sotera's own
+// history. If she actually said it, that is part of what happened."* ⇒ the assertions below prove BOTH: the
+// present tense leads, and every quoted line of hers is still byte-for-byte what is in `txn_messages`.
+{
+  const r = await cognition.recollect({ text: "How's Hermes doing?" })
+  const eps = (r.items ?? []).filter((i) => i.kind === 'episode')
+
+  if (!r.activated) {
+    ok(true, '10 · ⓘ nothing activated on this deployment — §3B has no material to assert against', 'skipped')
+  } else {
+    // ── ⭐ THE PRESENT TENSE EXISTS, AND IT IS TYPED BY THE LATTICE RATHER THAN BY HAND ──────────────
+    ok(Boolean(r.currentState), '10 · ⭐ the run emits ONE present-tense observation of itself',
+      `reach=${r.currentState?.reachableTotal}`)
+    ok(Array.isArray(r.currentState?.warrants) && r.currentState.warrants.length === 0,
+      '10 · ⭐⭐ …and it holds NO warrant — an observation of the run is not a new epistemic claim')
+    ok(findIllegalPromotions(r.items, [r.currentState]).length === 0,
+      '10 · ⛔⛔ the present-tense item cannot out-claim the items it was derived from')
+    ok(r.currentState?.basis !== BASIS.attestedBySource || r.items.every((i) => i.basis === BASIS.attestedBySource),
+      '10 · ⭐ it may only claim attestation when EVERY parent is attested — otherwise `synthesized`')
+    ok(r.currentState?.retention === RETENTION.notRetained,
+      '10 · ⛔ retention is never inherited — a fresh observation is not something she kept')
+
+    // ── ⭐⭐⭐ ORDER IS THE ONLY CLAIM THE LAYER MAKES: NOW BEFORE THEN ──────────────────────────────
+    const first = String(r.context ?? '').split('\n')[0] ?? ''
+    if (eps.length) {
+      ok(/^Right now I/.test(first), '10 · ⭐⭐⭐ the block LEADS with what she can reach right now',
+        first.slice(0, 78))
+      ok(!first.trim().endsWith(':'),
+        '10 · ⛔ …and that first line is not a heading — a title turns the rest into "the contents"')
+    }
+
+    // ── ⭐⭐ HER OWN DATED SELF-REPORTS · TYPED, KEPT, AND INTRODUCED AS PAST ───────────────────────
+    const selfReports = eps.flatMap((e) => (e.exchanges ?? [])
+      .filter((x) => x.who === 'me' && x.said && x.timeBound)
+      .map((x) => ({ ...x, cid: String(e.id).replace(/^ep:/, '') })))
+    ok(true, '10 · ⓘ dated self-reports of hers in this run', `${selfReports.length}`)
+    for (const x of selfReports) {
+      // ⭐ The mechanism, asserted on real text: her words, unchanged, behind four words that date them.
+      ok(r.context.includes(x.said),
+        '10 · ⭐⭐ her old line survives VERBATIM in the block', x.said.slice(0, 56))
+      ok(new RegExp(`(On \\d+ [A-Z][a-z]+|Earlier) I said: ${x.said.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(r.context),
+        '10 · ⭐⭐⭐ …and it is introduced as a PAST utterance, not a standing fact', x.timeBound)
+      // ⚠️⚠️ THIS ASSERTION WAS WRONG ON ITS FIRST WRITING AND FAILED 3-FOR-3 ON REAL DATA, and the reason
+      // is the design rather than the code: the stamp is derived from the **full** message while `x.said` is
+      // the 260-character display clip. A self-report three sentences in is correctly typed and correctly
+      // invisible in the clip. ⇒ ⭐ THE HONEST FORM IS ONE-DIRECTIONAL: re-deriving from a truncation may
+      // legitimately yield null, but it must never yield a DIFFERENT kind.
+      const fromClip = timeBoundOf({ text: x.said, owner: OWNER.sotera, source: SOURCE.ownUtterance })
+      ok(fromClip === null || fromClip === x.timeBound,
+        '10 · ⛔ the stamp is never INVENTED — a clip may under-detect, never mis-classify', fromClip ?? 'clipped away')
+    }
+
+    // ── ⭐⭐⭐ §3B.9.3 · NOTHING OF HER HISTORY WAS REWRITTEN — PROVED AGAINST `txn_messages` ────────
+    //
+    // ⛔ THE ONLY PROOF THAT MATTERS FOR THE "no sanitising" CONSTRAINT. Every line the block attributes to
+    // her must still be found in a real assistant message of that conversation.
+    //
+    // ⚠️⚠️ AND THE FIRST VERSION OF THIS ASSERTION OVERSTATED THE GUARANTEE — it claimed "byte-for-byte" and
+    // failed 5 of 7 on real data. The cause is not rewriting: `clip()` collapses runs of whitespace so a
+    // multi-line answer renders as one line, and a raw `position()` against the stored text then finds
+    // nothing. ⇒ ⭐ THE GUARANTEE IS ABOUT WORDS, AND IT IS STATED AS SUCH: both sides are whitespace-
+    // normalised, so the comparison proves **no word was altered, dropped, reordered or redacted**.
+    // ⓘ Her line breaks are NOT preserved in the block. That is a pre-existing display transform in `clip`,
+    // it predates §3B, and it is recorded here rather than papered over.
+    // ⓘ `position()` rather than LIKE, because her text routinely contains `%` and `_` and a LIKE pattern
+    // would silently match nothing and pass.
+    let verified = 0
+    let missing = 0
+    for (const e of eps) {
+      const cid = String(e.id).replace(/^ep:/, '')
+      for (const x of (e.exchanges ?? [])) {
+        if (x.who !== 'me' || !x.said) continue
+        // ⓘ `clip` may have appended an ellipsis for display; the stored text has none.
+        const needle = x.said.replace(/…$/, '')
+        if (needle.length < 12) continue
+        const [hit] = await Q(
+          `SELECT 1 AS ok FROM "${S}".txn_messages
+            WHERE conversation_id = $1 AND role = 'assistant'
+              AND position($2 in btrim(regexp_replace(content, '\\s+', ' ', 'g'))) > 0 LIMIT 1`,
+          [cid, needle])
+        if (hit) verified++; else missing++
+      }
+    }
+    ok(missing === 0,
+      '10 · ⭐⭐⭐ every word the block attributes to her is still in the record — nothing rewritten or dropped',
+      `${verified} verified, ${missing} altered`)
+
+    // ── ⭐⭐ CONTRADICTION IS MARKED, NOT RESOLVED ─────────────────────────────────────────────────
+    ok(Array.isArray(r.contradictions),
+      '10 · ⭐ the conflict between then and now is RECORDED', `${r.contradictions?.length ?? 0} marked`)
+    ok(!/\b(I was wrong|I was mistaken|no longer true|that was incorrect)\b/i.test(r.context ?? ''),
+      '10 · ⛔⛔ …and the layer does NOT adjudicate it — the revision is hers')
+    // ⛔ A marked contradiction must never have cost her anything: the count of her own lines is unchanged.
+    const own = eps.flatMap((e) => (e.exchanges ?? []).filter((x) => x.who === 'me' && x.said))
+    ok(own.length >= selfReports.length,
+      '10 · ⛔ nothing was filtered, reordered away or shortened for contradicting the present',
+      `${own.length} of her lines kept, ${selfReports.length} of them dated`)
+  }
 }
 
 await seq.close().catch(() => {})

@@ -163,8 +163,13 @@ export function warrantFor(axis, from, to) {
   return isPromotion(axis, from, to) ? (WARRANT_FOR_VALUE[axis]?.[to] ?? null) : null
 }
 
-/** The highest availability among a set of values, by the declared order. ⓘ Used for derived items. */
-function bestAvailability(values = []) {
+/**
+ * The highest availability among a set of values, by the declared order. ⓘ Used for derived items.
+ * ⭐ EXPORTED for §3B's `current-state` item, which is derived from the whole kept set and must not be able
+ * to out-reach it. ⛔ Exported so that item is typed BY THE LATTICE rather than by hand — a second copy of
+ * "which availability is higher" is how the two would start disagreeing.
+ */
+export function bestAvailability(values = []) {
   const order = [AVAILABILITY.absentInSearchedSet, AVAILABILITY.knownUnreachable, AVAILABILITY.recalled]
   let best = -1
   for (const v of values) best = Math.max(best, order.indexOf(v))

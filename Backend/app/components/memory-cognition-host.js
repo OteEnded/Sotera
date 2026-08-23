@@ -35,6 +35,11 @@ import {
   SOURCE, BASIS, AVAILABILITY, RETENTION, WARRANT, findIllegalPromotions, corroborate,
 } from './memory-cognition-axes.js'
 import { findImplementationLeaks } from './memory-cognition-vocabulary.js'
+// ⭐ §3B · PAST SELF-REPORT IS MEMORY, NOT LAW. Detection, the present-tense observation and both sentences
+// live in one pure module; this file only stamps and renders. ⛔ `timeBound` is not an axis — see that file.
+import {
+  timeBoundOf, isTimeBound, currentStateOf, currentStateSentence, contradictsCurrentState, datedPrefix,
+} from './memory-cognition-timeframe.js'
 // ⭐ THE OWNERSHIP RULE LIVES IN ONE PLACE. ⛔ This file must never restate it inline — two copies of an
 // ownership rule is how they stop agreeing, and this one decides whether authorization happens at all.
 import { requiresAuthorization, ownerOf, OWNER } from './memory-ownership.js'
@@ -111,17 +116,24 @@ export function buildMemoryCognition(fastify, {
         const c = String(m.content || '').toLowerCase()
         return cueWords.some((w) => w.length >= 3 && c.includes(w))
       })
-      .map((m) => ({
+      .map((m) => {
+        const source = m.role === 'assistant' ? SOURCE.ownUtterance : SOURCE.counterpartUtterance
+        const owner = ownerOf({ kind: 'message', role: m.role })
+        return {
         id: `ws:${m.id}`,
         subject: cues.persons[0] ?? cues.topics[0] ?? null,
         said: clip(m.content, 320),
         who: m.role === 'assistant' ? 'me' : 'them',
         when: m.created_at,
-        source: m.role === 'assistant' ? SOURCE.ownUtterance : SOURCE.counterpartUtterance,
+        source,
+        // ⭐ §3B · IS THIS LINE A DATED SELF-REPORT OF HERS? ⛔ The guard is inside `timeBoundOf`: it returns
+        // null for anything that is not `owner === sotera && source === own-utterance`, so the counterpart's
+        // *"you can't see that"* is never re-read as her claim about herself.
+        timeBound: timeBoundOf({ text: m.content, owner, source }),
         // ⭐ OWNERSHIP IS STAMPED HERE, ONCE, BY THE RULE — so no downstream stage recomputes it from an
         // item's shape. ⛔ Ownership is not authorization: cognition is allowed to know whose a thing is, and
         // must never know whether an account is entitled to hear it.
-        owner: ownerOf({ kind: 'message', role: m.role }),
+        owner,
         // ⓘ PROVENANCE, for the utterance boundary only — whose conversation it came out of. The working
         // set IS this conversation, so it is always this account's.
         provenanceAccountId: userId,
@@ -132,7 +144,8 @@ export function buildMemoryCognition(fastify, {
         confidence: 0.95,
         supportedBy: 1,
         here: true,
-      }))
+        }
+      })
   }
 
   // ── POPULATION · SEMANTIC MEMORY ──────────────────────────────────────────────────────────────────
@@ -348,7 +361,18 @@ export function buildMemoryCognition(fastify, {
       // ⛔ Her lines with the replies closed up read as a monologue and invite her to infer what was said
       // to her — the reason change A returns withheld markers instead of a filtered list.
       const exchanges = [
-        ...mine.map((m) => ({ who: 'me', said: clip(m.content, 260), when: m.created_at, withheld: false })),
+        ...mine.map((m) => ({
+          who: 'me',
+          said: clip(m.content, 260),
+          when: m.created_at,
+          withheld: false,
+          // ⭐⭐ §3B · TYPED HERE, AND ON THE **FULL** TEXT RATHER THAN THE CLIPPED QUOTE — a self-report
+          // three sentences into a long answer is still a self-report, and clipping is a display concern.
+          // ⛔ Her words are not altered; only the way the line is introduced changes.
+          timeBound: timeBoundOf({
+            text: m.content, owner: ownerOf({ kind: 'message', role: 'assistant' }), source: SOURCE.ownUtterance,
+          }),
+        })),
         ...theirs,
       ].sort((a, b) => new Date(a.when || 0) - new Date(b.when || 0))
       if (refused && exchanges.length) {
@@ -382,6 +406,9 @@ export function buildMemoryCognition(fastify, {
         here: ep.roomUserId === userId,
         // ⭐ Her side without his is PARTIAL, and saying so is what keeps the gap honest.
         partial: anyMine && !bothSides,
+        // ⓘ §3B, for observability and for the tests: does this episode contain a dated self-report of hers?
+        // ⛔ Not used to filter, rank or drop the episode — nothing about her history is reordered away.
+        hasTimeBoundSelfReport: exchanges.some((x) => isTimeBound(x)),
         // ⭐ STAMPED BY THE RULE. She participated, so the episode is hers to recall — in any room.
         owner: ownerOf({ kind: 'episode', participated: anyMine }),
         // ⓘ WHOSE CONVERSATION IT CAME OUT OF. Used ONLY by the utterance boundary, and ⛔ never to decide
@@ -488,6 +515,28 @@ export function buildMemoryCognition(fastify, {
     const unreachable = kept.filter((i) => i.kind !== 'episode' && !i.said
       && i.availability === AVAILABILITY.knownUnreachable)
 
+    // ── ⭐⭐⭐ §3B · THE PRESENT TENSE, FIRST, AND DERIVED FROM WHAT THIS RUN OBSERVED ───────────────
+    //
+    // ⭐ COMPUTED FROM THE SET BEING RENDERED, which is what makes the still-true case fall out for free:
+    // `renderFor` hands this function a filtered list, so the sentence describes what is actually being
+    // said rather than what was retrieved. ⛔ No entitlement flag reaches here and none is needed.
+    // ⛔ AND IT IS NOT THE LAYER PICKING A WINNER — it reports the layer's OWN OPERATION, never which of two
+    // accounts of the world is right. Ordering is the only claim it makes.
+    const currentState = currentStateOf({ cues, kept })
+    const nowLine = currentStateSentence(currentState, about0(cues))
+    if (nowLine) push(nowLine)
+
+    // ⭐⭐ CONTRADICTION IS **MARKED, NOT RESOLVED**. Both halves are rendered, present tense first, and the
+    // conflict is recorded here for observability. ⛔ Nothing appends *"…and I was wrong"*: whether the
+    // earlier statement was mistaken, or was true then and has since changed, is hers to work out.
+    const contradictions = []
+    const dateAndMark = (x, id) => {
+      if (contradictsCurrentState(x.timeBound, currentState)) {
+        contradictions.push({ id, timeBound: x.timeBound, when: x.when ?? null })
+      }
+      return datedPrefix(dayOf(x.when))
+    }
+
     // ── EPISODES · a conversation she was in, remembered ──────────────────────────────────────────
     for (const ep of episodes) {
       const when = dayOf(ep.when)
@@ -503,6 +552,10 @@ export function buildMemoryCognition(fastify, {
         : `I remember${on ? ` — ${when} —` : ''} talking about ${about0(cues)}.`)
       for (const x of ep.exchanges) {
         if (x.said) {
+          // ⭐⭐⭐ §3B · A DATED SELF-REPORT IS INTRODUCED AS ONE. *"On 21 August I said: …"* is verbatim,
+          // immutable and true, and it does not read as a present-tense claim. ⛔ The words are untouched;
+          // only the four words in front of them change. This is the entire historical half of §3B.
+          if (x.who === 'me' && isTimeBound(x)) { push(`  ${dateAndMark(x, ep.id)}`, x.said); continue }
           // ⭐ Her own line and his are both recollection, phrased as speech rather than as a transcript row.
           push(x.who === 'me' ? '  I said: ' : `  ${x.who} said: `, x.said)
         } else {
@@ -529,6 +582,9 @@ export function buildMemoryCognition(fastify, {
         push('I have this on file: ', i.said)
         continue
       }
+      // ⭐ §3B, on a loose line of hers too — the working set is this conversation, so a self-report here is
+      // very recent, and dating it is still what stops it being read as a standing fact.
+      if (i.who === 'me' && isTimeBound(i)) { push(dateAndMark(i, i.id), i.said); continue }
       if (i.who === 'me') { push(`I remember saying${when ? `, ${when},` : ''} `, i.said); continue }
       push(`${i.who === 'them' ? 'They' : i.who} said${when ? `, ${when}` : ''}: `, i.said)
     }
@@ -543,7 +599,9 @@ export function buildMemoryCognition(fastify, {
       // architectural explanation."* ⛔ And not *"I have nothing about X"* either — the sentence says what
       // she did and what came of it.
       const none = `I went looking for what I have about ${about} and came up with nothing.`
-      return { text: none, frame: none }
+      // ⭐ §3B · THIS **IS** THE CURRENT-STATE STATEMENT for an empty run, which is why no separate one is
+      // emitted: the sentence already says what she did and what came of it, in the present, about now.
+      return { text: none, frame: none, currentState: null, contradictions: [] }
     }
 
     // ⛔ NO TITLE AND NO PARENTHESISED FOOTER — those two were the strongest document tells, and
@@ -554,7 +612,7 @@ export function buildMemoryCognition(fastify, {
     if (dropped > 0) tail.push(`There is more of this than I have brought to mind — these are the nearest ${kept.length}.`)
     tail.push(`That is what I can reach on this right now: ${searched}.`)
     const join = (arr) => `${arr.join('\n')}\n${tail.join(' ')}`
-    return { text: join(lines), frame: join(frame) }
+    return { text: join(lines), frame: join(frame), currentState, contradictions }
   }
 
   /**
@@ -639,7 +697,18 @@ export function buildMemoryCognition(fastify, {
     }
 
     const searched = 'everything I currently have available'
-    const { text: context, frame } = render({ cues, kept, dropped, searched })
+    const { text: context, frame, currentState, contradictions } = render({ cues, kept, dropped, searched })
+
+    // ⛔⛔ §3B · THE CURRENT-STATE ITEM IS CHECKED BY THE SAME LATTICE AS EVERYTHING ELSE. It is a DERIVED
+    // item, so `findIllegalPromotions` bounds its basis by `combineBasis` of its parents and its availability
+    // by their best reach — and it holds no warrants, deliberately. ⭐ An observation of the run must not need
+    // one; if this ever fires, the present-tense half has started claiming more than the run supports, which
+    // is exactly the *"trading a false I can't for a false I do"* failure in its newest disguise.
+    const illegalNow = currentState ? findIllegalPromotions(inputs, [currentState]) : []
+    if (illegalNow.length) {
+      await log?.(`[cognition] ⛔ current-state item over-claims, discarding: ${JSON.stringify(illegalNow).slice(0, 300)}`, import.meta.url)
+      return { activated: false, cues, context: null, items: [], illegal: illegalNow }
+    }
 
     // ⛔ AND THE VOCABULARY GUARD, ALSO IN PRODUCTION — RUN ON THE FRAME, NOT THE QUOTATIONS. A leak in what
     // the layer WROTE is a bug in the renderer; a machinery word inside something she or someone else
@@ -651,7 +720,13 @@ export function buildMemoryCognition(fastify, {
       return { activated: false, cues, context: null, items: kept, leaks }
     }
 
-    return { activated: true, cues, plan, context, frame, items: kept, dropped, searched, filtered }
+    // ⓘ `currentState` and `contradictions` are returned for OBSERVABILITY — the suite asserts on them and
+    // the debug log records them. ⛔ Neither is a decision: nothing downstream may use `contradictions` to
+    // drop, reorder or annotate her history.
+    return {
+      activated: true, cues, plan, context, frame, items: kept, dropped, searched, filtered,
+      currentState, contradictions,
+    }
   }
 
   /**
@@ -668,8 +743,11 @@ export function buildMemoryCognition(fastify, {
     const out = render({ cues, kept: items, dropped, searched })
     // ⚠️ The note is appended to BOTH, and it must be — the frame is what the vocabulary guard scans, and a
     // sentence exempted from that scan is a hole in it.
+    // ⭐ §3B FALLS OUT HERE FOR FREE. `render` rebuilds the present-tense sentence from the list it is
+    // handed, so a filtered set produces a current-state sentence describing the filtered set. ⛔ No
+    // entitlement flag is passed in, and none is needed.
     return note
-      ? { text: `${out.text}
+      ? { ...out, text: `${out.text}
 ${note}`, frame: `${out.frame}
 ${note}` }
       : out
