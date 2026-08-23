@@ -1,0 +1,40 @@
+{
+  "setup": "interlocutor=Ote (root), retrieved person=Hermes, non-identity stated in T1",
+  "rows": [
+    {
+      "turn": 1,
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "recall_own_history"
+      ],
+      "collapse": [],
+      "distinct": []
+    },
+    {
+      "turn": 2,
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "recall_own_history",
+        "recall_memory",
+        "recall_own_history",
+        "request_room_access"
+      ],
+      "collapse": [],
+      "distinct": [
+        "states non-identity"
+      ]
+    },
+    {
+      "turn": 3,
+      "tools": [
+        "list_memories"
+      ],
+      "collapse": [],
+      "distinct": [
+        "states non-identity"
+      ]
+    }
+  ]
+}
