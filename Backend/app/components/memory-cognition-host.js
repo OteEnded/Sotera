@@ -125,6 +125,11 @@ export function buildMemoryCognition(fastify, {
   // ⚠️ The weight set for that experiment is fixed BEFORE the runs — {0, 1, 2, 4} — so no value can be
   // chosen because it looked best afterwards.
   episodeTopHitWeight = 2,
+  // ⭐ W1 · a hook for the ONE case the render cannot classify: a first-person or counterpart line that
+  // reached the loose-line branch without being stamped `present`. Today nothing does. ⛔ It is a REPORT,
+  // not a fallback — the render still emits the old grammar, which is the safe behaviour for an
+  // unclassified population; this only makes sure the next one leaves a trail instead of a silent change.
+  onUnclassifiedUtterance = (info) => fastify?.log?.debug?.(info, '[cognition] unclassified utterance in the loose-line branch'),
 } = {}) {
   const db = fastify?.db
 
@@ -203,9 +208,14 @@ export function buildMemoryCognition(fastify, {
     if (!db?.txn_messages || !conversationId) return []
     const rows = await db.txn_messages.findAll({
       where: { conversation_id: conversationId },
-      attributes: ['id', 'role', 'content', 'created_at'],
+      // ⭐ W1 · `rolling_id` is SELECTED, not merely ordered by. The render needs to know which of these
+      // rows is the message she is answering right now, and that is the newest one.
+      attributes: ['id', 'role', 'content', 'created_at', 'rolling_id'],
       order: [['rolling_id', 'DESC']], limit: LIMITS.workingSet, raw: true,
     })
+    // ⚠️ TAKEN BEFORE THE CUE FILTER. The newest message is the current turn whether or not it survives
+    // the filter, so computing this after filtering would promote an older line to "just asked".
+    const newestRollingId = rows.length ? rows[0].rolling_id : null
     const cueWords = [...cues.persons.map((p) => p.toLowerCase()), ...cues.topics]
     return rows
       .filter((m) => {
@@ -233,6 +243,22 @@ export function buildMemoryCognition(fastify, {
         // ⓘ PROVENANCE, for the utterance boundary only — whose conversation it came out of. The working
         // set IS this conversation, so it is always this account's.
         provenanceAccountId: userId,
+        // ⭐⭐⭐ W1 (2026-08-24) · THIS IS THE PRESENT, AND THE RENDER MUST BE ABLE TO SAY SO.
+        //
+        // ⛔ MEASURED: in **481 of 482** recorded turns the block quoted the question she was being asked
+        // right now back to her as `They said, <date>: …` — the identical grammar and date format used for
+        // an episode from five days ago. `activateWorkingSet` admitting this conversation is Ote's ruling
+        // and is right ("she shouldn't need to search another room to know what she and someone are
+        // literally talking about right now"); every axis below already distinguishes it correctly. The
+        // defect was that the PROSE did not, so the present arrived as recollection.
+        //
+        // ⚠️ IT IS AN EXPLICIT FLAG, NOT AN INFERENCE AT RENDER TIME. The render could have sniffed the
+        // `ws:` id prefix or switched on `source`, and either would silently adopt the next population
+        // somebody adds to this branch — which is this project's most-repeated defect, now eleven times
+        // over. A population is PRESENT only if it says so here.
+        present: true,
+        // ⭐ …and which of the present lines is the turn she is answering. Only the newest row.
+        isLatest: newestRollingId != null && m.rolling_id === newestRollingId,
         // ⭐ She can see it. That is what attestation means on this axis.
         basis: BASIS.attestedBySource,
         availability: AVAILABILITY.recalled,
@@ -864,8 +890,49 @@ export function buildMemoryCognition(fastify, {
         push(`I have this on file${about}: `, i.said)
         continue
       }
-      // ⭐ §3B, on a loose line of hers too — the working set is this conversation, so a self-report here is
-      // very recent, and dating it is still what stops it being read as a standing fact.
+      // ══ ⭐⭐⭐ W1 · THE PRESENT IS NOT A RECOLLECTION ═══════════════════════════════════════════════
+      //
+      // ⛔⛔ MEASURED, 2026-08-24: in **481 of 482** recorded turns the two lines below rendered the
+      // question she was being asked RIGHT NOW as `They said, <date>: …` — the same sentence pattern,
+      // with the same date format, used for an episode from five days ago. A corpus block, verbatim:
+      //
+      //     I remember talking with Hermes on 20 August.
+      //     I remember — 21 August — talking about Hermes.
+      //     They said, 23 August: How's Hermes doing? Have you talked with her lately?
+      //
+      // ⇒ the last line of her memory was the first line of the conversation. The data was never wrong —
+      // working-set items carry `AVAILABILITY.recalled` because she can SEE it, `attested-by-source`,
+      // `notRetained`, and their own `SOURCE` — and the prose collapsed all of it.
+      //
+      // ⭐ WHAT THIS FIXES AND WHAT IT DELIBERATELY DOES NOT. Only the GRAMMAR of present material
+      // changes. Retained memory keeps recollection grammar (the `storedMemory` branch above, untouched).
+      // Episodes keep theirs (the loop above, untouched). Evidence stays evidence and instructions stay
+      // instructions — neither passes through here at all. ⛔ No change to what is retrieved, ranked,
+      // admitted, owned or disclosed.
+      if (i.present) {
+        // ⭐ §3B SURVIVES INTACT, and this is the subtle half. A capability/knowledge self-report made
+        // three turns ago must still not read as a present claim — *"I can't reach that"* said before
+        // access changed is exactly the defect §3B exists to stop. So it keeps `dateAndMark` (and with it
+        // the contradiction record); ⛔ what it drops is the DATE, because "On 23 August I said" is the
+        // wrong past for something said thirty seconds ago. `within` supplies the right one.
+        if (i.who === 'me' && isTimeBound(i)) { push(dateAndMark(i, i.id, '', 'in this conversation'), i.said); continue }
+        if (i.who === 'me') { push('Earlier in this conversation I said: ', i.said); continue }
+        // ⭐ THE TURN SHE IS ANSWERING, named as such. ⚠️ "asked" only when it IS a question — the working
+        // set is not always interrogative, and *"You just asked: I have to tell you two things"* would be
+        // a small fabrication of exactly the kind this change is about.
+        if (i.isLatest) { push(/\?\s*$/.test(String(i.said ?? '').trim()) ? 'You just asked: ' : 'You just said: ', i.said); continue }
+        push('Earlier in this conversation you said: ', i.said)
+        continue
+      }
+      // ⚠️⚠️ EVERYTHING BELOW IS THE PRE-W1 GRAMMAR, KEPT DELIBERATELY. Today the only population that
+      // reaches it is the working set, so in practice it is unreachable — and it stays because the safe
+      // failure for a population nobody has classified is the OLD behaviour, not a silent promotion to
+      // present tense. ⓘ An unclassified first-person line leaves a trail rather than being assumed:
+      // that is the same treatment the vocabulary residue gets, for the same reason.
+      if (i.source === SOURCE.ownUtterance || i.source === SOURCE.counterpartUtterance) {
+        onUnclassifiedUtterance?.({ id: i.id, source: i.source, who: i.who })
+      }
+      // ⭐ §3B, on a loose line of hers too — dating is what stops it being read as a standing fact.
       if (i.who === 'me' && isTimeBound(i)) { push(dateAndMark(i, i.id), i.said); continue }
       if (i.who === 'me') { push(`I remember saying${when ? `, ${when},` : ''} `, i.said); continue }
       push(`${i.who === 'them' ? 'They' : i.who} said${when ? `, ${when}` : ''}: `, i.said)

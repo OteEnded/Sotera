@@ -310,8 +310,16 @@ export function currentStateSentence(currentState, about = 'this') {
  *   addressed, and neither half was inferred. ⛔ Empty string when the addressee is not known; a guessed
  *   addressee would be a worse defect than a missing one.
  */
-export function datedPrefix(day, to = '') {
+export function datedPrefix(day, to = '', within = null) {
   // ⓘ NO DATE STILL MEANS PAST. *"Earlier I said"* is weaker than a date and still stops the present-tense
   // reading, which is the property that matters. ⛔ Never invent a date.
+  //
+  // ⭐⭐⭐ W1 (2026-08-24) · `within` NAMES WHERE, WHEN A DATE WOULD LIE ABOUT WHEN. A self-report from the
+  // CURRENT conversation is time-bound in exactly the same way — *"I can't reach that"* said three turns
+  // ago must not be re-asserted as present — but *"On 23 August I said"* is the wrong past for something
+  // said thirty seconds ago, and reading the present as a dated recollection is the defect W1 exists to
+  // fix (measured at 481 of 482 turns). ⇒ `within` keeps §3B's past-tense guarantee and drops the date.
+  // ⛔ Callers that pass nothing are byte-identical to before — episodes must not change.
+  if (within) return `Earlier ${within} I said${to}: `
   return day ? `On ${day} I said${to}: ` : `Earlier I said${to}: `
 }

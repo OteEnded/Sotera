@@ -50,12 +50,40 @@ ok(labels.length === 2 && labels.includes('none') && labels.includes('sotera_mem
 ok(!labels.some((l) => ['global', 'all', 'cross_room', 'everything'].includes(l)),
   '1 · ⛔ no unenforceable wildcard value exists', labels.join(', '))
 
-// ── 2 · NOTHING WAS GRANTED ────────────────────────────────────────────────────────────────────────
+// ── 2 · ⭐ THE DEFAULT HANDS OUT NOTHING · ⛔ NOT "nobody is ever granted" ──────────────────────────
+//
+// ⚠️⚠️ THIS ASSERTION WAS WRONG AND IT CRIED WOLF ON 2026-08-23. It read `granted.length === 0` and
+// failed the moment Ote used the Console feature built the day before to grant `hermes` and
+// `hermes_alias` — an entirely legitimate act by the owner, recorded in `log_user_changes` as
+// `changed_by: root`. ⛔ A check that fails when the product is used correctly trains people to ignore
+// checks, and it is the `assert-the-state-not-the-answer` trap: it asserted a LIVE STATE the owner is
+// entitled to change, when the property worth protecting is that the SCHEMA hands nothing out.
+//
+// ⭐ WHAT IS ACTUALLY INVARIANT, and all three are asserted:
+//   ① the column default is `none` — §1 above already proves this, and it is the migration's promise;
+//   ② therefore every account created by the migration starts at `none`;
+//   ③ every account that is NOT at `none` got there by a DELIBERATE, AUDITED act.
+// ⇒ ③ is the real guarantee, and it is stronger than the old assertion rather than weaker: the old one
+// could pass with an unaudited grant so long as somebody had since revoked it.
 const { rows: granted } = await pg.query(
-  `select username, memory_access_scope from ${S}.mst_users where memory_access_scope <> 'none' order by username`)
-ok(granted.length === 0,
-  '2 · ⭐⭐ no account has been granted access — the migration hands out nothing, Ote grants deliberately',
-  granted.length ? granted.map((g) => `${g.username}=${g.memory_access_scope}`).join(', ') : '0 granted')
+  `select id::text, username, memory_access_scope from ${S}.mst_users where memory_access_scope <> 'none' order by username`)
+// ⓘ REPORTED, NEVER FAILED ON. Who holds access is Ote's decision; this line exists so a run is readable.
+console.log(`  ⓘ 2 · accounts holding access: ${granted.length ? granted.map((g) => `${g.username}=${g.memory_access_scope}`).join(', ') : '(none)'}`)
+const { rows: audits } = await pg.query(
+  `select user_id::text uid, new_value, changed_by, created_at from ${S}.log_user_changes
+     where field = 'memory_access_scope' and new_value <> 'none'`)
+const auditedIds = new Set(audits.map((a) => a.uid))
+const unaudited = granted.filter((g) => !auditedIds.has(g.id))
+ok(unaudited.length === 0,
+  '2 · ⭐⭐ every account holding access got it by a DELIBERATE, AUDITED grant — the migration hands out nothing',
+  unaudited.length ? `⛔ NO AUDIT ROW for: ${unaudited.map((g) => g.username).join(', ')}` : `${granted.length} granted, all audited`)
+// ⛔ AND THE GRANT IS ROOT-ONLY, which §6 proves against the live route. Here it is proved against the
+// HISTORY: if a non-root actor ever appears as the granter, the route's gate has leaked at some point,
+// and a passing §6 today would not tell us that.
+const nonRootGrants = audits.filter((a) => a.changed_by !== 'root')
+ok(nonRootGrants.length === 0,
+  '2 · ⛔ no grant in the audit history was made by a non-root actor',
+  nonRootGrants.length ? nonRootGrants.map((a) => `${a.changed_by}@${a.created_at.toISOString()}`).join(', ') : `${audits.length} grant(s), all by root`)
 
 // ── 3 · ⭐⭐⭐ THE VALUE REACHES A USER OBJECT — the allowlist half ─────────────────────────────────
 // The model mirrors the SQL, but a model field is not a session field. This grants one account, rebuilds

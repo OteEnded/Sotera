@@ -145,6 +145,28 @@ try {
   // traceable to something that could have produced it — a reflection that recorded the write, or a lesson
   // source naming the conversation it came from. A row with neither is exactly the invented authorship the
   // original line was guarding against, and it still fails.
+  //
+  // ⚠️⚠️ AND IT WENT RED A SECOND TIME, ON 2026-08-23, FOR THE SAME REASON IN A NEW LANE — so the fix is
+  // the same shape: the check was asserting THE ROUTES IT KNEW ABOUT instead of THE PROPERTY.
+  //
+  // What happened: during a real conversation Sotera called `remember_fact` and wrote a semantic row about
+  // the person she was talking to. `save_lesson` stamps `source = 'lesson:<conversation>'` and is therefore
+  // traceable; `remember_fact` stamps `source = NULL` and sets `source_message_id` instead — pointing at
+  // her own assistant message in the conversation where she decided to write it. ⇒ a row with the MOST
+  // direct provenance available failed a traceability test, because neither of the two routes below was
+  // the one that lane uses. ⛔ Third instance in this project of an allowlist of known cases dropping what
+  // it was not told about, and the twelfth overall.
+  //
+  // ⭐ THE THIRD ROUTE, and it is genuinely stronger than the other two rather than merely convenient: a
+  // `source_message_id` that RESOLVES to an existing message is a named occasion — the exact turn on which
+  // she decided. ⛔ `NOT NULL` would not be enough; a dangling id is an occasion that no longer exists, and
+  // this is checked by JOINING, so a deleted conversation puts the row back in the orphan set where it
+  // belongs. The invariant is unchanged: no reflection, no source, and no resolvable message ⇒ FAIL.
+  //
+  // ⏸ BACKLOG, NOT FIXED HERE (Ote, 2026-08-24: verification correctness, not another investigation): the
+  // two writing lanes record provenance differently — `save_lesson` via `source`, `remember_fact` via
+  // `source_message_id`. That inconsistency is real and is HIS call; widening the check does not paper over
+  // it, because the check now accepts either and still rejects neither.
   const orphans = await Q(
     `SELECT m.id::text AS id, m.source, m.created_at
        FROM persona_sotera.txn_memories m
@@ -153,7 +175,9 @@ try {
         -- traceable: a reflection recorded writing it…
         AND NOT EXISTS (SELECT 1 FROM persona_sotera.log_reflections r WHERE r.wrote_memory_id = m.id)
         -- …or it carries a source naming where it came from (the lesson lane writes lesson:<conversation>)
-        AND coalesce(m.source, '') = ''`)
+        AND coalesce(m.source, '') = ''
+        -- …or it names the turn she decided on, and that turn still exists (the remember_fact lane)
+        AND NOT EXISTS (SELECT 1 FROM persona_sotera.txn_messages x WHERE x.id = m.source_message_id)`)
   ok(orphans.length === 0,
     'N · ⭐⭐ every memory attributed to HER is traceable to an occasion — authorship is earned, never assigned',
     orphans.length ? `⛔ ${orphans.length} untraceable persona row(s): ${orphans.map((o) => o.id).join(', ')}` : 'no untraceable persona-authored rows')

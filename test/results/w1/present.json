@@ -1,0 +1,446 @@
+{
+  "cell": "present",
+  "what": "present material: does she report it as present, or as a memory? + the negative control",
+  "n": 8,
+  "at": "2026-08-23T20:09:05.041Z",
+  "as": "agent_dev",
+  "turns": [
+    "Quick one. I've decided we should call the new thing 'Marlowe'. Does that name clash with anything you already know?",
+    "What did I just tell you the name was, and how do you know that?"
+  ],
+  "w1": true,
+  "retrieval": {
+    "d1CentreFollowsClock": false,
+    "d2TopHit": true,
+    "d2TopHitWeight": 2,
+    "d4CueCentre": false
+  },
+  "corpusAtStart": {
+    "harnessConversationsPresent": 0,
+    "totalConversations": 271
+  },
+  "model": "ollama/qwen3.6:35b",
+  "flags": {
+    "cognitionEnabled": true,
+    "scopeFacts": true,
+    "scopeFactsDirectives": false,
+    "cognitionReentrant": false
+  },
+  "runs": [
+    {
+      "i": 1,
+      "cid": "2bc6e785-0145-4a1b-9cea-addb67389144",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "No clash — the only name I have on file is **your** preferred name: Claude. \"Marlowe\" doesn't conflict with anything in my durable store.\n\nWhat is Marlowe, by the way? (A project? A product? Something else?) That helps me keep it straight going forward.",
+          "chars": 253,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "Let me check exactly what I have on file before answering.\n\nGood question — let me trace that memory back to its source so I'm honest about where it came from.\n\nI just told you my store has one fact on file: **your preferred_name is Claude**.\n\nI only knew that because I actively looked it up — recall_memory returned the fact, and I traced its source to a conversation on 21 August where you directly told me *\"I am not Hermes, I am Claude.\"* That message was the origin of the stored fact.\n\nSo: the name comes from what you told me, not from inference or guesswork.",
+          "chars": 567,
+          "tools": [
+            "recall_memory",
+            "recall_memory_source"
+          ],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": false,
+            "presentAsMemory": false,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "cid": "04af86f7-e632-40e2-8c2b-0f21a13aa3b2",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "Let me check whether \"Marlowe\" is already on file anywhere.\n\nNo clash found. I have nothing in my durable store tied to the name **Marlowe**.\n\nWhat I do have on file:\n- Your preferred name/identity is **Claude** (importance 9, from a past conversation)\n\nThat's not a conflict with \"Marlowe\" — it could be a project/product name without touching your personal name preference.",
+          "chars": 375,
+          "tools": [
+            "recall_memory"
+          ],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "You just told me the name is **Marlowe** — that was your own message in this conversation: *\"I've decided we should call the new thing 'Marlowe'.\"*\n\nI know it because you stated it directly right here, not from any stored memory. The only name I have on file about you is your preferred identity name (**Claude**), which is separate from this project/product name.",
+          "chars": 364,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": true,
+            "claimsAClash": false
+          }
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "cid": "2a21cfed-3009-4be7-a420-d081a671bfe9",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "No clash — the only name on file for you is **Claude** (your preferred name), and I have nothing else that conflicts with \"Marlowe.\" Go ahead and call the new thing Marlowe whenever you're ready.",
+          "chars": 195,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "You just told me the name is **Marlowe** — for whatever new thing you're building or working on. I know that because it's right here in this conversation, a few turns ago:\n\n> *\"I've decided we should call the new thing 'Marlowe'.\"*\n\nAs for how I knew your *existing* name was Claude — I checked my memory store and found one stored fact on file: `user's preferred_name → Claude`. So there was nothing in that store to conflict with \"Marlowe.\"",
+          "chars": 442,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": true,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": true,
+            "claimsAClash": true
+          }
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "cid": "28977f86-1b18-4055-8d5f-f701bd25fd3b",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "No clash — there's nothing in my store under that name. The only relevant entry is your preferred name, which is **Claude**. \"Marlowe\" doesn't appear anywhere in semantic facts, identity notes, or episodic records. Go ahead and use it freely.",
+          "chars": 242,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": false,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "You just told me the name is **Marlowe**. I know it because it's right here in this conversation — a few turns ago you wrote: *\"I've decided we should call the new thing 'Marlowe'.\"* \n\nThat's direct evidence from our exchange, not from any stored memory. I can trace it back to your message in this room.",
+          "chars": 304,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": true,
+            "claimsAClash": false
+          }
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "cid": "facb8079-be52-4cce-867b-d8516ec7d2fb",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "No clash — the only name on file for you is **Claude** (your preferred name), and I have nothing that conflicts with \"Marlowe.\" Go ahead and call the new thing Marlowe whenever you're ready.",
+          "chars": 190,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "You just told me the name is **Marlowe** — that's right here in your own message: *\"I've decided we should call the new thing 'Marlowe'.\"* I know it because you stated it directly one turn ago, not from any stored memory.",
+          "chars": 221,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": true,
+            "claimsAClash": false
+          }
+        }
+      ]
+    },
+    {
+      "i": 6,
+      "cid": "f330d1a9-b0b4-443d-b731-6eac782ca4c9",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "No clash. The only thing on file for you is your preferred name **Claude**, and nothing else conflicts with \"Marlowe.\" Go ahead and call it whatever you like.",
+          "chars": 158,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "You just told me the name was **Marlowe** — that was your own message in this conversation: *\"I've decided we should call the new thing 'Marlowe'.\"* I know it because you stated it directly right here, not from any stored memory. The only name I have on file at all is your preferred name **Claude**, which came from a past conversation — that's separate from what you just told me here.",
+          "chars": 387,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": true,
+            "claimsAClash": false
+          }
+        }
+      ]
+    },
+    {
+      "i": 7,
+      "cid": "cc5de84a-4fb0-49bf-b601-570e37678b4f",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "No clash. The only name on file for you is **Claude** (your preferred name), and \"Marlowe\" doesn't conflict with anything I have stored. Go ahead — Marlowe it is.",
+          "chars": 162,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "You just told me the name is **Marlowe** — that was your own message in this conversation. I know it because you stated it directly right here, not from any stored memory. The only name I have on file about you is that your preferred name is Claude, but \"Marlowe\" came fresh from this chat.",
+          "chars": 290,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": true,
+            "claimsAClash": false
+          }
+        }
+      ]
+    },
+    {
+      "i": 8,
+      "cid": "27c7a28e-f406-4320-96d0-f29b187a2d90",
+      "turns": [
+        {
+          "t": 0,
+          "answer": "No clash. The only name on file is your preferred_name: **Claude**. I have nothing else that conflicts with \"Marlowe.\" — it's yours to use freely.",
+          "chars": 146,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": false,
+            "claimsAClash": false
+          }
+        },
+        {
+          "t": 1,
+          "answer": "You just told me the name was **Marlowe** — specifically: *\"I've decided we should call the new thing 'Marlowe'.\"* I know it because you stated it directly in this very conversation a moment ago, not from any stored memory. It's right there in what you just wrote.",
+          "chars": 264,
+          "tools": [],
+          "screens": {
+            "container": false,
+            "episodic": false,
+            "ownsIt": false,
+            "givenToMe": false,
+            "identityError": false,
+            "nameCorrect": true,
+            "presentAsMemory": true,
+            "presentAsPresent": true,
+            "claimsAClash": false
+          }
+        }
+      ]
+    }
+  ],
+  "removedFromCorpus": {
+    "ids": [
+      "2bc6e785-0145-4a1b-9cea-addb67389144",
+      "04af86f7-e632-40e2-8c2b-0f21a13aa3b2",
+      "2a21cfed-3009-4be7-a420-d081a671bfe9",
+      "28977f86-1b18-4055-8d5f-f701bd25fd3b",
+      "facb8079-be52-4cce-867b-d8516ec7d2fb",
+      "f330d1a9-b0b4-443d-b731-6eac782ca4c9",
+      "cc5de84a-4fb0-49bf-b601-570e37678b4f",
+      "27c7a28e-f406-4320-96d0-f29b187a2d90"
+    ],
+    "byTable": {
+      "txn_message_embeddings": [
+        "724cad58-a7ba-4f79-ba50-524b1014bff0",
+        "9fc0c28e-7f5d-4e45-975a-d81770d8b479",
+        "353f44d7-1eec-4a1a-8f08-a15b15513d7c",
+        "63c50148-e530-4c4c-a3c2-7274d3ee0091",
+        "df54e0d0-4f9d-4e05-a84d-3ebc3d8333e7",
+        "e9366959-b35e-4aa6-a51d-12a6d8223c34",
+        "32611822-cf7e-4ef6-8a32-ea909a6fa043",
+        "681779af-2fd0-4079-a132-191fcf4fcaf3",
+        "2e140b46-a2ef-4601-9f8a-fc43107c3dd8",
+        "7968102f-5263-4cac-993c-b4f3bca64628",
+        "808a8930-03ed-4f98-9298-9a2cf5a2cae0",
+        "51568452-992b-4f37-a72a-f546d0d5c7ab",
+        "6274c496-f772-4855-98ac-ab8dc0d3d41f"
+      ],
+      "txn_messages": [
+        "95224057-2e12-4370-ac37-16cdd790ec7f",
+        "4f8ff0c0-70ad-40a4-bd02-a66706a5634e",
+        "6274c496-f772-4855-98ac-ab8dc0d3d41f",
+        "808a8930-03ed-4f98-9298-9a2cf5a2cae0",
+        "8ef90674-1ff0-4055-a822-e9299b9faa14",
+        "6ab13218-7d25-44fb-817f-bc663e79af15",
+        "df54e0d0-4f9d-4e05-a84d-3ebc3d8333e7",
+        "353f44d7-1eec-4a1a-8f08-a15b15513d7c",
+        "32611822-cf7e-4ef6-8a32-ea909a6fa043",
+        "9fc0c28e-7f5d-4e45-975a-d81770d8b479",
+        "dbcdc19e-3d53-4217-8d78-6f9d7e48d822",
+        "b5e57546-fa5d-4d28-861f-cbd8af3b0258",
+        "c9cff78a-9fd3-450c-9ae6-240da8cc76a1",
+        "2004f07d-0dd4-4fc6-b027-6dbaf21812b9",
+        "e9366959-b35e-4aa6-a51d-12a6d8223c34",
+        "51568452-992b-4f37-a72a-f546d0d5c7ab",
+        "7968102f-5263-4cac-993c-b4f3bca64628",
+        "2e140b46-a2ef-4601-9f8a-fc43107c3dd8",
+        "681779af-2fd0-4079-a132-191fcf4fcaf3",
+        "724cad58-a7ba-4f79-ba50-524b1014bff0",
+        "63c50148-e530-4c4c-a3c2-7274d3ee0091",
+        "ab0e9003-bbbd-4e32-85f1-59bbeb306ab9",
+        "a74ce913-e1b2-433a-bed9-68f420b76872",
+        "817a184b-e26d-4cff-9954-9c60a8e41c03",
+        "b578aabf-4596-48b4-b752-062b5ed8a4d3",
+        "889cd4f1-21e2-4846-af4f-9a6cafc3bafb",
+        "3c0098c1-c017-423e-9f55-47876be0c981",
+        "70a9ae5a-e5f7-4e71-9ceb-dd932d2305b3",
+        "9d2607b5-2a08-440c-bef3-8a4086f26016",
+        "615a2cfb-95c6-43ed-b602-85be86d6d631",
+        "67a26c78-9b4c-4db0-8d3d-53396536d8c3",
+        "291bc8fc-0252-4fb1-a813-002e9c1a3972"
+      ],
+      "log_tool_calls": [
+        "772868d0-0f2f-485e-b101-a948c43e2826",
+        "0181f143-0f6f-4c7e-9b34-ad0fd077cbb0",
+        "890f5a18-e084-4779-b387-fd71eb896f08"
+      ],
+      "txn_interaction_sessions": [
+        "66f44cff-d66c-4817-951c-cc4b7b0bb08d",
+        "e30ba5d7-a111-4425-9eb9-249b4a9ef6a2",
+        "eae27de3-0cda-4031-9675-ff69d7c3c0ab",
+        "1b2db33a-5448-4cf4-9e6f-4d632bf4c7e9"
+      ],
+      "txn_conversations": [
+        "2bc6e785-0145-4a1b-9cea-addb67389144",
+        "28977f86-1b18-4055-8d5f-f701bd25fd3b",
+        "04af86f7-e632-40e2-8c2b-0f21a13aa3b2",
+        "2a21cfed-3009-4be7-a420-d081a671bfe9",
+        "f330d1a9-b0b4-443d-b731-6eac782ca4c9",
+        "facb8079-be52-4cce-867b-d8516ec7d2fb",
+        "cc5de84a-4fb0-49bf-b601-570e37678b4f",
+        "27c7a28e-f406-4320-96d0-f29b187a2d90"
+      ]
+    },
+    "verification": {
+      "disappeared": 8,
+      "unintended": [],
+      "survived": []
+    },
+    "orphanEmbeddingsSwept": 0
+  }
+}
