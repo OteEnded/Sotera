@@ -41,6 +41,8 @@ const BLOCK = START > 0 && END > START ? SRC.slice(START, END) : ''
 // would find its own explanation and call it the bug. (Recorded failure mode: a source scan matching the
 // comment that documents the thing it is looking for.)
 const CODE = BLOCK.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n')
+// ⓘ The whole file with comments stripped, for assertions about code outside the grouping block.
+const CODE_ALL = SRC.split('\n').filter((l) => !l.trim().startsWith('//')).join('\n')
 
 test('⭐⭐⭐ the centre is NOT reassigned from the recency branch', () => {
   assert.ok(/prev\.lastAt = at/.test(CODE), 'the recency branch itself must still be there — recency is a real input')
@@ -63,4 +65,19 @@ test('⛔ and the window is still bounded — this fix must not have widened the
 test('ⓘ the stated intent and the code now agree', () => {
   assert.match(BLOCK, /keeping the best-matching centre/,
     'the heading states the intent; if it is reworded, the code above must still satisfy it')
+})
+
+// ── ⭐⭐ D2 CANDIDATE · `episodeTopHit` MUST DEFAULT OFF ───────────────────────────────────────────
+//
+// ⚠️ Measured end to end and it gained 2 on-subject items with 0 lost — but it is a CANDIDATE, not a
+// decision: the `+2` is an arbitrary weight, and in a small lexical-only pool it was measured to demote a
+// holder from rank 1 to rank 2. ⛔ An untested treatment must not become the baseline by being convenient.
+test('⛔⛔ the D2 top-hit term ships OFF, and the baseline arm is unaffected by its wiring', () => {
+  assert.match(SRC, /episodeTopHit = false,/, 'the D2 candidate must default to false')
+  // ⭐ The bonus is gated on the flag, so the production arm computes exactly what it computed before.
+  assert.match(CODE_ALL, /const topHit = episodeTopHit && ep\.bestRank === 0 \? 2 : 0/,
+    'the bonus must be gated on the flag AND on holding the retriever\'s #1 candidate')
+  // ⓘ `bestRank` is recorded unconditionally — that is deliberate and harmless, and it is asserted so a
+  // future edit cannot make the baseline arm depend on it.
+  assert.match(CODE_ALL, /bestRank: rank/, 'bestRank must still be recorded while grouping')
 })

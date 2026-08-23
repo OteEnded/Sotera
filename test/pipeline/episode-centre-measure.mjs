@@ -83,17 +83,23 @@ if (opt('compare')) {
   console.log(`\n${'═'.repeat(104)}`)
   console.log(`  D1 · ${a}  →  ${b}      ⛔ MECHANISM ONLY — what the floor is shown, not what she says`)
   console.log(`${'═'.repeat(104)}`)
-  console.log(`  source line under test: ${A.centreAssignmentPresent ? 'PRESENT' : 'REMOVED'}`
-    + `  →  ${B.centreAssignmentPresent ? 'PRESENT' : 'REMOVED'}`)
+  const arm = (x) => `D1 ${x.centreAssignmentPresent ? 'pre-fix' : 'fixed'} · topHit ${x.episodeTopHit ? 'ON' : 'off'}`
+  console.log(`  arms: ${arm(A)}   →   ${arm(B)}`)
+  if (A.centreAssignmentPresent !== B.centreAssignmentPresent && A.episodeTopHit !== B.episodeTopHit) {
+    console.log('  ⛔⛔ TWO THINGS DIFFER BETWEEN THESE ARMS — the comparison is unattributable. Re-run.')
+  }
   console.log(`\n  ${'case'.padEnd(26)}${'kept'.padEnd(12)}${'ON-SUBJECT'.padEnd(14)}${'filtered'.padEnd(12)}verdict`)
   let gained = 0; let lost = 0
   for (const ca of A.cases) {
     const cb = B.cases.find((x) => x.key === ca.key)
     if (!cb) continue
     const d = cb.onSubject - ca.onSubject
+    const dw = (cb.withThem ?? 0) - (ca.withThem ?? 0)
     const verdict = ca.expectNothing
       ? (d === 0 ? '✓ negative control unmoved' : `⛔⛔ NEGATIVE CONTROL MOVED BY ${d} — manufacturing relevance`)
-      : d > 0 ? `⭐ RECOVERED +${d}` : d < 0 ? `⛔ REGRESSION ${d}` : '· unchanged'
+      : d > 0 ? `⭐ RECOVERED +${d}${dw ? ` (withThem ${dw > 0 ? '+' : ''}${dw})` : ''}`
+        : d < 0 ? `⛔ REGRESSION ${d}${dw ? ` (withThem ${dw > 0 ? '+' : ''}${dw})` : ''}`
+          : (dw ? `⚠️ on-subject unchanged but withThem moved ${dw > 0 ? '+' : ''}${dw}` : '· unchanged')
     if (!ca.expectNothing) { if (d > 0) gained += d; if (d < 0) lost -= d }
     console.log(`  ${ca.key.padEnd(26)}${`${ca.kept} → ${cb.kept}`.padEnd(12)}`
       + `${`${ca.onSubject} → ${cb.onSubject}`.padEnd(14)}${`${ca.filtered} → ${cb.filtered}`.padEnd(12)}${verdict}`)
@@ -105,6 +111,9 @@ if (opt('compare')) {
 
 // ══ MEASURE ═══════════════════════════════════════════════════════════════════════════════════════
 const label = opt('label')
+// ⭐⭐ `--topHit` runs the D2 CANDIDATE ARM. Both arms are options on the host, so ONE process can measure
+// both deterministically — no restart, no source edit between runs, and no way to mislabel which arm ran.
+const topHit = argv.includes('--topHit')
 if (!label) { console.error('✖ --label <name> (or --compare <a> <b>)'); process.exit(1) }
 
 const db = await initDB(); setDB(db); await initSettings(db)
@@ -125,16 +134,18 @@ const { rows: [corpus] } = await pg.query(
 console.log(`\n${'═'.repeat(104)}`)
 console.log(`  D1 MEASUREMENT · ${label}`)
 console.log(`${'═'.repeat(104)}`)
-console.log(`  the line under test (\`prev.centre = mid\`): ${centreAssignmentPresent ? 'PRESENT (baseline)' : 'REMOVED (fixed)'}`)
+console.log(`  D1 (\`prev.centre = mid\`): ${centreAssignmentPresent ? 'PRESENT — pre-fix' : 'REMOVED — fixed'}`
+  + `   ·   D2 episodeTopHit: ${topHit ? 'ON (candidate arm)' : 'off (production)'}`)
 console.log(`  corpus: ${corpus.harness} harness conversation(s) of ${corpus.total}`
   + `${corpus.harness ? ' ⚠️ CONTAMINATED' : ' ✓ clean'}`)
-console.log(`\n  ${'case'.padEnd(26)}${'kept'.padEnd(6)}${'onSubj'.padEnd(8)}${'filtered'.padEnd(10)}${'episodes'.padEnd(10)}subject named`)
+console.log(`\n  ${'case'.padEnd(26)}${'kept'.padEnd(6)}${'onSubj'.padEnd(8)}${'filtered'.padEnd(10)}${'eps'.padEnd(5)}${'withThem'.padEnd(10)}subject named`)
 
-const out = { label, at: new Date().toISOString(), centreAssignmentPresent, corpus, cases: [] }
+const out = { label, at: new Date().toISOString(), centreAssignmentPresent, episodeTopHit: topHit, corpus, cases: [] }
 for (const c of CASES) {
   // ⓘ A FRESH HOST PER CASE, so nothing accumulates between them.
   const cog = buildMemoryCognition(fastify, {
     userId: me.id, isRoot: false, username: me.username, conversationId: null, interactive: false,
+    episodeTopHit: topHit,
   })
   let row = { key: c.key, ask: c.ask, why: c.why, expectNothing: c.expectNothing === true,
     mustMention: String(c.mustMention), activated: false, kept: 0, onSubject: 0, filtered: 0, episodes: 0,
@@ -145,12 +156,15 @@ for (const c of CASES) {
     row.activated = r.activated === true
     row.kept = items.length
     row.episodes = items.filter((i) => i.kind === 'episode').length
+    // ⭐ THE PERSON PATH, SEPARATELY. `withThem` carries +100 and decides the person cases outright, so a
+    // topic-path change must be shown NOT to have moved them. ⛔ Reported per case rather than assumed.
+    row.withThem = items.filter((i) => i.withThem === true).length
     row.onSubject = items.filter((i) => c.mustMention.test(JSON.stringify(i))).length
     row.filtered = r.filtered ?? 0
     row.subjectNamed = (r.context ?? '').match(/(?:came up|talking about|about)\s+([^\n.]{1,40})/)?.[1]?.trim() ?? null
   } catch (e) { row.error = e?.message ?? String(e) }
   console.log(`  ${c.key.padEnd(26)}${String(row.kept).padEnd(6)}${String(row.onSubject).padEnd(8)}`
-    + `${String(row.filtered).padEnd(10)}${String(row.episodes).padEnd(10)}${row.subjectNamed ?? '—'}`)
+    + `${String(row.filtered).padEnd(10)}${String(row.episodes).padEnd(5)}${String(row.withThem).padEnd(10)}${row.subjectNamed ?? '—'}`)
   out.cases.push(row)
 }
 

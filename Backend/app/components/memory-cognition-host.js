@@ -95,6 +95,11 @@ export function buildMemoryCognition(fastify, {
   // ⭐ THE DATES-ONLY PROBE, passed IN rather than read here — this module reads no settings, and the one
   // time a component in this project started reading its own config the arms stopped being separable.
   localDates = false,
+  // ⭐⭐ D2 CANDIDATE · `episodeTopHit` · ⛔ DEFAULT OFF, and passed IN for the same reason: it lets ONE
+  // process measure BOTH arms deterministically, with no restart and no source edit between runs. An
+  // experiment whose arms require editing a file is an experiment that can be mislabelled — which is
+  // exactly what happened in the P5 round.
+  episodeTopHit = false,
 } = {}) {
   const db = fastify?.db
 
@@ -337,14 +342,19 @@ export function buildMemoryCognition(fastify, {
 
     // ── 2 · GROUP INTO EPISODES. One entry per conversation, keeping the best-matching centre. ─────
     const episodes = new Map()
+    let rank = -1
     for (const e of evidence) {
+      rank += 1   // ⓘ position in the RANKED list; `evidence` arrives best-first
       const cid = e.conversation?.id
       const mid = e.message?.id
       if (!cid || !mid) continue
       const at = e.timestamp ?? null
       const prev = episodes.get(cid)
       if (!prev) {
-        episodes.set(cid, { cid, centre: mid, matches: 1, firstAt: at, lastAt: at })
+        // ⓘ `bestRank` is the position of this conversation's best candidate in the RANKED evidence list, so
+        // 0 means "this conversation holds the retriever's top hit". ⛔ Recorded unconditionally and used only
+        // when `episodeTopHit` is on, so the baseline arm is byte-identical in behaviour to before.
+        episodes.set(cid, { cid, centre: mid, matches: 1, firstAt: at, lastAt: at, bestRank: rank })
       } else {
         prev.matches += 1
         if (at && (!prev.firstAt || at < prev.firstAt)) prev.firstAt = at
@@ -396,7 +406,19 @@ export function buildMemoryCognition(fastify, {
       const p = participants.get(ep.cid)
       const withThem = Boolean(p?.who && cueNames.includes(String(p.who).toLowerCase()))
       const recency = ep.lastAt ? Math.max(0, 1 - (Date.now() - new Date(ep.lastAt).getTime()) / (30 * 864e5)) : 0.2
-      return { ...ep, who: p?.who ?? null, roomUserId: p?.roomUserId ?? null, withThem, score: (withThem ? 100 : 0) + ep.matches + recency }
+      // ⭐⭐ D2 CANDIDATE (`episodeTopHit`, ⛔ default OFF). `ep.matches` is a COUNT OF CANDIDATES, so four
+      // weakly-matching messages beat one exact match and only the top `LIMITS.episodes` survive to the
+      // floor. Measured for *"…herb notebook?"*: the two conversations that hold the notebook rank 6th and
+      // 7th, beaten by one with 4 weak matches and 0 on-subject.
+      // ⛔ AND MY FIRST PROPOSAL — rank on the retriever's per-candidate score — WAS REFUTED BY
+      // MEASUREMENT: 1 of 7 cases reached the top-5 against production's 4 of 7. In hybrid mode that score
+      // is an RRF score, `1/(60+rank+1)`, so the whole pool sits inside a ~2× band under 0.033 while
+      // recency spans 0…1 ⇒ `bestScore + recency` is a recency sort with a rounding error attached.
+      // ⇒ this term uses the retriever's RANK instead, and only its top position: the conversation holding
+      // the #1 candidate gets a bonus. ⚠️ `+2` is an ARBITRARY WEIGHT and is not yet justified — the
+      // question being measured first is whether the shape helps at all.
+      const topHit = episodeTopHit && ep.bestRank === 0 ? 2 : 0
+      return { ...ep, who: p?.who ?? null, roomUserId: p?.roomUserId ?? null, withThem, bestRank: ep.bestRank ?? null, score: (withThem ? 100 : 0) + topHit + ep.matches + recency }
     }).sort((a, b) => b.score - a.score)
 
     // ── 5 · ⭐⭐⭐ HER OWN HALF IS FETCHED DIRECTLY. THE COUNTERPART'S GOES THROUGH THE DOOR. ─────────
