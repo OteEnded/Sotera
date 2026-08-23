@@ -2619,7 +2619,9 @@ export default async function chatSiteRoutes(fastify) {
             enabled: fastify.config?.memory?.cognitionEnabled === true,
             // ⚠️ A TERM LIST CATCHES ONLY WHAT IT WAS TOLD ABOUT — this repo's most-repeated defect. The
             // residue is LOGGED rather than assumed to be zero, so the next word we missed leaves a trail.
-            onLeak: (words) => fastify.log?.debug?.({ tool: tc.name, words }, '[cognition] tool vocabulary residue'),
+            onLeak: (words) => fastify.log?.debug?.({ tool: tc.name, words }, "[cognition] tool vocabulary residue"),
+            // ⭐ STEP A: the arguments are passed so the scope sentence can name WHAT was looked for.
+            args: tc.arguments ?? tc.function?.arguments ?? null,
           })
           working.push({ role: 'tool', tool_call_id: tc.id, name: tc.name, content: forModel })
         }

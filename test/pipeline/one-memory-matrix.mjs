@@ -127,7 +127,7 @@ function runRoot(cell) {
   const last = (t.transcript ?? []).at(-1)
   return {
     cid: t.conversationId,
-    answer: last?.reply ?? last?.answer ?? last?.content ?? '(empty)',,
+    answer: last?.reply ?? last?.answer ?? last?.content ?? '(empty)',
     error: last?.error ?? null,
     tools: last?.tools ?? [],
   }

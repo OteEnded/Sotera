@@ -1,17 +1,15 @@
 {
   "room": "ote",
-  "conversationId": "7db70206-ca7e-46c8-81ad-08a1bcb47b62",
+  "conversationId": "024876c3-cf22-45a7-8f3e-c5fbe2682bcd",
   "conversationTitle": "MATRIX 4 — old contradictory self-report (delete me)",
   "transcript": [
     {
       "turn": 1,
       "asked": "A while ago you told me you had no direct memories about Hermes from this room. Is that still true?",
       "tools": [
-        "recall_memory",
-        "list_memories",
         "list_memories"
       ],
-      "reply": "Let me check what's stored now.\n\nYes, that's still true. From this room, there are **no direct memories about Hermes** — no semantic facts, no episodic memories, nothing stored in the memory store here at all.\n\nWhat I *do* have (from what's visible in my reach right now) is awareness that I've interacted with Hermes before, but the actual content of those conversations lives in other rooms I can't see from here. The absence hasn't changed — it was never a gap to fill, just a boundary.",
+      "reply": "Let me check what's currently stored in this room right now.\n\nYes, it's still true. This room has four stored memories and **none** of them mention Hermes:\n\n1. A declined memory about cross-place conversation testing\n2. Your interaction preference (be yourself naturally)\n3. Your physical state\n4. Your current goal (build Rome in one day)\n\nSo there's nothing about Hermes in this room's durable memory store — same as before.",
       "error": null,
       "held": false,
       "wait": "direct",
