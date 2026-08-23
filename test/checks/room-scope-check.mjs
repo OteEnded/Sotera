@@ -183,13 +183,50 @@ try {
     'R2 · ⭐ …and the payload TELLS her that is why they match')
 
   // ── D13 · THE INJECTED SCOPE BLOCK, and its mutual exclusion with v1 ──────────────────────────
+  // ⭐⭐ 2026-08-23 · TWO ARMS. `legacy` is the block as it was MEASURED (47 of 104 machinery occurrences
+  // traced here, 45%, against 0 from the cognition layer); `block` is the default, facts only. Both are
+  // asserted, because a reversal that is not pinned is not a reversal.
+  const legacy = renderScope(s, { directives: true })
   const block = renderScope(s)
-  ok(block.includes('Kavi') && block.includes('kavi'),
-    'D13 · the rendered block names the PERSON and the ROOM')
-  ok(/same persona in every room/i.test(block) && /does not mean the same reach/i.test(block),
+  ok(legacy.includes('Kavi') && legacy.includes('kavi'),
+    'D13 · the LEGACY block names the PERSON and the ROOM — pinned, so the reverse switch is real')
+  ok(/same persona in every room/i.test(legacy) && /does not mean the same reach/i.test(legacy),
     'D13 · ⭐ …and states the invariant, so she can reason from it without calling a tool')
-  ok(/other room\(s\) you cannot read from here/i.test(block) && /\d/.test(block),
+  ok(/other room\(s\) you cannot read from here/i.test(legacy) && /\d/.test(legacy),
     'D13 · ⭐⭐ …and carries the TRACE, digits and all — which is exactly what v1 forbade')
+
+  // ── ⭐⭐⭐ D13b · THE FACT-ONLY ARM: same facts, no expression, no room name ────────────────────
+  // Ote: *"Keep the epistemic facts and D-13 behavior, but remove the expression directives, permission
+  // to expose the machinery, and room name from the model-facing scope-facts."* Each half is asserted
+  // separately, because "it got shorter" is not the claim — the claim is WHICH lines left.
+  ok(block.includes('Kavi'), 'D13b · ⭐ the default block still names the PERSON')
+  ok(!block.includes('kavi'),
+    'D13b · ⭐⭐ …and NOT the room — the single most-repeated machinery token in her answers', block.match(/^.*ROOM.*$/mi)?.[0] ?? '(no room line)')
+  ok(!/\broom\b/i.test(block),
+    'D13b · ⭐⭐ …and does not contain the word "room" at all, so it cannot teach her the vocabulary the'
+    + ' cognition layer is built to avoid')
+  ok(!/What is stored in a room stays in that room/i.test(block),
+    'D13b · ⛔ …and not the leak sentence quoted inside memory-cognition-vocabulary.js as its cause')
+  ok(!/Say you cannot see it from this/i.test(block),
+    'D13b · ⛔ the PHRASING directive is gone — architecture no longer dictates her expression')
+  ok(!/You may say any of this plainly/i.test(block),
+    'D13b · ⛔ the PERMISSION to speak the machinery is gone')
+  // ⭐ AND NOW THE HALF THAT MUST NOT HAVE MOVED. D-13 exists for a measured defect; losing it here would
+  // trade one defect for the one it was built to fix.
+  ok(/does not mean the same reach/i.test(block), 'D13b · ⭐ the identity invariant survives')
+  ok(/\d+ such place\(s\), holding \d+ stored memory\/memories/.test(block),
+    'D13b · ⭐⭐ D-13\'s COUNT survives, digits and all — the digit is the whole reason v2 replaced v1',
+    block.match(/^.*such place.*$/m)?.[0] ?? '(no trace line)')
+  ok(/empty result here is not evidence of absence/i.test(block),
+    "D13b · ⭐⭐ …and D-13's INFERENCE survives — what left was how to SAY it, not what is true")
+  ok(/keyed to the PERSON/.test(block) && /told you HERE/.test(block),
+    'D13b · ⭐ the GRAIN of each layer survives — the fact she could not derive from the data')
+  ok(/You may NOT name or describe another person/.test(block),
+    'D13b · ⚠️ the disclosure PROHIBITION survives verbatim in force — that is authorization, not expression')
+  // ⛔ THE PAYLOAD IS UNTOUCHED, and that is what keeps the measurement attributable: the same grain
+  // sentences ride on TOOL results, which trace separately (17%).
+  ok(s.grain?.whatTheyToldYou?.includes('THIS ROOM') && s.room?.name === 'kavi',
+    'D13b · ⛔ describeScope\'s PAYLOAD is unchanged — the tool surface is a separate, separately measured arm')
   // ⭐ THE CONFLICT, ASSERTED IN BOTH DIRECTIONS. v1's own test forbids a digit ("a digit here means it
   // is describing how much is hidden") and requires it to call the two states indistinguishable. v2 does
   // the opposite on purpose, licensed by being SAME-PERSON only. Neither is wrong; they cannot coexist.
@@ -206,12 +243,17 @@ try {
   const v1Only = composeSystemContext({ ...baseArgs, scopeAwareness: true }).system
   const v2Only = composeSystemContext({ ...baseArgs, scopeFacts: block }).system
   const bothOn = composeSystemContext({ ...baseArgs, scopeAwareness: true, scopeFacts: block }).system
-  ok(!offBoth.includes(SCOPE_AWARENESS) && !offBoth.includes('The ROOM you are in'),
+  // ⚠️ THE MARKER IS THE INVARIANT SENTENCE, NOT `The ROOM you are in`. The old marker was a line that the
+  // facts/expression split deliberately deletes, so keying the mutual-exclusion assertions to it would make
+  // them pass or fail for a reason that has nothing to do with mutual exclusion. This sentence is in BOTH
+  // arms because it is a fact, which is exactly what makes it a safe marker.
+  const V2 = 'does not mean the same reach'
+  ok(!offBoth.includes(SCOPE_AWARENESS) && !offBoth.includes(V2),
     'D13 · with both flags off the prompt carries neither')
   ok(v1Only.includes(SCOPE_AWARENESS), 'D13 · v1 alone still injects v1')
-  ok(v2Only.includes('The ROOM you are in') && !v2Only.includes(SCOPE_AWARENESS),
+  ok(v2Only.includes(V2) && !v2Only.includes(SCOPE_AWARENESS),
     'D13 · v2 alone injects only v2')
-  ok(bothOn.includes('The ROOM you are in') && !bothOn.includes(SCOPE_AWARENESS),
+  ok(bothOn.includes(V2) && !bothOn.includes(SCOPE_AWARENESS),
     'D13 · ⭐⭐ with BOTH set, v2 wins and v1 is suppressed — deterministically, never by throwing')
   ok(configDefault(null, 'memory.scopeFacts') === false,
     'D13 · ⭐ `memory.scopeFacts` SHIPS off', `shipped=${configDefault(null, 'memory.scopeFacts')} · live=${getSetting(config, 'memory.scopeFacts')}`)

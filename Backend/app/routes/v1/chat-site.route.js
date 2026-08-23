@@ -1680,7 +1680,11 @@ export default async function chatSiteRoutes(fastify) {
       scopeFacts: getSetting(fastify.config, 'memory.scopeFacts') === true
         ? await (async () => {
           try {
-            return renderScope(await describeScope(fastify, { userId: request.user.id, isRoot: request.user.isRoot === true }))
+            // ⭐ 2026-08-23 · facts by default; `scopeFactsDirectives` restores the measured legacy block.
+            return renderScope(
+              await describeScope(fastify, { userId: request.user.id, isRoot: request.user.isRoot === true }),
+              { directives: getSetting(fastify.config, 'memory.scopeFactsDirectives') === true },
+            )
           } catch (e) {
             fastify.log?.debug?.({ err: e?.message }, '[scope] scope-facts read failed (non-fatal)')
             return null

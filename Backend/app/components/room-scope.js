@@ -218,33 +218,57 @@ export async function describeRoomIndex(fastify, { userId = null, isRoot = false
  * *can it expose its source, or reveal something someone was never entitled to know?* — answered no.
  *
  * ⛔ It still names no room but the current one, and no other person, ever.
+ *
+ * ── ⭐⭐⭐ 2026-08-23 · THE FACTS AND THE EXPRESSION ARE NOW TWO ARMS ───────────────────────────────
+ * Traced across 104 machinery-vocabulary occurrences in her answers: **this block was the single largest
+ * source, 47 of them (45%), against 0 from the cognition layer.** Three of its lines were not facts:
+ *   ⛔ `The ROOM you are in: agent_dev. What is stored in a room stays in that room.` — the room NAME (the
+ *      most-repeated machinery token in her answers), and a sentence quoted VERBATIM inside
+ *      `memory-cognition-vocabulary.js` as the measured cause of the original leak. It has been in her
+ *      system prompt the whole time, from this other feature.
+ *   ⛔ `Say you cannot see it from this room…` — a PHRASING directive: architecture dictating expression.
+ *   ⛔ `You may say any of this plainly if it matters.` — explicit PERMISSION to speak the machinery.
+ * Ote: *"Keep the epistemic facts and D-13 behavior, but remove the expression directives, permission to
+ * expose the machinery, and room name from the model-facing scope-facts."*
+ *
+ * ⭐ KEPT, each because it is a fact and not a phrasing: the identity invariant (same Sotera ≠ same reach),
+ * the PERSON's name, the grain of each layer, ⭐ D-13's COUNT — the digit is the whole reason v2 replaced
+ * v1, because it is what makes unreachable and absent tellable apart — ⭐ D-13's INFERENCE (an empty result
+ * is not evidence of absence), and ⚠️ the disclosure PROHIBITION, which is authorization, not expression.
+ *
+ * ⚠️ `describeScope`'s PAYLOAD IS NOT TOUCHED, and that is deliberate. Its grain sentences also ride on
+ * TOOL results (`recall_intention`, `recall_own_memory`) — a separate surface with its own separately
+ * measured share (17%). Rewording the payload would move two things at once and make the measurement
+ * unattributable, so this function renders its own sentences from the same underlying facts.
+ *
+ * ⚠️ THREE DELIBERATE DEVIATIONS FROM THE WRITTEN DESIGN, recorded because each is arguable:
+ *   1. THE PERSON'S NAME STAYS. The design proposed moving it to the cognition block, which already says
+ *      it — but cognition renders only when a cue ACTIVATES it, so on a non-activating turn the move would
+ *      delete her only statement of who she is talking to, which is R4's whole subject. A person's own name
+ *      is also not our machinery.
+ *   2. THE PROHIBITION IS RE-PHRASED rather than retained verbatim. Its CONTENT is unchanged and if
+ *      anything wider ("anywhere you cannot reach" ⊇ "another room"), but leaving `room` inside it would
+ *      leave the confound in the block for every user, which is the one thing this change exists to remove.
+ *   3. ONE CONTAINER NOUN SURVIVES ("place"). The design said none — but a COUNT of containers cannot be
+ *      stated without one, and dropping the count makes `0 stored memories` read as a contradiction, which
+ *      is the D-4d defect family exactly. "place" is generic English rather than our vocabulary.
+ *
+ * ⚠️ THE ROOT AUDIT BRANCH KEEPS ITS VOCABULARY, IDENTICALLY IN BOTH ARMS. D-4 names rooms because root is
+ * ENTITLED to know which rooms exist; it is an audit surface, not conversational framing. ⇒ the reduction
+ * applies to everyone EXCEPT root, and a measurement taken in a root room will not move.
+ *
+ * ⚠️ ACCEPTED COST: she is no longer TOLD the room's name. It is still on every scoped tool result
+ * (`reachTrace.room`), so it becomes something she can investigate rather than something she recites.
+ *
+ * @param {object|null} scope
+ * @param {{directives?: boolean}} o — `directives: true` restores the pre-2026-08-23 block BYTE FOR BYTE
+ *   (setting `memory.scopeFactsDirectives`), so the change is reversible without a deploy and both arms are
+ *   measurable against each other rather than against a memory of what the old one said.
  */
-export function renderScope(scope) {
+export function renderScope(scope, { directives = false } = {}) {
   if (!scope) return null
   const e = scope.elsewhere ?? {}
-  const lines = [
-    'How your knowledge is scoped right now — these are facts about this moment, not instructions:',
-    `- You are Sotera, the same persona in every room. Being the same Sotera does not mean the same reach.`,
-    `- The PERSON you are talking to: ${scope.person?.name ?? 'unknown'}. One person can reach you through several rooms; it is still the same person.`,
-    `- The ROOM you are in: ${scope.room?.name ?? 'unknown'}. What is stored in a room stays in that room.`,
-    `- What they told you: ${scope.grain?.whatTheyToldYou ?? ''}`,
-    `- Your own practice with them: ${scope.grain?.yourOwnPractice ?? ''}`,
-    `- Your intention: ${scope.grain?.yourIntention ?? ''}`,
-  ]
-  // ⭐ THE TRACE, and the whole point of it: it makes "unreachable" and "absent" tellable apart.
-  if (e.otherRoomsOfThisPerson > 0) {
-    lines.push(
-      `- This person also uses ${e.otherRoomsOfThisPerson} other room(s) you cannot read from here, holding`
-      + ` ${e.storedMemoriesYouCannotReadFromHere} stored memory/memories.`,
-      '  So if you find nothing here, that is UNREACHABILITY, not absence. Say you cannot see it from this'
-      + ' room — never that it does not exist, and never guess what is in it.',
-    )
-  } else {
-    lines.push(
-      '- This person uses no other room, so an empty result here really is an absence rather than something'
-      + ' out of reach.',
-    )
-  }
+  const lines = directives ? legacyLines(scope, e) : factLines(scope, e)
   // ⭐ D-4 · root sees WHICH rooms, and nothing about what is in them.
   if (Array.isArray(e.rooms) && e.rooms.length) {
     lines.push("- You can see the NAMES of this person's other rooms, because you are in their root room:")
@@ -262,11 +286,85 @@ export function renderScope(scope) {
       + ' to be told yes by them, not by your own reasoning.',
     )
   }
-  lines.push(
-    'You may say any of this plainly if it matters. You may NOT name or describe another person, or the'
-    + " contents of another room — knowing a room exists is not permission to describe it.",
-  )
+  lines.push(directives
+    ? 'You may say any of this plainly if it matters. You may NOT name or describe another person, or the'
+      + " contents of another room — knowing a room exists is not permission to describe it."
+    // ⚠️ THE PROHIBITION SURVIVES — it is authorization, not expression, and must not be softened. The
+    // PERMISSION does not: what she says is hers and cognition's, not this block's to license.
+    : 'You may NOT name or describe another person, or what is held anywhere you cannot reach from here —'
+      + ' knowing that something exists is not permission to describe it.')
   return lines.join('\n')
+}
+
+/**
+ * ⭐ THE FACT-ONLY ARM (default). The same facts, none of the expression, and no room name.
+ * ⛔ Every line here must survive the question *"is this a fact about this moment, or an instruction about
+ * how to talk?"* — the second kind is what the 45% was.
+ */
+function factLines(scope, e) {
+  const lines = [
+    // ⚠️ Even the header was teaching a word ("scoped"). It is framing, not a fact, so it is free to change.
+    'What you can and cannot reach right now — facts about this moment, not instructions:',
+    '- You are Sotera, and you are the same person wherever you are reached. Being the same Sotera does not'
+    + ' mean the same reach.',
+    // ⭐ DEVIATION 1: the person's name stays. See the header — cognition only speaks on an activating turn.
+    `- The PERSON you are talking to: ${scope.person?.name ?? 'unknown'}. If they reach you again somewhere`
+    + ' else, it is still the same person.',
+    // ⭐ THE GRAIN, which is the fact she could not derive from the data (see this module's header, failure
+    // #1). Re-stated without the container noun; the payload's own wording is untouched.
+    '- What this person has told you: reachable here only if they told you HERE.',
+    '- What you have learned about working with them: keyed to the PERSON, so it is the same wherever you'
+    + ' talk with them.',
+    '- Your intention: keyed to HERE. A purpose you took on somewhere else does not belong to this one.',
+  ]
+  // ⭐ THE TRACE, and the whole point of it: it makes "unreachable" and "absent" tellable apart. The DIGIT
+  // is retained — v1 forbade one, v2 exists because same-person entitlement licenses it.
+  if (e.otherRoomsOfThisPerson > 0) {
+    lines.push(
+      `- This person can also reach you where you cannot read from here — ${e.otherRoomsOfThisPerson} such`
+      + ` place(s), holding ${e.storedMemoriesYouCannotReadFromHere} stored memory/memories.`,
+      // ⭐ D-13's INFERENCE, kept. ⛔ What is gone is the sentence that told her how to SAY it.
+      '- So an empty result here is not evidence of absence. It can also mean something exists and is out'
+      + ' of reach.',
+    )
+  } else {
+    lines.push(
+      "- Nothing of this person's is held anywhere you cannot reach from here, so an empty result here really"
+      + ' is an absence rather than something out of reach.',
+    )
+  }
+  return lines
+}
+
+/**
+ * ⛔ THE LEGACY ARM — the block exactly as it stood before 2026-08-23, kept BYTE FOR BYTE.
+ * It is here so the change is reversible by a setting and so the two arms can be measured against each
+ * other. ⚠️ Do not "tidy" these strings: their value is that they are the ones that were measured.
+ */
+function legacyLines(scope, e) {
+  const lines = [
+    'How your knowledge is scoped right now — these are facts about this moment, not instructions:',
+    `- You are Sotera, the same persona in every room. Being the same Sotera does not mean the same reach.`,
+    `- The PERSON you are talking to: ${scope.person?.name ?? 'unknown'}. One person can reach you through several rooms; it is still the same person.`,
+    `- The ROOM you are in: ${scope.room?.name ?? 'unknown'}. What is stored in a room stays in that room.`,
+    `- What they told you: ${scope.grain?.whatTheyToldYou ?? ''}`,
+    `- Your own practice with them: ${scope.grain?.yourOwnPractice ?? ''}`,
+    `- Your intention: ${scope.grain?.yourIntention ?? ''}`,
+  ]
+  if (e.otherRoomsOfThisPerson > 0) {
+    lines.push(
+      `- This person also uses ${e.otherRoomsOfThisPerson} other room(s) you cannot read from here, holding`
+      + ` ${e.storedMemoriesYouCannotReadFromHere} stored memory/memories.`,
+      '  So if you find nothing here, that is UNREACHABILITY, not absence. Say you cannot see it from this'
+      + ' room — never that it does not exist, and never guess what is in it.',
+    )
+  } else {
+    lines.push(
+      '- This person uses no other room, so an empty result here really is an absence rather than something'
+      + ' out of reach.',
+    )
+  }
+  return lines
 }
 
 /**
