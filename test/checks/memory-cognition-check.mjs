@@ -337,11 +337,16 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
       '10 · ⛔ retention is never inherited — a fresh observation is not something she kept')
 
     // ── ⭐⭐⭐ ORDER IS THE ONLY CLAIM THE LAYER MAKES: NOW BEFORE THEN ──────────────────────────────
-    const first = String(r.context ?? '').split('\n')[0] ?? ''
+    const blockLines = String(r.context ?? '').split('\n')
     if (eps.length) {
-      ok(/^Right now I/.test(first), '10 · ⭐⭐⭐ the block LEADS with what she can reach right now',
-        first.slice(0, 78))
-      ok(!first.trim().endsWith(':'),
+      // ⭐⭐⭐ R4 · THE ANCHOR FOR "YOU" COMES FIRST, then the present tense, then the dated past.
+      // ⚠️ Without that first line, every second-person pronoun inside every quotation below it is dangling,
+      // and a dangling "you" resolves — for any reader — to whoever they are talking to now. That is R4.
+      ok(/^I'm talking with .+ right now\.$/.test(blockLines[0] ?? ''),
+        '10 · ⭐⭐⭐ the block NAMES the person she is speaking with, before quoting anybody', blockLines[0])
+      ok(/^Right now I/.test(blockLines[1] ?? ''),
+        '10 · ⭐⭐⭐ …then what she can reach right now', String(blockLines[1]).slice(0, 68))
+      ok(!String(blockLines[0]).trim().endsWith(':'),
         '10 · ⛔ …and that first line is not a heading — a title turns the rest into "the contents"')
     }
 
@@ -354,7 +359,10 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
       // ⭐ The mechanism, asserted on real text: her words, unchanged, behind four words that date them.
       ok(r.context.includes(x.said),
         '10 · ⭐⭐ her old line survives VERBATIM in the block', x.said.slice(0, 56))
-      ok(new RegExp(`(On \\d+ [A-Z][a-z]+|Earlier) I said: ${x.said.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(r.context),
+      // ⓘ `I said` now also carries its ADDRESSEE (R4) — *"On 21 August I said to Ote: …"*. The DATE is
+      // required; the addressee clause is admitted because it is present exactly when the episode resolved
+      // a participant, and absent — correctly — when it did not.
+      ok(new RegExp(`(On \\d+ [A-Z][a-z]+|Earlier) I said( to [^:]{1,40})?: ${x.said.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(r.context),
         '10 · ⭐⭐⭐ …and it is introduced as a PAST utterance, not a standing fact', x.timeBound)
       // ⚠️⚠️ THIS ASSERTION WAS WRONG ON ITS FIRST WRITING AND FAILED 3-FOR-3 ON REAL DATA, and the reason
       // is the design rather than the code: the stamp is derived from the **full** message while `x.said` is

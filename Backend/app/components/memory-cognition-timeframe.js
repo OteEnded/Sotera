@@ -63,9 +63,11 @@ export const TIME_BOUND_IS_NOT_AN_AXIS =
  * ⭐ AND IT ONLY EVER APPLIES TO ITEMS THAT ARE `owner === sotera` **AND** `source === own-utterance`.
  * Someone else saying *"you can't access that"* is THEIR claim, not her self-report, and is never touched.
  *
- * ⚠️ ENGLISH ONLY, AND THAT IS A KNOWN GAP RATHER THAN AN OVERSIGHT — cue formation upstream is English-only
- * too, so the layer does not activate on a Thai turn at all yet. When multilingual activation lands, this
- * list gains its counterparts; until then a Thai self-report is a MISS, which is the mild direction.
+ * ⚠️ ENGLISH ONLY, AND THAT IS A KNOWN GAP RATHER THAN AN OVERSIGHT. ⓘ The note here used to say *"the layer
+ * does not activate on a Thai turn at all"*, and that was measured to be **too broad**: a Thai turn naming
+ * someone in Latin script activates and works end to end — 34% of her Thai messages. So her Thai lines DO
+ * reach this list, and an undetected Thai self-report is a MISS, which is the mild direction.
+ * ⇒ see `ANALYSIS_SOTERA_MULTILINGUAL_CUES.md` for what activation does and does not do per script.
  */
 export const SELF_REPORT_PATTERNS = Object.freeze([
   {
@@ -190,7 +192,7 @@ export function currentStateOf({ cues = null, kept = [], asOf = null } = {}) {
     kind: 'current-state',
     // ⓘ A REAL TIMESTAMP, because the whole point of the section is that claims have dates.
     asOf: asOf ? new Date(asOf) : new Date(),
-    subject: cues?.persons?.[0] ?? cues?.topics?.[0] ?? null,
+    cueSubject: cues?.persons?.[0] ?? cues?.topics?.[0] ?? null,
     observed,
     reachableTotal,
     source: SOURCE.derived,
@@ -303,9 +305,13 @@ export function currentStateSentence(currentState, about = 'this') {
  * ⛔ It never appends *"…and I was wrong"*. That judgement is hers.
  *
  * @param {string|null} day already-humanised, e.g. "21 August". Null when the item carries no usable date.
+ * @param {string} to  optional addressee clause, e.g. " to Hermes". ⭐ §3B's dating and R4's addressee
+ *   compose into one prefix — *"On 21 August I said to Ote: …"* is both correctly dated and correctly
+ *   addressed, and neither half was inferred. ⛔ Empty string when the addressee is not known; a guessed
+ *   addressee would be a worse defect than a missing one.
  */
-export function datedPrefix(day) {
+export function datedPrefix(day, to = '') {
   // ⓘ NO DATE STILL MEANS PAST. *"Earlier I said"* is weaker than a date and still stops the present-tense
   // reading, which is the property that matters. ⛔ Never invent a date.
-  return day ? `On ${day} I said: ` : 'Earlier I said: '
+  return day ? `On ${day} I said${to}: ` : `Earlier I said${to}: `
 }

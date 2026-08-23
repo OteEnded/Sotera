@@ -86,8 +86,13 @@ test('⛔ the scan is for what WE write — it never policies her speech', () =>
 // BY the epistemic state rather than chosen for how it sounds. If a future edit picks a phrase for style,
 // the axis stops being load-bearing and "natural" quietly becomes "confident".
 const HOST = readFileSync(new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
-const RENDER_RAW = HOST.slice(HOST.indexOf('function render({ cues, kept, dropped, searched })'),
-  HOST.indexOf('RE-RENDER A FILTERED SET'))
+// ⚠️ ANCHORED ON `function render({` RATHER THAN THE FULL SIGNATURE, because pinning the whole parameter list
+// made this slice silently empty the moment a parameter was added — `indexOf` returned -1, `slice(-1, …)`
+// returned a one-character string, and every negative assertion below passed VACUOUSLY while every positive
+// one failed. ⛔ A source scan whose anchor can go missing is a scan that can quietly stop scanning.
+const RENDER_AT = HOST.indexOf('function render({')
+assert.ok(RENDER_AT > 0, 'the renderer must be findable — if this fails, every assertion below is vacuous')
+const RENDER_RAW = HOST.slice(RENDER_AT, HOST.indexOf('RE-RENDER A FILTERED SET'))
 // ⚠️⚠️ CODE ONLY, AND THIS IS THE THIRD TIME THE SAME MISTAKE HAS BEEN CAUGHT. The negative assertions
 // below failed on COMMENTS: the renderer contains the line `⛔ Never "I don't remember"` — a comment that
 // quotes the forbidden phrase precisely in order to forbid it — and another describing the container header
@@ -118,7 +123,9 @@ test('⭐⭐ "I decided to keep this" is licensed by RETENTION, and `given` may 
 
 test('⭐⭐ inference is still phrased as inference — BASIS selects it', () => {
   assert.ok(RENDER.includes('BASIS.inferred'), 'basis must select the inference phrasing')
-  assert.ok(/worked this out rather than being told it/.test(RENDER),
+  // ⓘ The phrase is now interrupted by the SUBJECT clause (R4): `I worked this out${about} rather than …`,
+  // so the assertion spans it. ⛔ Both halves still required — the basis phrasing must not have been dropped.
+  assert.ok(/worked this out.{0,24}rather than being told it/.test(RENDER),
     'an inferred memory must announce itself as worked out')
   assert.ok(RENDER.includes('BASIS.synthesized'), 'and convergence must be distinguishable from attestation')
   assert.ok(/nothing says it outright/.test(RENDER),

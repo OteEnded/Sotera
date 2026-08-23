@@ -347,7 +347,10 @@ test('⭐⭐⭐ THE R2 FAILURE, RENDERED · present tense first, her old line ve
     'nothing of her history may be rewritten, shortened or filtered — this is the whole constraint')
 
   // ⭐⭐⭐ 3 · AND IT IS DATED, so it reads as a report of a past utterance rather than a standing fact.
-  assert.match(out.text, /On 21 August I said: From this room, I don't have any direct memories about Hermes\./)
+  // ⓘ NOW WITH THE ADDRESSEE (R4): §3B's dating and R4's addressee compose into one prefix, and both halves
+  // are asserted — the date, because the claim must not read as present tense, and "to Ote", because the
+  // "you" and "this room" inside her quotation have to belong to someone.
+  assert.match(out.text, /On 21 August I said to Ote: From this room, I don't have any direct memories about Hermes\./)
 
   // ⭐ 4 · THE CONFLICT IS MARKED, NOT RESOLVED.
   assert.equal(out.contradictions.length, 1)
@@ -404,8 +407,10 @@ test('⛔ a counterpart line saying the same thing is NOT dated as her self-repo
     ],
   })]
   const out = renderFor(items, { cues })
-  assert.match(out.text, /Hermes said: You can't access those/)
+  assert.match(out.text, /Hermes said to me: You can't access those/)
   assert.ok(!/On \d+ \w+ I said: You can't access those/.test(out.text),
     'his claim must never be re-attributed to her as a dated self-report')
+  assert.ok(!/I said to Hermes: You can't access those/.test(out.text),
+    'nor re-attributed to her by the addressee label')
   assert.deepEqual(out.contradictions, [])
 })

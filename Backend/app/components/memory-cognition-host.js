@@ -97,6 +97,43 @@ export function buildMemoryCognition(fastify, {
     return [...byLower.values()]
   }
 
+  /**
+   * ⭐⭐⭐ WHO SHE IS TALKING TO **RIGHT NOW** — and this exists because of a measured identity collapse.
+   *
+   * ⚠️⚠️ R4, 2026-08-21: asked ABOUT Hermes in root's room, she addressed the user AS Hermes — *"your name
+   * preference (Hermes)… now that I'm in the right room with access to your memories."* Ote: *"Sotera must
+   * not infer that the person asking her is Hermes merely because Hermes appears in retrieved memory. We
+   * need to separate conversation participant, memory subject, and current interlocutor much more
+   * explicitly."*
+   *
+   * ⇒ AND THE MEASUREMENT SAYS THE COLLAPSE WAS OURS, NOT HERS. Reading the real block root receives:
+   *   · it quotes her speech with **no addressee** — `I said: <text containing "you">`, where the "you" was
+   *     Hermes in one episode, Ote in another, and the current account in a third;
+   *   · and **the current interlocutor is never named in it at all**.
+   * ⇒ every second-person pronoun in every quotation was dangling, and a dangling "you" resolves, for any
+   * reader, to whoever they are talking to now. ⭐ The three roles are: the person she is speaking WITH now
+   * (this function), the participants of a retrieved episode (`ep.who`), and what a memory is ABOUT
+   * (`subjectPerson`). They were all rendered as bare names.
+   *
+   * ⛔ NOT AN INFERENCE. It is the session's own account, resolved by id. ⚠️ Which matters: this project's
+   * most-repeated defect is identity inferred from the SHAPE of a value rather than established from one.
+   */
+  let interlocutorCache
+  async function interlocutor() {
+    if (interlocutorCache !== undefined) return interlocutorCache
+    interlocutorCache = null
+    if (!db?.mst_users || !userId) return interlocutorCache
+    try {
+      const u = await db.mst_users.findOne({
+        where: { id: userId }, attributes: ['username', 'display_name'], raw: true,
+      })
+      // ⭐ The display name, the way a person writes it. ⛔ Never the username as a fallback identity claim —
+      // if there is no name to use, the block simply does not make one up.
+      interlocutorCache = u?.display_name || u?.username || null
+    } catch { /* a nameless interlocutor is one missing anchor sentence, never a failed turn */ }
+    return interlocutorCache
+  }
+
   // ── POPULATION · THE WORKING SET ──────────────────────────────────────────────────────────────────
   // ⭐ Ote: *"Current conversation counts as a memory population… She shouldn't need to search another room
   // to know what she and someone are literally talking about right now."* Highest availability by
@@ -121,7 +158,7 @@ export function buildMemoryCognition(fastify, {
         const owner = ownerOf({ kind: 'message', role: m.role })
         return {
         id: `ws:${m.id}`,
-        subject: cues.persons[0] ?? cues.topics[0] ?? null,
+        cueSubject: cues.persons[0] ?? cues.topics[0] ?? null,
         said: clip(m.content, 320),
         who: m.role === 'assistant' ? 'me' : 'them',
         when: m.created_at,
@@ -160,9 +197,46 @@ export function buildMemoryCognition(fastify, {
       await log?.(`[cognition] semantic arm unavailable: ${e.message}`, import.meta.url)
       return []
     }
+
+    // ── ⭐⭐⭐ R4 · WHAT IS THIS MEMORY **ABOUT**? THE ROW KNOWS, AND THE READ WAS DROPPING IT ──────────
+    //
+    // ⚠️⚠️ THE `allowlist-drops-what-it-was-not-told` FAMILY, AGAIN. `txn_memories.subject_person_id` exists
+    // and is populated — 5 of 8 Hermes-related rows point at Hermes — but the portable memory tool returns
+    // `id, kind, content, importance, confidence, pinned, entity, attribute, score, relevance, source,
+    // sourceMessageId` and **no subject at all**. So the layer stamped `cueSubject` (OUR cue) and the block
+    // rendered `I have this on file: user's preferred_name: Hermes` with nothing saying whose "user".
+    //
+    // ⭐ RESOLVED HERE RATHER THAN IN THE TOOL. `@ote/memory` is shared with OteLLMServices and its payload
+    // is what the model has learned to read; widening it would be a cross-project behaviour change. The host
+    // owns what the host needs. ⓘ Two small queries, keyed by the ids already in hand.
+    const subjectOf = new Map()
+    try {
+      const ids = hits.map((m) => m.id).filter(Boolean)
+      if (ids.length && db?.txn_memories) {
+        const rows = await db.txn_memories.findAll({
+          where: { id: ids }, attributes: ['id', 'subject_person_id'], raw: true,
+        })
+        const pids = [...new Set(rows.map((r) => r.subject_person_id).filter(Boolean))]
+        const people = pids.length && db.mst_persons
+          ? await db.mst_persons.findAll({ where: { id: pids }, attributes: ['id', 'display_name'], raw: true })
+          : []
+        const nameOf = new Map(people.map((p) => [p.id, p.display_name]))
+        for (const r of rows) {
+          if (r.subject_person_id) subjectOf.set(String(r.id), nameOf.get(r.subject_person_id) ?? null)
+        }
+      }
+    } catch (e) {
+      // ⛔ FAILS TO UNKNOWN, NEVER TO THE INTERLOCUTOR. An unresolved subject renders as *"I can't tell from
+      // it who this is about"*, which is the honest sentence; guessing the person in front of her is R4.
+      await log?.(`[cognition] subject resolution unavailable: ${e.message}`, import.meta.url)
+    }
+
     return hits.map((m) => ({
       id: `mem:${m.id ?? m.memoryId ?? Math.random().toString(36).slice(2)}`,
-      subject: cues.persons[0] ?? cues.topics[0] ?? null,
+      cueSubject: cues.persons[0] ?? cues.topics[0] ?? null,
+      // ⭐⭐ THE ROW'S OWN ANSWER, or null. ⛔ Never defaulted, never inferred from the room it sits in —
+      // storage location says where an event happened, not who it was about.
+      subjectPerson: subjectOf.get(String(m.id)) ?? null,
       said: clip(m.content, 320),
       who: null,
       when: m.created_at ?? m.createdAt ?? null,
@@ -385,7 +459,7 @@ export function buildMemoryCognition(fastify, {
       items.push({
         id: `ep:${ep.cid}`,
         kind: 'episode',
-        subject: ep.who ?? cues.persons[0] ?? null,
+        cueSubject: ep.who ?? cues.persons[0] ?? null,
         who: ep.who ?? 'someone',
         withThem: ep.withThem,
         exchanges,
@@ -495,7 +569,7 @@ export function buildMemoryCognition(fastify, {
    * ⓘ NOTHING IS HIDDEN. Provenance, source, availability, coverage, warrants and the debug trail are
    * untouched on the items — this changes only the sentence she reads.
    */
-  function render({ cues, kept, dropped, searched }) {
+  function render({ cues, kept, dropped, searched, speakingWith = null }) {
     // ⭐⭐ TWO RENDERS: the real one, and a FRAME with every quotation replaced by a token.
     // ⚠️ The guard must police what the layer WROTE, not what it quotes. It once flagged the word "room"
     // inside a quotation of her own earlier answer — quoting the conversation back is not a leak.
@@ -522,6 +596,20 @@ export function buildMemoryCognition(fastify, {
     // said rather than what was retrieved. ⛔ No entitlement flag reaches here and none is needed.
     // ⛔ AND IT IS NOT THE LAYER PICKING A WINNER — it reports the layer's OWN OPERATION, never which of two
     // accounts of the world is right. Ordering is the only claim it makes.
+    // ⭐⭐⭐ R4 · THE ANCHOR FOR "YOU". One sentence, first, naming who she is speaking with — so that
+    // every second-person pronoun inside every quotation below has an owner. ⚠️ Measured: without it the
+    // block named participants and subjects and never once named the person asking, so the only identity
+    // signal in it was whichever name appeared most.
+    // ⛔ NOT part of the current-state OBSERVATION: that item reports the layer's own operation, and who is
+    // logged in is not something the layer observed itself doing. Separate sentence, separate provenance.
+    //
+    // ⚠️⚠️ AND IT IS **NOT PUSHED**, WHICH IS A BUG I ALREADY WROTE ONCE. Pushing it made `lines.length`
+    // truthy, so the empty-result branch below stopped firing and the absence sentence — *"I went looking …
+    // and came up with nothing"* — silently disappeared. ⛔ The anchor is not a FINDING, and it must never be
+    // able to answer the question *"did this run find anything?"*. The live check caught it.
+    const anchor = speakingWith ? `I'm talking with ${speakingWith} right now.` : null
+    const lead = (body) => (anchor ? `${anchor}\n${body}` : body)
+
     const currentState = currentStateOf({ cues, kept })
     const nowLine = currentStateSentence(currentState, about0(cues))
     if (nowLine) push(nowLine)
@@ -530,11 +618,13 @@ export function buildMemoryCognition(fastify, {
     // conflict is recorded here for observability. ⛔ Nothing appends *"…and I was wrong"*: whether the
     // earlier statement was mistaken, or was true then and has since changed, is hers to work out.
     const contradictions = []
-    const dateAndMark = (x, id) => {
+    const dateAndMark = (x, id, to = '') => {
       if (contradictsCurrentState(x.timeBound, currentState)) {
         contradictions.push({ id, timeBound: x.timeBound, when: x.when ?? null })
       }
-      return datedPrefix(dayOf(x.when))
+      // ⭐ §3B's dating and R4's addressee compose: *"On 21 August I said to Ote: …"* is both correctly
+      // dated and correctly addressed, and neither claim was inferred.
+      return datedPrefix(dayOf(x.when), to)
     }
 
     // ── EPISODES · a conversation she was in, remembered ──────────────────────────────────────────
@@ -555,9 +645,15 @@ export function buildMemoryCognition(fastify, {
           // ⭐⭐⭐ §3B · A DATED SELF-REPORT IS INTRODUCED AS ONE. *"On 21 August I said: …"* is verbatim,
           // immutable and true, and it does not read as a present-tense claim. ⛔ The words are untouched;
           // only the four words in front of them change. This is the entire historical half of §3B.
-          if (x.who === 'me' && isTimeBound(x)) { push(`  ${dateAndMark(x, ep.id)}`, x.said); continue }
+          // ⭐⭐⭐ R4 · SPEECH CARRIES ITS ADDRESSEE. `I said` becomes `I said to Hermes`, and his line
+          // becomes `Hermes said to me`. ⛔ No inference — `ep.who` is the person whose conversation this was,
+          // already resolved in stage 3. ⭐ One word, and every dangling "you" inside the quotation acquires
+          // an owner, which is the whole of the identity fix: she addressed Hermes in one episode and Ote in
+          // the next, and both were rendered as bare `I said:`.
+          const to = ep.who && ep.who !== 'someone' ? ` to ${ep.who}` : ''
+          if (x.who === 'me' && isTimeBound(x)) { push(`  ${dateAndMark(x, ep.id, to)}`, x.said); continue }
           // ⭐ Her own line and his are both recollection, phrased as speech rather than as a transcript row.
-          push(x.who === 'me' ? '  I said: ' : `  ${x.who} said: `, x.said)
+          push(x.who === 'me' ? `  I said${to}: ` : `  ${x.who} said to me: `, x.said)
         } else {
           // ⛔ A GAP STAYS A GAP. Closing it up would read as a monologue and invite her to infer what was
           // said to her — the reason change A returns withheld markers rather than a filtered list.
@@ -571,15 +667,40 @@ export function buildMemoryCognition(fastify, {
     for (const i of said) {
       const when = dayOf(i.when)
       if (i.source === SOURCE.storedMemory) {
+        // ── ⭐⭐⭐ R4 · WHOSE "USER"? THE SUBJECT IS NAMED, OR ITS ABSENCE IS. ──────────────────────────
+        //
+        // ⚠️ Stored facts are phrased *"user's preferred_name: Hermes"*, *"user's alias: Hermes"*. Rendered
+        // bare, the "user" in that sentence attaches to whoever is reading it — which is precisely R4.
+        // ⭐ Three cases, and the third is the one that matters:
+        //   subject is the person she is speaking with  → *"about you"*, the ordinary case;
+        //   subject is somebody else                    → *"about Hermes"*, named;
+        //   subject unknown                             → ⛔ SAY SO. Never silently the interlocutor.
+        // ⓘ The content itself is untouched — this is a lead-in, not a rewrite of a stored fact.
+        //
+        // ⚠️⚠️ AND THE DEFAULT IS DELIBERATE, AFTER GETTING IT WRONG ONCE. My first version announced
+        // *"it does not say who this is about"* whenever `subject_person_id` was NULL — which is MOST rows,
+        // because the column is recent. That would hedge on facts that genuinely are about the person she is
+        // talking to, and hedging on the ordinary case is its own kind of dishonesty.
+        // ⭐ THE LOAD-BEARING FACT: the semantic arm is built with `{ userId }`, so every row it returns was
+        // recorded IN THIS PERSON'S ROOM — which is exactly who the extraction meant by "user's".
+        // ⇒ silence is correct for the ordinary case, and the case that must be NAMED is the opposite one:
+        // a row whose resolved subject is somebody else.
+        // ⛔ GUARDED ON THAT ASSUMPTION rather than trusting it: if the row did not come from this account's
+        // material, the subject is stated or admitted, never defaulted. If the semantic arm is ever widened,
+        // this stays correct instead of silently inheriting a wrong default.
+        const sameRoom = i.provenanceAccountId == null || i.provenanceAccountId === userId
+        const about = i.subjectPerson && i.subjectPerson !== speakingWith
+          ? ` about ${i.subjectPerson}`
+          : (sameRoom ? '' : ' about someone I cannot name from this')
         // ⭐ RETENTION FIRST — *"I decided to keep"* is a claim about her own act and only `retained`
         // licenses it. ⛔ `given` must never borrow it: nobody decided, it was extracted.
-        if (i.retention === RETENTION.retained) { push('I decided to keep this: ', i.said); continue }
+        if (i.retention === RETENTION.retained) { push(`I decided to keep this${about}: `, i.said); continue }
         // ⭐ BASIS SECOND, and this is where honesty lives. A stored memory is a claim someone recorded,
         // never a source she read — see the axes. `told` → someone told her; `inferred` → she concluded it;
         // `synthesized` → several things agree and none of them says it.
-        if (i.basis === BASIS.inferred) { push('I worked this out rather than being told it: ', i.said); continue }
-        if (i.basis === BASIS.synthesized) { push('Several things point this way, though nothing says it outright: ', i.said); continue }
-        push('I have this on file: ', i.said)
+        if (i.basis === BASIS.inferred) { push(`I worked this out${about} rather than being told it: `, i.said); continue }
+        if (i.basis === BASIS.synthesized) { push(`Several things point this way${about}, though nothing says it outright: `, i.said); continue }
+        push(`I have this on file${about}: `, i.said)
         continue
       }
       // ⭐ §3B, on a loose line of hers too — the working set is this conversation, so a self-report here is
@@ -598,7 +719,7 @@ export function buildMemoryCognition(fastify, {
       // ⭐ THE ABSENCE, AS THE RESULT OF LOOKING. Ote: *"give her the result of the search, not an
       // architectural explanation."* ⛔ And not *"I have nothing about X"* either — the sentence says what
       // she did and what came of it.
-      const none = `I went looking for what I have about ${about} and came up with nothing.`
+      const none = lead(`I went looking for what I have about ${about} and came up with nothing.`)
       // ⭐ §3B · THIS **IS** THE CURRENT-STATE STATEMENT for an empty run, which is why no separate one is
       // emitted: the sentence already says what she did and what came of it, in the present, about now.
       return { text: none, frame: none, currentState: null, contradictions: [] }
@@ -611,7 +732,7 @@ export function buildMemoryCognition(fastify, {
     const tail = []
     if (dropped > 0) tail.push(`There is more of this than I have brought to mind — these are the nearest ${kept.length}.`)
     tail.push(`That is what I can reach on this right now: ${searched}.`)
-    const join = (arr) => `${arr.join('\n')}\n${tail.join(' ')}`
+    const join = (arr) => lead(`${arr.join('\n')}\n${tail.join(' ')}`)
     return { text: join(lines), frame: join(frame), currentState, contradictions }
   }
 
@@ -697,7 +818,9 @@ export function buildMemoryCognition(fastify, {
     }
 
     const searched = 'everything I currently have available'
-    const { text: context, frame, currentState, contradictions } = render({ cues, kept, dropped, searched })
+    const { text: context, frame, currentState, contradictions } = render({
+      cues, kept, dropped, searched, speakingWith: await interlocutor(),
+    })
 
     // ⛔⛔ §3B · THE CURRENT-STATE ITEM IS CHECKED BY THE SAME LATTICE AS EVERYTHING ELSE. It is a DERIVED
     // item, so `findIllegalPromotions` bounds its basis by `combineBasis` of its parents and its availability
@@ -739,8 +862,8 @@ export function buildMemoryCognition(fastify, {
    * *"Cognition must remain completely unaware of access_sotera_memory and must continue treating Sotera's
    * memory as hers."*
    */
-  function renderFor(items = [], { cues, dropped = 0, searched = 'everything I currently have available', note = null } = {}) {
-    const out = render({ cues, kept: items, dropped, searched })
+  function renderFor(items = [], { cues, dropped = 0, searched = 'everything I currently have available', note = null, speakingWith = null } = {}) {
+    const out = render({ cues, kept: items, dropped, searched, speakingWith })
     // ⚠️ The note is appended to BOTH, and it must be — the frame is what the vocabulary guard scans, and a
     // sentence exempted from that scan is a hole in it.
     // ⭐ §3B FALLS OUT HERE FOR FREE. `render` rebuilds the present-tense sentence from the list it is
