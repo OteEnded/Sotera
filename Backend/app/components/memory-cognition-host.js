@@ -108,6 +108,12 @@ export function buildMemoryCognition(fastify, {
   // ten-case set — **2%** — with rank gaps of 4 and 12. ⇒ real, and RARE. It is built as an arm precisely
   // because a 2% defect has to earn its coupling.
   episodeCentreCueMatch = false,
+  // ⭐ THE TOP-HIT BONUS **SIZE**, separated from whether it applies at all. `+2` was chosen arbitrarily when
+  // the term was first sketched and has never been justified; the weight is an option so a single controlled
+  // experiment can compare weights instead of one being defended after the fact.
+  // ⚠️ The weight set for that experiment is fixed BEFORE the runs — {0, 1, 2, 4} — so no value can be
+  // chosen because it looked best afterwards.
+  episodeTopHitWeight = 2,
 } = {}) {
   const db = fastify?.db
 
@@ -441,7 +447,7 @@ export function buildMemoryCognition(fastify, {
       // ⇒ this term uses the retriever's RANK instead, and only its top position: the conversation holding
       // the #1 candidate gets a bonus. ⚠️ `+2` is an ARBITRARY WEIGHT and is not yet justified — the
       // question being measured first is whether the shape helps at all.
-      const topHit = episodeTopHit && ep.bestRank === 0 ? 2 : 0
+      const topHit = episodeTopHit && ep.bestRank === 0 ? episodeTopHitWeight : 0
       return { ...ep, who: p?.who ?? null, roomUserId: p?.roomUserId ?? null, withThem, bestRank: ep.bestRank ?? null, score: (withThem ? 100 : 0) + topHit + ep.matches + recency }
     }).sort((a, b) => b.score - a.score)
 

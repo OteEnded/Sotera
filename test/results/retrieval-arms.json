@@ -1,0 +1,1428 @@
+{
+  "at": "2026-08-23T14:50:58.558Z",
+  "corpus": {
+    "harness": 0,
+    "total": 224
+  },
+  "weights": [
+    0,
+    1,
+    2,
+    4
+  ],
+  "modes": [
+    "hybrid",
+    "lexical"
+  ],
+  "note": "D1 is the shipped baseline and is not an arm. The weight set was fixed before the runs. Mechanism only: ranking → centre selection → window rebuild → floor → final evidence, no model.",
+  "targets": [
+    "basil-bare",
+    "basil-sentence",
+    "notebook",
+    "herb-promise"
+  ],
+  "controls": [
+    "hermes-open",
+    "hermes-variant",
+    "kavi-open",
+    "mina-open",
+    "kavi-thai"
+  ],
+  "negative": [
+    "ferdinand"
+  ],
+  "arms": [
+    {
+      "mode": "hybrid",
+      "weight": 0,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 5,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 0,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 4
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "hybrid",
+      "weight": 0,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 5,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 0,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 4
+        },
+        "notebook": {
+          "kept": 1,
+          "onSubject": 0,
+          "filtered": 5,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 1
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "hybrid",
+      "weight": 1,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 0,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 4
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "hybrid",
+      "weight": 1,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 0,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 4
+        },
+        "notebook": {
+          "kept": 2,
+          "onSubject": 1,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 1
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "hybrid",
+      "weight": 2,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 3
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "hybrid",
+      "weight": 2,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 3
+        },
+        "notebook": {
+          "kept": 2,
+          "onSubject": 1,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 1
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "hybrid",
+      "weight": 4,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 3
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "hybrid",
+      "weight": 4,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 4,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 3
+        },
+        "notebook": {
+          "kept": 2,
+          "onSubject": 1,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 1
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 6,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 4,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 1,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 2,
+          "onSubject": 0,
+          "filtered": 4,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 2
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 0,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 0,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 1,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 1,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 2,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 2,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 4,
+      "cue": false,
+      "cases": {
+        "basil-bare": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 2,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    },
+    {
+      "mode": "lexical",
+      "weight": 4,
+      "cue": true,
+      "cases": {
+        "basil-bare": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "basil-sentence": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "notebook": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "herb-promise": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-open": {
+          "kept": 5,
+          "onSubject": 5,
+          "filtered": 0,
+          "withThem": 5,
+          "error": null,
+          "offSubject": 0
+        },
+        "hermes-variant": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-open": {
+          "kept": 2,
+          "onSubject": 2,
+          "filtered": 1,
+          "withThem": 2,
+          "error": null,
+          "offSubject": 0
+        },
+        "mina-open": {
+          "kept": 1,
+          "onSubject": 1,
+          "filtered": 1,
+          "withThem": 1,
+          "error": null,
+          "offSubject": 0
+        },
+        "kavi-thai": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        },
+        "ferdinand": {
+          "kept": 0,
+          "onSubject": 0,
+          "filtered": 0,
+          "withThem": 0,
+          "error": null,
+          "offSubject": 0
+        }
+      }
+    }
+  ]
+}

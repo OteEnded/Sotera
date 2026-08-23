@@ -75,8 +75,11 @@ test('ⓘ the stated intent and the code now agree', () => {
 test('⛔⛔ the D2 top-hit term ships OFF, and the baseline arm is unaffected by its wiring', () => {
   assert.match(SRC, /episodeTopHit = false,/, 'the D2 candidate must default to false')
   // ⭐ The bonus is gated on the flag, so the production arm computes exactly what it computed before.
-  assert.match(CODE_ALL, /const topHit = episodeTopHit && ep\.bestRank === 0 \? 2 : 0/,
+  assert.match(CODE_ALL, /const topHit = episodeTopHit && ep\.bestRank === 0 \? episodeTopHitWeight : 0/,
     'the bonus must be gated on the flag AND on holding the retriever\'s #1 candidate')
+  // ⭐ The WEIGHT is separate from whether the term applies, so a controlled experiment can compare weights
+  // rather than one being defended after the fact. ⚠️ `+2` was arbitrary and is still the default.
+  assert.match(SRC, /episodeTopHitWeight = 2,/, 'the default weight must stay 2 until an experiment moves it')
   // ⓘ `bestRank` is recorded unconditionally — that is deliberate and harmless, and it is asserted so a
   // future edit cannot make the baseline arm depend on it.
   assert.match(CODE_ALL, /bestRank: rank/, 'bestRank must still be recorded while grouping')
