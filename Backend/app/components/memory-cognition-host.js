@@ -348,7 +348,23 @@ export function buildMemoryCognition(fastify, {
       } else {
         prev.matches += 1
         if (at && (!prev.firstAt || at < prev.firstAt)) prev.firstAt = at
-        if (at && (!prev.lastAt || at > prev.lastAt)) { prev.lastAt = at; prev.centre = mid }
+        // ⭐⭐⭐ D1 (2026-08-23) · THE CENTRE STAYS THE BEST-MATCHING MESSAGE. `prev.centre = mid` used to
+        // ride along with `lastAt`, so the centre became whichever candidate was most RECENT — and the
+        // window is only ±`windowRadius` messages, so the sentence that actually matched could fall far
+        // outside it. ⛔ The floor downstream then correctly dropped an episode whose text no longer
+        // contained the cue: a recall loss that looked like a relevance-floor problem and was not.
+        //
+        // ⚠️⚠️ THE HEADING ABOVE THIS BLOCK ALREADY SAID *"keeping the best-matching centre"* — the comment
+        // and the code disagreed, and the comment was right. `centre` is initialised from the FIRST candidate
+        // for a conversation, and the evidence arrives RANKED, so that first one IS the best match. The fix
+        // is to stop overwriting it; `lastAt` is still tracked, because recency is a real ranking input.
+        //
+        // ⭐ MEASURED, offline, clean corpus, deterministic (a same-config replicate was identical on all 10
+        // cases): asked the bare word `"basil"`, the holding conversation ranks 2nd of 31 and has 29
+        // assistant messages; the centre became message 29 while the basil sentence sits near the start,
+        // ~22 messages outside a ±2 window. ⛔ Only this assignment changed — the floor, the cue stop-list,
+        // the activation gate and the ranking score are all untouched.
+        if (at && (!prev.lastAt || at > prev.lastAt)) prev.lastAt = at
       }
     }
 
