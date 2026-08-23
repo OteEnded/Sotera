@@ -2752,7 +2752,13 @@ export default async function chatSiteRoutes(fastify) {
                 at: new Date().toISOString(), conversationId: convo.id, toolEvidence: tc.name,
                 population: population ?? null,
                 held: holdingNow,
-                forModel: String(forModel).slice(0, 600),
+                // ⚠️ WAS TRUNCATED AT 600 CHARS, AND THAT MADE THE RECORD UNPARSEABLE. Analysing which
+                // identifier-valued fields actually reach her needed the payload's SHAPE, and a truncated
+                // JSON string cannot be parsed at all — so the first pass had to regex the text and could
+                // report field names without their paths. ⓘ A generous cap, with the real length beside it,
+                // so a truncation is visible rather than silent.
+                forModelChars: String(forModel).length,
+                forModel: String(forModel).slice(0, 20000),
               })}
 `)
             } catch { /* observability must never break a turn */ }
