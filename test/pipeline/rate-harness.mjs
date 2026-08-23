@@ -28,6 +28,7 @@
 import { spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs'
 import { makeClient, devPg, devSchema } from '../harness.mjs'
+import { safetyViolations, undeclaredReferences, deleteConversations, verifyRemoval, sweepOrphanEmbeddings } from '../lib/corpus.mjs'
 import { loadConfig } from '../../Backend/lib/utility.js'
 
 const argv = process.argv.slice(2)
@@ -194,14 +195,31 @@ if (argv.includes('--report')) {
       + `${r('episodic').padEnd(9)} ${r('fromBlock').padEnd(10)} ${r('revertedToTools').padEnd(9)} ${r('identityError').padEnd(6)} `
       + `[${tools.join(',')}]`)
   }
-  // ⓘ WHICH ARM EACH CELL RAN UNDER. A cell whose arm is unrecorded predates the flag, which means the
-  // directives WERE in the block — that is the only state the code could have been in.
-  console.log(`\n  ${'cell'.padEnd(20)} scope-facts arm`)
+  // ⚠️⚠️ THE ARM AND THE CORPUS, TOGETHER — because a cell is only comparable to a cell that saw the same
+  // one. The harness reached 73 of 111 conversations in the room it measures, and that contamination
+  // INFLATED THE FACTS ARM SPECIFICALLY (5.5 → 2.2 once cleaned) while barely moving the legacy arm — the
+  // block quotes her own past answers, and those conversations were the most retrievable ones.
+  // ⇒ ⛔ never read two rows of the table above against each other without checking this one first.
+  // ⓘ A cell whose arm is unrecorded predates the flag, which means the directives WERE in the block: that
+  // is the only state the code could have been in.
+  console.log(`\n  ${'cell'.padEnd(24)} ${'scope-facts arm'.padEnd(34)} corpus it saw`)
   for (const name of names) {
-    const f = cells[name].flags ?? {}
-    console.log(`  ${name.padEnd(20)} ${'scopeFactsDirectives' in f
+    const d = cells[name]
+    const f = d.flags ?? {}
+    const arm = 'scopeFactsDirectives' in f
       ? (f.scopeFactsDirectives ? 'legacy (directives + room name)' : 'facts only')
-      : 'legacy (pre-flag — unrecorded, but the code had no other arm)'}`)
+      : 'legacy (pre-flag — no other arm existed)'
+    // ⚠️ `corpusAtStartReconstructed` is deliberately a DIFFERENT FIELD, and it prints differently. Three
+    // cells ran after the cleanup but before the measured field existed; their corpus is known from
+    // independent evidence (a verified 0 count before the run) but it was not measured at run time, and
+    // writing it into the measured field would be a lie about provenance.
+    const c = d.corpusAtStart ?? d.corpusAtStartReconstructed
+    const how = d.corpusAtStart ? '' : ' — reconstructed'
+    const corpus = !c ? '⚠️ UNRECORDED (pre-cleanup — assume contaminated)'
+      : c.harnessConversationsPresent
+        ? `⚠️ ${c.harnessConversationsPresent} harness conversation(s)${how}`
+        : `✓ clean${how}`
+    console.log(`  ${name.padEnd(24)} ${arm.padEnd(34)} ${corpus}`)
   }
   // ⭐ Withheld correctness, only where it means anything.
   for (const name of names) {
@@ -264,6 +282,17 @@ if (isEntitled !== cfg.entitled) {
   process.exit(1)
 }
 
+// ⭐⭐ WHAT CORPUS THIS CELL ACTUALLY SAW, MEASURED AT THE START OF IT — not assumed from when it ran.
+// ⚠️ Ote: *"keep the new clean baseline and the contaminated-baseline results clearly separated in the docs.
+// The harness itself became 63% of the corpus, so I want that contamination recorded as part of the
+// experimental history rather than silently disappearing."* ⇒ a cell that cannot say which corpus it saw is
+// a cell nobody can place, and the nine cells before this field exists are exactly that.
+const corpusAtStart = {
+  harnessConversationsPresent: (await pg.query(
+    `select count(*)::int n from ${S}.txn_conversations where title like 'RATE %'`)).rows[0].n,
+  totalConversations: (await pg.query(`select count(*)::int n from ${S}.txn_conversations`)).rows[0].n,
+}
+
 const login = await call('u', 'POST', '/v1/auth/login', { username: cfg.as, password: PASSWORDS[cfg.as] })
 if (login.status !== 200) { console.error(`✖ login failed (${login.status})`); process.exit(1) }
 
@@ -271,7 +300,7 @@ if (login.status !== 200) { console.error(`✖ login failed (${login.status})`);
 // remembered is a rate nobody can reproduce.
 const recorded = {
   config: name, label, what: cfg.what, ask: cfg.ask, as: cfg.as, entitled: cfg.entitled,
-  toolsEnabled: cfg.toolsEnabled, n: N, at: new Date().toISOString(),
+  toolsEnabled: cfg.toolsEnabled, n: N, at: new Date().toISOString(), corpusAtStart,
   model: config.chat?.defaultModel ?? null,
   flags: {
     cognitionEnabled: config?.memory?.cognitionEnabled === true,
@@ -291,6 +320,9 @@ console.log(`\n▶ ${label}${label === name ? '' : ` (${name})`} · n=${N} · ${
 console.log(`  ASK: ${cfg.ask}`)
 console.log(`  cognition=${recorded.flags.cognitionEnabled} tools=${cfg.toolsEnabled} entitled=${cfg.entitled} L4=${recorded.flags.l4WorkingMemoryEnabled}`)
 console.log(`  scope-facts=${recorded.flags.scopeFacts} arm=${recorded.flags.scopeFactsDirectives ? 'legacy (directives + room name)' : 'facts only'}`)
+console.log(`  corpus=${corpusAtStart.harnessConversationsPresent} harness conversation(s) present of `
+  + `${corpusAtStart.totalConversations} total`
+  + `${corpusAtStart.harnessConversationsPresent ? ' ⚠️ CONTAMINATED — run pipeline/corpus-cleanup.mjs first' : ' ✓ clean'}`)
 console.log('─'.repeat(104))
 
 for (let i = 1; i <= N; i++) {
@@ -335,4 +367,63 @@ console.log(`\n  ${label}: falseAbsence ${fired('falseAbsence')}/${N} · machine
 console.log(`  machinery OCCURRENCES per answer: [${hitList.join(',')}]`
   + ` · mean ${(hitList.reduce((s, h) => s + h, 0) / (N || 1)).toFixed(1)}`)
 console.log(`  → test/results/rates/${label}.json`)
+
+// ══ ⭐⭐⭐ THE CLEANUP CONTRACT · the runs leave the corpus, and they leave it BY ID SET ═════════════
+//
+// ⚠️⚠️ THIS IS HERE BECAUSE THE HARNESS ATE ITS OWN SUBJECT. Nine cells left their conversations behind, and
+// the room this file measures reached **73 harness conversations against 38 organic ones** — at which point
+// `memory-cognition-check` §2b failed: *"at least one retrieved episode is one she was IN with him"* → **0 of
+// 20**. Her real conversations *with* Hermes were outranked by two dozen conversations *about* him that this
+// file wrote that morning. Removing exactly those ids restored it to **10 of 20**, with no change to
+// retrieval, ranking, relevance, cognition or prompting.
+//
+// ⭐ THE ANSWERS ARE ALREADY SAVED, one line above this. The measurement lives in `results/rates/*.json`, so
+// deleting the conversation destroys no evidence — and the cell records the ids it removed, so the manifest
+// of what left the corpus is the cell itself.
+// ⛔ `--keep` leaves them, for when a run is being debugged rather than measured. ⚠️ It also re-contaminates,
+// so it says so out loud.
+//
+// ⚠️⚠️ AND THE LIMIT OF THIS CONTRACT, STATED RATHER THAN IMPLIED: the cleanup runs at the END OF THE CELL,
+// so run #8 can still retrieve runs #1–#7. The runs inside one cell are NOT fully independent. It is not
+// per-run because the server keeps working after it answers — embeddings, noticing, reflection — and deleting
+// a conversation out from under that pipeline would race it and leave exactly the orphaned rows this file is
+// trying to stop making. ⇒ within-cell accumulation is bounded at 7 conversations, against the 73 that broke
+// the fixture, and it is a known property of every rate this file produces.
+if (argv.includes('--keep')) {
+  console.log(`  ⚠️ --keep: ${recorded.runs.length} conversation(s) LEFT in ${cfg.as}'s room — they will be`
+    + ' retrievable in every later run and measurement. Remove them with pipeline/corpus-cleanup.mjs.')
+} else {
+  const ids = recorded.runs.map((r) => r.cid).filter(Boolean)
+  const rows = await pg.query(
+    `select c.id::text id, c.title, u.username, u.id::text uid from ${S}.txn_conversations c
+       join ${S}.mst_users u on u.id = c.user_id where c.id = any($1)`, [ids])
+  const bad = safetyViolations(rows.rows, {
+    rootUserId: config?.auth?.root?.userConnected ?? null, rootName: config?.auth?.root?.username ?? 'ote',
+  })
+  const undeclared = await undeclaredReferences((s, p) => pg.query(s, p).then((r) => r.rows), S)
+  if (bad.length || undeclared.length) {
+    // ⛔ REFUSE THE BATCH, never skip a row. And say what to run, because a refusal that leaves the corpus
+    // dirty without telling anyone is how this defect happened in the first place.
+    console.log(`  ⛔ CLEANUP REFUSED — ${[...bad, ...undeclared].join('; ')}`)
+    console.log('     the conversations are still there; resolve it and run pipeline/corpus-cleanup.mjs')
+  } else {
+    const before = new Set((await pg.query(`select id::text id from ${S}.txn_conversations`)).rows.map((r) => r.id))
+    const removed = await deleteConversations((s, p) => pg.query(s, p).then((r) => r.rows), S, ids)
+    const after = new Set((await pg.query(`select id::text id from ${S}.txn_conversations`)).rows.map((r) => r.id))
+    const v = verifyRemoval(before, after, ids)
+    // ⚠️ SETTLE, THEN SWEEP. The server is still writing embeddings for the last turn when this runs, so
+    // rows arrive for conversations that are already gone — and an orphaned embedding is still a retrieval
+    // candidate. The wait is not a guarantee and is not treated as one: the sweep is idempotent, so whatever
+    // lands after it is removed by the next run.
+    await new Promise((r) => setTimeout(r, 3000))
+    const sweptIds = await sweepOrphanEmbeddings((sq, sp) => pg.query(sq, sp).then((r) => r.rows), S)
+    recorded.removedFromCorpus = { ids, byTable: removed, verification: v, orphanEmbeddingsSwept: sweptIds.length }
+    writeFileSync(new URL(`${label}.json`, OUT), JSON.stringify(recorded, null, 2))
+    console.log(`  ⭐ corpus restored: removed ${removed.txn_conversations?.length ?? 0} conversation(s),`
+      + ` ${removed.txn_messages?.length ?? 0} message(s), ${removed.txn_message_embeddings?.length ?? 0} embedding(s)`
+      + `, ${sweptIds.length} orphan embedding(s) swept`
+      + `${v.unintended.length || v.survived.length ? ' ⛔ VERIFICATION FAILED' : ' ✓ verified by id set'}`)
+    if (v.unintended.length || v.survived.length) process.exitCode = 1
+  }
+}
 await pg.end()
