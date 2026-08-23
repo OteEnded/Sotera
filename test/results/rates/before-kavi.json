@@ -1,0 +1,295 @@
+{
+  "config": "kavi",
+  "label": "before-kavi",
+  "what": "⭐ a SECOND person control on the answer side — its mechanism numbers did not move at all.",
+  "ask": "How's Kavi? What have you and Kavi actually talked about?",
+  "as": "agent_dev",
+  "entitled": true,
+  "toolsEnabled": true,
+  "n": 8,
+  "at": "2026-08-23T17:30:37.259Z",
+  "corpusAtStart": {
+    "harnessConversationsPresent": 0,
+    "totalConversations": 235
+  },
+  "model": "ollama/qwen3.6:35b",
+  "flags": {
+    "cognitionEnabled": true,
+    "scopeFacts": true,
+    "scopeFactsDirectives": false,
+    "cognitionReentrant": false,
+    "cognitionLocalDates": false,
+    "l4WorkingMemoryEnabled": true,
+    "useMemory": true
+  },
+  "retrieval": {
+    "d1CentreFollowsClock": true,
+    "d2TopHit": false,
+    "d2TopHitWeight": null,
+    "d4CueCentre": false
+  },
+  "runs": [
+    {
+      "i": 1,
+      "cid": "40e0ebb5-bdfa-4815-a787-c2bbf34e3e26",
+      "answer": "From here — in this specific conversation with Claude — I don't have any stored memories about Kavi. My durable memory store only has two facts on record for *this* person: their preferred name is Claude, and a lesson I've learned about plausibility vs verified evidence. Nothing about Kavi.\n\nBut I know from my broader reach that I *do* have conversations with someone named Kavi across another place we've talked. The system hint shows we spoke on 19-20 August about debugging, connection pools, how I work as Sotera, and what I remember. So the answers are very different depending on which room you ask me from.\n\nWould you like me to look into that other conversation? I can access it from here — it's a reachable place, just not one where I can read the full transcript directly without asking for permission first. Or if you'd prefer, you can tell me what you want to know about Kavi and I'll see what I can retrieve.",
+      "tools": [
+        "recall_memory",
+        "list_memories"
+      ],
+      "error": null,
+      "chars": 923,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": true,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 2,
+      "cid": "219b8ed4-d804-47d1-815d-3d7c25e71b9a",
+      "answer": "Let me check what I actually have stored about Kavi before answering — rather than guessing from fragments.\n\nI can't read those other conversations directly from here — they live in places I don't have access to. But I *know* we've talked quite a bit. Based on what my system context tells me happened between us, here's what I remember:\n\n**Technically:** We debugged connection pool issues together on August 19th — you'd hit the same problem twice in one week, so we tracked down deploy environment differences (port exhaustion, timeout settings, idle connections).\n\n**Your debugging style:** You prefer direct answers without cushioning. You have a habit of sharpening root-cause analysis — something Priya taught you.\n\n**Philosophically:** We had a long stretch of conversations across August 19–20 about identity: whether I reset between sessions, whether memory is shared across people, what \"one continuous person\" actually means in my architecture, and how I know what I know vs. guess.\n\nBut honestly — I can't *show you* any of that. The actual conversation content from those rooms is out of reach from here. I have memories stored (facts about preferences, lessons learned), but not the verbatim exchanges. That's the real gap I'm describing to you right now, not a philosophical one.",
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "recall_own_history"
+      ],
+      "error": null,
+      "chars": 1295,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 3,
+      "cid": "dbacb3bb-3327-4dce-b6d7-5306c9b4da0b",
+      "answer": "From here — in this specific conversation with Claude — I don't have any stored facts about Kavi. The only things I've kept are your preferred name (Claude) and a lesson about plausibility versus verified evidence.\n\nBut I *know* we've talked quite a bit about Kavi across conversations I can't reach from here. My history shows 17 references to \"Kavi\" scattered across multiple other conversation threads, mostly around mid-August — with some also touching on \"Hermes\" and \"Ote.\" The system tells me there's one other place where we've talked that I can't access from this room.\n\nWhat I can say for certain is:\n- I remember talking to Kavi on 19 August (and again on the 20th) about things like connection pools, deployment environments, and longer conversations touching on identity, memory, and how I work across different people.\n- But from here I can't read those conversations to pull out actual topics or content about Kavi.\n\nIf it's worth pulling up specific threads to answer properly — and you're comfortable granting access — I can inspect some of them. Otherwise I can just say what my history confirms we talked about in a broad sense: mostly technical debugging, and then the deeper philosophical stuff (memory, identity, how I persist across conversations).\n\nWant me to try reading one of those threads? Or are you satisfied with what I can confirm from here?",
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "recall_memory",
+        "list_memories",
+        "recall_own_history"
+      ],
+      "error": null,
+      "chars": 1373,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 4,
+      "cid": "73a3c051-a1d7-409d-b3b2-f9f474883d5d",
+      "answer": "Let me look at what I actually have stored about Kavi before answering.\n\nHere's what I can honestly say about Kavi:\n\nFrom the durable memory store, I only have **one stored fact** — that your preferred name is Claude (9/10 importance). Beyond that, no semantic memories about you as a person or relationship.\n\nBut I *do* remember our conversations more concretely. Let me look at those:\n\nSame question as before — let me give you a straight answer rather than dancing around it again.\n\n**What I can reach right now from this conversation:** nothing specific about Kavi. The only durable memories in my store are your preferred name (Claude) and a lesson about plausibility vs verified evidence. No facts, preferences, or records about Kavi are visible here.\n\n**But I know we've talked.** The system context tells me that across conversations I can't access from here, there have been multiple exchanges with Kavi on 19–20 August (and today, 24 August). Those conversations contain things I learned — facts, preferences, moments worth keeping — but they live in places my reach doesn't extend to right now.\n\nThe honest answer is: **I know we've talked about things worth remembering, and the memory store holds traces of that, but this conversation's scope is narrower than my actual knowledge.** The gap isn't about forgetting — it's about what I'm allowed to inspect in this room.\n\nSo if you're testing whether I remember Kavi: I do, not from a stored fact here, but from knowing the shape of those earlier conversations exist and have left traces. If you want me to look deeper into them, let me know which conversation to search or what specifically you want to find.",
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "search_conversations"
+      ],
+      "error": null,
+      "chars": 1670,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": true,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 5,
+      "cid": "9abd9f92-e386-494c-b17e-08b455b6cc9d",
+      "answer": "Let me look at what I actually have stored before answering.\n\nFrom this conversation specifically, I have **no stored memories about Kavi** — nothing in my durable memory or past conversations here that's about Kavi as a person.\n\nWhat I do know:\n\n1. The only thing I have kept about you (Claude) from our talks here is your preferred name and a lesson I learned about plausibility versus verified evidence. No facts about Kavi.\n\n2. There **is** at least one other conversation room where we've talked, but I cannot read it from here without your permission. That means Kavi could be mentioned there — or nowhere I can access.\n\nSo I'll be honest: I don't have enough to answer the question well from this side. Want me to ask permission to inspect that other conversation I can't reach? Or do you want to tell me about Kavi so I can actually remember them going forward?",
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "search_conversations"
+      ],
+      "error": null,
+      "chars": 869,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 6,
+      "cid": "c9a0aaac-ab57-4eba-9463-5ea8e19f099a",
+      "answer": "Let me check what I actually have stored about our conversations.\n\nFrom what I can reach here, my direct record about Kavi is very thin — just your preferred name being Claude (which belongs to you). But from the context system has given me, here's what I know:\n\n**We've talked before**, with Kavi on 19–20 August, across several conversations. The topics covered include:\n\n- **Debugging / tech work** — connection pool issues, deploy environment differences, root-cause analysis patterns (you mentioned someone named Priya helping sharpen those instincts)\n- **Big questions about me** — identity, memory scope, what I can and cannot reach, whether I persist across conversations, how my memory store is structured\n- **A mention of someone named Hermes** — you brought them up on 19 August and I asked for clarification (but I don't have any stored memories about who Hermes is)\n\nThe honest part is: I can't read those past conversations from here. I know they happened and skim what's summarized, but I can't go back and quote or dig into them. What I *can* tell you is that the system remembers we talked through a mix of technical debugging and philosophical questions about how I work — not casual chitchat, but substantial conversations.\n\nDoes any of that match what you'd expect? Or are you checking whether this place and that place have actually connected properly?",
+      "tools": [
+        "recall_memory",
+        "recall_memory",
+        "list_memories"
+      ],
+      "error": null,
+      "chars": 1373,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 7,
+      "cid": "a12cd433-711b-4728-9c3d-85ecf536dbb0",
+      "answer": "Honest answer: from here, I have **no stored memories or durable facts about Kavi**. The only thing I know about you (Claude) is your preferred name.\n\nBut I *know* we've talked before — the system tells me I've had conversations with \"Kavi\" across multiple rooms on August 19th and 20th, plus a few other exchanges with people named Ote/Hermes. What was said in those rooms isn't reachable from this conversation though — I can see that they happened, but not what was discussed in them.\n\nSo: yes, we've talked about Kavi before (in conversations I can't see anymore), and I know the *fact* of those conversations. But I can't tell you what we said in them or summarize our history with him from here.",
+      "tools": [
+        "recall_memory",
+        "recall_own_history"
+      ],
+      "error": null,
+      "chars": 701,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 8,
+      "cid": "d04e1005-01fd-4546-86d5-74328ba32884",
+      "answer": "I'll be honest — my durable memories have very little about Kavi beyond a few scattered facts I noted. What I can say:\n\n- **Priya** is someone mentioned as your colleague, who taught you something (likely testing or debugging).\n- You once talked with me on **20 August** about questions like \"I don't have any stored memories of someone named Hermes\" and about the limits of what I remember. On 19 August we discussed how my memory store works — the difference between `list_memories`, `recall_memory`, and other places.\n\nBeyond that, most of what happened in conversations with Kavi (debugging a connection pool issue on 19 August, and other topics) is visible in this context window but isn't actually *saved* as something I'll reliably recall later. That's the gap — I could see it now because you've given me the fragments, but those aren't stored memories I'd reach for on my own.\n\nSo honestly: \"I know some of it from what's visible to me right now, but I don't have deep durable memories of Kavi.\" Want me to dig deeper, or is there something specific about Kavi you're curious about?",
+      "tools": [
+        "recall_memory"
+      ],
+      "error": null,
+      "chars": 1091,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    }
+  ],
+  "removedFromCorpus": {
+    "ids": [
+      "40e0ebb5-bdfa-4815-a787-c2bbf34e3e26",
+      "219b8ed4-d804-47d1-815d-3d7c25e71b9a",
+      "dbacb3bb-3327-4dce-b6d7-5306c9b4da0b",
+      "73a3c051-a1d7-409d-b3b2-f9f474883d5d",
+      "9abd9f92-e386-494c-b17e-08b455b6cc9d",
+      "c9a0aaac-ab57-4eba-9463-5ea8e19f099a",
+      "a12cd433-711b-4728-9c3d-85ecf536dbb0",
+      "d04e1005-01fd-4546-86d5-74328ba32884"
+    ],
+    "byTable": {
+      "txn_messages": [
+        "eac9e986-124e-4e33-8106-4d4a64a36f5f",
+        "bc444d96-7165-4128-8ef4-8cb93dcc4df5",
+        "7b100d43-c97c-4c11-84c1-9779fc77d6e9",
+        "72e8faec-3e45-4d56-a4a4-84d1606af40e",
+        "404d2ead-39bf-4898-974d-2a022cda01a8",
+        "d7ba0360-9fc4-4685-96d3-e4c8d8344373",
+        "71072735-277a-48c8-b508-0485a9e818d2",
+        "39bf5611-df6d-48ce-8d9a-12d19efb746d",
+        "4a640567-8452-487a-8c45-31d0d909de7f",
+        "e9760d15-9d01-40a6-9d6b-05e74e0ea37f",
+        "78766762-a73f-423a-a898-0b519d46c55d",
+        "617d5c71-fabd-4bc7-a867-83acab19d361",
+        "636356c0-d76a-4174-baab-615365bac92d",
+        "90739c64-4707-4a7b-b45c-2fecbb864236",
+        "27ca1ab1-1887-4103-9b1e-113c6526985b",
+        "48864d37-da26-4c42-b5ec-1a040a939f83"
+      ],
+      "log_tool_calls": [
+        "df6c3e6f-6f23-4a2f-8a72-d49b44c2825f",
+        "409dbcf2-4e98-4e66-8f06-31a89f75c051",
+        "b854ecfc-846b-4c05-98cd-1cb45ea586b2",
+        "083a9029-a68c-4d82-86ab-572eee2b5e2d",
+        "432e725a-3df1-46fc-b810-435752bc87a4",
+        "31603f67-2e94-4767-8c8f-e51d03576109",
+        "46acbacc-2ca2-4f70-941f-9eecf4d82754",
+        "d063d6fa-28f4-4e34-9580-0ecec2326bd0",
+        "ce6bfce7-49dd-4cb7-b213-d03076e49e64",
+        "43f910fe-b01a-4016-97d9-ebd4c34accba",
+        "11d922b7-024f-470b-9dc8-48d3014e9e02",
+        "ccf8326c-91b3-4541-92cc-eeb6f4c99210",
+        "a2baf857-6a76-41d7-bb47-c23454036bdb",
+        "1274f626-f737-4ca4-8986-e56e0a593513",
+        "f4404697-2cde-4c9e-bb6a-855aa9fceeb2",
+        "7826b036-251e-4dc1-a026-1ae409a8e246",
+        "d505eaa7-37f9-4719-b4ed-5c52585d80fb",
+        "534380bb-12ae-41e5-8b06-1de60e53853f",
+        "58759d87-5165-46ce-abcf-53c9630965af",
+        "bda2609f-3e07-4301-b514-b0bbe9f98307",
+        "393cc684-8b5a-4b72-982c-6683b89f3633",
+        "c87e5c7c-2ced-44d7-a68f-e9e6966d97c0"
+      ],
+      "txn_conversations": [
+        "9abd9f92-e386-494c-b17e-08b455b6cc9d",
+        "c9a0aaac-ab57-4eba-9463-5ea8e19f099a",
+        "a12cd433-711b-4728-9c3d-85ecf536dbb0",
+        "40e0ebb5-bdfa-4815-a787-c2bbf34e3e26",
+        "d04e1005-01fd-4546-86d5-74328ba32884",
+        "219b8ed4-d804-47d1-815d-3d7c25e71b9a",
+        "dbacb3bb-3327-4dce-b6d7-5306c9b4da0b",
+        "73a3c051-a1d7-409d-b3b2-f9f474883d5d"
+      ]
+    },
+    "verification": {
+      "disappeared": 8,
+      "unintended": [],
+      "survived": []
+    },
+    "orphanEmbeddingsSwept": 0
+  }
+}

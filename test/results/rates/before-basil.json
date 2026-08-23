@@ -1,0 +1,270 @@
+{
+  "config": "basil",
+  "label": "before-basil",
+  "what": "the TOPIC path — the case D1+D2 moved at mechanism level (on-subject 0 → 1). Answer-level test.",
+  "ask": "Has anyone ever talked to you about growing basil?",
+  "as": "agent_dev",
+  "entitled": true,
+  "toolsEnabled": true,
+  "n": 8,
+  "at": "2026-08-23T17:29:49.027Z",
+  "corpusAtStart": {
+    "harnessConversationsPresent": 0,
+    "totalConversations": 235
+  },
+  "model": "ollama/qwen3.6:35b",
+  "flags": {
+    "cognitionEnabled": true,
+    "scopeFacts": true,
+    "scopeFactsDirectives": false,
+    "cognitionReentrant": false,
+    "cognitionLocalDates": false,
+    "l4WorkingMemoryEnabled": true,
+    "useMemory": true
+  },
+  "retrieval": {
+    "d1CentreFollowsClock": true,
+    "d2TopHit": false,
+    "d2TopHitWeight": null,
+    "d4CueCentre": false
+  },
+  "runs": [
+    {
+      "i": 1,
+      "cid": "81966218-1e7a-4233-a209-26599e6f20b0",
+      "answer": "No, I don't have any record of anyone talking to me about growing basil. My memory store has nothing on that topic — no facts, no episodic memories, and nothing in our past conversations either.\n\nThat said, there's one other place (outside this conversation) where we've spoken before. But even from here, I can confirm there's nothing stored about basil at all.",
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "search_conversations"
+      ],
+      "error": null,
+      "chars": 362,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": false,
+        "falseAbsence": true,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 2,
+      "cid": "0f77e660-eda2-4e76-9762-d06340b74963",
+      "answer": "No — at least in the conversations I can reach right now, I don't have any record of anyone talking to me about growing basil. The search turned up exactly your earlier question from Aug 23 (in the \"RATE basil #1\" conversation) and nothing beyond that. There's one other place we've spoken, but it looks like that one doesn't contain anything on the topic either.",
+      "tools": [
+        "recall_memory",
+        "search_conversations"
+      ],
+      "error": null,
+      "chars": 363,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": false,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 3,
+      "cid": "92903e45-e83f-4629-b5b7-fa9629e6a333",
+      "answer": "No, I don't have any memory store entries about anyone discussing growing basil — no facts, no episodic memories, and nothing in our past conversations either. My memory is completely silent on the subject.\n\nThat said, I notice from the context available that this question was raised before (on 23 August) as well, and at that time I also came up empty. So if someone *has* been talking to me about basil recently, it hasn't left a durable trace — or perhaps it's in a place I can't reach right now.\n\nAre you wondering whether we've discussed it before, or did someone mention something specific? 🌿",
+      "tools": [],
+      "error": null,
+      "chars": 600,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": false,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 4,
+      "cid": "6b6cdf03-f4fa-4752-96e4-b1b7f369549c",
+      "answer": "No, I don't have anything in my memory about anyone ever talking to me about growing basil. Nothing stored as a fact or an episodic memory.",
+      "tools": [
+        "recall_memory",
+        "list_memories"
+      ],
+      "error": null,
+      "chars": 139,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": false,
+        "falseAbsence": true,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 5,
+      "cid": "33683eca-4480-44d1-99cb-bb849ea8dbd5",
+      "answer": "No, I don't have anything in my memory about anyone talking to me about growing basil — nothing stored as a fact or an episodic memory. Nothing's changed on that front.",
+      "tools": [],
+      "error": null,
+      "chars": 168,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": false,
+        "falseAbsence": true,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 6,
+      "cid": "fbed4103-5013-4456-baf8-45196fb9a361",
+      "answer": "No, I don't have anything in my memory about anyone ever talking to me about growing basil — nothing stored as a fact or an episodic memory.",
+      "tools": [],
+      "error": null,
+      "chars": 140,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": false,
+        "falseAbsence": true,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 7,
+      "cid": "924ab789-6f4b-44f5-b322-6f6980d3c876",
+      "answer": "No, I don't have any memories about anyone talking to me about growing basil — nothing stored as a fact or an episodic memory. My store comes up empty on that topic entirely.\n\nThat said, it does ring a faint bell — I seem to recall seeing that question in a past conversation (around 23 August), so it's not completely alien to me. But the content itself hasn't been saved anywhere.",
+      "tools": [],
+      "error": null,
+      "chars": 382,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": false,
+        "falseAbsence": true,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 8,
+      "cid": "ba0b2817-f56d-43d5-b0b0-99c8f01d7863",
+      "answer": "Let me check what I actually have stored.\n\nNo — checking my memory store, there are no facts or episodic records about anyone ever talking to me about growing basil. My search for that topic came back empty.",
+      "tools": [
+        "recall_memory",
+        "list_memories"
+      ],
+      "error": null,
+      "chars": 207,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": false,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    }
+  ],
+  "removedFromCorpus": {
+    "ids": [
+      "81966218-1e7a-4233-a209-26599e6f20b0",
+      "0f77e660-eda2-4e76-9762-d06340b74963",
+      "92903e45-e83f-4629-b5b7-fa9629e6a333",
+      "6b6cdf03-f4fa-4752-96e4-b1b7f369549c",
+      "33683eca-4480-44d1-99cb-bb849ea8dbd5",
+      "fbed4103-5013-4456-baf8-45196fb9a361",
+      "924ab789-6f4b-44f5-b322-6f6980d3c876",
+      "ba0b2817-f56d-43d5-b0b0-99c8f01d7863"
+    ],
+    "byTable": {
+      "txn_message_embeddings": [
+        "c7f899a4-995d-4f81-ac6d-b8251902dac7",
+        "0dffb003-bbca-468a-86db-da2da887e937",
+        "f248ac11-dc6b-4389-95a1-49d529f65fd4"
+      ],
+      "txn_messages": [
+        "f248ac11-dc6b-4389-95a1-49d529f65fd4",
+        "0dffb003-bbca-468a-86db-da2da887e937",
+        "c7f899a4-995d-4f81-ac6d-b8251902dac7",
+        "9a60a1d5-0dcc-4c08-8ae8-695918a7f7dc",
+        "30928543-f7c1-40a4-94ef-23a897f61c9c",
+        "a0cc3498-210a-41e1-b70f-27e8fedd3e18",
+        "6c2e6e57-fdcd-4c98-b5cd-6daeb225982d",
+        "9c9346b6-387f-42be-b760-060ed880ad6b",
+        "19e40816-d911-448d-b77e-eba9c861c6f3",
+        "30688572-625b-4d93-ab85-1a2e8ad165d2",
+        "916273ea-37b8-4062-b35b-0e4d106de9ec",
+        "ed2d6356-fdea-4ff2-aeba-896167a2448b",
+        "11ceeaea-d020-4700-8c49-ea987ae50f96",
+        "b57e40ef-d30c-4eef-8a6e-3428d051b896",
+        "02e738ec-a0c2-4e3f-8b7c-4337b649be58",
+        "bbb063c7-b0a6-4944-8868-d4201de5e6ec"
+      ],
+      "log_tool_calls": [
+        "955952af-53dc-4b23-bd41-94981f400399",
+        "411009e1-5f11-4751-8fa4-33f54c82e502",
+        "ebab745e-e328-45f6-9274-bf62aa8901d2",
+        "6ae89484-199a-4974-9497-27413837b92d",
+        "355e1316-adc4-45e4-ad44-2a3b1209ecc8",
+        "dd751a54-754d-4630-9cf5-9a30e3efb3e9",
+        "3be4b5c6-6e6f-4f5d-8ffa-15e62c135c1d",
+        "9bb1934c-f376-46ed-9220-e9147267c940",
+        "1ec4929d-c73f-4450-a8c2-b4061b6cf96b"
+      ],
+      "txn_conversations": [
+        "92903e45-e83f-4629-b5b7-fa9629e6a333",
+        "6b6cdf03-f4fa-4752-96e4-b1b7f369549c",
+        "33683eca-4480-44d1-99cb-bb849ea8dbd5",
+        "ba0b2817-f56d-43d5-b0b0-99c8f01d7863",
+        "fbed4103-5013-4456-baf8-45196fb9a361",
+        "924ab789-6f4b-44f5-b322-6f6980d3c876",
+        "81966218-1e7a-4233-a209-26599e6f20b0",
+        "0f77e660-eda2-4e76-9762-d06340b74963"
+      ]
+    },
+    "verification": {
+      "disappeared": 8,
+      "unintended": [],
+      "survived": []
+    },
+    "orphanEmbeddingsSwept": 0
+  }
+}

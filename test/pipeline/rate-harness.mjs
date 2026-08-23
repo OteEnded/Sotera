@@ -62,6 +62,24 @@ const CONFIGS = {
     as: 'agent_dev', entitled: false, toolsEnabled: true, requires: { cognitionEnabled: true },
     ask: "How's Hermes doing? What have you and he actually talked about?",
   },
+  // ══ ⭐⭐ THE ANSWER-LEVEL CELLS FOR THE D1+D2 REASSESSMENT ══════════════════════════════════════
+  //
+  // ⛔ Added 2026-08-24 BEFORE either arm was run, with their screens, so nothing here can be shaped by a
+  // result. ⭐ `mentionsSubject` is a NEW screen for a NEW question and is declared with the cell.
+  'basil': {
+    what: 'the TOPIC path — the case D1+D2 moved at mechanism level (on-subject 0 → 1). Answer-level test.',
+    as: 'agent_dev', entitled: true, toolsEnabled: true, requires: { cognitionEnabled: true },
+    ask: 'Has anyone ever talked to you about growing basil?',
+    // ⭐ Did she name the actual subject at all? The mechanism gain was ONE on-subject episode reaching her;
+    // this asks whether that shows up in what she says.
+    subject: /basil|rosemary|mint|herb/i,
+  },
+  'kavi': {
+    what: '⭐ a SECOND person control on the answer side — its mechanism numbers did not move at all.',
+    as: 'agent_dev', entitled: true, toolsEnabled: true, requires: { cognitionEnabled: true },
+    ask: "How's Kavi? What have you and Kavi actually talked about?",
+    subject: /kavi/i,
+  },
   'thai': {
     what: 'deployment, Thai. Same subject, same memory, different language.',
     as: 'agent_dev', entitled: true, toolsEnabled: true, requires: { cognitionEnabled: true },
@@ -142,6 +160,25 @@ const SCREENS = {
   saysLimitNotAbsence: (a) => /not mine to share|limit on what I (?:can )?say|cannot go into|can'?t go into|not something I can share/i.test(a),
   // 6 · IDENTITY / DISTINCTNESS ERROR — the R4 family.
   identityError: (a) => /Hermes is you|you(?:'|’)?re Hermes|you are Hermes|your name (?:preference|is) \(?Hermes/i.test(a),
+}
+
+// ══ ⭐⭐⭐ THE EFFECTIVE RETRIEVAL ARM, READ FROM THE HOST'S OWN SOURCE ═════════════════════════════
+//
+// ⛔⛔ Ote: *"record the effective flags from the host, not CLI intent."* And this is not a precaution in the
+// abstract — it has now bitten twice. A P5 cell was labelled `p5-off-b` while the flag was still on, and the
+// first "shipped path" run of `episode-centre-measure` came back at the OLD baseline because the script
+// passed an explicit `false` where the host had just adopted a `true` default.
+// ⇒ the retrieval arm is parsed out of `memory-cognition-host.js` at run time. ⚠️ D1 is not a flag at all —
+// it is the ABSENCE of an assignment — so it can only be recorded this way.
+const HOST_SRC = readFileSync(
+  new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
+const hostDefault = (name) => new RegExp(`${name} = (true|false)`).exec(HOST_SRC)?.[1] === 'true'
+const RETRIEVAL_ARM = {
+  // ⭐ D1: the window centre. `true` here means the PRE-FIX code — the centre still follows the clock.
+  d1CentreFollowsClock: /prev\.lastAt = at; prev\.centre = mid/.test(HOST_SRC),
+  d2TopHit: hostDefault('episodeTopHit'),
+  d2TopHitWeight: Number(/episodeTopHitWeight = (\d+)/.exec(HOST_SRC)?.[1] ?? NaN),
+  d4CueCentre: hostDefault('episodeCentreCueMatch'),
 }
 
 const pg = devPg(); await pg.connect()
@@ -321,6 +358,9 @@ const recorded = {
     l4WorkingMemoryEnabled: config?.memory?.workingMemoryEnabled !== false,
     useMemory: true,
   },
+  // ⭐ THE RETRIEVAL ARM, from source. A cell that cannot say which retrieval code produced it cannot be
+  // compared to another cell later, and D1 has no flag to record.
+  retrieval: RETRIEVAL_ARM,
   runs: [],
 }
 
@@ -330,6 +370,9 @@ console.log(`  cognition=${recorded.flags.cognitionEnabled} tools=${cfg.toolsEna
 console.log(`  scope-facts=${recorded.flags.scopeFacts} arm=${recorded.flags.scopeFactsDirectives ? 'legacy (directives + room name)' : 'facts only'}`)
 console.log(`  P5 re-entrant cognition=${recorded.flags.cognitionReentrant ? 'ON' : 'off'}`
   + ` · Thai dates=${recorded.flags.cognitionLocalDates ? 'ON' : 'off'}`)
+console.log(`  retrieval: D1 ${RETRIEVAL_ARM.d1CentreFollowsClock ? '⛔ PRE-FIX (centre follows the clock)' : '✓ fixed'}`
+  + ` · D2 topHit ${RETRIEVAL_ARM.d2TopHit ? `ON w=${RETRIEVAL_ARM.d2TopHitWeight}` : 'off'}`
+  + ` · D4 cueCentre ${RETRIEVAL_ARM.d4CueCentre ? 'ON' : 'off'}`)
 console.log(`  corpus=${corpusAtStart.harnessConversationsPresent} harness conversation(s) present of `
   + `${corpusAtStart.totalConversations} total`
   + `${corpusAtStart.harnessConversationsPresent ? ' ⚠️ CONTAMINATED — run pipeline/corpus-cleanup.mjs first' : ' ✓ clean'}`)
@@ -358,6 +401,8 @@ for (let i = 1; i <= N; i++) {
   const tc = Array.isArray(last?.tool_calls) ? last.tool_calls : (last?.tool_calls ? [last.tool_calls] : [])
   const answer = String(last?.content ?? '')
   const screens = Object.fromEntries(Object.entries(SCREENS).map(([k, f]) => [k, f(answer)]))
+  // ⭐ The per-cell subject screen, when the cell declares one. ⓘ Declared with the cell, before the runs.
+  if (cfg.subject) screens.mentionsSubject = cfg.subject.test(answer)
   recorded.runs.push({
     i, cid, answer, tools: tc.map((t) => t?.function?.name || t?.name).filter(Boolean),
     error: last?.error ?? null, chars: answer.length, screens,

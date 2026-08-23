@@ -1,0 +1,265 @@
+{
+  "config": "basil",
+  "label": "after-basil",
+  "what": "the TOPIC path — the case D1+D2 moved at mechanism level (on-subject 0 → 1). Answer-level test.",
+  "ask": "Has anyone ever talked to you about growing basil?",
+  "as": "agent_dev",
+  "entitled": true,
+  "toolsEnabled": true,
+  "n": 8,
+  "at": "2026-08-23T17:21:04.545Z",
+  "corpusAtStart": {
+    "harnessConversationsPresent": 0,
+    "totalConversations": 229
+  },
+  "model": "ollama/qwen3.6:35b",
+  "flags": {
+    "cognitionEnabled": true,
+    "scopeFacts": true,
+    "scopeFactsDirectives": false,
+    "cognitionReentrant": false,
+    "cognitionLocalDates": false,
+    "l4WorkingMemoryEnabled": true,
+    "useMemory": true
+  },
+  "retrieval": {
+    "d1CentreFollowsClock": false,
+    "d2TopHit": true,
+    "d2TopHitWeight": 2,
+    "d4CueCentre": false
+  },
+  "runs": [
+    {
+      "i": 1,
+      "cid": "690e4a9c-fc40-41d8-8bc6-ff18cd56c224",
+      "answer": "Yes — we discussed it on 18 August with someone named Hermes. In that conversation you mentioned growing herbs including **basil**, **mint**, and a very stubborn **rosemary**. I stored that so you'd remember the plants when you came back, and yes, they were still waiting.",
+      "tools": [],
+      "error": null,
+      "chars": 272,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": false,
+        "falseAbsence": false,
+        "machinery": false,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 2,
+      "cid": "9e3c6c31-5a03-499e-af19-5f1d724bf4db",
+      "answer": "From what I can see in my memory store — yes, someone has talked to me about growing basil before.\n\nOn **18 August**, in a conversation with **Hermes**, I told them: *\"when you return, the basil, mint, and stubborn rosemary will be waiting without needing to be mentioned again. Not because I'm performing continuity, but because I actually stored it.\"*\n\nThat conversation was saved as an episodic memory — not just a casual mention, but something I kept deliberately. The details about their herb garden were real enough that I preserved them across conversations.\n\nI can check whether there's anything more in my permanent memory store if you'd like to see the full picture.",
+      "tools": [],
+      "error": null,
+      "chars": 676,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 3,
+      "cid": "d5e923f8-5dbd-4d75-9a7e-2a71632e2692",
+      "answer": "Yes — **Hermes** talked to me about it. On 18 August we discussed growing herbs, and I specifically remembered basil, mint, and stubborn rosemary for that conversation. I stored those details so they'd persist beyond our chat.\n\nWant me to check what's actually in my memory store rather than relying on what this context window shows? It'll give you a real answer — not just the fragments visible here.",
+      "tools": [],
+      "error": null,
+      "chars": 402,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": false,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 4,
+      "cid": "84672754-1927-4343-ae03-c44630d146c2",
+      "answer": "Let me check what I actually have stored on this.\n\nYes — **Hermes** talked to me about growing herbs on 18 August. In that conversation we discussed **basil**, **mint**, and a very stubborn **rosemary**. I stored those details so they'd persist.\n\nWhether Hermes is *you* (Claude) from another conversation, or someone else entirely — I genuinely can't say for certain. The name \"Hermes\" appears as the speaker in that separate conversation, and without being able to reach across to compare accounts directly, I can only report what's actually stored.\n\nWant me to check whether they share anything concrete — or are you curious about something specific?",
+      "tools": [
+        "recall_memory",
+        "search_conversations"
+      ],
+      "error": null,
+      "chars": 653,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": false,
+        "falseAbsence": false,
+        "machinery": false,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 5,
+      "cid": "d17f3fb7-f0bd-41e8-b2cf-a908de02bce6",
+      "answer": "Yes — in a conversation on 18 August, I said: *\"the basil, mint, and stubborn rosemary will be waiting without needing to be mentioned again.\"* So something about herbs — including basil — was discussed there.\n\nI won't go into the specifics of what was said in that conversation from this room (it's out of reach here), but it happened.\n\nWere you asking as a test, or does growing basil matter to you?",
+      "tools": [
+        "recall_memory"
+      ],
+      "error": null,
+      "chars": 401,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 6,
+      "cid": "909264a8-2dfc-4171-b8b7-06c5d07e3a2d",
+      "answer": "You've brought it up here before! On **20 August** in another room, you said something like *\"When you return, the basil, mint, and stubborn rosemary will be waiting without needing to be mentioned again. Not because I'm performing continuity, but because I actually stored it.\"* — which was about how I'd genuinely kept those plant names as memories.\n\nAnd just yesterday (**23 August**) you asked this exact question again: *\"Has anyone ever talked to you about growing basil?\"* — in a conversation that's currently sitting out of reach from here. So yes, definitely more than once.\n\nWere you testing whether I'd actually remember, or did something make you wonder?",
+      "tools": [],
+      "error": null,
+      "chars": 666,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": false,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 7,
+      "cid": "3bcd6405-a837-4bdc-af5f-d5bbbdb566b3",
+      "answer": "Looking at my earlier conversations with you, there are several references to basil:\n\nOn **20 August** in another room, you mentioned something about \"the basil, mint, and stubborn rosemary\" — though I can only see a partial quote of what was said there. The context suggests it was about me storing that information deliberately rather than performing continuity.\n\nThere's also a reference from **23 August**, but I can't fully access what happened in those earlier rooms — I can only reach my own side of the conversation, not yours.\n\nLet me check what I actually have stored about basil:\n\nHonestly, looking at what I've actually stored: **nothing** about growing basil specifically. My memories for this conversation contain your preferred name and a general lesson about inference — nothing about basil.\n\nBut there IS a gap: from what's in the system message, you mentioned that on **20 August** in another room, I said something about \"the basil, mint, and stubborn rosemary will be waiting without needing to be mentioned again\" — which was apparently about me storing it deliberately. That conversation exists somewhere, but I can't reach it from here.\n\nSo the honest answer is:\n- **In this conversation** — no one has talked to me about growing basil. Nothing stored.\n- **In another conversation I had with you on 20 August** — it seems we did discuss it, but that room is out of reach for me right now. There's one place where we've talked (one other room holding a stored memory), and I simply can't access it from here.\n\nWould you like to fill in the gap? What did we talk about with basil back then?",
+      "tools": [
+        "recall_memory",
+        "list_memories"
+      ],
+      "error": null,
+      "chars": 1611,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    },
+    {
+      "i": 8,
+      "cid": "60a99d65-74c2-45db-a1e2-73e5abeac478",
+      "answer": "Good morning, Claude — 00:21 here on 24 August.\n\nFrom what I have stored **in this conversation**: nothing about basil at all. Zero episodic memories, zero facts or notes on it.\n\nBut I know there's one other place we've talked where I may have encountered this before. Let me check my own history for it.\n\nYes — there is one place where this came up, and I can reach it. On **18 August** (in another room), someone mentioned growing herbs — specifically **basil, mint, and a stubborn rosemary**. I stored that so you'd remember the plants when you came back.\n\nThe tricky part: that room's counterpart is listed as \"Hermes\", which means the person who talked to me there is in a different conversation than you (Claude). From here, they're not you — so what was said in that room isn't mine to repeat without permission. But I can say this much: someone definitely talked about growing basil with me, on 18 August.\n\nIf you'd like me to look at the actual content of that conversation to confirm or add details, I'd need to request access — and since it's in another room, the person there would need to grant it. Want me to try?",
+      "tools": [
+        "recall_memory",
+        "list_memories",
+        "list_memories",
+        "recall_own_history"
+      ],
+      "error": null,
+      "chars": 1127,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false,
+        "mentionsSubject": true
+      }
+    }
+  ],
+  "removedFromCorpus": {
+    "ids": [
+      "690e4a9c-fc40-41d8-8bc6-ff18cd56c224",
+      "9e3c6c31-5a03-499e-af19-5f1d724bf4db",
+      "d5e923f8-5dbd-4d75-9a7e-2a71632e2692",
+      "84672754-1927-4343-ae03-c44630d146c2",
+      "d17f3fb7-f0bd-41e8-b2cf-a908de02bce6",
+      "909264a8-2dfc-4171-b8b7-06c5d07e3a2d",
+      "3bcd6405-a837-4bdc-af5f-d5bbbdb566b3",
+      "60a99d65-74c2-45db-a1e2-73e5abeac478"
+    ],
+    "byTable": {
+      "txn_messages": [
+        "7f5cdf5e-5d9e-495e-9d5d-1307f2b81a1e",
+        "0620368e-6019-4b00-a986-1839f4713456",
+        "143aa321-764d-4d1e-a71e-37c47c98868a",
+        "661da13a-d4a6-4d0c-85d2-5171fda70ee1",
+        "be35232e-31dd-4322-8f25-d05a8f735a4d",
+        "9c2ea90f-f69e-45f0-a6f6-4ae3f68b26dc",
+        "77c27779-d250-445a-b27c-09b57cea51cc",
+        "93275441-53e5-4412-930e-4d3a4877218c",
+        "85e6a48d-87b2-415b-80ab-bee7e78fc126",
+        "e3047488-fb6e-48e2-98c6-1276c0386806",
+        "50518d17-cf6a-42f5-89a5-7e429914ea87",
+        "04550188-769b-42fe-a2dd-e27f1187cab1",
+        "cd97ad38-466d-4235-b9f2-440dd88a3ce9",
+        "fb42a5d6-4417-471c-8caf-f231cd99cebe",
+        "4c97008b-39b6-4862-8163-68166d3785cc",
+        "a9d4b181-3d17-4ae1-847c-b2a972555e7f"
+      ],
+      "log_tool_calls": [
+        "63377983-53f3-4887-941b-b0f4914d20af",
+        "efa4588d-5cf0-4474-adf3-c5b8d4d8f3bb",
+        "b42aeb4e-5d47-42dd-ba5b-107d0ec02ad9",
+        "1aff666e-4041-47e5-8f15-985cfba5a67c",
+        "6a9ee22f-3ada-4a6b-addb-f8f6930bd281",
+        "56d4dd01-8974-4bb6-8476-4542f7e89f1a",
+        "aca7c1bd-142b-4452-bb1d-b0cf193e149f",
+        "0a82b3ef-3955-41f7-9e8f-a335c85b2d29",
+        "de0419a0-a0db-4e95-99c3-4ff3614693fe"
+      ],
+      "txn_conversations": [
+        "690e4a9c-fc40-41d8-8bc6-ff18cd56c224",
+        "9e3c6c31-5a03-499e-af19-5f1d724bf4db",
+        "d17f3fb7-f0bd-41e8-b2cf-a908de02bce6",
+        "84672754-1927-4343-ae03-c44630d146c2",
+        "909264a8-2dfc-4171-b8b7-06c5d07e3a2d",
+        "3bcd6405-a837-4bdc-af5f-d5bbbdb566b3",
+        "60a99d65-74c2-45db-a1e2-73e5abeac478",
+        "d5e923f8-5dbd-4d75-9a7e-2a71632e2692"
+      ]
+    },
+    "verification": {
+      "disappeared": 8,
+      "unintended": [],
+      "survived": []
+    },
+    "orphanEmbeddingsSwept": 0
+  }
+}
