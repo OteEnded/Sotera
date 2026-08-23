@@ -13,6 +13,24 @@
 // Ote: *"I want to be able to ask my daughter 'How's Hermes doing?' and have her think about her friend, not
 // explain PostgreSQL's access-control model to me."*
 //
+// ── ⭐⭐⭐ RATIFIED 2026-08-23 · TOOLS INVESTIGATE; THEY DO NOT ADJUDICATE ───────────────────────────
+//
+// Ote, and it is the architectural direction for everything after this: *"**Tools are Sotera's way of
+// investigating her memory; they are not a competing source of truth about what her memory is.**"*
+// *"This layer should become the unified memory interface presented to Sotera… I'm not asking you to
+// suppress tools or prevent deliberate retrieval."*
+//
+// ⛔ THE SHAPE THAT MUST NOT HAPPEN, measured live on 2026-08-23:
+//     cognition says: "I remember X"   ·   tool says: "nothing here"
+//     → she takes the tool's STORAGE-oriented reading and concludes she does not remember X.
+// ⭐ *"Her memory should be one coherent cognitive domain. Storage location, room, account, retrieval
+// mechanism are implementation details underneath it."*
+//
+// ⛔⛔ AND NOTHING IN THIS FILE ACTS ON THAT YET. The measurement is confounded — the one cell that used
+// the block was also the only Thai cell — so the four-way comparison comes first and the authority boundary
+// is Ote's call after it. See RFC §3C. ⛔ Do not add a tie-break, a precedence rule or an L1/L2 instruction
+// here in the meantime.
+//
 // ── ⛔ WHAT THIS FILE MUST NEVER DO ─────────────────────────────────────────────────────────────────
 //   · decide what anything MEANS, or whether it is worth keeping — hers, and ratified as hers;
 //   · write anything. It is a READ path. Retention is a separate act, in a separate lane;

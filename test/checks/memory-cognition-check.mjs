@@ -422,5 +422,32 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
   }
 }
 
+// ── ⭐⭐⭐ 11 · TOOLS INVESTIGATE; THEY DO NOT ADJUDICATE — RECORDED, AND ⛔ NOT YET ACTED ON ────────
+//
+// Ote's ruling, 2026-08-23: *"Tools are Sotera's way of investigating her memory; they are not a competing
+// source of truth about what her memory is."* ⛔ And the measurement that motivates it is CONFOUNDED — the
+// one cell that used the block was also the only Thai cell — so the four-way comparison comes first and the
+// authority boundary is his call after it.
+//
+// ⇒ This section asserts BOTH halves: the direction is written down where the code lives, and **nothing
+// implements it yet**. ⚠️ The second half is the one that matters: a precedence rule added quietly would be
+// a behaviour change dressed as a fix, and it would also destroy the experiment that decides its shape.
+{
+  const fsp = await import('node:fs/promises')
+  const raw = await fsp.readFile(
+    new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
+  ok(/TOOLS INVESTIGATE; THEY DO NOT ADJUDICATE/.test(raw),
+    '11 · ⭐ the ratified direction is recorded beside the code it governs')
+  ok(/RFC §3C/.test(raw), '11 · …and points at the section that holds the open options')
+
+  // ⛔ CODE ONLY — the comments above legitimately discuss tools, precedence and adjudication.
+  const code = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*/g, '$1')
+  ok(!/toolResult|tool_calls|toolsUsed|precedence|outrank|tieBreak|tie_break/i.test(code),
+    '11 · ⛔⛔ the layer implements NO tool-vs-cognition precedence — the experiment decides its shape first')
+  // ⭐ And it still cannot see a tool at all: cognition is a read path over stores, not a consumer of turns.
+  ok(!/\btools\b/.test(code),
+    '11 · ⛔ cognition does not know what a tool is, which is why it cannot be adjudicating against one')
+}
+
 await seq.close().catch(() => {})
 done()

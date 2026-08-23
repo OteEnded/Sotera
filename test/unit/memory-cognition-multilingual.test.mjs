@@ -105,6 +105,20 @@ test('⛔⛔ …and it does NOT open the gate, because a clause-as-topic guarant
   }
 })
 
+test('✅✅ RATIFIED — safe silence is a DECISION now, and option B is REFUSED', () => {
+  // ⭐ Ote, 2026-08-23: *"If we don't have enough signal to establish what the user is talking about, I'd
+  // rather Sotera not activate and not invent an aboutness claim… The Thai result already proves the
+  // cognition pipeline itself can work in Thai once activated; I don't want to solve the segmentless case by
+  // weakening the activation boundary."*
+  // ⛔ So this is not a gap awaiting a fix. A future edit that opens the gate for a bare Thai clause is
+  // REVERSING A RULING, and this assertion is here to make that obvious rather than plausible.
+  // ⓘ `includes`, not a regex — the source says `**REFUSED**` and `**` is not a literal in a pattern.
+  assert.ok(SRC_RAW.includes('RATIFIED 2026-08-23') && SRC_RAW.includes('REFUSED**, not pending'),
+    'the decision and its reasoning must live beside the code it governs')
+  assert.equal(hasCue(cue('เราคุยเรื่องอะไรกันบ้าง')), false)
+  assert.equal(hasCue(cue('記憶について話しましょう')), false)
+})
+
 test('⭐⭐ but a segmentless turn that NAMES someone works end to end — that is 34% of her Thai', () => {
   const c = cue('Hermes เป็นอย่างไรบ้าง')
   assert.deepEqual(c.persons, ['Hermes'])

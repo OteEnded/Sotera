@@ -100,6 +100,15 @@ const TECHNICAL = [
  * ⇒ ⓘ These runs are reported on `cues.unsegmented` and deliberately DO NOT become topics. See
  * `hasCue` for the decision and `ANALYSIS_SOTERA_MULTILINGUAL_CUES` for the two measurements that rule out
  * the obvious alternatives (character n-grams and a cosine floor both fail to separate on her own data).
+ *
+ * ── ✅✅ RATIFIED 2026-08-23 — THIS IS NOW A DECISION, NOT AN OPEN QUESTION. Ote chose **safe silence**:
+ * *"I don't want to remove the lexical floor just to make activation appear more complete. If we don't have
+ * enough signal to establish what the user is talking about, I'd rather Sotera not activate and not invent
+ * an aboutness claim."*
+ * ⭐ And the reasoning that closed it: *"The Thai result already proves the cognition pipeline itself can
+ * work in Thai once activated; I don't want to solve the segmentless case by weakening the activation
+ * boundary."* ⇒ multilingual CUE FORMATION is revisited separately, on its own terms.
+ * ⛔ So option B (activate with no lexical floor and drop the aboutness claim) is **REFUSED**, not pending.
  */
 const SEGMENTLESS = /[฀-๿຀-໿ក-៿က-႟぀-ヿ㐀-䶿一-鿿豈-﫿]/u
 
