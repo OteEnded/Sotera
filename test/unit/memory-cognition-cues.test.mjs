@@ -122,9 +122,17 @@ test('a real question always forms a cue, even with no known names', () => {
 // ── ⛔ NO INTENT TAXONOMY ESCAPES ──────────────────────────────────────────────────────────────────
 test('⛔ the cue object exposes no question-type label — cues are handles on the world, not categories', () => {
   const c = formCues("How's Hermes doing?", { knownNames: KNOWN })
-  assert.deepEqual(Object.keys(c).sort(), ['persons', 'raw', 'recency', 'technical', 'topics'])
+  // ⭐ THIS PIN CAUGHT THE MULTILINGUAL CHANGE, WHICH IS EXACTLY WHAT IT IS FOR. `unsegmented` and `scripts`
+  // were added deliberately and are the two kinds of thing this file is allowed to expose:
+  //   `unsegmented` — a HANDLE the layer could not form (a run of Thai/CJK with no word boundaries);
+  //   `scripts`     — pure OBSERVABILITY, so a check can assert a Thai turn was SEEN as Thai rather than as
+  //                   empty. ⛔ Nothing branches on it beyond the gate.
+  // ⛔ Neither is a category of QUESTION, which is the thing this test actually forbids.
+  assert.deepEqual(Object.keys(c).sort(),
+    ['persons', 'raw', 'recency', 'scripts', 'technical', 'topics', 'unsegmented'])
   assert.equal('intent' in c, false, 'the moment this has an intent field we have built a classifier')
   assert.equal('questionType' in c, false)
+  assert.equal('language' in c, false, 'a language LABEL would be a classifier by another name')
 })
 
 test('odd input does not throw', () => {

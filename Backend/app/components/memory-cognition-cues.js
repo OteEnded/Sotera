@@ -41,14 +41,25 @@ const NOT_A_NAME = new Set([
 /**
  * ⭐ RECENCY, in the words people actually use. ⛔ Not a parsed date range — a hint the activation stage may
  * use to prefer or to bound, never a filter that can silently exclude the answer.
+ *
+ * ⚠️ THAI IS LISTED BESIDE ENGLISH BECAUSE HE WRITES THAI — 167 of her messages carry Thai script. A
+ * per-language pattern list is a weak instrument (measured elsewhere in this project at 1-of-9 languages for
+ * name detection), but ⓘ the failure direction here is mild: a missed recency hint changes a PREFERENCE, and
+ * `recency` has never been allowed to exclude anything.
  */
 const RECENCY = [
   [/\b(right now|currently|at the moment)\b/i, 'now'],
+  [/(ตอนนี้|เดี๋ยวนี้|ขณะนี้)/, 'now'],
   [/\b(today|this morning|this afternoon|tonight)\b/i, 'today'],
+  [/(วันนี้|เมื่อเช้า|คืนนี้)/, 'today'],
   [/\b(lately|recently|these days|nowadays|last few days)\b/i, 'recent'],
+  [/(ล่าสุด|เพิ่ง|ช่วงนี้|หลังๆ|หลัง ๆ|ระยะนี้)/, 'recent'],
   [/\b(yesterday)\b/i, 'yesterday'],
+  [/(เมื่อวาน|วานนี้)/, 'yesterday'],
   [/\b(last week|past week)\b/i, 'week'],
+  [/(สัปดาห์ที่แล้ว|อาทิตย์ที่แล้ว)/, 'week'],
   [/\b(ever|at all|any ?time|before|previously|in the past)\b/i, 'any'],
+  [/(เคย|ก่อนหน้านี้|ที่ผ่านมา)/, 'any'],
 ]
 
 /**
@@ -65,7 +76,32 @@ const TECHNICAL = [
   /\bhow (does|do) (this|that|it) work\b/i,
   /\b(explain|describe) (your|the) (memory|architecture|system|retrieval)\b/i,
   /\b(room|rooms|scope|authorization|disclosure|permission)s?\b.*\bwork\b/i,
+  // ── ⭐⭐ THAI · HE ASKS HER THIS IN THAI, AND UNTIL NOW THE ANSWER WAS WORSE FOR IT ───────────────
+  // ⚠️ AND THE CONSEQUENCE OF MISSING IT IS NOT "a slightly worse answer" — `technical` is what exempts the
+  // block from the vocabulary guard, so a Thai technical question whose block legitimately mentions the
+  // mechanism gets the WHOLE BLOCK WITHHELD (`activated: false`). She loses her memory rather than her
+  // manners. ⓘ The miss direction is still the safe one, which is why a pattern list is tolerable here.
+  /ความ(ทรง)?จำ[^]{0,24}(ทำงาน|ยังไง|อย่างไร)/,
+  /(ทำงาน|จัดเก็บ|เก็บ)[^]{0,16}ความ(ทรง)?จำ/,
+  /(จำ|ลืม)[^]{0,20}(ได้ยังไง|ได้อย่างไร|ทำงานยังไง)/,
+  /(อธิบาย|เล่า)[^]{0,20}(ความ(ทรง)?จำ|ระบบ|สถาปัตยกรรม)/,
 ]
+
+/**
+ * ⚠️⚠️ SCRIPTS WITH NO INTER-WORD SPACES — Thai, Lao, Khmer, Myanmar, Japanese, Chinese.
+ *
+ * ⭐⭐ THIS EXISTS SO THE GATE'S BEHAVIOUR ON THEM IS A **NAMED DECISION** RATHER THAN AN ACCIDENT OF A
+ * CHARACTER CLASS. Splitting a Thai clause on non-word characters yields ONE token — the whole clause — and
+ * a whole clause is not a topic: nothing in the record contains it as a substring, so the relevance floor
+ * downstream would drop every candidate and the turn would render as *"I went looking … and came up with
+ * nothing"*. ⛔ THAT IS A FALSE ABSENCE, and it is strictly worse than the silence of not activating, because
+ * a silence claims nothing while a false absence claims a search that could not have succeeded.
+ *
+ * ⇒ ⓘ These runs are reported on `cues.unsegmented` and deliberately DO NOT become topics. See
+ * `hasCue` for the decision and `ANALYSIS_SOTERA_MULTILINGUAL_CUES` for the two measurements that rule out
+ * the obvious alternatives (character n-grams and a cosine floor both fail to separate on her own data).
+ */
+const SEGMENTLESS = /[฀-๿຀-໿ក-៿က-႟぀-ヿ㐀-䶿一-鿿豈-﫿]/u
 
 /**
  * ⭐ FORM THE CUES FOR ONE TURN. PURE.
@@ -78,7 +114,7 @@ const TECHNICAL = [
  */
 export function formCues(text, { knownNames = [] } = {}) {
   const raw = String(text ?? '').trim()
-  const empty = { persons: [], topics: [], recency: null, technical: false, raw }
+  const empty = { persons: [], topics: [], recency: null, technical: false, unsegmented: [], scripts: [], raw }
   if (!raw) return empty
 
   const known = new Map()
@@ -102,11 +138,26 @@ export function formCues(text, { knownNames = [] } = {}) {
   // ── TOPICS · the meaningful words, for the fallback semantic query ────────────────────────────────
   // ⛔ NOT a keyword extractor pretending to be smart. It drops stop-words and the names already resolved,
   // and hands the rest on. The retrieval stage does the real work with the raw text.
+  //
+  // ⚠️⚠️ AND THE SPLIT USED TO BE AN **ASCII ALLOWLIST**, `[^A-Za-z0-9'’-]+`, WHICH IS A WHOLE-LANGUAGE
+  // OUTAGE AND NOT A THAI PROBLEM. Every letter outside ASCII was treated as a SEPARATOR, so:
+  //     Russian «Что ты помнишь»  → 0 tokens        Greek, Hebrew, Arabic, Hindi → 0 tokens
+  //     Spanish "¿Qué recuerdas?" → "Qu" + "recuerdas"  (a word silently cut in half at the é)
+  //     Thai    "ความทรงจำ…"      → 0 tokens
+  // ⇒ `hasCue` was false, so the layer never ran, and the same class of bug is already recorded in this
+  // project as *the ASCII-tokenizer whole-language outage*. ⭐ `\p{L}\p{M}\p{N}` is the fix: `\p{M}` matters
+  // as much as `\p{L}`, because Thai tone marks, Devanagari matras and Arabic diacritics are combining marks
+  // and dropping them cuts words apart from the inside.
   const topics = []
-  for (const tok of raw.split(/[^A-Za-z0-9'’-]+/)) {
+  const unsegmented = []
+  for (const tok of raw.split(/[^\p{L}\p{M}\p{N}'’-]+/u)) {
     const t = tok.trim()
     if (t.length < 3) continue
     const l = t.toLowerCase()
+    // ⛔ A RUN OF SEGMENTLESS SCRIPT IS NOT A TOPIC — see `SEGMENTLESS`. It is reported so the decision is
+    // visible and testable, and it does NOT open the gate, because a clause-as-topic guarantees a false
+    // absence rather than a recollection.
+    if (SEGMENTLESS.test(t)) { if (!unsegmented.includes(t)) unsegmented.push(t); continue }
     if (NOT_A_NAME.has(l)) continue
     if (persons.some((p) => p.toLowerCase() === l)) continue
     if (!topics.includes(l)) topics.push(l)
@@ -115,7 +166,15 @@ export function formCues(text, { knownNames = [] } = {}) {
   let recency = null
   for (const [re, label] of RECENCY) { if (re.test(raw)) { recency = label; break } }
 
-  return { persons, topics, recency, technical: TECHNICAL.some((re) => re.test(raw)), raw }
+  // ⓘ OBSERVABILITY, NOT BEHAVIOUR. Which writing systems the turn used, so a check can assert that a Thai
+  // turn was SEEN as Thai rather than seen as empty. ⛔ Nothing branches on this beyond `hasCue`.
+  const scripts = []
+  if (/[\p{Script=Latin}]/u.test(raw)) scripts.push('latin')
+  if (/[฀-๿]/u.test(raw)) scripts.push('thai')
+  if (SEGMENTLESS.test(raw)) scripts.push('segmentless')
+  if (/[\p{L}]/u.test(raw) && !/[\p{Script=Latin}]/u.test(raw) && !SEGMENTLESS.test(raw)) scripts.push('other-alphabetic')
+
+  return { persons, topics, recency, technical: TECHNICAL.some((re) => re.test(raw)), unsegmented, scripts, raw }
 }
 
 /**
