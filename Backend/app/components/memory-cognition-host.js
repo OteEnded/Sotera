@@ -92,6 +92,9 @@ const clip = (s, n) => {
 
 export function buildMemoryCognition(fastify, {
   userId = null, isRoot = false, username = null, conversationId = null, interactive = false,
+  // ⭐ THE DATES-ONLY PROBE, passed IN rather than read here — this module reads no settings, and the one
+  // time a component in this project started reading its own config the arms stopped being separable.
+  localDates = false,
 } = {}) {
   const db = fastify?.db
 
@@ -580,10 +583,28 @@ export function buildMemoryCognition(fastify, {
   // dates ("yesterday") — those need a clock this function does not have, and a wrong one is a false memory.
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December']
-  const dayOf = (when) => {
+  // ⭐⭐ THE DATES-ONLY PROBE (`memory.cognitionLocalDates`, DEFAULT OFF). ⛔ NOT the language-local
+  // renderer, and deliberately not: the block stays in English and ONLY the date changes, because that is
+  // the one variable that can falsify the renderer design before it is written.
+  //
+  // ⚠️ THE MEASUREMENT IT ANSWERS. Offline, same account/subject/memory, the Thai and English blocks are
+  // near-identical (7 items · 5 episodes · 1 filtered) and the Thai block is RENDERED IN ENGLISH — so her
+  // Thai answer has to transpose *"21 August"* across languages. Her Thai episodic rate is 0/8.
+  //   · if Thai dates alone move it ⇒ the bottleneck is narrow, and a phrase table is worth building.
+  //   · if nothing moves ⇒ the bottleneck is cross-language transposition and the table would not fix it.
+  //
+  // ⛔ THAI MONTH NAMES ONLY — no Buddhist-era year, no reformatting of anything else. The year is not in
+  // the rendering at all, and converting one would be inventing a fact about the date rather than
+  // translating it. ⓘ Thai writes the day before the month, same order as the English form here.
+  const MONTHS_TH = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
+  const dayIn = (when, lang = 'en') => {
     if (!when) return null
     const d = new Date(when)
-    return Number.isNaN(d.getTime()) ? null : `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`
+    if (Number.isNaN(d.getTime())) return null
+    // ⭐ MISSING LANGUAGE ⇒ ENGLISH, so degradation is exactly today's behaviour rather than a blank.
+    const months = lang === 'th' ? MONTHS_TH : MONTHS
+    return `${d.getUTCDate()} ${months[d.getUTCMonth()]}`
   }
 
   /**
@@ -611,6 +632,21 @@ export function buildMemoryCognition(fastify, {
    * untouched on the items — this changes only the sentence she reads.
    */
   function render({ cues, kept, dropped, searched, speakingWith = null }) {
+    // ⭐ THE DATES-ONLY PROBE. The scripts present come from `cues.scripts`, which Step B already computes —
+    // ⛔ no new detection and no model call.
+    //
+    // ⚠️⚠️ AND THE FIRST VERSION OF THIS LINE WAS WRONG IN THE ONE CASE THAT MATTERS. It required Thai with
+    // NO Latin — and the probe question is *"Hermes เป็นอย่างไรบ้าง…"*, which contains a Latin proper name,
+    // so the rule would have been off for every turn the probe exists to measure. ⇒ ⭐ MAJORITY, NOT
+    // MEMBERSHIP: a Latin name inside a Thai sentence does not make the sentence English. The tie goes to
+    // English, because guessing wrong is worse than not localising — the date is the part of the block she
+    // quotes verbatim. ⓘ Counted over the raw utterance, so a script only wins by carrying the sentence.
+    const scripts = cues?.scripts ?? []
+    const raw = String(cues?.raw ?? '')
+    const thaiWeight = (raw.match(/[฀-๿]/g) ?? []).length
+    const latinWeight = (raw.match(/[\p{Script=Latin}]/gu) ?? []).length
+    const dateLang = (localDates && scripts.includes('thai') && thaiWeight > latinWeight) ? 'th' : 'en'
+    const dayOf = (when) => dayIn(when, dateLang)
     // ⭐⭐ TWO RENDERS: the real one, and a FRAME with every quotation replaced by a token.
     // ⚠️ The guard must police what the layer WROTE, not what it quotes. It once flagged the word "room"
     // inside a quotation of her own earlier answer — quoting the conversation back is not a leak.

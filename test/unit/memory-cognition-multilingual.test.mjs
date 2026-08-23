@@ -250,3 +250,70 @@ test('⛔ the ABOUT phrase prefers a typed cue over a manufactured one', () => {
   assert.ok(/derivedTopics/.test(fn), 'about0 must know which cues it made up')
   assert.ok(/find\(\(t\) => !derived\.has\(t\)\)/.test(fn), 'and prefer the ones it did not')
 })
+
+// ── ⭐⭐ THE DATES-ONLY PROBE · `memory.cognitionLocalDates` ──────────────────────────────────────
+//
+// ⛔ THIS IS NOT LANGUAGE-LOCAL RENDERING, AND THE TESTS BELOW EXIST TO KEEP IT FROM BECOMING IT BY
+// ACCIDENT. The block stays in English; only the DATE changes. One variable, so a Thai episodic rate that
+// does not move falsifies the phrase-table design before anybody writes it — and one that does move says
+// the bottleneck is narrow.
+//
+// ⚠️ The measurement it answers: offline, the Thai and English blocks are near-identical (7 items ·
+// 5 episodes · 1 filtered) and the Thai block is rendered in ENGLISH, so a Thai answer has to transpose
+// *"21 August"* across languages. Her Thai episodic rate is 0/8 against 6/8 in English.
+import { buildMemoryCognition } from '../../Backend/app/components/memory-cognition-host.js'
+
+const AUG21 = '2026-08-21T09:00:00Z'
+const ep = () => ({
+  id: 'ep:1', kind: 'episode', who: 'Hermes', withThem: true, when: AUG21, here: true,
+  availability: 'recalled', basis: 'attested-by-source', retention: 'retained', warrants: [],
+  exchanges: [{ who: 'me', said: 'I remember this one.', when: AUG21 }],
+})
+// ⓘ `renderFor` returns the rendering AND its quotation-masked frame; the block she receives is `.text`.
+const blockFor = (raw, opts) => {
+  const { renderFor } = buildMemoryCognition(null, opts)
+  return renderFor([ep()], { cues: formCues(raw, { knownNames: NAMES }) }).text
+}
+
+test('⭐⭐ a Thai turn gets a THAI month — and only when the probe is on', () => {
+  const TH = 'Hermes เป็นอย่างไรบ้าง คุยกับเขาเรื่องอะไรมาบ้าง'
+  assert.match(blockFor(TH, { localDates: true }), /21 สิงหาคม/, 'Thai month name, day-first as in the English form')
+  // ⛔ DEFAULT OFF is the claim that makes every earlier measurement still valid.
+  assert.match(blockFor(TH, {}), /21 August/, 'off by default — the probe must not change the baseline')
+  assert.match(blockFor(TH, { localDates: false }), /21 August/)
+})
+
+test('⭐ an English turn is untouched even with the probe on', () => {
+  assert.match(blockFor('How is Hermes doing?', { localDates: true }), /21 August/)
+})
+
+test('⚠️⚠️ MAJORITY, NOT MEMBERSHIP — a Latin NAME does not make a Thai sentence English', () => {
+  // ⛔⛔ THE FIRST VERSION OF THE RULE FAILED EXACTLY HERE. It required Thai with no Latin, and the probe's
+  // own question contains "Hermes" — so the probe would have been off on every turn it exists to measure.
+  const TH = 'Hermes เป็นอย่างไรบ้าง คุยกับเขาเรื่องอะไรมาบ้าง'
+  const c = formCues(TH, { knownNames: NAMES })
+  assert.ok(c.scripts.includes('thai') && c.scripts.includes('latin'),
+    'the probe question really does contain both scripts — that is the whole point of this test')
+  assert.match(blockFor(TH, { localDates: true }), /21 สิงหาคม/, 'Thai carries the sentence, so Thai wins')
+
+  // ⭐ AND THE OTHER DIRECTION: an English sentence with a Thai phrase in it stays English.
+  const mixed = 'Hermes เป็นอย่างไร — any updates on that, and what did we cover?'
+  const m = formCues(mixed, { knownNames: NAMES })
+  assert.ok(m.scripts.includes('thai') && m.scripts.includes('latin'), 'the fixture must actually be mixed')
+  assert.match(blockFor(mixed, { localDates: true }), /21 August/, 'Latin carries this one; the tie goes to English')
+})
+
+test('⛔ the probe changes the DATE and nothing else — the block is otherwise byte-identical', () => {
+  const TH = 'Hermes เป็นอย่างไรบ้าง คุยกับเขาเรื่องอะไรมาบ้าง'
+  const en = blockFor(TH, {})
+  const th = blockFor(TH, { localDates: true })
+  assert.notEqual(en, th, 'the fixture must exercise a date, or this test proves nothing')
+  assert.equal(th.replace(/21 สิงหาคม/g, '21 August'), en,
+    'swapping the month back must restore the English block exactly — no other string may differ')
+})
+
+test('⛔ no Buddhist-era year, and no year at all', () => {
+  const TH = 'Hermes เป็นอย่างไรบ้าง คุยกับเขาเรื่องอะไรมาบ้าง'
+  const th = blockFor(TH, { localDates: true })
+  assert.ok(!/2569|2026/.test(th), 'converting a year would invent a fact about the date rather than translate it')
+})

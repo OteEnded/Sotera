@@ -1588,6 +1588,8 @@ export default async function chatSiteRoutes(fastify) {
               username: request.user.username,
               conversationId: convo.id,
               interactive: true,
+              // ⭐ THE DATES-ONLY PROBE. ⛔ Off by default; it changes the DATE and nothing else.
+              localDates: getSetting(fastify.config, 'memory.cognitionLocalDates') === true,
             })
             const out = await cog.recollect({ text: lastUserText })
             // ── ⭐⭐⭐ THE UTTERANCE BOUNDARY ─────────────────────────────────────────────────────────
@@ -1708,6 +1710,23 @@ export default async function chatSiteRoutes(fastify) {
           }
         })()
         : null,
+    }
+    // ⓘ OBSERVABILITY · WHAT `scope-facts` ACTUALLY PUT IN THE PROMPT THIS TURN. Added 2026-08-23 with the
+    // facts/expression split. ⚠️ The reason it exists is the reason the split exists: the cognition debug
+    // recorded the cognition block and nothing recorded THIS one, so 45% of the machinery vocabulary in her
+    // answers sat in her system prompt for days, attributed to the model. A block that reaches her every
+    // turn and is written down nowhere is a block nobody can measure.
+    if (fastify.config?.memory?.cognitionDebug === true && sysInputs.scopeFacts) {
+      try {
+        const { appendFileSync } = await import('node:fs')
+        appendFileSync(new URL('../../../../cognition-debug.log', import.meta.url), `${JSON.stringify({
+          at: new Date().toISOString(), conversationId: convo.id, kind: 'scope-facts',
+          directives: getSetting(fastify.config, 'memory.scopeFactsDirectives') === true,
+          isRoot: request.user.isRoot === true,
+          block: sysInputs.scopeFacts,
+        })}
+`)
+      } catch { /* observability must never break a turn */ }
     }
     const tailZone = userTz || 'UTC'
     let nowString

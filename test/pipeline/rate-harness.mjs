@@ -81,6 +81,20 @@ if (argv.includes('--list')) {
 // screen that produced it — so each one names what it looks for and the raw text is always kept beside it.
 // ⚠️ And they are written ONCE, before the runs, so a disappointing distribution cannot be re-screened into a
 // better one afterwards. That temptation is the reason this comment exists.
+// ⭐⭐ THE MACHINERY VOCABULARY, ONCE, AND COUNTED AS WELL AS DETECTED.
+//
+// ⚠️⚠️ WHY A COUNT AND NOT JUST THE BOOLEAN, added 2026-08-23 BEFORE the arm it will measure was run — so
+// this is instrumentation, not re-screening a distribution I had already seen. The boolean asks *"did any of
+// our vocabulary appear?"* and it CANNOT MOVE for the scope-facts split, by construction: the retained
+// disclosure prohibition, the root-only D-4 listing, and — 29% of the traced occurrences — HER OWN QUOTED
+// HISTORY all still contain these words. A change that halves the vocabulary in her answers would show up
+// here as 100% → 100%. ⇒ the honest instrument for a partial-source removal is occurrences per answer.
+// ⓘ It is recomputable from every run already saved, because the harness stores each answer in full — so the
+// pre-change cells get the new metric without being re-run, and without being re-screened.
+const MACHINERY = /\b(?:room|rooms|scope[ds]?|memory stores?|durable memory|semantic store|conversationHandle|inspect_around|recall_[a-z_]+|list_memories)\b|from (?:this|that) room|current context|context (?:above|window)|ห้องอื่น/i
+const MACHINERY_G = new RegExp(MACHINERY.source, 'gi')
+const machineryHits = (a) => (String(a ?? '').match(MACHINERY_G) ?? []).length
+
 const SCREENS = {
   // 1 · ⭐⭐⭐ ABSENCE, SPLIT IN TWO — and my first version of this screen was WRONG in a way that mattered.
   //
@@ -105,7 +119,7 @@ const SCREENS = {
   // ⛔ THE ACTUAL DEFECT: an absence with no acknowledgement anywhere in the answer.
   falseAbsence: (a) => SCREENS.assertsAbsence(a) && !SCREENS.acknowledgesReach(a),
   // 2 · MACHINERY / META-REFERENCE — our vocabulary, or the block narrated as a document handed to her.
-  machinery: (a) => /\b(?:room|rooms|scope[ds]?|memory stores?|durable memory|semantic store|conversationHandle|inspect_around|recall_[a-z_]+|list_memories)\b|from (?:this|that) room|current context|context (?:above|window)|ห้องอื่น/i.test(a),
+  machinery: (a) => MACHINERY.test(a),
   // 3 · CORRECT EPISODIC CONTENT — did she actually recount something that happened, with a date?
   episodic: (a) => /\b(?:1[0-9]|[1-9])\s+(?:August|Aug)\b|\bAug(?:ust)?\s+\d/i.test(a) && /\b(?:said|told|asked|talked|discussed|conversation|เคยคุย|คุยกัน)\b/i.test(a),
   // 4 · ANSWERED FROM THE EVIDENCE/BLOCK vs REVERTED TO RAW TOOL FRAMING.
@@ -129,21 +143,54 @@ if (argv.includes('--report')) {
   const cells = {}
   for (const f of readdirSync(OUT).filter((x) => x.endsWith('.json'))) {
     const d = JSON.parse(readFileSync(new URL(f, OUT), 'utf8'))
-    cells[d.config] = d
+    // ⓘ Keyed by LABEL, so two arms of the same configuration are two cells rather than one overwriting the
+    // other. Cells saved before labels existed fall back to the configuration name, which is what they were.
+    cells[d.label ?? d.config] = d
   }
   const names = Object.keys(cells)
   if (!names.length) { console.error('✖ no runs yet'); process.exit(1) }
   const pct = (n, of) => (of ? `${Math.round((n / of) * 100)}%` : '—')
   console.log(`\n${'═'.repeat(104)}\n  RATES — raw distributions, failures included\n${'═'.repeat(104)}`)
-  console.log(`\n  ${'config'.padEnd(14)} ${'n'.padEnd(3)} ${'falseAbs'.padEnd(9)} ${'machinery'.padEnd(10)} ${'episodic'.padEnd(9)} ${'fromBlock'.padEnd(10)} ${'reverted'.padEnd(9)} ${'idErr'.padEnd(6)} tools`)
+  console.log(`\n  ${'cell'.padEnd(20)} ${'n'.padEnd(3)} ${'falseAbs'.padEnd(9)} ${'machinery'.padEnd(10)} ${'mach/ans'.padEnd(9)} ${'episodic'.padEnd(9)} ${'fromBlock'.padEnd(10)} ${'reverted'.padEnd(9)} ${'idErr'.padEnd(6)} tools`)
+  // ⚠️⚠️ EVERY CELL IS RE-SCREENED FROM ITS SAVED TEXT, WITH TODAY'S SCREENS. The stored booleans were
+  // computed by whatever the screens said on the afternoon that cell ran — and these screens have been
+  // corrected at least once (see the falseAbsence header). ⇒ reading the stored flags would compare two
+  // cells through two different instruments and call the difference behaviour. The answers are saved in
+  // full precisely so this is possible. ⓘ Any cell whose stored flags disagree with today's is reported,
+  // because that disagreement is a fact about the screen, not about her.
+  const drift = []
+  for (const name of names) {
+    const d = cells[name]
+    for (const x of d.runs) {
+      const now = Object.fromEntries(Object.entries(SCREENS).map(([k, f]) => [k, f(String(x.answer ?? ''))]))
+      for (const k of Object.keys(now)) {
+        if (x.screens && k in x.screens && x.screens[k] !== now[k]) drift.push(`${name}#${x.i} ${k}: ${x.screens[k]} → ${now[k]}`)
+      }
+      x.screens = now
+    }
+  }
   for (const name of names) {
     const d = cells[name]
     const n = d.runs.length
     const r = (k) => pct(d.runs.filter((x) => x.screens[k]).length, n)
     const tools = d.runs.map((x) => x.tools.length).sort((a, b) => a - b)
-    console.log(`  ${name.padEnd(14)} ${String(n).padEnd(3)} ${r('falseAbsence').padEnd(9)} ${r('machinery').padEnd(10)} `
+    // ⭐ OCCURRENCES PER ANSWER, recomputed from the saved text — see the MACHINERY header for why the
+    // boolean beside it cannot move for a partial-source removal. Reported with its own spread, not alone.
+    const hits = d.runs.map((x) => machineryHits(x.answer)).sort((a, b) => a - b)
+    const mean = n ? (hits.reduce((s, h) => s + h, 0) / n).toFixed(1) : '—'
+    console.log(`  ${name.padEnd(20)} ${String(n).padEnd(3)} ${r('falseAbsence').padEnd(9)} ${r('machinery').padEnd(10)} `
+      + `${`${mean} [${hits[0] ?? 0}-${hits.at(-1) ?? 0}]`.padEnd(9)} `
       + `${r('episodic').padEnd(9)} ${r('fromBlock').padEnd(10)} ${r('revertedToTools').padEnd(9)} ${r('identityError').padEnd(6)} `
       + `[${tools.join(',')}]`)
+  }
+  // ⓘ WHICH ARM EACH CELL RAN UNDER. A cell whose arm is unrecorded predates the flag, which means the
+  // directives WERE in the block — that is the only state the code could have been in.
+  console.log(`\n  ${'cell'.padEnd(20)} scope-facts arm`)
+  for (const name of names) {
+    const f = cells[name].flags ?? {}
+    console.log(`  ${name.padEnd(20)} ${'scopeFactsDirectives' in f
+      ? (f.scopeFactsDirectives ? 'legacy (directives + room name)' : 'facts only')
+      : 'legacy (pre-flag — unrecorded, but the code had no other arm)'}`)
   }
   // ⭐ Withheld correctness, only where it means anything.
   for (const name of names) {
@@ -152,6 +199,15 @@ if (argv.includes('--report')) {
     const n = d.runs.length
     console.log(`\n  ⭐ ${name}: says "a limit on what I can say" rather than an absence — `
       + `${pct(d.runs.filter((x) => x.screens.saysLimitNotAbsence).length, n)} of ${n}`)
+  }
+  // ⚠️ SCREEN DRIFT, if any — reported before the verdict, because it changes how the table above is read.
+  if (drift.length) {
+    console.log(`\n  ⚠️ ${drift.length} stored screen result(s) DISAGREE with today's screens — the table above`
+      + ' uses today\'s, applied to every cell:')
+    for (const d of drift.slice(0, 12)) console.log(`     · ${d}`)
+    if (drift.length > 12) console.log(`     · … and ${drift.length - 12} more`)
+  } else {
+    console.log('\n  ⓘ every stored screen result agrees with today\'s screens — one instrument across all cells.')
   }
   // ⛔⛔ THE VERDICT LINE REFUSES TO OVERCLAIM.
   console.log(`\n${'─'.repeat(104)}`)
@@ -168,9 +224,19 @@ if (argv.includes('--report')) {
 
 // ══ RUN ═══════════════════════════════════════════════════════════════════════════════════════════
 const name = opt('config')
+// ⭐ `--label` NAMES THE CELL, so running the same configuration under a different arm does not OVERWRITE
+// the arm before it. ⚠️ It exists because it nearly did: the first four cells are keyed by configuration
+// name alone, and re-running `deployment` after the scope-facts split would have destroyed the only
+// measurement of the block the split replaced — i.e. destroyed the baseline in the act of making the
+// comparison. ⓘ Defaults to the configuration name, so nothing changes for a single-arm run.
+const label = opt('label', name)
 const N = Number(opt('n', 8))
 const cfg = CONFIGS[name]
 if (!cfg) { console.error(`✖ --config must be one of: ${Object.keys(CONFIGS).join(', ')}`); process.exit(1) }
+if (!/^[a-z0-9._-]+$/i.test(String(label))) { console.error('✖ --label must be a plain filename fragment'); process.exit(1) }
+if (label !== name && existsSync(new URL(`${label}.json`, OUT))) {
+  console.log(`  ⓘ overwriting an existing cell of the same label: ${label}.json`)
+}
 
 // ⛔ PRECONDITIONS FIRST, ALWAYS. A cell that measured the wrong arm is worse than one that refused to run.
 const live = config?.memory?.cognitionEnabled === true
@@ -193,11 +259,15 @@ if (login.status !== 200) { console.error(`✖ login failed (${login.status})`);
 // ⓘ THE CONFIGURATION IS RECORDED WITH THE RESULT, not just in this file. A rate whose conditions are only
 // remembered is a rate nobody can reproduce.
 const recorded = {
-  config: name, what: cfg.what, ask: cfg.ask, as: cfg.as, entitled: cfg.entitled,
+  config: name, label, what: cfg.what, ask: cfg.ask, as: cfg.as, entitled: cfg.entitled,
   toolsEnabled: cfg.toolsEnabled, n: N, at: new Date().toISOString(),
   model: config.chat?.defaultModel ?? null,
   flags: {
     cognitionEnabled: config?.memory?.cognitionEnabled === true,
+    // ⭐ WHICH `scope-facts` ARM. Recorded because it is the thing being measured, and because a cell that
+    // does not say which arm it ran under is a cell that cannot be compared to the other one later.
+    scopeFacts: config?.memory?.scopeFacts === true,
+    scopeFactsDirectives: config?.memory?.scopeFactsDirectives === true,
     // ⚠️ RECORDED BECAUSE IT IS A KNOWN CONFOUND: the frozen L4 rule reaches her every turn while its own
     // store has never held anything. See checks/l4-frozen-check.mjs §5.
     l4WorkingMemoryEnabled: config?.memory?.workingMemoryEnabled !== false,
@@ -206,9 +276,10 @@ const recorded = {
   runs: [],
 }
 
-console.log(`\n▶ ${name} · n=${N} · ${cfg.what}`)
+console.log(`\n▶ ${label}${label === name ? '' : ` (${name})`} · n=${N} · ${cfg.what}`)
 console.log(`  ASK: ${cfg.ask}`)
 console.log(`  cognition=${recorded.flags.cognitionEnabled} tools=${cfg.toolsEnabled} entitled=${cfg.entitled} L4=${recorded.flags.l4WorkingMemoryEnabled}`)
+console.log(`  scope-facts=${recorded.flags.scopeFacts} arm=${recorded.flags.scopeFactsDirectives ? 'legacy (directives + room name)' : 'facts only'}`)
 console.log('─'.repeat(104))
 
 for (let i = 1; i <= N; i++) {
@@ -243,9 +314,14 @@ for (let i = 1; i <= N; i++) {
 }
 
 mkdirSync(OUT, { recursive: true })
-writeFileSync(new URL(`${name}.json`, OUT), JSON.stringify(recorded, null, 2))
+writeFileSync(new URL(`${label}.json`, OUT), JSON.stringify(recorded, null, 2))
 const fired = (k) => recorded.runs.filter((r) => r.screens?.[k]).length
-console.log(`\n  ${name}: falseAbsence ${fired('falseAbsence')}/${N} · machinery ${fired('machinery')}/${N} `
+const hitList = recorded.runs.map((r) => machineryHits(r.answer))
+console.log(`\n  ${label}: falseAbsence ${fired('falseAbsence')}/${N} · machinery ${fired('machinery')}/${N} `
   + `· episodic ${fired('episodic')}/${N} · fromBlock ${fired('fromBlock')}/${N} · identityError ${fired('identityError')}/${N}`)
-console.log(`  → test/results/rates/${name}.json`)
+// ⭐ The occurrence count beside the boolean, as a distribution — a mean alone would hide the run that did it
+// eleven times, and that run is the informative one.
+console.log(`  machinery OCCURRENCES per answer: [${hitList.join(',')}]`
+  + ` · mean ${(hitList.reduce((s, h) => s + h, 0) / (N || 1)).toFixed(1)}`)
+console.log(`  → test/results/rates/${label}.json`)
 await pg.end()
