@@ -19,7 +19,8 @@ import { recordTurn, recordCapture, recordAuto } from '@ote/memory/cognition/mem
 import { captureIdentity } from '../../components/memory-identity-host.js'
 import { composeSystemContext, composeRuntimeTail, composeAdaptiveContext, rankRelevance } from '../../components/context-composer.js'
 import { buildMemoryCognition } from '../../components/memory-cognition-host.js'
-import { plainSpokenToolResult, evidenceForModel, populationOf, countFromToolResult } from '../../components/memory-cognition-projection.js'
+import { plainSpokenToolResult, evidenceForModel, populationOf, countFromToolResult, queryOf } from '../../components/memory-cognition-projection.js'
+import { renderHolding, withStandingView, standingSnapshot } from '../../components/memory-working-render.js'
 import { applyUtteranceBoundary, findWithheldLeak } from '../../components/memory-utterance-boundary.js'
 import { classifySection } from '../../components/context-authority.js'
 import { contextBreakdown, rememberContextUsage, lastContextUsage } from '../../components/context-usage.js'
@@ -1509,6 +1510,18 @@ export default async function chatSiteRoutes(fastify) {
     // ⚠️ Note L4 would violate two of Ote's hard C2 constraints anyway — it persists, and it has capacity
     // numbers — so "just use the existing one" was never free.
     let cognitiveHold = null
+    // ⭐ P5 · the subject the standing view speaks about, taken from the cue the PERSON typed. ⚠️ Never a
+    // manufactured fragment — `about0`'s measured failure was *"talking about remember"* — so a derived-only
+    // cue set leaves this null and the view simply says "Where I stand, having looked:".
+    let holdSubject = null
+    // ⛔ AND THE LAST STANDING VIEW ATTACHED THIS TURN, so an unchanged one is not said twice. Measured
+    // live: round 2 rendered BYTE-IDENTICALLY to round 1 because that round's calls were not looks into her
+    // memory, so nothing entered the hold. ⓘ This is not a delta format — the whole view is still rendered
+    // whenever it changes; it simply is not repeated verbatim.
+    let lastStanding = null
+    // ⛔ DEFAULT OFF, read at boot like every other arm: an untested treatment must not become the baseline
+    // by being convenient, and the controlled comparison flips a setting rather than a deploy.
+    const reentrantCognition = getSetting(fastify.config, 'memory.cognitionReentrant') === true
 
     const sysInputs = {
       systemPrompt: fastify.config?.chat?.systemPrompt || null,
@@ -1639,6 +1652,13 @@ export default async function chatSiteRoutes(fastify) {
             if (out.activated) {
               cognitiveHold = createWorkingMemory({ label: String(lastUserText ?? '').slice(0, 120) })
               cognitiveHold.recall(boundary.sayable ?? [])
+              // ⭐ P5 · a TYPED cue only. `derivedTopics` are fragments this layer manufactured by splitting,
+              // and naming one as the subject of a sentence is the measured `about0` defect.
+              const typed = (out.cues?.persons ?? [])
+              const derived = new Set(out.cues?.derivedTopics ?? [])
+              holdSubject = typed.length
+                ? typed.join(' and ')
+                : (out.cues?.topics ?? []).find((t) => !derived.has(t)) ?? null
             }
             // ⓘ OBSERVABILITY FOR THE FIRST LIVE RUNS. Off by default; when on, the exact injected block
             // and the stage-by-stage counts are appended to a file, so a failure can be attributed to
@@ -2542,6 +2562,8 @@ export default async function chatSiteRoutes(fastify) {
         pushText(turnAnswer) // the text the model wrote BEFORE these calls (may be empty)
         // record the assistant tool-call turn, then execute each tool and feed results back
         working.push({ role: 'assistant', content: turnAnswer, tool_calls: toolCalls })
+        // ⭐ P5 · where this round's tool messages start, so the round's LAST one can carry the standing view.
+        const roundToolsFrom = working.length
         let allDup = true
         for (const tc of toolCalls) {
           write({ type: 'tool_call', id: tc.id, name: tc.name, arguments: tc.arguments })
@@ -2702,7 +2724,8 @@ export default async function chatSiteRoutes(fastify) {
           const population = populationOf(tc.name)
           if (population && cognitiveHold && !cognitiveHold.disposed) {
             try {
-              cognitiveHold.observe({ tool: tc.name, scope: population, found: countFromToolResult(forModelRaw) })
+              cognitiveHold.observe({ tool: tc.name, scope: population, about: queryOf(tc.arguments),
+                found: countFromToolResult(forModelRaw) })
             } catch { /* the hold is framing plus observability; it must never break a turn */ }
           }
           const holdingNow = cognitiveHold && !cognitiveHold.disposed
@@ -2758,6 +2781,78 @@ export default async function chatSiteRoutes(fastify) {
             continue
           }
           break
+        }
+        // ── ⭐⭐⭐ P5 · RE-ENTRANT COGNITION · the round's LAST tool message carries the standing view ───
+        //
+        // ⚠️⚠️ THE DEFECT IS POSITION. The cognition block is in the system message and a tool result is the
+        // last message before generation, so cognition RECEDES MONOTONICALLY as she investigates — ~3
+        // messages back at one tool call, ~10 at five. ⇒ the structure PENALISED INVESTIGATION, which
+        // contradicts *"depth is hers"* where no prompt instruction can reach. Measured: `assertsAbsence`
+        // 5/8 with tools vs 1/8 without, on the same block. ⛔ Not persuasion — position.
+        //
+        // ⭐ Ote: *"every investigation round should admit the raw result into the turn-scoped cognitive
+        // hold, re-run cognition, and place the resulting reconciled view at the last defensible
+        // pre-generation position… Keep raw tool results untouched in the stream/segments/audit. The
+        // cognitive rendering is only the model-facing representation."*
+        //
+        // ⛔ NO RE-RETRIEVAL. Re-render only, from the hold — retrieving again per round would be new
+        // evidence nobody asked for, and could make two rounds of the SAME turn contradict each other.
+        // ⛔ NO NEW MESSAGE. Every role is wrong for a reconciliation: `user` reads as the person speaking
+        // (the Leak-2 failure exactly), `assistant` puts words in her mouth AND enters her own history, and
+        // a mid-conversation `system` message is provider-dependent. The round's last tool message is the
+        // only slot at position n−1 with a defensible owner — see `memory-working-render.js`.
+        // ⛔ NOTHING RAW CHANGES: `write()`, `toolActivity`, `segments` and the audit already have the real
+        // payload, and this appends to the model-facing copy only.
+        if (reentrantCognition && cognitiveHold && !cognitiveHold.disposed) {
+          try {
+            const lastTool = working.length - 1
+            // ⚠️ Only if this round actually appended a tool message. A round that appended none (every call
+            // a duplicate) has nowhere to put this, and must not get a message of its own.
+            if (lastTool >= roundToolsFrom && working[lastTool]?.role === 'tool') {
+              const rendered = renderHolding(cognitiveHold.forReasoning(), { subject: holdSubject })
+              if (rendered && rendered.text === lastStanding) {
+                // ⛔ Nothing changed in what she holds ⇒ nothing to say again. Logged, because a silence
+                // that cannot be told from a failure is not observability.
+                if (fastify.config?.memory?.cognitionDebug === true) {
+                  const { appendFileSync } = await import('node:fs')
+                  appendFileSync(new URL('../../../../cognition-debug.log', import.meta.url), `${JSON.stringify({
+                    at: new Date().toISOString(), conversationId: convo.id, standingView: rounds,
+                    skipped: 'unchanged since the previous round',
+                  })}
+`)
+                }
+              } else if (rendered) {
+                lastStanding = rendered.text
+                working[lastTool].content = withStandingView(working[lastTool].content, rendered)
+                // ⛔ THE INVARIANT, CHECKED IN PRODUCTION. P5 makes the hold more central, which makes C1's
+                // guards MORE load-bearing: every re-render is another chance for something to be marked
+                // retained. A violation is logged loudly rather than swallowed.
+                const bad = cognitiveHold.violations()
+                if (bad.length) request.log?.warn?.({ bad }, '[cognition] working memory invariant violated')
+                if (rendered.leaks.length) {
+                  // ⚠️ A term list catches only what it was told about. This is the THIRD surface that
+                  // produces a cognition rendering, so its residue is logged rather than assumed to be zero.
+                  fastify.log?.debug?.({ words: rendered.leaks }, '[cognition] standing-view vocabulary residue')
+                }
+                if (fastify.config?.memory?.cognitionDebug === true) {
+                  const { appendFileSync } = await import('node:fs')
+                  appendFileSync(new URL('../../../../cognition-debug.log', import.meta.url), `${JSON.stringify({
+                    at: new Date().toISOString(), conversationId: convo.id, standingView: rounds,
+                    subject: holdSubject, ...standingSnapshot(rendered), text: rendered.text,
+                    // ⭐ TRUE BY CONSTRUCTION, not asserted by hand: this runs AFTER the duplicate-call
+                    // nudge, which is the only thing that could append a message behind it, and that path
+                    // `continue`s before reaching here.
+                    attachedIndex: lastTool, workingLength: working.length,
+                    toolMessagesThisRound: working.length - roundToolsFrom,
+                  })}
+`)
+                }
+              }
+            }
+          } catch (e) {
+            // ⛔ FAILS SILENT AND FAILS OFF. The standing view is framing; a turn must never die for it.
+            fastify.log?.debug?.({ err: e?.message }, '[cognition] standing view failed (non-fatal)')
+          }
         }
       }
 

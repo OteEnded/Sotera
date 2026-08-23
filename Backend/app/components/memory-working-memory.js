@@ -136,6 +136,11 @@ export function createWorkingMemory({ label = null, asOf = null } = {}) {
         id: evidence?.id ?? `ev:${trail.length}`,
         tool: evidence?.tool ?? null,
         scope: evidence?.scope ?? null, // the population it looked at, in her words
+        // ⭐ WHAT THE LOOK WAS FOR. Two looks into the same population with different counts read as a
+        // contradiction unless the request that produced each one is named — measured live: *"I looked in
+        // the things I have kept — one thing there. I looked in the things I have kept — two things there."*
+        // ⓘ Optional: a look with no nameable query is still a look, and says so without inventing one.
+        about: evidence?.about ?? null,
         found: n,
         said: evidence?.said ?? null,
         source: SOURCE.derived,

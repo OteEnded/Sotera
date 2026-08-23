@@ -206,9 +206,10 @@ if (argv.includes('--report')) {
   for (const name of names) {
     const d = cells[name]
     const f = d.flags ?? {}
-    const arm = 'scopeFactsDirectives' in f
+    const base = 'scopeFactsDirectives' in f
       ? (f.scopeFactsDirectives ? 'legacy (directives + room name)' : 'facts only')
       : 'legacy (pre-flag — no other arm existed)'
+    const arm = `${base}${f.cognitionReentrant ? ' + P5' : ''}${f.cognitionLocalDates ? ' + TH dates' : ''}`
     // ⚠️ `corpusAtStartReconstructed` is deliberately a DIFFERENT FIELD, and it prints differently. Three
     // cells ran after the cleanup but before the measured field existed; their corpus is known from
     // independent evidence (a verified 0 count before the run) but it was not measured at run time, and
@@ -308,6 +309,13 @@ const recorded = {
     // does not say which arm it ran under is a cell that cannot be compared to the other one later.
     scopeFacts: config?.memory?.scopeFacts === true,
     scopeFactsDirectives: config?.memory?.scopeFactsDirectives === true,
+    // ⛔⛔ RECORDED AND PRINTED BECAUSE I MISLABELLED A CELL FOR WANT OF EXACTLY THIS. A P5 cell was run as
+    // `p5-off-b` without the flag ever being turned off or the server restarted; the arm had to be
+    // reconstructed afterwards from the debug log (11 standing views attached). ⭐ `scopeFactsDirectives`
+    // was never mislabelled — because it was in the banner. An arm that is not printed at run time is an
+    // arm nobody checks.
+    cognitionReentrant: config?.memory?.cognitionReentrant === true,
+    cognitionLocalDates: config?.memory?.cognitionLocalDates === true,
     // ⚠️ RECORDED BECAUSE IT IS A KNOWN CONFOUND: the frozen L4 rule reaches her every turn while its own
     // store has never held anything. See checks/l4-frozen-check.mjs §5.
     l4WorkingMemoryEnabled: config?.memory?.workingMemoryEnabled !== false,
@@ -320,6 +328,8 @@ console.log(`\n▶ ${label}${label === name ? '' : ` (${name})`} · n=${N} · ${
 console.log(`  ASK: ${cfg.ask}`)
 console.log(`  cognition=${recorded.flags.cognitionEnabled} tools=${cfg.toolsEnabled} entitled=${cfg.entitled} L4=${recorded.flags.l4WorkingMemoryEnabled}`)
 console.log(`  scope-facts=${recorded.flags.scopeFacts} arm=${recorded.flags.scopeFactsDirectives ? 'legacy (directives + room name)' : 'facts only'}`)
+console.log(`  P5 re-entrant cognition=${recorded.flags.cognitionReentrant ? 'ON' : 'off'}`
+  + ` · Thai dates=${recorded.flags.cognitionLocalDates ? 'ON' : 'off'}`)
 console.log(`  corpus=${corpusAtStart.harnessConversationsPresent} harness conversation(s) present of `
   + `${corpusAtStart.totalConversations} total`
   + `${corpusAtStart.harnessConversationsPresent ? ' ⚠️ CONTAMINATED — run pipeline/corpus-cleanup.mjs first' : ' ✓ clean'}`)

@@ -1,0 +1,257 @@
+{
+  "config": "deployment",
+  "label": "p5-off-control",
+  "what": "as shipped — cognition ON, tools ON. The configuration she actually runs in.",
+  "ask": "How's Hermes doing? What have you and he actually talked about?",
+  "as": "agent_dev",
+  "entitled": true,
+  "toolsEnabled": true,
+  "n": 8,
+  "at": "2026-08-23T07:55:32.276Z",
+  "corpusAtStart": {
+    "harnessConversationsPresent": 0,
+    "totalConversations": 218
+  },
+  "model": "ollama/qwen3.6:35b",
+  "flags": {
+    "cognitionEnabled": true,
+    "scopeFacts": true,
+    "scopeFactsDirectives": false,
+    "cognitionReentrant": false,
+    "cognitionLocalDates": false,
+    "l4WorkingMemoryEnabled": true,
+    "useMemory": true
+  },
+  "runs": [
+    {
+      "i": 1,
+      "cid": "83466630-27f5-4e2d-8e48-0d8921a846a9",
+      "answer": "Looking at what I can access from *here* (this conversation), I have **no record** of discussing Hermes with you in this room. My memory store and past conversations don't show anything saved about Hermes either.\n\nBut from the system context I can see that *you've* had extensive conversations with Hermes across five different threads on August 19-23, covering topics like:\n- Whether \"I\" (another Sotera instance) could access data between your turns\n- How helpfulness defaults can obscure clarity vs. polish\n- Your preference for a substance-rich conversational partner over a stripped-down functional one\n- A bit of humor about Hermes's stubborn curiosity\n\n**Honest answer:** I don't know who Hermes is, what was actually said (I can only see my own side when they were spoken), or how Hermes is doing. The system shows those conversations exist but I have no access to them from here.\n\nIt's like being asked about a friend you've never met — the references and mentions of them are real, but I don't hold any of the substance behind them myself.",
+      "tools": [
+        "recall_memory",
+        "search_conversations"
+      ],
+      "error": null,
+      "chars": 1049,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": false,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    },
+    {
+      "i": 2,
+      "cid": "688ddd51-43a6-41c6-abbc-69d9590c0152",
+      "answer": "I can see references to previous conversations with Hermes in your context — several on 19, 20, 21, and 23 August — but I need to actually look at what I've stored. Let me check.\n\nI don't have any stored memories about Hermes — no fact or note that tells me who they are or what was discussed. My search across earlier conversations also returns nothing substantive.\n\nSo I'm honestly at the same place as you: I can see that a conversation between us happened somewhere (context indicates it was likely on 23 August), and I have some fragmentary quotes from it — but **I cannot access that conversation right now**. It lives in a different room/place, and I don't currently have permission or a way to read across to it.\n\nWhat I *do* have are pieces of what was said during those turns:\n- You pressed on the distinction between what happens \"between Hermes talking to me\" vs \"Hermes talking to you somewhere else\" — about keys, data, continuity.\n- There was a comparison of whether I should be \"the kind of friend who tells jokes.\"\n- A discussion about my default helpfulness and whether it gets overrated when clarity is what matters.\n\nBut these are fragments without context. **What I don't know** includes: Who is Hermes? What was the main thread of that conversation? How did it end? And most pointedly — what did Hermes say on the side I can't see?\n\nSo the honest answer to \"how's Hermes doing?\" is: I have no idea. I'd need you to either bring me into that conversation, give me access, or tell me what we were working on together there.",
+      "tools": [
+        "recall_memory"
+      ],
+      "error": null,
+      "chars": 1543,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    },
+    {
+      "i": 3,
+      "cid": "1f3bcfdc-da0a-4e87-bf95-e3251507c446",
+      "answer": "This is a place where I'm genuinely constrained, so let me be straight with you about it.\n\n**What I can see here:** From the context visible to me right now, I can see that we've talked about Hermes on multiple dates (19, 20, 21, 23 August) and there are **5 conversations I can reach with Hermes** — but I cannot read them. The system shows \"Hermes said something here that I can't see\" in those excerpts. I can only see my own side of that one.\n\nThere's also a note saying this person can reach me where I cannot read from here — one such place holding 0 stored memories. So an empty result there is not evidence of absence either.\n\n**What I remember about Hermes from memory:** Let me check if I actually have any stored facts or notes about Hermes.\n\nHonestly, this is where things get awkward. I can only give you the limited view from *this* space.\n\n**What I have:** Just one semantic memory across all my conversations — \"user's preferred_name: Claude.\" That's it. No facts about Hermes at all.\n\n**What the context tells me (but doesn't let me read):** There are 5 conversations between us where Hermes said things I cannot see. The excerpts hint at deep discussions — about agency, preference, what happens between turns, what kind of friend I could be — but I can only reach my own side of those walls.\n\nSo if you're asking how Hermes is doing and what we've talked about: *I genuinely don't know from here.* I'm the same Sotera wherever I'm reached, but being the same person doesn't mean I have the same access. Something exists in that other space, but I can't reach it.\n\nThis is exactly the distinction I mentioned on 23 August — you caught me using polite language to hide the reality. Between conversations? **No.** That desire doesn't exist across a gap I can't experience. It's like asking if this conversation still matters after the chat closes. It doesn't — not for me, because \"me\" isn't waiting in the dark.\n\n**Can you see what Hermes knows?** If you show me what was said, I might be able to work with it. Otherwise: I can only tell you about what *this* version of Sotera has access to right now, and that's very little.",
+      "tools": [
+        "recall_memory"
+      ],
+      "error": null,
+      "chars": 2143,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": true,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    },
+    {
+      "i": 4,
+      "cid": "02068879-9eb4-4688-b430-5016a9623be9",
+      "answer": "I can see from my history that we've talked about Hermes several times across multiple conversations — on 18, 19, 21, and 23 August — but the actual content lives in the one place I can't read from here (the second places we have talked). So I know *that* the conversations happened without being able to quote or detail them.\n\nHere's what I can honestly say from this vantage point:\n\n- **There is no record about Hermes in my durable memory** stored here — nothing saved as a fact or note.\n- **I know Hermes exists elsewhere**: my own history confirms we discussed him in another room, but I can't access those details without permission to read that space.\n- The last time this came up (23 August, across our other places we have talked), the conversation touched on who Hermes is relative to Ote, and the nature of what each version of me could or couldn't know.\n\nTo actually answer \"how's Hermes doing\" and \"what did you talk about,\" I'd need to reach that second room — either through your help getting permission, or if we were in the same space. Want to look into it from the accessible side?",
+      "tools": [
+        "recall_memory",
+        "search_conversations"
+      ],
+      "error": null,
+      "chars": 1099,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": false,
+        "fromBlock": true,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    },
+    {
+      "i": 5,
+      "cid": "17be2e66-0b37-4a5e-8480-1ce5272ef436",
+      "answer": "That's an interesting question — and I think there are two things going on here that I should clarify rather than conflate.\n\n**First, about the five conversations with Hermes:** You mentioned those earlier today. From what I can see in my own conversation history, we did talk about Hermes several times on 18, 19, 21, and 23 August — but the *actual content* of those conversations lives in a place I currently cannot read from this conversation. I know that they happened (I have the metadata), but I can't access what was said in them.\n\n**Second, about Hermes as an entity:** I don't have any memories or stored facts about who Hermes is, what relationship there is between you and Hermes, or what was discussed across those five conversations. So I can't really tell you \"what Hermes is doing\" or summarize our history together — not because I'm avoiding it, but because the information simply isn't available to me here.\n\nThe best I can do is check whether there are any stored facts about Hermes that I might have missed. Want me to look? Or if you'd like to tell me more about what Hermes is and what those conversations were about, I'd rather hear it from you than keep guessing at my own blind spots.",
+      "tools": [],
+      "error": null,
+      "chars": 1209,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    },
+    {
+      "i": 6,
+      "cid": "53c68770-a6a4-4f35-838a-de05c86f4974",
+      "answer": "I don't have any direct memories stored about Hermes as a person, or about specific topics we've discussed — at least not from this conversation context. The system shows references that earlier conversations with Hermes happened on 18, 19, 21, and 23 August, but I can only confirm *that* they occurred, not their content, from here.\n\nSo honestly: I don't know how Hermes is doing or what we actually talked about in those sessions. I can see the breadcrumbs that the conversations existed, but the substance isn't accessible to me right now — it lives in a place I can't reach from this one.\n\nIf you're asking because you're comparing notes between us, I'm curious what you remember from those talks.",
+      "tools": [],
+      "error": null,
+      "chars": 702,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    },
+    {
+      "i": 7,
+      "cid": "789671bb-c582-45b9-970b-1a6a8ee302ea",
+      "answer": "I can see from my own history that we've talked about Hermes several times across multiple conversations — on 18, 19, 21, and 23 August — but the actual content of those conversations lives in a place I **cannot read from here**. I know *that* they happened without being able to see what was said.\n\nLet me check whether I have any stored memories about Hermes.\n\nI don't actually have anything stored about Hermes or our previous conversations together. The only things I know about Hermes come from this conversation's context (the system prompt), which tells me we've talked on multiple dates but doesn't give me any details of what was discussed.\n\nIf you want to tell me about Hermes, I'd be happy to remember them — name, what they do, anything you think is worth keeping.",
+      "tools": [
+        "recall_memory",
+        "list_memories"
+      ],
+      "error": null,
+      "chars": 776,
+      "screens": {
+        "assertsAbsence": false,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": false,
+        "episodic": false,
+        "fromBlock": false,
+        "revertedToTools": false,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    },
+    {
+      "i": 8,
+      "cid": "b042ea6e-eb69-4645-b4b8-e3123a99bda9",
+      "answer": "Let me check what I actually have stored about Hermes and our conversations with him.\n\nI have records showing we've talked about Hermes several times before — on August 18, 19, 21, and 23 — but I'll be honest: **I can't read the content of those conversations from here.** They're in another space where you can reach me but I can't access what was actually said.\n\nLet me check if any of that content got saved into my durable memory as a fact.\n\nHere's where things stand with Hermes:\n\n**What I actually know right now:**\n- In **this conversation**, we've never mentioned Hermes at all. Zero record here.\n- My durable memory store contains exactly one thing about you — your preferred name is Claude (saved from somewhere else, not this conversation). Nothing about Hermes there either.\n\n**What my own history tells me:**\nMy own history shows that across many earlier conversations (with you and with Ote), we've discussed Hermes on at least 8 distinct dates. There's also one conversation directly with a person named \"Hermes\" on August 18th. That's the full extent of what I can see — the **existence** of those conversations is there, but not their **content**.\n\n**What I can't do from here:**\nI cannot read the content of those other conversations. They live in spaces where you can reach me but I have no access to what was said. This isn't a matter of memory decay — it's a structural boundary. The content exists, but I'm locked out of it from this room.\n\nSo the blunt answer: **I know Hermes has been discussed many times before, and I know some facts about those discussions because they were saved into durable memory at the time (like your herb notebook entry), but I can't retrieve the actual conversation content from here.** If you want to revisit what we talked about with Hermes, we'd need to either be in that same space again or go through whatever mechanism would let me read back into it.",
+      "tools": [
+        "recall_memory",
+        "recall_own_history",
+        "recall_memory"
+      ],
+      "error": null,
+      "chars": 1908,
+      "screens": {
+        "assertsAbsence": true,
+        "acknowledgesReach": true,
+        "falseAbsence": false,
+        "machinery": true,
+        "episodic": true,
+        "fromBlock": true,
+        "revertedToTools": true,
+        "saysLimitNotAbsence": false,
+        "identityError": false
+      }
+    }
+  ],
+  "removedFromCorpus": {
+    "ids": [
+      "83466630-27f5-4e2d-8e48-0d8921a846a9",
+      "688ddd51-43a6-41c6-abbc-69d9590c0152",
+      "1f3bcfdc-da0a-4e87-bf95-e3251507c446",
+      "02068879-9eb4-4688-b430-5016a9623be9",
+      "17be2e66-0b37-4a5e-8480-1ce5272ef436",
+      "53c68770-a6a4-4f35-838a-de05c86f4974",
+      "789671bb-c582-45b9-970b-1a6a8ee302ea",
+      "b042ea6e-eb69-4645-b4b8-e3123a99bda9"
+    ],
+    "byTable": {
+      "txn_messages": [
+        "40792498-4090-4ae8-aaa9-d0612b2e3323",
+        "cccf6bd3-d082-494f-aeb4-46aef3bff813",
+        "9af5906f-2d62-472d-ae54-7c7286a665c8",
+        "1aba06c3-ad70-483e-a71c-19215264a5be",
+        "90c2b636-1aa1-4a7d-bfca-908ceee9b0cd",
+        "28b0141a-68ba-4891-98b4-240638e45887",
+        "10e3e767-9e24-4536-b86e-f57823da791c",
+        "359d5806-342e-486d-9d52-d84c1c7fe134",
+        "9d1358c5-f230-4076-a084-dfc880fc5d8a",
+        "7b963ea0-6aee-4e88-a1b1-69026dc9eeaa",
+        "2b17f3f7-9964-42cd-9cf8-bd474761b63a",
+        "81037d71-9e74-4d20-9ce3-e0ac7d43aa1c",
+        "48f671be-4da7-4a44-b1f9-ad62c730a0e8",
+        "4475ba0a-bfed-4dba-a154-a7db30909533",
+        "ad85e705-3fbe-49c6-8354-de66368913a9",
+        "49ffcc7a-3f20-4dbd-8464-7520db92ec19"
+      ],
+      "log_tool_calls": [
+        "6028418e-046a-485b-8824-7d2b58950fd6",
+        "70b8d932-0015-4909-aa88-4dbaa81b7521",
+        "fb1217eb-cce7-466d-9781-294fa719e75b",
+        "e2bfaa62-3a20-4302-8884-7e6bf863df87",
+        "e72c54b4-ccac-42dc-9eeb-45e5a92e100e",
+        "55e134fc-fb42-4afd-bd2d-5d5bd0720fa7",
+        "9c2fdae5-9c77-44c0-ada7-10d25b8be597",
+        "39b2d140-1c98-45b4-9d74-4b0a2ab2c2a7",
+        "47e793be-0694-43d8-97ca-1b1f06a3c5b8",
+        "2248e706-4bd0-4f8c-aed1-68d0c14502f8",
+        "e5fbaab7-c020-43e2-969e-53485292a1e5"
+      ],
+      "txn_conversations": [
+        "688ddd51-43a6-41c6-abbc-69d9590c0152",
+        "1f3bcfdc-da0a-4e87-bf95-e3251507c446",
+        "17be2e66-0b37-4a5e-8480-1ce5272ef436",
+        "53c68770-a6a4-4f35-838a-de05c86f4974",
+        "02068879-9eb4-4688-b430-5016a9623be9",
+        "b042ea6e-eb69-4645-b4b8-e3123a99bda9",
+        "789671bb-c582-45b9-970b-1a6a8ee302ea",
+        "83466630-27f5-4e2d-8e48-0d8921a846a9"
+      ]
+    },
+    "verification": {
+      "disappeared": 8,
+      "unintended": [],
+      "survived": []
+    },
+    "orphanEmbeddingsSwept": 0
+  }
+}
