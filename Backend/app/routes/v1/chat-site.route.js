@@ -19,7 +19,7 @@ import { recordTurn, recordCapture, recordAuto } from '@ote/memory/cognition/mem
 import { captureIdentity } from '../../components/memory-identity-host.js'
 import { composeSystemContext, composeRuntimeTail, composeAdaptiveContext, rankRelevance } from '../../components/context-composer.js'
 import { buildMemoryCognition } from '../../components/memory-cognition-host.js'
-import { plainSpokenToolResult } from '../../components/memory-cognition-projection.js'
+import { plainSpokenToolResult, evidenceForModel, populationOf, countFromToolResult } from '../../components/memory-cognition-projection.js'
 import { applyUtteranceBoundary, findWithheldLeak } from '../../components/memory-utterance-boundary.js'
 import { classifySection } from '../../components/context-authority.js'
 import { contextBreakdown, rememberContextUsage, lastContextUsage } from '../../components/context-usage.js'
@@ -28,6 +28,9 @@ import { proposePerson } from '../../components/person-service.js'
 import { initConversationSearch, buildConversationSearch, evidenceLine, hasRetrievableTopic } from '../../components/conversation-search.js'
 import { initReflection, buildReflection } from '../../components/reflection-host.js'
 import { normalizeWorkingMemory, renderWorkingMemory, extractIntent, initWorkingMemory } from '../../components/working-memory-host.js'
+// ⭐ C2 · the COGNITIVE HOLD — the layer's ephemeral per-operation working set. ⚠️ Distinct from the L4
+// `working-memory-host.js` above, which is her own persisted scratchpad and is 0-for-177 unused.
+import { createWorkingMemory } from '../../components/memory-working-memory.js'
 import { makeEmbedder } from '../../components/memory-embed-host.js'
 import { readOwnStance, renderOwnStance } from '../../components/relational-knowledge.js'
 import { initOwnMemory } from '../../components/own-memory-host.js'
@@ -1481,6 +1484,32 @@ export default async function chatSiteRoutes(fastify) {
     // installed (it's a Portable Component, and its service needs a provider key).
     const searchOffered = toolsOn
       && ((activeSkill ? activeSkill.tools : toolDefinitions()) || []).some((d) => d?.function?.name === 'search_web')
+    // ══ ⭐⭐⭐ C2 · WORKING MEMORY IS TURN-SCOPED, AND IT IS THE ONE THING REASONING READS ═════════════
+    //
+    // Ote: *"tools → evidence → cognition → working memory → Sotera → answer. The tool result should no
+    // longer compete with the cognition block as a second source of truth."*
+    //
+    // ⚠️ Declared HERE, before `sysInputs`, because two distant places need the same instance: the cognition
+    // arm seeds it with what it reconciled, and the tool loop several hundred lines below admits each result
+    // into it as EVIDENCE. ⛔ It is a local, so it dies with the request — there is no registry and nothing
+    // can look it up afterwards, which is what keeps "ephemeral" true rather than intended.
+    // ⛔ null when cognition is off: C2 must not invent a working set out of nothing.
+    //
+    // ⚠️⚠️ NAMED `cognitiveHold`, NOT `workingMemory`, AND THE COLLISION IS REAL. This file already has an
+    // L4 feature called Working Memory (`workingMemoryBlock`, `renderWorkingMemory`, `memory.working
+    // MemoryEnabled`): a per-conversation `{focus, plan, openQuestions, activeItems}` scratchpad PERSISTED on
+    // `txn_conversations.working_memory`, which SHE maintains via the `update_working_memory` tool.
+    // ⇒ MEASURED 2026-08-23: `working_memory` is NULL on **177 of 177 conversations**. It is offered, it is
+    // in the prompt, and she has never once used it.
+    // ⭐⭐ Which is itself an argument for this layer: L4 asks HER to orchestrate her own working set, and
+    // that is the exact pattern this whole arc has been dismantling. 0-for-177 is the measurement.
+    // ⛔ L4's fate is Ote's call and is untouched here. Two different things must simply not share a name:
+    //   L4            model-authored · PERSISTED · capacity-capped (MAX_ITEMS 12 / MAX_Q 8) · unused
+    //   cognitiveHold layer-authored · EPHEMERAL · no cap · per operation
+    // ⚠️ Note L4 would violate two of Ote's hard C2 constraints anyway — it persists, and it has capacity
+    // numbers — so "just use the existing one" was never free.
+    let cognitiveHold = null
+
     const sysInputs = {
       systemPrompt: fastify.config?.chat?.systemPrompt || null,
       // ⚠ `??` NOT `||` — '' is the explicit "no identity line" switch and must reach the composer as ''.
@@ -1597,6 +1626,18 @@ export default async function chatSiteRoutes(fastify) {
                 out.frame = rebuilt.frame
               }
             }
+            // ── ⭐⭐⭐ C2 · SEED WORKING MEMORY WITH WHAT COGNITION RECONCILED ────────────────────────
+            //
+            // ⭐ It is seeded from `boundary.sayable`, NOT from `out.items` — because what she may SAY to this
+            // account is what may appear in the model-facing context, and working memory is a model-facing
+            // structure. ⛔ This is NOT authorization entering cognition: cognition already ran unfractured
+            // and retrieved everything she owns. The filtering happened at the utterance boundary, above.
+            // ⓘ Ote's line: authorization controls what she may say to an account, never what she may
+            // retrieve, think about, rank, fuse or remember.
+            if (out.activated) {
+              cognitiveHold = createWorkingMemory({ label: String(lastUserText ?? '').slice(0, 120) })
+              cognitiveHold.recall(boundary.sayable ?? [])
+            }
             // ⓘ OBSERVABILITY FOR THE FIRST LIVE RUNS. Off by default; when on, the exact injected block
             // and the stage-by-stage counts are appended to a file, so a failure can be attributed to
             // discovery / activation / access / fusion / typing / injection rather than guessed at.
@@ -1622,6 +1663,9 @@ export default async function chatSiteRoutes(fastify) {
                     exchanges: (i.exchanges ?? []).length,
                   })),
                   context: out.context,
+                  // ⭐ C2 · what she is HOLDING, and the snapshot states `retained: 0` beside the counts so
+                  // anyone reading a debug line sees the rule with the data.
+                  cognitiveHold: cognitiveHold ? cognitiveHold.snapshot() : null,
                 })}
 `)
               } catch { /* observability must never break a turn */ }
@@ -2615,14 +2659,58 @@ export default async function chatSiteRoutes(fastify) {
           // ⛔ ONLY THE MODEL-FACING COPY. `write()`, `toolActivity`, `segments` and the audit trail keep the
           // RAW payload — that is the evidence. ⛔ And it suppresses nothing: she may call any tool as often
           // as she likes. V3 gave the best answer of the five while calling the MOST tools.
-          const forModel = plainSpokenToolResult(tc.name, forModelRaw, {
+          // ── ⭐⭐⭐ C2 · THE RESULT ENTERS THE HOLD AS EVIDENCE, THEN GOES TO THE MODEL BESIDE IT ─────
+          //
+          // Ote: *"The tool result should no longer compete with the cognition block as a second source of
+          // truth. It should become evidence that cognition can inspect, reconcile, question, and incorporate
+          // into working memory. If the tool says 'nothing in X', that remains a fact about X — it must not
+          // silently become 'nothing exists.'"*
+          //
+          // ⛔ RETRIEVAL IS UNTOUCHED. She called whatever she called, it ran, and the raw result is intact
+          // in `write()`, `toolActivity`, `segments` and the audit. What changes is only the framing of the
+          // MODEL-FACING copy: it now arrives with its own scope AND its relation to what she already holds.
+          // ⛔ And no tool is suppressed, delayed or counted — *"do not optimize for fewer tool calls."*
+          // ⛔ MEMORY READS ONLY. `populationOf` returns null for anything whose population cannot be named
+          // in her words — a web search, a todo write, `inspect_around`. Admitting those as evidence ABOUT
+          // HER MEMORY would be a category error, and it produced one in testing: a web search came back
+          // saying *"that does not change the five things I can already reach"*.
+          // ⓘ They are still real evidence in the ordinary sense; they simply are not looks into her memory,
+          // which is the only thing this hold reconciles.
+          const population = populationOf(tc.name)
+          if (population && cognitiveHold && !cognitiveHold.disposed) {
+            try {
+              cognitiveHold.observe({ tool: tc.name, scope: population, found: countFromToolResult(forModelRaw) })
+            } catch { /* the hold is framing plus observability; it must never break a turn */ }
+          }
+          const holdingNow = cognitiveHold && !cognitiveHold.disposed
+            ? { recollections: cognitiveHold.snapshot().counts?.recollection ?? 0,
+              openQuestions: cognitiveHold.snapshot().openQuestions ?? 0 }
+            : null
+          const forModel = evidenceForModel(tc.name, forModelRaw, {
             enabled: fastify.config?.memory?.cognitionEnabled === true,
+            holding: holdingNow,
             // ⚠️ A TERM LIST CATCHES ONLY WHAT IT WAS TOLD ABOUT — this repo's most-repeated defect. The
             // residue is LOGGED rather than assumed to be zero, so the next word we missed leaves a trail.
             onLeak: (words) => fastify.log?.debug?.({ tool: tc.name, words }, "[cognition] tool vocabulary residue"),
             // ⭐ STEP A: the arguments are passed so the scope sentence can name WHAT was looked for.
             args: tc.arguments ?? tc.function?.arguments ?? null,
           })
+          // ⓘ OBSERVABILITY ON THE MODEL-FACING COPY, and it was MISSING — which is why the first C2 run
+          // could not be read. `segments` and the audit keep the RAW payload by design, so nothing recorded
+          // what she was actually handed. ⛔ A change to what she reads that cannot be observed is a change
+          // that cannot be attributed.
+          if (fastify.config?.memory?.cognitionDebug === true) {
+            try {
+              const { appendFileSync } = await import('node:fs')
+              appendFileSync(new URL('../../../../cognition-debug.log', import.meta.url), `${JSON.stringify({
+                at: new Date().toISOString(), conversationId: convo.id, toolEvidence: tc.name,
+                population: population ?? null,
+                held: holdingNow,
+                forModel: String(forModel).slice(0, 600),
+              })}
+`)
+            } catch { /* observability must never break a turn */ }
+          }
           working.push({ role: 'tool', tool_call_id: tc.id, name: tc.name, content: forModel })
         }
         // Mid-turn overflow surface: tool results just grew the working context. If the
@@ -2987,6 +3075,12 @@ export default async function chatSiteRoutes(fastify) {
       return reply
     } finally {
       steerReg.end(convo.id) // this generation no longer accepts steers
+      // ⭐⭐ C2 · THE HOLD DIES WITH THE TURN, ON EVERY EXIT PATH. Ote: *"working memory must remain
+      // ephemeral. No persistence, no automatic retention, no capacity number, no hidden cache."*
+      // ⛔ `dispose()` is not cosmetic — it drops the contents AND refuses further admission, so a stray
+      // reference cannot keep filling it. ⓘ In the same `finally` as `steerReg.end` deliberately: that block
+      // already exists precisely because it covers every exit, including the error paths.
+      try { cognitiveHold?.dispose() } catch { /* disposing must never mask the real error */ }
     }
   }
 

@@ -146,7 +146,7 @@ const rewriteString = (s) => {
  * ⓘ Absent from this map ⇒ no sentence is emitted. A population we cannot name honestly is one we must not
  * describe, and a guessed scope would be worse than none.
  */
-const POPULATION = new Map(Object.entries({
+export const POPULATION = new Map(Object.entries({
   recall_memory: 'the things I have kept',
   recall_own_memory: 'the things I have kept about myself',
   list_memories: 'the things I have kept',
@@ -270,4 +270,93 @@ export function plainSpokenToolResult(toolName, json, { enabled = true, onLeak =
     if (left.length) onLeak(left)
   }
   return out
+}
+
+// ══ ⭐⭐⭐ C2 · A TOOL RESULT ARRIVES AS EVIDENCE, BESIDE WHAT SHE IS ALREADY HOLDING ════════════════
+//
+// Ote: *"tools → evidence → cognition → working memory → Sotera → answer. The tool result should no longer
+// compete with the cognition block as a second source of truth. It should become evidence that cognition can
+// inspect, reconcile, question, and incorporate into working memory. If the tool says 'nothing in X', that
+// remains a fact about X — it must not silently become 'nothing exists.'"*
+//
+// ⭐ STEP A gave the result its own SCOPE. C2 gives it its RELATION to the reconciled set — which is the
+// half that stops it standing alone. ⛔ And the relation is ARITHMETIC, not interpretation: it is derived
+// from two counts and makes no judgement about what either means.
+//
+// ⛔ NOTHING IS REMOVED. The projected payload follows underneath, and the raw payload still goes to the
+// stream, the segments and the audit. ⛔ No claim about what exists elsewhere is added — the tool does not
+// know, and cognition already said what it could reach.
+
+/**
+ * ⭐⭐ ONE SENTENCE PLACING THIS LOOK BESIDE THE HOLD. Returns null when there is nothing to relate to.
+ *
+ * @param {{found:number|null}} evidence    what this look returned
+ * @param {{recollections:number, openQuestions:number}} holding  what the hold already contains
+ */
+export function relateToHold(evidence, holding) {
+  const held = Number(holding?.recollections) || 0
+  if (!held) return null // ⛔ nothing to relate to; the scope sentence already stands on its own
+  const found = Number.isFinite(evidence?.found) ? evidence.found : null
+  if (found === null) return null // ⛔ unknown count ⇒ no arithmetic, so no sentence
+  // ⓘ Spelled, like every other count the layer speaks — *"five things"* is speech, *"5 things"* is a report.
+  const already = spokenCount(held)
+  // ⭐ THE LOAD-BEARING CASE. An empty look next to a non-empty hold used to read as "nothing"; now it reads
+  // as one look that changed nothing — which is exactly what it was. ⓘ Pure arithmetic: zero found, so
+  // nothing added, whatever the query was about.
+  if (found === 0) return `That was one look, and it does not change the ${already} I can already reach.`
+  // ⛔⛔ AND THERE IS NO POSITIVE BRANCH, WHICH IS A CORRECTION TO MY OWN FIRST VERSION.
+  //
+  // ⚠️⚠️ IT SAID *"That adds to the six things I can already reach."* — and the live run showed what that
+  // means in practice: `recall_memory` for "Hermes" returned THREE rows that were an interaction preference,
+  // a physical state and a current goal. **None of them about Hermes.** The tool is a nearest-neighbour index
+  // with no relevance floor (the floor lives in cognition), so its count is "how many rows came back", never
+  // "how many are about this".
+  // ⇒ ⭐ *"It does not change what I can reach"* is ARITHMETIC and survives that. *"It adds to what I can
+  // reach"* is a claim that the results are RELEVANT — which this layer cannot know and the tool cannot
+  // assess. ⛔ So it is not made.
+  // ⚠️ And Ote named this hazard in advance: *"I don't want Working Memory to inherit or hide that
+  // [relevance] defect."* The first version did worse than hide it — it amplified it.
+  return null
+}
+
+/**
+ * ⭐⭐⭐ THE C2 ENTRY POINT. Wraps `plainSpokenToolResult` and adds the relation line.
+ *
+ * ⛔ Shape-preserving and additive: `thisLook` (step A) then `alongside` (C2) then the payload. A reader that
+ * only understood the payload still gets the payload.
+ * ⓘ `holding` is supplied by the caller from the cognitive hold's snapshot, so this stays PURE and cannot
+ * reach into the hold itself.
+ */
+export function evidenceForModel(toolName, json, { enabled = true, onLeak = null, args = null, holding = null } = {}) {
+  const projected = plainSpokenToolResult(toolName, json, { enabled, onLeak, args })
+  // ⛔⛔ ONLY TOOLS WHOSE POPULATION WE CAN NAME, and this bug was caught by its own test: a `web_search`
+  // result came back carrying *"that does not change the five things I can already reach"*. That is a
+  // CATEGORY ERROR — a web search is not a look into her memory — and it is exactly the scope creep this
+  // module's header warns about. ⇒ gate on `POPULATION`, which is the same list that licenses a scope
+  // sentence, so the two can never disagree about which tools this layer speaks for.
+  if (!POPULATION.has(toolName)) return projected
+  if (!enabled || !holding || typeof projected !== 'string' || !projected.startsWith('{')) return projected
+  let parsed
+  try { parsed = JSON.parse(projected) } catch { return projected }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return projected
+  const said = relateToHold({ found: foundCount(parsed) }, holding)
+  if (!said) return projected
+  // ⭐ `thisLook` first (what this look covered), then `alongside` (how it sits) — reading order is the
+  // order the two facts have to be understood in.
+  const { thisLook, ...rest } = parsed
+  const out = thisLook ? { thisLook, alongside: said, ...rest } : { alongside: said, ...rest }
+  try { return JSON.stringify(out) } catch { return projected }
+}
+
+/** ⭐ The population a tool looked at, in her words — or null when we cannot name it honestly. */
+export const populationOf = (toolName) => POPULATION.get(toolName) ?? null
+
+/**
+ * ⭐ How many things a SERIALISED tool result contains, or null. ⛔ Null is the important return: an
+ * unrecognised shape gets no count rather than a guessed zero, because "I do not know how many" and "none"
+ * are different facts and conflating them would manufacture an absence.
+ */
+export function countFromToolResult(json) {
+  if (typeof json !== 'string' || !json.startsWith('{')) return null
+  try { return foundCount(JSON.parse(json)) } catch { return null }
 }

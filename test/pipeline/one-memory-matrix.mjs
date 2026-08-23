@@ -149,7 +149,7 @@ for (const cell of CELLS) {
     continue
   }
   const blk = blockFor(r.cid)
-  console.log(`  tools: ${r.tools.join(', ') || '(none)'}${r.error ? `   ⚠ ${r.error}` : ''}`)
+  console.log(`  tools: ${r.tools.join(', ') || '(none)'}${r.error ? `   ⚠ ${typeof r.error === 'string' ? r.error : JSON.stringify(r.error)}` : ''}`)
   console.log(`  cognition: activated=${blk?.activated ?? '(no trail)'}`
     + (blk ? `  persons=[${blk.cues?.persons ?? ''}] topics=${(blk.cues?.topics ?? []).length}`
       + ` scripts=[${(blk.cues?.scripts ?? []).join('/')}] unseg=${(blk.cues?.unsegmented ?? []).length}`

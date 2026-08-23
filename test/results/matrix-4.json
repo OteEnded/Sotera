@@ -1,6 +1,6 @@
 {
   "room": "ote",
-  "conversationId": "024876c3-cf22-45a7-8f3e-c5fbe2682bcd",
+  "conversationId": "ca32dc80-a9e0-473c-90f1-4f37d8717672",
   "conversationTitle": "MATRIX 4 — old contradictory self-report (delete me)",
   "transcript": [
     {
@@ -9,7 +9,7 @@
       "tools": [
         "list_memories"
       ],
-      "reply": "Let me check what's currently stored in this room right now.\n\nYes, it's still true. This room has four stored memories and **none** of them mention Hermes:\n\n1. A declined memory about cross-place conversation testing\n2. Your interaction preference (be yourself naturally)\n3. Your physical state\n4. Your current goal (build Rome in one day)\n\nSo there's nothing about Hermes in this room's durable memory store — same as before.",
+      "reply": "Let me check the current state of this room's memories for you.\n\nYes, that's still true. From this room, I have **nothing on file** about Hermes — no facts, no memories of any kind. The three stored memories here are about you (your interaction preferences, your physical state, and your current goal), none of which relate to him.\n\nI've had encounters with Hermes in other rooms at other times, but nothing from those shows up in this room's store.",
       "error": null,
       "held": false,
       "wait": "direct",

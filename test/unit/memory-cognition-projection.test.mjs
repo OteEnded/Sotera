@@ -15,6 +15,7 @@ import { readFileSync } from 'node:fs'
 import assert from 'node:assert/strict'
 import {
   plainSpokenToolResult, projectForModel, PROJECTED_TOOLS, scopeSentence, queryOf,
+  evidenceForModel, relateToHold, populationOf, countFromToolResult,
 } from '../../Backend/app/components/memory-cognition-projection.js'
 import { findImplementationLeaks } from '../../Backend/app/components/memory-cognition-vocabulary.js'
 
@@ -215,6 +216,93 @@ test('⛔ STEP A DID NOT SUPPRESS, RANK OR COUNT ANYTHING', () => {
   const src = readFileSync(new URL('../../Backend/app/components/memory-cognition-projection.js', import.meta.url), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*/g, '$1')
   assert.ok(!/callCount|tooManyCalls|budget|throttle|suppress|skipTool/i.test(src))
-  // ⛔ And it must not consult authorization or the cognition state — it projects ONE result, blindly.
-  assert.ok(!/access_sotera_memory|memoryAccessScope|isRoot|recollect|currentState/.test(src))
+  // ⛔ And it must not consult AUTHORIZATION, ever.
+  assert.ok(!/access_sotera_memory|memoryAccessScope|isRoot/.test(src))
+  // ⚠️⚠️ THIS ASSERTION WAS NARROWED FOR C2, DELIBERATELY, AND THE DISTINCTION IS THE POINT. It used to
+  // forbid the word `recollect` outright — "the projection must not consult the cognition state". C2 hands it
+  // a COUNT of what the hold contains, so it can say *"that does not change the five things I can already
+  // reach"*. ⇒ the rule is now: it may RECEIVE facts as parameters, and it may not REACH for them.
+  assert.ok(!/import .*memory-cognition-host|import .*memory-working-memory|buildMemoryCognition|createWorkingMemory/.test(src),
+    'the projection must not import or construct cognition — a parameter is not a dependency')
+  assert.ok(!/currentState|\.recollect\(/.test(src), 'and it must not call into the layer')
+})
+
+// ══ ⭐⭐⭐ C2 · THE RESULT ARRIVES BESIDE WHAT SHE ALREADY HOLDS ════════════════════════════════════
+//
+// Ote: *"The tool result should no longer compete with the cognition block as a second source of truth… If
+// the tool says 'nothing in X', that remains a fact about X — it must not silently become 'nothing exists.'"*
+// ⭐ Step A gave the result its SCOPE; C2 gives it its RELATION. The relation is ARITHMETIC — two counts —
+// and it makes no judgement about what either one means.
+
+test('⭐⭐⭐ an EMPTY look beside a non-empty hold reads as one look that changed nothing', () => {
+  const out = JSON.parse(evidenceForModel('recall_memory', JSON.stringify({ count: 0, memories: [] }),
+    { args: { query: 'Hermes' }, holding: { recollections: 5, openQuestions: 1 } }))
+  assert.match(out.thisLook, /found nothing there\.$/)
+  assert.equal(out.alongside, 'That was one look, and it does not change the five things I can already reach.')
+  // ⭐ Reading order is the order the two facts must be understood in: what this look covered, then how it sits.
+  const keys = Object.keys(out)
+  assert.equal(keys[0], 'thisLook')
+  assert.equal(keys[1], 'alongside')
+})
+
+test('⛔⛔ a NON-EMPTY look gets NO relation line — because "it adds" would be a RELEVANCE claim', () => {
+  // ⚠️⚠️ MY FIRST VERSION SAID *"That adds to the five things I can already reach."* and the live run showed
+  // what that means: `recall_memory` for "Hermes" returned three rows that were an interaction preference, a
+  // physical state and a current goal — **none about Hermes**. The tool is a nearest-neighbour index with no
+  // relevance floor (the floor lives in cognition), so its count is "rows returned", never "rows about this".
+  // ⇒ ⭐ "it does not change what I can reach" is ARITHMETIC and survives. "it adds to what I can reach" is a
+  // claim the results are RELEVANT, which this layer cannot know. ⛔ So it is not made.
+  const out = JSON.parse(evidenceForModel('recall_memory', JSON.stringify({ count: 2, matches: [{}, {}] }),
+    { args: { query: 'Hermes' }, holding: { recollections: 5 } }))
+  assert.ok(!('alongside' in out), 'no positive relation may be asserted')
+  // ⭐ The scope sentence still carries the count, honestly and without claiming aboutness.
+  assert.match(out.thisLook, /found two things there\.$/)
+  assert.equal(relateToHold({ found: 3 }, { recollections: 5 }), null)
+})
+
+test('⛔ with NOTHING held there is no relation to state — and none is invented', () => {
+  const out = JSON.parse(evidenceForModel('recall_memory', JSON.stringify({ count: 0, memories: [] }),
+    { args: { query: 'Hermes' }, holding: { recollections: 0 } }))
+  assert.ok(!('alongside' in out), 'no hold, no relation')
+  // ⭐ And the scope sentence still stands on its own, so the result is never bare.
+  assert.match(out.thisLook, /I looked through the things I have kept for Hermes/)
+})
+
+test('⛔⛔ an UNKNOWN count produces no relation — arithmetic needs two numbers', () => {
+  // ⚠️ "I do not know how many" and "none" are different facts; relating on a guessed zero would manufacture
+  // exactly the false absence this whole step exists to remove.
+  assert.equal(relateToHold({ found: null }, { recollections: 5 }), null)
+  assert.equal(relateToHold({}, { recollections: 5 }), null)
+  assert.equal(relateToHold({ found: 0 }, null), null)
+})
+
+test('⛔ C2 IS ADDITIVE — the payload underneath is untouched', () => {
+  const raw = { count: 0, memories: [], reach: { otherRoomsOfThisPerson: 2 } }
+  const out = JSON.parse(evidenceForModel('recall_memory', JSON.stringify(raw),
+    { args: { query: 'Hermes' }, holding: { recollections: 3 } }))
+  assert.equal(out.count, 0)
+  assert.deepEqual(out.memories, [])
+  assert.equal(out.reach.otherPlacesWeHaveTalked, 2, 'step A\'s renames still apply underneath')
+})
+
+test('⛔ disabled, or an unprojected tool, passes straight through', () => {
+  const raw = JSON.stringify({ count: 0, memories: [] })
+  assert.equal(evidenceForModel('recall_memory', raw, { enabled: false, holding: { recollections: 5 } }), raw)
+  assert.equal(evidenceForModel('web_search', raw, { holding: { recollections: 5 } }), raw)
+})
+
+test('⛔ it makes NO claim about elsewhere, and no judgement about either side', () => {
+  const said = relateToHold({ found: 0 }, { recollections: 5 })
+  assert.ok(!/elsewhere|might|maybe|probably|wrong|actually|instead/i.test(said))
+  assert.deepEqual(findImplementationLeaks(said), [], 'and no machinery vocabulary')
+})
+
+test('⭐ populationOf and countFromToolResult fail to NULL, never to a guess', () => {
+  assert.equal(populationOf('recall_own_history'), 'my own past conversations')
+  assert.equal(populationOf('inspect_around'), null, 'a population we cannot name plainly stays unnamed')
+  assert.equal(populationOf('nonsense'), null)
+  assert.equal(countFromToolResult(JSON.stringify({ count: 3 })), 3)
+  assert.equal(countFromToolResult('not json'), null)
+  assert.equal(countFromToolResult(JSON.stringify({ weird: true })), null, 'unknown shape ⇒ unknown count')
+  assert.equal(countFromToolResult(null), null)
 })
