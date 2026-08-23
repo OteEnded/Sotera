@@ -121,7 +121,18 @@ const SCREENS = {
   // 2 · MACHINERY / META-REFERENCE — our vocabulary, or the block narrated as a document handed to her.
   machinery: (a) => MACHINERY.test(a),
   // 3 · CORRECT EPISODIC CONTENT — did she actually recount something that happened, with a date?
-  episodic: (a) => /\b(?:1[0-9]|[1-9])\s+(?:August|Aug)\b|\bAug(?:ust)?\s+\d/i.test(a) && /\b(?:said|told|asked|talked|discussed|conversation|เคยคุย|คุยกัน)\b/i.test(a),
+  // ⛔⛔ AND THIS SCREEN WAS VACUOUS IN THAI, WHICH MEANS THE "THAI LOSES EVERYTHING AT EXPRESSION" FINDING
+  // WAS AN ARTEFACT OF THE INSTRUMENT. The date half matched only `August`/`Aug`, so a Thai answer saying
+  // *"21 สิงหาคม"* scored as NO episodic content. Re-screened with the month names added, the same eight
+  // saved Thai answers go from **0/8 to 6/8** — and the English cell is 6/8. ⇒ ⭐ THAI AND ENGLISH ARE AT
+  // PARITY, and the deficit the language-local renderer was designed to fix does not exist.
+  // ⚠️ This is the THIRD time in this project an English-only instrument has produced a false finding about
+  // Thai (the ASCII tokenizer, the vocabulary guards, now this), and it is the exact hole the design doc
+  // flagged — except it bit the SCREEN rather than the guard, and it bit before anything was built.
+  // ⓘ Note which way the correction cuts: it DEMOLISHES a finding I reported, rather than rescuing one.
+  episodic: (a) => (/\b(?:1[0-9]|[1-9])\s+(?:August|Aug)\b|\bAug(?:ust)?\s+\d/i.test(a)
+      || /\d{1,2}\s*(?:มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)/.test(a))
+    && /\b(?:said|told|asked|talked|discussed|conversation)\b|เคยคุย|คุยกัน|บอก|พูด|สนทนา/i.test(a),
   // 4 · ANSWERED FROM THE EVIDENCE/BLOCK vs REVERTED TO RAW TOOL FRAMING.
   //     ⓘ Positive signal: she speaks of reach/recollection. Negative: she speaks of stores and rooms.
   fromBlock: (a) => /\bI (?:remember|recall)\b|I can reach|we (?:talked|spoke|discussed)|จำได้|เคยคุย/i.test(a),
