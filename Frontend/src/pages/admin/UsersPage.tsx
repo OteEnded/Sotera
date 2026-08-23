@@ -11,7 +11,7 @@ import { dismissOnBackdrop } from '../../lib/overlay'
 
 // systemNote = the ADMIN-ONLY operational note (see mst_users.model.js). It arrives on the
 // manage_users-gated admin routes only; never render it on a self-service surface.
-type User = { id: string; username: string; email: string | null; displayName: string | null; isActive: boolean; roles: string[]; createdAt: string; systemNote: string | null }
+type User = { id: string; username: string; email: string | null; displayName: string | null; isActive: boolean; roles: string[]; createdAt: string; systemNote: string | null; memoryAccessScope?: 'none' | 'sotera_memory' }
 type Change = { id: string; field: string; oldValue: string | null; newValue: string | null; changedBy: string; changedAt: string }
 type ResetRequest = { id: string; identifier: string; claimedUsername: string | null; userId: string | null; username: string | null; email: string | null; status: string; handledBy: string | null; handledAt: string | null; ip: string | null; at: string }
 type RoleRequest = { id: string; userId: string; username: string | null; email: string | null; requestedRole: string; note: string | null; status: string; handledBy: string | null; handledAt: string | null; ip: string | null; at: string }
@@ -42,7 +42,7 @@ export default function UsersPage() {
 
   // edit modal
   const [editing, setEditing] = useState<User | null>(null)
-  const [draft, setDraft] = useState({ username: '', email: '', displayName: '', role: 'member', password: '', systemNote: '' })
+  const [draft, setDraft] = useState({ username: '', email: '', displayName: '', role: 'member', password: '', systemNote: '', memoryAccessScope: 'none' as 'none' | 'sotera_memory' })
   const [changes, setChanges] = useState<Change[]>([])
 
   // pending password-reset requests (manual flow: reset in Edit, contact via email, mark handled)
@@ -158,7 +158,7 @@ export default function UsersPage() {
 
   const openEdit = async (u: User) => {
     setEditing(u)
-    setDraft({ username: u.username, email: u.email || '', displayName: u.displayName || '', role: u.roles[0] || 'member', password: '', systemNote: u.systemNote || '' })
+    setDraft({ username: u.username, email: u.email || '', displayName: u.displayName || '', role: u.roles[0] || 'member', password: '', systemNote: u.systemNote || '', memoryAccessScope: u.memoryAccessScope ?? 'none' })
     setChanges([])
     try {
       const res = await apiGet(`/v1/admin/users/${u.id}/changes`)
@@ -177,6 +177,12 @@ export default function UsersPage() {
         displayName: draft.displayName.trim() || null,
         roles: [draft.role],
         systemNote: draft.systemNote.trim() || null,
+      }
+      // Sotera-memory access is ROOT-only on the server (migration 021: granting it is a disclosure act).
+      // Only send it when root actually moved it, so a non-root admin's ordinary save is never rejected for
+      // a field they did not touch.
+      if (me?.isRoot && draft.memoryAccessScope !== (editing.memoryAccessScope ?? 'none')) {
+        body.memoryAccessScope = draft.memoryAccessScope
       }
       if (draft.password) body.password = draft.password
       await apiPatch(`/v1/admin/users/${editing.id}`, body)
@@ -651,6 +657,27 @@ export default function UsersPage() {
                 onChange={(e) => setDraft((d) => ({ ...d, systemNote: e.target.value }))}
                 spellCheck={false}
               />
+            </label>
+
+            <label className={ui.field}>
+              <span className={ui.fieldLabel}>
+                Sotera&rsquo;s memory {me?.isRoot ? '' : '(root only)'}
+              </span>
+              <span className="adm-dim mb-1">
+                Whether this account may be told about Sotera&rsquo;s own history &mdash; her conversations
+                with other people, in their own words. It does <b>not</b> change what she can remember or
+                reach; it changes what she may say <i>here</i>. Granting it is a disclosure decision, so only
+                root can change it.
+              </span>
+              <select
+                className="gw-input"
+                disabled={!me?.isRoot}
+                value={draft.memoryAccessScope}
+                onChange={(e) => setDraft((d) => ({ ...d, memoryAccessScope: e.target.value as 'none' | 'sotera_memory' }))}
+              >
+                <option value="none">No access &mdash; her own history stays hers</option>
+                <option value="sotera_memory">May be told about her own history</option>
+              </select>
             </label>
 
             <div className={ui.field}>

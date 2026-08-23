@@ -96,6 +96,9 @@ export default async function adminRoutes(fastify) {
         roles: (u.roles || []).map((r) => r.name),
         createdAt: u.created_at,
         systemNote: u.system_note,
+        // ⭐ Migration 021. Shown so an admin can SEE who has been granted access to her memory even though
+        // only root can change it — a boundary nobody can read is a boundary nobody can audit.
+        memoryAccessScope: u.memory_access_scope ?? 'none',
       })),
       total: count,
       ...(paged ? { page, pageSize } : {}),
@@ -112,6 +115,7 @@ export default async function adminRoutes(fastify) {
         id: u.id, username: u.username, email: u.email, displayName: u.display_name,
         isActive: u.is_active, roles: (u.roles || []).map((r) => r.name), createdAt: u.created_at,
         systemNote: u.system_note, // admin-only (manage_users) — never on a self-service route
+        memoryAccessScope: u.memory_access_scope ?? 'none', // migration 021 · readable by admins, ROOT-only to change
       },
     })
   })
@@ -194,6 +198,9 @@ export default async function adminRoutes(fastify) {
           password: { type: 'string', minLength: 1 },
           // admin-only operational note ('' or null clears it)
           systemNote: { type: ['string', 'null'], maxLength: 5000 },
+          // ⭐⭐ SOTERA-MEMORY ACCESS (migration 021). ⛔ ROOT ONLY — enforced in the handler, not here.
+          // ⚠️ The enum is the DATABASE's enum; a value outside it would be a 500 rather than a 400.
+          memoryAccessScope: { type: 'string', enum: ['none', 'sotera_memory'] },
         },
         additionalProperties: false,
       },
@@ -202,7 +209,7 @@ export default async function adminRoutes(fastify) {
     const user = await fastify.db.mst_users.findByPk(request.params.id, { include: [{ association: 'roles' }] })
     if (!user) return reply.code(404).send({ error: { code: 'user_not_found', message: 'User not found' } })
 
-    const { username, email, displayName, roles, isActive, password, systemNote } = request.body
+    const { username, email, displayName, roles, isActive, password, systemNote, memoryAccessScope } = request.body
     const actor = request.user
     // Peer-admin protection: only root may modify an account that HOLDS admin, or
     // GRANT/keep the admin role. A non-root admin can't reset an admin's password,
@@ -278,6 +285,38 @@ export default async function adminRoutes(fastify) {
         const old = user.system_note
         await user.update({ system_note: next })
         await logUserChange(fastify.db, { userId: user.id, field: 'system_note', oldValue: preview(old), newValue: preview(next), actor })
+      }
+    }
+
+    // ── ⭐⭐⭐ SOTERA-MEMORY ACCESS · migration 021 · ⛔ ROOT ONLY ────────────────────────────────────
+    //
+    // ⚠️⚠️ WHY THIS IS NOT AN ORDINARY ADMIN FIELD. `memory_access_scope` decides what an account may be
+    // TOLD about Sotera's own history — the capability `access_sotera_memory`. Migration 021's own comment
+    // is the ruling it implements: *"Don't make memory_access_scope the mechanism that lets Sotera remember
+    // herself"* — it governs DISCLOSURE TO AN ACCOUNT, never her own reach. ⇒ granting it is a disclosure
+    // act, and disclosure acts belong to root (D-4). An `admin` who could grant it could grant themselves
+    // a view of her history with Ote, which is exactly the boundary the whole layer exists to hold.
+    //
+    // ⛔ AND THE GATE IS `actor.isRoot`, THE AUTHENTICATED FLAG — never the row id. This project has paid
+    // nine times for inferring root-ness from data, and `auth.route.js` can authenticate a NON-root session
+    // onto root's row, so an id check here would hand the grant to that login.
+    if (memoryAccessScope !== undefined) {
+      if (!actor.isRoot) {
+        return reply.code(403).send({ error: {
+          code: 'root_only',
+          message: "Only root can change an account's access to Sotera's memory. It governs what that account "
+            + 'may be told about her own history, so granting it is a disclosure act.',
+        } })
+      }
+      const next = memoryAccessScope
+      if (next !== user.memory_access_scope) {
+        const before = user.memory_access_scope
+        await user.update({ memory_access_scope: next })
+        // ⭐ AUDITED LIKE ANY OTHER FIELD CHANGE, and this one especially: a grant that leaves no trace is a
+        // boundary nobody can reconstruct afterwards.
+        await logUserChange(fastify.db, {
+          userId: user.id, field: 'memory_access_scope', oldValue: before, newValue: next, actor,
+        })
       }
     }
 

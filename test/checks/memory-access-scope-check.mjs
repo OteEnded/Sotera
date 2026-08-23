@@ -116,5 +116,56 @@ for (const f of cognitionFiles) {
     `5 · ⛔⛔ ${f} never asks whether she is allowed to remember`)
 }
 
+// ── ⭐⭐⭐ 6 · THE CONSOLE CONTROL · granting is ROOT's, and it leaves a trace ──────────────────────
+//
+// ⚠️ Added 2026-08-24 with the Console control. `memory_access_scope` decides what an account may be TOLD
+// about her own history, so granting it is a DISCLOSURE act — and disclosure acts belong to root (D-4).
+// ⛔ An `admin` who could grant it could grant themselves a view of her conversations with Ote.
+// ⓘ The gate is the AUTHENTICATED `isRoot` flag, never the row id: `auth.route.js` can authenticate a
+// non-root session onto root's row, so an id check would hand the grant to that login.
+{
+  const { makeClient } = await import('../harness.mjs')
+  const call = makeClient()
+  const { rows: [target] } = await pg.query(
+    `SELECT id::text id, memory_access_scope s FROM "${S}".mst_users WHERE username = $1`, ['agent_dev'])
+  const before = target.s
+  ok(Boolean(target), '6 · a test account to work on', String(target?.id).slice(0, 8))
+
+  // ⛔ A NON-ROOT ADMIN MUST BE REFUSED — and the row must not move.
+  const adm = await call('a', 'POST', '/v1/auth/login', { username: 'agent_dev', password: 'agentdev123' })
+  ok(adm.status === 200 && adm.json?.user?.isRoot === false && adm.json?.user?.capabilities?.manage_users === true,
+    '6 · ⭐ the actor is a NON-ROOT admin — otherwise this proves nothing',
+    `isRoot=${adm.json?.user?.isRoot} manage_users=${adm.json?.user?.capabilities?.manage_users}`)
+  const refused = await call('a', 'PATCH', `/v1/admin/users/${target.id}`, { memoryAccessScope: 'sotera_memory' })
+  ok(refused.status === 403 && refused.json?.error?.code === 'root_only',
+    '6 · ⛔⛔ a non-root admin CANNOT grant access to her memory', `${refused.status} ${refused.json?.error?.code}`)
+  const { rows: [afterRefusal] } = await pg.query(`SELECT memory_access_scope s FROM "${S}".mst_users WHERE id = $1`, [target.id])
+  ok(afterRefusal.s === before, '6 · ⭐ …and the refusal left the scope untouched', `${before} → ${afterRefusal.s}`)
+
+  // ⭐ ROOT CAN, AND IT AUDITS. A boundary change with no durable trace is one nobody can reconstruct.
+  const root = await call('r', 'POST', '/v1/auth/login',
+    { username: config.auth.root.username, password: config.auth.root.password })
+  ok(root.status === 200 && root.json?.user?.isRoot === true, '6 · root session established')
+  const granted = await call('r', 'PATCH', `/v1/admin/users/${target.id}`, { memoryAccessScope: 'sotera_memory' })
+  ok(granted.status === 200, '6 · ⭐ root CAN grant it', String(granted.status))
+  const { rows: [afterGrant] } = await pg.query(`SELECT memory_access_scope s FROM "${S}".mst_users WHERE id = $1`, [target.id])
+  ok(afterGrant.s === 'sotera_memory', '6 · …and the row moved', afterGrant.s)
+  const { rows: [audit] } = await pg.query(
+    `SELECT field, old_value, new_value, changed_by FROM "${S}".log_user_changes
+      WHERE user_id = $1 AND field = 'memory_access_scope' ORDER BY rolling_id DESC LIMIT 1`, [target.id])
+  // ⚠️⚠️ THIS ASSERTION EXISTS BECAUSE IT FAILED FIRST TIME. `user_change_field` is an ALLOWLIST on the
+  // model, and the new field name was not in it — so the row was written and the audit insert threw a 500.
+  // It failed LOUDLY, which is the right direction, but a disclosure change with no trace is the thing the
+  // audit is for.
+  ok(audit?.new_value === 'sotera_memory' && audit?.changed_by === 'root',
+    '6 · ⭐⭐ …and it left an AUDIT row naming root', JSON.stringify(audit ?? null))
+
+  // ⭐ RESTORED. A check that leaves a grant behind is a security change, and it also fails §2 above.
+  const restored = await call('r', 'PATCH', `/v1/admin/users/${target.id}`, { memoryAccessScope: before })
+  const { rows: [end] } = await pg.query(`SELECT memory_access_scope s FROM "${S}".mst_users WHERE id = $1`, [target.id])
+  ok(restored.status === 200 && end.s === before,
+    '6 · ⛔ and it is put back exactly as found', `${end.s}, was ${before}`)
+}
+
 await pg.end()
 done()

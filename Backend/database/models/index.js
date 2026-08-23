@@ -96,7 +96,19 @@ export const CHOICES = {
     token_grant_source: ["feedback", "manual"],
     // 'limits' rows audit token-limit changes (override set, boost granted/revoked, reward)
     // 'system_note' rows audit the admin-only account note (value previews are truncated)
-    user_change_field: ["username", "email", "display_name", "roles", "account", "limits", "system_note"],
+    // ⭐⭐ 'memory_access_scope' rows audit who was granted or refused access to Sotera's own history
+    // (migration 021). ⛔ Root-only to change, and the audit row is the only durable record that the
+    // boundary moved — so this list is load-bearing rather than descriptive.
+    //
+    // ⚠️⚠️ AND THIS LIST IS AN ALLOWLIST THAT DROPS WHAT IT WAS NOT TOLD ABOUT — the defect family with nine
+    // recorded instances in this project. Adding the Console control for memory access wrote the user row
+    // and then threw a 500 on the audit insert, because the field name was new here. ⇒ ⛔ it failed LOUDLY,
+    // which is the right direction; but note the hazard it exposed, which is older than this change: every
+    // field in `admin.route.js` updates the row FIRST and audits second, so a rejected audit leaves the
+    // mutation standing with no trace. ⓘ Recorded, not silently re-ordered — it is the same for every field
+    // and changing it is a decision about all of them.
+    user_change_field: ["username", "email", "display_name", "roles", "account", "limits", "system_note",
+      "memory_access_scope"],
     key_reveal_outcome: ["revealed", "reauth_failed", "rate_limited", "not_recoverable", "system_key"],
     password_reset_status: ["pending", "handled"],
     role_upgrade_role: ["developer"],
