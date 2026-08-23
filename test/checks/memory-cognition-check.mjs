@@ -438,7 +438,11 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
     new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
   ok(/TOOLS INVESTIGATE; THEY DO NOT ADJUDICATE/.test(raw),
     '11 · ⭐ the ratified direction is recorded beside the code it governs')
-  ok(/RFC §3C/.test(raw), '11 · …and points at the section that holds the open options')
+  // ⓘ The pointer moved when Step A shipped: §3C held the OPTIONS, §3D is the ratified model, and the
+  // remaining open piece is §3E (Working Memory, Step C) which is where the two representations become one.
+  ok(/RFC §3C|§3E/.test(raw), '11 · …and points at the section that holds what is still open')
+  ok(/Step C/.test(raw) && /not started/i.test(raw),
+    '11 · ⭐ …and says plainly that the reconciliation is NOT started')
 
   // ⛔ CODE ONLY — the comments above legitimately discuss tools, precedence and adjudication.
   const code = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*/g, '$1')

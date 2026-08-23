@@ -26,10 +26,16 @@
 // ⭐ *"Her memory should be one coherent cognitive domain. Storage location, room, account, retrieval
 // mechanism are implementation details underneath it."*
 //
-// ⛔⛔ AND NOTHING IN THIS FILE ACTS ON THAT YET. The measurement is confounded — the one cell that used
-// the block was also the only Thai cell — so the four-way comparison comes first and the authority boundary
-// is Ote's call after it. See RFC §3C. ⛔ Do not add a tie-break, a precedence rule or an L1/L2 instruction
-// here in the meantime.
+// ✅ THE CONFOUND IS SETTLED (2026-08-23). The four-way comparison showed the denial tracks the ARM, not the
+// language: tools-only produced a false absence in BOTH languages, block-only produced real episodes in
+// BOTH. ⇒ **Step A** acted on it, in `memory-cognition-projection.js`, by making a tool result state the
+// population it looked through — *"I looked through the things I have kept for Hermes and found nothing
+// **there**."* ⭐ The mechanism is grammar: "found nothing" can be read as "nothing anywhere"; "found nothing
+// there" cannot.
+// ⛔⛔ AND THIS FILE STILL IMPLEMENTS NO PRECEDENCE. There is no tie-break, no ranking of the block against a
+// tool result, and no L1/L2 instruction — the layer cannot even see what a tool is. Reconciling the two into
+// ONE representation is **Working Memory (§3E), Step C**, and it is deliberately not started.
+// `memory-cognition-check` §11 asserts both halves of that.
 //
 // ── ⛔ WHAT THIS FILE MUST NEVER DO ─────────────────────────────────────────────────────────────────
 //   · decide what anything MEANS, or whether it is worth keeping — hers, and ratified as hers;
@@ -48,7 +54,7 @@
 // additive and does not change any stage.
 
 import { Op } from 'sequelize'
-import { formCues, hasCue, populationsFor } from './memory-cognition-cues.js'
+import { formCues, hasCue, populationsFor, mayClaimAboutness } from './memory-cognition-cues.js'
 import {
   SOURCE, BASIS, AVAILABILITY, RETENTION, WARRANT, findIllegalPromotions, corroborate,
 } from './memory-cognition-axes.js'
@@ -551,7 +557,14 @@ export function buildMemoryCognition(fastify, {
    * ⛔ NO population names, NO tool names, NO room names, NO ids, NO axis tokens. Human-facing provenance
    * only: *"I said this"*, *"they said this to me"*, *"I know we talked, I can't see it"*.
    */
-  const about0 = (cues) => (cues.persons.length ? cues.persons.join(' and ') : (cues.topics[0] ?? 'this'))
+  // ⭐ AND THE SUBJECT SHE IS TOLD ABOUT PREFERS A CUE THE PERSON TYPED. ⚠️ Otherwise a manufactured
+  // fragment becomes the subject of a sentence — measured: *"talking about ทรง"*, and in English
+  // *"talking about remember"*. ⛔ A derived cue is the LAST resort, never the first.
+  const about0 = (cues) => {
+    if (cues.persons.length) return cues.persons.join(' and ')
+    const derived = new Set(cues.derivedTopics ?? [])
+    return (cues.topics ?? []).find((t) => !derived.has(t)) ?? cues.topics?.[0] ?? 'this'
+  }
 
   // ⭐ HUMAN DATES. `2026-08-20` is a database value; *"20 August"* is how a person says it. ⛔ No relative
   // dates ("yesterday") — those need a clock this function does not have, and a wrong one is a false memory.
@@ -833,6 +846,19 @@ export function buildMemoryCognition(fastify, {
     if (illegal.length) {
       await log?.(`[cognition] ⛔ illegal promotion, discarding: ${JSON.stringify(illegal).slice(0, 300)}`, import.meta.url)
       return { activated: false, cues, context: null, items: [], illegal }
+    }
+
+    // ⭐⭐⭐ THE THIRD SILENCE — a cue resolved, nothing survived the floor, and the cue was one WE
+    // MANUFACTURED. ⚠️ Measured the moment Thai segmentation shipped: ICU splits ความทรงจำ into
+    // ความ / ทรง / จำ and the block came out as *"I went looking for what I have about ทรง and came up with
+    // nothing."* ⛔ That is a false absence whose subject is a fragment of our own making.
+    // ⭐ Ote: *"I'd rather Sotera not activate and not invent an aboutness claim."* ⇒ claim nothing.
+    // ⓘ AND IT IS NARROW ON PURPOSE. A token the PERSON typed still carries its absence honestly —
+    // *"I went looking for Zephyrine and came up with nothing"* is true, useful, and asserted by
+    // `memory-cognition-check` §5. Only a derived-cue-only turn with an empty result goes silent.
+    if (!kept.length && !mayClaimAboutness(cues)) {
+      await log?.(`[cognition] derived cues only and nothing survived the floor — claiming nothing: ${JSON.stringify(cues.derivedTopics)}`, import.meta.url)
+      return { activated: false, cues, context: null, items: [], reason: 'derived-cues-only' }
     }
 
     const searched = 'everything I currently have available'

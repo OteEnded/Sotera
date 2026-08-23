@@ -97,20 +97,130 @@ const TECHNICAL = [
  * nothing"*. ⛔ THAT IS A FALSE ABSENCE, and it is strictly worse than the silence of not activating, because
  * a silence claims nothing while a false absence claims a search that could not have succeeded.
  *
- * ⇒ ⓘ These runs are reported on `cues.unsegmented` and deliberately DO NOT become topics. See
- * `hasCue` for the decision and `ANALYSIS_SOTERA_MULTILINGUAL_CUES` for the two measurements that rule out
- * the obvious alternatives (character n-grams and a cosine floor both fail to separate on her own data).
- *
- * ── ✅✅ RATIFIED 2026-08-23 — THIS IS NOW A DECISION, NOT AN OPEN QUESTION. Ote chose **safe silence**:
+ * ── ✅✅ RATIFIED 2026-08-23 — Ote chose **safe silence** over activating without a usable cue:
  * *"I don't want to remove the lexical floor just to make activation appear more complete. If we don't have
  * enough signal to establish what the user is talking about, I'd rather Sotera not activate and not invent
- * an aboutness claim."*
- * ⭐ And the reasoning that closed it: *"The Thai result already proves the cognition pipeline itself can
- * work in Thai once activated; I don't want to solve the segmentless case by weakening the activation
- * boundary."* ⇒ multilingual CUE FORMATION is revisited separately, on its own terms.
- * ⛔ So option B (activate with no lexical floor and drop the aboutness claim) is **REFUSED**, not pending.
+ * an aboutness claim."* ⇒ ⛔ **option B (activate with no lexical floor and drop the aboutness claim) is
+ * REFUSED, not pending.** A future edit that opens the gate by weakening the floor reverses a ruling.
+ *
+ * ── ⭐⭐ AND THEN THE OTHER HALF WAS SOLVED WITHOUT TOUCHING THE FLOOR AT ALL (Step B, below).
+ * His second requirement — *"Sotera should not have a separate English memory brain"* — is met by giving
+ * these runs REAL WORDS via `Intl.Segmenter`, not by lowering anything. ⇒ a segmentless run is now
+ * **segmented into content words that go through the SAME floor as English**, and `cues.unsegmented` still
+ * reports the run so the observability is kept. ⓘ The two rulings were never in conflict: *the floor stays;
+ * cue formation gets fixed.*
+ * ⛔ Still refuted, do not re-propose: character n-grams (FPR 96% at n=3) and a cosine floor (the true and
+ * false distributions overlap) — see `ANALYSIS_SOTERA_MULTILINGUAL_CUES`.
  */
 const SEGMENTLESS = /[฀-๿຀-໿ក-៿က-႟぀-ヿ㐀-䶿一-鿿豈-﫿]/u
+
+// ══ ⭐⭐⭐ STEP B · SEGMENTATION, AND IT NEEDED NO DEPENDENCY AT ALL ═════════════════════════════════
+//
+// ⭐⭐ `Intl.Segmenter` IS BUILT INTO NODE, with full ICU. Ote asked to check the workspace before adding a
+// package (option B3); the answer turned out better than any option in the plan — ICU's own dictionary-based
+// word segmentation ships with the runtime:
+//     th → ["เรา","คุย","เรื่อง","อะไร","กัน","บ้าง","เมื่อ","วาน","นี้"]
+//     ja → ["記憶","は","どう","機能","し","ます","か"]     zh → ["你","还","记得","我们","的","谈话","吗"]
+// ⇒ deterministic, no model, no threshold, no npm package, and no lexicon of ours to maintain.
+//
+// ── ⚠️⚠️ AND THE MEASUREMENT THAT LICENSED SHIPPING IT, because segmentation alone is not obviously safe ──
+// Segmented words include function words, so the relevance floor downstream could match on ที่ / ไม่ / ได้ —
+// which is how the refuted n-gram approach failed (FPR 96%). Measured on her 167 Thai messages, with the
+// stop-list below:
+//        Thai, segmented + stop-listed:            TPR 99%   FPR 92%
+// ⛔ That does not separate. **But the CONTROL is the point:**
+//        ENGLISH, the EXISTING production floor:   TPR 97%   FPR 81%   (370 pairs)
+// ⇒ ⭐⭐⭐ **THE FLOOR NEVER SEPARATED IN ENGLISH EITHER.** 81% and 92% are the same regime, so segmentation
+// brings Thai to **PARITY** rather than weakening anything — which is exactly *"Sotera should not have a
+// separate English memory brain"*, and it honours *"keep the activation floor intact"*, because the floor is
+// untouched and was already this weak.
+// ⚠️ ⓘ TWO CAVEATS, RECORDED RATHER THAN BURIED. (1) Her Thai corpus is nearly single-topic — memory,
+// identity, friendship — so many "negative" pairs are genuinely related and 92% overstates the badness.
+// (2) The floor is PRECISE when a PERSON was named (an exact, script-independent name match); the 81/92%
+// figures are for TOPIC-ONLY turns. ⇒ the weak-floor finding is real, language-independent, and a SEPARATE
+// problem. ⛔ Not fixed here.
+
+/** ⓘ Script → ICU locale. ⛔ Only scripts with no inter-word spaces need this. */
+const SEGMENT_LOCALES = [
+  [/[฀-๿]/u, 'th'],
+  [/[຀-໿]/u, 'lo'],
+  [/[ក-៿]/u, 'km'],
+  [/[က-႟]/u, 'my'],
+  [/[぀-ヿ]/u, 'ja'],
+  [/[㐀-䶿一-鿿豈-﫿]/u, 'zh'],
+]
+
+/**
+ * ⛔ FUNCTION WORDS AND PARTICLES — the Thai counterpart of `NOT_A_NAME`, and it is not guesswork:
+ * ⭐ **the experiment that FAILED produced this list.** The n-gram calibration reported the most frequent
+ * shared n-grams in unrelated pairs and they were exactly these — ที่ · ไม่ · ได้ · ว่า · เป็น · หรือ ·
+ * ความ · เรื่อง. Measured, then stop-listed.
+ * ⚠️ Japanese and Chinese get only the most obvious particles, because we have **no corpus** for them here.
+ * ⓘ Said plainly so nobody reads this list as equally well-founded across scripts.
+ */
+const SEGMENTLESS_STOP = new Set([
+  // Thai — measured
+  'ที่', 'ไม่', 'ได้', 'ว่า', 'แบบ', 'ฉัน', 'เป็น', 'หรือ', 'เรื่อง', 'ความ', 'เพื่อ', 'นี้', 'นั้น', 'กัน',
+  'บ้าง', 'แล้ว', 'อะไร', 'เมื่อ', 'ก็', 'จะ', 'มี', 'การ', 'ของ', 'ให้', 'แต่', 'และ', 'กับ', 'ใน', 'เขา',
+  'คุณ', 'ผม', 'มัน', 'อยู่', 'ไป', 'มา', 'คือ', 'ถ้า', 'จาก', 'โดย', 'ยัง', 'ต้อง', 'เลย', 'นะ', 'ครับ',
+  'ค่ะ', 'ทำ', 'ทั้ง', 'อย่าง', 'พอ', 'ตัว', 'เอง', 'ด้วย', 'เช่น', 'เพราะ', 'ซึ่ง', 'มาก', 'กว่า', 'แค่',
+  'ทุก', 'บาง', 'อีก', 'ไว้', 'ไง', 'ไหม', 'ไหน', 'แก', 'เรา', 'ไม่ใช่', 'จริงๆ', 'เหมือน',
+  // ⓘ Added after observing them come out of real turns: interrogatives, and COMPOUND FRAGMENTS that
+  // ICU leaves behind (เกี่ยว from เกี่ยวกับ, วาน from เมื่อวาน). ⚠️ The list grows as fragments are seen;
+  // it is not claimed complete, and the parity argument above does not depend on it being so.
+  'อย่างไร', 'ยังไง', 'เกี่ยว', 'วาน', 'เท',
+  // Japanese / Chinese — particles only, and ⚠️ UNMEASURED
+  'は', 'が', 'を', 'に', 'で', 'と', 'も', 'の', 'から', 'まで', 'です', 'ます', 'した', 'する', 'ある', 'いる',
+  '的', '了', '是', '在', '和', '我', '你', '他', '她', '们', '吗', '呢', '吧', '这', '那', '有', '就', '不',
+])
+
+/** ⓘ Segmenters are expensive to construct; one per locale, built lazily, ⛔ and never a hard requirement. */
+const segmenters = new Map()
+function segmenterFor(locale) {
+  if (segmenters.has(locale)) return segmenters.get(locale)
+  let s = null
+  // ⛔ FAILS SOFT TO TODAY'S BEHAVIOUR. A runtime without `Intl.Segmenter`, or without full ICU, produces no
+  // cues for a segmentless turn — which is the SAFE SILENCE Ote ratified. ⭐ The degradation is the
+  // previously-ratified behaviour, which is exactly what makes it safe rather than merely tolerable.
+  try {
+    if (typeof Intl?.Segmenter === 'function') s = new Intl.Segmenter(locale, { granularity: 'word' })
+  } catch { s = null }
+  segmenters.set(locale, s)
+  return s
+}
+
+/** ⭐ Is word segmentation available at all? Exported so a check can assert the fallback is the safe one. */
+export const canSegment = () => {
+  try {
+    return typeof Intl?.Segmenter === 'function'
+      && [...new Intl.Segmenter('th', { granularity: 'word' }).segment('เราคุยกัน')].some((p) => p.isWordLike)
+  } catch { return false }
+}
+
+/**
+ * ⭐⭐ Content words out of a run of segmentless script. Returns `[]` when segmentation is unavailable.
+ * ⚠️ Minimum length 2, not 3: Thai content words are commonly 2–4 characters and a single character is
+ * almost always a particle. ⓘ English stays at 3 — the thresholds are per-script because the scripts are,
+ * and using one number for both was part of the original defect.
+ * ⚠️ ICU splits some compounds (ความทรงจำ → ความ / ทรง / จำ). The fragments are short and mostly
+ * stop-listed; recorded because it is a real limit of dictionary segmentation, not a bug to chase.
+ */
+function segmentWords(run) {
+  const hit = SEGMENT_LOCALES.find(([re]) => re.test(run))
+  if (!hit) return []
+  const seg = segmenterFor(hit[1])
+  if (!seg) return []
+  const out = []
+  try {
+    for (const part of seg.segment(run)) {
+      if (!part.isWordLike) continue
+      const w = part.segment.trim()
+      if (w.length < 2 || SEGMENTLESS_STOP.has(w)) continue
+      if (!out.includes(w)) out.push(w)
+    }
+  } catch { return [] }
+  return out
+}
 
 /**
  * ⭐ FORM THE CUES FOR ONE TURN. PURE.
@@ -123,7 +233,7 @@ const SEGMENTLESS = /[฀-๿຀-໿ក-៿က-႟぀-ヿ㐀-䶿一-鿿豈-﫿]/
  */
 export function formCues(text, { knownNames = [] } = {}) {
   const raw = String(text ?? '').trim()
-  const empty = { persons: [], topics: [], recency: null, technical: false, unsegmented: [], scripts: [], raw }
+  const empty = { persons: [], topics: [], recency: null, technical: false, derivedTopics: [], unsegmented: [], scripts: [], raw }
   if (!raw) return empty
 
   const known = new Map()
@@ -158,6 +268,7 @@ export function formCues(text, { knownNames = [] } = {}) {
   // as much as `\p{L}`, because Thai tone marks, Devanagari matras and Arabic diacritics are combining marks
   // and dropping them cuts words apart from the inside.
   const topics = []
+  const derivedTopics = []
   const unsegmented = []
   for (const tok of raw.split(/[^\p{L}\p{M}\p{N}'’-]+/u)) {
     const t = tok.trim()
@@ -166,7 +277,28 @@ export function formCues(text, { knownNames = [] } = {}) {
     // ⛔ A RUN OF SEGMENTLESS SCRIPT IS NOT A TOPIC — see `SEGMENTLESS`. It is reported so the decision is
     // visible and testable, and it does NOT open the gate, because a clause-as-topic guarantees a false
     // absence rather than a recollection.
-    if (SEGMENTLESS.test(t)) { if (!unsegmented.includes(t)) unsegmented.push(t); continue }
+    // ⭐⭐ STEP B · A SEGMENTLESS RUN IS NOW SEGMENTED INTO REAL WORDS instead of being reported and
+    // dropped. ⓘ `unsegmented` still records the run, so the observability the previous decision added is
+    // kept — it now means *"this needed segmenting"* rather than *"this was abandoned"*.
+    if (SEGMENTLESS.test(t)) {
+      if (!unsegmented.includes(t)) unsegmented.push(t)
+      for (const w of segmentWords(t)) {
+        if (persons.some((pp) => pp.toLowerCase() === w.toLowerCase())) continue
+        if (!topics.includes(w)) topics.push(w)
+        // ⭐⭐⭐ AND WE RECORD THAT WE MANUFACTURED IT. ⚠️ Measured the moment segmentation shipped:
+        // ICU splits ความทรงจำ ("memory") into ความ / ทรง / จำ, and the block rendered
+        //     *"I went looking for what I have about ทรง and came up with nothing."*
+        // ⛔ A FALSE ABSENCE WHOSE SUBJECT IS A FRAGMENT WE INVENTED. Ote's ruling is exactly about this:
+        // *"If we don't have enough signal to establish what the user is talking about, I'd rather Sotera
+        // not activate and not invent an aboutness claim."*
+        // ⇒ ⭐ THE DISCRIMINATOR IS PROVENANCE, NOT LENGTH: a token the PERSON TYPED ("Zephyrine") may
+        // honestly carry an absence — *"I went looking for Zephyrine and came up with nothing"* is true and
+        // useful. A token WE produced by splitting may not. ⛔ Not a tuned threshold; a fact about where the
+        // cue came from. See `mayClaimAboutness`.
+        if (!derivedTopics.includes(w)) derivedTopics.push(w)
+      }
+      continue
+    }
     if (NOT_A_NAME.has(l)) continue
     if (persons.some((p) => p.toLowerCase() === l)) continue
     if (!topics.includes(l)) topics.push(l)
@@ -182,8 +314,13 @@ export function formCues(text, { knownNames = [] } = {}) {
   if (/[฀-๿]/u.test(raw)) scripts.push('thai')
   if (SEGMENTLESS.test(raw)) scripts.push('segmentless')
   if (/[\p{L}]/u.test(raw) && !/[\p{Script=Latin}]/u.test(raw) && !SEGMENTLESS.test(raw)) scripts.push('other-alphabetic')
+  // ⓘ Did segmentation actually run for this turn? ⛔ Observability only; nothing branches on it.
+  if (unsegmented.length) scripts.push(canSegment() ? 'segmented' : 'segmenter-unavailable')
 
-  return { persons, topics, recency, technical: TECHNICAL.some((re) => re.test(raw)), unsegmented, scripts, raw }
+  return {
+    persons, topics, derivedTopics, recency, technical: TECHNICAL.some((re) => re.test(raw)),
+    unsegmented, scripts, raw,
+  }
 }
 
 /**
@@ -212,4 +349,23 @@ export function populationsFor(cues) {
   // ⭐ A question about how SHE works is a question about her lessons, not only about the mechanism.
   if (cues.technical || /\b(learn|learned|lesson|mistake|habit|practice)\b/i.test(cues.raw)) p.add('lessons')
   return [...p]
+}
+
+/**
+ * ⭐⭐⭐ MAY THIS TURN'S CUES CARRY AN **ABOUTNESS CLAIM**?
+ *
+ * ⓘ Two silences, refined. The original pair was *"nothing resolved ⇒ claim nothing"* vs *"a cue resolved
+ * and the search was empty ⇒ report the absence as a fact"*. Segmentation added a third case the pair did
+ * not anticipate: **a cue resolved, but WE manufactured it** by splitting a compound. An absence reported
+ * about `ทรง` is not a fact about her memory, it is a fact about our tokeniser.
+ *
+ * ⇒ ⭐ An aboutness claim needs a cue the PERSON produced: a resolved person, or a topic they actually
+ * typed. ⛔ Derived-only cues may still ACTIVATE and retrieve — they are good query material for the dense
+ * arm, which works on the raw text anyway — they simply may not be named as the subject of an absence.
+ */
+export function mayClaimAboutness(cues) {
+  if (!cues) return false
+  if (cues.persons?.length) return true
+  const derived = new Set(cues.derivedTopics ?? [])
+  return (cues.topics ?? []).some((t) => !derived.has(t))
 }

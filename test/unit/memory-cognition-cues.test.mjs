@@ -128,8 +128,12 @@ test('⛔ the cue object exposes no question-type label — cues are handles on 
   //   `scripts`     — pure OBSERVABILITY, so a check can assert a Thai turn was SEEN as Thai rather than as
   //                   empty. ⛔ Nothing branches on it beyond the gate.
   // ⛔ Neither is a category of QUESTION, which is the thing this test actually forbids.
+  // ⭐ THIS PIN HAS NOW CAUGHT TWO CHANGES, WHICH IS EXACTLY ITS JOB. `derivedTopics` was added with Thai
+  // segmentation and is the third allowed kind of field: PROVENANCE OF A CUE — which of these handles the
+  // person typed and which we manufactured by splitting a compound. ⛔ Still not a category of QUESTION,
+  // which is the thing this test forbids.
   assert.deepEqual(Object.keys(c).sort(),
-    ['persons', 'raw', 'recency', 'scripts', 'technical', 'topics', 'unsegmented'])
+    ['derivedTopics', 'persons', 'raw', 'recency', 'scripts', 'technical', 'topics', 'unsegmented'])
   assert.equal('intent' in c, false, 'the moment this has an intent field we have built a classifier')
   assert.equal('questionType' in c, false)
   assert.equal('language' in c, false, 'a language LABEL would be a classifier by another name')

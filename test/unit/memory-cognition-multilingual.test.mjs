@@ -20,7 +20,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { formCues, hasCue, populationsFor } from '../../Backend/app/components/memory-cognition-cues.js'
+import {
+  formCues, hasCue, populationsFor, canSegment, mayClaimAboutness,
+} from '../../Backend/app/components/memory-cognition-cues.js'
 
 const NAMES = ['Ote', 'Hermes', 'Kavi', 'Sotera', 'Mina']
 const cue = (t) => formCues(t, { knownNames: NAMES })
@@ -92,31 +94,42 @@ test('⭐⭐ a segmentless-script turn is SEEN as that script, not seen as empty
   assert.ok(cue('เราคุยเรื่องอะไร').scripts.includes('thai'))
 })
 
-test('⛔⛔ …and it does NOT open the gate, because a clause-as-topic guarantees a FALSE ABSENCE', () => {
-  // ⭐ THE REASONING, WHICH IS THE POINT OF THIS TEST. A whole Thai clause as a "topic" matches nothing in
-  // the record as a substring, so the relevance floor downstream drops every candidate and the turn renders
-  // as *"I went looking … and came up with nothing"*. ⛔ A false absence is strictly worse than silence: a
-  // silence claims nothing, while a false absence claims a search that could not have succeeded.
-  // ⓘ Two alternatives were MEASURED on her own 167 Thai messages and both fail to separate — character
-  // n-grams (FPR 86% at n=5, 96% at n=3) and a cosine floor (already refuted in self-history-host.js, where
-  // Thai .450 sits below takraw .521). ⇒ this stays a reported gap, not a guessed threshold.
+test('⭐⭐⭐ STEP B · a segmentless turn now activates, on REAL WORDS from `Intl.Segmenter`', () => {
+  // ⭐⭐ IT NEEDED NO DEPENDENCY. Ote asked to check the workspace first (option B3); ICU's own
+  // dictionary-based word segmentation ships with Node, so there is no package, no lexicon of ours, no
+  // threshold and no model.
+  const th = cue('เราคุยเรื่องอะไรกันบ้างเมื่อวานนี้')
+  assert.equal(hasCue(th), true, 'a Thai-only turn must activate')
+  assert.ok(th.topics.length > 0 && th.topics.every((t) => /[฀-๿]/.test(t)),
+    `real Thai words, not a clause: ${JSON.stringify(th.topics)}`)
+  // ⛔ AND NOT THE WHOLE CLAUSE AS ONE "TOPIC" — that was the false-absence machine.
+  assert.ok(!th.topics.some((t) => t.length > 12), `a clause leaked in as a topic: ${JSON.stringify(th.topics)}`)
   for (const [lang, q] of SEGMENTLESS_CASES) {
-    assert.equal(hasCue(cue(q)), false, `${lang}: must not activate without a resolvable cue`)
+    const c = cue(q)
+    assert.equal(hasCue(c), true, `${lang}: must activate`)
+    assert.ok(c.scripts.includes('segmented'), `${lang}: segmentation must have run`)
+    assert.ok(c.unsegmented.length > 0, `${lang}: the run is still REPORTED — observability was kept`)
   }
 })
 
-test('✅✅ RATIFIED — safe silence is a DECISION now, and option B is REFUSED', () => {
-  // ⭐ Ote, 2026-08-23: *"If we don't have enough signal to establish what the user is talking about, I'd
-  // rather Sotera not activate and not invent an aboutness claim… The Thai result already proves the
-  // cognition pipeline itself can work in Thai once activated; I don't want to solve the segmentless case by
-  // weakening the activation boundary."*
-  // ⛔ So this is not a gap awaiting a fix. A future edit that opens the gate for a bare Thai clause is
-  // REVERSING A RULING, and this assertion is here to make that obvious rather than plausible.
-  // ⓘ `includes`, not a regex — the source says `**REFUSED**` and `**` is not a literal in a pattern.
-  assert.ok(SRC_RAW.includes('RATIFIED 2026-08-23') && SRC_RAW.includes('REFUSED**, not pending'),
-    'the decision and its reasoning must live beside the code it governs')
-  assert.equal(hasCue(cue('เราคุยเรื่องอะไรกันบ้าง')), false)
-  assert.equal(hasCue(cue('記憶について話しましょう')), false)
+test('⛔⛔ …and the RELEVANCE FLOOR WAS NOT WEAKENED — that is the ruling this respects', () => {
+  // ⭐ Ote ratified safe silence over activating without a usable cue, and refused option B (drop the
+  // floor). ⇒ the gate opens because cue formation now produces REAL WORDS, not because anything was
+  // lowered: Thai topics go through the SAME `terms` → `hay.includes(t)` path as English topics.
+  assert.ok(SRC_RAW.includes('REFUSED, not pending'), 'the refusal of option B must still stand in writing')
+  // ⛔ Nothing in cue formation may score, threshold or rank — the refuted alternatives all did.
+  assert.ok(!/minSim|threshold|score|ngram|nGram|cosine/i.test(SRC), 'no threshold may have crept in')
+})
+
+test('⛔ AND THE FALLBACK IS THE RATIFIED SILENCE, not a crash and not a guess', () => {
+  // ⚠️ A runtime without `Intl.Segmenter` or without full ICU must degrade to the PREVIOUS behaviour —
+  // no cues for a segmentless turn — which is exactly the safe silence Ote chose. ⭐ The degradation being
+  // the previously-ratified behaviour is what makes it safe rather than merely tolerable.
+  assert.equal(typeof canSegment, 'function')
+  assert.equal(canSegment(), true, 'this runtime has it; the guard below is what protects one that does not')
+  assert.ok(/catch \{ s = null \}|catch \{ return \[\] \}/.test(SRC),
+    'construction and segmentation must both be wrapped — a missing segmenter is not an exception path')
+  assert.ok(SRC.includes("'segmenter-unavailable'"), 'and the unavailable case must be OBSERVABLE, not silent')
 })
 
 test('⭐⭐ but a segmentless turn that NAMES someone works end to end — that is 34% of her Thai', () => {
@@ -177,4 +190,63 @@ test('odd and mixed input does not throw', () => {
   const c = formCues('  ', { knownNames: NAMES })
   assert.deepEqual(c.unsegmented, [])
   assert.deepEqual(c.scripts, [])
+})
+
+// ══ ⭐⭐⭐ THE THIRD SILENCE · A CUE WE MANUFACTURED MAY NOT CARRY AN ABOUTNESS CLAIM ════════════════
+//
+// ⚠️⚠️ MEASURED THE MOMENT SEGMENTATION SHIPPED. ICU splits ความทรงจำ ("memory") into ความ / ทรง / จำ, so a
+// Thai turn about memory produced topics `["ทรง","จำ","ทำงาน"]`, the floor dropped all 8 candidates, and the
+// block rendered:
+//     "I went looking for what I have about ทรง and came up with nothing."
+// ⛔ A FALSE ABSENCE WHOSE SUBJECT IS A FRAGMENT OF OUR OWN MAKING — which is precisely what Ote's ruling
+// forbids: *"I'd rather Sotera not activate and not invent an aboutness claim."*
+//
+// ⭐ THE DISCRIMINATOR IS PROVENANCE, NOT LENGTH. A token the PERSON typed can honestly carry an absence;
+// one we produced by splitting cannot. ⛔ Not a tuned threshold — a fact about where the cue came from.
+
+test('⭐⭐⭐ a segmented cue is recorded as DERIVED, and a typed one is not', () => {
+  const th = cue('ความทรงจำของคุณทำงานยังไง')
+  assert.ok(th.derivedTopics.length > 0, 'segmented words must be marked as ours')
+  assert.deepEqual([...th.topics].sort(), [...th.derivedTopics].sort(),
+    'every topic in this turn was manufactured by splitting')
+  const en = cue('What do you remember about Hermes?')
+  assert.deepEqual(en.derivedTopics, [], 'nothing the person typed is derived')
+})
+
+test('⭐⭐⭐ …so a derived-only cue set may NOT claim aboutness', () => {
+  assert.equal(mayClaimAboutness(cue('ความทรงจำของคุณทำงานยังไง')), false)
+  assert.equal(mayClaimAboutness(cue('คุณจำอะไรเกี่ยวกับผมได้บ้าง')), false)
+})
+
+test('⛔⛔ …but a TYPED cue still carries its absence honestly — this is the narrow part', () => {
+  // ⚠️ *"I went looking for Zephyrine and came up with nothing"* is TRUE and USEFUL, and
+  // `memory-cognition-check` §5 asserts it. A blanket "empty ⇒ say nothing" rule would have broken it.
+  assert.equal(mayClaimAboutness(cue('What has Zephyrine been up to?')), true)
+  assert.equal(mayClaimAboutness(cue("How's Hermes doing?")), true, 'a person cue always may')
+  // ⭐ And a MIXED turn may, because the Latin half is the person's own word.
+  assert.equal(mayClaimAboutness(cue('ช่วยเล่าเรื่อง pattern matching หน่อย')), true)
+})
+
+test('⛔ nothing and nonsense do not claim aboutness either', () => {
+  assert.equal(mayClaimAboutness(cue('ok thanks')), false)
+  assert.equal(mayClaimAboutness(null), false)
+  assert.equal(mayClaimAboutness({}), false)
+})
+
+test('⭐ a Thai turn with a SUBSTANTIVE word still activates and may claim it', () => {
+  // ⓘ Not everything Thai is a fragment: มิตรภาพ (friendship) and เพื่อน (friend) are whole words, and they
+  // are still DERIVED, so this turn activates and retrieves but does not get to name a subject on its own.
+  const c = cue('คุยกับเพื่อนเรื่องมิตรภาพและความทรงจำ')
+  assert.equal(hasCue(c), true)
+  assert.ok(c.topics.includes('มิตรภาพ') && c.topics.includes('เพื่อน'))
+  assert.equal(mayClaimAboutness(c), false, 'derived is derived, however good the word')
+})
+
+test('⛔ the ABOUT phrase prefers a typed cue over a manufactured one', () => {
+  // ⚠️ Measured in English too, and parked at Ote's instruction: *"talking about remember"*. The renderer
+  // must reach for a derived fragment only as a last resort.
+  const HOST = readFileSync(new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
+  const fn = HOST.slice(HOST.indexOf('const about0 = (cues)'), HOST.indexOf('const MONTHS'))
+  assert.ok(/derivedTopics/.test(fn), 'about0 must know which cues it made up')
+  assert.ok(/find\(\(t\) => !derived\.has\(t\)\)/.test(fn), 'and prefer the ones it did not')
 })
