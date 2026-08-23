@@ -1,0 +1,273 @@
+{
+  "label": "pre-d1",
+  "at": "2026-08-23T18:07:34.377Z",
+  "arm": {
+    "d1CentreFollowsClock": true,
+    "d2TopHit": false,
+    "d2Weight": null,
+    "d4CueCentre": false
+  },
+  "corpus": {
+    "harness": 0,
+    "total": 262
+  },
+  "cells": [
+    {
+      "subject": "Hermes",
+      "template": "bare",
+      "ask": "Hermes",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Hermes",
+      "template": "remember-anything",
+      "ask": "Do you remember anything about Hermes?",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Hermes",
+      "template": "have-we-talked",
+      "ask": "Have we ever talked about Hermes?",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Hermes",
+      "template": "what-do-you-know",
+      "ask": "What do you know about Hermes?",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Hermes",
+      "template": "tell-me",
+      "ask": "Tell me about Hermes.",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Kavi",
+      "template": "bare",
+      "ask": "Kavi",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Kavi",
+      "template": "remember-anything",
+      "ask": "Do you remember anything about Kavi?",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Kavi",
+      "template": "have-we-talked",
+      "ask": "Have we ever talked about Kavi?",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Kavi",
+      "template": "what-do-you-know",
+      "ask": "What do you know about Kavi?",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Kavi",
+      "template": "tell-me",
+      "ask": "Tell me about Kavi.",
+      "activated": true,
+      "items": 5,
+      "onSubject": 5,
+      "sayable": 5
+    },
+    {
+      "subject": "Mina",
+      "template": "bare",
+      "ask": "Mina",
+      "activated": true,
+      "items": 2,
+      "onSubject": 2,
+      "sayable": 2
+    },
+    {
+      "subject": "Mina",
+      "template": "remember-anything",
+      "ask": "Do you remember anything about Mina?",
+      "activated": true,
+      "items": 2,
+      "onSubject": 2,
+      "sayable": 2
+    },
+    {
+      "subject": "Mina",
+      "template": "have-we-talked",
+      "ask": "Have we ever talked about Mina?",
+      "activated": true,
+      "items": 2,
+      "onSubject": 2,
+      "sayable": 2
+    },
+    {
+      "subject": "Mina",
+      "template": "what-do-you-know",
+      "ask": "What do you know about Mina?",
+      "activated": true,
+      "items": 2,
+      "onSubject": 2,
+      "sayable": 2
+    },
+    {
+      "subject": "Mina",
+      "template": "tell-me",
+      "ask": "Tell me about Mina.",
+      "activated": true,
+      "items": 2,
+      "onSubject": 2,
+      "sayable": 2
+    },
+    {
+      "subject": "basil",
+      "template": "bare",
+      "ask": "basil",
+      "activated": true,
+      "items": 0,
+      "onSubject": 0,
+      "sayable": 0
+    },
+    {
+      "subject": "basil",
+      "template": "remember-anything",
+      "ask": "Do you remember anything about basil?",
+      "activated": true,
+      "items": 2,
+      "onSubject": 0,
+      "sayable": 2
+    },
+    {
+      "subject": "basil",
+      "template": "have-we-talked",
+      "ask": "Have we ever talked about basil?",
+      "activated": true,
+      "items": 3,
+      "onSubject": 0,
+      "sayable": 3
+    },
+    {
+      "subject": "basil",
+      "template": "what-do-you-know",
+      "ask": "What do you know about basil?",
+      "activated": true,
+      "items": 0,
+      "onSubject": 0,
+      "sayable": 0
+    },
+    {
+      "subject": "basil",
+      "template": "tell-me",
+      "ask": "Tell me about basil.",
+      "activated": true,
+      "items": 0,
+      "onSubject": 0,
+      "sayable": 0
+    },
+    {
+      "subject": "the herb notebook",
+      "template": "bare",
+      "ask": "the herb notebook",
+      "activated": true,
+      "items": 0,
+      "onSubject": 0,
+      "sayable": 0
+    },
+    {
+      "subject": "the herb notebook",
+      "template": "remember-anything",
+      "ask": "Do you remember anything about the herb notebook?",
+      "activated": true,
+      "items": 0,
+      "onSubject": 0,
+      "sayable": 0
+    },
+    {
+      "subject": "the herb notebook",
+      "template": "have-we-talked",
+      "ask": "Have we ever talked about the herb notebook?",
+      "activated": true,
+      "items": 4,
+      "onSubject": 1,
+      "sayable": 4
+    },
+    {
+      "subject": "the herb notebook",
+      "template": "what-do-you-know",
+      "ask": "What do you know about the herb notebook?",
+      "activated": true,
+      "items": 1,
+      "onSubject": 1,
+      "sayable": 1
+    },
+    {
+      "subject": "the herb notebook",
+      "template": "tell-me",
+      "ask": "Tell me about the herb notebook.",
+      "activated": true,
+      "items": 1,
+      "onSubject": 1,
+      "sayable": 1
+    }
+  ],
+  "bySubject": [
+    {
+      "subject": "Hermes",
+      "min": 5,
+      "max": 5,
+      "spread": 0
+    },
+    {
+      "subject": "Kavi",
+      "min": 5,
+      "max": 5,
+      "spread": 0
+    },
+    {
+      "subject": "Mina",
+      "min": 2,
+      "max": 2,
+      "spread": 0
+    },
+    {
+      "subject": "basil",
+      "min": 0,
+      "max": 0,
+      "spread": 0
+    },
+    {
+      "subject": "the herb notebook",
+      "min": 0,
+      "max": 1,
+      "spread": 1
+    }
+  ]
+}
