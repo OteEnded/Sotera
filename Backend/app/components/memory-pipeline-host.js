@@ -14,6 +14,7 @@ import { createResolverRouter, DEFAULT_RESOLVER } from '@ote/memory/cognition/me
 import { createIdentityResolver } from '@ote/memory/cognition/memory-identity-resolver.js'
 import { createEpisodicResolver } from '@ote/memory/cognition/memory-episodic-resolver.js'
 import { createCardResolver } from '@ote/memory/cognition/memory-card-resolver.js'
+import { partitionMemoryRead } from './memory-decision-record.js'
 import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { buildMemoryV2 } from './memory-v2-host.js'
 import { reachTrace } from './room-scope.js'
@@ -110,6 +111,28 @@ export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMes
  * and the write stays fire-and-forget on the store's SERIAL queue — validation is still synchronous so a
  * bad tool call returns a retryable error to the model.
  */
+/**
+ * ⭐⭐ REMOVE RECORDED DECISIONS FROM A MEMORY READ, and say how many were removed.
+ *
+ * ⛔ THE ROW IS NOT TOUCHED. It stays durable, attributable and auditable — that is Ote's whole point:
+ * *"I don't want to delete the row simply because it isn't a retained memory. That would sacrifice exactly
+ * the auditability I want."* This only stops a DECISION being returned as a MEMORY.
+ * ⓘ Shape-preserving: whichever array the read used, the count beside it is corrected to match, so no
+ * downstream reader can see a count that disagrees with the list it describes.
+ */
+function withoutDecisions(out) {
+  if (!out || typeof out !== 'object') return out
+  for (const key of ['memories', 'matches', 'items', 'results']) {
+    if (!Array.isArray(out[key])) continue
+    const { memories, declined } = partitionMemoryRead(out[key])
+    if (!declined) return out
+    const next = { ...out, [key]: memories, withheldDecisions: declined }
+    if (typeof out.count === 'number') next.count = Math.max(0, out.count - declined)
+    return next
+  }
+  return out
+}
+
 export function buildMemoryToolService(fastify, { userId = null, persona, sourceMessageId = null, self = null, author = 'account' } = {}) {
   const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self, author })
   return {
@@ -139,12 +162,20 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
     // Ote: *"an empty scoped result is being narrated as a global absence… this is data, not another
     // persona instruction."* `matched` is passed in so the trace can state the EXTENT of the set the
     // number describes — see `readCoverage`, which counts nothing outside the search.
+    // ⭐⭐⭐ A DECISION IS NOT A MEMORY (2026-08-23). Reflection #111 declined explicitly — *"I'll decline to
+    // retain this"* — and `list_memories` returned the resulting record LIVE, so she read it back to Ote as
+    // one of four things she has stored. ⭐ Ote: *"keep it durable, but it is NOT a memory… fix the
+    // consumers/semantics, rather than changing the underlying representation."*
+    // ⇒ filtered HERE, at the host wrapper, for the same reason the reach trace lives here: `@ote/memory` is
+    // shared with OteLLMServices and the host owns what the host returns.
+    // ⛔ AND THE SPLIT IS REPORTED, never silent — `withheldDecisions` says how many, because a filter nobody
+    // can see is how "I covered everything" gets said about a filtered set.
     async search(query, opts = {}) {
-      const out = await mem.search(query, opts)
+      const out = withoutDecisions(await mem.search(query, opts))
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out) }))
     },
     async list(opts = {}) {
-      const out = await mem.list(opts)
+      const out = withoutDecisions(await mem.list(opts))
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out) }))
     },
     // ⚠️ `listArchived` WAS NOT WRAPPED BEFORE, AND IT IS ONE OF THE TWO CALLS THAT PRODUCED THE FALSE
@@ -152,7 +183,7 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
     // concluded nothing had ever been stored — so the read that fed half that conclusion was the one
     // read carrying no trace at all.
     async listArchived(opts = {}) {
-      const out = await mem.listArchived(opts)
+      const out = withoutDecisions(await mem.listArchived(opts))
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out), }))
     },
     rememberAsync(opts = {}) {

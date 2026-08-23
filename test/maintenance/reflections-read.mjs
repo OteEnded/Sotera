@@ -92,7 +92,16 @@ try {
   // conversation that grew afterwards must not make an honest reflection look like it skipped messages.
   const { rows } = await pg.query(
     `SELECT r.rolling_id, r.reflected_at, u.username AS room, r.tools_used,
-            r.wrote_memory_id IS NOT NULL AS retained,
+            -- ⭐⭐ A DECISION IS NOT A RETENTION (found 2026-08-23). Testing wrote_memory_id IS NOT NULL
+            -- counted reflection #111 as "retained something" when she had explicitly DECLINED — the row it
+            -- wrote is a recorded decision (entity=sotera, attribute=declined), not a memory. The true score
+            -- over 47 opportunities was 0 retained, not 1. ⛔ Fixed HERE, in the consumer; the row is untouched.
+            -- ⚠ NO BACKTICKS IN THIS COMMENT. It sits inside a JS template literal and a backtick would
+            -- terminate the string — which has now happened FOUR times in this repo, once by me right here.
+            -- ⚠ And the alias is dm, not m: m is already txn_messages in the subquery below.
+            (r.wrote_memory_id IS NOT NULL
+              AND NOT (dm.entity = 'sotera' AND dm.attribute = 'declined')) AS retained,
+            (dm.entity = 'sotera' AND dm.attribute = 'declined') AS declined_record,
             r.blocked_by_disclosure AS blocked,
             r.messages_considered AS considered,
             (SELECT count(*)::int FROM ${S}.txn_messages m
@@ -100,6 +109,7 @@ try {
             length(r.text) AS chars, r.prompt_generation AS gen, r.model
        FROM ${S}.log_reflections r
        LEFT JOIN ${S}.mst_users u ON u.id = r.user_id
+       LEFT JOIN ${S}.txn_memories dm ON dm.id = r.wrote_memory_id
       WHERE ($1::text IS NULL OR u.username = $1)
       ORDER BY r.rolling_id`, [room])
 
@@ -146,6 +156,9 @@ try {
   console.log(`opportunities that happened     ${n}`)
   console.log(`  retained something            ${rows.filter((r) => r.retained).length}`)
   console.log(`  retained nothing              ${rows.filter((r) => !r.retained).length}   ⓘ a real outcome, not an absence`)
+  // ⭐⭐ REPORTED SEPARATELY, because "she decided not to keep this" is a THIRD outcome and it is the most
+  // interesting one — it is her judgement, recorded, and it is neither a retention nor a silence.
+  console.log(`  …of which an explicit DECLINE  ${rows.filter((r) => r.declined_record).length}   ⭐ a decision, durable and auditable — ⛔ not a memory`)
   console.log(`  refused by a room boundary    ${rows.filter((r) => r.blocked).length}`)
   console.log(`called any tool                 ${withTools.length}`)
   console.log(`  investigative tool            ${rows.filter((r) => r.tools_used.some((t) => INVESTIGATIVE.includes(t))).length}`)

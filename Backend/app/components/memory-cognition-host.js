@@ -67,6 +67,8 @@ import {
 // ⭐ THE OWNERSHIP RULE LIVES IN ONE PLACE. ⛔ This file must never restate it inline — two copies of an
 // ownership rule is how they stop agreeing, and this one decides whether authorization happens at all.
 import { requiresAuthorization, ownerOf, OWNER } from './memory-ownership.js'
+// ⭐ A DECISION IS NOT A MEMORY — one predicate, one place. See that file for the measured defect.
+import { isDeclineRecord } from './memory-decision-record.js'
 import { buildConversationSearch } from './conversation-search.js'
 import { makeEmbedder } from './memory-embed-host.js'
 import { buildDisclosure } from './disclosure-host.js'
@@ -255,7 +257,15 @@ export function buildMemoryCognition(fastify, {
       await log?.(`[cognition] subject resolution unavailable: ${e.message}`, import.meta.url)
     }
 
-    return hits.map((m) => ({
+    // ⭐⭐ A DECISION IS NOT A MEMORY, and cognition must not recall one as one. ⓘ The tool service already
+    // filters, so this is belt-and-braces on a second path — but the cost of missing it is that *"I decided
+    // not to remember X"* would be rendered to her as *"I have this on file: X"*, which inverts her own
+    // decision. ⛔ Cheap guard, catastrophic omission.
+    const decisions = hits.filter((m) => isDeclineRecord(m)).length
+    if (decisions) {
+      await log?.(`[cognition] ${decisions} recorded decision(s) withheld from recall — a decision is not a memory`, import.meta.url)
+    }
+    return hits.filter((m) => !isDeclineRecord(m)).map((m) => ({
       id: `mem:${m.id ?? m.memoryId ?? Math.random().toString(36).slice(2)}`,
       cueSubject: cues.persons[0] ?? cues.topics[0] ?? null,
       // ⭐⭐ THE ROW'S OWN ANSWER, or null. ⛔ Never defaulted, never inferred from the room it sits in —
