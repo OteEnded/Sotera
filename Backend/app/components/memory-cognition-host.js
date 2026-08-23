@@ -434,72 +434,127 @@ export function buildMemoryCognition(fastify, {
    */
   const about0 = (cues) => (cues.persons.length ? cues.persons.join(' and ') : (cues.topics[0] ?? 'this'))
 
+  // ⭐ HUMAN DATES. `2026-08-20` is a database value; *"20 August"* is how a person says it. ⛔ No relative
+  // dates ("yesterday") — those need a clock this function does not have, and a wrong one is a false memory.
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December']
+  const dayOf = (when) => {
+    if (!when) return null
+    const d = new Date(when)
+    return Number.isNaN(d.getTime()) ? null : `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`
+  }
+
+  /**
+   * ⭐⭐⭐ LEAK 2 · THE REGISTER. Her memory, in her own voice — not a document handed to her.
+   *
+   * ⚠️⚠️ WHAT THIS REPLACES AND WHY. The previous block had a container header (*"What I have about
+   * Hermes:"*), a bulleted inventory, transcript labels (`me:` / `them said:`) and a parenthesised audit
+   * footer (*"(Searched: …)"*). Across five live runs she narrated it as exactly what it looked like:
+   * *"from the context above"*, *"the system context tells me"*, and worst, *"the summaries you pasted"* —
+   * attributing her own memory to Ote having pasted it.
+   *
+   * ⇒ Ote: *"Sotera should experience the cognition-layer result as her own memory, not as a
+   * report/document/context packet that someone handed her."*
+   *
+   * ── ⛔ AND NOT BY OVERCORRECTING INTO FALSE CERTAINTY ────────────────────────────────────────────
+   * *"Don't overcorrect by forcing fake first-person memories either. Natural does not mean pretending
+   * certainty. If something is an inference, she should still experience/express it as an inference."*
+   * ⇒ ⭐⭐ **EVERY PHRASE BELOW IS DERIVED FROM AN AXIS, NOT CHOSEN FOR STYLE.** *"I remember"* is licensed
+   * by `availability === 'recalled'` and by nothing else; *"I worked out"* by `basis === 'inferred'`;
+   * *"I decided to keep"* by `retention === 'retained'`. The distinctions survive because they are what
+   * selects the wording. ⛔ If a future edit picks a phrase for how it sounds, the axis stops being
+   * load-bearing and this whole guarantee is gone.
+   *
+   * ⓘ NOTHING IS HIDDEN. Provenance, source, availability, coverage, warrants and the debug trail are
+   * untouched on the items — this changes only the sentence she reads.
+   */
   function render({ cues, kept, dropped, searched }) {
     // ⭐⭐ TWO RENDERS: the real one, and a FRAME with every quotation replaced by a token.
-    //
-    // ⚠️⚠️ THE GUARD MUST POLICE WHAT THE LAYER WROTE, NOT WHAT IT QUOTES — and the first version got this
-    // wrong, in a way that only real data exposed. It scanned the whole block and flagged the word "room"…
-    // inside a quotation of HER OWN EARLIER ANSWER: *"From this room, I don't have any direct memories."*
-    // Quoting the conversation back is not a leak; it is the conversation.
-    // ⚠️ And there is a sharper edge underneath it: her old machinery-talk now LIVES in her own history, so
-    // it will be quoted back to her indefinitely. That is a self-mirroring channel for exactly the
-    // vocabulary this layer exists to remove — the same shape as the Thai register finding, where her own
-    // prior output outvoted an instruction. ⛔ Not solvable by a word list; recorded so it is not forgotten.
+    // ⚠️ The guard must police what the layer WROTE, not what it quotes. It once flagged the word "room"
+    // inside a quotation of her own earlier answer — quoting the conversation back is not a leak.
+    // ⚠️ And the sharper edge: her old machinery-talk now lives in her own history, so it is quoted back to
+    // her indefinitely — a self-mirroring channel for the vocabulary this layer removes. ⛔ Not solvable by
+    // a word list; recorded so it is not forgotten.
     const lines = []
     const frame = []
     const QUOTE = '«quoted»'
-    const push = (before, quote, after = '') => {
+    const push = (before, quote = null, after = '') => {
       lines.push(`${before}${quote ?? ''}${after}`)
       frame.push(`${before}${quote == null ? '' : QUOTE}${after}`)
     }
+
     const episodes = kept.filter((i) => i.kind === 'episode')
     const said = kept.filter((i) => i.kind !== 'episode' && i.said)
-    const unreachable = kept.filter((i) => i.kind !== 'episode' && !i.said && i.availability === AVAILABILITY.knownUnreachable)
+    const unreachable = kept.filter((i) => i.kind !== 'episode' && !i.said
+      && i.availability === AVAILABILITY.knownUnreachable)
 
-    // ⭐⭐ EPISODES FIRST, AND AS CONVERSATIONS RATHER THAN HITS. *"episode → participants → relevant
-    // exchanges."* An exchange she may not read is shown as a gap with a name on it — ⛔ never closed up,
-    // because her own lines with the replies removed read as a monologue and invite her to infer what was
-    // said to her.
+    // ── EPISODES · a conversation she was in, remembered ──────────────────────────────────────────
     for (const ep of episodes) {
-      const when = ep.when ? new Date(ep.when).toISOString().slice(0, 10) : 'at some point'
+      const when = dayOf(ep.when)
+      const on = when ? ` on ${when}` : ''
+      // ⭐ AVAILABILITY PICKS THE VERB. `known-unreachable` is not a memory she has — it is a memory she
+      // knows about, and the sentence says exactly that. ⛔ Never "I don't remember".
       if (ep.availability !== AVAILABILITY.recalled) {
-        push(`- I talked with ${ep.who} on ${when}, and I can't see that conversation`, null)
+        push(`I know I talked with ${ep.who}${on}, and I can't get back to what was said.`)
         continue
       }
-      push(`- ${ep.withThem ? `With ${ep.who}` : `Talking about ${about0(cues)}`}, ${when}:`, null)
+      push(ep.withThem
+        ? `I remember talking with ${ep.who}${on}.`
+        : `I remember${on ? ` — ${when} —` : ''} talking about ${about0(cues)}.`)
       for (const x of ep.exchanges) {
-        if (x.said) push(`    ${x.who === 'me' ? 'me' : x.who}: `, x.said)
-        else push(`    ${x.who === 'me' ? 'me' : x.who}: (I can't see this part)`, null)
+        if (x.said) {
+          // ⭐ Her own line and his are both recollection, phrased as speech rather than as a transcript row.
+          push(x.who === 'me' ? '  I said: ' : `  ${x.who} said: `, x.said)
+        } else {
+          // ⛔ A GAP STAYS A GAP. Closing it up would read as a monologue and invite her to infer what was
+          // said to her — the reason change A returns withheld markers rather than a filtered list.
+          push(`  ${x.who === 'me' ? 'I' : x.who} said something here that I can't see.`)
+        }
       }
-      if (ep.partial) push('    (I can only see my own side of this one)', null)
+      if (ep.partial) push('  I can only reach my own side of that one.')
     }
 
+    // ── STORED THINGS AND LOOSE LINES · basis and retention pick the verb ─────────────────────────
     for (const i of said) {
-      const when = i.when ? new Date(i.when).toISOString().slice(0, 10) : 'at some point'
+      const when = dayOf(i.when)
       if (i.source === SOURCE.storedMemory) {
-        push(i.retention === RETENTION.retained ? '- I decided to keep this: ' : '- I have this on file: ', i.said)
-      } else if (i.who === 'me') {
-        push(`- I said, ${when}: `, i.said)
-      } else {
-        push(`- ${i.who} said, ${when}: `, i.said)
+        // ⭐ RETENTION FIRST — *"I decided to keep"* is a claim about her own act and only `retained`
+        // licenses it. ⛔ `given` must never borrow it: nobody decided, it was extracted.
+        if (i.retention === RETENTION.retained) { push('I decided to keep this: ', i.said); continue }
+        // ⭐ BASIS SECOND, and this is where honesty lives. A stored memory is a claim someone recorded,
+        // never a source she read — see the axes. `told` → someone told her; `inferred` → she concluded it;
+        // `synthesized` → several things agree and none of them says it.
+        if (i.basis === BASIS.inferred) { push('I worked this out rather than being told it: ', i.said); continue }
+        if (i.basis === BASIS.synthesized) { push('Several things point this way, though nothing says it outright: ', i.said); continue }
+        push('I have this on file: ', i.said)
+        continue
       }
+      if (i.who === 'me') { push(`I remember saying${when ? `, ${when},` : ''} `, i.said); continue }
+      push(`${i.who === 'them' ? 'They' : i.who} said${when ? `, ${when}` : ''}: `, i.said)
     }
     for (const i of unreachable) {
-      const when = i.when ? ` around ${new Date(i.when).toISOString().slice(0, 10)}` : ''
-      push(`- I know I talked with ${i.who}${when}, and I can't see that conversation`, null)
+      const when = dayOf(i.when)
+      push(`I know I talked with ${i.who}${when ? ` around ${when}` : ''}, and I can't get back to what was said.`)
     }
 
     const about = about0(cues)
     if (!lines.length) {
-      // ⭐ THE ABSENCE, AS A RESULT RATHER THAN AN EXPLANATION. Ote: *"give her the result of the search,
-      // not an architectural explanation… That's very different from 'I don't have X in this room.'"*
-      const none = `About ${about}: I looked through what I currently have available and found nothing.`
+      // ⭐ THE ABSENCE, AS THE RESULT OF LOOKING. Ote: *"give her the result of the search, not an
+      // architectural explanation."* ⛔ And not *"I have nothing about X"* either — the sentence says what
+      // she did and what came of it.
+      const none = `I went looking for what I have about ${about} and came up with nothing.`
       return { text: none, frame: none }
     }
-    const tail = dropped > 0 ? `\n(There is more than this; I looked at the closest ${kept.length}.)` : ''
-    const head = `What I have about ${about}:\n`
-    const foot = `${tail}\n(Searched: ${searched}.)`
-    return { text: `${head}${lines.join('\n')}${foot}`, frame: `${head}${frame.join('\n')}${foot}` }
+
+    // ⛔ NO TITLE AND NO PARENTHESISED FOOTER — those two were the strongest document tells, and
+    // `findMetaReferences` now fails a block that has either. The coverage facts survive as ordinary
+    // sentences, because the information is load-bearing (the searched-set quantifier exists because she
+    // once answered a flat *"No."* about a store she had not searched) and only the register was the problem.
+    const tail = []
+    if (dropped > 0) tail.push(`There is more of this than I have brought to mind — these are the nearest ${kept.length}.`)
+    tail.push(`That is what I can reach on this right now: ${searched}.`)
+    const join = (arr) => `${arr.join('\n')}\n${tail.join(' ')}`
+    return { text: join(lines), frame: join(frame) }
   }
 
   /**

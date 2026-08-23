@@ -80,6 +80,61 @@ export const EXPLANATORY_CONTEXT = Object.freeze([
   'audit',                // logs, provenance records, anything only we read
 ])
 
+/**
+ * ⭐⭐⭐ LEAK 2 · WORDS THAT MAKE HER MEMORY SOUND LIKE A DOCUMENT SOMEONE HANDED HER.
+ *
+ * ⚠️⚠️ MEASURED ACROSS FIVE LIVE RUNS, and every one of these is something she actually said:
+ *   *"I do know from **the context above**"* · *"**the system context** tells me"* ·
+ *   *"**the summaries you pasted** above"* · *"the content is already provided in my **current context**"*.
+ * The last one is the worst: it attributes her own memory to **Ote having pasted it**.
+ *
+ * ⭐ These are a DIFFERENT class from `IMPLEMENTATION_WORDS`. Those are our machinery leaking (room, scope,
+ * inspect_around). These are the *shape* of the payload leaking — the block read as an inventory with a
+ * title and an audit footer, so she narrated it as one. ⇒ the fix is REGISTER, and this list is how we know
+ * whether the register changed rather than assuming it did.
+ *
+ * ⛔ NOT a filter on her speech. This is checked against what WE WRITE, never against what she says: she is
+ * allowed to talk about context windows if the question is about context windows.
+ */
+export const META_REFERENCE_WORDS = Object.freeze([
+  'context above', 'the context', 'system context', 'current context', 'provided context',
+  'injected', 'injection', 'the summaries', 'you pasted', 'pasted above', 'the above',
+  'listed above', 'as shown', 'the following items', 'retrieved items', 'search results',
+  'the report', 'this report', 'the record below', 'my notes below', 'the block',
+  'cognition layer', 'memory cognition',
+])
+
+const META_PATTERNS = META_REFERENCE_WORDS.map((w) => [w, new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')])
+
+/**
+ * ⭐⭐ Does this text present her memory as an artifact rather than as recollection?
+ *
+ * ⓘ Includes two STRUCTURAL tells that are not words at all, because they are what actually invited the
+ * phrasing: a parenthesised audit line at the end (*"(Searched: …)"*) and a colon-terminated title on the
+ * first line (*"What I have about Hermes:"*). A block with either reads as a compiled document no matter
+ * how the sentences inside it are worded.
+ */
+export function findMetaReferences(text) {
+  const s = String(text ?? '')
+  if (!s) return []
+  const hits = []
+  for (const [word, re] of META_PATTERNS) {
+    const m = re.exec(s)
+    if (m) hits.push({ kind: 'word', word, at: s.slice(Math.max(0, m.index - 24), m.index + word.length + 24) })
+  }
+  // ⛔ A TITLE. First line, ends in a colon, no sentence verb — that is a heading, and a heading makes the
+  // rest of the block its contents.
+  const first = s.split('\n')[0] ?? ''
+  if (/^[^.!?]{0,60}:$/.test(first.trim())) hits.push({ kind: 'title', word: first.trim(), at: first })
+  // ⛔ AN AUDIT FOOTER. A parenthesised line at the end reads as provenance metadata appended by a system.
+  const last = s.trim().split('\n').at(-1) ?? ''
+  if (/^\(.*\)$/.test(last.trim())) hits.push({ kind: 'audit-footer', word: last.trim(), at: last })
+  return hits
+}
+
+/** ⭐ Convenience: does this read as her own recollection rather than a supplied document? */
+export const readsAsRecollection = (text) => findMetaReferences(text).length === 0
+
 const boundary = (w) => {
   const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   // ⓘ `\b` is unreliable next to `_` and `-`, so word-ish boundaries are spelled out. Case-insensitive.

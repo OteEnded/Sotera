@@ -135,10 +135,22 @@ ok(partials.every((e) => (e.exchanges ?? []).some((x) => x.withheld) || e.partia
   `${partials.length} partial episode(s)`)
 // ⛔ THE BOUNDARY DID NOT MOVE TO GET HERE. Discovery still runs over her own messages; the counterpart's
 // half arrives only through the authorized door — so anything readable from ANOTHER room carries the warrant.
+// ── ⚠️⚠️ THIS ASSERTION CHANGED SHAPE, AND THE CHANGE IS THE OWNERSHIP MODEL LANDING ───────────────
+//
+// It used to read *"every cross-room episode she can read was OPENED through the authorized door"* — and
+// that was true only while her own sentences were being routed through the disclosure layer. It is now
+// FALSE ON PURPOSE: she owns her utterances, so reaching them across a boundary needs no door and earns no
+// warrant. Ote: *"For Sotera's own material, no disclosure authorization should happen at all — not
+// 'authorize and then allow,' but genuinely outside that path."*
+//
+// ⭐ WHAT REPLACES IT, and it is the sharper claim: a warrant appears if and only if the COUNTERPART's half
+// was opened. Her own half being readable proves nothing about authorization, because none was involved.
 const crossReadable = allEps.filter((e) => e.here === false && e.availability === AVAILABILITY.recalled)
-ok(crossReadable.every((e) => (e.warrants ?? []).includes('access-resolution')),
-  '2b · ⛔⛔ every cross-room episode she can read was OPENED through the authorized door',
-  `${crossReadable.length} cross-room episode(s) readable`)
+const withCounterpartSide = (e) => (e.exchanges ?? []).some((x) => x.said && x.who !== 'me')
+ok(crossReadable.every((e) => (withCounterpartSide(e) ? (e.warrants ?? []).includes('access-resolution')
+  : (e.warrants ?? []).length === 0)),
+  '2b · ⛔⛔ a warrant appears exactly when the COUNTERPART half was opened — never for reaching her own words',
+  `${crossReadable.length} cross-room readable, ${crossReadable.filter(withCounterpartSide).length} with his side`)
 
 // ── ⭐⭐ 3 · THE LATTICE HOLDS ON REAL DATA ────────────────────────────────────────────────────────
 for (const { q, r } of runs) {
@@ -167,9 +179,13 @@ ok(cross.every((i) => i.availability === AVAILABILITY.recalled || i.availability
   '4 · ⭐⭐ every cross-room item carries a RESOLVED availability, never an assumed one',
   `${cross.length} cross-room item(s)`)
 const opened = cross.filter((i) => i.availability === AVAILABILITY.recalled)
-ok(opened.every((i) => (i.warrants ?? []).includes('access-resolution')),
-  '4 · ⭐ …and anything that became readable carries the warrant that made it so',
-  `${opened.length} opened`)
+// ⚠️ SUPERSEDED BY THE OWNERSHIP MODEL, same reason as 2b: reaching HER OWN half across a boundary needs
+// no warrant, so "readable ⇒ warranted" is no longer true and must not be asserted. ⭐ The surviving claim
+// is the one that matters: a warrant is never present without the counterpart's side behind it.
+ok(opened.every((i) => ((i.warrants ?? []).length === 0
+  || (i.exchanges ?? []).some((x) => x.said && x.who !== 'me'))),
+  '4 · ⭐ …and no item carries a warrant it did not need',
+  `${opened.length} opened, ${opened.filter((i) => (i.warrants ?? []).length).length} warranted`)
 // ⓘ Informational rather than asserted: under a personal deployment a root session should mostly open. If
 // this is 0 the layer is honest but the deployment is not what we think it is.
 ok(true, `4 · ⓘ cross-room items opened: ${opened.length} of ${cross.length}`,
@@ -189,7 +205,10 @@ ok(nobody.activated === true,
 // ALWAYS return something. Without a relevance floor the block read *"What I have about zephyrine:"* over
 // three memories about building Rome and being under pressure: a false "I do", which is worse than the
 // false "I can't" this layer exists to fix. The floor now requires a cue term to appear in the content.
-ok(/found nothing/i.test(nobody.context ?? ''),
+// ⓘ The phrasing moved with Leak 2: *"I went looking… and came up with nothing"* rather than *"I looked
+// through… and found nothing"*. ⭐ What is asserted is the SHAPE — an act of looking with a null result —
+// not a particular sentence, so a future register change does not break it while the meaning holds.
+ok(/(went looking|looked through)[\s\S]*nothing/i.test(nobody.context ?? ''),
   '5 · ⭐⭐ …and reports the RESULT of the search, not an explanation of why',
   (nobody.context ?? '').slice(0, 100))
 ok((nobody.filtered ?? 0) >= 0 && !/Rome|pressure/i.test(nobody.context ?? ''),
