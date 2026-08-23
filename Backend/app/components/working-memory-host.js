@@ -1,3 +1,33 @@
+// ══ ⚠️⚠️⚠️ FROZEN 2026-08-23 · DEPRECATION CANDIDATE — DO NOT BUILD ON THIS ═══════════════════════
+//
+// ⭐⭐ MEASURED: `txn_conversations.working_memory` is **NULL on 177 of 177 conversations.** This feature is
+// enabled by default, its rule text is in the prompt every turn (*"It is shown back to you each turn"*), and
+// the `update_working_memory` tool is offered to her — and **she has never used it once.**
+//
+// ⭐⭐⭐ AND THE REASON MATTERS MORE THAN THE COUNT: L4 asks **her** to maintain her own working set. That is
+// the exact pattern the Memory Cognition arc has been dismantling — *"she was the orchestrator"* — and 0-for-177
+// is the measurement. See `RFC_MEMORY_COGNITION_LAYER.md` §3E.
+//
+// ⛔ Ote, 2026-08-23: *"Freeze L4. Do not wire C2 into it… Record it as legacy/deprecated candidate, not yet
+// removed. If the dependency audit confirms it is genuinely unused, then I want a later cleanup step to
+// remove it rather than leaving two concepts called Working Memory around indefinitely."*
+//
+// ── DEPENDENCY AUDIT, 2026-08-23 — the complete set, and `checks/l4-frozen-check.mjs` asserts it has not grown
+//   READERS   chat-site.route.js (the prompt path ONLY: normalizeWorkingMemory → renderWorkingMemory)
+//   WRITERS   the `update_working_memory` tool via the `workingMemory` host service · `decayWorkingMemory`
+//             from cron, which nulls idle rows — i.e. a job that clears a column that is always already null
+//   DECLARED  txn_conversations.working_memory (model) · memory.workingMemoryEnabled (setting) ·
+//             WORKING_MEMORY_RULE (composer) · runtime.js hostProvides
+//   ⇒ ⭐ NOTHING outside the old prompt path depends on it: no other reader, no derived data, no join.
+//   ⚠️ And `runtime.js` still comments that `workingMemory` "has real tool consumers" — falsified by the data.
+//
+// ⛔ THE NEW RUNTIME CONCEPT IS SEPARATE AND IS NOT THIS: `memory-working-memory.js` (`cognitiveHold`) —
+// layer-authored, EPHEMERAL, no capacity number, per operation, never persisted. ⚠️ L4 could not have become
+// it: it persists, and it caps at MAX_ITEMS 12 / MAX_Q 8, both of which Ote ruled out for C2.
+//
+// ⛔ DO NOT: extend this · wire cognition or evidence into it · fix its bugs · re-enable it harder.
+// ✅ DO: leave it running untouched until he calls the cleanup, and record any new caller as a decision.
+
 // Working Memory — L4 ACTIVE session state (roadmap step 6). The assistant's live per-conversation
 // CURRENT MENTAL CONTEXT: what it's focused on, its plan, open questions, the threads it's actively
 // tracking. It answers "what am I thinking about in THIS chat right now" — distinct from durable recall

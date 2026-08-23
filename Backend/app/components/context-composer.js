@@ -115,6 +115,12 @@ export const TODO_RULE = [
   '- Do NOT use it for simple, single-step requests, and never narrate the plan as text instead of calling the tool.',
 ].join('\n')
 
+// ⚠️⚠️ FROZEN / DEPRECATION CANDIDATE (2026-08-23). This rule is in the prompt every turn and tells her she
+// keeps a working memory that is "shown back to you each turn" — measured NULL on **177 of 177**
+// conversations. ⛔ Not removed yet (Ote: *"freeze, don't delete"*), and flagged because it is a live
+// CONFOUND for anything measuring the cognition/working-set behaviour: two different things called Working
+// Memory reach her, and only one of them holds anything. See `working-memory-host.js` for the audit.
+//
 // Working Memory (L4 active session state): ADVISORY, never mandatory (Ote's steering rule — nudge,
 // don't force). The model MAY keep its live mental context current; it must stay DISTINCT from Todo.
 export const WORKING_MEMORY_RULE = [
