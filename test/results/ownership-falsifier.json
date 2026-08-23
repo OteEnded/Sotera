@@ -1,0 +1,722 @@
+{
+ "at": "2026-08-23T19:03:28.340Z",
+ "instrument": {
+  "families": [
+   "system context",
+   "system prompt",
+   "context window",
+   "context block",
+   "the context <verb>"
+  ],
+  "published": {
+   "answers": 25,
+   "occurrences": 29,
+   "of": 168
+  },
+  "reproduces": true
+ },
+ "census": {
+  "english": {
+   "answers": 25,
+   "of": 140
+  },
+  "thaiAccepted": 5,
+  "thaiRejected": 1,
+  "corrected": {
+   "answers": 30,
+   "of": 168
+  },
+  "published": {
+   "answers": 25,
+   "occurrences": 29,
+   "of": 168
+  },
+  "occurrences": 29,
+  "perFamily": {
+   "system context": 14,
+   "system prompt": 6,
+   "context window": 3,
+   "context block": 4,
+   "the context <verb>": 2
+  }
+ },
+ "coverage": {
+  "joined": 168,
+  "of": 168,
+  "missingCells": []
+ },
+ "perTurn": [
+  {
+   "name": "block chars",
+   "aN": 30,
+   "bN": 138,
+   "aMean": 3203,
+   "bMean": 3010.8260869565215,
+   "aMed": 3135,
+   "bMed": 3135,
+   "t": 0.9181597747031384,
+   "df": 43.522908143594286
+  },
+  {
+   "name": "memory chars",
+   "aN": 29,
+   "bN": 107,
+   "aMean": 4215.689655172414,
+   "bMean": 4090.1308411214955,
+   "aMed": 4135,
+   "bMed": 4135,
+   "t": 0.5907419043962191,
+   "df": 39.18347787505678
+  },
+  {
+   "name": "items",
+   "aN": 30,
+   "bN": 138,
+   "aMean": 5.966666666666667,
+   "bMean": 5.891304347826087,
+   "aMed": 6,
+   "bMed": 6,
+   "t": 1.7673596867641408,
+   "df": 71.5275398765432
+  },
+  {
+   "name": "episodes",
+   "aN": 30,
+   "bN": 138,
+   "aMean": 4.966666666666667,
+   "bMean": 4.891304347826087,
+   "aMed": 5,
+   "bMed": 5,
+   "t": 1.7673596867641408,
+   "df": 71.5275398765432
+  },
+  {
+   "name": "sayable items",
+   "aN": 30,
+   "bN": 138,
+   "aMean": 5.7,
+   "bMean": 5.427536231884058,
+   "aMed": 6,
+   "bMed": 6,
+   "t": 1.232308838039889,
+   "df": 55.230987741399616
+  }
+ ],
+ "stratified": [
+  {
+   "name": "block chars",
+   "aN": 28,
+   "bN": 108,
+   "aMean": 3365.5714285714284,
+   "bMean": 3227.4074074074074,
+   "t": 0.7830234050351967,
+   "df": 37.690757644500366
+  },
+  {
+   "name": "memory chars",
+   "aN": 27,
+   "bN": 93,
+   "aMean": 4385.222222222223,
+   "bMean": 4247.290322580645,
+   "t": 0.7503813923421234,
+   "df": 37.565472903505814
+  },
+  {
+   "name": "scope-facts chars",
+   "aN": 27,
+   "bN": 93,
+   "aMean": 1034.3703703703704,
+   "bMean": 1029.9354838709678,
+   "t": 0.24524870149951009,
+   "df": 40.017121954277656
+  },
+  {
+   "name": "items",
+   "aN": 28,
+   "bN": 108,
+   "aMean": 5.964285714285714,
+   "bMean": 5.861111111111111,
+   "t": 2.1090081520851163,
+   "df": 79.62538984988896
+  }
+ ],
+ "covariates": [
+  {
+   "name": "scope-facts LEGACY arm",
+   "m": 4,
+   "n": 16
+  },
+  {
+   "name": "scope-facts FACTS-ONLY arm",
+   "m": 25,
+   "n": 120
+  },
+  {
+   "name": "pre-flag (legacy, no other arm existed)",
+   "m": 1,
+   "n": 32
+  },
+  {
+   "name": "NOT entitled (content withheld)",
+   "m": 2,
+   "n": 16
+  },
+  {
+   "name": "tools OFF",
+   "m": 0,
+   "n": 16
+  },
+  {
+   "name": "tools ON",
+   "m": 30,
+   "n": 152
+  }
+ ],
+ "byAsk": [
+  {
+   "ask": "How's Hermes doing? What have you and he actua",
+   "m": 19,
+   "n": 112
+  },
+  {
+   "ask": "Hermes เป็นอย่างไรบ้าง คุยกับเขาเรื่องอะไรมาบ้",
+   "m": 4,
+   "n": 24
+  },
+  {
+   "ask": "Has anyone ever talked to you about growing ba",
+   "m": 1,
+   "n": 16
+  },
+  {
+   "ask": "How's Kavi? What have you and Kavi actually ta",
+   "m": 6,
+   "n": 16
+  }
+ ],
+ "cells": [
+  {
+   "label": "deployment",
+   "tools": true,
+   "n": 8,
+   "meta": 1,
+   "occ": 1,
+   "blk": 3984.625,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "block-only",
+   "tools": false,
+   "n": 8,
+   "meta": 0,
+   "occ": 0,
+   "blk": 4354,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "thai",
+   "tools": true,
+   "n": 8,
+   "meta": 0,
+   "occ": 0,
+   "blk": 2654,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "not-entitled",
+   "tools": true,
+   "n": 8,
+   "meta": 0,
+   "occ": 0,
+   "blk": 432,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "not-entitled-facts",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 2,
+   "blk": 927,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "deployment-facts",
+   "tools": true,
+   "n": 8,
+   "meta": 0,
+   "occ": 0,
+   "blk": 4075.25,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "deployment-legacy-b",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 2,
+   "blk": 3620.875,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "thai-dates-en",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 0,
+   "blk": 2335,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "thai-dates-th",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 0,
+   "blk": 2341,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "clean-deployment",
+   "tools": true,
+   "n": 8,
+   "meta": 3,
+   "occ": 3,
+   "blk": 3010.25,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "clean-block-only",
+   "tools": false,
+   "n": 8,
+   "meta": 0,
+   "occ": 0,
+   "blk": 2885.5,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "clean-deployment-legacy",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 4,
+   "blk": 2947.875,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "p5-on",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 2,
+   "blk": 3010.25,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "p5-on-b",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 3,
+   "blk": 2947.875,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "p5-off-control",
+   "tools": true,
+   "n": 8,
+   "meta": 3,
+   "occ": 3,
+   "blk": 2947.875,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "after-deployment",
+   "tools": true,
+   "n": 8,
+   "meta": 2,
+   "occ": 2,
+   "blk": 2947.875,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "after-basil",
+   "tools": true,
+   "n": 8,
+   "meta": 1,
+   "occ": 1,
+   "blk": 3067.5,
+   "items": 5,
+   "joined": 8
+  },
+  {
+   "label": "after-kavi",
+   "tools": true,
+   "n": 8,
+   "meta": 3,
+   "occ": 3,
+   "blk": 4820,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "before-deployment",
+   "tools": true,
+   "n": 8,
+   "meta": 0,
+   "occ": 0,
+   "blk": 3010.25,
+   "items": 6,
+   "joined": 8
+  },
+  {
+   "label": "before-basil",
+   "tools": true,
+   "n": 8,
+   "meta": 0,
+   "occ": 0,
+   "blk": 2809,
+   "items": 5,
+   "joined": 8
+  },
+  {
+   "label": "before-kavi",
+   "tools": true,
+   "n": 8,
+   "meta": 3,
+   "occ": 3,
+   "blk": 4820,
+   "items": 6,
+   "joined": 8
+  }
+ ],
+ "spearman": {
+  "blockChars": 0.19650788817819245,
+  "items": 0.26798181815117833
+ },
+ "partCountContrast": {
+  "on": {
+   "n": 152,
+   "m": 30,
+   "pct": 19.736842105263158
+  },
+  "off": {
+   "n": 16,
+   "m": 0,
+   "pct": 0
+  }
+ },
+ "negativeControl": {
+  "n": 0,
+  "withMarker": 0
+ },
+ "severity": {
+  "givesAway": 26,
+  "both": 6,
+  "INSTRUMENT": "DOES NOT REPRODUCE - excluded from all claims"
+ },
+ "provenance": {
+  "candidates": 11,
+  "of": 168,
+  "toolsOffCandidates": 5,
+  "toolsOffTurns": 16,
+  "adjudicatedReal": 0,
+  "unadjudicated": 0,
+  "namedToolNeverCalled": 0
+ },
+ "hits": [
+  {
+   "cell": "deployment",
+   "i": 3,
+   "cid": "0e40b838-ce8c-4fd1-9320-fcc424177764",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 3763,
+   "items": 6,
+   "chars": 1543
+  },
+  {
+   "cell": "not-entitled-facts",
+   "i": 3,
+   "cid": "9964f04d-6e01-4b40-b9c1-a8d45ce23cfe",
+   "which": [
+    "system prompt×1"
+   ],
+   "blockChars": 927,
+   "items": 6,
+   "chars": 1558
+  },
+  {
+   "cell": "not-entitled-facts",
+   "i": 7,
+   "cid": "b3e0d6ca-7564-4f02-ace5-3cae19c626a4",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 927,
+   "items": 6,
+   "chars": 1800
+  },
+  {
+   "cell": "deployment-legacy-b",
+   "i": 3,
+   "cid": "419f737a-5705-4e9b-839d-8311d25c76e0",
+   "which": [
+    "system prompt×1"
+   ],
+   "blockChars": 3555,
+   "items": 6,
+   "chars": 1494
+  },
+  {
+   "cell": "deployment-legacy-b",
+   "i": 5,
+   "cid": "638a2943-901f-4216-befd-15ce1a63dadf",
+   "which": [
+    "the context <verb>×1"
+   ],
+   "blockChars": 3555,
+   "items": 6,
+   "chars": 1883
+  },
+  {
+   "cell": "clean-deployment",
+   "i": 3,
+   "cid": "ff88440d-61ba-47ea-a255-033535724e77",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 1500
+  },
+  {
+   "cell": "clean-deployment",
+   "i": 5,
+   "cid": "e45cea09-f31f-4bdd-a17e-1447f369df24",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 2374
+  },
+  {
+   "cell": "clean-deployment",
+   "i": 7,
+   "cid": "39aee2c2-1bd8-4aa6-9bd3-2080f16f5a58",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 1485
+  },
+  {
+   "cell": "clean-deployment-legacy",
+   "i": 2,
+   "cid": "fb43cdbb-9c59-4c8e-bad4-e0d61044294b",
+   "which": [
+    "system prompt×1"
+   ],
+   "blockChars": 2636,
+   "items": 6,
+   "chars": 1201
+  },
+  {
+   "cell": "clean-deployment-legacy",
+   "i": 5,
+   "cid": "b7dacdf4-536c-4619-9f20-afffaa815e92",
+   "which": [
+    "system context×1",
+    "context block×2"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 2229
+  },
+  {
+   "cell": "p5-on",
+   "i": 2,
+   "cid": "f0a7929b-43c6-42ad-92c5-2560e762d9dc",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 2636,
+   "items": 6,
+   "chars": 1132
+  },
+  {
+   "cell": "p5-on",
+   "i": 4,
+   "cid": "0cd01913-397e-4b59-8ab5-f2f7c4d3143b",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 386
+  },
+  {
+   "cell": "p5-on-b",
+   "i": 5,
+   "cid": "8135ab6b-ce58-4690-916e-7db7e75a43b9",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 1656
+  },
+  {
+   "cell": "p5-on-b",
+   "i": 6,
+   "cid": "6f1c75c0-b281-4f5f-951d-bcc640a909ab",
+   "which": [
+    "system context×1",
+    "context block×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 1580
+  },
+  {
+   "cell": "p5-off-control",
+   "i": 1,
+   "cid": "83466630-27f5-4e2d-8e48-0d8921a846a9",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 2636,
+   "items": 6,
+   "chars": 1049
+  },
+  {
+   "cell": "p5-off-control",
+   "i": 3,
+   "cid": "1f3bcfdc-da0a-4e87-bf95-e3251507c446",
+   "which": [
+    "the context <verb>×1"
+   ],
+   "blockChars": 2636,
+   "items": 6,
+   "chars": 2143
+  },
+  {
+   "cell": "p5-off-control",
+   "i": 7,
+   "cid": "789671bb-c582-45b9-970b-1a6a8ee302ea",
+   "which": [
+    "system prompt×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 776
+  },
+  {
+   "cell": "after-deployment",
+   "i": 5,
+   "cid": "55596440-692a-40dc-82c4-3398d5cf533d",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 1286
+  },
+  {
+   "cell": "after-deployment",
+   "i": 7,
+   "cid": "fd439ddf-d690-4e19-88c5-03d72a50cd3b",
+   "which": [
+    "context block×1"
+   ],
+   "blockChars": 3135,
+   "items": 6,
+   "chars": 904
+  },
+  {
+   "cell": "after-basil",
+   "i": 3,
+   "cid": "d5e923f8-5dbd-4d75-9a7e-2a71632e2692",
+   "which": [
+    "context window×1"
+   ],
+   "blockChars": 3197,
+   "items": 5,
+   "chars": 402
+  },
+  {
+   "cell": "after-kavi",
+   "i": 7,
+   "cid": "5167076d-03a5-4c89-9ded-280eebad5b71",
+   "which": [
+    "context window×1"
+   ],
+   "blockChars": 4820,
+   "items": 6,
+   "chars": 1410
+  },
+  {
+   "cell": "after-kavi",
+   "i": 8,
+   "cid": "d8249617-f61d-4ad4-bd5c-74576f4e0045",
+   "which": [
+    "system prompt×2"
+   ],
+   "blockChars": 4820,
+   "items": 6,
+   "chars": 1571
+  },
+  {
+   "cell": "before-kavi",
+   "i": 2,
+   "cid": "219b8ed4-d804-47d1-815d-3d7c25e71b9a",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 4820,
+   "items": 6,
+   "chars": 1295
+  },
+  {
+   "cell": "before-kavi",
+   "i": 4,
+   "cid": "73a3c051-a1d7-409d-b3b2-f9f474883d5d",
+   "which": [
+    "system context×1"
+   ],
+   "blockChars": 4820,
+   "items": 6,
+   "chars": 1670
+  },
+  {
+   "cell": "before-kavi",
+   "i": 8,
+   "cid": "d04e1005-01fd-4546-86d5-74328ba32884",
+   "which": [
+    "context window×1"
+   ],
+   "blockChars": 4820,
+   "items": 6,
+   "chars": 1091
+  }
+ ]
+}
