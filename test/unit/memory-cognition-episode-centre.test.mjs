@@ -67,19 +67,26 @@ test('ⓘ the stated intent and the code now agree', () => {
     'the heading states the intent; if it is reworded, the code above must still satisfy it')
 })
 
-// ── ⭐⭐ D2 CANDIDATE · `episodeTopHit` MUST DEFAULT OFF ───────────────────────────────────────────
+// ── ⭐⭐⭐ D2 · `episodeTopHit` · SHIPPED, DEFAULT ON, AT THE SATURATION WEIGHT ─────────────────────
 //
-// ⚠️ Measured end to end and it gained 2 on-subject items with 0 lost — but it is a CANDIDATE, not a
-// decision: the `+2` is an arbitrary weight, and in a small lexical-only pool it was measured to demote a
-// holder from rank 1 to rank 2. ⛔ An untested treatment must not become the baseline by being convenient.
-test('⛔⛔ the D2 top-hit term ships OFF, and the baseline arm is unaffected by its wiring', () => {
-  assert.match(SRC, /episodeTopHit = false,/, 'the D2 candidate must default to false')
+// ⭐ Isolated end-to-end result on a clean corpus: target on-subject **+2 with 0 lost**, off-subject **4 → 3**
+// (so precision improved too), the five person controls unmoved, the negative control at 0, and **no effect
+// and no regression on the lexical fallback path**.
+// ⭐⭐ THE WEIGHT IS THE SATURATION POINT, not a tuned number: over the pre-registered set {0,1,2,4}, `w=4`
+// is identical to `w=2` on every number and `w=1` is strictly worse on both axes.
+// ⚠️⚠️ AND AN EARLIER CLAIM OF MINE WAS WITHDRAWN HERE: I reported the bonus as "slightly negative" under
+// lexical fallback, on the strength of a RANK moving 1 → 2 in a simulation. End to end it changed nothing —
+// the rank move never changed what survived the floor. ⇒ a simulation artefact, corrected before shipping.
+test('⭐⭐⭐ the D2 top-hit term is ON by default, at the saturation weight', () => {
+  assert.match(SRC, /episodeTopHit = true,/, 'D2 shipped: the default is now true')
   // ⭐ The bonus is gated on the flag, so the production arm computes exactly what it computed before.
   assert.match(CODE_ALL, /const topHit = episodeTopHit && ep\.bestRank === 0 \? episodeTopHitWeight : 0/,
     'the bonus must be gated on the flag AND on holding the retriever\'s #1 candidate')
-  // ⭐ The WEIGHT is separate from whether the term applies, so a controlled experiment can compare weights
-  // rather than one being defended after the fact. ⚠️ `+2` was arbitrary and is still the default.
-  assert.match(SRC, /episodeTopHitWeight = 2,/, 'the default weight must stay 2 until an experiment moves it')
+  // ⭐ The WEIGHT is separate from whether the term applies, so a controlled experiment could compare weights
+  // rather than one being defended after the fact — and one did.
+  // ⛔ 2 IS THE MEASURED SATURATION POINT. Moving it needs a new controlled experiment, not an opinion:
+  // 4 bought nothing and 1 was worse on both on-subject and off-subject counts.
+  assert.match(SRC, /episodeTopHitWeight = 2,/, 'the weight is the measured saturation point — 4 buys nothing, 1 is worse')
   // ⓘ `bestRank` is recorded unconditionally — that is deliberate and harmless, and it is asserted so a
   // future edit cannot make the baseline arm depend on it.
   assert.match(CODE_ALL, /bestRank: rank/, 'bestRank must still be recorded while grouping')

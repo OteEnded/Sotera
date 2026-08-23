@@ -118,12 +118,21 @@ if (opt('compare')) {
 const label = opt('label')
 // ⭐⭐ `--topHit` runs the D2 CANDIDATE ARM. Both arms are options on the host, so ONE process can measure
 // both deterministically — no restart, no source edit between runs, and no way to mislabel which arm ran.
-const topHit = argv.includes('--topHit')
+// ⛔⛔ AND THIS NEARLY REPORTED A SHIP AS UNVERIFIED. The first version passed `episodeTopHit: topHit` with
+// `topHit = argv.includes('--topHit')` — i.e. an explicit **false** whenever the flag was absent. Once D2
+// shipped as a default, that silently OVERRODE production and the "shipped path" run came back 23, the old
+// baseline. ⭐ Caught by the arm line printed at the top of every run: *an arm that is not printed is an arm
+// nobody checks.*
+// ⇒ THREE STATES, not two: `--topHit` forces on, `--noTopHit` forces off, and **absent means production** —
+// the option is not passed at all, so the host's own default applies.
+const tri = (on, off) => (argv.includes(on) ? true : argv.includes(off) ? false : null)
+const topHitReq = tri('--topHit', '--noTopHit')
+const cueReq = tri('--cueCentre', '--noCueCentre')
 // ⭐⭐ `--cueCentre` runs the D4 CANDIDATE ARM. ⛔ A SEPARATE FLAG, not bundled with topHit — Ote: *"Don't
 // bundle this with top-hit. Treat it as its own measured change."* ⓘ Keeping them separate is also what makes
 // the 2×2 possible, which is how the INTERACTION gets measured without either being credited with the other's
 // effect: D4 can only pay off on a conversation that ranking has already promoted into the top-5.
-const cueCentre = argv.includes('--cueCentre')
+
 if (!label) { console.error('✖ --label <name> (or --compare <a> <b>)'); process.exit(1) }
 
 const db = await initDB(); setDB(db); await initSettings(db)
@@ -135,6 +144,13 @@ const { rows: [me] } = await pg.query(
 // in — a run that cannot say which arm it measured is the mislabelling defect from the P5 round.
 const HOST = readFileSync(new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
 const centreAssignmentPresent = /prev\.lastAt = at; prev\.centre = mid/.test(HOST)
+// ⭐ THE PRODUCTION DEFAULTS, READ FROM THE SOURCE, so the recorded arm is the EFFECTIVE value rather than
+// the flag that was typed. ⛔ Not remembered, not assumed: the whole reason this exists is that a typed flag
+// and an effective value came apart once already.
+const defOf = (name) => new RegExp(`${name} = (true|false)`).exec(HOST)?.[1] === 'true'
+const topHit = topHitReq === null ? defOf('episodeTopHit') : topHitReq
+const cueCentre = cueReq === null ? defOf('episodeCentreCueMatch') : cueReq
+const weightDefault = Number(/episodeTopHitWeight = (\d+)/.exec(HOST)?.[1] ?? NaN)
 
 // ⚠️ THE CORPUS THIS SAW, recorded for the same reason.
 const { rows: [corpus] } = await pg.query(
@@ -145,17 +161,21 @@ console.log(`\n${'═'.repeat(104)}`)
 console.log(`  D1 MEASUREMENT · ${label}`)
 console.log(`${'═'.repeat(104)}`)
 console.log(`  D1 (\`prev.centre = mid\`): ${centreAssignmentPresent ? 'PRESENT — pre-fix' : 'REMOVED — fixed'}`
-  + `   ·   D2 topHit: ${topHit ? 'ON' : 'off'}   ·   D4 cueCentre: ${cueCentre ? 'ON' : 'off'}`)
+  + `   ·   D2 topHit: ${topHit ? `ON w=${weightDefault}` : 'off'}   ·   D4 cueCentre: ${cueCentre ? 'ON' : 'off'}`
+  + `   ${topHitReq === null && cueReq === null ? '⭐ PRODUCTION DEFAULTS (nothing overridden)' : '⚠️ overridden'}`)
 console.log(`  corpus: ${corpus.harness} harness conversation(s) of ${corpus.total}`
   + `${corpus.harness ? ' ⚠️ CONTAMINATED' : ' ✓ clean'}`)
 console.log(`\n  ${'case'.padEnd(26)}${'kept'.padEnd(6)}${'onSubj'.padEnd(8)}${'filtered'.padEnd(10)}${'eps'.padEnd(5)}${'withThem'.padEnd(10)}subject named`)
 
-const out = { label, at: new Date().toISOString(), centreAssignmentPresent, episodeTopHit: topHit, episodeCentreCueMatch: cueCentre, corpus, cases: [] }
+const out = { label, at: new Date().toISOString(), centreAssignmentPresent, episodeTopHit: topHit, episodeCentreCueMatch: cueCentre,
+  topHitWeight: weightDefault, overridden: !(topHitReq === null && cueReq === null), corpus, cases: [] }
 for (const c of CASES) {
   // ⓘ A FRESH HOST PER CASE, so nothing accumulates between them.
   const cog = buildMemoryCognition(fastify, {
     userId: me.id, isRoot: false, username: me.username, conversationId: null, interactive: false,
-    episodeTopHit: topHit, episodeCentreCueMatch: cueCentre,
+    // ⭐ Only OVERRIDE what was asked for. An unrequested flag is omitted so the production default applies.
+    ...(topHitReq === null ? {} : { episodeTopHit: topHitReq }),
+    ...(cueReq === null ? {} : { episodeCentreCueMatch: cueReq }),
   })
   let row = { key: c.key, ask: c.ask, why: c.why, expectNothing: c.expectNothing === true,
     mustMention: String(c.mustMention), activated: false, kept: 0, onSubject: 0, filtered: 0, episodes: 0,

@@ -95,11 +95,22 @@ export function buildMemoryCognition(fastify, {
   // ⭐ THE DATES-ONLY PROBE, passed IN rather than read here — this module reads no settings, and the one
   // time a component in this project started reading its own config the arms stopped being separable.
   localDates = false,
-  // ⭐⭐ D2 CANDIDATE · `episodeTopHit` · ⛔ DEFAULT OFF, and passed IN for the same reason: it lets ONE
-  // process measure BOTH arms deterministically, with no restart and no source edit between runs. An
-  // experiment whose arms require editing a file is an experiment that can be mislabelled — which is
-  // exactly what happened in the P5 round.
-  episodeTopHit = false,
+  // ⭐⭐⭐ D2 · `episodeTopHit` · **SHIPPED 2026-08-23, DEFAULT ON.** A conversation holding the retriever's
+  // #1 candidate gets a bonus, because `ep.matches` alone is a COUNT and four weak hits beat one exact one.
+  //
+  // ⭐ THE EVIDENCE, end to end through ranking → centre → window rebuild → floor → final evidence, on a
+  // clean corpus, deterministic, 16 arms in one process:
+  //     ISOLATED (cue-centre OFF):  target on-subject +2, **0 lost**, and off-subject **4 → 3**
+  //                                 ⇒ it improves PRECISION as well as recall
+  //     the five person controls:   unmoved (22) in every arm · the negative control: 0 in all sixteen
+  //     the lexical fallback:       **no effect and no regression at any weight**
+  // ⭐⭐ AND THE WEIGHT IS NOT TUNED. The set {0,1,2,4} was fixed before the runs: `w=4` is IDENTICAL to
+  // `w=2` on every number and `w=1` is strictly worse on both axes. ⇒ 2 is the SMALLEST WEIGHT AT WHICH THE
+  // EFFECT SATURATES, which is a defensible number rather than a chosen one.
+  // ⚠️ MECHANISM, not behaviour: this is what survives retrieval → window → floor. ⛔ It is NOT a claim that
+  // her final answers improved by the same amount; that would need live runs and has not been measured.
+  // ⓘ Still an OPTION rather than a constant, so the arms stay reproducible and a regression can be bisected.
+  episodeTopHit = true,
   // ⭐⭐ D4 CANDIDATE · `episodeCentreCueMatch` · ⛔ DEFAULT OFF. Centre the window on a conversation's best
   // CUE-MATCHING candidate rather than blindly on its best-RANKED one.
   // ⚠️⚠️ NAME NOTE: `D3` is already taken (the floor's `terms.some` disjunction). This is the "third defect"
