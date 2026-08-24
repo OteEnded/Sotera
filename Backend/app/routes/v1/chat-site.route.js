@@ -2107,6 +2107,50 @@ export default async function chatSiteRoutes(fastify) {
         },
       }]
     }
+    // ══ ⭐⭐⭐ list_decisions — A LOOKUP, NOT A RECALL ═════════════════════════════════════════════
+    //
+    // ⛔⛔ WHY A SEPARATE TOOL AND NOT BETTER RETRIEVAL. Measured, three runs: with twelve verified
+    // project decisions in her own store — embedded — she answered *"no prior decision found"* about a
+    // proposal that is FROZEN, and on the third run retrieved HER OWN two failed answers from minutes
+    // earlier and cited them as evidence the matter was undecided. Semantic recall surfaced
+    // conversational similarity and recency; it did not surface the record.
+    //
+    // ⭐ Ote, 2026-08-24: *"'Have we made a decision about X?' is an enumeration/lookup question, so
+    // don't try to force semantic recall to solve it."* ⇒ this ENUMERATES. There are a dozen records;
+    // similarity has no work to do, and a lookup cannot be outranked by a conversation that merely
+    // sounds like the question.
+    // ⛔ AND IT CHANGES NOTHING ABOUT RETRIEVAL. No ranking, no floor, no cue formation, no embedding.
+    // Defect A and the relevance floor stay exactly where they are.
+    //
+    // ── THE BOUNDARIES, each deliberate ──────────────────────────────────────────────────────────
+    //   READ-ONLY        one SELECT. No write path exists here.
+    //   ONE ENTITY       `entity = 'project-decision'` and nothing else, so it cannot become a general
+    //                    memory reader by accident — the failure mode a broad "list rows" tool invites.
+    //   OWNERSHIP        `user_id = <the caller's own room>`, the same boundary every memory read uses.
+    //                    ⛔ It does not consult the utterance boundary because it never returns another
+    //                    person's material: a project decision has no counterpart and no third party.
+    //   PROVENANCE OUT   the source reference and the verbatim quote come back with the record, because
+    //                    the whole point is that her citation can be checked rather than trusted.
+    //   NO OTHER CONTENT the projection lists its fields explicitly; a memory that is not a decision
+    //                    cannot appear, and no unrelated column rides along.
+    if (toolsOn) {
+      toolDefs = [...(toolDefs || []), {
+        type: 'function',
+        function: {
+          name: 'list_decisions',
+          description: 'Enumerate the recorded PROJECT DECISIONS — what was decided, its status '
+            + '(shipped/frozen/rejected/deferred/open), when, and the source reference it came from. '
+            + 'Use this to answer whether something has already been decided, frozen or rejected. '
+            + 'This is a complete list, not a search: an empty result means no decision is recorded.',
+          parameters: {
+            type: 'object',
+            properties: {
+              status: { type: 'string', description: 'optional filter: shipped | frozen | rejected | deferred | open' },
+            },
+          },
+        },
+      }]
+    }
     // Skill trigger: use_skill (activation) + read_skill_file (the activated skill's bundled
     // files). Offered only when NO skill is bound — a bound skill already frames the turn.
     if (toolsOn && invocableSkills.length) {
@@ -2751,6 +2795,53 @@ export default async function chatSiteRoutes(fastify) {
                     ? 'Follow the instructions for the rest of this reply. Read bundled text files with read_skill_file when the instructions reference them.'
                     : 'Follow the instructions for the rest of this reply.',
                 }
+              }
+              toolCtx.events?.emit?.('tool.executed', { name: tc.name, args: tc.arguments, ok: !result?.error, durationMs: Date.now() - t0, isReadOnly: true, caller: toolCtx.caller })
+            } else if (tc.name === 'list_decisions') {
+              // ⭐ ONE SELECT, ONE ENTITY, ONE OWNER. The projection is spelled out field by field so a
+              // column added to txn_memories later cannot start riding along — the allowlist failure this
+              // repo has hit twelve times, in the direction where it leaks rather than drops.
+              const t0 = Date.now()
+              try {
+                const want = String(tc.arguments?.status || '').trim().toLowerCase()
+                const seq = fastify.db.txn_memories.sequelize
+                const { tableName, schema } = fastify.db.txn_memories.getTableName()
+                const MEM = schema ? `"${schema}"."${tableName}"` : `"${tableName}"`
+                const rows = await seq.query(
+                  `SELECT attribute AS key, value AS status, content AS decision,
+                          source, evidence, valid_at
+                     FROM ${MEM}
+                    WHERE entity = 'project-decision' AND user_id = :uid
+                      AND invalid_at IS NULL AND expired_at IS NULL
+                      ${want ? 'AND lower(value) = :want' : ''}
+                    ORDER BY value, attribute`,
+                  { type: seq.QueryTypes.SELECT, replacements: { uid: request.user.id, want } })
+                result = {
+                  decisions: rows.map((r) => ({
+                    key: r.key,
+                    status: r.status,
+                    decision: r.decision,
+                    decidedOn: r.evidence?.decidedOn ?? (r.valid_at ? String(r.valid_at).slice(0, 10) : null),
+                    // ⭐ THE PROVENANCE COMES BACK WITH THE RECORD — reference plus the verbatim quote it
+                    // was verified against, so a citation she repeats is one a reader can resolve.
+                    source: r.source ?? null,
+                    sourceQuote: r.evidence?.quote ?? null,
+                    sourcePath: r.evidence?.path ?? null,
+                    sourceCommit: r.evidence?.commit ?? null,
+                  })),
+                  count: rows.length,
+                  // ⛔ THE QUANTIFIER, for the same reason `readCoverage` exists: an empty enumeration is a
+                  // fact about the RECORD, never about the world, and it has been narrated as the latter
+                  // before. Say which it is, in the payload, so it does not depend on her framing.
+                  coverage: want
+                    ? `every recorded project decision with status "${want}" in this room`
+                    : 'every recorded project decision in this room — this is the complete list',
+                  note: rows.length === 0
+                    ? 'No project decision is recorded. That means none was written down, not that the matter is undecided.'
+                    : 'Each record carries the source it was verified against. Quote the source reference as given; do not reconstruct it.',
+                }
+              } catch (e) {
+                result = { error: `list_decisions failed: ${e.message}` }
               }
               toolCtx.events?.emit?.('tool.executed', { name: tc.name, args: tc.arguments, ok: !result?.error, durationMs: Date.now() - t0, isReadOnly: true, caller: toolCtx.caller })
             } else if (tc.name === 'read_skill_file' && (activeSkill || dynamicSkill)) {

@@ -146,7 +146,7 @@ if (!user) { console.error(`✖ no such user: ${AS}`); await pg.end(); process.e
 if (VERIFY_ONLY) {
   const { rows } = await pg.query(
     `select id::text id, attribute, value, source, evidence, created_at from ${S}.txn_memories
-      where user_id = $1 and entity = 'decision' and invalid_at is null and expired_at is null order by attribute`, [user.id])
+      where user_id = $1 and entity = 'project-decision' and invalid_at is null and expired_at is null order by attribute`, [user.id])
   console.log(`  ── stored decisions for ${AS}: ${rows.length} ──`)
   let bad = 0
   for (const r of rows) {
@@ -184,10 +184,15 @@ for (const d of verified) {
   // reference lives where it can actually be resolved: `source` = doc:<path>@<commit>, plus `evidence`
   // carrying path + commit + verbatim quote. ⓘ Adding an enum value would be a migration and an
   // ontology change; it is recorded as a gap, not fixed here.
-  const evidence = { kind: 'decision', status: d.status, decidedOn: d.when, path: d.path, commit: d.commit, quote: d.quote, repo: 'Reference' }
+  // ⚠️ ENTITY IS `project-decision`, NOT `decision`, AND THE RENAME IS DELIBERATE. This store already
+  // has a different thing called a decision: `memory-decision-record.js` records her DECISION TO DECLINE
+  // remembering something, and `partitionMemoryRead` filters those out of every memory read under the
+  // rule *"a decision is not a memory"*. ⛔ Two senses of one word in one store is a trap that would
+  // eventually be resolved wrongly by whoever read the shorter name first.
+  const evidence = { kind: 'project-decision', status: d.status, decidedOn: d.when, path: d.path, commit: d.commit, quote: d.quote, repo: 'Reference' }
   const { rows: existing } = await pg.query(
     `select id::text id from ${S}.txn_memories
-      where user_id = $1 and entity = 'decision' and attribute = $2 and invalid_at is null and expired_at is null`,
+      where user_id = $1 and entity = 'project-decision' and attribute = $2 and invalid_at is null and expired_at is null`,
     [user.id, d.key])
   if (existing.length) {
     await pg.query(
@@ -200,7 +205,7 @@ for (const d of verified) {
       `insert into ${S}.txn_memories
          (id, persona, user_id, namespace, kind, content, entity, attribute, value,
           importance, confidence, source, provenance, evidence, author, valid_at, created_at, updated_at)
-       values (gen_random_uuid(), 'sotera', $1, 'default', 'semantic', $2, 'decision', $3, $4,
+       values (gen_random_uuid(), 'sotera', $1, 'default', 'semantic', $2, 'project-decision', $3, $4,
           9, 1.0, $5, null, $6, 'account', $7::date, now(), now())`,
       [user.id, d.decision, d.key, d.status, d.source, JSON.stringify(evidence), d.when])
     inserted++
@@ -224,7 +229,7 @@ let embedFailed = 0
 {
   const { rows: toEmbed } = await pg.query(
     `select id::text id, content from ${S}.txn_memories
-      where user_id = $1 and entity = 'decision' and embedding is null
+      where user_id = $1 and entity = 'project-decision' and embedding is null
         and invalid_at is null and expired_at is null`, [user.id])
   for (const r of toEmbed) {
     try {
