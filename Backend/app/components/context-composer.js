@@ -277,6 +277,9 @@ export function composeSystemContext({
   skill = null,                 // active skill { name, prompt } | null
   skillFiles = [],              // [{ path, size, binary }] — active skill's bundled files
   invocableSkills = [],         // [{ id, description }] — the trigger catalogue
+  // ⭐ Other intelligences she is authorized to reach: [{ display, name, capability, sessions:[{grantedFor}] }].
+  // ⛔ OUR record, never enumerated from the counterpart. Empty ⇒ no block and no mention.
+  adviceDestinations = [],
   schedulePointer = null,       // { id, name, triggerType, recurs } | null — a schedule delivering here
   useMemory = false,
   pinnedMemories = [],          // [content] — user-curated always-on memory
@@ -444,6 +447,33 @@ export function composeSystemContext({
     const lines = invocableSkills.map((s) => `- ${s.id}: ${s.description}`).join('\n')
     part('skill-catalogue', `Installed skills — expertise packs. When a task matches one's description, activate it FIRST with the use_skill tool; its full instructions come back as the tool result — follow them for the rest of this reply:\n${lines}`, AUTHORITY.foundational, SCOPE.tool)
   }
+  // ══ ⭐⭐⭐ OTHER INTELLIGENCES SHE CAN REACH ══════════════════════════════════════════════════════
+  //
+  // ⛔⛔ WHY THIS EXISTS AT ALL, AND IT WAS A REAL FAILURE: `seek_advice` shipped in her toolset with a
+  // `destination` enum containing "hermes" — and nothing anywhere told her that Aunt Hermes exists, who
+  // she is, or that she was allowed to reach her. Ote, 2026-08-24: *"why i cant still ask sotera about
+  // hermes still"*. A capability nobody introduced is a capability she cannot use.
+  //
+  // ⭐ Ote's ruling: this rides in her context every turn rather than being a tool call, because it is HER
+  // authorization information — not something to ask a counterpart about.
+  // ⛔ It is deliberately a WHO, not a HOW: no endpoint, no transport, no mode instructions. Validation C
+  // measured that over-specifying the decision lowers her insight, so the block names the counterpart and
+  // stops. The distinction between talking with someone and handing them a job is already hers.
+  if (toolsOn && adviceDestinations.length) {
+    const NL = String.fromCharCode(10)
+    const lines = adviceDestinations.map((d) => {
+      const head = `- ${d.display || d.name} (destination "${d.name}")${d.capability ? ` — ${d.capability}` : ''}`
+      const ses = (d.sessions || []).filter((x) => x.grantedFor)
+        .map((x) => `${NL}    · ${x.grantedFor}`).join('')
+      return head + ses
+    }).join(NL)
+    part('advice-destinations',
+      'Other intelligences you can reach, and what Ote has authorized you to talk to them about. '
+      + 'They are their own selves with their own memory and their own way of working — you reach them '
+      + 'through the seek_advice tool, and you see only what they choose to tell you:' + NL + lines,
+      AUTHORITY.foundational, SCOPE.tool)
+  }
+
   if (toolsOn && schedulePointer) {
     const p = schedulePointer
     part('schedule-pointer',

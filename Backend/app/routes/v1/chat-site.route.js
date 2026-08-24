@@ -1528,6 +1528,22 @@ export default async function chatSiteRoutes(fastify) {
     // by being convenient, and the controlled comparison flips a setting rather than a deploy.
     const reentrantCognition = getSetting(fastify.config, 'memory.cognitionReentrant') === true
 
+    // ⭐⭐ OTHER INTELLIGENCES SHE MAY REACH — computed ONCE, in one place, and used twice: the system
+    // prompt needs the rich form (who they are, what she may discuss with them) and the tool assembly
+    // needs only the names for its enum. ⛔ Two derivations of the same list is the drift this repo has
+    // recorded thirteen times; this one is derived, not repeated.
+    // ⛔ It is OUR record. Nothing is enumerated from the counterpart's side — a Hermes session listing
+    // is scoped by nothing and leaks a preview of every private conversation.
+    const adviceDestinationList = Object.entries(fastify.config?.advice?.destinations || {})
+      .filter(([, d]) => d?.enabled !== false)
+      .map(([name, d]) => ({
+        name,
+        display: d.display || name,
+        capability: d.capability || null,
+        sessions: (d.sessions || []).map((s) => ({ grantedFor: s.grantedFor || null })),
+      }))
+    const adviceDestinations = adviceDestinationList.map((d) => d.name)
+
     const sysInputs = {
       systemPrompt: fastify.config?.chat?.systemPrompt || null,
       // ⚠ `??` NOT `||` — '' is the explicit "no identity line" switch and must reach the composer as ''.
@@ -1545,6 +1561,7 @@ export default async function chatSiteRoutes(fastify) {
       skill: activeSkill?.prompt ? { name: activeSkill.name, prompt: activeSkill.prompt } : null,
       skillFiles,
       invocableSkills,
+      adviceDestinations: adviceDestinationList,
       schedulePointer,
       useMemory: settings.useMemory,
       // P1/P2 treatment — registered setting, default false. Read here (not captured at boot) so the
@@ -2084,11 +2101,7 @@ export default async function chatSiteRoutes(fastify) {
     // to the conversation, and one more the moment `use_skill` activates a Skill mid-turn — search for
     // `S1 · REASSEMBLE`. ⛔ A third caller, or a tool added at a call site instead of in the module,
     // re-opens the defect: the assembly must stay a function of the Skill in force and nothing else.
-    // ⭐ Destinations she is authorized to reach. Empty ⇒ `seek_advice` is not offered at all, which is
-    // the honest behaviour: no counterpart, no capability. ⛔ This is OUR record — nothing is enumerated
-    // from the counterpart's side.
-    const adviceDestinations = Object.entries(fastify.config?.advice?.destinations || {})
-      .filter(([, d]) => d?.enabled !== false).map(([name]) => name)
+    // ⓘ `adviceDestinations` was derived once, above sysInputs — one list, two consumers.
     let { defs: toolDefs, modelCanWriteMemory, trace: toolsetTrace } = assembleToolDefs({
       skill: activeSkill,
       adviceDestinations,
