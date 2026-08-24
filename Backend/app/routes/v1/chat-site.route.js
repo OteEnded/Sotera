@@ -12,6 +12,8 @@ import { capsForModel, capsVerdictForModel, mergeCapVerdict, SPECIALIST_CAPS } f
 import { extractFile, MAX_FILES } from '../../files/extract.js'
 import { toolDefinitions, runTool, buildToolContext, resolveSkill, listSkills, memoryToolNames, attachLogger, attachToolAudit } from '../../components/runtime.js'
 import { readSkillFile } from '../../components/skill-store.js'
+// ⭐ S1: the turn's toolset is assembled in ONE place, for the bound Skill and the triggered one alike.
+import { assembleToolDefs, MEMORY_WRITE_TOOLS } from '../../chat/tool-defs.js'
 import { ownerIdOf, ownedBy } from '../../auth/owner.js'
 import { buildMemoryV2 } from '../../components/memory-v2-host.js'
 import { captureFacts } from '../../components/memory-extract-host.js'
@@ -94,7 +96,8 @@ function platformVisionRelayModel(serverConfig) {
 // The model's memory WRITE tools. One source of truth: the same set decides whether the model is the
 // turn's writer up front AND whether it actually wrote by the end (the fallback-capture check), so the
 // two can never drift apart.
-const MEMORY_WRITE_TOOLS = new Set(['remember', 'remember_fact'])
+// ⓘ It now LIVES in app/chat/tool-defs.js — beside step ⑨, the only place that decides "is the model the
+// writer this turn" — and is imported back here for the end-of-turn check. Still one definition.
 
 function sse(obj) {
   return `data: ${JSON.stringify(obj)}\n\n`
@@ -2072,186 +2075,22 @@ export default async function chatSiteRoutes(fastify) {
     messages.push(...tailMsgs)
 
     // ---- agent loop: model -> (tool calls -> execute -> feed results back) -> final answer ----
-    // A bound Skill constrains the tools to its allowedComponents (already OpenAI-shaped, only
-    // those actually installed; allowedComponents null = unconstrained = all tools); otherwise
-    // the full installed toolset is offered.
-    let toolDefs = toolsOn ? (activeSkill ? activeSkill.tools : toolDefinitions()) : undefined
-    // One-shot tool constraint (scheduled runs): intersects with whatever the skill allows —
-    // a caller can narrow the toolset for this send, never widen it. Infra tools
-    // (read_skill_file / use_skill) are added AFTER, so constraining never breaks skills.
-    if (toolDefs && Array.isArray(request.body?.allowedTools) && request.body.allowedTools.length) {
-      const allowedOnce = new Set(request.body.allowedTools)
-      toolDefs = toolDefs.filter((d) => allowedOnce.has(d.function?.name))
-    }
-    // Headless gate (RFC: requiresHuman): internal self-requests (scheduled runs, digests,
-    // assist side-calls) have NO human watching — interactive tools like ask_user are simply
-    // ABSENT from their toolset, never a hang or an error the model must dance around.
-    // (interactiveTurn hoisted above — it also gates the ASK_USER_RULE prompt line.)
-    if (toolDefs && !interactiveTurn) {
-      toolDefs = toolDefs.filter((d) => !INTERACTIVE_TOOL_NAMES.has(d.function?.name))
-    }
-    // read_skill_file: the host-side reader behind the bundled-file inventory above. Offered
-    // whenever the active skill ships files — even a skill with an empty tool allowlist gets
-    // it, because reading its own material isn't a platform capability, it's part of the skill.
-    if (toolsOn && skillFiles.length) {
-      toolDefs = [...(toolDefs || []), {
-        type: 'function',
-        function: {
-          name: 'read_skill_file',
-          description: `Read a text file bundled with the active "${activeSkill.name}" skill (the files listed in the system prompt).`,
-          parameters: {
-            type: 'object',
-            properties: { path: { type: 'string', description: 'bundled file path exactly as listed, e.g. references/guide.md' } },
-            required: ['path'],
-          },
-        },
-      }]
-    }
-    // ══ ⭐⭐⭐ list_decisions — A LOOKUP, NOT A RECALL ═════════════════════════════════════════════
     //
-    // ⛔⛔ WHY A SEPARATE TOOL AND NOT BETTER RETRIEVAL. Measured, three runs: with twelve verified
-    // project decisions in her own store — embedded — she answered *"no prior decision found"* about a
-    // proposal that is FROZEN, and on the third run retrieved HER OWN two failed answers from minutes
-    // earlier and cited them as evidence the matter was undecided. Semantic recall surfaced
-    // conversational similarity and recency; it did not surface the record.
-    //
-    // ⭐ Ote, 2026-08-24: *"'Have we made a decision about X?' is an enumeration/lookup question, so
-    // don't try to force semantic recall to solve it."* ⇒ this ENUMERATES. There are a dozen records;
-    // similarity has no work to do, and a lookup cannot be outranked by a conversation that merely
-    // sounds like the question.
-    // ⛔ AND IT CHANGES NOTHING ABOUT RETRIEVAL. No ranking, no floor, no cue formation, no embedding.
-    // Defect A and the relevance floor stay exactly where they are.
-    //
-    // ── THE BOUNDARIES, each deliberate ──────────────────────────────────────────────────────────
-    //   READ-ONLY        one SELECT. No write path exists here.
-    //   ONE ENTITY       `entity = 'project-decision'` and nothing else, so it cannot become a general
-    //                    memory reader by accident — the failure mode a broad "list rows" tool invites.
-    //   OWNERSHIP        `user_id = <the caller's own room>`, the same boundary every memory read uses.
-    //                    ⛔ It does not consult the utterance boundary because it never returns another
-    //                    person's material: a project decision has no counterpart and no third party.
-    //   PROVENANCE OUT   the source reference and the verbatim quote come back with the record, because
-    //                    the whole point is that her citation can be checked rather than trusted.
-    //   NO OTHER CONTENT the projection lists its fields explicitly; a memory that is not a decision
-    //                    cannot appear, and no unrelated column rides along.
-    if (toolsOn) {
-      toolDefs = [...(toolDefs || []), {
-        type: 'function',
-        function: {
-          name: 'list_decisions',
-          description: 'Enumerate the recorded PROJECT DECISIONS — what was decided, its status '
-            + '(shipped/frozen/rejected/deferred/open), when, and the source reference it came from. '
-            + 'Use this to answer whether something has already been decided, frozen or rejected. '
-            + 'This is a complete list, not a search: an empty result means no decision is recorded.',
-          parameters: {
-            type: 'object',
-            properties: {
-              status: { type: 'string', description: 'optional filter: shipped | frozen | rejected | deferred | open' },
-            },
-          },
-        },
-      }]
-    }
-    // Skill trigger: use_skill (activation) + read_skill_file (the activated skill's bundled
-    // files). Offered only when NO skill is bound — a bound skill already frames the turn.
-    if (toolsOn && invocableSkills.length) {
-      toolDefs = [...(toolDefs || []), {
-        type: 'function',
-        function: {
-          name: 'use_skill',
-          description: 'Activate an installed skill (listed in the system prompt) when the task matches its description. Returns the skill\'s full instructions — follow them for the rest of this reply.',
-          parameters: {
-            type: 'object',
-            properties: { skill: { type: 'string', enum: invocableSkills.map((s) => s.id), description: 'the skill id exactly as listed' } },
-            required: ['skill'],
-          },
-        },
-      }, {
-        type: 'function',
-        function: {
-          name: 'read_skill_file',
-          description: 'Read a text file bundled with the skill you activated via use_skill (its file list comes back with the activation).',
-          parameters: {
-            type: 'object',
-            properties: { path: { type: 'string', description: 'bundled file path exactly as returned by use_skill' } },
-            required: ['path'],
-          },
-        },
-      }]
-    }
-    // Profile: set_display_name — the model's hand on the Profile Service (how it addresses the
-    // user). Platform-intrinsic account management (like use_skill/read_skill_file), not a portable
-    // capability, so it's a native tool the dispatch loop handles directly. Offered only on
-    // INTERACTIVE turns — there's a human to confirm with (the PROFILE_RULE requires an ask_user
-    // yes first), and a scheduled/headless run has no one whose name to set.
-    if (toolsOn && interactiveTurn) {
-      toolDefs = [...(toolDefs || []), {
-        type: 'function',
-        function: {
-          name: 'set_display_name',
-          description: "Set the user's display name — the name you address them by, persisted across all conversations. TWO STEPS, both required: (1) call with just { name } — this changes NOTHING and returns a confirmation prompt; (2) ask the user to confirm, and ONLY after they explicitly say yes, call again with { name, confirm: true } to apply it. Never pass confirm:true without the user's explicit yes in this same turn.",
-          parameters: {
-            type: 'object',
-            properties: {
-              name: { type: 'string', description: 'The display name to set, e.g. "Ote".' },
-              confirm: { type: 'boolean', description: 'Pass true ONLY on the second call, after the user has explicitly agreed to this exact name. Omit (or false) on the first call.' },
-            },
-            required: ['name'],
-            additionalProperties: false,
-          },
-        },
-      }]
-    }
-    // People: remember_person — the model's hand on the Person Service. Same shape and same reason as
-    // set_display_name above: naming a human who is NOT PRESENT TO OBJECT is exactly the act that must
-    // not happen silently, so it is two-phase and the confirm gate lives in the service.
-    //
-    // ⭐ It exists because she kept needing it and improvising. Five times, unprompted, across two
-    // people and two accounts, a belief about a third party had to be smuggled into an attribute name
-    // or a value string — "user's known_others: Ote…", "User's colleague Priya taught them…" — because
-    // there was no way to bring into existence a person who never logs in.
-    // ⚠️ It creates a person. It does NOT link accounts, merge identities, or decide two people are the
-    // same human; a name collision is REPORTED back so she can ask rather than assume.
-    if (toolsOn && interactiveTurn) {
-      toolDefs = [...(toolDefs || []), {
-        type: 'function',
-        function: {
-          name: 'remember_person',
-          description: "Create a record for a PERSON the user mentions who does not have an account here — a colleague, a friend, someone in a story. Once created you can use their id as `subject` on remember_fact, so a memory can be ABOUT them rather than about the user. TWO STEPS, both required: (1) call with just { name } — this creates NOTHING and tells you whether anyone of that name is already recorded; (2) ask the user, and ONLY after they answer, call again with { name, confirm: true }. If someone of that name already exists, ASK whether it is the same person — never assume two people with one name are one human. Do not use this for the user themselves (that is set_display_name).",
-          parameters: {
-            type: 'object',
-            properties: {
-              name: { type: 'string', description: 'The person\'s name as the user gave it, e.g. "Priya".' },
-              note: { type: 'string', description: 'Optional: how they came up, e.g. "Kavi\'s colleague, mentioned 2026-08-19".' },
-              confirm: { type: 'boolean', description: 'Pass true ONLY on the second call, after the user has answered. Omit on the first call.' },
-            },
-            required: ['name'],
-            additionalProperties: false,
-          },
-        },
-      }]
-    }
-    // Persona Memory v2 — `useMemory` is the MASTER memory switch. When it's OFF, strip the memory
-    // tools (recall_memory / remember / … — anything consuming memory.v2) so the model can't reach
-    // memory at all, matching the toggle (previously they leaked in whenever Tools was on, so the
-    // model still recalled/saved with "Use memory" unchecked). When it's ON and the model HAS memory
-    // write-tools, the MODEL drives writes (softly nudged in the system prompt to save proactively) —
-    // so the platform does NOT also auto-capture. ONE-WRITER, and it stays: we tried relaxing this
-    // (2026-07-24) to let both paths run and lean on the store's dedup, but the two writers RACE — the
-    // model's remember_fact + the async captureFacts each reconcile against a store that doesn't yet
-    // hold the other's write, so a fact lands twice under different phrasings ("preferred" vs
-    // "favorite text editor") and the semantic slot-reconcile (which only collapses writes landing
-    // against an EXISTING slot) sails past it. A real fallback would need the two paths serialized
-    // through one write queue, not just dedup. Until then: one writer.
-    let modelCanWriteMemory = false
-    if (toolDefs?.length) {
-      if (!settings.useMemory) {
-        const memNames = memoryToolNames()
-        toolDefs = toolDefs.filter((d) => !memNames.has(d.function?.name))
-      } else {
-        modelCanWriteMemory = toolDefs.some((d) => MEMORY_WRITE_TOOLS.has(d.function?.name))
-      }
-      if (!toolDefs.length) toolDefs = undefined // stripped to empty → send no tools param
-    }
+    // ⭐⭐⭐ S1 · THE TOOLSET IS ASSEMBLED IN ONE PLACE, AND BOTH SKILL PATHS CALL IT.
+    // The nine ordered steps, and why this is a module rather than two copies of a filter chain, live in
+    // `app/chat/tool-defs.js`. Here there are exactly TWO calls: this one, with whatever Skill is BOUND
+    // to the conversation, and one more the moment `use_skill` activates a Skill mid-turn — search for
+    // `S1 · REASSEMBLE`. ⛔ A third caller, or a tool added at a call site instead of in the module,
+    // re-opens the defect: the assembly must stay a function of the Skill in force and nothing else.
+    let { defs: toolDefs, modelCanWriteMemory, trace: toolsetTrace } = assembleToolDefs({
+      skill: activeSkill,
+      toolsOn,
+      interactiveTurn,
+      invocableSkills,
+      oneShotAllowedTools: request.body?.allowedTools ?? null,
+      useMemory: settings.useMemory,
+      path: activeSkill ? 'bound' : 'none',
+    })
 
     // Automatic memory WRITE — the AUTOMATIC path, used when the model can't drive memory itself this
     // turn (no memory write-tools). When it CAN, the decision moves to the END of the turn — see
@@ -2799,7 +2638,27 @@ export default async function chatSiteRoutes(fastify) {
                 // resolveSkill IS the trace point (skill.used, caller attached) — a triggered
                 // run counts exactly like a bound one.
                 dynamicSkill = resolveSkill(wanted, { caller: { userId: ownerIdOf(request.user, 'this request') }, config: fastify.config })
-                write({ type: 'status', phase: 'skill', skill: dynamicSkill.id, name: dynamicSkill.name, origin: dynamicSkill.origin, files: dynamicSkill.skillFiles.length, triggered: true })
+                // ⭐⭐⭐ S1 · REASSEMBLE — the activated Skill's `allowed_tools` takes effect from the NEXT
+                // round, because the round loop reads `toolDefs` on every `streamChat`. Same function,
+                // same nine steps, same order as the bound path: the ONLY thing that changed is which
+                // Skill is in force. ⭐ A Skill declaring no restriction resolves to every installed tool,
+                // so this is a no-op for it — which is the property the unit test pins.
+                // ⚠️ `modelCanWriteMemory` is reassigned deliberately: if the Skill's allowlist removes the
+                // memory write tools, the model is no longer this turn's writer and the automatic capture
+                // path must take over at the end of the turn. ONE-WRITER holds either way.
+                const reassembled = assembleToolDefs({
+                  skill: dynamicSkill,
+                  toolsOn,
+                  interactiveTurn,
+                  invocableSkills,
+                  oneShotAllowedTools: request.body?.allowedTools ?? null,
+                  useMemory: settings.useMemory,
+                  path: 'triggered',
+                })
+                toolDefs = reassembled.defs
+                modelCanWriteMemory = reassembled.modelCanWriteMemory
+                toolsetTrace = reassembled.trace
+                write({ type: 'status', phase: 'skill', skill: dynamicSkill.id, name: dynamicSkill.name, origin: dynamicSkill.origin, files: dynamicSkill.skillFiles.length, triggered: true, tools: toolDefs?.length ?? 0, constrained: Array.isArray(dynamicSkill.allowedComponents) })
                 result = {
                   skill: dynamicSkill.id,
                   instructions: dynamicSkill.prompt,
@@ -3307,6 +3166,13 @@ export default async function chatSiteRoutes(fastify) {
       // ⭐ the artefact verdict, so a reload and the stats line both show whether the Skill's declared
       // output shape actually appeared — and so it can be measured over many runs rather than eyeballed
       skillArtefacts: artefactCheck || undefined,
+      // ⭐⭐ S1 · WHAT SHE COULD ACTUALLY REACH THIS TURN. Recorded because a Skill's `allowed_tools` is
+      // otherwise unobservable after the fact: the toolset is assembled per turn, sent to the provider,
+      // and thrown away. `path` says which assembly produced it — `none` (no Skill), `bound`, or
+      // ⭐ `triggered`, the case that was silently unconstrained before S1. `constrained` is whether the
+      // Skill declared an allowlist at all, so an unconstrained Skill is distinguishable from no Skill.
+      // ⓘ It is a COUNT and two labels — no tool names, nothing about content.
+      toolset: toolsetTrace || undefined,
       // context caching: prefill wall-clock (Ollama — ~0ms on a big prompt = the runner's
       // prefix cache hit) and provider-reported cached/cache-written input tokens (remote)
       promptEvalMs: usage?.promptEvalMs ?? undefined,
