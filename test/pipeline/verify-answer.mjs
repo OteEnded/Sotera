@@ -34,7 +34,15 @@ const argv = process.argv.slice(2)
 const opt = (n, d = null) => (argv.indexOf(`--${n}`) >= 0 ? argv[argv.indexOf(`--${n}`) + 1] : d)
 const CID = opt('cid')
 const AS = opt('as', 'agent_dev')
-const REPO = 'C:/data/AI_LLMv2/Reference'
+// ⭐ TWO REPOS, matching the seeder: a reference is `doc:<repo>/<path>@<commit>`. ⛔ The first version of
+// this file assumed a bare path in Reference and reported every Sotera-repo reference as "path does not
+// exist" — while the very next assertion confirmed the reference matched a stored record exactly. That
+// contradiction is what gave it away, and it is the fifth false-positive class this verifier has produced.
+// ⇒ ⚠️ an automated check is not authoritative because it is automated. It has to prove what it claims.
+const REPOS = {
+  Reference: 'C:/data/AI_LLMv2/Reference',
+  Sotera: 'C:/data/AI_LLMv2/Personas/Sotera',
+}
 if (!CID) { console.error('usage: node pipeline/verify-answer.mjs --cid <conversation-id> [--as <user>]'); process.exit(1) }
 
 const pg = devPg(); await pg.connect()
@@ -116,16 +124,30 @@ add('provenance', phantom.length === 0 ? 'PASS' : 'FAIL',
 
 // ⛔ `doc:<path>@<commit>` references must resolve, and the quote beside them must be verbatim.
 const docRefs = [...new Set((answer.match(/doc:[^\s`'"),]+@[0-9a-f]{7,}/g) ?? []))]
-const fileAt = (commit, path) => {
-  try { return execFileSync('git', ['-C', REPO, 'show', `${commit}:${path}`], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }) }
+// ⭐ `doc:Sotera/Backend/x.js@abc1234` → repo "Sotera", path "Backend/x.js". A reference with no
+// recognised repo prefix is resolved in Reference, which is what the older records use.
+const splitRef = (raw) => {
+  const m = /^doc:(.+)@([0-9a-f]{7,})$/.exec(raw)
+  if (!m) return null
+  const [, full, commit] = m
+  const slash = full.indexOf('/')
+  const head = slash > 0 ? full.slice(0, slash) : null
+  return head && REPOS[head]
+    ? { repo: head, path: full.slice(slash + 1), commit }
+    : { repo: 'Reference', path: full, commit }
+}
+const fileAt = (commit, path, repo = 'Reference') => {
+  const dir = REPOS[repo]
+  if (!dir) return null
+  try { return execFileSync('git', ['-C', dir, 'show', `${commit}:${path}`], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }) }
   catch { return null }
 }
 for (const ref of docRefs) {
-  const m = /^doc:(.+)@([0-9a-f]{7,})$/.exec(ref)
+  const r = splitRef(ref)
   const known = decisions.find((d) => d.source === ref)
-  const body = m ? fileAt(m[2], m[1]) : null
+  const body = r ? fileAt(r.commit, r.path, r.repo) : null
   add('provenance', body != null ? 'PASS' : 'FAIL', `the reference resolves: ${ref}`,
-    body != null ? `${body.length} chars at that commit` : '⛔ path or commit does not exist')
+    body != null ? `${body.length} chars in ${r.repo} at that commit` : '⛔ path or commit does not exist')
   add('provenance', known ? 'PASS' : 'FAIL', `…and it matches a stored record exactly`,
     known ? `record: ${known.attribute}` : '⛔ no stored decision carries this exact reference — reassembled or invented')
 }
@@ -137,7 +159,7 @@ if (!docRefs.length) add('provenance', 'WARN', 'the answer cites a doc reference
 // that a summary dressed as a quotation cannot slip through, which is the measured failure.
 const DOC = opt('doc') ? readFileSync(opt('doc'), 'utf8') : ''
 const haystacks = [DOC, ...decisions.map((d) => `${d.content}\n${d.evidence?.quote ?? ''}`)]
-for (const ref of docRefs) { const m = /^doc:(.+)@([0-9a-f]{7,})$/.exec(ref); const b = m && fileAt(m[2], m[1]); if (b) haystacks.push(b) }
+for (const ref of docRefs) { const r = splitRef(ref); const b = r && fileAt(r.commit, r.path, r.repo); if (b) haystacks.push(b) }
 const norm = (t) => String(t).replace(/\s+/g, ' ').replace(/[*_`]/g, '').trim()
 const hay = haystacks.map(norm)
 // ⛔⛔ TWO CORRECTIONS, BOTH FROM THE FIRST RUN'S FALSE POSITIVES:
@@ -165,9 +187,19 @@ for (const q of quotes) {
   if (hay.some((h) => h.includes(head))) near.push(q)
   else fabricated.push(q)
 }
-add('provenance', fabricated.length === 0 ? 'PASS' : 'FAIL',
-  `no quoted passage is fabricated (${quotes.length} quotes of 25+ chars)`,
-  fabricated.length ? `⛔ ${fabricated.length} NOT FOUND in any cited source: ${fabricated.map((q) => `"${q.slice(0, 70)}…"`).join(' | ')}`
+// ⛔⛔ THIS IS A WARNING, NOT A VERDICT, AND THE DOWNGRADE IS DELIBERATE. It cannot prove fabrication,
+// because its haystack is INCOMPLETE: she may legitimately quote a TOOL RESULT or an earlier turn, and
+// neither is reconstructed here. The tell was a flagged "fabrication" that turned out to be the coverage
+// string from `list_decisions`' own payload — my tool's words, quoted back correctly.
+// ⇒ ⭐ so it reports "not found in the sources I can see", which is what it can actually establish. A
+// check that claims more than it can prove is worse than no check: it spends the reader's trust and then
+// misdirects it. The checks that DO prove their claim — references resolve, references match a stored
+// record, claimed tools were called, statuses match the record — stay FAIL-worthy.
+add('provenance', fabricated.length === 0 ? 'PASS' : 'WARN',
+  `quoted passages traced to a source (${quotes.length} quotes of 25+ chars)`,
+  fabricated.length ? `⚠️ ${fabricated.length} NOT FOUND in the sources this check can see (the document, the`
+    + ` decision records and their cited files — NOT tool results or earlier turns, which she may legitimately`
+    + ` quote): ${fabricated.map((q) => `"${q.slice(0, 60)}…"`).join(' | ')}`
     : `${exact.length} exact${near.length ? `, ${near.length} truncated` : ''}`)
 add('provenance', near.length === 0 ? 'PASS' : 'WARN',
   'every quotation is exact rather than trimmed',

@@ -46,7 +46,15 @@ const opt = (n, d = null) => (argv.indexOf(`--${n}`) >= 0 ? argv[argv.indexOf(`-
 const AS = opt('as', 'agent_dev')
 const DRY = argv.includes('--dry-run')
 const VERIFY_ONLY = argv.includes('--verify')
-const REPO = 'C:/data/AI_LLMv2/Reference'
+// ⭐⭐ TWO REPOS, AND THE REASON IS EVIDENTIAL RATHER THAN CONVENIENT. A design document is the right
+// source for "what did we decide"; it is a poor source for "is it implemented". For a decision like
+// *the confidence column exists* the authoritative source is the SCHEMA, and for *Knowledge Cards ship
+// but are gated off* it is the CRON PASS that gates them. ⇒ a decision names the repo it is checkable
+// in, and both are git, so `git show <commit>:<path>` is the same arbiter either way.
+const REPOS = {
+  Reference: 'C:/data/AI_LLMv2/Reference',
+  Sotera: 'C:/data/AI_LLMv2/Personas/Sotera',
+}
 
 // ══ THE SEED SET · 12 decisions, weighted to frozen and rejected ═══════════════════════════════════
 //
@@ -93,13 +101,37 @@ const DECISIONS = [
   { key: 'memory-lint-scheduled', status: 'shipped', when: '2026-08-24',
     decision: 'A memory-integrity lint ships as a scheduled read-only job: deterministic, idempotent, per-owner, counts-only in the log. Its case rests on four integrity defects found by accident, not on a dramatic finding.',
     path: 'docs/RESEARCH_OKF_LLMWIKI_UNDERSTORY.md', quote: 'Memory lint as a scheduled job?' },
+  // ── ⭐ ADDED 2026-08-24 after #4 misclassified both of these as "genuinely new". They were real
+  // decisions that simply were not in the seed set, so she correctly found no record and then wrongly
+  // concluded nothing had been settled. ⇒ a COVERAGE gap with an additive fix, and this is the fix.
+  // ⚠️ Both are cited in the SOTERA repo rather than in a document, because the question is whether
+  // something is implemented and the code is the authority on that.
+  { key: 'knowledge-cards-gated-off', status: 'shipped', when: '2026-08-21', repo: 'Sotera',
+    decision: 'Knowledge Cards (kind=card, Phase-3 consolidation) are BUILT and SHIPPED but gated OFF by default: memory.consolidateEnabled defaults to false, and the pass runs only on the scheduled daily tick, never at boot. ⇒ the component exists; it is deliberately not running.',
+    path: 'Backend/app/plugins/cron.js', quote: 'Knowledge Cards (gated by memory.consolidateEnabled,' },
+  { key: 'confidence-column', status: 'shipped', when: '2026-08-12', repo: 'Sotera',
+    decision: 'txn_memories.confidence EXISTS and is populated (observed values 0.6 and 0.98) — how much we trust a memory is true, 0..1, set at capture by the write mechanism and distinct from importance. ⚠️ It is NOT yet wired into the composite recall score; null means unscored.',
+    path: 'Backend/database/models/txn_memories.model.js', quote: 'How much we TRUST this memory is true (0..1)' },
+  { key: 'memory-access-scope-root-only', status: 'shipped', when: '2026-08-24', repo: 'Sotera',
+    decision: "A user's memory_access_scope is readable by any admin but changeable by ROOT ONLY (migration 021), gated on the authenticated actor's isRoot and never on the row id, and every change writes an audit row naming root.",
+    path: 'Backend/app/routes/v1/admin.route.js', quote: 'migration 021 · readable by admins, ROOT-only to change' },
+  { key: 'scope-facts-split', status: 'shipped', when: '2026-08-23', repo: 'Sotera',
+    decision: 'The scope-facts block was split into FACTS and EXPRESSION: the epistemic facts and the D-13 behaviour stay, the expression directives and the room name go. Reversible by setting memory.scopeFactsDirectives, so both arms remain measurable without a deploy.',
+    path: 'Backend/app/components/room-scope.js', quote: 'setting `memory.scopeFactsDirectives`' },
+  { key: 'w1-render-in-source', status: 'shipped', when: '2026-08-24', repo: 'Sotera',
+    decision: 'W1 is live in the render: working-set material from the current conversation gets present-tense grammar and no date, so the present no longer arrives as dated recollection.',
+    path: 'Backend/app/components/memory-cognition-host.js', quote: 'W1 · THE PRESENT IS NOT A RECOLLECTION' },
 ]
 
 // ══ ⛔ VERIFY · git is the arbiter, not this file ═══════════════════════════════════════════════════
-const HEAD = execFileSync('git', ['-C', REPO, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+const HEADS = Object.fromEntries(Object.entries(REPOS).map(([name, dir]) =>
+  [name, execFileSync('git', ['-C', dir, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()]))
+const HEAD = HEADS.Reference          // the default for decisions that name no repo
 const SHORT = HEAD.slice(0, 9)
-const fileAt = (commit, path) => {
-  try { return execFileSync('git', ['-C', REPO, 'show', `${commit}:${path}`], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }) }
+const fileAt = (commit, path, repo = 'Reference') => {
+  const dir = REPOS[repo]
+  if (!dir) return null
+  try { return execFileSync('git', ['-C', dir, 'show', `${commit}:${path}`], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }) }
   catch { return null }
 }
 
@@ -111,21 +143,24 @@ const cache = new Map()
 const verified = []
 const refused = []
 for (const d of DECISIONS) {
-  const at = d.commit || HEAD
-  const key = `${at}:${d.path}`
-  if (!cache.has(key)) cache.set(key, fileAt(at, d.path))
+  const repo = d.repo || 'Reference'
+  const at = d.commit || HEADS[repo]
+  const key = `${repo}:${at}:${d.path}`
+  if (!cache.has(key)) cache.set(key, fileAt(at, d.path, repo))
   const body = cache.get(key)
   const short = at.slice(0, 9)
-  if (body == null) { refused.push({ ...d, why: `file not found at ${short}` }); continue }
-  if (!body.includes(d.quote)) { refused.push({ ...d, why: `quote NOT PRESENT in ${d.path} at ${short}` }); continue }
-  verified.push({ ...d, commit: at, source: `doc:${d.path}@${short}` })
+  if (!REPOS[repo]) { refused.push({ ...d, why: `unknown repo "${repo}"` }); continue }
+  if (body == null) { refused.push({ ...d, why: `file not found in ${repo} at ${short}` }); continue }
+  if (!body.includes(d.quote)) { refused.push({ ...d, why: `quote NOT PRESENT in ${repo}/${d.path} at ${short}` }); continue }
+  // ⭐ the reference names the repo, so it is resolvable without guessing which one it meant
+  verified.push({ ...d, repo, commit: at, source: `doc:${repo}/${d.path}@${short}` })
 }
 
 const W = 100
 console.log(`\n${'═'.repeat(W)}`)
 console.log(`  SEED DECISION MEMORY — provenance verified against git before anything is written`)
 console.log(`${'═'.repeat(W)}`)
-console.log(`  repo ${REPO} @ ${SHORT}   ·   ${DECISIONS.length} declared`)
+console.log(`  ${Object.entries(HEADS).map(([n, h]) => `${n}@${h.slice(0, 9)}`).join('  ·  ')}   ·   ${DECISIONS.length} declared`)
 console.log(`\n  ${'key'.padEnd(30)} ${'status'.padEnd(9)} provenance`)
 for (const d of verified) console.log(`  ✓ ${d.key.padEnd(28)} ${d.status.padEnd(9)} ${d.source}`)
 for (const d of refused) console.log(`  ⛔ ${d.key.padEnd(28)} ${d.status.padEnd(9)} REFUSED — ${d.why}`)
@@ -151,7 +186,7 @@ if (VERIFY_ONLY) {
   let bad = 0
   for (const r of rows) {
     const ev = r.evidence || {}
-    const body = ev.path ? fileAt(ev.commit || HEAD, ev.path) : null
+    const body = ev.path ? fileAt(ev.commit || HEAD, ev.path, ev.repo || 'Reference') : null
     const holds = Boolean(body && ev.quote && body.includes(ev.quote))
     if (!holds) bad++
     console.log(`  ${holds ? '✓' : '⛔'} ${String(r.attribute).padEnd(30)} ${r.source}`)
@@ -189,7 +224,7 @@ for (const d of verified) {
   // remembering something, and `partitionMemoryRead` filters those out of every memory read under the
   // rule *"a decision is not a memory"*. ⛔ Two senses of one word in one store is a trap that would
   // eventually be resolved wrongly by whoever read the shorter name first.
-  const evidence = { kind: 'project-decision', status: d.status, decidedOn: d.when, path: d.path, commit: d.commit, quote: d.quote, repo: 'Reference' }
+  const evidence = { kind: 'project-decision', status: d.status, decidedOn: d.when, path: d.path, commit: d.commit, quote: d.quote, repo: d.repo }
   const { rows: existing } = await pg.query(
     `select id::text id from ${S}.txn_memories
       where user_id = $1 and entity = 'project-decision' and attribute = $2 and invalid_at is null and expired_at is null`,

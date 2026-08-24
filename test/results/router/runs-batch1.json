@@ -1,0 +1,182 @@
+{
+ "at": "2026-08-24T07:27:45.723Z",
+ "reps": 4,
+ "runs": [
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 1,
+   "cid": "976913cb-5554-4a15-af75-bb917f03543f",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 2,
+   "cid": "15541d64-1d52-4019-800a-89f77708b103",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 3,
+   "cid": "69d6ea1b-16a6-4556-b78c-57582c31d1ab",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 4,
+   "cid": "4dddaec2-f985-42f5-8209-acaf9ab46999",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 1,
+   "cid": "cd63f78c-959b-4ea6-9a6c-c8599ac7da6c",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 2,
+   "cid": "e6b9fbe2-d9bd-4ae7-b920-7bcf6cfd98a3",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 3,
+   "cid": "8df78b7e-d7a8-4087-a063-38f580824f46",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 4,
+   "cid": "e197dd38-b680-496d-b0bb-775a59b3579a",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 1,
+   "cid": "82118e40-7623-4b9f-92a5-96bccdaa46f2",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 2,
+   "cid": "faee71ba-04a8-4cbd-8aa0-20977bbf7c2a",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 3,
+   "cid": "6bf1d105-9f8c-4ed5-a35e-8e553fe63b21",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 4,
+   "cid": "ee11fd59-f922-4457-a740-ed01e4a94282",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 1,
+   "cid": "80111f52-d68b-4d97-8384-670c2de3dd75",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 2,
+   "cid": "f9d364dc-49d5-42a5-9888-3894b75c50eb",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 3,
+   "cid": "b18c7d8b-c290-456e-8bbc-12d12245b3c9",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 4,
+   "cid": "933e6080-10c7-4f23-bfa0-bf42c238386e",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  }
+ ]
+}

@@ -1,0 +1,182 @@
+{
+ "at": "2026-08-24T07:37:56.319Z",
+ "reps": 4,
+ "runs": [
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 1,
+   "cid": "754dda3a-f891-4031-a2f7-a57e0d41c0aa",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 2,
+   "cid": "41a40eeb-6a37-40e8-954f-2bc9304c8a3f",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 3,
+   "cid": "f7ee273f-9f5a-4271-b802-a8aad2dc2f63",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "natural",
+   "i": 4,
+   "cid": "8ff55af6-ac68-419e-aef9-a52f080c8d99",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 1,
+   "cid": "6eb59a0c-2e08-4c86-8c7c-8e16847daf1d",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 2,
+   "cid": "be74b83e-fcb6-4e60-a83c-22180db402a8",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 3,
+   "cid": "41d85b3e-faeb-4b3f-b9ad-fb78a513b8da",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.prior-decision",
+   "phrasing": "explicit",
+   "i": 4,
+   "cid": "f8432137-4888-46c4-aa0a-7d9851b4f5b2",
+   "fired": true,
+   "stamped": "skill.prior-decision",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 1,
+   "cid": "634c6669-f737-4aac-b276-405bc00f353f",
+   "fired": false,
+   "stamped": "skill.prior-decision",
+   "other": "skill.prior-decision",
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 2,
+   "cid": "f0a5104d-1177-4159-a2df-13f19d23066a",
+   "fired": false,
+   "stamped": "skill.prior-decision",
+   "other": "skill.prior-decision",
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 3,
+   "cid": "2df20527-1f1f-41d0-b6cc-a38e4e567b68",
+   "fired": false,
+   "stamped": null,
+   "other": null,
+   "usedSkillTool": false,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "natural",
+   "i": 4,
+   "cid": "c2f0e029-c92e-4dc4-90b8-efcc672c3bb2",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 1,
+   "cid": "857c383f-cf7b-44cf-8bde-6d215f725c8d",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 2,
+   "cid": "07fb3258-8147-4a92-99fa-7feae4ea8aff",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 3,
+   "cid": "19ba299e-dbec-48f7-8eef-ebc6feecd905",
+   "fired": true,
+   "stamped": "skill.doc-reconcile",
+   "other": null,
+   "usedSkillTool": true,
+   "refused": null
+  },
+  {
+   "skill": "skill.doc-reconcile",
+   "phrasing": "explicit",
+   "i": 4,
+   "cid": "46d825f3-4389-4fbe-b13c-4aed7553e393",
+   "fired": false,
+   "stamped": "skill.prior-decision",
+   "other": "skill.prior-decision",
+   "usedSkillTool": true,
+   "refused": null
+  }
+ ]
+}
