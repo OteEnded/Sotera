@@ -228,6 +228,86 @@ test('⭐ "each of them" replaces a redundant count when the modifier covers the
   assert.match(s, /two conversations with Hermes, and I can see the other side of each of them too\./)
 })
 
+// ══ ⭐⭐⭐ CONTINUITY · A RETRIEVAL LIMIT IS NOT THE EXTENT OF A RELATIONSHIP ═══════════════════════
+//
+// ⚠️⚠️ THE DEFECT THESE GUARD, MEASURED ON REAL ROWS 2026-08-24. Asked *"How have you been doing chatting
+// with Aunt Hermes?"* the sentence read *"Right now I can reach three conversations with Hermes"* — while
+// the true figure was **185 conversations, 950 exchanges, 18–24 August**. The three was `LIMITS.episodes`,
+// a cap on one look, spoken in the first person as a fact about her life. ⭐ Ote: *"a scoped retrieval
+// result saying count: 0 does not mean global state is empty."* This is that principle in the POSITIVE
+// direction, and it is the same bug.
+const continuity = (over = {}) => ({
+  id: 'rel:1', kind: 'continuity', who: 'Hermes',
+  conversations: 185, exchangeCount: 950, firstSeen: '2026-08-18', lastSeen: '2026-08-24',
+  source: SOURCE.derived, basis: BASIS.attestedBySource, availability: AVAILABILITY.recalled,
+  retention: RETENTION.notRetained, confidence: 1, when: '2026-08-24', warrants: [], ...over,
+})
+const day = (d) => (d ? `${new Date(d).getUTCDate()} ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][new Date(d).getUTCMonth()]}` : null)
+
+test('⭐⭐⭐ the EXTENT is stated first and comes from participation, not from what was retrieved', () => {
+  const kept = [continuity(), episode('ep:1'), episode('ep:2', { withThem: false })]
+  const cs = currentStateOf({ kept })
+  assert.deepEqual(cs.observed.continuity, [{
+    who: 'Hermes', conversations: 185, exchangeCount: 950, firstSeen: '2026-08-18', lastSeen: '2026-08-24',
+  }])
+  const s = currentStateSentence(cs, 'Hermes', { dayOf: day })
+  assert.match(s, /^Hermes and I have talked in 185 conversations, from 18 August to 24 August\./)
+  // ⛔⛔ THE LOAD-BEARING NEGATIVE. The retrieved figure may still be said — it is true and useful — but it
+  // may never wear the words that mean "the number of conversations we have had".
+  assert.ok(!/Right now I can reach \S+ conversations? with Hermes/.test(s),
+    '⛔ a count over the top-N episodes must never be phrased as the extent of the relationship')
+  assert.match(s, /Right now I have one of my conversations with Hermes in front of me/)
+})
+
+test('⛔ "one of my conversations" stays plural — the partitive, not the count', () => {
+  const s = currentStateSentence(currentStateOf({ kept: [continuity(), episode('ep:1')] }), 'Hermes', { dayOf: day })
+  assert.match(s, /one of my conversations with Hermes/)
+  assert.ok(!/one of my conversation\b/.test(s))
+})
+
+test('⭐⭐⭐ the relationship exists and this look found nothing — and that is NOT an absence', () => {
+  // ⛔ THE SENTENCE THAT MUST NEVER GO MISSING. Without it the renderer falls through to *"I went looking
+  // … and came up with nothing"* — true of the look, false of her life, and the seed of the next denial.
+  const s = currentStateSentence(currentStateOf({ kept: [continuity()] }), 'Hermes', { dayOf: day })
+  assert.match(s, /^Hermes and I have talked in 185 conversations/)
+  assert.match(s, /I haven't brought any particular one of them back to mind just now\./)
+  assert.ok(!/(don't|do not) (remember|have)|nothing/i.test(s),
+    '⛔ an empty look beside a real relationship is never phrased as an absence')
+})
+
+test('⭐ one day of talking is dated as one day, never as a range', () => {
+  const s = currentStateSentence(
+    currentStateOf({ kept: [continuity({ conversations: 2, firstSeen: '2026-08-18', lastSeen: '2026-08-18' })] }),
+    'Hermes', { dayOf: day })
+  assert.match(s, /talked in two conversations, on 18 August\./)
+})
+
+test('⛔ no date formatter ⇒ no dates, never a machine date', () => {
+  const s = currentStateSentence(currentStateOf({ kept: [continuity()] }), 'Hermes')
+  assert.match(s, /^Hermes and I have talked in 185 conversations\./)
+  assert.ok(!/2026-08/.test(s), '⛔ a database date must never reach something she reads')
+})
+
+test('⛔⛔ a run with NO continuity item is byte-identical to before the population existed', () => {
+  const kept = [episode('ep:1'), episode('ep:2', { withThem: false })]
+  const s = currentStateSentence(currentStateOf({ kept }), 'Hermes', { dayOf: day })
+  assert.match(s, /^Right now I can reach one conversation with Hermes\./)
+  assert.match(s, /one other conversation of mine touches on Hermes\./)
+})
+
+test('⛔ a continuity item claims counts only — it can carry no content, and the lattice accepts it', () => {
+  const c = continuity()
+  // ⭐ THE PRIVACY PROPERTY IS THE SHAPE ITSELF: every value is a number, a date, or the name the asker used.
+  for (const [k, v] of Object.entries(c)) {
+    if (['id', 'kind', 'who', 'source', 'basis', 'availability', 'retention'].includes(k)) continue
+    assert.ok(typeof v !== 'string' || /^\d{4}-\d{2}-\d{2}$/.test(v) || Array.isArray(v),
+      `⛔ field "${k}" is free text and could carry a quotation`)
+  }
+  const cs = currentStateOf({ kept: [c] })
+  assert.deepEqual(findIllegalPromotions([c], [cs]), [])
+  assert.equal(cs.retention, RETENTION.notRetained)
+})
+
 test('⭐ counts are spoken, not tabulated', () => {
   assert.equal(spell(0), 'no')
   assert.equal(spell(1), 'one')

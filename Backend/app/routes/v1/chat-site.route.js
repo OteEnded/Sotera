@@ -1519,6 +1519,11 @@ export default async function chatSiteRoutes(fastify) {
     // manufactured fragment — `about0`'s measured failure was *"talking about remember"* — so a derived-only
     // cue set leaves this null and the view simply says "Where I stand, having looked:".
     let holdSubject = null
+    // ⭐⭐⭐ THE EXTENT CLAUSES, CARRIED FOR THE WHOLE TURN so they can ride BESIDE a tool result and not
+    // only inside the block. ⚠️ A room-scoped memory read tells her the material is out of reach; a count of
+    // conversations she has actually had is a population that read never looked at. ⛔ The route RELAYS these
+    // strings and never builds one — the cognition layer renders them, in the conversation's language.
+    let holdContinuity = []
     // ⛔ AND THE LAST STANDING VIEW ATTACHED THIS TURN, so an unchanged one is not said twice. Measured
     // live: round 2 rendered BYTE-IDENTICALLY to round 1 because that round's calls were not looks into her
     // memory, so nothing entered the hold. ⓘ This is not a delta format — the whole view is still rendered
@@ -1681,6 +1686,7 @@ export default async function chatSiteRoutes(fastify) {
               holdSubject = typed.length
                 ? typed.join(' and ')
                 : (out.cues?.topics ?? []).find((t) => !derived.has(t)) ?? null
+              holdContinuity = Array.isArray(out.continuityLines) ? out.continuityLines : []
             }
             // ⓘ OBSERVABILITY FOR THE FIRST LIVE RUNS. Off by default; when on, the exact injected block
             // and the stage-by-stage counts are appended to a file, so a failure can be attributed to
@@ -2902,7 +2908,9 @@ export default async function chatSiteRoutes(fastify) {
           }
           const holdingNow = cognitiveHold && !cognitiveHold.disposed
             ? { recollections: cognitiveHold.snapshot().counts?.recollection ?? 0,
-              openQuestions: cognitiveHold.snapshot().openQuestions ?? 0 }
+              openQuestions: cognitiveHold.snapshot().openQuestions ?? 0,
+              // ⭐ THE POPULATION NO MEMORY READ OBSERVED. Relayed verbatim; see `relateToHold`.
+              continuity: holdContinuity }
             : null
           const forModel = evidenceForModel(tc.name, forModelRaw, {
             enabled: fastify.config?.memory?.cognitionEnabled === true,

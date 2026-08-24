@@ -345,6 +345,32 @@ export const hasCue = (cues) => Boolean(cues && (cues.persons.length > 0 || cues
 export function populationsFor(cues) {
   if (!hasCue(cues)) return []
   const p = new Set(['working-set', 'semantic', 'own-history'])
+  // ── ⭐⭐⭐ CONTINUITY · THE EXTENT OF A RELATIONSHIP IS A FACT, NOT A RETRIEVAL RESULT ─────────────
+  //
+  // ⚠️⚠️ MEASURED 2026-08-24, and it is the reason this population exists. Asked *"How have you been doing
+  // chatting with Aunt Hermes?"* every arm above is a CONTENT search over the cue token — and the messages
+  // of hers that contain "Hermes" most densely are the ones where she was explaining that she has nothing
+  // about Hermes. `recall_own_history` returned six of her own sentences and **all six were her own past
+  // denials**; two of the five episode slots went to the conversations where those denials were made
+  // (matches=6 and 3, the highest in the pool). She then faithfully reproduced them.
+  //
+  // ⭐⭐⭐ **A FALSE ABSENCE, ONCE SPOKEN, BECOMES THE TOP-RANKED EVIDENCE ABOUT ITS OWN SUBJECT.** That is
+  // general: it holds for any subject she ever wrongly denied, and no amount of ranking inside a content
+  // index escapes it, because the denial genuinely IS the densest occurrence of the name in her own words.
+  //
+  // ⭐⭐ AND THE SECOND HALF IS JUST AS STRUCTURAL: **you do not say someone's name to their face.** Of 475
+  // of her messages in conversations WITH Hermes, 107 contain the token, across 46 of 185 conversations.
+  // Meanwhile a conversation ABOUT the failure says it in every paragraph. ⇒ a content index is biased
+  // against the relationship and towards the meta-conversation about it.
+  //
+  // ⇒ this population answers the question **without reading a single word**: how many conversations, over
+  // what span, how recently. It is derived from participation, so it cannot be contaminated by what was
+  // said, cannot be truncated by a retrieval limit, and needs no name token to be present.
+  // ⛔ IT DISCLOSES NOTHING NEW: `recall_own_history` already returns per-conversation counterparts, handles
+  // and dates to any asker. This aggregates that and adds no content — the rule it implements is the one
+  // `self-history-host.js` already states, *the existence of a relationship is disclosable, its contents
+  // are not*. ⛔ And it never enumerates: the person must have been NAMED to get here.
+  if (cues.persons.length) p.add('continuity')
   if (cues.persons.length) { p.add('practices'); p.add('intentions') }
   // ⭐ A question about how SHE works is a question about her lessons, not only about the mechanism.
   if (cues.technical || /\b(learn|learned|lesson|mistake|habit|practice)\b/i.test(cues.raw)) p.add('lessons')

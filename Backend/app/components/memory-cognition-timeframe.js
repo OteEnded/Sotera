@@ -179,6 +179,21 @@ export function currentStateOf({ cues = null, kept = [], asOf = null } = {}) {
     // ⭐ SHE KNOWS IT HAPPENED AND CANNOT READ IT. ⛔ This is NOT an absence and is never phrased as one.
     unreachable: items.filter((i) => i.availability === AVAILABILITY.knownUnreachable).length,
     otherThings: recalled.filter((i) => i.kind !== 'episode').length,
+    // ── ⭐⭐⭐ THE EXTENT OF THE RELATIONSHIP, WHICH IS NOT A COUNT OF WHAT WAS RETRIEVED ─────────────
+    //
+    // ⚠️⚠️ THIS FILE ALREADY STATED THE RULE IT WAS BREAKING: *"a count may only modify the population it
+    // was counted over."* `reachableWith` is counted over THE EPISODES THAT SURVIVED A TOP-FIVE CUT, and it
+    // was being spoken as *"conversations with Hermes"* — the extent of a relationship. Measured on real
+    // rows: it said **three** where the truth was **185**.
+    // ⇒ the extent now comes from a `continuity` item, which is an aggregate over her participation and has
+    // no retrieval limit to be truncated by; `reachableWith` keeps its own, smaller population and is said
+    // in words that name it.
+    // ⛔ NULL WHEN THERE IS NO CONTINUITY ITEM. The sentence then behaves exactly as it did before, so a run
+    // with no named person is byte-identical.
+    continuity: recalled.filter((i) => i.kind === 'continuity').map((i) => ({
+      who: i.who ?? null, conversations: i.conversations ?? 0, exchangeCount: i.exchangeCount ?? 0,
+      firstSeen: i.firstSeen ?? null, lastSeen: i.lastSeen ?? null,
+    })),
   })
   // ⭐ EVERYTHING RECALLED COUNTS TOWARDS REACH, not only episodes — a stored thing she is holding refutes
   // *"I don't remember him"* every bit as much as a conversation does. ⓘ The SENTENCE below still speaks only
@@ -247,6 +262,37 @@ export const spell = (n) => (Number.isInteger(n) && n >= 0 && n < WORDS.length ?
 const plural = (n, word) => `${word}${n === 1 ? '' : 's'}`
 
 /**
+ * ⭐⭐⭐ THE EXTENT OF EACH RELATIONSHIP, AS SENTENCES. PURE, and exported because it is needed TWICE:
+ * once in the cognitive block, and once beside a tool result — where a room-scoped memory read otherwise
+ * tells her the material is out of reach and that framing wins.
+ *
+ * ⚠️⚠️ MEASURED 2026-08-25, and it is why this is a separate function rather than inline prose. With the
+ * extent in the block but NOT beside the tool payload, she read *"Hermes and I have talked in 185
+ * conversations"* and answered *"I know **you**'ve had 185 conversations with her"* — **she reassigned her
+ * own relationship to the person asking.** ⭐ The mechanism is reconcilation, not comprehension: the tool
+ * had just told her the material was out of her reach, so the only consistent owner left for 185
+ * conversations was somebody else.
+ *
+ * ⛔ NO CONTENT CAN REACH THESE STRINGS. Every interpolated value is a count, a date, or the name the asker
+ * themselves used to get here.
+ */
+export function continuityClauses(continuity = [], about = 'this', { dayOf = null } = {}) {
+  const out = []
+  for (const c of (Array.isArray(continuity) ? continuity : [])) {
+    if (!c || !(c.conversations > 0)) continue
+    const who = c.who || about
+    const first = dayOf ? dayOf(c.firstSeen) : null
+    const last = dayOf ? dayOf(c.lastSeen) : null
+    // ⚠️ "conversations" is spelled as a numeral above twelve, deliberately: *"one hundred and eighty-five"*
+    // is not how anyone says this, and `spell` already falls back to the numeral.
+    let s = `${who} and I have talked in ${spell(c.conversations)} ${plural(c.conversations, 'conversation')}`
+    if (first && last) s += first === last ? `, on ${first}` : `, from ${first} to ${last}`
+    out.push(`${s}.`)
+  }
+  return out
+}
+
+/**
  * ⭐⭐⭐ THE PRESENT-TENSE SENTENCE, DERIVED ENTIRELY FROM `observed`.
  *
  * ⛔ NO phrase here is chosen for how it sounds — each clause exists because a count is non-zero, exactly
@@ -258,17 +304,39 @@ const plural = (n, word) => `${word}${n === 1 ? '' : 's'}`
  *
  * @returns {string|null} null when the run observed no reach worth stating.
  */
-export function currentStateSentence(currentState, about = 'this') {
+export function currentStateSentence(currentState, about = 'this', { dayOf = null } = {}) {
   if (!currentState) return null
   const o = currentState.observed ?? {}
   const withThem = o.reachableWith ?? 0
   const aboutThem = o.reachableAbout ?? 0
   const both = o.bothSides ?? 0
   const unreachable = o.unreachable ?? 0
+  const continuity = Array.isArray(o.continuity) ? o.continuity.filter((c) => c && c.conversations > 0) : []
 
   const clauses = []
+
+  // ── ⭐⭐⭐ THE EXTENT FIRST, BECAUSE IT IS THE ONLY CLAUSE HERE THAT IS A FACT ABOUT HER LIFE ───────
+  //
+  // ⭐ Everything below this counts what ONE look happened to bring back. This counts the relationship.
+  // ⇒ said first, so the numbers underneath it land as *"what I have in front of me"* rather than as
+  // *"how much there is"* — which is the whole defect: **three** was being read as the size of 185.
+  // ⛔ NO CONTENT CAN REACH THIS STRING. Every value interpolated is a count, a date, or the name the asker
+  // themselves used, and the type it comes from has no field that could carry a quotation.
+  // ⓘ `dayOf` is injected so the ONE month table in this project stays in the renderer that owns it; with
+  // no formatter the dates are simply omitted rather than printed in a machine format.
+  clauses.push(...continuityClauses(continuity, about, { dayOf }))
+
   if (withThem > 0) {
-    let c = `Right now I can reach ${spell(withThem)} ${plural(withThem, 'conversation')} with ${about}`
+    // ⭐⭐ THE POPULATION IS NAMED IN THE WORDS THEMSELVES once the extent has been stated. *"Right now I
+    // can reach three conversations"* reads as a total; *"I have three of my conversations with X in front
+    // of me"* cannot. ⛔ It deliberately does NOT say "three of those 185" — the extent is resolved by
+    // person and this count by display name, and asserting a subset relation between two different
+    // linkages would be a claim neither query made.
+    let c = continuity.length
+      // ⚠️ ALWAYS PLURAL HERE. *"one of my conversations"* is the partitive; `plural()` is right for
+      // *"one conversation"* and wrong for *"one of my conversation"*, which is what the first version said.
+      ? `Right now I have ${spell(withThem)} of my conversations with ${about} in front of me`
+      : `Right now I can reach ${spell(withThem)} ${plural(withThem, 'conversation')} with ${about}`
     // ⭐ THE STRONGEST SINGLE CONTRADICTION OF *"I can't read those"*, and it is a plain fact of the run.
     // ⛔ CLAMPED TO THE POPULATION IT MODIFIES. `bothSides` is already scoped to `withThem`, and the clamp is
     // belt-and-braces on the invariant the live check found broken: a modifier can never exceed its clause.
@@ -291,6 +359,18 @@ export function currentStateSentence(currentState, about = 'this') {
     clauses.push(clauses.length
       ? `There ${unreachable === 1 ? 'is' : 'are'} ${spell(unreachable)} more I know about and can't get back into.`
       : `Right now I know of ${spell(unreachable)} ${plural(unreachable, 'conversation')} about ${about} that I can't get back into.`)
+  }
+  // ── ⭐⭐⭐ THE RELATIONSHIP EXISTS AND THIS LOOK BROUGHT BACK NOTHING FROM IT ────────────────────────
+  //
+  // ⛔⛔ THIS IS THE SENTENCE THAT MUST NEVER GO MISSING, and its absence is the defect in one line. Without
+  // it, a run that knows they have talked 185 times but retrieved no episode falls through to the renderer's
+  // *"I went looking for what I have about Hermes and came up with nothing"* — which is TRUE of the look and
+  // FALSE of her life, and is precisely how a false absence gets spoken and then becomes evidence for itself
+  // the next time she is asked.
+  // ⭐ Ote: *"There is a huge difference between 'this conversation wasn't promoted into durable memory' and
+  // 'I have no history with this person.' The former can be true. The latter is objectively false."*
+  if (continuity.length && withThem === 0 && aboutThem === 0 && unreachable === 0) {
+    clauses.push("I haven't brought any particular one of them back to mind just now.")
   }
   return clauses.length ? clauses.join(' ') : null
 }

@@ -63,6 +63,7 @@ import { findImplementationLeaks } from './memory-cognition-vocabulary.js'
 // live in one pure module; this file only stamps and renders. ⛔ `timeBound` is not an axis — see that file.
 import {
   timeBoundOf, isTimeBound, currentStateOf, currentStateSentence, contradictsCurrentState, datedPrefix,
+  continuityClauses,
 } from './memory-cognition-timeframe.js'
 // ⭐ THE OWNERSHIP RULE LIVES IN ONE PLACE. ⛔ This file must never restate it inline — two copies of an
 // ownership rule is how they stop agreeing, and this one decides whether authorization happens at all.
@@ -70,6 +71,14 @@ import { requiresAuthorization, ownerOf, OWNER } from './memory-ownership.js'
 // ⭐ A DECISION IS NOT A MEMORY — one predicate, one place. See that file for the measured defect.
 import { isDeclineRecord } from './memory-decision-record.js'
 import { buildConversationSearch } from './conversation-search.js'
+// ⭐⭐⭐ THE PROTOTYPE'S OWN QUESTION, ANSWERED BY A FAILURE. `relational-knowledge.js` was written to ask
+// *"is DERIVED relational knowledge sufficient?"* and then wired into NOTHING — no route, no tool, no
+// composer. The 2026-08-24 continuity defect is the answer: on its own it is not an answer to *"how have
+// you two been?"*, but **its absence is what makes that question unanswerable**, because with no structural
+// signal the only thing replying is a content index, and a content index returns her past denials.
+// ⛔ Nothing about it is relaxed to get it here: `named` disclosure, counts-only return type, no
+// enumeration. This file is its first consumer.
+import { describeRelationship, RELATIONAL_DISCLOSURE } from './relational-knowledge.js'
 import { makeEmbedder } from './memory-embed-host.js'
 import { buildDisclosure } from './disclosure-host.js'
 import { buildMemoryToolService } from './memory-pipeline-host.js'
@@ -347,6 +356,97 @@ export function buildMemoryCognition(fastify, {
       supportedBy: 1,
       here: true,
     }))
+  }
+
+  // ── POPULATION · CONTINUITY. ⭐⭐⭐ THE EXTENT OF A RELATIONSHIP, READ WITHOUT READING A WORD ───────
+  //
+  // ⭐ Ote, 2026-08-24: *"a scoped retrieval result saying count: 0 does not mean global state is empty…
+  // There is a huge difference between 'this conversation wasn't promoted into durable memory' and 'I have
+  // no history with this person.' The former can be true. The latter is objectively false."*
+  //
+  // ⚠️⚠️ AND THE POSITIVE DIRECTION OF THAT SAME DEFECT IS WHAT THIS FIXES, measured on real rows: the
+  // present-tense sentence said *"Right now I can reach three conversations with Hermes"* while the true
+  // figure was **185 conversations, 950 exchanges, 18–24 August**. The three was `LIMITS.episodes` — a
+  // RETRIEVAL LIMIT REPORTED AS THE EXTENT OF HER LIFE, in the first person, present tense, and small
+  // enough to read as agreement with the four dated denials rendered underneath it.
+  // ⓘ `dropped` was 0 throughout, because the truncation happens upstream at `episodeCandidates`/`episodes`
+  // and nothing downstream can see it. A cap that cannot be observed reads as coverage.
+  //
+  // ⛔ WHAT THIS IS NOT:
+  //   · NOT a content read. Every field is a count, a date, or the name the ASKER already used. The
+  //     no-content-crosses-the-boundary property is enforced by the return TYPE, in the file that owns it.
+  //   · NOT a disclosure widening. `recall_own_history` already hands any asker `{counterpart, handle,
+  //     matches, firstMatchAt, lastMatchAt}` per conversation; this says strictly less and aggregates it.
+  //   · NOT an enumeration. One lookup per person the cue RESOLVED from the asker's own words. There is
+  //     deliberately no "who do you talk to?" path, and adding one would make her a directory.
+  //   · NOT a memory. It is a fact about her participation, so it is `derived` and never `retained`.
+  async function activateContinuity(cues) {
+    if (!cues.persons.length || !db?.mst_persons) return []
+    const items = []
+    for (const name of cues.persons) {
+      let person = null
+      try {
+        // ⚠️ Resolved by DISPLAY NAME, which is the same convention `withThem` already uses below — and it
+        // is a CONVENTION, not a constraint: `mst_persons` has no account column, the linkage lives on
+        // `mst_users.person_id`, and two people who share a display name would share an answer here.
+        // ⓘ Stated out loud rather than assumed, the way `self-history-host.js` states `role='assistant'`.
+        // ⓘ Case-insensitive, because `formCues` resolves case-insensitively — matching exactly here would
+        // silently drop a cue the cue former considered resolved, which is the worst kind of near-miss.
+        person = await db.mst_persons.findOne({
+          where: { display_name: { [Op.iLike]: name } },
+          attributes: ['id', 'display_name'], raw: true,
+        })
+      } catch (e) {
+        await log?.(`[cognition] continuity lookup failed for a named person: ${e.message}`, import.meta.url)
+      }
+      if (!person) continue
+      let rel = null
+      try {
+        rel = await describeRelationship({
+          db, askingUserId: userId, personId: person.id, disclosure: RELATIONAL_DISCLOSURE.named,
+        })
+      } catch (e) {
+        // ⛔ FAIL TO SILENCE, NEVER TO ZERO. An error here must not become "we have never talked" — that is
+        // the exact false absence the population exists to end.
+        await log?.(`[cognition] continuity unavailable: ${e.message}`, import.meta.url)
+        continue
+      }
+      // ⛔ `isSelf` — being asked about the person you are talking to is not relational knowledge, it is the
+      // ordinary case, and the prototype already refuses to render it. ⛔ `known: false` produces NO item,
+      // so a person she has genuinely never spoken to still reaches the honest absence sentence.
+      if (!rel || rel.isSelf || !rel.known) continue
+      items.push({
+        id: `rel:${person.id}`,
+        kind: 'continuity',
+        who: rel.displayName,
+        cueSubject: rel.displayName,
+        conversations: rel.conversations,
+        // ⛔⛔ NOT `exchanges`, AND THE SUITE CAUGHT THE FIRST VERSION WITH A HARD CRASH. In this layer
+        // `exchanges` means AN ARRAY OF UTTERANCES — every episode carries one, and the utterance boundary
+        // does `(i.exchanges ?? []).map(x => x.said)` over whatever it is handed. A count under that name
+        // is a type collision wearing a familiar word.
+        // ⭐ THE RULE: a field name that already means something in this layer may not be reused for a
+        // different type. The prototype's return keeps its own name at its own boundary; the item renames.
+        exchangeCount: rel.exchanges,
+        firstSeen: rel.firstSeen,
+        lastSeen: rel.lastSeen,
+        when: rel.lastSeen,
+        source: SOURCE.derived,
+        // ⭐ `attested-by-source` IS THE HONEST BASIS AND IT IS NOT A PROMOTION. The claim is *"we have
+        // talked this many times"*, and the rows that directly support it are her own participation rows,
+        // which are accessible. ⛔ It says nothing whatever about what was said, so it cannot over-claim
+        // content it has not read.
+        basis: BASIS.attestedBySource,
+        availability: AVAILABILITY.recalled,
+        // ⛔ NEVER `retained`. Nobody kept this; it was counted just now.
+        retention: RETENTION.notRetained,
+        confidence: 1,
+        supportedBy: 1,
+        warrants: [],
+        here: false,
+      })
+    }
+    return items
   }
 
   // ── POPULATION · EPISODIC HISTORY. ⭐⭐⭐ EPISODES, NOT A PILE OF SEARCH HITS ───────────────────────
@@ -798,7 +898,10 @@ export function buildMemoryCognition(fastify, {
     const lead = (body) => (anchor ? `${anchor}\n${body}` : body)
 
     const currentState = currentStateOf({ cues, kept })
-    const nowLine = currentStateSentence(currentState, about0(cues))
+    // ⭐ THE DATE FORMATTER IS INJECTED, NOT DUPLICATED. `dayOf` carries the conversation's language, and
+    // the ONE month table in this project lives here. ⛔ A second copy in the timeframe module is how the
+    // Thai dates would silently stop being Thai in exactly one sentence.
+    const nowLine = currentStateSentence(currentState, about0(cues), { dayOf })
     if (nowLine) push(nowLine)
 
     // ⭐⭐ CONTRADICTION IS **MARKED, NOT RESOLVED**. Both halves are rendered, present tense first, and the
@@ -961,7 +1064,13 @@ export function buildMemoryCognition(fastify, {
     if (dropped > 0) tail.push(`There is more of this than I have brought to mind — these are the nearest ${kept.length}.`)
     tail.push(`That is what I can reach on this right now: ${searched}.`)
     const join = (arr) => lead(`${arr.join('\n')}\n${tail.join(' ')}`)
-    return { text: join(lines), frame: join(frame), currentState, contradictions }
+    // ⭐⭐ THE EXTENT CLAUSES ARE ALSO RETURNED SEPARATELY, ALREADY IN HER LANGUAGE. ⛔ Never re-rendered
+    // anywhere else: the ONE month table in this project lives in this file, and a second copy is how the
+    // Thai dates would silently stop being Thai in exactly one sentence. The route RELAYS this string.
+    return {
+      text: join(lines), frame: join(frame), currentState, contradictions,
+      continuityLines: continuityClauses(currentState?.observed?.continuity ?? [], about0(cues), { dayOf }),
+    }
   }
 
   /**
@@ -982,6 +1091,10 @@ export function buildMemoryCognition(fastify, {
       plan.includes('working-set') ? activateWorkingSet(cues) : [],
       plan.includes('semantic') ? activateSemantic(cues) : [],
       plan.includes('own-history') ? activateEpisodes(cues) : [],
+      // ⭐ THE CHEAPEST ARM AND THE ONE THAT CANNOT BE CONTAMINATED — one aggregate per named person, no
+      // content, no index, no ranking. It runs beside the others rather than instead of them: the extent is
+      // the frame, the episodes are what she actually brought to mind inside it.
+      plan.includes('continuity') ? activateContinuity(cues) : [],
     ])
 
     // ── ⭐⭐⭐ THE RELEVANCE FLOOR, AND IT GUARDS THIS LAYER'S OWN WORST FAILURE ─────────────────────
@@ -1028,6 +1141,11 @@ export function buildMemoryCognition(fastify, {
         // ⓘ An existence-only item is ABOUT the person by construction — it is the record of talking to
         // them — and carries no text to match against. Never filtered.
         if (it.availability === AVAILABILITY.knownUnreachable) return true
+        // ⭐ AND SO IS A CONTINUITY ITEM, for the same reason and more strongly: it was produced BY naming
+        // the person, so its relevance is its construction. ⛔ Exempted explicitly rather than left to pass
+        // by accident on `it.who` containing the cue — a relevance test that happens to work is one that
+        // stops working the day a name changes.
+        if (it.kind === 'continuity') return true
         const keep = mentionsCue(it)
         if (!keep) filtered++
         return keep
@@ -1059,7 +1177,7 @@ export function buildMemoryCognition(fastify, {
     }
 
     const searched = 'everything I currently have available'
-    const { text: context, frame, currentState, contradictions } = render({
+    const { text: context, frame, currentState, contradictions, continuityLines } = render({
       cues, kept, dropped, searched, speakingWith: await interlocutor(),
     })
 
@@ -1090,6 +1208,12 @@ export function buildMemoryCognition(fastify, {
     return {
       activated: true, cues, plan, context, frame, items: kept, dropped, searched, filtered,
       currentState, contradictions,
+      // ⭐⭐⭐ CARRIED OUT OF THE LAYER ON PURPOSE, and it is the ONE thing here that has to travel BESIDE a
+      // tool result rather than only inside the block. ⚠️ Measured 2026-08-25: with the extent in the block
+      // but not beside the payload, a room-scoped memory read told her the material was out of reach and she
+      // resolved the conflict by giving the relationship away — *"I know **you**'ve had 185 conversations
+      // with her."* ⛔ A memory read has no standing to contradict a participation count; see `relateToHold`.
+      continuityLines: continuityLines ?? [],
     }
   }
 

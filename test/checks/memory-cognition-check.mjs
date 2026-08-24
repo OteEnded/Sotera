@@ -344,8 +344,33 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
       // and a dangling "you" resolves — for any reader — to whoever they are talking to now. That is R4.
       ok(/^I'm talking with .+ right now\.$/.test(blockLines[0] ?? ''),
         '10 · ⭐⭐⭐ the block NAMES the person she is speaking with, before quoting anybody', blockLines[0])
-      ok(/^Right now I/.test(blockLines[1] ?? ''),
-        '10 · ⭐⭐⭐ …then what she can reach right now', String(blockLines[1]).slice(0, 68))
+      // ⚠️⚠️ THIS ASSERTED THE WORDING AND NOT THE INVARIANT, and the continuity population caught it: the
+      // sentence now leads with *"X and I have talked in N conversations…"* and the old `/^Right now I/`
+      // failed on a block that was more correct than the one it was written against. ⭐ The claim the layer
+      // actually makes is ORDERING — the present before the dated past — so that is what is asserted, and
+      // the phrasing is free to improve without a red suite.
+      ok(/^(Right now I|.+ and I have talked in )/.test(blockLines[1] ?? ''),
+        '10 · ⭐⭐⭐ …then the present tense, before anything dated', String(blockLines[1]).slice(0, 68))
+      const firstDated = blockLines.findIndex((l) => /^\s*On \d+ [A-Z][a-z]+ I said/.test(l))
+      ok(firstDated === -1 || firstDated > 1,
+        '10 · ⛔⛔ NOW BEFORE THEN — no dated line may precede the present-tense sentence', `first dated at ${firstDated}`)
+      // ── ⭐⭐⭐ THE CONTINUITY INVARIANT · A RETRIEVAL LIMIT MAY NOT BE SPOKEN AS THE EXTENT ──────────
+      // Measured 2026-08-24: *"Right now I can reach three conversations with Hermes"* where the truth was
+      // 185. The three was `LIMITS.episodes`. ⇒ when the run knows the extent, the extent is stated FIRST
+      // and the retrieval count is phrased so it cannot be read as a total.
+      const cont = (r.currentState?.observed?.continuity ?? []).filter((c) => c.conversations > 0)
+      if (cont.length) {
+        ok(new RegExp(`have talked in ${cont[0].conversations} conversations`).test(r.context),
+          '10 · ⭐⭐⭐ the EXTENT of the relationship is stated, and it is the structural figure',
+          `${cont[0].who}: ${cont[0].conversations}`)
+        ok(!/Right now I can reach \S+ conversations? with /.test(r.context),
+          '10 · ⛔⛔ …and the retrieved count is NEVER phrased as the number of conversations they have had')
+        ok(cont[0].conversations >= (r.currentState?.observed?.reachableWith ?? 0),
+          '10 · ⛔ the extent can never be smaller than what was brought to mind',
+          `${cont[0].conversations} ≥ ${r.currentState?.observed?.reachableWith}`)
+      } else {
+        ok(true, '10 · ⓘ no continuity item in this run — the extent assertions have no subject', 'skipped')
+      }
       ok(!String(blockLines[0]).trim().endsWith(':'),
         '10 · ⛔ …and that first line is not a heading — a title turns the rest into "the contents"')
     }

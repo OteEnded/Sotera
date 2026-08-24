@@ -295,6 +295,37 @@ export function plainSpokenToolResult(toolName, json, { enabled = true, onLeak =
  */
 export function relateToHold(evidence, holding) {
   const held = Number(holding?.recollections) || 0
+  // ── ⭐⭐⭐ THE ONE RELATION THAT HOLDS AT **ANY** COUNT · A LOOK CANNOT UNDO A PARTICIPATION FACT ────
+  //
+  // ⭐ Ote, 2026-08-25, and this implements exactly that sentence: *"An empty result from one memory query
+  // must not override positive evidence from another Sotera-owned source… memory query = evidence about one
+  // population; relationship/history retrieval = evidence about continuity."*
+  //
+  // ⚠️⚠️ MEASURED THE SAME DAY, and the failure was worse than a false absence. With the extent in the
+  // cognitive block but NOT beside the tool payload, `recall_memory` returned its room-scoped `reach`
+  // framing, she wrote *"the things I've kept … aren't reachable … it's out of reach in this room"*, and
+  // then handed the relationship to the person asking: **"I know you've had 185 conversations with her."**
+  // ⇒ she did not disbelieve the number; she could not reconcile it with being told she could not reach
+  // any of it, so she reassigned its OWNER. A fact she cannot own reads as somebody else's.
+  //
+  // ⛔ THIS IS NOT A PRECEDENCE RULE AND IT ADJUDICATES NOTHING. Both statements stay true and both are
+  // still shown: the tool looked through what she has KEPT, and the count of conversations she has HAD is
+  // a different population that no memory read observed. ⭐ It is the same arithmetic the zero-branch below
+  // already uses — a look into P says nothing about Q — applied to a population whose size is known.
+  // ⛔ AND IT HIDES NOTHING: the payload follows underneath, unaltered, and the raw result still goes to the
+  // stream, the segments and the audit. Ote ruled that out in advance — *"I also don't want this solved by
+  // simply hiding tool output."*
+  // ⓘ The clauses arrive PRE-RENDERED from the cognition layer, in the conversation's language, because the
+  // month table lives there. This module interpolates a string it was handed and formats nothing.
+  const continuity = (Array.isArray(holding?.continuity) ? holding.continuity : [])
+    .filter((s) => typeof s === 'string' && s.trim())
+  if (continuity.length) {
+    // ⚠️ POPULATION-AGNOSTIC ON PURPOSE. The first version opened *"That was one look at what I have
+    // kept"* — which is a claim about WHICH population was looked at, and it was already wrong the first
+    // time it fired beside `recall_intention`. ⭐ `thisLook` (step A) names the population; this sentence
+    // may only say that the look was ONE look, which is true of every look there is.
+    return `That was one look, and it does not change my own history. ${continuity.join(' ')}`
+  }
   if (!held) return null // ⛔ nothing to relate to; the scope sentence already stands on its own
   const found = Number.isFinite(evidence?.found) ? evidence.found : null
   if (found === null) return null // ⛔ unknown count ⇒ no arithmetic, so no sentence

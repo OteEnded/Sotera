@@ -30,6 +30,10 @@
 // means "I answered, nothing matched". Collapse them and recall goes silently empty.
 // Each capability latch flips ONCE and warns ONCE — a missing index must not log per query.
 import { Op } from 'sequelize'
+// ⭐⭐⭐ THE ONE INVARIANT THE STORE CAN GUARANTEE ABOUT ITSELF: no durable row may assert what the store
+// contains. ⛔ The predicate lives in its own file — one predicate, one place, the same discipline as
+// `memory-ownership.js` — so this file holds the ENFORCEMENT and none of the judgement.
+import { admissible } from './memory-self-state-claim.js'
 
 const LIVE = { invalid_at: null, expired_at: null }
 const OWNED_KINDS = ['episodic', 'semantic', 'card'] // identity is persona-global, never "owned"
@@ -398,6 +402,37 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
 
     // ── WRITES ───────────────────────────────────────────────────────────────────────────────
     async create(row = {}) {
+      // ── ⭐⭐⭐ THE SELF-STATE GATE · EVERY LANE PASSES THROUGH HERE, WHICH IS WHY IT IS HERE ─────────
+      //
+      // ⚠️⚠️ MEASURED 2026-08-25. The distiller read one of her own messages narrating a search that found
+      // nothing and wrote it as a durable semantic fact — *"their specific content was not preserved in
+      // durable memory"* — `importance: 8`, in Ote's own room, about the one person he was asking about.
+      // It then became the highest-authority item in her context on that subject and she reported it back.
+      // ⭐ **A FALSE ABSENCE HAD BECOME A DURABLE BELIEF**, and §3B cannot date a stored row, so the one
+      // mechanism built to stop her agreeing with her past self was structurally blind to it.
+      //
+      // ⭐⭐ THE GATE IS AT THE STORE BECAUSE THE GUARANTEE IS THE STORE'S. The extractor, the distiller,
+      // the reflection lane and her own `remember_fact` are four writers; putting the rule in any one of
+      // them leaves three doors open, and the fourth is written next month. ⓘ Same principle as
+      // `setIdentity` converging in the store: *the datastore guarantees convergence, not the caller.*
+      //
+      // ⛔ IT REFUSES, IT DOES NOT REWRITE, and it never touches what she SAID — her messages are untouched
+      // and still retrieve. What it refuses is one of them becoming a standing fact.
+      // ⛔ AND IT IS LOUD. A silent drop here is indistinguishable from an extractor that found nothing,
+      // which is exactly the ambiguity that hid a 4-in-5 fact drop once already.
+      const gate = admissible(row)
+      if (!gate.ok) {
+        log?.warn?.({ reason: gate.reason, why: gate.why, kind: row?.kind, author: AUTHOR,
+          content: String(row?.content ?? '').slice(0, 160) },
+        '[memory] refused a durable row that asserts the state of her own memory')
+        // ⭐ THROWN, NOT RETURNED NULL. Every caller of `create` treats the result as a row; handing back
+        // null would surface as a confusing shape error three frames away, and a write that was refused
+        // for a stated reason is not the same event as a write that failed.
+        const err = new Error(`refused: a durable memory may not assert what her own memory contains (${gate.why})`)
+        err.code = 'SELF_STATE_CLAIM'
+        err.reason = gate.reason
+        throw err
+      }
       // THE STORE STAMPS SCOPE — the component must not pass persona/user_id, and the
       // identity-is-persona-global rule is enforced here rather than trusted to every caller.
       // PRESERVE an explicit subject, otherwise DEFAULT it (see resolveSubjects above). `??` not `||`
