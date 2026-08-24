@@ -11,6 +11,7 @@ import { reflectAllQuiet } from '../components/reflection-lifecycle-host.js'
 import { REFLECTION_GENERATION, REFLECTION_TOOLS } from '../components/reflection-lifecycle.js'
 import { runHealthSuite } from '../maintenance/health-suite.js'
 import { decayWorkingMemory } from '../components/working-memory-host.js'
+import { lintMemory, lintSummaryLine } from '../components/memory-lint-host.js'
 
 export default fp(async function (fastify, opts) {
 
@@ -52,6 +53,23 @@ export default fp(async function (fastify, opts) {
             }
         } catch (e) {
             await log(`[working-memory-decay] (${trigger}) error: ${e.message}`, import.meta.url)
+        }
+        // ⭐⭐ MEMORY INTEGRITY LINT — read-only, deterministic, idempotent, per-owner. Rides the boot +
+        // daily pass because it is pure SELECTs and cannot make anything worse.
+        // ⛔ Ote, 2026-08-24: *"We shouldn't have to discover memory-integrity violations accidentally
+        // while investigating something else."* Every integrity defect found before this existed was
+        // found by accident — a suite that happened to run, a fixture that happened to break.
+        // ⚠️ COUNTS ONLY IN THE LOG, never content: `includeContent` is not passed, so beliefs are not
+        // even FETCHED. And it REPORTS — it never repairs, which is a separate decision.
+        // ⓘ Logged only when something fired or a rule could not run; a clean store stays quiet.
+        try {
+            const lint = await lintMemory(fastify.db)
+            const dirty = lint.ok && (lint.summary.defects || lint.summary.suspects || Object.keys(lint.notRun ?? {}).length)
+            if (!lint.ok || dirty) {
+                await log(`[memory-lint] (${trigger}) ${lintSummaryLine(lint)}`, import.meta.url)
+            }
+        } catch (e) {
+            await log(`[memory-lint] (${trigger}) error: ${e.message}`, import.meta.url)
         }
         // persona memory v2 Phase-3 consolidation → Knowledge Cards (gated by memory.consolidateEnabled,
         // default OFF). Makes LLM calls, so it rides ONLY the scheduled daily tick, never the boot pass.

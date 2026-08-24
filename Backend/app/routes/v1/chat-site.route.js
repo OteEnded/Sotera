@@ -1832,6 +1832,50 @@ export default async function chatSiteRoutes(fastify) {
     const keptRecall = keptOf('recall')
     const keptConversation = keptOf('conversation') // passive Conversation-Search evidence that fit the budget
     const keptWorking = keptOf('working')[0] || null // L4 working-memory block (single), if it fit the budget
+    // ══ ⭐⭐⭐ B0 · THE WORKING-MEMORY TRACE. Ote, 2026-08-24: *"First add the rendered working-memory
+    // trace so F6 is properly observable."*
+    //
+    // ⛔⛔ WHY: the working block was the ONE model-facing surface with no record anywhere. The cognition
+    // block and `scope-facts` are both logged per turn; this was not, and `contextBreakdown` reports only
+    // the working-memory RULE because the block rides in the runtime TAIL, which the route builds without
+    // `withMeta`. ⇒ establishing what she was actually shown required recomputing a pure function and
+    // arguing from budget headroom. That is reconstruction, not observation, and no multi-turn claim
+    // about working state can be verified on it.
+    //
+    // ⭐ PLACED HERE, AFTER `keptWorking`, ON PURPOSE — it records what SURVIVED THE ADAPTIVE BUDGET, not
+    // merely what was rendered. Logging `workingMemoryBlock` would hide exactly the failure mode we are
+    // hunting: a block that was built and then silently dropped.
+    // ⭐ AND IT SEPARATES THE TWO PROVENANCES the render collapses: `wm.focus` is HERS (she set it with
+    // update_working_memory); `seedFocus` is a machine extraction of the user's message. The rendered
+    // line is identical either way — that is F1 — so the trace records which one it was.
+    // ⛔ OBSERVABILITY ONLY. No behaviour changes, nothing she sees changes, and L4 gains no reader or
+    // writer: this reads variables the route already computed. Same file the freeze audit already lists.
+    if (fastify.config?.memory?.cognitionDebug === true && wmEnabled) {
+      try {
+        const raw = normalizeWorkingMemory(convo.working_memory)
+        const seed = extractIntent(lastUserText)
+        const { appendFileSync } = await import('node:fs')
+        appendFileSync(new URL('../../../../cognition-debug.log', import.meta.url), `${JSON.stringify({
+          at: new Date().toISOString(), conversationId: convo.id, kind: 'working-memory',
+          // ⭐ THE PROVENANCE OF THE FOCUS LINE, which the rendered text cannot express:
+          //   'hers'    — she set it via update_working_memory
+          //   'seed'    — the route derived it from the user's message this turn (F1)
+          //   'none'    — no focus at all
+          focusProvenance: raw.focus ? 'hers' : (seed ? 'seed' : 'none'),
+          stored: { focus: raw.focus, plan: raw.plan, openQuestions: raw.openQuestions.length,
+            activeItems: raw.activeItems.length, completedItems: raw.completedItems.length, updatedAt: raw.updatedAt },
+          seedFocus: raw.focus ? null : seed,
+          // ⭐ RENDERED vs DELIVERED — the two can differ, and that difference is F2.
+          renderedChars: workingMemoryBlock ? String(workingMemoryBlock).length : 0,
+          deliveredChars: keptWorking ? String(keptWorking).length : 0,
+          droppedByBudget: Boolean(workingMemoryBlock) && !keptWorking,
+          adaptiveBudgetTokens: adaptiveBudget,
+          // the exact text she was handed, or null when nothing was
+          block: keptWorking ?? null,
+        })}
+`)
+      } catch { /* observability must never break a turn */ }
+    }
 
     // Compose with ONLY the kept adaptive items (system stays the hard one). The Composer is PURE — the
     // route owns the side effects: SURFACE anything trimmed over SSE (never a silent truncation).
