@@ -90,3 +90,18 @@ If you find an error, correct it in place and say so on that line. A correction 
 ## Length
 
 Proportionate to the document. A short document gets a short report. Do not pad a bucket to make it look thorough, and do not stretch a single observation into three entries.
+
+---
+
+## Before you send: the seven labels
+
+`Checked against:` · `## Already decided` · `## Conflicts` · `## New` · `## Unresolved` ·
+`Could not check:` · `Checked:`
+
+⛔ The last two are the ones that get dropped, and they are the two a reader most needs. **Could not
+check** is what you had no reach to verify; **Checked** is the pass where you tested each date, count and
+reference against the source it came from, and said what you corrected. Neither can be inferred from the
+rest of the document, so an answer without them is missing exactly the part that makes it trustworthy.
+
+If either is genuinely empty, write the label and say so — `Could not check: nothing, every claim above
+has a source` is a real answer. Omitting it is not.

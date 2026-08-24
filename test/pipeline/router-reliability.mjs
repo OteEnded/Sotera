@@ -101,7 +101,7 @@ for (const cell of CELLS) {
     // ⭐ THE OUTCOME COMES FROM THE ROW. `message.skill` is stamped by the route; `use_skill` is logged
     // independently. Two witnesses, neither of them her prose.
     const { rows } = await pg.query(
-      `select skill, tool_calls from ${S}.txn_messages
+      `select skill, tool_calls, metrics, error, length(content) chars from ${S}.txn_messages
         where conversation_id = $1 and role = 'assistant' order by created_at desc limit 1`, [cid])
     const { rows: tools } = await pg.query(
       `select distinct tool from ${S}.log_tool_calls where conversation_id = $1`, [cid])
@@ -112,7 +112,13 @@ for (const cell of CELLS) {
     // lumping it in with "did not fire" would hide the more interesting failure.
     const other = stamped && stamped !== cell.skill ? stamped : null
     runs.push({ skill: cell.skill, phrasing: cell.phrasing, i, cid, fired, stamped, other,
-      usedSkillTool: called.has('use_skill'), refused: posted.status >= 300 ? posted.status : null })
+      usedSkillTool: called.has('use_skill'), refused: posted.status >= 300 ? posted.status : null,
+      // ⭐ THE ARTEFACT VERDICT RIDES ALONG, so ONE pass answers all four rates Ote asked for:
+      // activation, wrong-skill, no-skill and artefact completion. ⛔ Read from `metrics`, never from her text.
+      artefacts: (rows[0]?.metrics?.skillArtefacts) ? {
+        required: rows[0].metrics.skillArtefacts.required, missing: rows[0].metrics.skillArtefacts.missing,
+        satisfied: rows[0].metrics.skillArtefacts.satisfied, nudged: rows[0].metrics.skillArtefacts.nudged } : null,
+      chars: rows[0]?.chars ?? 0, error: rows[0]?.error ?? null })
     console.log(`  ${cell.skill.replace('skill.', '').padEnd(16)} ${cell.phrasing.padEnd(9)} #${i}  `
       + `${fired ? '✓ fired' : (other ? `⚠ ${other} fired instead` : '⛔ did not fire')}`)
   }
@@ -155,6 +161,25 @@ function report(rs) {
           : '⚠️ VARIANCE — no phrasing effect; the misses are spread across both'))
     console.log(`     ${sk.replace('skill.', '').padEnd(18)} ${verdict}`)
   }
+  // ══ ⭐ THE FOUR RATES, stated plainly ══════════════════════════════════════════════════════════
+  const n = rs.length
+  const fired = rs.filter((r) => r.fired).length
+  const wrong = rs.filter((r) => r.other).length
+  const none = rs.filter((r) => !r.fired && !r.other).length
+  const withArt = rs.filter((r) => r.artefacts)
+  const satisfied = withArt.filter((r) => r.artefacts.satisfied).length
+  const nudged = withArt.filter((r) => r.artefacts.nudged).length
+  const nudgedOk = withArt.filter((r) => r.artefacts.nudged && r.artefacts.satisfied).length
+  const missTally = {}
+  for (const r of withArt) for (const m of (r.artefacts.missing ?? [])) missTally[m] = (missTally[m] || 0) + 1
+  console.log(`  ── the rates ──`)
+  console.log(`     activation (correct skill)   ${fired}/${n} = ${Math.round((fired / n) * 100)}%`)
+  console.log(`     wrong skill                  ${wrong}/${n} = ${Math.round((wrong / n) * 100)}%`)
+  console.log(`     no skill                     ${none}/${n} = ${Math.round((none / n) * 100)}%`)
+  console.log(`     artefacts complete           ${satisfied}/${withArt.length}   (of turns where a skill ran)`)
+  console.log(`     ...of those nudged           ${nudgedOk}/${nudged} recovered`)
+  if (Object.keys(missTally).length) console.log(`     still-missing labels         ${Object.entries(missTally).map(([k, v]) => `"${k}" x${v}`).join(', ')}`)
+
   console.log(`\n  ⛔ n is small. ${rs.length} turns total, and a binary rate does not resolve at this size —`)
   console.log(`     this separates a PHRASING EFFECT from noise, which is a coarser and more answerable`)
   console.log(`     question than "what is the true rate". ⛔ Nothing here licenses changing the router.\n`)

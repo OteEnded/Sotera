@@ -65,3 +65,14 @@ If a record carries a status, use the record's. Do not upgrade "deferred" to "re
 ## Length
 
 Short. This is a lookup with provenance, not an essay. If several prior decisions bear on the question, give each one its own block of the six labels rather than merging them into a summary.
+
+---
+
+## Before you send: the six labels
+
+`Looked for:` · `Status:` · `What I believe was decided:` · `Where I say that came from:` ·
+`Verbatim from the source:` · `What I could not verify:`
+
+⛔ The last one gets dropped, and it is the one that tells a reader how much of the rest to trust. If
+everything you said has a record behind it, write `What I could not verify: nothing — every claim above
+carries a record`. Omitting it is not the same as having nothing to declare.

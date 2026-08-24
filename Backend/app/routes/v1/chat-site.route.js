@@ -2709,10 +2709,23 @@ export default async function chatSiteRoutes(fastify) {
                 // ⛔ Ephemeral, exactly like the other nudges — never persisted, so it cannot enter the
                 // conversation or her memory. And it names the missing sections rather than re-stating the
                 // whole contract, because the contract was already in the prompt and was not the problem.
+                // ⭐ THE NUDGE NAMES WHAT THE SECTION MUST CONTAIN, not just its label — measured: the
+                // label-only version fired and she still omitted `Checked:` and `Could not check:` with
+                // budget left. A heading is easy to skip when nothing says what goes under it; the two
+                // sections she drops both require an ACT (verify; state your reach) rather than prose.
+                // ⛔ Still exactly ONE nudge. A loop would be worse, and it would teach nothing.
+                const WHAT_IT_NEEDS = {
+                  'Checked:': 'test each date, count and reference you wrote against the source it came from, and say what you checked and anything you corrected',
+                  'Could not check:': 'name what you had no reach to verify, and why — or say "nothing, every claim above has a source"',
+                  'What I could not verify:': 'name anything you asserted without a record behind it — or say "nothing, every claim carries a record"',
+                  'Looked for:': 'name each source you actually consulted and what it returned',
+                }
+                const NL = String.fromCharCode(10)   // ⓘ built this way so no escape survives a scripted edit
                 working.push({ role: 'user', content:
-                  `(your answer is missing ${missing.length} section(s) this skill requires: `
-                  + `${missing.map((m) => `"${m}"`).join(', ')}. Add them to what you have already written — `
-                  + 'do not start over, and do not pad them. If a section is genuinely empty, say so under its heading.)' })
+                  `(your answer is missing ${missing.length} section(s) this skill requires. Add each to what `
+                  + 'you have already written — do not start over, and do not pad:' + NL
+                  + missing.map((m) => `  · "${m}" — ${WHAT_IT_NEEDS[m] ?? 'fill it in as the skill describes, or say plainly that it is empty'}`).join(NL)
+                  + NL + 'An empty section stated is an answer; an omitted one is a gap.)' })
                 continue
               }
             }
