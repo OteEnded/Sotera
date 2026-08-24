@@ -11,6 +11,7 @@
 //
 // ⛔ Refuses root: `ote` is his account.
 
+import { readFileSync } from 'node:fs'
 import { makeClient, devPg, devSchema } from '../harness.mjs'
 import { loadConfig } from '../../Backend/lib/utility.js'
 
@@ -19,10 +20,26 @@ const asIdx = argv.indexOf('--as')
 const AS = asIdx >= 0 ? argv[asIdx + 1] : 'agent_dev'
 const cidIdx = argv.indexOf('--cid')
 const GIVEN_CID = cidIdx >= 0 ? argv[cidIdx + 1] : null
-const TURNS = argv.filter((a, i) => a !== '--as' && a !== '--cid' && i !== asIdx + 1 && i !== cidIdx + 1)
+const RAW_TURNS = argv.filter((a, i) => a !== '--as' && a !== '--cid' && i !== asIdx + 1 && i !== cidIdx + 1)
+// ⭐ A TURN OF THE FORM `@path` IS READ FROM A FILE, and `text@path` puts the file after the text.
+// Documents do not fit on a command line — Windows caps argv near 32 KB and quoting a markdown file
+// through a shell mangles it — and "here is a document, reconcile it" is a real recurring job, not a
+// one-off. ⛔ The path is read verbatim: no templating, no interpolation, nothing that could rewrite
+// what she is actually shown.
+const TURNS = RAW_TURNS.map((t) => {
+  const at = t.indexOf('@')
+  if (at < 0) return t
+  const lead = t.slice(0, at)
+  const path = t.slice(at + 1)
+  if (!path || /\s/.test(path)) return t   // an ordinary @ in prose, not a file reference
+  const body = readFileSync(path, 'utf8')
+  return lead ? `${lead}
+
+${body}` : body
+})
 
 if (AS === 'ote') { console.error('✖ refusing to run as root'); process.exit(1) }
-if (!TURNS.length) { console.error('usage: node pipeline/ask-sotera.mjs --as <user> "turn" ["turn" …]'); process.exit(1) }
+if (!TURNS.length) { console.error('usage: node pipeline/ask-sotera.mjs --as <user> "turn" ["turn" …]   (a turn may be "prompt@path/to/file")'); process.exit(1) }
 
 // agent_dev_alt is the second TEST ROOM (same person as agent_dev) — see room-scope-check.
 const PASSWORDS = { agent_dev: 'agentdev123', agent_dev_alt: 'agentdev123', kavi: 'kaviobs123' }
