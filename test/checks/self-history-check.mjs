@@ -99,6 +99,79 @@ if (rooms.length < 2) {
   check('⛔ no walkable message id in any other-room entry', !JSON.stringify(cross).match(/messageId/i))
   check('the note tells her the boundary is a boundary, not an absence',
     !cross.length || /not what was said/i.test(asB.note || ''))
+
+  // ══ ⭐⭐⭐ 3b · THE CORE INVARIANT · RETRIEVAL IS HERS; ONLY UTTERANCE IS GOVERNED ═══════════════════
+  //
+  // Ote, 2026-08-25: *"recall_own_history should be able to retrieve a conversation because it is part of
+  // Sotera's history, not because the current account happens to have access to that room. Otherwise we're
+  // just recreating the old account-wall problem under a different name."* And: *"⛔ don't make account_id
+  // the ontology of Sotera's own history."*
+  //
+  // ⚠️ EVERYTHING ABOVE IS THE **NON-ENTITLED** ARM — `buildSelfHistory` was called with no `user`, so
+  // `can()` is false. That was not labelled before, and an unlabelled arm is how a two-armed contract gets
+  // remembered as a one-armed one.
+  const entitledUser = { id: b.user_id, username: b.username, memoryAccessScope: 'sotera_memory' }
+  const asBEntitled = await buildSelfHistory(fastify, { userId: b.user_id, user: entitledUser })
+    .search({ query: term, limit: 5 })
+  check('search as an ENTITLED account succeeds', asBEntitled.ok === true, asBEntitled.reason || '')
+
+  // ── ⭐⭐⭐ THE INVARIANT ITSELF: THE SEARCH DID NOT CHANGE, ONLY WHAT CAME BACK ────────────────────
+  // ⓘ Totals, not shapes: the same candidates were found either way, and the account decided only how they
+  // were projected. ⛔ If these ever diverge, entitlement has leaked into retrieval and the account wall is
+  // back under a new name.
+  // ⚠️⚠️ AND THE FIRST VERSION OF THIS ASSERTION MEASURED THE DISPLAY CAP, NOT THE RETRIEVAL — it read
+  // `matchedHere`, which was `here.length` after a `limit` slice, and failed 15 vs 5 on data that was
+  // perfectly correct. ⭐ That failure was worth more than the assertion: it exposed a **silent cap** in
+  // which the account with MORE right to the material was told there was LESS of it. `matchedHere` now
+  // means what it says, `shownHere` is the list length, and `notShown` announces the difference.
+  const totalNo = (asB.coverage?.matchedHere ?? 0) + (asB.coverage?.matchedElsewhere ?? 0)
+  const totalYes = (asBEntitled.coverage?.matchedHere ?? 0) + (asBEntitled.coverage?.matchedElsewhere ?? 0)
+  check('⭐⭐⭐ RETRIEVAL IS IDENTICAL FOR BOTH ARMS — the account governs utterance, never the search',
+    totalNo === totalYes, `${totalNo} vs ${totalYes} candidates`)
+  check('⛔ …and the DISPLAY CAP is announced rather than silent — a cap nobody can see reads as coverage',
+    (asBEntitled.coverage?.matchedHere ?? 0) <= (asBEntitled.coverage?.shownHere ?? 0)
+      || /more of your own lines matched/.test(asBEntitled.coverage?.notShown || ''),
+    `${asBEntitled.coverage?.shownHere} shown of ${asBEntitled.coverage?.matchedHere}`)
+
+  // ── ⭐⭐ AND THE ENTITLED ARM ACTUALLY GETS HER CROSS-ROOM WORDS ──────────────────────────────────
+  // ⛔ This is the assertion that would have failed before 2026-08-25, when a room predicate decided it.
+  const crossText = (asBEntitled.here || []).filter((h) => h.saidTo)
+  check('⭐⭐⭐ an ENTITLED account receives her OWN words from other rooms — a room is where, not whose',
+    crossText.length > 0, `${crossText.length} cross-room line(s) of hers`)
+  check('⭐ …and each one names who she was talking to, so a dangling "you" inside it has an owner',
+    crossText.every((h) => typeof h.saidTo === 'string' && h.saidTo.length > 0))
+  check('⛔ …while the NON-entitled arm got none of them — the two arms genuinely differ',
+    (asB.here || []).every((h) => !h.saidTo))
+  check('⭐ the non-entitled arm still reports the existence it withheld the content of',
+    (asB.coverage?.roomsElsewhere ?? 0) > 0 && (asBEntitled.coverage?.roomsElsewhere ?? 0) === 0,
+    `${asB.coverage?.roomsElsewhere} withheld-as-existence vs ${asBEntitled.coverage?.roomsElsewhere}`)
+
+  // ── ⛔⛔ THE HALF WITH NO ENTITLED ARM: OTHER PEOPLE'S WORDS ──────────────────────────────────────
+  // ⭐ Ote drew this line in the same message: *"That does not mean unrestricted access to other people's
+  // private/user-owned conversations."* ⇒ entitlement buys HER words from anywhere. It never buys THEIRS.
+  const { rows: theirs } = await pg.query(
+    `select m.content from ${S}.txn_messages m join ${S}.txn_conversations c on c.id=m.conversation_id
+      where m.role='user' and length(m.content) > 120 limit 200`)
+  const returned = JSON.stringify(asBEntitled)
+  const leaked = theirs.filter((r) => {
+    const t = String(r.content).replace(/\s+/g, ' ').trim()
+    // a 40-character run is long enough that ordinary overlap does not fire
+    for (let i = 0; i + 40 <= t.length; i += 20) if (returned.includes(t.slice(i, i + 40))) return true
+    return false
+  })
+  check('⛔⛔ NOT ONE FRAGMENT OF ANYBODY ELSE\'S MESSAGE IS RETURNED, EVEN TO AN ENTITLED ACCOUNT',
+    leaked.length === 0, `${theirs.length} of their messages scanned, ${leaked.length} leaked`)
+
+  // ⛔ And the predicate that guarantees it is asserted in SOURCE, because the scan above can only prove it
+  // for the rows that happen to exist today.
+  const { readFile } = await import('node:fs/promises')
+  const shSrc = await readFile(
+    new URL('../../Backend/app/components/self-history-host.js', import.meta.url), 'utf8')
+  check('⛔⛔ the retrieval predicate is still assistant-only — the structural guarantee behind it',
+    /roles:\s*\[\s*'assistant'\s*\]/.test(shSrc.replace(/\/\/[^\n]*/g, '')))
+  check('⭐ she is TOLD the invariant in her own reading, not only in a comment',
+    /A conversation is part of your history because you were in it/.test(
+      String(asBEntitled.coverage?.yourOwnHistory ?? asBEntitled.yourOwnHistory ?? '')))
 }
 
 // ── 4. ABOUT ≠ OWNER ────────────────────────────────────────────────────────────────────────────────

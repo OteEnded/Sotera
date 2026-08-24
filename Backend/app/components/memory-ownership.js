@@ -78,6 +78,31 @@ export function ownerOf(src) {
     case 'episode':
       return src.participated === true ? OWNER.sotera : OWNER.unknown
 
+    // ── ⭐⭐⭐ THE EXTENT OF A RELATIONSHIP · HERS BY PARTICIPATION, AND ALWAYS FROM ELSEWHERE ────────
+    //
+    // ⭐ Ote's rule, 2026-08-25: *"Sotera can know the extent of her own participation/history. NOT: any
+    // account can query the continuity system and learn how much activity exists in another account."*
+    //
+    // ⇒ HERS, so retrieval is free and the authorization path is not entered — she may always know how much
+    // she and someone have talked. ⛔ AND the utterance boundary then governs whether THIS account may be
+    // TOLD it, which is the half that was missing and is what makes the aggregate safe.
+    //
+    // ⚠️⚠️ THE OMISSION THIS CASE EXISTS TO END, and it was a ONE-FIELD BUG WITH A DOCUMENTED FAILURE MODE.
+    // The continuity item shipped with no `owner` stamp at all. `applyUtteranceBoundary` reads
+    // `item.owner !== OWNER.sotera` and routes an unstamped item straight to `sayable` — correct for
+    // account-owned material, which has already passed its own authorization, and **exactly wrong for
+    // Sotera-owned material that has passed none.** ⇒ *"Hermes and I have talked in 185 conversations"* was
+    // reaching an account with `memory_access_scope: 'none'`. Ote caught the risk from one line of my own
+    // report before any test did.
+    //
+    // ⭐⭐ AND THE FAIL-CLOSED IS EXACT HERE, NOT A COMPROMISE. `describeRelationship` counts conversations
+    // owned by THE SUBJECT's accounts, and the subject-is-the-asker case is refused upstream (`isSelf`).
+    // ⇒ a continuity item that exists at all is BY CONSTRUCTION about rooms that are not the asker's, so
+    // carrying no provenance account — which the boundary reads as "elsewhere" — is not a guess. It is the
+    // only truthful value.
+    case 'continuity':
+      return OWNER.sotera
+
     default:
       return OWNER.unknown
   }

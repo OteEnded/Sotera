@@ -432,6 +432,15 @@ export function buildMemoryCognition(fastify, {
         lastSeen: rel.lastSeen,
         when: rel.lastSeen,
         source: SOURCE.derived,
+        // ⭐⭐⭐ THE OWNERSHIP STAMP, AND IT IS WHAT MAKES THE AGGREGATE SAFE. Hers ⇒ retrieval is free, and
+        // the UTTERANCE BOUNDARY then decides whether this account may be told it. ⛔ Asked of the one place
+        // that owns the rule, never asserted here — two copies of an ownership rule is how they stop
+        // agreeing, and this one decides whether a count of somebody's activity crosses an account line.
+        owner: ownerOf({ kind: 'continuity' }),
+        // ⛔ NO PROVENANCE ACCOUNT, AND THAT IS EXACT RATHER THAN CAUTIOUS. The counts span the SUBJECT's
+        // rooms — never the asker's, because the subject-is-the-asker case is refused above — so there is no
+        // single room this came out of, and `provenanceAccountOf` returning null is read as "elsewhere".
+        provenanceAccountId: null,
         // ⭐ `attested-by-source` IS THE HONEST BASIS AND IT IS NOT A PROMOTION. The claim is *"we have
         // talked this many times"*, and the rows that directly support it are her own participation rows,
         // which are accessible. ⛔ It says nothing whatever about what was said, so it cannot over-claim

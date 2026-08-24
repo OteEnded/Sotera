@@ -1686,7 +1686,20 @@ export default async function chatSiteRoutes(fastify) {
               holdSubject = typed.length
                 ? typed.join(' and ')
                 : (out.cues?.topics ?? []).find((t) => !derived.has(t)) ?? null
-              holdContinuity = Array.isArray(out.continuityLines) ? out.continuityLines : []
+              // ── ⛔⛔ THE SECOND DOOR, AND IT WOULD HAVE BYPASSED THE BOUNDARY COMPLETELY ────────────
+              //
+              // `out.continuityLines` is rendered from the UNFILTERED set, because cognition runs
+              // unfractured. Relaying it here unconditionally would put *"X and I have talked in N
+              // conversations"* beside every tool result **for an account the boundary had just withheld it
+              // from** — the block would be clean and the payload would leak. ⚠️ Two doors, one fact: the
+              // first was the missing `owner` stamp, this is the second.
+              //
+              // ⭐ Gated on the SAME set the hold is seeded from, so there is one source of truth and no
+              // second copy of the rule. ⓘ `some` is exact rather than approximate: every continuity item
+              // carries `owner: sotera` and no provenance account, so the boundary's verdict is identical
+              // for all of them — they survive together or not at all.
+              const extentIsSayable = (boundary.sayable ?? []).some((i) => i?.kind === 'continuity')
+              holdContinuity = extentIsSayable && Array.isArray(out.continuityLines) ? out.continuityLines : []
             }
             // ⓘ OBSERVABILITY FOR THE FIRST LIVE RUNS. Off by default; when on, the exact injected block
             // and the stage-by-stage counts are appended to a file, so a failure can be attributed to
@@ -3809,7 +3822,8 @@ export default async function chatSiteRoutes(fastify) {
   initIntention() // `intention` host service — what she is TRYING TO ACCOMPLISH with this person (A1)
   initLesson() // `lesson` host service — what she GOT WRONG and what generalizes from it (step 4)
   initDisclosure() // `disclosure` — the only door between rooms, opened by a card a human answers.
-  initSelfHistory() // `selfHistory` — her own sentences across every room. Existence cross-room, text same-room.
+  initSelfHistory() // `selfHistory` — her own sentences across every room, because they are HERS. What varies
+  // by account is whether it may be TOLD them (`access_sotera_memory`), never whether she may find them.
   // Tool-call audit: the EventBus already emitted every call; nothing kept them. See audit/tool-log.js.
   initToolLog(fastify, attachToolAudit)
   initReflection() // `reflection` host service (L3 Persona Notes; the Reflection Host Adapter, step 5 R1)

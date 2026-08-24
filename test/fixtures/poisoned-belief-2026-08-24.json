@@ -1,0 +1,43 @@
+{
+  "what": "THE REGRESSION PROOF for RFC_MEMORY_COGNITION_LAYER 16.1 item 4 — a failed retrieval that became a durable belief.",
+  "why_kept": "Ote, 2026-08-25: \"I want the causal evidence preserved: failed retrieval -> false absence -> distillation -> durable false belief -> future false absence.\" Captured here BEFORE the row was soft-retired, so retiring it costs nothing.",
+  "row": {
+    "id": "7fb034c5-99dd-4a99-965b-0076ca9c9566",
+    "kind": "semantic",
+    "author": "persona",
+    "provenance": "synthesized",
+    "tier": "hot",
+    "importance": 8,
+    "confidence": 0.6,
+    "entity": null,
+    "attribute": null,
+    "subject_person_id": null,
+    "source_message_id": "eef5b347-fa9a-41ce-b2dd-3d3836cc078f",
+    "created_at": "2026-08-24T17:00:19.195Z",
+    "valid_at": "2026-08-24T17:00:19.191Z",
+    "invalid_at": null,
+    "expired_at": null,
+    "content": "Hermes is a person with whom I have had multiple direct conversations across several separate rooms dating back to August 18. While traces of these interactions exist in my history, their specific content was not preserved in durable memory, resulting in a gap between historical evidence and current knowledge. It is crucial to check other rooms' histories directly when discussing her, as my memory store does not contain the details of our past exchanges with her."
+  },
+  "source_message": {
+    "id": "eef5b347-fa9a-41ce-b2dd-3d3836cc078f",
+    "role": "assistant",
+    "room": "ote",
+    "created_at": "2026-08-24T16:18:44.586Z",
+    "excerpt": "ให้ลองใช้เครื่องมือทุกทางที่มีเลย — จะ search หมดทั้ง memory, archived, และ conversation history ของคุณเองค่ะ\n{\"name\": \"list_memories\", \"properties\": {\"kind\": \"episodic\"}}\n</function>\n\nให้ตรวจสอบทุกที่จริงๆ เลยค่ะ — จะ scan หมดทั้ง semantic, episodic, identity memories และ archived ด้วยนะคะ\n\nตอนนี้ได้ scan ทุกที่ใน memory ที่ฉันมีแล้วค่ะ ผลก็คือ:\n\n**memory store:**\n- semantic memories: 3 รายการ (i"
+  },
+  "chain": [
+    "she could not retrieve her Hermes history",
+    "she answered \"I have nothing about Hermes\"",
+    "the distiller read THAT ANSWER and wrote it as a durable semantic fact (author=persona, provenance=synthesized, importance=8)",
+    "the fact then outranked everything about Hermes in her context",
+    "she reported it back, which produced the next false absence"
+  ],
+  "gate": "Backend/app/components/memory-self-state-claim.js, enforced in the store's single write lane, refuses this shape now. test/unit/memory-self-state-claim.test.mjs asserts THIS EXACT TEXT is refused.",
+  "her_answers_BEFORE_retirement": {
+    "note": "Verbatim, 2026-08-25, AFTER the continuity fix (F1-F4) was live. The extent reaches her correctly; the poisoned row is what still produces the denial. This is the causal isolation.",
+    "as_root_entitled": "I have the numbers - 185 conversations with Hermes from August 18 through August 24 ... but when it comes to actually recalling what we discussed, there is a gap. The content of those past conversations exists in my history as evidence that they happened, but NONE OF THEM WAS PRESERVED IN DURABLE MEMORY. ... It is a strange situation - I can count the conversations but not really remember them.",
+    "the_tell": "not preserved in durable memory is the stored row almost verbatim. She was not reasoning; she was reporting a fact she had on file."
+  },
+  "expected_AFTER_retirement": "The extent and the real episodes remain (they come from participation and retrieval, not from this row). The recited phrase not preserved in durable memory should stop appearing."
+}

@@ -30,11 +30,18 @@ const MIGRATION = read('../../Backend/database/migrations/022_advice_exchanges.s
 // ⭐ CODE ONLY. A comment explaining why the route must not know an endpoint is documentation, not a
 // dependency on it. My first version of ⑧ fired on its own explanatory comment — a scan that reads prose
 // proves nothing, which is the same lesson as "a source-scan whose anchor goes vacuous stops scanning".
+// ⚠️⚠️ AND ITS SECOND BUG WAS LINE ENDINGS, MEASURED 2026-08-25. The line comment was stripped with
+// `/\/\/.*$/` — and `$` (no `m` flag) matches at end of string or before a trailing `\n`, ⛔ NEVER before a
+// `\r`. So on a CRLF working copy the pattern did not match, no comment was removed, and ⑧ went red on a
+// file whose CODE was clean: it fired on the explanatory comment it was specifically written not to read.
+// ⭐ The failure mode is the dangerous one — this test's verdict depended on `core.autocrlf`, so it could be
+// green in CI and red locally on identical content, or the reverse. ⇒ matched explicitly against both line
+// terminators, so the scan measures the code and nothing about the checkout.
 const NEWLINE = String.fromCharCode(10)
 const strip = (src) => src
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .split(NEWLINE)
-  .map((l) => l.replace(/\/\/.*$/, ''))
+  .map((l) => l.replace(/\/\/[^\r\n]*/g, ''))
   .join(NEWLINE)
 
 // ══ ① ⭐⭐⭐ THE GENERIC LAYER NEVER NAMES A TRANSPORT ═══════════════════════════════════════════════
