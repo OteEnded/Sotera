@@ -2392,6 +2392,40 @@ export default async function chatSiteRoutes(fastify) {
     const working = messages.slice()
     let rounds = 0
     let emptyNudges = 0 // continuation nudges after a silent post-tool round (bounded)
+    // ⭐⭐⭐ THE ROUND BUDGET, MADE VISIBLE TO BOTH SIDES. Ote, 2026-08-24: *"I want the system to never
+    // silently spend the whole turn and then return nothing."*
+    //
+    // ⛔⛔ MEASURED, and it is why this exists. The first real Phase C job — reconcile a document against
+    // what she knows — spent 19 tool calls across the 8-round budget and returned **no answer at all**:
+    // only the narration she had written between rounds, with `error: null`. Nothing had told her she was
+    // on her last round, and nothing told the user the turn had been cut short. The whole turn was spent
+    // and the result was indistinguishable from a short reply.
+    //
+    // ⭐ TWO SEPARATE THINGS, and the first is the actual fix:
+    //   `roundsWarned`     — she is TOLD when a round is her last, so she can land the answer. Prevention.
+    //   `roundsExhausted`  — the turn is MARKED when the budget ran out, whether or not text came back.
+    //                        Reporting. ⛔ Unconditional: a truncated turn is never silent again.
+    // ⛔ Generic, not Skill-specific: it is a property of the agent loop, and any long job hits it.
+    let roundsWarned = false
+    let roundsExhausted = false
+    // ⭐⭐⭐ SKILL ARTEFACTS · conformance enforced in CODE, not in prose.
+    //
+    // ⛔⛔ MEASURED TWICE, AND THAT IS WHY THIS IS A MECHANISM RATHER THAN ANOTHER SENTENCE. Both Skills
+    // written this phase state a required output shape in their instructions, and both times she honoured
+    // the SPIRIT and dropped the FORM: `doc-framework` run 2 produced 0 of 3 named artefacts, and
+    // `doc-reconcile` produced 5 of 7 — missing the verification pass both times. And the omission cost a
+    // real error: she wrote "confidence scoring is NOT visible" while the rows carry 0.6 and 0.98, which
+    // the verification pass she skipped was designed to catch.
+    // ⇒ ⭐ Ote: *"Don't just add another instruction to the Skill saying 'remember to verify.' We already
+    // have evidence that prose requirements get dropped."*
+    //
+    // ⭐ THE WHOLE MECHANISM: a Skill DECLARES literal strings its answer must contain, in its SKILL.md
+    // frontmatter under `metadata.required-artefacts`. After the answer is written the platform checks
+    // them — a substring test, deterministic, no model involved — and if any are missing it says so, once.
+    // ⛔ NO SCHEMA CHANGE: `metadata` is already an open frontmatter field carried through
+    // `agentSkillToComponent` into `agentSkill.metadata`. A Skill that declares nothing is unaffected.
+    let artefactNudges = 0
+    let artefactCheck = null // { required[], missing[], satisfied } — recorded whether it passed or not
     // Has the model SPOKEN since its last tool call? Starts true (nothing has run yet). A tool execution sets
     // it false; any answer token sets it true. This is what tells "worked, then reported back" apart from
     // "worked, then went silent" — the latter reads to a user as the request being ignored.
@@ -2546,6 +2580,18 @@ export default async function chatSiteRoutes(fastify) {
         { const tail = wire.flush(); if (tail) write({ type: 'token', text: tail }) }
 
         if (degenerateCut) { pushReasoning(turnReasoning); pushText(turnAnswer); break }
+        // ⭐ THE BUDGET RAN OUT. `clientGone` is a different thing and must not be reported as one:
+        // a disconnect is the user leaving, exhaustion is us stopping her mid-job.
+        if (rounds >= maxRounds && !clientGone) {
+          roundsExhausted = true
+          // ⛔ UNCONDITIONAL — the status fires whether or not she produced text, because "she answered
+          // but was cut off" and "she answered fully" are different facts and only one of them is fine.
+          write({ type: 'status', phase: 'rounds_exhausted', rounds, maxRounds,
+            note: `the tool-round budget (${maxRounds}) ran out — this reply may be incomplete` })
+          request.log?.warn?.({ rounds, maxRounds, toolCalls: toolActivity.length, conversation: convo.id,
+            answerChars: (answer + turnAnswer).trim().length },
+          '[chat] ROUNDS EXHAUSTED — the turn hit chat.toolsMaxCalls')
+        }
         if (clientGone || rounds >= maxRounds) { pushReasoning(turnReasoning); pushText(turnAnswer); break }
         if (steerInterrupted) {
           // The partial text stays visible as a segment (Claude-style: interrupted, not
@@ -2588,6 +2634,45 @@ export default async function chatSiteRoutes(fastify) {
             working.push({ role: 'user', content: '(continue: the tool result is above — make the next tool call if steps remain, then give your final answer)' })
             continue
           }
+          // ⭐⭐ THE ARTEFACT CHECK, at the only place a turn ends with a finished answer.
+          //
+          // ⚠️ Ordered BEFORE the steer handling and the break so a missing section can still be fixed in
+          // this turn. ⛔ And gated on budget: if the rounds are already spent we must not nudge — being
+          // told to add a section with no round left to write it in is worse than the omission.
+          {
+            const sk = activeSkill || dynamicSkill
+            const declared = sk?.agentSkill?.metadata?.['required-artefacts']
+            const required = Array.isArray(declared) ? declared.filter((x) => typeof x === 'string' && x.trim()) : []
+            if (required.length) {
+              const full = answer + turnAnswer
+              const missing = required.filter((r) => !full.includes(r))
+              // ⓘ RECORDED EVERY TIME, pass or fail — "7 of 7 present" is a result, and a check that only
+              // speaks up on failure cannot tell a satisfied Skill from a Skill nobody checked.
+              // ⛔⛔ NO RECORDING HERE. The first version assigned `artefactCheck` at this site only, and
+              // this site is the CLEAN-FINISH path — a turn that exits through the rounds-exhausted break
+              // never reaches it. The result: a real run produced 5 of 7 artefacts and recorded
+              // `skillArtefacts: null`, i.e. the verdict was missing exactly when it mattered most.
+              // ⇒ ⭐ RECORDING happens once, after the loop, from the final answer (see below); the NUDGE
+              // stays here, because here is the only place there is still a round left to act on it.
+              if (missing.length && artefactNudges < 1 && rounds < maxRounds && !roundsExhausted) {
+                artefactNudges++
+                write({ type: 'status', phase: 'skill_artefacts_missing', skill: sk.id, missing })
+                request.log?.warn?.({ skill: sk.id, missing, conversation: convo.id },
+                  '[chat] SKILL ARTEFACTS MISSING — nudging once')
+                pushReasoning(turnReasoning)
+                pushText(turnAnswer)
+                working.push({ role: 'assistant', content: turnAnswer })
+                // ⛔ Ephemeral, exactly like the other nudges — never persisted, so it cannot enter the
+                // conversation or her memory. And it names the missing sections rather than re-stating the
+                // whole contract, because the contract was already in the prompt and was not the problem.
+                working.push({ role: 'user', content:
+                  `(your answer is missing ${missing.length} section(s) this skill requires: `
+                  + `${missing.map((m) => `"${m}"`).join(', ')}. Add them to what you have already written — `
+                  + 'do not start over, and do not pad them. If a section is genuinely empty, say so under its heading.)' })
+                continue
+              }
+            }
+          }
           pushReasoning(turnReasoning)
           pushText(turnAnswer)
           // Hybrid steering: if the user steered while this (final) stream ran, don't end —
@@ -2602,6 +2687,26 @@ export default async function chatSiteRoutes(fastify) {
           break
         }
         rounds++
+        // ⭐⭐ THE LAST-ROUND WARNING — the fix that PREVENTS the truncation rather than reporting it.
+        //
+        // After this round's tools run there is exactly one stream left before the cap breaks the loop
+        // (see the `rounds >= maxRounds` check above, which fires at the TOP of the next iteration).
+        // ⇒ tell her now, so that stream is an answer instead of more searching. In the measured failure
+        // she used it to narrate another search, because nothing had told her it was her last.
+        //
+        // ⭐ Same mechanism as the existing continuation nudges: an ephemeral `user` message in the
+        // working context, never persisted, so it cannot pollute the conversation or her memory.
+        // ⛔ Bounded to ONCE per turn (`roundsWarned`) — a warning repeated every round is noise, and
+        // this loop has already learned that lesson with `emptyNudges`.
+        if (rounds >= maxRounds && !roundsWarned) {
+          roundsWarned = true
+          write({ type: 'status', phase: 'last_round', rounds, maxRounds,
+            note: 'final tool round — asking for the answer now' })
+          working.push({ role: 'user', content:
+            '(this is your LAST round — no more tool calls will be executed after the results above. '
+            + 'Write your final answer now, from what you already have. If you could not finish, say '
+            + 'exactly what you completed and what you did not, rather than describing what you would do next.)' })
+        }
         pushReasoning(turnReasoning) // this round's thinking, before the text/calls it led to
         pushText(turnAnswer) // the text the model wrote BEFORE these calls (may be empty)
         // record the assistant tool-call turn, then execute each tool and feed results back
@@ -3056,6 +3161,27 @@ export default async function chatSiteRoutes(fastify) {
         }
       }
     } catch { /* telemetry is best-effort — never affects the turn */ }
+    // ⭐ WAS THE TURN CUT SHORT WITH NOTHING TO SHOW? Declared HERE, before `metrics` reads it — the
+    // first version declared it beside `turnError` fifty lines lower and produced a temporal-dead-zone
+    // ReferenceError that the module still PARSED. ⚠️ A const used above its declaration is a runtime
+    // fault a syntax check cannot see, which is why the tests below execute the path rather than read it.
+    // ⓘ The 200-character threshold is deliberately crude and is a heuristic, named as one: a reply that
+    // short after a FULL tool budget is not an answer to a multi-stage job. The unconditional signal is
+    // the `rounds_exhausted` status; this only decides whether the ROW is stamped as an error.
+    const roundsTruncated = roundsExhausted && (answer.trim().length < 200)
+    // ⭐⭐ THE ARTEFACT VERDICT, RECORDED FOR EVERY TURN A DECLARING SKILL RAN — pass, fail, truncated or
+    // nudged. ⓘ "7 of 7 present" is a result; a check that only speaks on failure cannot tell a satisfied
+    // Skill from a Skill nobody checked. ⛔ Deterministic substring test, no model, no judgement.
+    {
+      const sk = activeSkill || dynamicSkill
+      const declared = sk?.agentSkill?.metadata?.['required-artefacts']
+      const required = Array.isArray(declared) ? declared.filter((x) => typeof x === 'string' && x.trim()) : []
+      if (required.length) {
+        const missing = required.filter((r) => !answer.includes(r))
+        artefactCheck = { skill: sk.id, required: required.length, missing, satisfied: missing.length === 0,
+          nudged: artefactNudges > 0 }
+      }
+    }
     const metrics = {
       generatedAt: endedAt, // when the reply finished (epoch ms) — shown in the stats line so a
       // user can check WHEN a reply (incl. a scheduled run's) landed; survives reload (stored)
@@ -3072,6 +3198,11 @@ export default async function chatSiteRoutes(fastify) {
       outputCapped: outputCapped || undefined,
       // a clean finish that produced nothing (rides in metrics → stats line + the empty-body note)
       blankReply: blankReply || undefined,
+      // ⭐ so the stats line and a reload both show that the turn was cut short, not merely brief
+      roundsExhausted: roundsExhausted ? { rounds, maxRounds, truncated: roundsTruncated } : undefined,
+      // ⭐ the artefact verdict, so a reload and the stats line both show whether the Skill's declared
+      // output shape actually appeared — and so it can be measured over many runs rather than eyeballed
+      skillArtefacts: artefactCheck || undefined,
       // context caching: prefill wall-clock (Ollama — ~0ms on a big prompt = the runner's
       // prefix cache hit) and provider-reported cached/cache-written input tokens (remote)
       promptEvalMs: usage?.promptEvalMs ?? undefined,
@@ -3096,9 +3227,13 @@ export default async function chatSiteRoutes(fastify) {
     // downstream finalisation depends on `saved`. Naming the state is the smaller, safer fix.
     const producedNothing = !String(answer || '').trim() && !String(reasoning || '').trim()
       && !toolActivity.length && !structuredSegments
-    const turnError = genError || (producedNothing
-      ? 'no output was produced — the client disconnected before the first token, or generation ended empty'
-      : null)
+    const turnError = genError
+      || (roundsTruncated
+        ? `the tool-round budget (${maxRounds}) ran out before an answer was written — raise chat.toolsMaxCalls or narrow the request`
+        : null)
+      || (producedNothing
+        ? 'no output was produced — the client disconnected before the first token, or generation ended empty'
+        : null)
 
     try {
       // persist the assistant message (even partial, so Stop keeps what streamed)

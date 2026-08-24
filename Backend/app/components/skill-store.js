@@ -117,13 +117,17 @@ export async function importSkillArchive(fastify, { buffer, userId = null, repla
  * Author a skill from console fields: name/description/instructions become a spec-faithful
  * SKILL.md (SDK buildSkillMd — exports round-trip to claude.ai like any import).
  */
-export function authorSkill(fastify, { name, description, instructions, license = null, userId = null, replace = false }) {
+export function authorSkill(fastify, { name, description, instructions, license = null, metadata = null, userId = null, replace = false }) {
   // Foreign imports are lenient; OUR authoring UI enforces the spec strictly, so what we
   // produce always re-uploads to claude.ai/Cowork clean.
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name || '') || name.length > 64) {
     return { error: { code: 'bad_skill', message: 'name must be kebab-case (lowercase letters, digits, single hyphens), max 64 characters' } }
   }
-  const skillMd = buildSkillMd({ name, description, license, body: instructions })
+  // ⭐ `metadata` IS PASSED THROUGH, and it was the one spec field the authoring path could not express.
+  // `buildSkillMd` has always supported it; only this call omitted it, so a Skill authored here could
+  // not declare anything the open format allows. ⇒ that is what `required-artefacts` rides on — an
+  // open frontmatter mapping, no schema change, and it stays byte-faithful on export to claude.ai.
+  const skillMd = buildSkillMd({ name, description, license, metadata, body: instructions })
   return importSkillFiles(fastify, { files: { 'SKILL.md': skillMd }, folderName: null, userId, replace })
 }
 

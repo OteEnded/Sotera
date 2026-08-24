@@ -134,6 +134,9 @@ export default async function skillsAdminRoutes(fastify) {
           description: { type: 'string', minLength: 1, maxLength: 1024 },
           instructions: { type: 'string', minLength: 1, maxLength: 200_000 },
           license: { type: 'string', maxLength: 200 },
+          // ⭐ the open frontmatter mapping from the Agent Skills spec. `required-artefacts` (an array
+          // of literal strings the answer must contain) is checked deterministically by the chat loop.
+          metadata: { type: 'object', additionalProperties: true },
           replace: { type: 'boolean' },
         },
         additionalProperties: false,
@@ -145,6 +148,7 @@ export default async function skillsAdminRoutes(fastify) {
       description: request.body.description.trim(),
       instructions: request.body.instructions,
       license: request.body.license?.trim() || null,
+      metadata: request.body.metadata ?? null,
       userId: request.user?.id ?? null,
       replace: request.body.replace === true,
     })
