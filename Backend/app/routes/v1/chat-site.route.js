@@ -14,6 +14,8 @@ import { toolDefinitions, runTool, buildToolContext, resolveSkill, listSkills, m
 import { readSkillFile } from '../../components/skill-store.js'
 // ⭐ S1: the turn's toolset is assembled in ONE place, for the bound Skill and the triggered one alike.
 import { assembleToolDefs, MEMORY_WRITE_TOOLS } from '../../chat/tool-defs.js'
+// ⭐ SeekAdvice: reaching another intelligence. The route knows the SERVICE, never a transport.
+import { createAdviceService, adviceContextBlock } from '../../advice/index.js'
 import { ownerIdOf, ownedBy } from '../../auth/owner.js'
 import { buildMemoryV2 } from '../../components/memory-v2-host.js'
 import { captureFacts } from '../../components/memory-extract-host.js'
@@ -2082,8 +2084,14 @@ export default async function chatSiteRoutes(fastify) {
     // to the conversation, and one more the moment `use_skill` activates a Skill mid-turn — search for
     // `S1 · REASSEMBLE`. ⛔ A third caller, or a tool added at a call site instead of in the module,
     // re-opens the defect: the assembly must stay a function of the Skill in force and nothing else.
+    // ⭐ Destinations she is authorized to reach. Empty ⇒ `seek_advice` is not offered at all, which is
+    // the honest behaviour: no counterpart, no capability. ⛔ This is OUR record — nothing is enumerated
+    // from the counterpart's side.
+    const adviceDestinations = Object.entries(fastify.config?.advice?.destinations || {})
+      .filter(([, d]) => d?.enabled !== false).map(([name]) => name)
     let { defs: toolDefs, modelCanWriteMemory, trace: toolsetTrace } = assembleToolDefs({
       skill: activeSkill,
+      adviceDestinations,
       toolsOn,
       interactiveTurn,
       invocableSkills,
@@ -2653,6 +2661,7 @@ export default async function chatSiteRoutes(fastify) {
                   invocableSkills,
                   oneShotAllowedTools: request.body?.allowedTools ?? null,
                   useMemory: settings.useMemory,
+                  adviceDestinations,
                   path: 'triggered',
                 })
                 toolDefs = reassembled.defs
@@ -2669,6 +2678,44 @@ export default async function chatSiteRoutes(fastify) {
                 }
               }
               toolCtx.events?.emit?.('tool.executed', { name: tc.name, args: tc.arguments, ok: !result?.error, durationMs: Date.now() - t0, isReadOnly: true, caller: toolCtx.caller })
+            } else if (tc.name === 'seek_advice') {
+              // ══ ⭐⭐⭐ seek_advice — REACHING ANOTHER INTELLIGENCE ═══════════════════════════════════
+              //
+              // ⭐ The route knows the SERVICE and a MODE. It does not know that `/chat` or `/v1/runs`
+              // exist, and it must never learn: everything Hermes-shaped lives in app/advice/hermes.js.
+              // Ote, 2026-08-24: *"Nothing in the generic architecture should become Hermes-specific
+              // because of what we discovered here."*
+              //
+              // ⛔ NOTHING BLOCKS HERE ON A DELEGATION. `reach()` returns a handle the moment the run is
+              // accepted; a converse returns when the counterpart replies, because that is the interface
+              // she owns her context on — a fact about the transport, not a shape for this loop.
+              const t0 = Date.now()
+              try {
+                const advice = createAdviceService({ db: fastify.db, config: fastify.config, user: request.user })
+                const check = String(tc.arguments?.check || '').trim()
+                if (check) {
+                  result = await advice.observe(check)
+                } else {
+                  const mode = tc.arguments?.mode === 'delegate' ? 'delegate' : 'converse'
+                  result = await advice.reach({
+                    destination: String(tc.arguments?.destination || '').trim(),
+                    mode,
+                    message: typeof tc.arguments?.message === 'string' ? tc.arguments.message : null,
+                    brief: typeof tc.arguments?.brief === 'string' ? tc.arguments.brief : null,
+                    conversationId: convo.id,
+                  })
+                  // ⭐ A pending delegation is a SUCCESS with no answer. Say so plainly so she does not
+                  // read the absence of a reply as a failure and ask again immediately.
+                  if (result?.ok && result.state === 'pending') {
+                    result.note = 'Accepted. They are working on it — this is not an answer yet. '
+                      + 'Come back to it later with check="' + result.exchangeId + '".'
+                  }
+                }
+              } catch (e) {
+                // ⛔ An outbound failure is a reported outcome, never a thrown turn.
+                result = { ok: false, reason: String(e?.message || e).slice(0, 300) }
+              }
+              toolCtx.events?.emit?.('tool.executed', { name: tc.name, args: tc.arguments, ok: !!result?.ok, durationMs: Date.now() - t0, isReadOnly: false, caller: toolCtx.caller })
             } else if (tc.name === 'list_decisions') {
               // ⭐ ONE SELECT, ONE ENTITY, ONE OWNER. The projection is spelled out field by field so a
               // column added to txn_memories later cannot start riding along — the allowlist failure this

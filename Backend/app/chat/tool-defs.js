@@ -33,6 +33,7 @@
 //   ⑥  use_skill        activation (+ its own reader) while skills are still triggerable
 //   ⑦  set_display_name interactive only
 //   ⑧  remember_person  interactive only
+//   ⑧b seek_advice      reaching another intelligence (only when a destination is configured)
 //   ⑨  memory gate      the master memory switch, then empty → undefined
 // ⭐ Steps ④–⑧ are INFRA and land AFTER ①–③ on purpose: a Skill's allowlist governs capability tools,
 // never the platform's own hands. A Skill with an empty allowlist can still read its own files.
@@ -60,6 +61,7 @@ export const MEMORY_WRITE_TOOLS = new Set(['remember', 'remember_fact'])
  * @param {Array}    o.invocableSkills       skills the model may still activate (empty once one is bound)
  * @param {string[]?} o.oneShotAllowedTools  a caller's per-send narrowing (scheduled runs)
  * @param {boolean}  o.useMemory             the master memory switch
+ * @param {string[]} [o.adviceDestinations]   destinations she may reach; empty = no `seek_advice` tool
  * @param {'none'|'bound'|'triggered'} [o.path]  which assembly this is — the ONLY thing the caller knows
  *                                           that this function cannot work out for itself.
  * @returns {{ defs: Array|undefined, modelCanWriteMemory: boolean, trace: object|null }}
@@ -75,6 +77,9 @@ export function assembleToolDefs({
   oneShotAllowedTools = null,
   useMemory,
   path = null,
+  // ⭐ Destination names Sotera may reach (from config.advice.destinations). Empty = the tool is not
+  // offered at all, which is the right behaviour: no counterpart, no capability.
+  adviceDestinations = [],
 }) {
   const files = skill?.skillFiles || []
 
@@ -234,6 +239,50 @@ export function assembleToolDefs({
             confirm: { type: 'boolean', description: 'Pass true ONLY on the second call, after the user has answered. Omit on the first call.' },
           },
           required: ['name'],
+          additionalProperties: false,
+        },
+      },
+    }]
+  }
+
+  // ══ ⑧b ⭐⭐⭐ seek_advice — REACHING ANOTHER INTELLIGENCE ═══════════════════════════════════════════
+  //
+  // ⭐ ONE tool, not three. Hermes's own Footprint-Ladder reasoning applied to her toolset: she must not
+  // have to manage session lifecycle, and every extra tool is schema paid for on every call.
+  //
+  // ⛔⛔ THE DESCRIPTION IS DELIBERATELY THIN, AND THAT IS A MEASURED CHOICE. Validation C (2026-08-24)
+  // gave her the same eight scenarios with and without a decision framework. Unprimed she got 8/8 on the
+  // labels and reasoned BETTER — *"I'd be outsearcing responsibility for the outcome"* — and she invented
+  // the word "brief" herself. Primed, consistency held and insight fell. ⇒ Ote: *"Name the distinction,
+  // give the default, then get out of the way. Don't turn the Skill into a giant decision tree."*
+  // ⛔ Do not grow this description into a rubric. The words below are hers.
+  //
+  // ⭐ And the FIRST gate is not in here at all: *does she need another intelligence?* Offering only
+  // converse/delegate measurably suppressed her *"I wouldn't involve her at all on this one"* — so the
+  // description says the tool is for when she has decided to reach out, and says nothing that implies
+  // reaching out is the default.
+  if (toolsOn && adviceDestinations.length) {
+    toolDefs = [...(toolDefs || []), {
+      type: 'function',
+      function: {
+        name: 'seek_advice',
+        description:
+          'Reach another intelligence you are authorized to talk to (they are listed in your context). '
+          + 'Two ways, and the difference matters: mode="converse" is thinking WITH someone — they keep the '
+          + 'context of your relationship and you expect to react to what they say; mode="delegate" is '
+          + 'handing over a self-contained job — they will NOT have any of your earlier conversation, only '
+          + 'the brief you write, and they work on it independently. When it is ambiguous, converse. '
+          + 'A delegation returns immediately with an exchange id, not an answer: come back later and call '
+          + 'this with `check` set to that id to see how it is going or collect the result.',
+        parameters: {
+          type: 'object',
+          properties: {
+            destination: { type: 'string', enum: adviceDestinations, description: 'who to reach' },
+            mode: { type: 'string', enum: ['converse', 'delegate'], description: 'converse = thinking with them; delegate = handing them a self-contained job' },
+            message: { type: 'string', description: 'for converse: what you want to say to them, in your own voice' },
+            brief: { type: 'string', description: 'for delegate: the whole task, written so someone with no other context could act on it exactly as written' },
+            check: { type: 'string', description: 'instead of asking: an exchange id from an earlier delegation, to see its state or collect its result' },
+          },
           additionalProperties: false,
         },
       },
