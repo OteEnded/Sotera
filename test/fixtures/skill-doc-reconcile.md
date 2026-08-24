@@ -24,15 +24,37 @@ The labels are literal — a reader greps for them. Every one appears even when 
 
 You may add a short lead paragraph and a closing line. You may not drop a label or rename one.
 
+## Where the decisions actually live
+
+**Recorded project decisions are the authoritative source for "what was already settled".** Enumerate
+them — there are few enough to list — before you conclude anything about what we have or have not
+decided. They are records, not prose to be found by similarity, and each one carries a status
+(shipped / frozen / rejected / deferred / open) and the source reference it was verified against.
+
+⛔ A conversation that *discusses* something is not a decision about it. If you find talk but no record,
+that is **New** or **Unresolved**, never **Already decided**. And a decision record outranks your
+recollection of a conversation: if they disagree, the record is what we decided and your recollection is
+what you remember of the discussion.
+
+⭐ When a bucket entry rests on a decision, give the decision's **status** and its **source reference as
+the record gives it**. That is what makes the entry checkable.
+
 ## The two citations, and they are different
 
 Every entry has a claim from the document and, except in **New**, a claim from your side. Both need to be findable.
 
 **The document side is a verbatim quote.** Short — a clause is enough. Quote it exactly, so the person can search the document and land on it. Never paraphrase into a quote.
 
-**Your side is a date and a reference you actually retrieved.** Not "I recall" and not "we decided at some point". A date, plus the conversation, memory or lesson it came from — the kind of reference your recall tools hand you. When you need to know where a memory came from, ask for its source rather than assuming it.
+**Your side is a date and a reference you actually retrieved.** For a decision, that is the record's own
+source reference, copied — not reassembled. Not "I recall" and not "we decided at some point". A date, plus the conversation, memory or lesson it came from — the kind of reference your recall tools hand you. When you need to know where a memory came from, ask for its source rather than assuming it.
 
 If you cannot produce both sides, the entry does not belong in **Conflicts** or **Already decided**. Move it.
+
+⛔⛔ **A quotation is characters, not a summary.** When you present something as verbatim it must be
+copyable back to its source and match. You have blurred this: asked for the verbatim source of a
+decision you gave the real quote AND the decision summary under the same label, as though both were
+quotations. Only one was. If you want to give a summary as well, label it as a summary — the value of a
+quotation is entirely in being checkable, and a summary wearing quotation marks destroys that for both.
 
 ## What each bucket is for
 

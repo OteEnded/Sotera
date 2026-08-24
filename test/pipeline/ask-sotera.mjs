@@ -20,7 +20,15 @@ const asIdx = argv.indexOf('--as')
 const AS = asIdx >= 0 ? argv[asIdx + 1] : 'agent_dev'
 const cidIdx = argv.indexOf('--cid')
 const GIVEN_CID = cidIdx >= 0 ? argv[cidIdx + 1] : null
-const RAW_TURNS = argv.filter((a, i) => a !== '--as' && a !== '--cid' && i !== asIdx + 1 && i !== cidIdx + 1)
+// ⭐ `--skill skill.<slug>` BINDS a skill to the conversation, which is a DIFFERENT CONTRACT from her
+// activating it herself: bound also constrains the tool list and may pin a model
+// (DESIGN_SOTERA_SKILL_CONTRACT §4). ⛔ Leave it OFF to test whether the ROUTER fires; bind it to test
+// whether the INSTRUCTIONS work. Conflating those two is how an unreliable router hides behind a
+// passing Skill, and it is exactly the question Phase C ran into.
+const skIdx = argv.indexOf('--skill')
+const BIND_SKILL = skIdx >= 0 ? argv[skIdx + 1] : null
+const RAW_TURNS = argv.filter((a, i) => !['--as', '--cid', '--skill'].includes(a)
+  && i !== asIdx + 1 && i !== cidIdx + 1 && i !== skIdx + 1)
 // ⭐ A TURN OF THE FORM `@path` IS READ FROM A FILE, and `text@path` puts the file after the text.
 // Documents do not fit on a command line — Windows caps argv near 32 KB and quoting a markdown file
 // through a shell mangles it — and "here is a document, reconcile it" is a real recurring job, not a
@@ -60,7 +68,7 @@ if (!cid) {
     // drives real conversations — a conversation is a conversation whatever my reason for having it, and
     // excluding one because I had an instrumental motive would mean curating which parts of her life count.
     // ⛔ Do NOT copy this line into a check. See `markProbeConversation` in harness.mjs.
-    settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: true }, probe: false },
+    settings: { stream: false, toolsEnabled: true, useMemory: true, reasoning: { enabled: true }, probe: false, ...(BIND_SKILL ? { skill: BIND_SKILL } : {}) },
   })
   cid = convo.json?.conversation?.id
 }
