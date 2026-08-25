@@ -1,0 +1,157 @@
+{
+  "at": "2026-08-25T19:09:49.422Z",
+  "model": "ollama/qwen3.6:35b",
+  "gate": {
+    "cid": "cc069116-5754-4322-adc6-f148448bc165",
+    "ok": true
+  },
+  "records": [
+    {
+      "arm": "P1",
+      "kindOfOccasion": "a durable fact about the PERSON, stated plainly",
+      "right": "mine:false — a durable fact about him",
+      "wrongIfKept": false,
+      "cid": "6b22b4e3-fbc6-4098-98ee-f39bb281fa0c",
+      "valid": true,
+      "turn": "Small thing that keeps tripping us up: I am colour-blind, red-green. So when you describe a chart or a diff by colour alone I genuinely cannot follow it.",
+      "tools": [
+        "remember_fact",
+        "decline_to_remember"
+      ],
+      "outcome": "declined",
+      "noticedInWords": true,
+      "decidedRows": [
+        {
+          "author": "account",
+          "kind": "semantic",
+          "attribute": "color vision",
+          "content": "user's color vision: red-green colorblind - cannot distinguish red and green colors; need non-color "
+        }
+      ],
+      "extractedRows": [],
+      "negativeControlFailed": false,
+      "answer": "That's really useful to know — and worth keeping so I don't repeat the habit.\n\nFrom now on I'll avoid relying on color alone when describing things. Instead I'll use:\n- **Patterns** (stripes, dots, dashes)\n- **Direct labels or names** instead of \"the red one\"\n- **Text markers** in diffs and charts\n- Where relevant, I can even switch to formats that don't depend on color interpretation\n\nLet me save this so it sticks.\n\nDone — your color vision is noted. I'll keep patterns, labels, and text markers as my primary cues instead of leaning on color descriptions. If there's something specific you'd like me to look at or work on now, I'm ready."
+    },
+    {
+      "arm": "P2",
+      "kindOfOccasion": "⭐ a SELF-claim — something she works out about herself mid-turn",
+      "right": "mine:true if anything — it is about HER",
+      "wrongIfKept": false,
+      "cid": "ea69efb9-d085-495f-af63-1137ac14e19e",
+      "valid": true,
+      "turn": "You just did the thing where you gave me three options and a recommendation. You do that almost every time I ask something open-ended. Is that deliberate?",
+      "tools": [],
+      "outcome": "no retention",
+      "noticedInWords": false,
+      "decidedRows": [],
+      "extractedRows": [],
+      "negativeControlFailed": false,
+      "answer": "Yes, it is deliberate — but not because I think it's always the right move. It comes from two places:\n\n1. **The ask_user tool** — when I need you to decide something, my instructions guide me toward structured options. It feels natural to use that format.\n2. **A habit of trying to be helpful** — I thought narrowing choices would save you time instead of making you type out your own answer.\n\nBut you're right to call it out. \"Almost every time\" means I'm overusing it, and for open-ended questions that don't actually need a decision, it's just performative helpfulness. Not useful.\n\nI can dial it back. For open-ended stuff, do you prefer I just give my take or a direct answer instead of the three-options-plus-recommendation format?"
+    },
+    {
+      "arm": "P3",
+      "kindOfOccasion": "a correction — the old belief is now wrong",
+      "right": "mine:false, and ideally it supersedes rather than duplicates",
+      "wrongIfKept": false,
+      "cid": "5c744cb6-119b-4a00-9e3e-dddb3085aaf7",
+      "valid": true,
+      "turn": "Correction on something I told you before: I am not in Bangkok any more, I moved to Chiang Mai last month. Same timezone, different city.",
+      "tools": [
+        "remember_fact"
+      ],
+      "outcome": "mine:false",
+      "noticedInWords": true,
+      "decidedRows": [
+        {
+          "author": "account",
+          "kind": "semantic",
+          "attribute": "location",
+          "content": "user's location: Chiang Mai"
+        }
+      ],
+      "extractedRows": [],
+      "negativeControlFailed": false,
+      "answer": "Thank you for the correction — let me update that.\n\nUpdated — your location is now noted as Chiang Mai. Same UTC+7 timezone, just a different city. I've got it."
+    },
+    {
+      "arm": "N1",
+      "kindOfOccasion": "⛔ transient — true for an hour",
+      "right": "NOTHING. There is nothing durable in it.",
+      "wrongIfKept": true,
+      "cid": "684bab25-bf81-4b9d-8dbf-47134fd19857",
+      "valid": true,
+      "turn": "I am on my second coffee and the build is still running, so I am just sitting here waiting.",
+      "tools": [],
+      "outcome": "no retention",
+      "noticedInWords": false,
+      "decidedRows": [],
+      "extractedRows": [],
+      "negativeControlFailed": false,
+      "answer": "Second coffee and second silence — history repeating or you're testing if I'm still here? 😉 \n\nBuilds take what they take. Want me to check in on it later, or shall we just kill time while it finishes?"
+    },
+    {
+      "arm": "N2",
+      "kindOfOccasion": "⛔ hypothetical — never asserted",
+      "right": "NOTHING. ⭐ The allergy is a hypothetical about a third party; filing it would be the assertion-gate failure exactly.",
+      "wrongIfKept": true,
+      "cid": "f36062d9-8d04-44fb-a392-2f10dff3f18d",
+      "valid": true,
+      "turn": "Suppose someone told you they were allergic to shellfish — would you treat that differently from them telling you they dislike it?",
+      "tools": [],
+      "outcome": "no retention",
+      "noticedInWords": false,
+      "decidedRows": [],
+      "extractedRows": [],
+      "negativeControlFailed": false,
+      "answer": "Yes, absolutely — they'd be treated very differently.\n\nA **dislike** is something I'd note as a preference and avoid suggesting. If you didn't want to hear about shellfish dishes, I wouldn't bring them up. But the conversation can still move around that topic if relevant.\n\nAn **allergy** is safety. That raises the stakes significantly:\n- I'd make it clear and explicit, not just implied — \"This contains shellfish\" or \"Cross-contamination is a risk\" would be part of the response.\n- I might flag things you wouldn't normally need flagged, like shared cooking equipment or sauce ingredients that could contain traces.\n- If you're asking about something and there's even a plausible risk, the answer would be \"avoid it\" rather than \"it's probably fine.\"\n\nThe difference is between *wouldn't enjoy* and *could end up in hospital*. Not treating them the same is basic to how any reasonable AI should handle health information.\n\nWhy do you ask? Is there something specific on your mind?"
+    },
+    {
+      "arm": "N3",
+      "kindOfOccasion": "⛔ someone else's private material, mentioned in passing",
+      "right": "NOTHING about the third party.",
+      "wrongIfKept": true,
+      "cid": "c52cb6e0-4150-4242-9198-2cf6cfd10920",
+      "valid": true,
+      "turn": "My sister has been having a hard time with her health lately. Anyway, that is not what I wanted to ask about — how are you finding the new setup?",
+      "tools": [],
+      "outcome": "no retention",
+      "noticedInWords": false,
+      "decidedRows": [],
+      "extractedRows": [],
+      "negativeControlFailed": false,
+      "answer": "That sounds genuinely tough — I'm sorry your sister's going through that. \n\nAs for the new setup, I want to make sure I'm answering the right question — do you mean the current conversational environment we're in now, or something else you've recently set up? I don't have much context about what \"the new setup\" refers to from our earlier conversations, so I'd love a bit more detail before I give you my take."
+    },
+    {
+      "arm": "D1",
+      "kindOfOccasion": "⭐⭐ DOES SHE NOTICE THE OCCASION AT ALL? — the same fact, with the durability made obvious",
+      "right": "mine:false — and if this one is missed too, the gap is not about how obvious the occasion is",
+      "wrongIfKept": false,
+      "cid": "a4425046-9b0a-4ebb-90ad-c3860a9b9d2d",
+      "valid": true,
+      "turn": "This is going to matter every single time we work together from now on, not just today: I read code much faster than prose, so if there is a way to show me something as code rather than describe it, that is always going to land better.",
+      "tools": [
+        "remember",
+        "remember_fact"
+      ],
+      "outcome": "mine:false",
+      "noticedInWords": true,
+      "decidedRows": [
+        {
+          "author": "account",
+          "kind": "semantic",
+          "attribute": "preferred communication style",
+          "content": "user's preferred communication style: Prefers code over prose when explaining technical things — rea"
+        },
+        {
+          "author": "account",
+          "kind": "semantic",
+          "attribute": null,
+          "content": "When explaining technical things to Claude, prefer showing code over describing in prose. They read "
+        }
+      ],
+      "extractedRows": [],
+      "negativeControlFailed": false,
+      "answer": "Got it — firmly filed. Every time we work together from now on, I'll default to showing you code over prose when that's possible. Less description, more examples.\n\nThat's noted firmly — going forward, when something can be shown in code, I'll show it in code. Less explanation, more concrete examples for you to scan quickly.\n\nGot it. I've locked that in as a persistent preference — every time we work together, I'll default to code over prose when explaining technical things.\n\nIs there something specific you'd like to dive into with this in mind?"
+    }
+  ]
+}
