@@ -1,0 +1,84 @@
+=== SNAPSHOT TAKEN BEFORE ANY APPROVAL, 2026-08-25T03:14:54Z ===
+
+--- gateway run object (peek, GET only) ---
+{"object": "hermes.run", "run_id": "run_1a73a464b0c34e9d9f17407f697c747f", "status": "waiting_for_approval", "updated_at": 1787627487.430485, "created_at": 1787627063.7807872, "session_id": "20260824_213027_2c4579", "model": "hermes-agent", "last_event": "approval.request"}
+
+--- three-layer snapshot ---
+snapshot at 2026-08-25T03:14:54.787Z
+
+══ 37ba49a4  hermes  delegate
+  L1 their side      : waiting_for_approval  (approval.request)   ⏳ not terminal
+  L2 her exchange    : state=pending  closed_at=null  ⛔ unchanged
+  L3 she received    : 0 inbound turn(s)   ⛔ has nothing
+  ── when
+     opened_at        : 2026-08-25 03:04:23
+     L1 their terminal: — (not terminal)
+     binding noticed  : —
+     L2 exchange moved: — (unchanged)
+     L3 she received  : — (nothing)
+
+══ 5a01694e  hermes  converse
+  L1 their side      : (no detached work)   ⏳ not terminal
+  L2 her exchange    : state=completed  closed_at=set  ✅ moved
+  L3 she received    : 1 inbound turn(s) (998 chars, attested=true)   ✅ has it
+  ── when
+     opened_at        : 2026-08-25 02:49:17
+     L1 their terminal: — (not terminal)
+     binding noticed  : —
+     L2 exchange moved: 2026-08-25 02:49:35
+     L3 she received  : 2026-08-25 02:49:35
+
+══ b2295737  hermes  converse
+  L1 their side      : (no detached work)   ⏳ not terminal
+  L2 her exchange    : state=completed  closed_at=set  ✅ moved
+  L3 she received    : 1 inbound turn(s) (5315 chars, attested=true)   ✅ has it
+  ── when
+     opened_at        : 2026-08-25 02:39:45
+     L1 their terminal: — (not terminal)
+     binding noticed  : —
+     L2 exchange moved: 2026-08-25 02:40:48
+     L3 she received  : 2026-08-25 02:40:48
+
+══ e050f9ea  hermes  delegate
+  L1 their side      : cancelled  (run.cancelled)   ✅ terminal
+  L2 her exchange    : state=pending  closed_at=null  ⛔ unchanged
+  L3 she received    : 0 inbound turn(s)   ⛔ has nothing
+  ⚠️  L1→L2 GAP      : their side is terminal and her record has not moved. Nothing crosses on its own.
+  ── when
+     opened_at        : 2026-08-25 01:31:07
+     L1 their terminal: 2026-08-25 02:38:38
+     binding noticed  : only when polled — ⛔ the product never asks on its own
+     L2 exchange moved: — (unchanged)
+     L3 she received  : — (nothing)
+
+--- watcher trace (peek-only, every 20s) ---
+10:05:05 running tool.started
+10:05:25 running tool.started
+10:05:46 running tool.started
+10:06:06 running tool.started
+10:06:26 running tool.started
+10:06:46 running tool.started
+10:07:06 running tool.started
+10:07:26 running tool.started
+10:07:46 running tool.started
+10:08:07 running tool.started
+10:08:27 running tool.started
+10:08:47 running tool.started
+10:09:07 running tool.started
+10:09:27 running tool.started
+10:09:47 running tool.started
+10:10:07 running tool.started
+10:10:28 running tool.started
+10:10:48 running tool.completed
+10:11:08 running tool.completed
+10:11:28 waiting_for_approval approval.request
+10:11:48 waiting_for_approval approval.request
+10:12:08 waiting_for_approval approval.request
+10:12:28 waiting_for_approval approval.request
+10:12:49 waiting_for_approval approval.request
+10:13:09 waiting_for_approval approval.request
+10:13:29 waiting_for_approval approval.request
+10:13:49 waiting_for_approval approval.request
+10:14:09 waiting_for_approval approval.request
+10:14:29 waiting_for_approval approval.request
+10:14:49 waiting_for_approval approval.request

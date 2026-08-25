@@ -42,7 +42,7 @@ for (const r of targets) {
     } catch (e) { theirs = { status: `unreachable: ${e.message}` } }
   }
   const turns = (await cl.query(
-    `SELECT direction, attested, length(content) AS len, latency_ms
+    `SELECT direction, attested, length(content) AS len, latency_ms, created_at
        FROM "${S}".txn_advice_turns WHERE exchange_id = $1 ORDER BY created_at`, [r.id])).rows
   const inbound = turns.filter((t) => t.direction === 'in')
 
@@ -59,5 +59,22 @@ for (const r of targets) {
   if (L1done && !L2done) console.log('  ⚠️  L1→L2 GAP      : their side is terminal and her record has not moved. Nothing crosses on its own.')
   if (L2done && !L3done) console.log('  ⚠️  L2→L3 GAP      : the exchange closed with no inbound turn — closed, and she received nothing.')
   if (L1done && L3done) console.log('  ✅ full chain      : terminal, moved, and content she can quote.')
+
+  // ⭐⭐⭐ WHEN EACH LAYER MOVED — Ote: *"include the timestamps so we can distinguish
+  // Hermes completed at T / binding knew at T? / exchange changed at T? / Sotera received at T?"*
+  const iso = (t) => (t ? new Date(t).toISOString().replace('T', ' ').slice(0, 19) : null)
+  const theirT = theirs?.updated_at ? iso(theirs.updated_at * 1000) : null
+  console.log('  ── when')
+  console.log(`     opened_at        : ${iso(r.opened_at)}`)
+  console.log(`     L1 their terminal: ${L1done ? theirT : '— (not terminal)'}`)
+  // ⚠️⚠️ AND THIS ONE IS THE POINT. The binding has no clock of its own for L1, because it never
+  // learns anything until something ASKS. Any "binding knew at T" is the time an INSTRUMENT polled, never a
+  // time the product noticed — so it is labelled as mine and never presented as a system event.
+  console.log(`     binding noticed  : ${L1done ? 'only when polled — ⛔ the product never asks on its own' : '—'}`)
+  // ⚠️ AN OBSERVABILITY GAP, RECORDED: txn_advice_exchanges has opened_at and closed_at and NO updated_at,
+  // so a state move that is not terminal (pending→running) leaves NO timestamp at all. L2 is only datable
+  // when it CLOSES.
+  console.log(`     L2 exchange moved: ${r.closed_at ? iso(r.closed_at) : (L2done ? '(moved, but no timestamp — no updated_at column)' : '— (unchanged)')}`)
+  console.log(`     L3 she received  : ${inbound.length ? inbound.map((t) => iso(t.created_at)).join(', ') : '— (nothing)'}`)
 }
 await cl.end()
