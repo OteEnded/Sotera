@@ -78,8 +78,18 @@ try {
   // one is a stored structured answer re-read by the server, the other is an authenticated session. There
   // is still no value for prose, and a schema that cannot record a prose authorization cannot be talked
   // into accepting one.
-  ok(authz.length === 2 && authz.includes('held_turn_card') && authz.includes('root_session'),
-    'E · ⭐ disclosure_authz has exactly two values, both of them facts the SERVER establishes',
+  // ⚠️⚠️ AND `standing_grant` WAS ADDED 2026-08-25 BY MIGRATION 028 — and THIS ASSERTION WAS NOT UPDATED
+  // WITH IT, so the suite went red the moment the capability was proven live. ⭐ That is the recorded
+  // allowlist defect exactly: **an explicit list silently rejects whatever was added after it** — here it
+  // failed loudly, which is the good version, but the enumeration still has to be maintained WITH the
+  // migration that changes it, not after someone notices.
+  // ⭐⭐ THE CLAIM 014 WAS PROTECTING IS UNCHANGED AND IS WHAT MATTERS: **no value can be produced by
+  // something someone SAID.** A stored structured answer re-read by the server, an authenticated root
+  // session, and a permission root granted through the Console are all facts the SERVER establishes.
+  // There is still no value for prose, and a schema that cannot record a prose authorization cannot be
+  // talked into accepting one.
+  ok(authz.length === 3 && ['held_turn_card', 'root_session', 'standing_grant'].every((v) => authz.includes(v)),
+    'E · ⭐ disclosure_authz has exactly three values, every one of them a fact the SERVER establishes',
     authz.join(', '))
   ok(!authz.some((v) => /prose|stated|claimed|assumed|model|said/i.test(v)),
     'E · ⭐⭐ …and STILL no value for prose — authorization never travels through a sentence',
@@ -111,8 +121,10 @@ try {
   // strongest statement in this file. `root_session` rows now exist by Ote's decision, so the assertion
   // becomes: every row names an authority from the CLOSED vocabulary, and ⭐ the two remain countable
   // separately — because *"which of these reads did a human actually agree to?"* has to stay answerable.
-  ok(authzRows.every((r) => ['held_turn_card', 'root_session'].includes(r.authorized_via)),
-    'I · ⭐ every row names one of the two legal authorities — nothing else has ever written one',
+  // ⓘ `standing_grant` joined the vocabulary with 028 and rows now exist. The shape of the claim does not
+  // change: every row names an authority from the CLOSED vocabulary, and each stays countable on its own.
+  ok(authzRows.every((r) => ['held_turn_card', 'root_session', 'standing_grant'].includes(r.authorized_via)),
+    'I · ⭐ every row names one of the three legal authorities — nothing else has ever written one',
     authzRows.map((r) => `${r.authorized_via}:${r.n}`).join(' ') || 'no rows yet')
   // ⭐⭐ AND THE PROOF REQUIREMENT NOW FOLLOWS THE AUTHORITY. A card row without its interaction would mean
   // a consent we cannot verify; a root_session row has no interaction BY CONSTRUCTION, and pretending
@@ -121,7 +133,12 @@ try {
   ok(cards.every((r) => r.no_proof === 0),
     'I · ⭐⭐ every CARD row names the interaction that proved it',
     cards.map((r) => `${r.authorized_via} missing=${r.no_proof}`).join(' ') || 'no card rows yet')
-  const autos = authzRows.filter((r) => r.authorized_via === 'root_session')
+  // ⭐ BOTH AUTOMATIC AUTHORITIES, not just root. A `standing_grant` row has no interaction for the same
+  // reason a `root_session` row does not: the human decision happened ONCE, in the Console, and is not
+  // re-taken per read. ⛔ Attaching an interaction to it would be inventing evidence for a card nobody saw.
+  // ⚠️ Listing only `root_session` here would have let a standing_grant row carry a bogus interaction id
+  // without any assertion noticing — the second half of the same allowlist gap 028 opened above.
+  const autos = authzRows.filter((r) => ['root_session', 'standing_grant'].includes(r.authorized_via))
   ok(autos.every((r) => r.no_proof === r.n),
     'I · ⭐ and every AUTOMATIC row honestly has NO interaction — it did not happen, so it is not claimed',
     autos.map((r) => `${r.authorized_via} ${r.no_proof}/${r.n} without an interaction`).join(' ') || 'no automatic rows yet')
@@ -164,6 +181,51 @@ try {
   ok(hits.length > 0,
     'I · ⭐ …and it IS wired now — the capability is usable, not decoratively inert',
     hits.join(', '))
+
+  // ── ⭐⭐⭐ W · EVERY DOOR IS TOLD ABOUT THE STANDING GRANT ──────────────────────────────────────────
+  //
+  // ⚠️⚠️ THE DEFECT, MEASURED 2026-08-26. `buildDisclosure` takes `crossRoom` and DEFAULTS IT TO FALSE.
+  // Two of the three production construction sites — `conversation-retrieval.js` and
+  // `memory-cognition-host.js` — never passed it, so those calls SUCCEEDED and simply decided every
+  // cross-room question as though migration 028 had never been applied. Measured for `agent_dev`, who
+  // holds the grant: the gate said `autoAuthorizes(...crossRoom:true) -> true`, and the window built the
+  // way retrieval built it said *"without a grant I can only centre on your own words."*
+  // ⇒ 028 worked through the tool factory and was ABSENT through `retrieve_conversations`, the path she
+  // actually uses. ⭐ **A defaulted parameter fails silently — which is the only way a capability can be
+  // live, correct, and unreachable at the same time.**
+  //
+  // ⭐ SO THE ASSERTION IS ON THE CALL SITES, NOT ON THE BEHAVIOUR OF ONE OF THEM. A behavioural test
+  // proves the door it opens; this proves there is no door that was never told.
+  const sites = []
+  const walkCalls = (dir) => {
+    for (const e of readdirSync(dir)) {
+      const p = join(dir, e)
+      if (statSync(p).isDirectory()) {
+        if (e === 'node_modules' || e === 'migrations' || e === '.git') continue
+        walkCalls(p); continue
+      }
+      if (!/\.(js|mjs|cjs)$/.test(e)) continue
+      const body = strip(readFileSync(p, 'utf8'))
+      // The call's argument object, up to the closing brace of that object literal.
+      // ⛔ `(?<!function\s)` — the DEFINITION is not a call site, and counting it inflated the floor by
+      // one while trivially satisfying the `crossRoom` test (its own default declares the name). A scan
+      // that counts the thing it is checking is measuring itself.
+      for (const m of body.matchAll(/(?<!function\s)buildDisclosure\s*\(\s*[A-Za-z_$][\w$]*\s*,\s*\{([^}]*)\}/g)) {
+        sites.push({ file: norm(relative(BACKEND, p)), args: m[1] })
+      }
+    }
+  }
+  walkCalls(BACKEND)
+  // ⛔⛔ THE ANCHOR GUARD, AND IT IS NOT OPTIONAL. A scan whose pattern stops matching reports a
+  // triumphant PASS over zero files — the failure mode where the check dies quietly and nobody is told.
+  // The definition itself is not a call, so the real floor is the construction sites.
+  ok(sites.length >= 3,
+    'W · ⛔ the buildDisclosure call-site scan actually found call sites — an empty scan is not a pass',
+    `${sites.length} site(s): ${sites.map((s) => s.file).join(', ')}`)
+  const deaf = sites.filter((s) => !/\bcrossRoom\b/.test(s.args))
+  ok(deaf.length === 0,
+    'W · ⭐⭐⭐ every buildDisclosure call site passes `crossRoom` — no door is left unaware of 028',
+    deaf.map((s) => s.file).join(', ') || `${sites.length} site(s), all wired`)
 
   // A Sequelize model would be enough on its own to make it non-inert: `sync()` would touch it and any
   // route could read it without naming the table.

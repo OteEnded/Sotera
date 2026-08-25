@@ -51,6 +51,10 @@ import { askInteraction } from '../interaction/service.js'
 // ⭐ THE DEPLOYMENT'S POLICY LIVES IN ONE PLACE, NOT INLINE AT EACH SITE. See disclosure-policy.js for
 // why: two inline reads of the same flag is how ASKING ended up worse than not asking.
 import { autoAuthorizes, mayRaiseDisclosureCard, disclosureMode } from './disclosure-policy.js'
+// ⭐⭐ THE SAME SCHEME THE RETRIEVAL TOOL MINTS. ⛔ Not a second definition — that is precisely what was
+// wrong: this door had its own idea of what a handle is (a uuid, nothing else) while `handleFor` was
+// handing her a 10-character checksummed one. See `conversation-handle.js`.
+import { resolveHandle, isUuid } from './conversation-handle.js'
 
 // ⭐ The affirmative option's label is a CONSTANT, not free text, because matching on prose is how prose
 // becomes authorization. The card must offer this exact string for the grant to verify.
@@ -80,10 +84,13 @@ const MAX_RADIUS = 6
 // `config?.memory?.rootAutoDisclosure === true` at each site, and the second site was added a day late,
 // which is precisely how asking became worse than not asking. Anything else that ever needs to know
 // imports the policy; ⛔ nothing reads the raw config key again.
-// ⚠ A handle is validated as a UUID before it reaches a query. Sequelize would throw
-// `invalid input syntax for type uuid` on anything else — an unusable handle must read as "not
-// reachable", never take the turn down.
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+// ⚠ PRECONDITION, STILL LOAD-BEARING: a handle is resolved to a UUID before it reaches a query.
+// Sequelize would throw `invalid input syntax for type uuid` on anything else — an unusable handle must
+// read as "not reachable", never take the turn down.
+// ⓘ WHAT CHANGED is only WHERE that is enforced. The regex used to live here as this file's private
+// notion of a handle; it now lives in `conversation-handle.js`, shared with the tool that MINTS handles,
+// and `locateConversation` resolves the short form through it. The precondition below the resolve step is
+// exactly as strong: what reaches a query is a uuid or nothing.
 
 // ⚠️ `conversationId` IS LOAD-BEARING, not context. A grant is written FROM a room INTO the conversation
 // that asked, so a host without it cannot find the grant it just created — which is exactly how the
@@ -133,19 +140,39 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     // this does not let a caller probe ids — the "missing and refused must look alike" rule is untouched.
     // ⛔ AND IT DOES NOT ACCEPT A PREFIX. Resolving `de19b111` by matching would be an enumeration
     // surface across every room; the handle stays whole, and the error teaches instead.
+    //
+    // ── ⚠️⚠️ AND IT USED TO ACCEPT ONLY A UUID, WHICH WAS A SECOND SCHEME, MEASURED 2026-08-26 ────────
+    // `retrieve_conversations` hands her `handleFor(cid)` — ten characters, checksummed — and this door
+    // refused that exact string as "shortened", telling her to use *"the complete value exactly as
+    // recall_own_history gave it to you"*. ⛔ She had not used `recall_own_history`, and her value WAS
+    // complete. ⇒ **the only identifier the system would give her was the one it would not take**, and
+    // the instruction for repairing it was impossible to follow. In her words: *"Every retrieval call
+    // consistently returned the handle as `7198c1b0de`, yet the system keeps rejecting it as too short."*
+    //
+    // ⭐⭐ THE SCHEME IS NOW SHARED RATHER THAN COPIED, so the two doors cannot drift apart again.
+    // ⛔ AND THIS OPENS NOTHING NEW. Measured before the change: `retrieve_conversations in:"7198c1b0de"`
+    // ALREADY resolves that handle for an UNGRANTED account and already returns `person: "Ote"` — so the
+    // same string was always a working identifier one door over. Authorization is still `decideAccess`'s
+    // job here, unchanged, and an 8-character prefix is still refused by the checksum.
     if (typeof conversationHandle !== 'string' || !conversationHandle.trim()) {
       return { found: false, malformed: true, why: 'no conversation handle was given' }
     }
-    if (!UUID_RE.test(conversationHandle.trim())) {
-      return {
-        found: false,
-        malformed: true,
-        why: 'that is not a whole conversation handle — it looks shortened. Use the complete value exactly '
-          + 'as recall_own_history gave it to you, not the abbreviated form you may have written out.',
-      }
+    const raw = conversationHandle.trim()
+    let id = raw
+    if (!isUuid(raw)) {
+      const r = await resolveHandle(db, raw)
+      // ⭐ THE THREE OUTCOMES ARE CARRIED THROUGH, NOT FLATTENED. `resolveHandle` already distinguishes
+      // "you mistyped it" from "the checksum disagrees" from "it matches more than one" — collapsing
+      // those into one message here would rebuild the exact ambiguity this arc exists to remove.
+      if (r.malformed || r.ambiguous) return { found: false, malformed: true, why: r.why }
+      // ⛔ RESOLVED-TO-NOTHING IS *NOT* MALFORMED. A well-formed handle for a conversation that does not
+      // exist is an absence, and absence and refusal must look alike — so it falls through to the same
+      // `{ found: false }` a uuid would get, with no extra word about why.
+      if (!r.id) return { found: false }
+      id = r.id
     }
     const conv = await db.txn_conversations.findOne({
-      where: { id: conversationHandle.trim() }, attributes: ['id', 'user_id', 'incognito'], raw: true,
+      where: { id }, attributes: ['id', 'user_id', 'incognito'], raw: true,
     })
     // ⛔ FAIL CLOSED, exactly as `locate` does.
     if (!conv || !conv.user_id || conv.incognito) return { found: false }
@@ -511,14 +538,21 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     // the Console. So this path must not summon a human on their behalf — it should hand back the same
     // automatic grant `inspect_around` would, for the same reason the root case does: **asking must
     // never be worse than not asking.**
+    // ⭐⭐ WELL-FORMEDNESS IS ASKED **BEFORE** AUTHORITY, AND THE ORDER IS THE WHOLE POINT.
+    // ⚠️ It used to be the other way round, so a non-root asker who mistyped a handle was told *"only a
+    // root session can authorize reading another room"* — a BOUNDARY message for a TYPO. That is the
+    // malformed-reported-as-a-closed-door failure this arc exists to end, rebuilt at a different door;
+    // my own probe walked straight into it on 2026-08-26.
+    // ⛔ It discloses nothing new: malformedness is a property of the string she typed, established
+    // without a database lookup, and every answer about whether the conversation EXISTS still sits below
+    // the authority check.
+    const at = await locateConversation(conversationHandle)
+    if (at.malformed) return { ok: false, reason: at.why }
+    // ⛔ A NON-ROOT SESSION STILL CANNOT *CONSENT* FOR SOMEONE WHO IS NOT IN THE ROOM.
     if (!isRoot && !crossRoom) {
       return { ok: false, reason: 'only a root session can authorize reading another room', howToOpen: null }
     }
     if (!conversationId) return { ok: false, reason: 'no conversation to raise the card in' }
-    const at = await locateConversation(conversationHandle)
-    // ⭐ MALFORMED FIRST, and it is NOT `unreachable` — see locateConversation. A bad argument must be
-    // reported as a bad argument, or she reads it as a closed door and stops asking.
-    if (at.malformed) return { ok: false, reason: at.why }
     if (!at.found) return { ok: false, state: 'unreachable', note: 'That is not reachable from here.' }
     if (at.conv.user_id === userId) {
       // ⭐ Already hers to read — say so instead of raising a card for a boundary that is not there.

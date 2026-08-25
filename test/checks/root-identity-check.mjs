@@ -45,6 +45,18 @@ if (room.ok) {
 // The root-identity doc's "cliff": if root's id stops being null while null-owned rows exist, those rows
 // become invisible. She has zero, and that is what makes the whole refactor safe — so it is asserted
 // rather than remembered.
+//
+// ── ⛔⛔ THIS TRIPWIRE HAS FIRED, AND IT IS **CORRECT**. DO NOT WIDEN IT TO GO GREEN. ────────────────
+// Since 2026-08-25 22:05 there is exactly one row here: `d211f5b4`, `kind='identity'`, `user_id=NULL`,
+// `subject_person_id` = Sotera-the-persona — written by her own tool call, and the first identity row
+// ever stored. It is one of the three family-lineage rows Ote ruled UNTOUCHABLE pending the retention
+// design, so the row cannot move and this check must stay red until it does.
+// ⭐ The assertion below already states its own remedy — *"when this becomes non-zero, `user_id IS NULL`
+// is overloaded and needs its own column"* — and that column is what the retention/authorship design
+// (`Reference/docs/DESIGN_SOTERA_RETENTION_AND_AUTHORSHIP.md`) exists to introduce.
+// ⚠️ Relaxing the count to 1 would turn a design alarm into a description of the bug, and the next NULL
+// row — a real one — would arrive silently. **A red check holding a known, dated, owned condition is
+// doing its job; an all-green suite with a broken slot is the failure.**
 for (const [table, col] of [['txn_memories', 'user_id'], ['txn_conversations', 'user_id'], ['txn_intentions', 'person_id']]) {
   const [{ n }] = (await pg.query(`select count(*)::int n from ${S}.${table} where ${col} is null`)).rows
   ok(n === 0, `I2 · ⭐ no ${table} row has a null ${col} — "unowned" can never be mistaken for "root's"`, `${n} null`)

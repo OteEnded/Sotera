@@ -1652,6 +1652,10 @@ export default async function chatSiteRoutes(fastify) {
               username: request.user.username,
               conversationId: convo.id,
               interactive: true,
+              // ⭐ 028 · the standing cross-room grant, read through `can()` like every other capability.
+              // ⚠️ Without it this layer decided every cross-room episode as though the grant did not
+              // exist — `buildDisclosure` defaults `crossRoom` to false, so the omission was silent.
+              crossRoom: can(request.user, 'sotera_cross_room_conversations'),
               // ⭐ THE DATES-ONLY PROBE. ⛔ Off by default; it changes the DATE and nothing else.
               localDates: getSetting(fastify.config, 'memory.cognitionLocalDates') === true,
             })

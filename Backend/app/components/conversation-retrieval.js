@@ -53,9 +53,19 @@
 // ⓘ No sequelize operators here: every predicate below is explicit SQL, because the columns this file
 // filters on are uuid/timestamp and the operator layer has already produced one wrong answer on that.
 import { registerHostService } from './runtime.js'
+import { can } from '../auth/permissions.js'
 import { buildConversationSearch } from './conversation-search.js'
 import { makeEmbedder } from './memory-embed-host.js'
 import { buildDisclosure } from './disclosure-host.js'
+// ⭐⭐ THE HANDLE SCHEME NOW LIVES IN ITS OWN MODULE, imported by BOTH this file and `disclosure-host.js`.
+// It used to be defined here, which made it retrieval's private convention — and the door those handles
+// exist for disagreed about what a handle is, silently, for as long as nobody round-tripped one. See
+// `conversation-handle.js` for the measurement.
+// ⓘ Re-exported so every existing importer and check keeps its current path; the definition moved, the
+// vocabulary did not.
+import { handleFor, resolveHandle } from './conversation-handle.js'
+
+export { handleFor, resolveHandle }
 import { SOURCE, BASIS, AVAILABILITY, RETENTION } from './memory-cognition-axes.js'
 import { log } from '../../lib/utility.js'
 
@@ -128,65 +138,6 @@ export function shapeOf(config) {
   return Object.values(SHAPES).includes(v) ? v : DEFAULT_SHAPE
 }
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-// ── ⭐⭐ THE HANDLE · SHORT, AND CHECKSUMMED SO A MANGLED ONE SAYS SO ────────────────────────────────
-//
-// ⚠️⚠️ MEASURED COST OF NOT DOING THIS, 2026-08-21: she rendered a handle abbreviated to eight characters
-// in her own table one turn earlier, passed that back, and got `unreachable` three times — the message
-// for a BOUNDARY. So she concluded the mechanism was broken, stopped using it, and hand-rolled a
-// permission card in prose instead. ⇒ **a truncated handle must be reported as TRUNCATED, never as
-// absent**, because the two states lead her to opposite and equally confident conclusions.
-// ⭐ 8 hex of the id + 2 check chars. Short enough that she is not tempted to abbreviate it, and any
-// abbreviation now fails the checksum instead of silently addressing nothing.
-// ⛔ It is NOT a security boundary and is not pretending to be one — authorization is `decideAccess`'s
-// job. This is legibility.
-export function handleFor(conversationId) {
-  const id = String(conversationId || '').toLowerCase()
-  if (!UUID_RE.test(id)) return null
-  const hex = id.replace(/-/g, '')
-  let sum = 0
-  for (let i = 0; i < hex.length; i += 1) sum = (sum * 31 + parseInt(hex[i], 16)) % 251
-  return `${hex.slice(0, 8)}${sum.toString(16).padStart(2, '0')}`
-}
-
-/**
- * ⭐ THREE OUTCOMES, NEVER TWO. `{ id }` resolved · `{ malformed, why }` she mistyped it · `{ ambiguous }`.
- * ⛔ "Not found" is deliberately absent here — that is the STORE's answer, not the parser's, and
- * conflating a bad argument with a closed door is the recorded failure above.
- * ⓘ A full uuid is still accepted, because `inspect_around` speaks uuids and she may carry one across.
- */
-export async function resolveHandle(db, raw) {
-  const s = String(raw || '').trim().toLowerCase()
-  if (!s) return { malformed: true, why: 'no conversation handle was given' }
-  if (UUID_RE.test(s)) return { id: s }
-  if (!/^[0-9a-f]{10}$/.test(s)) {
-    return {
-      malformed: true,
-      why: `"${raw}" is not a conversation handle. A handle is exactly 10 characters — copy it whole from `
-        + 'the result you got it from, and do not shorten it for readability.',
-    }
-  }
-  const prefix = s.slice(0, 8)
-  // ⚠️ RAW SQL WITH AN EXPLICIT `::text` CAST, NOT `Op.iLike`. Postgres has no `uuid ~~* unknown`
-  // operator, so the sequelize form throws `SequelizeDatabaseError` rather than matching nothing — and a
-  // thrown query inside a resolver reads to the caller as "that handle does not exist", which is the one
-  // conclusion this function exists to prevent. Caught by the round-trip probe, not by reasoning.
-  // ⛔ `prefix` is 8 hex characters, already validated by the pattern above, so it cannot carry a wildcard.
-  const seq = db.txn_conversations.sequelize
-  const { schema } = db.txn_conversations.getTableName()
-  const rows = await seq.query(
-    `SELECT id::text AS id FROM "${schema}"."txn_conversations" WHERE id::text LIKE :p LIMIT 4`,
-    { replacements: { p: `${prefix}%` }, type: seq.QueryTypes.SELECT },
-  )
-  const matches = rows.filter((r) => handleFor(r.id) === s)
-  // ⛔ A PREFIX THAT MATCHES BUT WHOSE CHECKSUM DOES NOT IS A TYPO, NOT AN ABSENCE.
-  if (!matches.length && rows.length) {
-    return { malformed: true, why: `"${raw}" looks like a handle but its check characters do not match — it was probably retyped or truncated.` }
-  }
-  if (matches.length > 1) return { ambiguous: true, why: 'that handle matches more than one conversation' }
-  return matches.length ? { id: matches[0].id } : {}
-}
 
 export function buildConversationRetrieval(fastify, { userId = null, isRoot = false, user = null, conversationId = null, username = null, interactive = false } = {}) {
   const db = fastify.db
@@ -197,7 +148,19 @@ export function buildConversationRetrieval(fastify, { userId = null, isRoot = fa
   // ⛔ ONE disclosure host, built once per request, with THIS conversation as the "into" room — the
   // grant is per room-pair per conversation, and a host without `conversationId` cannot find the grant
   // it just created (that is how the first version of disclosure failed its own test).
-  const disclosure = buildDisclosure(fastify, { userId, isRoot, username, conversationId, interactive })
+  // ⚠️⚠️ `crossRoom` IS NOT OPTIONAL HERE, AND LEAVING IT OFF WAS A SILENT DEFECT — measured 2026-08-26.
+  // `buildDisclosure` defaults it to `false`, so this call SUCCEEDED and simply decided every cross-room
+  // question as if the 028 standing grant did not exist. Measured for `agent_dev`, who holds it:
+  //     autoAuthorizes({ isRoot: false, crossRoom: true })  -> true      the gate honours the grant
+  //     readWindow, built the way this line built it        -> "without a grant I can only centre
+  //                                                            on your own words."
+  // ⇒ 028 worked through the tool factory and was ABSENT through `retrieve_conversations` — the path she
+  // actually uses. ⭐ Same shape as the three defects the night before: **a thing is not applied until
+  // whatever GATES it knows about it**, and a defaulted parameter fails without a sound.
+  // ⛔ Read through `can()` like every other capability, so this file never learns a column name.
+  const disclosure = buildDisclosure(fastify, {
+    userId, isRoot, username, conversationId, interactive, crossRoom: can(user, 'sotera_cross_room_conversations'),
+  })
 
   // ── STAGE 1 · RESOLVE THE SELECTOR, IN SQL AND METADATA ONLY ──────────────────────────────────────
   // ⛔ Nothing here touches an embedding. A person is resolved from `mst_persons`, a room from

@@ -20,6 +20,9 @@ import { initSettings } from '../../Backend/app/settings/index.js'
 import {
   buildConversationRetrieval, handleFor, resolveHandle, CAPS,
 } from '../../Backend/app/components/conversation-retrieval.js'
+// ⭐ THE OTHER SIDE OF THE SEAM. §7b passes this tool's output into that door's input — the only shape of
+// assertion that could have caught the two-scheme defect, since each side passed its own checks alone.
+import { buildDisclosure } from '../../Backend/app/components/disclosure-host.js'
 import { readFileSync } from 'node:fs'
 
 const { check, done } = makeChecker('conversation-retrieval')
@@ -171,6 +174,44 @@ const badCheck = await resolveHandle(db, `${h.slice(0, 8)}00` === h ? `${h.slice
 ok(badCheck.malformed === true && /check/i.test(badCheck.why ?? ''),
   '7 · ⭐ a right-length handle with wrong check characters is a TYPO, not an absence',
   String(badCheck.why).slice(0, 70))
+
+// ── 7b · ⭐⭐⭐ THE HANDLE THIS TOOL MINTS IS THE HANDLE THE DISCLOSURE DOOR TAKES ────────────────
+//
+// ⚠️⚠️ THE DEFECT, MEASURED 2026-08-26. `handleFor` lived in this file, so it was retrieval's PRIVATE
+// convention — and `disclosure-host.locateConversation` had a different one (a uuid, nothing else). She
+// was handed `7198c1b0de` by every retrieval call and told by `inspect_around` that it was "shortened",
+// with the advice *"use the complete value exactly as recall_own_history gave it to you"* — a tool she
+// had not called, and a value that WAS complete. In her words: *"Every retrieval call consistently
+// returned the handle as `7198c1b0de`, yet the system keeps rejecting it as too short."*
+//
+// ⭐ THE ASSERTION IS DELIBERATELY A ROUND TRIP ACROSS THE SEAM, not two separate claims about two
+// functions. Each side was internally consistent and passing its own checks the whole time; ⛔ only
+// passing one side's output into the other side's input could ever have caught it.
+{
+  const d = buildDisclosure(fastify, {
+    userId: ROOT, isRoot: false, username: 'root', conversationId: HERE, interactive: false,
+  })
+  const viaShort = await d.locateConversation(h)
+  const viaUuid = await d.locateConversation(HERE)
+  ok(viaShort.found === true && viaShort.conv?.id === HERE,
+    '7b · ⭐⭐⭐ the disclosure door ACCEPTS the handle retrieval mints — one scheme, not two',
+    JSON.stringify({ handle: h, found: viaShort.found, malformed: viaShort.malformed ?? false }))
+  ok(viaUuid.found === true && viaUuid.conv?.id === viaShort.conv?.id,
+    '7b · ⭐ …and both spellings of the same conversation land on the same row')
+  // ⛔ AND THE PREFIX IS STILL REFUSED AT THAT DOOR. Widening the scheme must not have widened it into
+  // the enumeration surface the original comment forbade — the checksum is what draws that line.
+  const shortPrefix = await d.locateConversation(h.slice(0, 8))
+  ok(shortPrefix.found === false && shortPrefix.malformed === true,
+    '7b · ⛔ an 8-character prefix is STILL malformed at the door — the checksum draws the line',
+    String(shortPrefix.why).slice(0, 70))
+  // ⭐ A WELL-FORMED HANDLE FOR NOTHING IS AN ABSENCE, NOT A COMPLAINT. Absence and refusal must look
+  // alike, so a handle that resolves to no row gets the same silence a stranger's uuid gets.
+  const nonexistent = `${'0'.repeat(8)}${(await import('../../Backend/app/components/conversation-handle.js')).handleFor('00000000-0000-4000-8000-000000000000').slice(8)}`
+  const ghost = await d.locateConversation(nonexistent)
+  ok(ghost.found === false && !ghost.malformed,
+    '7b · ⛔ a well-formed handle for no conversation is ABSENT, not malformed — the two must stay distinct',
+    JSON.stringify(ghost))
+}
 
 // ── 8 · ⛔ AN UNRESOLVED AXIS STOPS THE RETRIEVAL RATHER THAN WIDENING IT ────────────────────────
 // ⭐ Running anyway would answer a DIFFERENT question and return a confident result to it — this

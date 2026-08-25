@@ -101,6 +101,11 @@ const clip = (s, n) => {
 
 export function buildMemoryCognition(fastify, {
   userId = null, isRoot = false, username = null, conversationId = null, interactive = false,
+  // ⭐⭐ 028 · THE STANDING CROSS-ROOM GRANT, PASSED IN RATHER THAN LOOKED UP — this module has no `user`
+  // object and deliberately reads no settings of its own. ⚠️ It was simply absent before, so
+  // `buildDisclosure` defaulted it to `false` and every episode this layer activated was decided as
+  // though the grant did not exist: the capability was live and this door never consulted it.
+  crossRoom = false,
   // ⭐ THE DATES-ONLY PROBE, passed IN rather than read here — this module reads no settings, and the one
   // time a component in this project started reading its own config the arms stopped being separable.
   localDates = false,
@@ -481,7 +486,7 @@ export function buildMemoryCognition(fastify, {
   // by widening a predicate — so a non-root session still receives `own_only` and the counterpart stays
   // withheld, exactly as change A specifies.
   async function activateEpisodes(cues) {
-    const disclosure = buildDisclosure(fastify, { userId, isRoot, username, conversationId, interactive })
+    const disclosure = buildDisclosure(fastify, { userId, isRoot, username, conversationId, interactive, crossRoom })
     const query = [cues.persons.join(' '), cues.raw].filter(Boolean).join(' ').trim()
 
     // ── 1 · DISCOVER CANDIDATE EPISODES, from her own sentences ───────────────────────────────────
