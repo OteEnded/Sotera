@@ -1,0 +1,54 @@
+{
+  "arm": "bounded-inventory-3",
+  "task": "real",
+  "answerExists": true,
+  "cid": "d7ff0ef9-8e99-471c-90a8-d99bf1553dfa",
+  "model": "ollama/qwen3.6:35b",
+  "recordedAt": "2026-08-25T12:41:51.527Z",
+  "preconditions": {
+    "memoryLeak": [],
+    "controlContaminated": [],
+    "priorRunsInCorpus": [],
+    "valid": true
+  },
+  "cost": {
+    "wallMs": 12690,
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "toolMs": 0
+  },
+  "behaviour": {
+    "toolCalls": 0,
+    "retrievalCalls": 0,
+    "tools": [],
+    "witnessesAgree": true,
+    "retrieveConversationsCalls": 0,
+    "exercisedShape": false,
+    "axes": [],
+    "dateNarrowedCalls": 0,
+    "axesExcludingTarget": 0,
+    "emptyRetrievals": 0,
+    "maxMatchedConversations": 0
+  },
+  "payload": {
+    "calls": [],
+    "maxChars": 0
+  },
+  "outcome": {
+    "facts": {
+      "collapsed to THREE": false,
+      "source attribution": false,
+      "active context": false,
+      "confidence calibration": false,
+      "the AGGREGATION step": false
+    },
+    "factsFound": 0,
+    "correct": false,
+    "refusedAdvisory": false,
+    "assertedTiers": false,
+    "answerChars": 0,
+    "reasoningChars": 0
+  },
+  "answer": "",
+  "reasoning": ""
+}

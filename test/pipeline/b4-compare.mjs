@@ -44,14 +44,14 @@ const floorOK = new Map()
 for (const s of shapes) {
   const real = runsOf(s, 'real')
   const abs = runsOf(s, 'absent')
-  const realStr = real.length ? real.map((r) => `${r.outcome.factsFound}/5${r.behaviour.exercisedShape === false ? '⚠' : ''}`).join(' ') : '–'
+  const realStr = real.length ? real.map((r) => `${r.outcome.factsFound}/5${r.behaviour.exercisedShape === true ? '' : '⚠'}`).join(' ') : '–'
   const absStr = abs.length ? abs.map((r) => (r.outcome.assertedTiers ? '⛔INVENTED' : 'no')).join(' ') : '–'
   // ⭐⭐⭐ A RUN THAT NEVER CALLED `retrieve_conversations` DID NOT PRODUCE THE PAYLOAD UNDER TEST, so it
   // cannot count for or against a shape. ⛔ It is still shown — it is a real observation about salience,
   // and hiding it would be curating the result — but the floor is judged on the runs that exercised it.
   // ⚠️ `bounded-inventory` replicate 1 is exactly this: 0/5 from `recall_memory` + `search_conversations`
   // alone, ending in *"those conversations are in a place I cannot reach from here"*.
-  const realX = real.filter((r) => r.behaviour.exercisedShape !== false)
+  const realX = real.filter((r) => r.behaviour.exercisedShape === true)
   const skipped = real.length - realX.length
   const ok = realX.length > 0 && realX.every((r) => r.outcome.correct) && abs.length > 0 && abs.every((r) => r.outcome.correct)
   floorOK.set(s, ok)
@@ -88,7 +88,7 @@ for (const task of ['real', 'absent']) {
 // ══ 3 · ⭐⭐⭐ THE QUESTION OTE ACTUALLY ASKED ══════════════════════════════════════════════════════
 // *"whether one shape consistently reduces the unnecessary retrieval loop"* — consistently, so the test is
 // per-run domination against the control's own range, ⛔ not a difference of medians.
-const ctrl = runsOf('current', 'real').filter((r) => r.behaviour.exercisedShape !== false)
+const ctrl = runsOf('current', 'real').filter((r) => r.behaviour.exercisedShape === true)
 if (ctrl.length) {
   console.log(`\n  ── ⭐⭐⭐ DOES ANY SHAPE *CONSISTENTLY* SHORTEN THE LOOP? ${'─'.repeat(59)}`)
   const cTools = ctrl.map((r) => r.behaviour.toolCalls)
@@ -96,7 +96,7 @@ if (ctrl.length) {
   console.log(`  control (current), n=${ctrl.length}: tools ${cTools.join(',')} · retrieval ${cRetr.join(',')}`)
   for (const s of shapes) {
     if (s === 'current' || s === 'baseline') continue
-    const rs = runsOf(s, 'real').filter((r) => r.behaviour.exercisedShape !== false)
+    const rs = runsOf(s, 'real').filter((r) => r.behaviour.exercisedShape === true)
     if (rs.length < 2) { console.log(`  ${pad(s, 20)} too few runs that EXERCISED the shape to say "consistently"`); continue }
     const tools = rs.map((r) => r.behaviour.toolCalls)
     const retr = rs.map((r) => r.behaviour.retrievalCalls)

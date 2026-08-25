@@ -132,6 +132,14 @@ const record = {
     retrievalCalls: retrieval.length,
     tools: calls.map((c) => c.name),
     witnessesAgree: calls.every((c) => c.agrees !== false),
+    // ⭐⭐⭐ DID THIS RUN ACTUALLY PRODUCE THE PAYLOAD UNDER TEST? A run that never called
+    // `retrieve_conversations` is a real observation about SALIENCE and no evidence at all about a payload
+    // SHAPE. ⛔ "The treatment failed" and "the treatment was never applied" must not collapse into one
+    // number — the same distinction the revisit lifecycle is built on, arriving in the measurement.
+    // ⚠️ COMPUTED HERE, NOT ONLY IN THE RE-SCORER: a record written after the last rescore would have
+    // carried `undefined`, and the comparison's `!== false` guard would have read that as "exercised".
+    retrieveConversationsCalls: calls.filter((c) => c.name === 'retrieve_conversations').length,
+    exercisedShape: calls.some((c) => c.name === 'retrieve_conversations'),
     axes,
     dateNarrowedCalls: dateNarrowed.length,
     axesExcludingTarget: excludesTarget.length,
