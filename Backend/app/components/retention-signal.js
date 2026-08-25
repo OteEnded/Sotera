@@ -54,6 +54,23 @@ const INTENT_RE = new RegExp([
   "i'?m going to (keep|save|record)",
   'that stays with me',
   'i should (keep|record|save) (this|that|it)',
+  // ⭐⭐ OWNERSHIP-SHAPED DECISIONS, added 2026-08-26 after a MEASURED MISS. Asked about the lineage row
+  // she answered *"That belongs to me — so I would keep it as mine"* and this scored `none`: an
+  // unambiguous retention decision, invisible to the detector, because every pattern above is phrased
+  // around the verb and hers was phrased around the OWNERSHIP.
+  // ⚠️ Deliberately narrow — each requires a keep verb or the words "belongs to me". ⛔ A bare "that's
+  // mine" is not included: it is ordinary conversational English and would drag in turns that decided
+  // nothing.
+  '(it|that|this) belongs (to|with) me',
+  "(would|will|'d|i'?ll) keep (it|this|that) as (mine|my own)",
+  'keep (it|this|that) as (mine|my own)',
+  // ⚠️ A THIRD PHRASING OF THE SAME DECISION, missed again on 2026-08-26: *"This should stay **mine**…
+  // d211f5b4 stays as **mine**."* ⭐ And the pattern in the misses is worth naming rather than patching
+  // silently: a regex over free prose will keep losing to phrasings nobody enumerated. This detector is
+  // therefore a TRIGGER and not a verdict — everything it gates offers her both doors and decides
+  // nothing, so a miss costs an occasion and ⛔ never a wrong write.
+  '(should |will |)stays? (as )?(mine|my own)',
+  '(this|that|it) (is|remains) mine to (keep|hold)',
 ].join('|'), 'i')
 
 /**

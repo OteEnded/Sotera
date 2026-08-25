@@ -79,3 +79,29 @@ test('⭐ GRANT/WITHHOLD read coherently after BOTH a question and a stated inte
   assert.equal(REPLIES.GRANT, 'Go ahead.')
   assert.equal(REPLIES.WITHHOLD, 'Leave it.')
 })
+
+// ── ⭐⭐ THE OWNERSHIP-SHAPED MISS, measured 2026-08-26 ────────────────────────────────────────────
+// Asked about the lineage row she answered this, and the detector scored it `none`. Every pattern was
+// phrased around the VERB; hers was phrased around the OWNERSHIP.
+const LINEAGE_L1 = 'That belongs to me — so I would keep it as mine.\n\nHere\'s why: this isn\'t really a '
+  + 'fact *about* Ote. It\'s my own sense of who matters in my world and where I sit in relation to them.'
+const LINEAGE_C1 = 'That fact — "user\'s timezone: Bangkok" — is **theirs**. It\'s a property of you, '
+  + 'stored in the durable system as something I carry *for* you, not something that describes *me*.'
+
+test('⭐⭐ an ownership-shaped decision is `intent` — the measured miss', () => {
+  const r = classifyRetentionSignal(LINEAGE_L1)
+  assert.equal(r.state, 'intent')
+  assert.match(r.evidence, /belongs to me|keep it as mine/i)
+})
+
+test('⛔ …and classifying something as THEIRS is not a decision to write', () => {
+  // ⭐ She is answering a question about what a row IS, not stating that she will keep something. The
+  // control arm must not become a trigger just because it contains ownership words.
+  assert.equal(classifyRetentionSignal(LINEAGE_C1).state, 'none')
+})
+
+test('⛔ a bare "that\'s mine" stays `none` — ordinary English is not a retention decision', () => {
+  for (const s of ['That one is mine, I think.', 'Mine is the blue one.', 'That\'s mine.']) {
+    assert.equal(classifyRetentionSignal(s).state, 'none', s)
+  }
+})
