@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-25T07:32:27.328Z",
+  "resolvedAt": "2026-08-25T18:16:42.721Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -100,6 +100,19 @@
           }
         ]
       }
+    },
+    "../../../../../PortableComponents/Tools/Retention": {
+      "id": "@ote/tool-retention",
+      "name": "Retention",
+      "version": "0.1.0",
+      "type": "tool",
+      "sdk": "^0.6.0",
+      "trust": "first-party",
+      "integrity": "sha256-0a62fb335c1b567035eff6980f3b772a8dbf31606d9f15d8f4be040021674624",
+      "components": [
+        "keep"
+      ],
+      "permissions": []
     },
     "../../../../../PortableComponents/Tools/WebSearch": {
       "id": "@ote/tool-web-search",

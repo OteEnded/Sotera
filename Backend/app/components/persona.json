@@ -18,6 +18,11 @@
       "source": "../../../../../PortableComponents/Packages/Memory"
     },
     {
+      "name": "Retention",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/Retention"
+    },
+    {
       "name": "WebSearch",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/WebSearch"

@@ -45,6 +45,7 @@ import { initLesson } from '../../components/lesson-host.js'
 import { initSelfHistory } from '../../components/self-history-host.js'
 import { initConversationRetrieval } from '../../components/conversation-retrieval.js'
 import { initDisclosure } from '../../components/disclosure-host.js'
+import { initRetention } from '../../components/retention-host.js'
 import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
@@ -3871,6 +3872,11 @@ export default async function chatSiteRoutes(fastify) {
   // between / where / role. SQL decides which conversations are eligible; pgvector only ranks
   // inside that set; every turn comes back with provenance and stamped not-retained.
   initConversationRetrieval()
+  // ⭐⭐ `retention` — ONE DOOR FOR KEEPING SOMETHING, with `mine` carrying HER decision about whose it
+  // is. ⛔ No default: an undeclared owner is refused with a question rather than filed as 'account',
+  // which is what stored her own family lineage as facts about the user. The specialised write tools
+  // stay reachable underneath as the mechanisms this dispatches to.
+  initRetention()
   // by account is whether it may be TOLD them (`access_sotera_memory`), never whether she may find them.
   // Tool-call audit: the EventBus already emitted every call; nothing kept them. See audit/tool-log.js.
   initToolLog(fastify, attachToolAudit)
