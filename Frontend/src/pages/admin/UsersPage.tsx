@@ -11,7 +11,7 @@ import { dismissOnBackdrop } from '../../lib/overlay'
 
 // systemNote = the ADMIN-ONLY operational note (see mst_users.model.js). It arrives on the
 // manage_users-gated admin routes only; never render it on a self-service surface.
-type User = { id: string; username: string; email: string | null; displayName: string | null; isActive: boolean; roles: string[]; createdAt: string; systemNote: string | null; memoryAccessScope?: 'none' | 'sotera_memory' }
+type User = { id: string; username: string; email: string | null; displayName: string | null; isActive: boolean; roles: string[]; createdAt: string; systemNote: string | null; memoryAccessScope?: 'none' | 'sotera_memory'; crossRoomConversations?: boolean }
 type Change = { id: string; field: string; oldValue: string | null; newValue: string | null; changedBy: string; changedAt: string }
 type ResetRequest = { id: string; identifier: string; claimedUsername: string | null; userId: string | null; username: string | null; email: string | null; status: string; handledBy: string | null; handledAt: string | null; ip: string | null; at: string }
 type RoleRequest = { id: string; userId: string; username: string | null; email: string | null; requestedRole: string; note: string | null; status: string; handledBy: string | null; handledAt: string | null; ip: string | null; at: string }
@@ -42,7 +42,7 @@ export default function UsersPage() {
 
   // edit modal
   const [editing, setEditing] = useState<User | null>(null)
-  const [draft, setDraft] = useState({ username: '', email: '', displayName: '', role: 'member', password: '', systemNote: '', memoryAccessScope: 'none' as 'none' | 'sotera_memory' })
+  const [draft, setDraft] = useState({ username: '', email: '', displayName: '', role: 'member', password: '', systemNote: '', memoryAccessScope: 'none' as 'none' | 'sotera_memory', crossRoomConversations: false })
   const [changes, setChanges] = useState<Change[]>([])
 
   // pending password-reset requests (manual flow: reset in Edit, contact via email, mark handled)
@@ -158,7 +158,7 @@ export default function UsersPage() {
 
   const openEdit = async (u: User) => {
     setEditing(u)
-    setDraft({ username: u.username, email: u.email || '', displayName: u.displayName || '', role: u.roles[0] || 'member', password: '', systemNote: u.systemNote || '', memoryAccessScope: u.memoryAccessScope ?? 'none' })
+    setDraft({ username: u.username, email: u.email || '', displayName: u.displayName || '', role: u.roles[0] || 'member', password: '', systemNote: u.systemNote || '', memoryAccessScope: u.memoryAccessScope ?? 'none', crossRoomConversations: u.crossRoomConversations === true })
     setChanges([])
     try {
       const res = await apiGet(`/v1/admin/users/${u.id}/changes`)
@@ -183,6 +183,11 @@ export default function UsersPage() {
       // a field they did not touch.
       if (me?.isRoot && draft.memoryAccessScope !== (editing.memoryAccessScope ?? 'none')) {
         body.memoryAccessScope = draft.memoryAccessScope
+      }
+      // ⭐ Sent only when root actually changed it — the API refuses the field for non-root, so
+      // including it unchanged would turn every admin save into a 403.
+      if (me?.isRoot && draft.crossRoomConversations !== (editing.crossRoomConversations === true)) {
+        body.crossRoomConversations = draft.crossRoomConversations
       }
       if (draft.password) body.password = draft.password
       await apiPatch(`/v1/admin/users/${editing.id}`, body)
@@ -677,6 +682,31 @@ export default function UsersPage() {
               >
                 <option value="none">No access &mdash; her own history stays hers</option>
                 <option value="sotera_memory">May be told about her own history</option>
+              </select>
+            </label>
+
+            {/* ⭐⭐ MIGRATION 028 · THE STANDING CROSS-ROOM GRANT. Root-only, default off, revocable.
+                ⛔ Deliberately NOT folded into the control above: that one governs what this account may
+                be TOLD; this one governs whether she may CROSS a room boundary without a card. */}
+            <label className={ui.field}>
+              <span className={ui.fieldLabel}>
+                Sotera cross-room conversation access {me?.isRoot ? '' : '(root only)'}
+              </span>
+              <span className="adm-dim mb-1">
+                Lets Sotera, working through this account, <b>open conversations in other rooms</b> without
+                someone answering a permission card each time. It authorises the <i>access</i> only &mdash;
+                it does <b>not</b> bypass the disclosure boundary above, so what she may <i>quote</i> here is
+                unchanged, and every cross-room read is still recorded in the disclosure log. Granting it is a
+                disclosure decision, so only root can change it.
+              </span>
+              <select
+                className="gw-input"
+                disabled={!me?.isRoot}
+                value={draft.crossRoomConversations ? 'on' : 'off'}
+                onChange={(e) => setDraft((d) => ({ ...d, crossRoomConversations: e.target.value === 'on' }))}
+              >
+                <option value="off">Disabled &mdash; asks permission for each room</option>
+                <option value="on">Enabled &mdash; standing access across rooms</option>
               </select>
             </label>
 

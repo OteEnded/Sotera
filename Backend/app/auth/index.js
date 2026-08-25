@@ -215,6 +215,12 @@ async function loadInternalUser(request) {
     // ⛔ It answers *"may this ACCOUNT be given Sotera's memory?"* — NEVER *"may Sotera reach her own?"*,
     // which is intrinsic and ungated. Read it only through `can(user, 'access_sotera_memory')`.
     memoryAccessScope: user.memory_access_scope ?? 'none',
+    // ⭐ 028 · the standing cross-room grant. ⛔ A SEPARATE question from `memoryAccessScope`:
+    // that one says whether this account may be TOLD her memories; this one says whether she may
+    // CROSS a room boundary to read a conversation without a human answering a card each time.
+    // ⚠️ Both builders must carry it — a field list that forgets one makes `can()` read `undefined`,
+    // which is this project's most repeated defect wearing a boolean.
+    crossRoomConversations: user.cross_room_conversations === true,
     isRoot: false,
   }
 }
@@ -248,6 +254,12 @@ async function loadSessionUser(request) {
     // ⛔ It answers *"may this ACCOUNT be given Sotera's memory?"* — NEVER *"may Sotera reach her own?"*,
     // which is intrinsic and ungated. Read it only through `can(user, 'access_sotera_memory')`.
     memoryAccessScope: user.memory_access_scope ?? 'none',
+    // ⭐ 028 · the standing cross-room grant. ⛔ A SEPARATE question from `memoryAccessScope`:
+    // that one says whether this account may be TOLD her memories; this one says whether she may
+    // CROSS a room boundary to read a conversation without a human answering a card each time.
+    // ⚠️ Both builders must carry it — a field list that forgets one makes `can()` read `undefined`,
+    // which is this project's most repeated defect wearing a boolean.
+    crossRoomConversations: user.cross_room_conversations === true,
     isRoot: false,
   }
 }

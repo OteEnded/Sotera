@@ -107,8 +107,12 @@ export const CHOICES = {
     // field in `admin.route.js` updates the row FIRST and audits second, so a rejected audit leaves the
     // mutation standing with no trace. ⓘ Recorded, not silently re-ordered — it is the same for every field
     // and changing it is a decision about all of them.
+    // MIGRATION 028 added cross_room_conversations. This list is an ALLOWLIST, so a field it has not
+    // been told about makes the audit write throw - which is how the first attempt at 028 produced a
+    // 500 AFTER the column had already been updated: the change happened and the record of it did not.
+    // That failure is the good kind (loud), and it is exactly why the audit is a separate write.
     user_change_field: ["username", "email", "display_name", "roles", "account", "limits", "system_note",
-      "memory_access_scope"],
+      "memory_access_scope", "cross_room_conversations"],
     key_reveal_outcome: ["revealed", "reauth_failed", "rate_limited", "not_recoverable", "system_key"],
     password_reset_status: ["pending", "handled"],
     role_upgrade_role: ["developer"],

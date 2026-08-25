@@ -90,6 +90,20 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 allowNull: false,
                 defaultValue: "none",
             },
+
+            // MIGRATION 028 - THE STANDING CROSS-ROOM GRANT. A SEPARATE question from the one above:
+            // that column says whether this account may be TOLD her memories; this one says whether
+            // she may CROSS a room boundary to read a conversation without a human answering a
+            // request_room_access card each time.
+            // It grants the ACCESS step only - the utterance boundary is unchanged, and every read
+            // still writes a log_disclosure_events row with authorized_via = standing_grant.
+            // Default FALSE, root-only to change, revocable by setting it back.
+            // SQL is the truth (028); this mirrors it.
+            cross_room_conversations: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+            },
         },
         {
             tableName: "mst_users",

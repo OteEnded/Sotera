@@ -99,6 +99,9 @@ export default async function adminRoutes(fastify) {
         // ⭐ Migration 021. Shown so an admin can SEE who has been granted access to her memory even though
         // only root can change it — a boundary nobody can read is a boundary nobody can audit.
         memoryAccessScope: u.memory_access_scope ?? 'none',
+        // ⭐ Migration 028 · the STANDING CROSS-ROOM GRANT. Shown for the same reason as 021: a
+        // boundary nobody can read is a boundary nobody can audit. ⛔ Root-only to change.
+        crossRoomConversations: u.cross_room_conversations === true,
       })),
       total: count,
       ...(paged ? { page, pageSize } : {}),
@@ -116,6 +119,9 @@ export default async function adminRoutes(fastify) {
         isActive: u.is_active, roles: (u.roles || []).map((r) => r.name), createdAt: u.created_at,
         systemNote: u.system_note, // admin-only (manage_users) — never on a self-service route
         memoryAccessScope: u.memory_access_scope ?? 'none', // migration 021 · readable by admins, ROOT-only to change
+        // ⭐ Migration 028 · the STANDING CROSS-ROOM GRANT. Shown for the same reason as 021: a
+        // boundary nobody can read is a boundary nobody can audit. ⛔ Root-only to change.
+        crossRoomConversations: u.cross_room_conversations === true,
       },
     })
   })
@@ -201,6 +207,8 @@ export default async function adminRoutes(fastify) {
           // ⭐⭐ SOTERA-MEMORY ACCESS (migration 021). ⛔ ROOT ONLY — enforced in the handler, not here.
           // ⚠️ The enum is the DATABASE's enum; a value outside it would be a 500 rather than a 400.
           memoryAccessScope: { type: 'string', enum: ['none', 'sotera_memory'] },
+          // ⭐ 028 · the standing cross-room grant. A boolean: one question, two answers.
+          crossRoomConversations: { type: 'boolean' },
         },
         additionalProperties: false,
       },
@@ -209,7 +217,7 @@ export default async function adminRoutes(fastify) {
     const user = await fastify.db.mst_users.findByPk(request.params.id, { include: [{ association: 'roles' }] })
     if (!user) return reply.code(404).send({ error: { code: 'user_not_found', message: 'User not found' } })
 
-    const { username, email, displayName, roles, isActive, password, systemNote, memoryAccessScope } = request.body
+    const { username, email, displayName, roles, isActive, password, systemNote, memoryAccessScope, crossRoomConversations } = request.body
     const actor = request.user
     // Peer-admin protection: only root may modify an account that HOLDS admin, or
     // GRANT/keep the admin role. A non-root admin can't reset an admin's password,
@@ -316,6 +324,36 @@ export default async function adminRoutes(fastify) {
         // boundary nobody can reconstruct afterwards.
         await logUserChange(fastify.db, {
           userId: user.id, field: 'memory_access_scope', oldValue: before, newValue: next, actor,
+        })
+      }
+    }
+
+    // ── ⭐⭐ 028 · THE STANDING CROSS-ROOM GRANT · ROOT ONLY, AND THE CHANGE ITSELF IS AUDITED ─────
+    //
+    // ⛔ ROOT ONLY for the same reason `memory_access_scope` is: this authorizes reading ACROSS the room
+    // boundary, so granting it is a disclosure act. An `admin` who could grant it could grant themselves
+    // a standing view into everyone else's rooms.
+    // ⛔ AND THE GATE IS `actor.isRoot`, THE AUTHENTICATED FLAG — never the row id. `auth.route.js` can
+    // authenticate a NON-root session onto root's row, so an id check here would hand the grant to it.
+    // This project has paid nine times for inferring root-ness from data.
+    if (crossRoomConversations !== undefined) {
+      if (!actor.isRoot) {
+        return reply.code(403).send({ error: {
+          code: 'root_only',
+          message: 'Only root can change standing cross-room conversation access. It lets Sotera read '
+            + 'conversations in other rooms without a per-case permission card, so granting it is a '
+            + 'disclosure act.',
+        } })
+      }
+      const next = crossRoomConversations === true
+      if (next !== (user.cross_room_conversations === true)) {
+        const before = user.cross_room_conversations === true
+        await user.update({ cross_room_conversations: next })
+        // ⭐ THE PERMISSION CHANGE ITSELF IS AUDITED, not only the reads it later authorizes. Ote:
+        // *"Audit the permission change itself as well as the resulting cross-room reads."* A grant
+        // whose creation leaves no trace is a boundary nobody can reconstruct afterwards.
+        await logUserChange(fastify.db, {
+          userId: user.id, field: 'cross_room_conversations', oldValue: String(before), newValue: String(next), actor,
         })
       }
     }

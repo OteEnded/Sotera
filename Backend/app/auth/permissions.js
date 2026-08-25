@@ -59,6 +59,21 @@ const CAPABILITIES = {
   // by a different allowlist, a mock in a test — must read as `none`. ⛔ `!== 'none'` would make every
   // missing field a grant, which is this project's most-repeated defect wearing a boolean.
   access_sotera_memory: (u) => Boolean(u?.isRoot) || u?.memoryAccessScope === 'sotera_memory',
+
+  // ⭐⭐ 028 · STANDING CROSS-ROOM ACCESS FOR SOTERA, OPERATING THROUGH THIS ACCOUNT.
+  //
+  // Ote, 2026-08-25: *"allow Sotera operating through the dev account to retrieve/read conversations
+  // across rooms without requiring me to approve a request_room_access card every time… Keep the
+  // existing disclosure/utterance boundary intact. The grant should authorize retrieval/access, not
+  // make everything automatically quotable."*
+  //
+  // ⛔ IT IS NOT `access_sotera_memory` AND MUST NEVER BE FOLDED INTO IT. That one answers *may this
+  // account be told the TEXT of her own memories*; this one answers *may she cross a room boundary
+  // without a card*. One lever answering two questions is unreadable the first time they disagree.
+  //
+  // ⚠️ FAILS CLOSED. `=== true` — a user object missing the field (an older session, a mock, a
+  // different allowlist) reads as NO GRANT rather than as one.
+  sotera_cross_room_conversations: (u) => u?.crossRoomConversations === true,
 }
 
 export function can(user, capability) {

@@ -70,8 +70,14 @@ export function disclosureMode(config) {
  * ⚠️ `isRoot` MUST come from the authenticated user. Never from a null id (that defect has nine recorded
  * instances in this codebase), never from a username string, never from anything she said.
  */
-export function autoAuthorizes(config, { isRoot = false } = {}) {
-  return isRoot === true && disclosureMode(config) === 'personal'
+export function autoAuthorizes(config, { isRoot = false, crossRoom = false } = {}) {
+  // ⭐⭐ TWO AUTHORITIES, AND THE MODE GATE APPLIES TO BOTH.
+  //   isRoot     — the session IS root (020)
+  //   crossRoom  — THIS ACCOUNT holds the 028 standing grant, given by root through the Console
+  // ⛔ `disclosureMode` still governs: a deployment that is not `personal` does not hand out automatic
+  // access to anyone, however they were authorised. The grant widens WHO may proceed, ⛔ never WHERE.
+  if (disclosureMode(config) !== 'personal') return false
+  return isRoot === true || crossRoom === true
 }
 
 /**
@@ -82,8 +88,8 @@ export function autoAuthorizes(config, { isRoot = false } = {}) {
  * right thing to reach for if I cannot?"* — and in a personal deployment the answer for root is NO even
  * when something else refuses, because there is no second party whose consent a card would be collecting.
  */
-export function mayRaiseDisclosureCard(config, { isRoot = false } = {}) {
-  if (autoAuthorizes(config, { isRoot })) return false
+export function mayRaiseDisclosureCard(config, { isRoot = false, crossRoom = false } = {}) {
+  if (autoAuthorizes(config, { isRoot, crossRoom })) return false
   return true
 }
 

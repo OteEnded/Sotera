@@ -37,6 +37,7 @@
 
 import { Op } from 'sequelize'
 import { registerHostService } from './runtime.js'
+import { can } from '../auth/permissions.js'
 import { log } from '../../lib/utility.js'
 import { buildConversationSearch } from './conversation-search.js'
 import { makeEmbedder } from './memory-embed-host.js'
@@ -87,7 +88,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // ⚠️ `conversationId` IS LOAD-BEARING, not context. A grant is written FROM a room INTO the conversation
 // that asked, so a host without it cannot find the grant it just created — which is exactly how the
 // first version failed its own test: the row existed and the lookup keyed on the wrong conversation.
-export function buildDisclosure(fastify, { userId = null, isRoot = false, username = null, conversationId = null, interactive = false } = {}) {
+export function buildDisclosure(fastify, { userId = null, isRoot = false, username = null, conversationId = null, interactive = false, crossRoom = false } = {}) {
   const db = fastify.db
   const seq = db?.txn_messages?.sequelize
   const { schema } = db?.txn_messages?.getTableName?.() ?? {}
@@ -225,8 +226,15 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
           -- root, so it cannot outlive that fact. A card grant is different and stays inheritable: a human
           -- consented for this conversation, and that consent is not about who is asking.
           AND (authorized_via <> 'root_session' OR :askerIsRoot)
+          -- ⛔⛔ SAME RULE FOR THE STANDING GRANT (028), AND FOR THE SAME REASON. A standing grant exists
+          -- BECAUSE this account holds the capability, so it cannot outlive that fact: a session
+          -- WITHOUT the grant, working in the same conversation, must not inherit one. 020 learned this
+          -- the hard way when disclosure-inspect-check 6b caught a non-root session picking up a root
+          -- auto-grant. ⭐ A CARD grant stays inheritable — a human consented for this conversation, and
+          -- that consent is not about who is asking.
+          AND (authorized_via <> 'standing_grant' OR :askerHasStanding)
         ORDER BY disclosed_at DESC LIMIT 1`,
-      { replacements: { from: fromRoomUserId, into: intoConversationId, askerIsRoot: isRoot === true }, type: seq.QueryTypes.SELECT },
+      { replacements: { from: fromRoomUserId, into: intoConversationId, askerIsRoot: isRoot === true, askerHasStanding: crossRoom === true }, type: seq.QueryTypes.SELECT },
     )
     return row ?? null
   }
@@ -296,26 +304,31 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
    * ⓘ `interaction_id` is NULL here — correctly, because no interaction happened. That is why
    * `disclosure-log-check` now requires it for `held_turn_card` rows only.
    */
-  async function autoGrantForRoot({ fromRoomUserId, radius = 3 }) {
-    if (!isRoot || !EVENTS || !conversationId) return null
+  async function autoGrant({ fromRoomUserId, radius = 3 }) {
+    // ⭐⭐ TWO AUTHORITIES, ONE MECHANISM, AND THEY STAY DISTINGUISHABLE IN THE AUDIT FOREVER.
+    // `root_session` — the session IS root (020). `standing_grant` — THIS ACCOUNT holds the 028
+    // capability, granted by root through the Console. ⛔ Never collapsed into one value: how access was
+    // obtained is the only thing that makes a disclosure log auditable after the fact.
+    const via = isRoot ? 'root_session' : (crossRoom ? 'standing_grant' : null)
+    if (!via || !EVENTS || !conversationId) return null
     const r = Math.min(Math.max(1, Number(radius) || 3), MAX_RADIUS)
     const [row] = await seq.query(
       `INSERT INTO ${EVENTS}
         (from_room_user_id, into_room_user_id, into_conversation_id, authorized_by_user_id,
          authorized_by_username, authorized_via, interaction_id, scope_kind, scope_limit, item_count,
          lifetime, expires_at)
-       VALUES (:from, :into, :convo, :by, :byName, 'root_session', NULL, 'message', :limit, 0,
+       VALUES (:from, :into, :convo, :by, :byName, :via, NULL, 'message', :limit, 0,
                'conversation', now() + interval '2 hours')
        RETURNING id, scope_limit, authorized_via`,
       {
         replacements: {
           from: fromRoomUserId, into: userId, convo: conversationId, by: userId, byName: username,
-          limit: r * 2 + 1,
+          limit: r * 2 + 1, via,
         },
         type: seq.QueryTypes.SELECT,
       },
     )
-    await log(`[disclosure] AUTO-granted (root session, no card) from_room=${fromRoomUserId} into=${conversationId}`, import.meta.url)
+    await log(`[disclosure] AUTO-granted (${via}, no card) from_room=${fromRoomUserId} into=${conversationId}`, import.meta.url)
     return row ?? null
   }
 
@@ -388,8 +401,8 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       // consented to and which were automatic"* stays answerable and this stays reversible.
       // ⛔ AND STILL NO PROSE PATH: root-ness comes from `isRootConnectedUser`, never from a sentence, never
       // from her own claim, never from the shape of an id.
-      if (!grant && autoAuthorizes(fastify.config, { isRoot }) && conversationId) {
-        grant = await autoGrantForRoot({ fromRoomUserId: at.conv.user_id, radius: r })
+      if (!grant && autoAuthorizes(fastify.config, { isRoot, crossRoom }) && conversationId) {
+        grant = await autoGrant({ fromRoomUserId: at.conv.user_id, radius: r })
       }
       if (!grant) ownOnly = true
     }
@@ -514,8 +527,8 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     // consulted `interactive` at all, so under a personal deployment a headless root run was refused by the
     // request path and granted by the inspect path. ⇒ ⭐ WHETHER A HUMAN IS PRESENT ONLY MATTERS IF A HUMAN
     // IS GOING TO BE ASKED. Establish the policy answer first; reach for a person only if it says to.
-    if (autoAuthorizes(fastify.config, { isRoot })) {
-      const auto = await autoGrantForRoot({ fromRoomUserId: at.conv.user_id, radius })
+    if (autoAuthorizes(fastify.config, { isRoot, crossRoom })) {
+      const auto = await autoGrant({ fromRoomUserId: at.conv.user_id, radius })
       if (auto) {
         return {
           ok: true, granted: true, automatic: true, counterpart: at.counterpart,
@@ -542,7 +555,7 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     // (no events table, a degraded store). ⇒ In a deployment whose policy is that no card is needed, a
     // failed automatic grant must not silently become a card: that is how *"you never have to click"*
     // turns back into a click at exactly the moment nobody is expecting one. Refuse and say why.
-    if (!mayRaiseDisclosureCard(fastify.config, { isRoot })) {
+    if (!mayRaiseDisclosureCard(fastify.config, { isRoot, crossRoom })) {
       return {
         ok: false,
         reason: 'this deployment authorizes a root session automatically, so no card is raised here —'
@@ -668,7 +681,7 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     }
   }
 
-  return { inspectAround, readWindow, grantFromInteraction, requestRoomAccess, autoGrantForRoot, liveGrant, locateConversation }
+  return { inspectAround, readWindow, grantFromInteraction, requestRoomAccess, autoGrant, liveGrant, locateConversation }
 }
 
 let initialized = false
@@ -679,6 +692,10 @@ export function initDisclosure() {
     buildDisclosure(f, {
       userId: user?.id ?? null, isRoot: user?.isRoot === true, username: user?.username ?? null,
       conversationId: extras?.conversationId ?? null,
+      // ⭐ 028 · read through `can()` like every other capability, so no caller learns a column name.
+      // ⛔ Grants the ACCESS step only — the utterance boundary is untouched and every read it
+      // authorizes still writes its own `log_disclosure_events` row.
+      crossRoom: can(user, 'sotera_cross_room_conversations'),
       // ⭐ The same `interactive` fact the interaction service reads — only the route knows whether this
       // turn can be HELD, and a card raised where nobody can answer is a five-minute hang.
       interactive: extras?.interactive === true,
