@@ -261,6 +261,7 @@ export async function* stream({ host, model, messages, tools, options = {} } = {
   if (Array.isArray(tools) && tools.length > 0) request.tools = tools
   applySampling(request, await clampNumCtx(host, model, options))
   applyThink(request, options)
+  applyResidency(request, options)
 
   let iter
   try {

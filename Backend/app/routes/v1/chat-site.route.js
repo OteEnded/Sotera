@@ -218,8 +218,31 @@ function resolveSettings(user, convo, serverConfig) {
 }
 
 // Build the adapter options object from effective settings.
-function buildOptions(settings) {
-  const o = { stream: true, reasoning: { enabled: settings.reasoning.enabled } }
+/**
+ * ⭐⭐ HOW LONG SOTERA'S CHAT MODEL STAYS RESIDENT, and it is a SLIDING WINDOW, not a timer.
+ *
+ * ⚠️ THE DEFECT THIS FIXES: the chat path set **no** `keep_alive` at all, so Ollama's own 5-minute
+ * default applied — `local-monitor.js` already said so in a comment (*"chat requests do not set
+ * keep_alive at all"*), and the Local console showed `qwen3.6:35b` expiring in 5m. A 36B reload between
+ * ordinary turns is ~29s the person pays for nothing.
+ *
+ * ⛔ NO BACKGROUND PING. Ote: *"Don't implement a periodic background ping just to keep it alive.
+ * Ollama's keep_alive is already a sliding window: each request should establish/renew the expiry."*
+ * ⇒ the renewal is a side effect of real work, and a model nobody is using is allowed to fall out.
+ *
+ * ⭐ SCOPED TO SOTERA. This sets the field on HER requests; ⛔ it does not change Ollama's global default,
+ * which is shared with everything else on this box.
+ * ⓘ Override with `chat.keepAlive` (any string Ollama accepts — '10m', '1h', '-1' for never).
+ */
+function chatKeepAlive(config) {
+  try { const v = getSetting(config, 'chat.keepAlive'); return typeof v === 'string' && v ? v : '10m' } catch { return '10m' }
+}
+
+function buildOptions(settings, config = null) {
+  // ⭐ ONE options OBJECT SERVES THE WHOLE TURN — the first `streamChat`, every tool-continuation round,
+  // and the forced closing round all read this same object. That is what makes "the model must not
+  // expire mid-interaction" true by construction rather than by remembering to set it in three places.
+  const o = { stream: true, reasoning: { enabled: settings.reasoning.enabled }, keepAlive: chatKeepAlive(config) }
   if (settings.reasoning.enabled && settings.reasoning.effort) o.reasoning.effort = settings.reasoning.effort
   if (settings.temperature != null) o.temperature = settings.temperature
   if (settings.top_p != null) o.top_p = settings.top_p
@@ -999,7 +1022,7 @@ export default async function chatSiteRoutes(fastify) {
       const startedAt = Date.now()
       const res = await chat({
         serverConfig: fastify.config,
-        request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false }, max_tokens: 24 }, userId: ownerIdOf(request.user, 'this request') },
+        request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false }, max_tokens: 24, keepAlive: chatKeepAlive(fastify.config) }, userId: ownerIdOf(request.user, 'this request') },
       })
       const t = (res?.message?.content || '').trim().split('\n')[0].replace(/^["'#\s]+|["'.\s]+$/g, '')
       if (t) suggestedTitle = t.slice(0, 60)
@@ -1075,7 +1098,7 @@ export default async function chatSiteRoutes(fastify) {
       `preserving key facts, names, decisions, and anything needed to continue. Output only the summary text.`
     const res = await chat({
       serverConfig: fastify.config,
-      request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false } }, userId },
+      request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false }, keepAlive: chatKeepAlive(fastify.config) }, userId },
     })
     await logInternalUsage('chat.summary', modelId, res?.usage, userId)
     return (res?.message?.content || '').trim() || prevSummary || ''
@@ -1093,7 +1116,7 @@ export default async function chatSiteRoutes(fastify) {
         `Title:`
       const res = await chat({
         serverConfig: fastify.config,
-        request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false }, max_tokens: 24 }, userId },
+        request: { provider, model, messages: [{ role: 'user', content: prompt }], options: { stream: false, reasoning: { enabled: false }, max_tokens: 24, keepAlive: chatKeepAlive(fastify.config) }, userId },
       })
       await logInternalUsage('chat.title', modelId, res?.usage, userId)
       const t = (res?.message?.content || '').trim().split('\n')[0].replace(/^["'#\s]+|["'.\s]+$/g, '')
@@ -1127,7 +1150,7 @@ export default async function chatSiteRoutes(fastify) {
     // The passive Conversation-Search provider is gated on the same switch, and the search index/scope
     // exclude incognito rows independently (defense in depth).
     if (convo.incognito) settings.useMemory = false
-    const options = buildOptions(settings)
+    const options = buildOptions(settings, fastify.config)
 
     // ---- Skill executor: run this turn "as" a bound Skill, if any ----
     // Binding sources, strongest first: the composer's /slash invocation (skillOnce — this
