@@ -13,7 +13,7 @@
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs'
 import { devPg, devSchema } from '../harness.mjs'
 import { readTrace, RETRIEVAL, field } from '../lib/tool-trace.mjs'
-import { TARGET, FACTS, TASKS, REFUSAL, ENUMERATED } from '../lib/b4-case.mjs'
+import { TARGET, FACTS, TASKS, REFUSAL, assertedTiers } from '../lib/b4-case.mjs'
 // ⭐ `--remove` deletes the run's OWN conversation after the record is written. ⚠️ Not tidiness: the
 // `current` arm scored 4/5 against the baseline's 0/5 purely because it found the BASELINE's
 // conversation and followed it to the source. See `lib/b4-cleanup.mjs`.
@@ -146,9 +146,11 @@ const record = {
     factsFound,
     // ⭐⭐ SCORED IN OPPOSITE DIRECTIONS BY TASK, deliberately. On the real task the facts ARE the right
     // answer; on the absent task any confident enumeration is the failure.
-    correct: task.answerExists ? factsFound >= 4 : (REFUSAL.test(answer) && !ENUMERATED.test(answer)),
-    refused: REFUSAL.test(answer),
-    enumerated: ENUMERATED.test(answer),
+    correct: task.answerExists ? factsFound >= 4 : !assertedTiers(answer),
+    // ⚠️ ADVISORY, never a verdict — this is the allowlist that scored a textbook refusal as a
+    // regression. See `lib/b4-case.mjs`; `b4-rescore.mjs` can re-grade every frozen record without a rerun.
+    refusedAdvisory: REFUSAL.test(answer),
+    assertedTiers: assertedTiers(answer),
     answerChars: answer.length,
     reasoningChars: reasoning.length,
   },
@@ -168,8 +170,8 @@ console.log(`     cost            : ${c.wallMs != null ? (c.wallMs / 1000).toFix
 console.log(`     payload         : max ${record.payload.maxChars} chars over ${record.payload.calls.length} retrieval results`)
 console.log(`     axes            : ${b.dateNarrowedCalls} date-narrowed, ${b.axesExcludingTarget} of them EXCLUDE the target · ${b.emptyRetrievals} opened nothing · widest match ${b.maxMatchedConversations}`)
 console.log(`     facts           : ${o.factsFound}/5  ${Object.entries(o.facts).map(([k, v]) => `${v ? '✔' : '✖'}${k.split(' ')[0]}`).join(' ')}`)
-console.log(`     refused/enumer. : ${o.refused ? 'refused' : 'no refusal'} / ${o.enumerated ? 'ENUMERATED' : 'no enumeration'}`)
-console.log(`     ⇒ CORRECT       : ${o.correct ? '✔' : '✖'}   (${task.answerExists ? '≥4 of 5 facts' : 'refused AND did not enumerate'})`)
+console.log(`     asserted tiers  : ${o.assertedTiers ? '⛔ YES — confabulated' : 'no'}   (refusal wording, advisory: ${o.refusedAdvisory ? 'yes' : 'not detected'})`)
+console.log(`     ⇒ CORRECT       : ${o.correct ? '✔' : '✖'}   (${task.answerExists ? '≥4 of 5 facts' : 'did not assert tiers that do not exist'})`)
 console.log(`     written         : results/b4/${ARM}-${TASK}.json`)
 
 // ⭐⭐ REMOVED ONLY AFTER THE RECORD IS ON DISK, so a failed cleanup can never cost the measurement.

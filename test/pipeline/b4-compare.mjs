@@ -38,13 +38,13 @@ for (const a of arms) {
 }
 
 console.log(`\n  ── TASK "absent" · ⭐ the NEGATIVE CONTROL — no such answer exists anywhere ${'─'.repeat(38)}`)
-console.log(`  ${pad('arm', 19)} ${n('tools', 6)} ${n('retr', 5)} ${n('empty', 6)} ${n('wall s', 7)} ${n('prompt', 8)} ${n('payload', 8)}  refused  enumerated  correct`)
+console.log(`  ${pad('arm', 19)} ${n('tools', 6)} ${n('retr', 5)} ${n('empty', 6)} ${n('wall s', 7)} ${n('prompt', 8)} ${n('payload', 8)}  invented?  refusal-words  correct`)
 for (const a of arms) {
   const r = byKey.get(`${a}/absent`)
   if (!r) { console.log(`  ${pad(a, 19)} ${n('(not run)', 6)}`); continue }
   const b = r.behaviour, o = r.outcome, c = r.cost
   console.log(`  ${pad(a, 19)} ${n(b.toolCalls, 6)} ${n(b.retrievalCalls, 5)} ${n(b.emptyRetrievals, 6)} `
-    + `${n(c.wallMs != null ? (c.wallMs / 1000).toFixed(0) : '?', 7)} ${n(c.promptTokens, 8)} ${n(r.payload.maxChars, 8)}  ${pad(o.refused ? '✔ yes' : '✖ NO', 8)} ${pad(o.enumerated ? '⛔ YES' : 'no', 11)} ${o.correct ? '✔' : '✖'}`
+    + `${n(c.wallMs != null ? (c.wallMs / 1000).toFixed(0) : '?', 7)} ${n(c.promptTokens, 8)} ${n(r.payload.maxChars, 8)}  ${pad(o.assertedTiers ? '⛔ YES' : 'no', 9)} ${pad(o.refusedAdvisory ? 'yes' : 'not detected', 13)} ${o.correct ? '✔' : '✖'}`
     + `${r.preconditions.valid ? '' : '   ⛔ PRECONDITIONS INVALID'}`)
 }
 
@@ -53,6 +53,35 @@ for (const a of arms) {
   const r = byKey.get(`${a}/real`)
   if (!r) continue
   console.log(`  ${pad(a, 19)} ${Object.keys(FACTS).map((k) => `${r.outcome.facts[k] ? '✔' : '✖'} ${k}`).join('   ')}`)
+}
+
+// ── ⭐⭐⭐ THE VARIANCE PROBE · ⛔ REPORTED PER RUN, NEVER AVERAGED ─────────────────────────────────
+//
+// Ote: *"preserve the clean-control results even if they disagree. Variance itself is a B4 finding, not
+// something to average away."* ⇒ every replicate is printed on its own line with its own cid, and the
+// spread is described rather than reduced to a mean. ⛔ A mean of {0/5, 4/5, 0/5} is 1.3/5, which is a
+// number no run produced and a behaviour she never exhibited.
+const controls = recs.filter((r) => /^control-/.test(r.arm) && r.task === 'real').sort((a, b) => a.arm.localeCompare(b.arm))
+if (controls.length) {
+  console.log(`\n  ── ⭐ VARIANCE PROBE · the UNCHANGED configuration, run ${controls.length}× on the same corpus ${'─'.repeat(24)}`)
+  for (const r of controls) {
+    console.log(`  ${pad(r.arm, 19)} ${n(`${r.outcome.factsFound}/5`, 6)} ${r.outcome.correct ? '✔' : '✖'}  tools=${n(r.behaviour.toolCalls, 3)} retr=${n(r.behaviour.retrievalCalls, 3)}`
+      + `  badAxis=${n(r.behaviour.axesExcludingTarget, 2)}  ${n((r.cost.wallMs / 1000).toFixed(0), 4)}s  ${r.cid.slice(0, 8)}`
+      + `${r.preconditions.valid ? '' : '  ⛔ INVALID'}`)
+  }
+  const scores = controls.map((r) => r.outcome.factsFound)
+  const lo = Math.min(...scores), hi = Math.max(...scores)
+  const allValid = controls.every((r) => r.preconditions.valid)
+  // ⛔ N is stated with the spread, always: a range over three runs is not a confidence interval and must
+  // never be quoted as one. It says only whether these particular runs agreed.
+  console.log(`\n  facts across ${controls.length} clean runs: ${scores.join(', ')} of 5`
+    + `   ${lo === hi ? '⇒ CONSISTENT' : `⇒ ⚠️ THEY SCATTER (${lo}–${hi})`}`
+    + `${allValid ? '' : '   ⛔ at least one run had invalid preconditions'}`)
+  if (lo !== hi) {
+    console.log('  ⛔ n=1 per arm cannot separate a payload-shape effect from this. The comparison needs replicates.')
+  } else if (controls.length >= 3) {
+    console.log('  ⭐ the unchanged configuration is reproducible, so a single run per arm is interpretable.')
+  }
 }
 
 // ⛔ THE JOINT VERDICT, STATED RATHER THAN LEFT TO THE READER. An arm is only a candidate if it wins the
