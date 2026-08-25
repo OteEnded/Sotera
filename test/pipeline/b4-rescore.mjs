@@ -49,6 +49,16 @@ for (const f of files) {
     answerChars: answer.length,
     reasoningChars: String(rec.reasoning ?? '').length,
   }
+  // ⭐⭐⭐ DID THIS RUN ACTUALLY EXERCISE THE SHAPE UNDER TEST? `bounded-inventory` replicate 1 scored 0/5
+  // having called `recall_memory` and `search_conversations` and NOTHING ELSE — `retrieve_conversations`
+  // was never invoked, so the payload shape was never produced and the run is not evidence about it.
+  // ⛔ The same distinction the whole revisit lifecycle is built on: **"the treatment failed" and "the
+  // treatment was never applied" must not collapse into one number.** ⚠️ Such a run is still REPORTED — it
+  // is a real observation about salience — but it may not be counted for or against a shape.
+  const tools = rec.behaviour?.tools ?? []
+  rec.behaviour.retrieveConversationsCalls = tools.filter((t) => t === 'retrieve_conversations').length
+  rec.behaviour.exercisedShape = rec.behaviour.retrieveConversationsCalls > 0
+
   rec.rescored = { at: new Date().toISOString(), previous: before, why: 'both graders were allowlists that under-reported' }
   writeFileSync(url, JSON.stringify(rec, null, 2))
 }
