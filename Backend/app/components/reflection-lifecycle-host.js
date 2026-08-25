@@ -45,7 +45,9 @@ import {
 import { checkIdleGate, gateSummaryLine } from './revisit-idle-gate.js'
 // ⭐ The sweep's SELECTOR. ⛔ It decides nothing — see `sweepStalled` below for why the act and the
 // selection are deliberately different things.
-import { stalledAttempts } from './revisit-lifecycle.js'
+// ⭐ `admitToQueue` is the two-lane budget rule. ⛔ It lives beside the lifecycle, not here, so the
+// property Ote asked for — *"correct as the backlog grows"* — is testable without a database.
+import { stalledAttempts, admitToQueue } from './revisit-lifecycle.js'
 
 // ⭐ READ ONCE AT MODULE LOAD, NEVER PER ROW. Same rule and the same reason as the noticing pass: this
 // must report the code that is LOADED, not the file on disk. The manual version of this check failed three
@@ -672,22 +674,96 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
   const until = new Date(Date.now() - quietMinutes * 60000)
   const since = new Date(Date.now() - lookbackHours * 3600e3)
   const convos = await db.txn_conversations.findAll({
-    where: { incognito: false, updated_at: { [Op.lte]: until, [Op.gte]: since } },
+    // ⛔ ARCHIVED IS INELIGIBLE (2026-08-25). Ote: *"Exclude archived conversations for now. Don't
+    // delete, modify, or mark them as reviewed. Just make them ineligible for the passive revisit lane."*
+    // ⚠️ This was MISSING and the lane has been eligible to revisit archived conversations all along —
+    // 18 of them here. Archiving is the one signal a person gives that a conversation is finished with;
+    // background cognition walking into it is the opposite of respecting that.
+    // ⭐ INELIGIBLE, NOT MARKED. No row is written for them, so if archived history ever becomes
+    // revisitable they are simply eligible again — nothing has to be undone.
+    where: { incognito: false, archived_at: null, updated_at: { [Op.lte]: until, [Op.gte]: since } },
     order: [['updated_at', 'ASC']], raw: true,
   })
+
+  // -- ⭐⭐⭐ THE HISTORICAL BACKLOG · A SECOND LANE, WITH ITS OWN BUDGET ------------------------
+  //
+  // Ote: *"Start with a small bounded pilot batch of old, eligible conversations… This should be a real
+  // backlog, not a one-time «startup migration». Anything not selected remains eligible for a later tick."*
+  // and, on the day it was applied: *"Keep the bounded/oldest-first behavior anyway; don't special-case the
+  // fact that there are currently only 3 eligible never-completed conversations. We want the worker
+  // semantics to remain correct as the backlog grows."*
+  //
+  // ⚠⚠ WHY A SECOND LANE IS NEEDED AT ALL: the ordinary lane is bounded by `lookbackHours` (48h), and this
+  // file already recorded that bound as deliberate — *"a conversation whose last activity is older than
+  // lookbackHours is never reflected on, EVEN IF IT NEVER HAS BEEN."* ⇒ anything older is unreachable
+  // **permanently**, which is fine for a lane that only ever needed to keep up, and wrong for one that is
+  // supposed to catch up.
+  //
+  // ⭐ IT IS A QUEUE, NOT A SWEEP. Each tick does at most `revisitBacklogPerTick` of it; whatever it does
+  // not reach stays exactly as eligible next tick. ⛔ There is no "backfill complete" state and there must
+  // not be one — that is what makes this a budget we can raise rather than a migration we have to finish.
+  //
+  // ⚠️⚠️ **NO `LIMIT` HERE, AND THAT IS THIS FILE'S OWN LESSON APPLIED.** The starvation bug recorded
+  // above cost ~8 hours to *"a LIMIT above a filter"*, and an `ORDER BY updated_at ASC LIMIT 2` would
+  // rebuild it exactly: the two oldest rows are returned every tick, so if those two are permanently
+  // skipped by the gate (too thin, a fixture) **nothing behind them is ever offered again**. ⭐ The rule is
+  // unchanged — *a cap must bound the WORK, never the SEARCH FOR work* — so the filter selects the whole
+  // backlog and `backlogDone` below is what stops.
+  const backlogBudget = intCfg(fastify.config, 'revisitBacklogPerTick', 2)
+  let backlog = []
+  if (backlogBudget > 0) {
+    try {
+      backlog = await db.txn_messages.sequelize.query(
+        `SELECT c.id::text AS id, c.user_id::text AS user_id
+           FROM "${schema}"."txn_conversations" c
+          WHERE c.incognito = false
+            AND c.archived_at IS NULL
+            AND c.updated_at < :since
+            AND NOT EXISTS (SELECT 1 FROM "${schema}"."log_conversation_revisits" r
+                             WHERE r.conversation_id = c.id AND r.outcome = 'completed')
+          ORDER BY c.updated_at ASC`,
+        { replacements: { since }, type: db.txn_messages.sequelize.QueryTypes.SELECT })
+    } catch (e) {
+      // ⛔ A backlog read that fails must not take the ordinary lane down with it.
+      await log(`[revisit] backlog query failed: ${e.message}`, import.meta.url)
+    }
+  }
 
   // ⭐ SWEEP FIRST, so a stalled row from a dead process cannot keep its watermark out of this tick's
   // reach. ⛔ After the gate, never before it: a sweep is still background work.
   const swept = await sweepStalled(fastify, { quietMinutes })
-  const tally = { scanned: 0, reflected: 0, wroteMemory: 0, blocked: 0, swept, skipped: {} }
+  const tally = { scanned: 0, reflected: 0, wroteMemory: 0, blocked: 0, swept, backlogOffered: 0, backlogReflected: 0, skipped: {} }
   const details = []
-  for (const c of convos) {
-    if (tally.reflected >= maxConvos) break
+  // ⭐ BACKLOG FIRST IN THE QUEUE, because the backlog is what starves under any recency ordering —
+  // this file already lost eight hours to exactly that, and a busy day would otherwise permanently
+  // outrank a conversation from August 10th.
+  // ⭐⭐ **TWO BUDGETS, NOT ONE**, and this is the part that has to stay right as the backlog grows.
+  // Spending `maxConvos` on whichever lane got there first looks fine at a backlog of three and
+  // inverts the starvation at a backlog of three hundred: every tick would burn its whole budget on
+  // history and the live lane — the one that only ever needed to keep up — would never run again.
+  // ⇒ `backlogDone` bounds catching up, `liveDone` bounds keeping up, and neither can consume the other.
+  const backlogIds = new Set(backlog.map((b) => b.id))
+  const seen = new Set()
+  const queue = [...backlog, ...convos].filter((c) => (seen.has(c.id) ? false : seen.add(c.id)))
+  tally.backlogOffered = backlog.length
+  let liveDone = 0
+  let backlogDone = 0
+  for (const c of queue) {
+    const fromBacklog = backlogIds.has(c.id)
+    // ⛔ The admission rule is `admitToQueue`, not two comparisons inlined here — see it for why `skip`
+    // and `stop` have to be different answers, and why the two lanes may not share one counter.
+    const admit = admitToQueue({ fromBacklog, liveDone, backlogDone, maxConvos, backlogBudget })
+    if (admit === 'stop') break
+    if (admit === 'skip') continue
     tally.scanned++
     try {
       const r = await reflectOnConversation(fastify, { conversationId: c.id })
       if (r.skipped) { tally.skipped[r.reason] = (tally.skipped[r.reason] ?? 0) + 1; continue }
       tally.reflected++
+      // ⚠️ Counted where the WORK happened, not where it was offered: a backlog row the gate skipped
+      // spent no generation and must not spend a slot, or a run of thin old conversations would eat
+      // the budget every tick and the real backlog behind them would never be reached.
+      if (fromBacklog) { backlogDone++; tally.backlogReflected++ } else { liveDone++ }
       if (r.wroteMemoryId) tally.wroteMemory++
       if (r.blockedByDisclosure) tally.blocked++
       details.push({ conversationId: c.id, reflectionId: r.reflectionId, tools: r.toolsUsed, wrote: !!r.wroteMemoryId })

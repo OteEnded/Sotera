@@ -151,3 +151,30 @@ export function revisitSummaryLine(d) {
   if (d.inFlight) bits.push('⏳ one attempt still open')
   return bits.join(' · ')
 }
+
+/**
+ * ⭐⭐⭐ MAY THIS CONVERSATION HAVE A SLOT THIS TICK? Two lanes, two budgets, one rule.
+ *
+ * ⚠️⚠️ THE FAILURE THIS EXISTS TO PREVENT is the *inverse* of the starvation bug `reflectAllQuiet`
+ * already paid eight hours for. Backlog-first ordering fixes old work being outranked by new work — and
+ * if both lanes then spend the SAME counter, a deep backlog burns the whole tick every tick and the live
+ * lane, the one that only ever needed to keep up, never runs again. At a backlog of three that is
+ * invisible; at three hundred it is the whole behaviour. Ote, on the day the pilot was applied:
+ * *"We want the worker semantics to remain correct as the backlog grows."*
+ * ⇒ **Catching up and keeping up are separate guarantees, so they get separate budgets.**
+ *
+ * ⛔ AND `skip` IS NOT `stop`. The queue is backlog-then-live, so an over-budget BACKLOG row must let the
+ * scan walk past it (the live lane is behind it), while an over-budget LIVE row means everything after it
+ * is also live and the scan is genuinely finished. Collapsing the two into one boolean silently deletes
+ * one of the lanes depending on which way it is read.
+ *
+ * ⓘ Counters are what the caller has actually COMPLETED, never what it offered — a row the eligibility
+ * gate skipped spent no generation and must not spend a slot, or a run of thin old conversations would
+ * eat the budget every tick and the real backlog behind them would never be reached.
+ *
+ * @returns {'run'|'skip'|'stop'}
+ */
+export function admitToQueue({ fromBacklog = false, liveDone = 0, backlogDone = 0, maxConvos = 0, backlogBudget = 0 } = {}) {
+  if (fromBacklog) return backlogDone >= backlogBudget ? 'skip' : 'run'
+  return liveDone >= maxConvos ? 'stop' : 'run'
+}

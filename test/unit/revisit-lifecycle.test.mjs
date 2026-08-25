@@ -10,7 +10,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import {
-  deriveRevisitState, stalledAttempts, attemptState, REVISIT, OUTCOME, revisitSummaryLine,
+  deriveRevisitState, stalledAttempts, attemptState, REVISIT, OUTCOME, revisitSummaryLine, admitToQueue,
 } from '../../Backend/app/components/revisit-lifecycle.js'
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8')
@@ -371,4 +371,64 @@ test('⛔⛔ derivation is STILL blind to age — the sweep did not smuggle a cl
   const pure = readFileSync(new URL('../../Backend/app/components/revisit-lifecycle.js', import.meta.url), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
   assert.ok(!/Date\.now\(\)/.test(pure), '⛔ the pure module has no clock of its own')
+})
+
+// ══ 6 · ⭐⭐⭐ THE TWO-LANE BUDGET · "correct as the backlog grows" ══════════════════════════════════
+//
+// ⓘ Ote, applying the pilot: *"Keep the bounded/oldest-first behavior anyway; don't special-case the fact
+// that there are currently only 3 eligible never-completed conversations. We want the worker semantics to
+// remain correct as the backlog grows."* ⇒ every test below is written at a backlog size where the bug
+// would be VISIBLE, because at a backlog of three both designs behave identically.
+
+const admit = (o) => admitToQueue({ maxConvos: 3, backlogBudget: 2, ...o })
+
+test('⭐⭐⭐ a backlog of 300 cannot starve the live lane', () => {
+  // The failure mode: one shared counter + backlog-first ordering ⇒ the tick's whole budget goes to
+  // history every tick, forever, and the lane that only had to keep up never runs again.
+  let backlogDone = 0
+  for (let i = 0; i < 300; i++) {
+    if (admit({ fromBacklog: true, backlogDone, liveDone: 0 }) === 'run') backlogDone++
+  }
+  assert.equal(backlogDone, 2, 'the backlog spends its own budget and nothing more')
+  assert.equal(admit({ fromBacklog: false, backlogDone, liveDone: 0 }), 'run',
+    '⛔ the live lane is still open after the backlog has spent out')
+})
+
+test('⭐⭐ and a busy day cannot starve the backlog', () => {
+  // The original starvation, in the other direction — the one that cost this file eight hours.
+  assert.equal(admit({ fromBacklog: true, liveDone: 99, backlogDone: 0 }), 'run')
+})
+
+test('⛔ skip and stop are different answers, and the direction is not arbitrary', () => {
+  // The queue is backlog-then-live. An over-budget BACKLOG row must let the scan walk past it, because
+  // the live lane is physically behind it; an over-budget LIVE row means everything after it is live too.
+  assert.equal(admit({ fromBacklog: true, backlogDone: 2 }), 'skip', 'the live lane is still behind this')
+  assert.equal(admit({ fromBacklog: false, liveDone: 3 }), 'stop', 'nothing behind this can run')
+})
+
+test('⭐ a budget of zero disables its lane and only its lane', () => {
+  assert.equal(admitToQueue({ fromBacklog: true, backlogBudget: 0, maxConvos: 3 }), 'skip')
+  assert.equal(admitToQueue({ fromBacklog: false, backlogBudget: 0, maxConvos: 3, liveDone: 0 }), 'run')
+})
+
+test('⚠️ the host counts slots where the WORK happened, not where it was offered', () => {
+  // A backlog row the eligibility gate skipped spent no generation. If it spent a slot anyway, a run of
+  // thin old conversations would eat the budget every tick and the real backlog behind them would never
+  // be reached — the same "cap bounds the search, not the work" shape, one layer down.
+  assert.match(hostCode, /if \(r\.skipped\)[\s\S]{0,200}if \(fromBacklog\) \{ backlogDone\+\+/,
+    '⛔ the counter must be incremented after the skip check, never before it')
+})
+
+test('⭐⭐ the backlog SEARCH is unbounded — no LIMIT above the filter', () => {
+  // This file's own lesson: `ORDER BY updated_at ASC LIMIT 2` returns the same two rows every tick, so two
+  // permanently-skipped conversations would hide the entire backlog behind them forever.
+  const q = hostCode.match(/log_conversation_revisits" r[\s\S]{0,400}?ORDER BY c\.updated_at ASC[^`]*/)
+  assert.ok(q, 'the backlog query is still here (⛔ this assertion is not allowed to go vacuous)')
+  assert.ok(!/LIMIT/i.test(q[0]), '⛔ a LIMIT above the filter rebuilds the starvation bug')
+})
+
+test('⛔ archived conversations are ineligible in BOTH lanes', () => {
+  // Ote: *"Exclude archived conversations for now."* Two lanes ⇒ two independent places to forget it.
+  assert.match(hostCode, /where: \{ incognito: false, archived_at: null,/, 'the ordinary lane')
+  assert.match(hostCode, /c\.archived_at IS NULL/, 'the backlog lane')
 })

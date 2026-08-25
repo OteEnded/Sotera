@@ -144,7 +144,10 @@ test('⭐⭐⭐ the gate sits ABOVE the loop, not inside it', () => {
   const code = strip(HOST_SRC)
   const i = code.indexOf('checkIdleGate(')
   assert.ok(i > 0, 'the pass consults the gate')
-  const loopAt = code.indexOf('for (const c of convos)')
+  // ⚠️ RENAMED 2026-08-25 (`convos` → `queue`) when the backlog lane was added — and the guard on the
+  // next line is why that was a two-minute fix: it turned a scan whose target had MOVED into a loud
+  // failure instead of a silent pass. ⛔ Never relax it to make an anchor optional.
+  const loopAt = code.indexOf('for (const c of queue)')
   assert.ok(loopAt > 0, 'the per-conversation loop was found — a vacuous slice is not a pass')
   assert.ok(i < loopAt, '⛔ the gate is evaluated BEFORE the loop over conversations')
   // ⭐ …and eligibility still happens INSIDE, untouched.
