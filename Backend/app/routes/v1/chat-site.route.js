@@ -43,6 +43,7 @@ import { initIntention, readOpenIntention, renderOpenIntention } from '../../com
 import { describeScope, renderScope } from '../../components/room-scope.js'
 import { initLesson } from '../../components/lesson-host.js'
 import { initSelfHistory } from '../../components/self-history-host.js'
+import { initConversationRetrieval } from '../../components/conversation-retrieval.js'
 import { initDisclosure } from '../../components/disclosure-host.js'
 import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
@@ -3831,6 +3832,10 @@ export default async function chatSiteRoutes(fastify) {
   initLesson() // `lesson` host service — what she GOT WRONG and what generalizes from it (step 4)
   initDisclosure() // `disclosure` — the only door between rooms, opened by a card a human answers.
   initSelfHistory() // `selfHistory` — her own sentences across every room, because they are HERS. What varies
+  // `conversationRetrieval` -- one selector over the conversation SOURCE: with / in / about /
+  // between / where / role. SQL decides which conversations are eligible; pgvector only ranks
+  // inside that set; every turn comes back with provenance and stamped not-retained.
+  initConversationRetrieval()
   // by account is whether it may be TOLD them (`access_sotera_memory`), never whether she may find them.
   // Tool-call audit: the EventBus already emitted every call; nothing kept them. See audit/tool-log.js.
   initToolLog(fastify, attachToolAudit)

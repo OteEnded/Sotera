@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-08-21T02:25:33.610Z",
+  "resolvedAt": "2026-08-25T07:32:27.328Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -184,6 +184,19 @@
       "integrity": "sha256-815d340f63ed8cff58f6d8ad9d7be9f33ef4bc959580495a4c6d2dd3bfa927b3",
       "components": [
         "recall_own_history"
+      ],
+      "permissions": []
+    },
+    "../../../../../PortableComponents/Tools/ConversationRetrieval": {
+      "id": "@ote/tool-conversation-retrieval",
+      "name": "ConversationRetrieval",
+      "version": "0.1.0",
+      "type": "tool",
+      "sdk": "^0.6.0",
+      "trust": "first-party",
+      "integrity": "sha256-7663f310ae1ca22729f5105957b817e201138052b63d0268ec374c09a45542dc",
+      "components": [
+        "retrieve_conversations"
       ],
       "permissions": []
     },

@@ -195,7 +195,13 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
   async function liveGrant({ fromRoomUserId, intoConversationId }) {
     if (!EVENTS) return null
     const [row] = await seq.query(
-      `SELECT id, scope_limit FROM ${EVENTS}
+      // ⭐ `authorized_via` ADDED 2026-08-25, AND IT FIXES A LATENT DEFECT RATHER THAN ADDING A FIELD.
+      // `autoGrantForRoot` has always RETURNED it; this one never SELECTed it — so `grant?.authorized_via`
+      // was `undefined` for every REUSED grant, and `inspect_around`'s own note could say *"automatically,
+      // because this is a root session"* only on the single turn the grant was created and never again.
+      // ⇒ how access was obtained became unknowable to the reader after one turn, in the one sentence
+      // written to tell her. Provenance that degrades silently on reuse is provenance she cannot rely on.
+      `SELECT id, scope_limit, authorized_via FROM ${EVENTS}
         WHERE from_room_user_id = :from AND into_conversation_id = :into
           AND scope_kind = 'message' AND revoked_at IS NULL
           AND (expires_at IS NULL OR expires_at > now())
@@ -342,6 +348,24 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     if (!at.found) return { ok: false, state: 'unreachable', note: 'That is not reachable from here.' }
     const r = Math.min(Math.max(1, Number(radius) || 3), MAX_RADIUS)
     const sameRoom = at.conv.user_id === userId
+    const { grant, ownOnly } = await decideAccess(at, sameRoom, r)
+    // ⭐⭐ RESOLUTION STILL HAPPENS **AFTER** THE AUTHORIZATION DECISION, AND THE ORDER IS STILL THE POINT.
+    // ⚠️ But the claim above it had to be narrowed when A landed, rather than left standing: it used to say
+    // *"nothing has read another room yet"*, and under `ownOnly` that is no longer literally true — the
+    // resolver does query the other conversation. What is still true, and is what the invariant was
+    // protecting, is that **it reads only HER OWN messages** (`roles: ['assistant']`, see
+    // resolveHerMessageIn), which authorship authorizes without anyone's permission. ⛔ Not one query
+    // touches the counterpart's content before the grant is decided.
+    return finishInspect({ at, sameRoom, grant, ownOnly, r, query, messageIdGiven: Boolean(messageId) })
+  }
+
+  // ⭐⭐⭐ THE ACCESS DECISION, EXTRACTED 2026-08-25 SO THERE IS EXACTLY ONE OF IT.
+  //
+  // ⚠️ `readWindow` (below) needed the same decision, and the alternative was a second copy of the most
+  // consequential twelve lines in this file. Two copies of an authorization rule is how they stop agreeing
+  // — the defect this project has recorded in a memory-liveness predicate, in a room predicate, and in a
+  // disclosure flag read inline at two sites a day apart. ⇒ ONE implementation, two callers.
+  async function decideAccess(at, sameRoom, r) {
     let grant = null
     // ⭐⭐⭐ A · HER OWN WORDS NEED NO PERMISSION FROM ANYONE, BECAUSE SHE WROTE THEM (2026-08-21).
     // Ote: *"i want her to be able to automaticly access to her memory, no need you me to answer."* — and,
@@ -369,13 +393,14 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       }
       if (!grant) ownOnly = true
     }
-    // ⭐⭐ RESOLUTION STILL HAPPENS **AFTER** THE AUTHORIZATION DECISION, AND THE ORDER IS STILL THE POINT.
-    // ⚠️ But the claim above it had to be narrowed when A landed, rather than left standing: it used to say
-    // *"nothing has read another room yet"*, and under `ownOnly` that is no longer literally true — the
-    // resolver does query the other conversation. What is still true, and is what the invariant was
-    // protecting, is that **it reads only HER OWN messages** (`roles: ['assistant']`, see
-    // resolveHerMessageIn), which authorship authorizes without anyone's permission. ⛔ Not one query
-    // touches the counterpart's content before the grant is decided.
+    return { grant, ownOnly }
+  }
+
+  /**
+   * The remainder of `inspectAround`, after the access decision. ⛔ Split for ONE reason only — so
+   * `decideAccess` has a single home — and the behaviour is byte-for-byte what it was.
+   */
+  async function finishInspect({ at, sameRoom, grant, ownOnly, r, query }) {
     let centre = at.msg ?? null
     if (!centre) {
       const foundId = await resolveHerMessageIn({ conversationId: at.conv.id, query })
@@ -558,7 +583,92 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     }
   }
 
-  return { inspectAround, grantFromInteraction, requestRoomAccess, autoGrantForRoot, liveGrant, locateConversation }
+  // ── ⭐⭐⭐ READ A BOUNDED WINDOW OF ONE CONVERSATION, WITH PROVENANCE · 2026-08-25 ─────────────────
+  //
+  // The primitive `conversation-retrieval.js` composes with. ⛔ It is NOT a second door: it reuses
+  // `locateConversation` and `decideAccess` unchanged, so the boundary, the grant, the `ownOnly`
+  // degradation and the `log_disclosure_events` row are all exactly `inspect_around`'s.
+  //
+  // ── ⭐ WHAT IT ADDS, AND WHY EACH ADDITION IS DELIBERATE ─────────────────────────────────────────
+  //
+  // 1. `recent: true` — a window centred on the LAST turn instead of one resolved from a query.
+  //    ⚠️⚠️ THIS NARROWS A STATED RULE, so it is written down rather than slipped in. `inspectAround`
+  //    refuses a handle without a query — *"a handle alone is not a request… giving her the latest thing
+  //    she said there would be browsing by another name"* — and that rule was written for the projection
+  //    a NON-ENTITLED asker gets. But *"how has it been going with Hermes?"* has no query by nature, and
+  //    Ote ratified composing the relationship index with real conversation context. ⇒ recency windows
+  //    are allowed ONLY where the content was already authorized (same room, or a live/auto grant); an
+  //    `ownOnly` read still gets her own half and content-free markers, exactly as before.
+  //
+  // 2. PROVENANCE ON EVERY TURN, and the rule for ids is one line:
+  //    ⭐ **a message id is emitted only for a turn whose content was actually disclosed.** A withheld
+  //    turn carries speaker and timestamp and NO id — so nothing about the part she may not read becomes
+  //    walkable, which is the property the original no-cross-room-ids rule existed to protect.
+  async function readWindow({ conversationHandle, query = null, radius = 4, recent = false } = {}) {
+    const at = await locateConversation(conversationHandle)
+    if (at.malformed) return { ok: false, reason: at.why }
+    if (!at.found) return { ok: false, state: 'unreachable', note: 'That is not reachable from here.' }
+    const r = Math.min(Math.max(1, Number(radius) || 4), MAX_RADIUS)
+    const sameRoom = at.conv.user_id === userId
+    const { grant, ownOnly } = await decideAccess(at, sameRoom, r)
+
+    // ⛔ THE NARROWING IS GATED, NOT ASSUMED. Without authorization there is no recency path at all —
+    // `recent` on an unauthorized room would be precisely the browsing the original rule forbade.
+    let centre = null
+    if (recent && !ownOnly) {
+      centre = await db.txn_messages.findOne({
+        where: { conversation_id: at.conv.id },
+        attributes: ['id', 'rolling_id'], order: [['rolling_id', 'DESC']], raw: true,
+      })
+    } else {
+      if (!String(query || '').trim()) {
+        return { ok: false, state: 'needs_query', counterpart: at.counterpart,
+          note: 'Say what you are looking for in that conversation — without a grant I can only centre on your own words.' }
+      }
+      const foundId = await resolveHerMessageIn({ conversationId: at.conv.id, query })
+      // ⛔ NOT AN ABSENCE CLAIM — same wording and same reason as inspect_around's `not_located`.
+      if (!foundId) {
+        return { ok: false, state: 'not_located', counterpart: at.counterpart,
+          note: 'I could not find which of your own messages that refers to. This is a failure to locate, not evidence that it never happened.' }
+      }
+      centre = await db.txn_messages.findOne({ where: { id: foundId }, attributes: ['id', 'rolling_id'], raw: true })
+    }
+    if (!centre) return { ok: false, state: 'unreachable', note: 'That is not reachable from here.' }
+
+    const rows = await db.txn_messages.findAll({
+      where: {
+        conversation_id: at.conv.id,
+        rolling_id: { [Op.between]: [centre.rolling_id - r, centre.rolling_id + r] },
+      },
+      attributes: ['id', 'role', 'content', 'created_at', 'rolling_id'],
+      order: [['rolling_id', 'ASC']], limit: r * 2 + 1, raw: true,
+    })
+    return {
+      ok: true,
+      state: ownOnly ? 'own_only' : (sameRoom ? 'same_room' : 'authorized'),
+      sameRoom,
+      authorizedVia: grant?.authorized_via ?? (sameRoom ? 'own_room' : null),
+      counterpart: at.counterpart,
+      roomUserId: at.conv.user_id,
+      centredOn: recent && !ownOnly ? 'the end of the conversation' : 'what you were looking for',
+      turns: rows.map((m) => {
+        const mine = m.role === 'assistant'
+        // ⭐ HERS IS ALWAYS READABLE — authorship, not permission. THEIRS depends on the grant.
+        const disclosed = mine || !ownOnly
+        return {
+          messageId: disclosed ? m.id : null, // ⛔ no id for what she may not read
+          rollingId: m.rolling_id,
+          role: m.role,
+          speaker: mine ? 'you' : at.counterpart,
+          at: m.created_at,
+          said: disclosed ? m.content : null,
+          ...(disclosed ? {} : { withheld: true }),
+        }
+      }),
+    }
+  }
+
+  return { inspectAround, readWindow, grantFromInteraction, requestRoomAccess, autoGrantForRoot, liveGrant, locateConversation }
 }
 
 let initialized = false

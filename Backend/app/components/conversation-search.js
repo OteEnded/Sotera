@@ -155,7 +155,7 @@ export function filterEvidence(items = [], { minLength = 20, roles = ['user', 'a
 // in that conversation the query refers to — server-side, so a cross-room message id never has to be
 // handed to her to be handed back. ⛔ It NARROWS; it can never widen the room predicate, and it is a
 // builder-level SCOPE rather than a per-call tweak because that is what it is.
-export function buildConversationSearch(fastify, { userId = null, currentConversationId = null, embed = null, acrossRooms = false, roles = ['user', 'assistant'], onlyConversationId = null } = {}) {
+export function buildConversationSearch(fastify, { userId = null, currentConversationId = null, embed = null, acrossRooms = false, roles = ['user', 'assistant'], onlyConversationId = null, onlyConversationIds = null } = {}) {
   const { txn_messages } = fastify.db
   const seq = txn_messages.sequelize
   const { tableName: MT, schema } = txn_messages.getTableName()
@@ -183,6 +183,29 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
     throw new Error(`conversation-search: roles must be a subset of ${ALLOWED_ROLES.join('/')} — got ${JSON.stringify(roles)}`)
   }
   const ROLE_IN = `m.role IN (${asked.map((r) => `'${r}'`).join(',')})`
+  // ── ⭐⭐ `onlyConversationIds` — PIN THE SEARCH TO A SET · 2026-08-25 ─────────────────────────────
+  // The plural of `onlyConversationId`, added for CONVERSATION RETRIEVAL: SQL first establishes which
+  // conversations are eligible (person, room, time, role), and the ranker then only ever ranks INSIDE
+  // that set. ⭐ Ote's rule made mechanical: *"pgvector helps answer «which content is relevant?»; SQL
+  // answers «which conversations are we allowed/trying to search?»"* — so the dense arm can never widen
+  // the population, only order it.
+  // ⛔ VALIDATED, NOT ESCAPED — the same discipline as ROLE_IN above, and for a harder reason: sequelize
+  // `replacements` expand an array into a comma list, which breaks `ANY(:ids::uuid[])`. A UUID that fails
+  // the pattern THROWS rather than reaching the WHERE clause.
+  // ⛔ AND IT ONLY EVER NARROWS. An empty array is not "no filter" — it is a set with nothing in it, and
+  // must return nothing; `null` means "not restricted". Conflating those would turn a resolved-but-empty
+  // selector into a search of everything, which is the widest possible failure direction.
+  const ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  let idSet = null
+  if (onlyConversationIds != null) {
+    const ids = Array.isArray(onlyConversationIds) ? onlyConversationIds : [onlyConversationIds]
+    for (const id of ids) {
+      if (!ID_RE.test(String(id))) throw new Error(`conversation-search: onlyConversationIds must all be uuids — got ${JSON.stringify(id)}`)
+    }
+    idSet = ids.length ? ids.map((i) => `'${i}'`).join(',') : null
+    if (!ids.length) idSet = 'NULL' // an empty set matches nothing, ⛔ never everything
+  }
+  const IDS_IN = (col) => (idSet ? `AND ${col} IN (${idSet})` : '')
   // ⭐ THE ROOM PREDICATE, AND IT IS THE WHOLE BOUNDARY. Room-scoped by default; `acrossRooms` drops it
   // for persona-level self-history, where the ROLE filter is what makes the result hers.
   const ROOM = acrossRooms ? 'TRUE' : 'c.user_id IS NOT DISTINCT FROM :userId'
@@ -190,7 +213,8 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
           AND c.incognito = false
           AND ${ROLE_IN}
           AND (:excludeConversationId::uuid IS NULL OR m.conversation_id <> :excludeConversationId::uuid)
-          AND (:onlyConversationId::uuid IS NULL OR m.conversation_id = :onlyConversationId::uuid)`
+          AND (:onlyConversationId::uuid IS NULL OR m.conversation_id = :onlyConversationId::uuid)
+          ${IDS_IN('m.conversation_id')}`
   const COLS = `m.id AS message_id, m.conversation_id, m.role, m.content, m.created_at, c.title AS conversation_title`
 
   // ⭐⭐ THE SAME SCOPE, EXPRESSED AGAINST THE EMBEDDING TABLE (migration 018) — so the vector index can
@@ -206,7 +230,8 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
   const VECTOR_SCOPE = `${V_ROOM}
           AND ${V_ROLE_IN}
           AND (:excludeConversationId::uuid IS NULL OR me.conversation_id <> :excludeConversationId::uuid)
-          AND (:onlyConversationId::uuid IS NULL OR me.conversation_id = :onlyConversationId::uuid)`
+          AND (:onlyConversationId::uuid IS NULL OR me.conversation_id = :onlyConversationId::uuid)
+          ${IDS_IN('me.conversation_id')}`
 
   async function lexical(q, pool, excludeConversationId) {
     return seq.query(

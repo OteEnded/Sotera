@@ -48,6 +48,11 @@
       "source": "../../../../../PortableComponents/Tools/SelfHistory"
     },
     {
+      "name": "ConversationRetrieval",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/ConversationRetrieval"
+    },
+    {
       "name": "Disclosure",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/Disclosure"
