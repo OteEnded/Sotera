@@ -113,8 +113,17 @@ export function makeClient(base = BASE) {
     if (body !== undefined) headers['content-type'] = 'application/json'
     if (key) headers.authorization = `Bearer ${key}`
     else if (jars[as]) headers.cookie = jars[as]
+    // ⚠️⚠️ THE HARNESS'S OWN TIMEOUT IS A CONFOUNDER, AND IT COST A RUN. Undici's default headers
+    // timeout is 300 s. On 2026-08-25 a turn in which Sotera reached another intelligence exceeded that:
+    // the counterpart had answered in 17 s, the exchange row completed cleanly, and the HARNESS aborted —
+    // ⛔ killing the turn so no assistant message was ever persisted. The experiment recorded a failure
+    // that belonged to the instrument.
+    // ⭐ Ote: *"the infrastructure timeout is now a confounder, not an interesting measurement."*
+    // ⇒ generous by default, overridable per call. ⛔ NEVER infinite: a hang must still end as a failure
+    // rather than as a test that never returns.
     const res = await fetch(`${base}${pathname}`, {
       method, headers, body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.timeout(Number(process.env.SOTERA_TEST_TIMEOUT_MS) || 1_800_000),
     })
     const setCookie = res.headers.getSetCookie?.() ?? []
     if (setCookie.length && !key) jars[as] = setCookie.map((c) => c.split(';')[0]).join('; ')
