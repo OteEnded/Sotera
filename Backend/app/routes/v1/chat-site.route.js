@@ -2725,7 +2725,15 @@ export default async function chatSiteRoutes(fastify) {
               try {
                 const advice = createAdviceService({ db: fastify.db, config: fastify.config, user: request.user })
                 const check = String(tc.arguments?.check || '').trim()
-                if (check) {
+                const steerId = String(tc.arguments?.steer || '').trim()
+                // ⭐⭐ STEER IS ITS OWN ACT AND IS TRIED FIRST. ⛔ It is NOT a variant of `check`: `check`
+                // may COLLECT — it is her act of receiving — and a steer must never receive anything.
+                // ⛔ The route still knows only the service and an intent; it does not learn that an
+                // endpoint called `/steer` exists.
+                if (steerId) {
+                  result = await advice.steer(steerId,
+                    typeof tc.arguments?.message === 'string' ? tc.arguments.message : '')
+                } else if (check) {
                   result = await advice.observe(check)
                 } else {
                   const mode = tc.arguments?.mode === 'delegate' ? 'delegate' : 'converse'

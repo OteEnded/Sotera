@@ -75,6 +75,15 @@ export function createHermesBinding({ config, destination }) {
         cancellable: true,        // ⚠️ cooperative: "an unbounded window" in her own words
         attestable: true,         // we hold her verbatim reply either way
         reportsModel: { converse: true, delegate: false },
+        // ⭐⭐ STEERABLE — TRUE, AND ONLY BECAUSE IT WAS MEASURED. ⚠️ An earlier note in this arc recorded
+        // "steering is not on the interface" against build `8f271272`; the counterpart updated itself and
+        // that was false three hours later against `64a6f42c`. ⇒ the flag carries the build it was
+        // observed on, and ⛔ no destination gets `steerable: true` from source-reading alone.
+        steerable: true,
+        steerableObservedOn: '64a6f42c',
+        // ⛔ EXISTS AND IS NOT EXPOSED TO HER. `cancel()` is implemented below and advertised here, and
+        // nothing plumbs it up to `seek_advice` — kept a separate build item at Ote's instruction rather
+        // than silently added. ⚠️ Until it is, she can start work she cannot stop.
       }
     },
 
@@ -141,6 +150,32 @@ export function createHermesBinding({ config, destination }) {
         // refuses any attempt to claim otherwise.
         model: null,
       }
+    },
+
+    /**
+     * ⭐⭐ STEER a run that is already in flight. MEASURED LIVE against `64a6f42c`, not read from source:
+     * same `run_id`, ⛔ no interrupt (status stayed `running`), delivered on the next iteration, and the
+     * subsequent work changed in exactly the direction the text specified (`search_files`: 0 before, 7
+     * after). ⓘ Hermes injects the text into the next TOOL RESULT rather than as a user turn, so message
+     * role alternation is preserved on her side.
+     *
+     * ⭐⭐⭐ AND EVERY FAILURE HERE IS ALSO AN OBSERVATION. A refusal tells us something true about the
+     * counterpart's liveness, and the service records it as such — which is why the outcomes below are
+     * TYPED rather than collapsed into `ok: false`.
+     * ⛔ `refused_not_running` and `unreachable` must never be merged: *alive and not accepting* and *not
+     * there at all* are different worlds with different recoveries.
+     */
+    async steer(runId, text) {
+      const { status, json } = await call(
+        'POST', `/v1/runs/${encodeURIComponent(runId)}/steer`, { text }, 30_000,
+      )
+      if (status === 200 && json?.accepted === true) return { outcome: 'accepted' }
+      // ⓘ `steer_not_accepted`: the AGENT declined, which is a real and distinct answer from
+      // "this run will not take a steer at all".
+      if (json?.error?.code === 'steer_not_accepted') return { outcome: 'declined' }
+      if (json?.error?.code === 'run_not_accepting_steer') return { outcome: 'refused_not_running' }
+      if (status === 404) return { outcome: 'not_found' }
+      return { outcome: 'error', reason: `http_${status}` }
     },
 
     /** ⚠️ Cooperative. `cancelling` may never settle, and the caller must not assume it does. */

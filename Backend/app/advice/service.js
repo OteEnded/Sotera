@@ -267,6 +267,103 @@ export function createAdviceService({ db, config, user }) {
     },
 
     /**
+     * ⭐⭐⭐ STEER — influence work that is already in flight.
+     *
+     * ⭐ Ote: steering is broader than correction. Legitimate reasons include ADDING a requirement,
+     * correcting direction, clarifying scope, changing priority, adding a constraint, or responding to
+     * something newly discovered. ⓘ And the DOMINANT case originates on HER side — *"Ote just told me
+     * something that changes the job"* — which needs no progress observation at all.
+     *
+     * ⛔⛔ A STEER NEVER CREATES L3. That she instructed the counterpart is HER action; their eventual
+     * result stays something she may subsequently COLLECT. ⇒ `direction: 'out'`, always — and migration
+     * 024's CHECK makes the opposite impossible rather than merely discouraged.
+     *
+     * ⚠⚠ IT DOES NOT GATE ON `peek`, AND THAT IS DELIBERATE. A derived world is only as fresh as the
+     * last observation; the run may have finished since. ⇒ **attempt, then let the OUTCOME re-derive the
+     * world.** Do not store a conclusion — act, and record what actually happened.
+     *
+     * ⭐⭐ AND EVERY FAILURE IS FREE LIVENESS INFORMATION. A 409 proves they are alive and not running
+     * this work; a 404 proves they no longer know it; a timeout proves nothing except that we could not
+     * reach them. ⛔ None of these is "an error" — each is an OBSERVATION, and each is written as one.
+     */
+    async steer(exchangeId, text) {
+      const ex = await store.findById(exchangeId, user.id)
+      if (!ex) return { ok: false, reason: 'no such exchange' }
+
+      const said = String(text ?? '').trim()
+      if (!said) return { ok: false, reason: 'a steer needs something to say' }
+
+      const dest = resolveDestination(ex.destination)
+      const binding = dest && bindingFor(dest)
+      const caps = binding?.capabilities?.() ?? {}
+
+      // ⛔⛔ EXPLICIT REFUSAL, NEVER EMULATION. A destination that cannot be steered is told so — it is
+      // ⛔ NOT emulated as stop-then-re-brief, which would discard work in flight and quietly become a
+      // DIFFERENT exchange. Same rule as every other mode in this Feature.
+      if (!caps.steerable) {
+        return {
+          ok: false,
+          reason: `${dest?.display || ex.destination} cannot be steered once work has started. `
+            + 'You could wait for them to finish, or start again with a fuller brief.',
+        }
+      }
+      if (!ex.remoteWorkId) return { ok: false, reason: 'there is no detached work to steer' }
+
+      const t0 = Date.now()
+      let outcome = 'error'
+      let observation = null
+      try {
+        const r = await binding.steer(ex.remoteWorkId, said)
+        outcome = r?.outcome ?? 'error'
+        // ⭐ THE OUTCOME IS ALSO AN OBSERVATION. ⛔ `refused_not_running` maps to `refused`, NOT to
+        // `unreachable`: they answered us, so they are demonstrably up.
+        observation = outcome === 'accepted' || outcome === 'declined'
+          ? { contactResult: 'heard', heardState: 'running' }
+          : outcome === 'refused_not_running' ? { contactResult: 'refused' }
+            : outcome === 'not_found' ? { contactResult: 'not_found' }
+              : { contactResult: 'error' }
+      } catch (e) {
+        outcome = 'unreachable'
+        observation = { contactResult: 'unreachable', note: String(e?.message ?? '').slice(0, 200) }
+      }
+
+      // ⛔ RECORDED WHATEVER HAPPENED — including a refusal. Measured against Hermes `64a6f42c`: a
+      // refused steer left `status`, `last_event` AND `updated_at` byte-identical. ⇒ **our row is the
+      // only record that will ever exist that she tried.**
+      const turn = await store.addTurn(ex.id, {
+        direction: 'out', content: said, kind: 'steer', outcome,
+        latencyMs: Date.now() - t0, attested: false,
+      })
+      if (observation) {
+        await store.recordObservation(ex.id, { ...observation, askedHow: 'probe', latencyMs: Date.now() - t0 })
+      }
+
+      const latest = await store.latestObservation(ex.id)
+      const turns = await store.turns(ex.id)
+      const derived = deriveWorld({
+        exchange: ex, latest, inboundTurns: turns.filter((x) => x.direction === 'in').length,
+      })
+
+      // ⭐ A STEER THAT ARRIVED TOO LATE IS NOT AN ERROR — it is news that the work is over, and the
+      // honest next act is to go and get it. ⛔ Reporting "your steer failed" would be true about the
+      // mechanism and misleading about the relationship.
+      return {
+        ok: outcome === 'accepted',
+        exchangeId: ex.id,
+        outcome,
+        turnOrdinal: turn.ordinal,
+        ...derived,
+        note: outcome === 'accepted'
+          ? 'They have it and are still working — this is not an answer yet.'
+          : outcome === 'declined' ? 'They took the message and chose not to act on it.'
+            : outcome === 'refused_not_running'
+              ? 'They are there, but that work is no longer running — see what state it is in.'
+              : outcome === 'not_found' ? 'They no longer have that work at all.'
+                : 'They could not be reached just now.',
+      }
+    },
+
+    /**
      * ⭐⭐⭐ ABANDON — **hers, explicitly.** ⛔ Never a timeout, never inferred from silence.
      *
      * ⚠⚠ SILENCE IS THE ONE THING ALL FOUR FAILURE WORLDS HAVE IN COMMON — unreachable, swept,

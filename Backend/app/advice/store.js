@@ -52,6 +52,8 @@ const turnView = (r) => (r ? {
   attested: r.attested,
   latencyMs: r.latency_ms ?? null,
   createdAt: r.created_at,
+  kind: r.kind ?? 'message',
+  outcome: r.outcome ?? null,
 } : null)
 
 /**
@@ -104,14 +106,15 @@ export function createAdviceStore(db) {
     },
 
     /** Append a turn. The ordinal is derived here so two callers cannot disagree about it. */
-    async addTurn(exchangeId, { direction, content, attested = false, latencyMs = null }) {
+    async addTurn(exchangeId, { direction, content, attested = false, latencyMs = null,
+      kind = 'message', outcome = null }) {
       const row = await one(
-        `INSERT INTO ${TU} (exchange_id, ordinal, direction, content, attested, latency_ms)
+        `INSERT INTO ${TU} (exchange_id, ordinal, direction, content, attested, latency_ms, kind, outcome)
          VALUES (:exchangeId,
                  (SELECT COALESCE(MAX(ordinal), 0) + 1 FROM ${TU} WHERE exchange_id = :exchangeId),
-                 :direction, :content, :attested, :latencyMs)
-         RETURNING id, ordinal, direction, content, attested, latency_ms, created_at`,
-        { exchangeId, direction, content, attested, latencyMs },
+                 :direction, :content, :attested, :latencyMs, :kind, :outcome)
+         RETURNING id, ordinal, direction, content, attested, latency_ms, kind, outcome, created_at`,
+        { exchangeId, direction, content, attested, latencyMs, kind, outcome },
       )
       await seq.query(`UPDATE ${EX} SET turn_count = turn_count + 1 WHERE id = :id`, { replacements: { id: exchangeId } })
       return turnView(row)

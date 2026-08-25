@@ -43,6 +43,8 @@ export const WORLD = Object.freeze({
   collected: 'collected',
   /** ⚠️ we could not reach them at all — **possibly transient**, e.g. a restart in progress. */
   counterpartUnreachable: 'counterpart-unreachable',
+  /** ⭐ alive, and would not take that action — ⛔ NOT unreachable. Evidence they are UP. */
+  counterpartNotAccepting: 'counterpart-not-accepting',
   /** ⛔ they are up and do not know this work — **permanent**. Swept, restarted, or never dispatched. */
   counterpartForgot: 'counterpart-forgot',
   /** ⭐ she declared it over. ⛔ Never a timeout. */
@@ -118,6 +120,15 @@ export function deriveWorld({ exchange = null, latest = null, inboundTurns = 0, 
         { recoverable: false })
 
     case 'refused':
+      // ⚠️⚠️ CORRECTED — this used to fall through to `counterpartUnreachable`, and that MERGED TWO
+      // DIFFERENT WORLDS: *"alive and not accepting this action"* is not *"not there at all"*. The
+      // steering build exposed it: a 409 proves the destination is **up** and simply is not running this
+      // work — the opposite of unreachable. ⇒ ⭐ it is its own world, and the honest next act is to ASK
+      // what state the work is actually in, not to give up on the counterpart.
+      return out(WORLD.counterpartNotAccepting, 'ask what state it is in', latest, t,
+        'they are reachable and would not take that action — ⭐ which is evidence they are ALIVE',
+        { recoverable: true })
+
     case 'error':
       return out(WORLD.counterpartUnreachable, 'ask again later, or abandon', latest, t,
         `the attempt itself failed: ${latest.contactResult}`, { recoverable: null })

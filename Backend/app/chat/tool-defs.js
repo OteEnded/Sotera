@@ -273,7 +273,15 @@ export function assembleToolDefs({
           + 'handing over a self-contained job — they will NOT have any of your earlier conversation, only '
           + 'the brief you write, and they work on it independently. When it is ambiguous, converse. '
           + 'A delegation returns immediately with an exchange id, not an answer: come back later and call '
-          + 'this with `check` set to that id to see how it is going or collect the result.',
+          + 'this with `check` set to that id to see how it is going or collect the result. '
+          // ⭐⭐ STEER — named as what it IS, not as a correction mechanism. Ote: *"the original
+          // architectural idea is broader than stopping Hermes from doing something wrong."* ⇒ the
+          // description lists the ordinary reasons and ⛔ gives NO rule about when to use it and ⛔ no
+          // instruction about asking permission — validation C measured that priming lowers her insight.
+          + 'While a delegation is still running you can also send them more: set `steer` to the exchange '
+          + 'id and `message` to what you want to add or change — something you have since learned, a '
+          + 'requirement you left out, a narrower focus, a different priority. They keep working; it '
+          + 'reaches them on their next step. It is not a way to get the result.',
         parameters: {
           type: 'object',
           properties: {
@@ -282,6 +290,7 @@ export function assembleToolDefs({
             message: { type: 'string', description: 'for converse: what you want to say to them, in your own voice' },
             brief: { type: 'string', description: 'for delegate: the whole task, written so someone with no other context could act on it exactly as written' },
             check: { type: 'string', description: 'instead of asking: an exchange id from an earlier delegation, to see its state or collect its result' },
+            steer: { type: 'string', description: 'an exchange id from a delegation that is still running, to send them something more — put it in `message`. Not a way to collect the result.' },
           },
           additionalProperties: false,
         },
