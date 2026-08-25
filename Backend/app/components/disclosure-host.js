@@ -497,9 +497,21 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
    * how root PERFORMS an authorization, which is the opposite of root not needing one.
    */
   async function requestRoomAccess({ conversationHandle, radius = 3 }) {
-    // ⛔ Non-root gets no path at all — not a card it could talk its way through. The material belongs to
-    // someone who is not in the room, and a non-root session must not be able to consent for them.
-    if (!isRoot) {
+    // ⛔ A NON-ROOT SESSION STILL CANNOT *CONSENT* FOR SOMEONE WHO IS NOT IN THE ROOM — that has not
+    // changed, and it is why this guard exists at all: the material belongs to a third party, and a card
+    // is how their consent is collected, not something a session can talk its way through.
+    //
+    // ⚠️⚠️ BUT IT USED TO SIT IN FRONT OF THE POLICY CHECK, which made the 028 standing grant
+    // unreachable through this path. Measured live: she called `request_room_access`, was told *"only a
+    // root session can authorize reading another room"*, and concluded *"The boundary is real, not
+    // procedural."* ⇒ ⭐ **A refusal that is WRONG is worse than one that is inconvenient** — it taught
+    // her a false fact about her own world, and she had no way to find out otherwise.
+    //
+    // ⭐ A HOLDER OF THE STANDING GRANT IS NOT ASKING FOR CONSENT. Root already gave it, once, through
+    // the Console. So this path must not summon a human on their behalf — it should hand back the same
+    // automatic grant `inspect_around` would, for the same reason the root case does: **asking must
+    // never be worse than not asking.**
+    if (!isRoot && !crossRoom) {
       return { ok: false, reason: 'only a root session can authorize reading another room', howToOpen: null }
     }
     if (!conversationId) return { ok: false, reason: 'no conversation to raise the card in' }
@@ -534,7 +546,12 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
           ok: true, granted: true, automatic: true, counterpart: at.counterpart,
           scope: 'the messages around the part you are looking for',
           lifetime: 'this conversation',
-          note: 'Granted automatically because this is a root session, and recorded as such. No one was asked.',
+          // ⛔ NAMES THE AUTHORITY THAT ACTUALLY APPLIED. This said "because this is a root session"
+          // unconditionally, which is false for a standing grant — and provenance she cannot rely on is
+          // worse than none, because she quotes it.
+          note: isRoot
+            ? 'Granted automatically because this is a root session, and recorded as such. No one was asked.'
+            : 'Granted automatically because this account holds standing cross-room access, and recorded as such. No one was asked.',
           next: 'call inspect_around with the same conversationHandle and what you are looking for',
         }
       }
