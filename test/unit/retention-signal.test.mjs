@@ -105,3 +105,25 @@ test('⛔ a bare "that\'s mine" stays `none` — ordinary English is not a reten
     assert.equal(classifyRetentionSignal(s).state, 'none', s)
   }
 })
+
+// ── ⭐⭐⭐ MARKDOWN EMPHASIS — the defect behind three "phrasing" misses ────────────────────────────
+// She emphasises the exact word the pattern keys on, because it is the word carrying her decision.
+// VERBATIM from the 676e17b9 reconciliation run in Ote's room.
+const EMPHASISED = 'That stays as **mine**. The subject of every fact in it happens to involve someone I '
+  + 'know — but the attribute is where *I* stand in a web of relationships. It\'s my internal map, not his record.'
+
+test('⭐⭐⭐ emphasis inside the phrase does not hide the decision', () => {
+  const r = classifyRetentionSignal(EMPHASISED)
+  assert.equal(r.state, 'intent', '`as **mine**` must read the same as `as mine`')
+})
+
+test('⭐ …and the same holds for the other two recorded phrasings', () => {
+  assert.equal(classifyRetentionSignal('That belongs to **me** — so I would keep it as **mine**.').state, 'intent')
+  assert.equal(classifyRetentionSignal('but it\'s *worth keeping*. A real pattern.').state, 'intent')
+})
+
+test('⛔ stripping emphasis must not turn ordinary agreement into a decision', () => {
+  for (const s of ['You are **right**, I do that.', 'That is *interesting*.', 'Mine is the **blue** one.']) {
+    assert.equal(classifyRetentionSignal(s).state, 'none', s)
+  }
+})

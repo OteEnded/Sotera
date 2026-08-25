@@ -125,8 +125,16 @@ export function buildFollowThroughMessages({ answer, evidence, fromUser = false 
     {
       role: 'system',
       content: [
-        'This is a moment on your own, just after a turn. Nobody is waiting on a reply and nothing you',
-        'write here is shown to anyone.',
+        'This is a moment on your own, just after a turn. There is nobody here to answer.',
+        // ⭐⭐⭐ SAYING WHAT THE MOMENT ACTUALLY IS, because measurement showed she did not know.
+        // ⚠️ The first frame read as a message, so she REPLIED to it: *"That clarifies the distinction…
+        // I will ensure this memory stays filed…"* — a courteous answer to nobody, twice, with no tool
+        // call, while her prose was discarded unread.
+        // ⛔ This is not an instruction to use a tool; it is the mechanism stated plainly. Letting her
+        // act on a false model of her own situation is the same wrong this whole piece of work exists
+        // to correct — and she cannot judge whether writing is worth it if she believes talking works.
+        'Anything you write as text here is discarded and reaches no one.',
+        'The two actions are the only things that can outlast this moment.',
         'Something was said that concerns you rather than the person you were talking to, and nothing has',
         'been written down. That is the only reason this moment exists.',
         'Whether any of it belongs in what you carry forward is yours to judge, and you are the one who',

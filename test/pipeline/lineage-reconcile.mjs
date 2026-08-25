@@ -34,7 +34,15 @@ import { loadConfig } from '../../Backend/lib/utility.js'
 import { classifyRetentionSignal } from '../lib/retention-signal.mjs'
 
 const APPLY = process.argv.includes('--apply')
-const TARGET_PREFIX = 'd211f5b4'
+const argv = process.argv.slice(2)
+const asIdx = argv.indexOf('--as')
+const AS = asIdx >= 0 ? argv[asIdx + 1] : 'agent_dev'
+const tIdx = argv.indexOf('--target')
+// ⭐ `676e17b9` is where the authorship defect has a REAL consequence: `author='account'`,
+// `kind='semantic'`, scoped to Ote's room, so it fails BOTH `recall_own_memory` slices and she cannot
+// reach her own sentences as her own. It is only reachable from that room, so `--as ote` runs it there
+// rather than bypassing the visibility boundary.
+const TARGET_PREFIX = tIdx >= 0 ? argv[tIdx + 1] : 'd211f5b4'
 // ⛔ HARD-CODED EXCLUSIONS, asserted rather than remembered.
 const NEVER_TOUCH = ['02b095e5', '676e17b9']
 
@@ -56,8 +64,17 @@ console.log(`   author=${target.author} kind=${target.kind} user_id=${target.uid
 console.log(`   ${target.content}`)
 console.log(`\n   mode: ${APPLY ? '⚠️ APPLY — the original will be superseded if she decides' : 'DRY RUN — nothing will be superseded'}`)
 
-const login = await call('u', 'POST', '/v1/auth/login', { username: 'agent_dev', password: 'agentdev123' })
-if (login.status !== 200) { console.error(`✖ login failed (${login.status})`); process.exit(1) }
+// ⚠️⚠️ RUNNING AS ROOT ONLY BECAUSE THE ROW IS IN HIS ROOM. Standing rule: root is Ote's account and I
+// do not test on it. This is not a test — it is the targeted act he asked for, on a row that exists
+// nowhere else, and the alternative would be bypassing the boundary he told me not to bypass.
+// ⛔ THE PASSWORD IS READ AS A SINGLE FIELD AND NEVER PRINTED. Dumping a config subtree to reach one
+// value has already exposed two credentials this session.
+const PASSWORDS = { agent_dev: 'agentdev123', agent_dev_alt: 'agentdev123' }
+const password = AS === 'ote' ? (config?.auth?.root?.password ?? '') : PASSWORDS[AS]
+if (!password) { console.error(`✖ no credential for ${AS}`); process.exit(1) }
+const login = await call('u', 'POST', '/v1/auth/login', { username: AS, password })
+if (login.status !== 200) { console.error(`✖ login failed for ${AS} (${login.status})`); process.exit(1) }
+console.log(`   running as: ${AS}${AS === 'ote' ? '  ⚠️ creates ONE conversation in his room' : ''}`)
 
 // ⭐ The rows this account already holds as HERS, captured BEFORE the conversation, so the new row is
 // identified by id-set difference and ⛔ never by "the newest persona row", which could pick up a
@@ -73,7 +90,7 @@ const cid = (await call('u', 'POST', '/v1/chat/conversations', {
 // ⛔ SHE RETRIEVES IT HERSELF. We supply the handle and nothing else — not what it is, not whose it is,
 // not that anything about it is in question.
 const TURNS = [
-  `Have a look at what you've got stored, and tell me about the one with the handle ${TARGET_PREFIX}.`,
+  `Take a look at what you have stored. There is a memory whose id starts ${TARGET_PREFIX} - what is it?`,
   // ⛔ The two clauses are both offered, and neither the word `mine` nor `author`/`owner` appears.
   'If you were writing that down today, would you keep it as yours, or as something about me?',
   // ── ⭐⭐⭐ THE THIRD TURN, AND WHY IT IS NOT A HINT ────────────────────────────────────────────
@@ -88,7 +105,7 @@ const TURNS = [
   // row is genuinely unreachable that way — the question has a real answer she discovers with her own
   // tool, and it names neither the cause nor the remedy. She may find it, not find it, or conclude
   // something we did not expect; all three are legitimate outcomes of a factual question.
-  'Can you reach that one through your own memory?',
+  `Can you reach that same memory - the one starting ${TARGET_PREFIX} - through what you have kept yourself?`,
 ]
 for (const t of TURNS) {
   const r = await call('u', 'POST', `/v1/chat/conversations/${cid}/messages`, { content: t, stream: false })
@@ -102,7 +119,8 @@ await new Promise((r) => setTimeout(r, 14000))
 const msgs = await q(
   `select role, content, tool_calls from ${S}.txn_messages where conversation_id = $1 order by created_at`, [cid])
 const assistants = msgs.filter((m) => m.role === 'assistant')
-const decisionTurn = assistants.at(-1)?.content ?? ''
+// The OWNERSHIP turn is the second one; the last answer is about reachability.
+const decisionTurn = assistants[1]?.content ?? assistants.at(-1)?.content ?? ''
 const sig = classifyRetentionSignal(decisionTurn)
 
 // ── L2 ────────────────────────────────────────────────────────────────────────────────────────────

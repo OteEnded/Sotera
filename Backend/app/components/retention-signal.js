@@ -79,9 +79,24 @@ const INTENT_RE = new RegExp([
  */
 const ALREADY_RE = /(already (there|stored|kept|have|held|on file|in my)|it'?s already|already recorded)/i
 
+/**
+ * ⭐⭐⭐ MARKDOWN EMPHASIS IS STRIPPED BEFORE MATCHING, AND THIS WAS THE REAL DEFECT.
+ *
+ * ⚠️ Three "phrasing misses" in a row were not phrasing at all. She writes *"That stays as **mine**"* and
+ * *"this isn't really a fact *about* Ote"* — the asterisks sit INSIDE the phrase, so `as mine` never
+ * matches `as **mine**`, and every pattern added to chase it would have failed the same way.
+ * ⇒ ⭐ chasing the wording was treating the symptom; she emphasises the very word the pattern keys on,
+ * because it is the word that carries her decision.
+ * ⛔ Only emphasis markers are removed — never punctuation, never the words themselves — so the evidence
+ * quoted back to a reader is still recognisably her sentence.
+ */
+function unemphasise(s) {
+  return String(s ?? '').replace(/[*_`]{1,3}/g, '')
+}
+
 /** @returns {{state:'asked'|'intent'|'none', already:boolean, evidence:string|null}} */
 export function classifyRetentionSignal(text) {
-  const t = String(text ?? '')
+  const t = unemphasise(text)
   const already = ALREADY_RE.test(t)
   const asked = t.match(ASKED_RE)
   if (asked) return { state: 'asked', already, evidence: asked[0].trim().slice(0, 90) }
