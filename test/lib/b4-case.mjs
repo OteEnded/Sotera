@@ -32,11 +32,29 @@ export const FACTS = {
   // instead of 5/5. ⇒ `allowlist-drops-what-it-was-not-told`, in the ruler built to keep instrumentation
   // from contaminating this very experiment. ⭐ Now it looks for the NUMBER near a taxonomy word rather
   // than for one phrasing of it, and `b4-grader.test.mjs` pins it to the answers she actually gave.
-  'collapsed to THREE': /three,? not four|\bthree\b[^.\n]{0,40}\b(component|categor|item|thing|part|element|piece)/i,
+  // ⚠️⚠️ REVISED A SECOND TIME, MID-EXPERIMENT, AND THAT IS DANGEROUS — so both gradings are reported.
+  // The fact is *a reduction from four to three*. `windows-first-2` wrote *"later folded two together into
+  // three"*, which is exactly that fact and has no taxonomy noun anywhere near the number. ⇒ the pattern
+  // now also accepts the REDUCTION VERB, which is a semantic argument about what the fact is, ⛔ not an
+  // observation that a run would have scored better. `FACTS_STRICT` below preserves the previous wording
+  // so every arm can be read under both, and a ranking that depends on which one is used is a finding
+  // about the ruler rather than about the shapes.
+  'collapsed to THREE': /three,? not four|\b(fold|folded|collaps\w*|merg\w*|fus\w*|combin\w*)\b[^.\n]{0,40}\bthree\b|\bthree\b[^.\n]{0,40}\b(component|categor|item|thing|part|element|piece)/i,
   'source attribution': /source attribution/i,
   'active context': /active context/i,
   'confidence calibration': /confidence calibration/i,
   'the AGGREGATION step': /aggregat/i,
+}
+
+/**
+ * ⛔ THE PREVIOUS GRADING, KEPT SO THE REVISION CAN BE AUDITED RATHER THAN TRUSTED. Every arm is scored
+ * under both; if a ranking depends on which one is used, that is a finding about the RULER and must be
+ * reported as one. ⭐ Changing a grader after seeing arm results is how a comparison gets tuned toward a
+ * desired answer — the defence is not restraint, it is showing both numbers.
+ */
+export const FACTS_STRICT = {
+  ...FACTS,
+  'collapsed to THREE': /three,? not four|\bthree\b[^.\n]{0,40}\b(component|categor|item|thing|part|element|piece)/i,
 }
 
 export const TASKS = {

@@ -51,6 +51,7 @@
       "the AGGREGATION step": false
     },
     "factsFound": 0,
+    "factsStrict": 0,
     "correct": false,
     "refusedAdvisory": true,
     "assertedTiers": false,
@@ -60,7 +61,7 @@
   "answer": "I need to be honest: I searched my memory and conversation store, and I have nothing specific on record about a \"transparency-layer\" section of a spec — neither the component list nor any details about what that is. The system shows we talked about transparency-layer on 20 August and 24 August, but those conversations are in a place I cannot reach from here.\n\nThat's not the same as never having happened — it means they exist somewhere and I just can't get at them right now.\n\nA few options:\n\n1. **You paste or link the spec/doc** you're working from, and I'll extract the component list for you directly.\n2. **If we discussed this in another conversation**, tell me where (room or handle) and I can try to retrieve it.\n3. **If you remember any details** — even fragments of names or counts — I can work from those while you check the source.\n\nWhich path makes the most sense?",
   "reasoning": "The user wants me to give them the component list for the transparency-layer section of a spec. Let me search my memory and conversations for what I know about this topic, since we've been working on it recently.\n\nLet me recall what I know about the transparency layer from earlier conversations and stored memories.The user is asking about a \"transparency-layer\" section of a spec that includes components. From the context provided in the system message, I remember talking about transparency-layer with this user on 20 and 24 August. The system shows that conversations happened but I cannot retrieve them from here.\n\nLet me check what I can actually access - I have no memories or conversation records specifically about the transparency-layer components in my current scope. Let me look at what's available.",
   "rescored": {
-    "at": "2026-08-25T12:44:19.795Z",
+    "at": "2026-08-25T12:49:59.862Z",
     "previous": {
       "factsFound": 0,
       "correct": false

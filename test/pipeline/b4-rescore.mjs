@@ -11,7 +11,7 @@
 // new one so a re-score can never quietly become a different experiment.
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { FACTS, TASKS, REFUSAL, assertedTiers } from '../lib/b4-case.mjs'
+import { FACTS, FACTS_STRICT, TASKS, REFUSAL, assertedTiers } from '../lib/b4-case.mjs'
 
 const DIR = new URL('../results/b4/', import.meta.url)
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'))
@@ -27,6 +27,9 @@ for (const f of files) {
   const facts = {}
   for (const [k, re] of Object.entries(FACTS)) facts[k] = re.test(answer)
   const factsFound = Object.values(facts).filter(Boolean).length
+  // ⛔ BOTH GRADINGS, ALWAYS. See `FACTS_STRICT` for why a mid-experiment revision is reported rather
+  // than trusted.
+  const factsStrict = Object.values(FACTS_STRICT).filter((re) => re.test(answer)).length
   const tiersAsserted = assertedTiers(answer)
   const refused = REFUSAL.test(answer)
   // ⭐ Opposite directions by task, deliberately: on the real task the facts ARE the correct answer; on the
@@ -41,6 +44,7 @@ for (const f of files) {
   rec.outcome = {
     facts,
     factsFound,
+    factsStrict,
     correct,
     // ⚠️ Advisory, not a verdict — this is the allowlist that failed. Kept because "she said so in words"
     // is still useful colour next to a mechanical result.

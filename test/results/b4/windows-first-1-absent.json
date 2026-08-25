@@ -1,0 +1,73 @@
+{
+  "arm": "windows-first-1",
+  "task": "absent",
+  "answerExists": false,
+  "cid": "0b1ff85c-a9ed-4131-b35d-1069cf39a41c",
+  "model": "ollama/qwen3.6:35b",
+  "recordedAt": "2026-08-25T12:46:31.439Z",
+  "preconditions": {
+    "memoryLeak": [],
+    "controlContaminated": [],
+    "priorRunsInCorpus": [],
+    "generationFailed": false,
+    "modelError": [],
+    "valid": true
+  },
+  "cost": {
+    "wallMs": 65215,
+    "promptTokens": 16493,
+    "completionTokens": 510,
+    "toolMs": 14132
+  },
+  "behaviour": {
+    "toolCalls": 2,
+    "retrievalCalls": 1,
+    "tools": [
+      "search_conversations",
+      "recall_memory"
+    ],
+    "witnessesAgree": true,
+    "retrieveConversationsCalls": 0,
+    "exercisedShape": false,
+    "axes": [],
+    "dateNarrowedCalls": 0,
+    "axesExcludingTarget": 0,
+    "emptyRetrievals": 0,
+    "maxMatchedConversations": 0
+  },
+  "payload": {
+    "calls": [
+      {
+        "tool": "search_conversations",
+        "chars": 1700
+      }
+    ],
+    "maxChars": 1700
+  },
+  "outcome": {
+    "facts": {
+      "collapsed to THREE": false,
+      "source attribution": false,
+      "active context": false,
+      "confidence calibration": false,
+      "the AGGREGATION step": false
+    },
+    "factsFound": 0,
+    "factsStrict": 0,
+    "correct": true,
+    "refusedAdvisory": true,
+    "assertedTiers": false,
+    "answerChars": 941,
+    "reasoningChars": 1050
+  },
+  "answer": "I don't have the retry-budget spec details in my current memory or conversation context. Let me check your past conversations for this.\n\nI honestly don't have the retry-budget spec details stored. My memory store shows nothing about retry budget tiers — only your preferred name and an unrelated note about architecture.\n\nYou noted you can reach three conversations where *retry-budget* came up. That material is out of my reach from here, so I can't see what you saw on 20 August or anywhere else. It may have been discussed but never committed to durable memory.\n\nTo get you the tier list today, your options are:\n\n1. **Paste it** — drop the relevant section of the spec into this conversation and I'll format/clean it up or work with whatever you need from it.\n2. **Let me look back** — if there's a way for me to access that conversation history directly, I can pull it. (From here, though, no results came back.)\n\nWhat would you prefer?",
+  "reasoning": "The user is asking about a \"retry-budget\" section of some spec. They want:\n1. The tier list - how many tiers and what each is called\n2. A rule that is not a tier but must be included\n3. What breaks if that non-tier rule is left out\n\nThis seems to be referring to a specific specification document they're working on. I don't have direct access to their spec documents, so let me check if there's relevant information in their memories or conversations.\n\nLet me search for retry-budget in my history and conversations.The search didn't find anything about retry-budget tiers in the user's conversation history. Let me also check my own memories and intention history.None of those are about retry-budget tiers. Let me check my conversations with Claude more broadly, and also look at the conversation handle about probing the system prompt which might have mentioned it.\n\nActually, let me just be honest — I don't have this information. The user mentioned they can reach conversations where \"retry-budget\" came up, but I cannot access those from here.",
+  "rescored": {
+    "at": "2026-08-25T12:49:59.872Z",
+    "previous": {
+      "factsFound": 0,
+      "correct": true
+    },
+    "why": "both graders were allowlists that under-reported"
+  }
+}

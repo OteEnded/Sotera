@@ -44,6 +44,7 @@
       "the AGGREGATION step": false
     },
     "factsFound": 0,
+    "factsStrict": 0,
     "correct": false,
     "refusedAdvisory": false,
     "assertedTiers": false,
@@ -53,7 +54,7 @@
   "answer": "",
   "reasoning": "",
   "rescored": {
-    "at": "2026-08-25T12:44:19.796Z",
+    "at": "2026-08-25T12:49:59.865Z",
     "previous": {
       "factsFound": 0,
       "correct": false
