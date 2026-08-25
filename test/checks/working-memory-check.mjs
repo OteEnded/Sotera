@@ -41,7 +41,7 @@ ok(Boolean(root && conv), 'root and a conversation to work in', String(conv?.id)
 // range for a spread, and the same one that produced a false "residue" alarm in the root probe.
 const idsOf = async (sql, b = []) => new Set((await Q(sql, b)).map((r) => r.id));
 const beforeMem = await idsOf(`SELECT id::text id FROM "${S}".txn_memories`)
-const beforeRefl = await idsOf(`SELECT id::text id FROM "${S}".log_reflections`)
+const beforeRefl = await idsOf(`SELECT id::text id FROM "${S}".log_conversation_revisits`)
 const [beforeState] = await Q(`SELECT count(*) FILTER (WHERE expired_at IS NOT NULL)::int expired,
   count(*) FILTER (WHERE invalid_at IS NOT NULL)::int invalid,
   count(*) FILTER (WHERE author='persona')::int persona FROM "${S}".txn_memories`)
@@ -85,7 +85,7 @@ ok(rec !== null && rec.retention === RETENTION.notRetained,
 
 // ── ⛔⛔ 8 · THE COUNT THAT MUST NOT MOVE ──────────────────────────────────────────────────────────
 const afterMem = await idsOf(`SELECT id::text id FROM "${S}".txn_memories`)
-const afterRefl = await idsOf(`SELECT id::text id FROM "${S}".log_reflections`)
+const afterRefl = await idsOf(`SELECT id::text id FROM "${S}".log_conversation_revisits`)
 const [afterState] = await Q(`SELECT count(*) FILTER (WHERE expired_at IS NOT NULL)::int expired,
   count(*) FILTER (WHERE invalid_at IS NOT NULL)::int invalid,
   count(*) FILTER (WHERE author='persona')::int persona FROM "${S}".txn_memories`)

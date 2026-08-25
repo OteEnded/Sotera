@@ -13,7 +13,7 @@
 // ── ⛔ ONE WRITE LANE, AND IT IS NOT THIS FILE ───────────────────────────────────────────────────────
 // Ote: *"Use the existing single memory write lane. Don't introduce a second memory writer."* ⇒ NOTHING
 // here writes `txn_memories`. If she retains something it is because **she called a tool**, and the tool
-// wrote it exactly as it would in an ordinary turn. This file writes ONE table: `log_reflections`, which
+// wrote it exactly as it would in an ordinary turn. This file writes ONE table: `log_conversation_revisits`, which
 // records that the occasion happened and what came of it.
 //
 // ── ⭐ AUTHORSHIP FOLLOWS THE OCCASION ──────────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ function reflectionModel(config) {
  */
 async function lastWatermark(seq, schema, conversationId) {
   const [row] = await seq.query(
-    `SELECT max(up_to_rolling_id)::bigint AS up_to FROM "${schema}"."log_reflections"
+    `SELECT max(up_to_rolling_id)::bigint AS up_to FROM "${schema}"."log_conversation_revisits"
       WHERE conversation_id = :c AND outcome = 'completed'`,
     { replacements: { c: conversationId }, type: seq.QueryTypes.SELECT })
   return Number(row?.up_to ?? 0) || 0
@@ -136,7 +136,7 @@ async function recordFailure(seq, schema, { conversationId, userId, upTo, from, 
     const why = String(failure || 'unknown').slice(0, 2000)
     if (claimId) {
       await seq.query(
-        `UPDATE "${schema}"."log_reflections"
+        `UPDATE "${schema}"."log_conversation_revisits"
             SET outcome = 'failed', failure = $2, completed_at = now()
           WHERE id = $1::uuid AND outcome IS NULL`,
         { bind: [claimId, why], type: seq.QueryTypes.UPDATE })
@@ -153,14 +153,14 @@ async function recordFailure(seq, schema, { conversationId, userId, upTo, from, 
     // ⓘ `UPDATE … RETURNING` is what makes "was there one?" answerable without a separate SELECT and a
     // race between the two.
     const closed = await seq.query(
-      `UPDATE "${schema}"."log_reflections"
+      `UPDATE "${schema}"."log_conversation_revisits"
           SET outcome = 'failed', failure = $3, completed_at = now()
         WHERE conversation_id = $1 AND up_to_rolling_id = $2 AND outcome IS NULL
         RETURNING id`,
       { bind: [conversationId, Math.max(1, Number(upTo) || 1), why], type: seq.QueryTypes.SELECT })
     if (closed?.length) return
     await seq.query(
-      `INSERT INTO "${schema}"."log_reflections"
+      `INSERT INTO "${schema}"."log_conversation_revisits"
          (conversation_id, user_id, up_to_rolling_id, from_rolling_id, text, prompt_generation,
           reason, outcome, failure, completed_at)
        VALUES ($1, $2, $3, $4, '', $5, $6, 'failed', $7, now())`,
@@ -248,7 +248,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // an occasion recorded as incomplete is honest, and a durable memory with no ledger row is not — and an
   // empty `text` with `tools_used = {}` is identifiable as exactly that.
   const [claim] = await seq.query(
-    `INSERT INTO "${schema}"."log_reflections"
+    `INSERT INTO "${schema}"."log_conversation_revisits"
        (conversation_id, user_id, up_to_rolling_id, from_rolling_id, messages_considered, text,
         tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, reason)
      SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection'
@@ -262,7 +262,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
      -- concurrency arbitration. ⛔ Neither alone is sufficient, and it is not belt-and-braces: they
      -- refuse two different things.
      WHERE NOT EXISTS (
-       SELECT 1 FROM "${schema}"."log_reflections"
+       SELECT 1 FROM "${schema}"."log_conversation_revisits"
         WHERE conversation_id = $1 AND up_to_rolling_id = $3 AND outcome = 'completed')
      ON CONFLICT (conversation_id, up_to_rolling_id) WHERE outcome IS NULL DO NOTHING
      RETURNING id::text AS id, rolling_id`,
@@ -348,7 +348,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // ⛔ NOT A RECORD FIELD ANY MORE — migration 017 dropped the `finish` column on Ote's instruction
   // (*"remove finish from the ratified reflection schema"*). This variable survives as an OPERATOR signal
   // only: a clipped reflection is a lifecycle failure, and those stay in scope, but it reaches a log line
-  // and never `log_reflections`. ⛔ If it starts wanting to be a column again, that is an argument to make,
+  // and never `log_conversation_revisits`. ⛔ If it starts wanting to be a column again, that is an argument to make,
   // not a field to grow.
   let clipped = null
   let rounds = 0
@@ -451,7 +451,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   }
 
   // ── THE ROW. Written whether or not anything else was. ────────────────────────────────────────────
-  // ⭐⭐ Ote, explicitly: *"a reflection that produces no memory must still create a log_reflections row."*
+  // ⭐⭐ Ote, explicitly: *"a reflection that produces no memory must still create a log_conversation_revisits row."*
   // Row-exists-vs-no-row is what separates "she reflected and kept nothing" from "she was never asked",
   // and those are opposite facts that used to look identical.
   // ⭐ FILLING IN THE ROW THIS RUN ALREADY CLAIMED. The claim above is what makes a durable write
@@ -462,7 +462,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     // material and a boundary refused her, which is neither an answer nor a breakage.
     // ⛔ `completed` means she was ASKED AND ANSWERED. It never means she found something worth keeping
     // -- that stays in `wrote_memory_id` (a fact) and in her own words (everything else).
-    `UPDATE "${schema}"."log_reflections"
+    `UPDATE "${schema}"."log_conversation_revisits"
         SET text = $2, wrote_memory_id = $3, tools_used = $4::text[], blocked_by_disclosure = $5,
             model = $6, messages_considered = $7,
             outcome = CASE WHEN $5 THEN 'blocked' ELSE 'completed' END, completed_at = now()

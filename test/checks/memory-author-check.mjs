@@ -173,7 +173,7 @@ try {
       WHERE m.author = 'persona'
         AND m.content NOT LIKE 'zz_test%'
         -- traceable: a reflection recorded writing it…
-        AND NOT EXISTS (SELECT 1 FROM persona_sotera.log_reflections r WHERE r.wrote_memory_id = m.id)
+        AND NOT EXISTS (SELECT 1 FROM persona_sotera.log_conversation_revisits r WHERE r.wrote_memory_id = m.id)
         -- …or it carries a source naming where it came from (the lesson lane writes lesson:<conversation>)
         AND coalesce(m.source, '') = ''
         -- …or it names the turn she decided on, and that turn still exists (the remember_fact lane)

@@ -8,7 +8,7 @@
 // reflection never happened at all.** Row-exists-vs-no-row separates the fourth from the rest with no
 // vocabulary at all, which is why the two assertions Ote asked for are the two that matter:
 //
-//   1. *"a reflection that produces no memory must still create a log_reflections row"*
+//   1. *"a reflection that produces no memory must still create a log_conversation_revisits row"*
 //   2. *"if she chooses to save something, the reflection record should point to the resulting memory
 //       rather than duplicating its contents"*
 //
@@ -88,7 +88,7 @@ try {
   // ⚠️⚠️ SCANNED PER SQL STATEMENT, AND THE PREVIOUS FORM WAS A LATENT FALSE POSITIVE. It was
   // `/INSERT\s+INTO[^;]*txn_memories/i` — and `[^;]*` does not stop at the end of a statement, it runs to
   // the next SEMICOLON, which in this semicolon-free codebase can be most of a file. It fired on
-  // 2026-08-25 the moment a new `INSERT INTO log_reflections` was added ABOVE an unrelated
+  // 2026-08-25 the moment a new `INSERT INTO log_conversation_revisits` was added ABOVE an unrelated
   // `db.txn_memories.sequelize`, and it had only ever passed because the existing INSERT happened to sit
   // BELOW that line. ⇒ ⭐ **its verdict depended on the ORDER of two unrelated pieces of code** — the
   // same family as a scan that reads prose, one layer along: a scan whose boundary is incidental layout
@@ -103,7 +103,7 @@ try {
   // ⛔ NON-VACUOUS: the scan must actually have found write statements to judge.
   ok(statements.some((q) => /INSERT\s+INTO/i.test(q)),
     'N · ⛔ …and the scan found real INSERT statements — a scan over nothing is not a pass')
-  ok(/log_reflections/.test(hostCode), 'N · …and it does write the reflection record')
+  ok(/log_conversation_revisits/.test(hostCode), 'N · …and it does write the reflection record')
 
   // ── T · THE TOOLSET IS AN ALLOWLIST, AND THE DESTRUCTIVE ONES ARE NOT ON IT ─────────────────────
   const withheld = ['forget_memory', 'retract_own_practice', 'restore_memory', 'pin_memory', 'remember_fact']
@@ -168,8 +168,8 @@ try {
   // with no generation expression because "exit 0" was the only thing anybody looked at.
   const cols = new Map((await Q(
     `SELECT column_name, is_nullable, data_type FROM information_schema.columns
-      WHERE table_schema = :s AND table_name = 'log_reflections'`, { s: S })).map((c) => [c.column_name, c]))
-  ok(cols.size > 0, 'S · log_reflections exists', `${cols.size} columns`)
+      WHERE table_schema = :s AND table_name = 'log_conversation_revisits'`, { s: S })).map((c) => [c.column_name, c]))
+  ok(cols.size > 0, 'S · log_conversation_revisits exists', `${cols.size} columns`)
   ok(cols.get('wrote_memory_id')?.is_nullable === 'YES',
     'S · ⭐⭐ wrote_memory_id is NULLABLE — a successful "nothing" is a real persisted outcome')
   ok(cols.get('text')?.is_nullable === 'NO', 'S · her words are mandatory')
@@ -184,7 +184,7 @@ try {
   // ── ⭐⭐ EXTENDED 2026-08-25 BY MIGRATION 025 · THE REVISIT LIFECYCLE ─────────────────────────────
   // ⓘ THE GUARD WORKED EXACTLY AS DESIGNED: these six columns landed and it went red until the list was
   // updated deliberately. That is the whole point of it being a counted property.
-  // Ote's ruling, which is what authorizes them: *"Generalize log_reflections; do not create another
+  // Ote's ruling, which is what authorizes them: *"Generalize log_conversation_revisits; do not create another
   // conversation_revisits table… I want the lifecycle to distinguish never_attempted → requested →
   // started → completed / failed / blocked… Most importantly, a failed revisit must leave a record.
   // «Never tried» and «tried but failed» must never collapse into the same database state."*
@@ -195,7 +195,7 @@ try {
   // column and still live only in her words. A value like `nothing_to_remember` appearing here would be
   // the contamination arriving one layer down, and 025's CHECK makes it impossible.
   const REVISIT_COLUMNS = ['started_at', 'completed_at', 'outcome', 'reason', 'failure', 'from_rolling_id']
-  const RATIFIED_COLUMNS = ['id', 'rolling_id', 'reflected_at', 'conversation_id', 'user_id', 'up_to_rolling_id',
+  const RATIFIED_COLUMNS = ['id', 'rolling_id', 'requested_at', 'conversation_id', 'user_id', 'up_to_rolling_id',
     'messages_considered', 'text', 'wrote_memory_id', 'tools_used', 'blocked_by_disclosure',
     'prompt_generation', 'code_mtime', 'model', ...REVISIT_COLUMNS]
   // ⭐ …and each of them must actually BE there, or "the list matches" would also be true of a migration
@@ -222,10 +222,10 @@ try {
     enums.map((e) => e.typname).join(', ') || 'none')
   const fks = await Q(
     `SELECT count(*)::int n FROM information_schema.table_constraints
-      WHERE table_schema = :s AND table_name = 'log_reflections' AND constraint_type = 'FOREIGN KEY'`, { s: S })
+      WHERE table_schema = :s AND table_name = 'log_conversation_revisits' AND constraint_type = 'FOREIGN KEY'`, { s: S })
   ok(fks[0].n === 0, 'S · ⭐ zero foreign keys — the record that she reflected outlives the conversation')
   const uniq = await Q(
-    `SELECT indexdef FROM pg_indexes WHERE schemaname = :s AND tablename = 'log_reflections' AND indexdef LIKE '%UNIQUE%'`, { s: S })
+    `SELECT indexdef FROM pg_indexes WHERE schemaname = :s AND tablename = 'log_conversation_revisits' AND indexdef LIKE '%UNIQUE%'`, { s: S })
   ok(uniq.some((u) => /conversation_id, up_to_rolling_id/.test(u.indexdef)),
     'S · ⭐⭐ one-per-quiet-stretch is enforced by the DATABASE, not by the caller trusting itself')
 
@@ -286,7 +286,7 @@ try {
     const [row1] = await Q(
       `SELECT id::text AS id, text, wrote_memory_id, tools_used, blocked_by_disclosure,
               up_to_rolling_id, messages_considered, prompt_generation, model
-         FROM ${S}.log_reflections WHERE conversation_id = :c`, { c: quiet })
+         FROM ${S}.log_conversation_revisits WHERE conversation_id = :c`, { c: quiet })
     ok(!!row1, 'L1 · ⭐⭐ A REFLECTION THAT WROTE NO MEMORY STILL LEFT A ROW — "she reflected and kept nothing" is now a fact, not an absence')
     ok(row1?.wrote_memory_id === null, 'L1 · ⭐ and wrote_memory_id is NULL — a fact, not a verdict')
     ok(row1?.text === NOTHING, 'L1 · her words are stored verbatim, unparsed')
@@ -304,7 +304,7 @@ try {
     })
     ok(again.skipped === true && (again.reason === 'unchanged' || again.reason === 'already-reflected'),
       'L1 · ⭐⭐ the same quiet stretch cannot be reflected on twice', again.reason ?? 'it ran again')
-    const [{ n: dupes }] = await Q(`SELECT count(*)::int n FROM ${S}.log_reflections WHERE conversation_id = :c`, { c: quiet })
+    const [{ n: dupes }] = await Q(`SELECT count(*)::int n FROM ${S}.log_conversation_revisits WHERE conversation_id = :c`, { c: quiet })
     ok(dupes === 1, 'L1 · …and exactly one row exists for it', `${dupes} row(s)`)
 
     // ── 2 · A SAVING REFLECTION **POINTS AT** THE MEMORY ─────────────────────────────────────────
@@ -331,7 +331,7 @@ try {
     if (r2.reflectionId) MADE.reflections.push(r2.reflectionId)
     if (r2.wroteMemoryId) MADE.memories.push(r2.wroteMemoryId)
     const [row2] = await Q(
-      `SELECT text, wrote_memory_id::text AS wrote_memory_id, tools_used FROM ${S}.log_reflections WHERE conversation_id = :c`, { c: saving })
+      `SELECT text, wrote_memory_id::text AS wrote_memory_id, tools_used FROM ${S}.log_conversation_revisits WHERE conversation_id = :c`, { c: saving })
     ok(!!row2?.wrote_memory_id,
       'L2 · ⭐⭐ THE REFLECTION RECORD POINTS AT THE MEMORY — and it survived the fire-and-forget lane, which returns no id',
       String(row2?.wrote_memory_id))
@@ -417,7 +417,7 @@ try {
 } finally {
   // ⛔ CLEAN UP EVERYTHING. Residue from my testing has appeared in Ote's own panels before.
   const wipe = (sql, args = []) => pg.query(sql, args).catch(() => {})
-  await wipe(`DELETE FROM ${S}.log_reflections WHERE conversation_id = ANY($1::uuid[])`, [MADE.conversations])
+  await wipe(`DELETE FROM ${S}.log_conversation_revisits WHERE conversation_id = ANY($1::uuid[])`, [MADE.conversations])
   // ⚠️ `zz_test %` is the fixture prefix every line here carries, so a memory that escaped the returned id
   // (a second write, a renamed field) is still cleaned up rather than left in her store.
   await wipe(`DELETE FROM ${S}.txn_memories WHERE content LIKE 'zz\_test %'`)

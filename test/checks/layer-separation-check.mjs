@@ -135,12 +135,12 @@ try {
   // PRIORS_OFFERED, with a vector attached: her earlier answer shows her a SHAPE, and shape is the
   // variable generation 3 exists to measure.
   const cols = (await pg.query(
-    `SELECT column_name FROM information_schema.columns WHERE table_schema=$1 AND table_name='log_reflections'`,
+    `SELECT column_name FROM information_schema.columns WHERE table_schema=$1 AND table_name='log_conversation_revisits'`,
     [S])).rows.map((r) => r.column_name)
-  ok(cols.length > 0, 'R · log_reflections exists', `${cols.length} columns`)
+  ok(cols.length > 0, 'R · log_conversation_revisits exists', `${cols.length} columns`)
   const vectorish = cols.filter((c) => /embed|vector|hv$/i.test(c))
   ok(vectorish.length === 0,
-    'R · ⭐⭐ NO EMBEDDING COLUMN ON log_reflections — her prior reflections are not retrievable, on purpose',
+    'R · ⭐⭐ NO EMBEDDING COLUMN ON log_conversation_revisits — her prior reflections are not retrievable, on purpose',
     vectorish.join(', ') || 'none')
   const reflectionHost = strip(read('app/components/reflection-lifecycle-host.js'))
   ok(!/makeEmbedder|embeddings\(/.test(reflectionHost),
@@ -153,7 +153,7 @@ try {
   const [prov] = (await pg.query(
     `SELECT count(*)::int n,
             count(prompt_generation)::int gen, count(code_mtime)::int code, count(model)::int model
-       FROM ${S}.log_reflections`)).rows
+       FROM ${S}.log_conversation_revisits`)).rows
   ok(prov.n === prov.gen && prov.n === prov.code && prov.n === prov.model,
     'V · ⭐⭐ every reflection row records its generation, its code and its model',
     `${prov.n} row(s): gen=${prov.gen} code=${prov.code} model=${prov.model}`)

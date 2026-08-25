@@ -68,16 +68,16 @@ try {
   if (one !== null) {
     // ── ONE ROW, VERBATIM. A deliberate act, one row at a time. ──────────────────────────────────
     const { rows } = await pg.query(
-      `SELECT r.rolling_id, r.reflected_at, u.username AS room, c.title, r.text,
+      `SELECT r.rolling_id, r.requested_at, u.username AS room, c.title, r.text,
               r.tools_used, r.wrote_memory_id::text AS wrote, r.blocked_by_disclosure AS blocked,
               r.messages_considered, r.model
-         FROM ${S}.log_reflections r
+         FROM ${S}.log_conversation_revisits r
          LEFT JOIN ${S}.mst_users u ON u.id = r.user_id
          LEFT JOIN ${S}.txn_conversations c ON c.id = r.conversation_id
         WHERE r.rolling_id = $1`, [Number(one)])
     if (!rows.length) { console.log(`no reflection with rolling_id ${one}`); process.exit(0) }
     const r = rows[0]
-    console.log(`\n#${r.rolling_id}  ${r.reflected_at.toISOString()}  room=${r.room}  model=${r.model}`)
+    console.log(`\n#${r.rolling_id}  ${r.requested_at.toISOString()}  room=${r.room}  model=${r.model}`)
     console.log(`considered=${r.messages_considered}  tools=[${r.tools_used.join(', ')}]  `
       + `wrote=${r.wrote ?? 'nothing'}  blocked=${r.blocked}`)
     console.log(`conversation: ${r.title ?? '(untitled)'}`)
@@ -91,7 +91,7 @@ try {
   // ⭐ `existed` is computed against the WATERMARK, not against the conversation as it stands now — a
   // conversation that grew afterwards must not make an honest reflection look like it skipped messages.
   const { rows } = await pg.query(
-    `SELECT r.rolling_id, r.reflected_at, u.username AS room, r.tools_used,
+    `SELECT r.rolling_id, r.requested_at, u.username AS room, r.tools_used,
             -- ⭐⭐ A DECISION IS NOT A RETENTION (found 2026-08-23). Testing wrote_memory_id IS NOT NULL
             -- counted reflection #111 as "retained something" when she had explicitly DECLINED — the row it
             -- wrote is a recorded decision (entity=sotera, attribute=declined), not a memory. The true score
@@ -107,7 +107,7 @@ try {
             (SELECT count(*)::int FROM ${S}.txn_messages m
               WHERE m.conversation_id = r.conversation_id AND m.rolling_id <= r.up_to_rolling_id) AS existed,
             length(r.text) AS chars, r.prompt_generation AS gen, r.model
-       FROM ${S}.log_reflections r
+       FROM ${S}.log_conversation_revisits r
        LEFT JOIN ${S}.mst_users u ON u.id = r.user_id
        LEFT JOIN ${S}.txn_memories dm ON dm.id = r.wrote_memory_id
       WHERE ($1::text IS NULL OR u.username = $1)
@@ -131,7 +131,7 @@ try {
     const read = r.existed && r.considered < r.existed ? `${r.considered}/${r.existed} ✂` : `${r.considered}/${r.existed}`
     console.log(
       pad(`#${r.rolling_id}`, 5)
-      + pad(r.reflected_at.toISOString().slice(5, 16).replace('T', ' '), 18)
+      + pad(r.requested_at.toISOString().slice(5, 16).replace('T', ' '), 18)
       + pad(r.room ?? '(none)', 14)
       + pad(read, 12)
       + pad(r.chars, 7)

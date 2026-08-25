@@ -60,7 +60,7 @@ export function attemptState(row) {
  */
 export function deriveRevisitState({ attempts = [], topRollingId = null } = {}) {
   const rows = [...(attempts ?? [])].sort(
-    (a, b) => (ms(a.reflected_at ?? a.requestedAt) ?? 0) - (ms(b.reflected_at ?? b.requestedAt) ?? 0),
+    (a, b) => (ms(a.requested_at ?? a.requestedAt) ?? 0) - (ms(b.requested_at ?? b.requestedAt) ?? 0),
   )
   const top = Number(topRollingId) || 0
 
@@ -128,7 +128,7 @@ export function stalledAttempts(attempts = [], { now, staleAfterMs } = {}) {
   if (t == null || !(staleAfterMs > 0)) return []
   return (attempts ?? []).filter((r) => {
     if (r.outcome != null) return false
-    const opened = ms(r.reflected_at ?? r.requestedAt)
+    const opened = ms(r.requested_at ?? r.requestedAt)
     return opened != null && (t - opened) >= staleAfterMs
   })
 }

@@ -120,7 +120,7 @@ ok(nulls.every((k) => k in a.notRun),
   '5 · ⛔ every null total has a recorded REASON — a rule cannot be silently absent', nulls.join(', ') || 'no nulls')
 ok(Object.keys(a.notRun).length === 0,
   '5 · ⭐⭐ …and RIGHT NOW every rule actually ran', Object.keys(a.notRun).join(', ') || `all ${LINT_RULES.length} rules executed`)
-ok(!/db\.txn_message_embeddings \?|db\.log_reflections \?/.test(CODE),
+ok(!/db\.txn_message_embeddings \?|db\.log_conversation_revisits \?/.test(CODE),
   '5 · ⛔ raw tables are not gated on model presence — they are real tables that are not sequelize models')
 const line = lintSummaryLine({ ...a, notRun: { 'orphan-embedding': 'test' }, totals: { ...a.totals, 'orphan-embedding': null } })
 ok(/DID NOT RUN/.test(line), '5 · ⭐ and the one-line log form SHOUTS when a rule did not run', line.slice(0, 90))

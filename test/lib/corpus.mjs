@@ -31,7 +31,7 @@ export const DEPENDENTS = [
   ['txn_message_embeddings', 'conversation_id', 'message_id'],
   ['txn_messages', 'conversation_id', 'id'],
   ['log_tool_calls', 'conversation_id', 'id'],
-  ['log_reflections', 'conversation_id', 'id'],
+  ['log_conversation_revisits', 'conversation_id', 'id'],
   ['txn_interaction_sessions', 'conversation_id', 'id'],
   ['txn_todo_sessions', 'conversation_id', 'id'],
   ['log_disclosure_events', 'into_conversation_id', 'id'],

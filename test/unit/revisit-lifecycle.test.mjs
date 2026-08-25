@@ -8,19 +8,20 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import {
   deriveRevisitState, stalledAttempts, attemptState, REVISIT, OUTCOME, revisitSummaryLine,
 } from '../../Backend/app/components/revisit-lifecycle.js'
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8')
 const MIGRATION = read('../../Backend/database/migrations/025_revisit_lifecycle.sql')
+const RENAME = read('../../Backend/database/migrations/026_revisit_naming.sql')
 const HOST = read('../../Backend/app/components/reflection-lifecycle-host.js')
 // ⛔ Comments stripped, string literals KEPT — the SQL this file asserts about lives in literals. The
 // polarity follows where the truth lives; stripping literals here would make every scan vacuous.
 const hostCode = HOST.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\r\n]*/g, '')
 
-const row = (o) => ({ reflected_at: '2026-08-25T01:00:00Z', up_to_rolling_id: 100, ...o })
+const row = (o) => ({ requested_at: '2026-08-25T01:00:00Z', up_to_rolling_id: 100, ...o })
 
 // ══ 1 · ⭐⭐⭐ THE HEADLINE · NEVER TRIED ≠ TRIED AND FAILED ═════════════════════════════════════════
 test('⭐⭐⭐ never_attempted and failed are different states, not one silence', () => {
@@ -55,8 +56,8 @@ test('⭐⭐⭐ a failed attempt does not move the cursor — the trap that woul
   // would have stalled the whole lane, one conversation at a time, invisibly.
   const d = deriveRevisitState({
     attempts: [
-      row({ outcome: 'completed', up_to_rolling_id: 120, reflected_at: '2026-08-25T01:00:00Z' }),
-      row({ outcome: 'failed', failure: 'gateway died', up_to_rolling_id: 145, reflected_at: '2026-08-25T02:00:00Z' }),
+      row({ outcome: 'completed', up_to_rolling_id: 120, requested_at: '2026-08-25T01:00:00Z' }),
+      row({ outcome: 'failed', failure: 'gateway died', up_to_rolling_id: 145, requested_at: '2026-08-25T02:00:00Z' }),
     ],
     topRollingId: 145,
   })
@@ -84,9 +85,9 @@ test('⭐ never reviewed at all ⇒ the range starts at the beginning, not at 1'
 test('⭐ consecutive failures are counted backwards, so a recovered conversation is not "failing"', () => {
   const d = deriveRevisitState({
     attempts: [
-      row({ outcome: 'failed', failure: 'a', reflected_at: '2026-08-25T01:00:00Z' }),
-      row({ outcome: 'failed', failure: 'b', reflected_at: '2026-08-25T02:00:00Z' }),
-      row({ outcome: 'completed', up_to_rolling_id: 100, reflected_at: '2026-08-25T03:00:00Z' }),
+      row({ outcome: 'failed', failure: 'a', requested_at: '2026-08-25T01:00:00Z' }),
+      row({ outcome: 'failed', failure: 'b', requested_at: '2026-08-25T02:00:00Z' }),
+      row({ outcome: 'completed', up_to_rolling_id: 100, requested_at: '2026-08-25T03:00:00Z' }),
     ],
     topRollingId: 100,
   })
@@ -112,12 +113,12 @@ test('⛔⛔ an open attempt stays open — at a minute and at a year alike', ()
 
 test('⭐⭐ ending a stalled attempt is an ACT, and this only SELECTS candidates', () => {
   const now = Date.parse('2026-08-25T10:00:00Z')
-  const fresh = row({ outcome: null, reflected_at: '2026-08-25T09:59:00Z' })
+  const fresh = row({ outcome: null, requested_at: '2026-08-25T09:59:00Z' })
   // ⭐ BOTH IN-FLIGHT SHAPES ARE SWEEPABLE, and they are genuinely different failures: `requested` means
   // a slot was opened and the turn never began; `started` means the turn began and we never heard again.
-  const staleRequested = row({ outcome: null, reflected_at: '2026-08-25T06:00:00Z' })
-  const staleStarted = row({ outcome: null, reflected_at: '2026-08-25T05:00:00Z', started_at: '2026-08-25T05:00:01Z' })
-  const done = row({ outcome: 'completed', reflected_at: '2026-08-25T01:00:00Z' })
+  const staleRequested = row({ outcome: null, requested_at: '2026-08-25T06:00:00Z' })
+  const staleStarted = row({ outcome: null, requested_at: '2026-08-25T05:00:00Z', started_at: '2026-08-25T05:00:01Z' })
+  const done = row({ outcome: 'completed', requested_at: '2026-08-25T01:00:00Z' })
   const picked = stalledAttempts([fresh, staleRequested, staleStarted, done], { now, staleAfterMs: 36e5 })
   assert.equal(picked.length, 2)
   assert.ok(picked.includes(staleRequested) && picked.includes(staleStarted))
@@ -167,9 +168,17 @@ test('⭐⭐ the index SPLIT is what makes a retry recordable at all', () => {
   // ⛔ One unique index on (conversation_id, up_to_rolling_id) would refuse the retry, so the first
   // failure would permanently occupy the watermark and "tried but failed" would become "can never be
   // tried again" — the requirement defeated by its own storage.
+  // ⚠️⚠️ THESE ASSERT AGAINST MIGRATION 025's HISTORICAL TEXT, SO THEY USE ITS VOCABULARY, NOT TODAY'S.
+  // 026 renamed the table to `log_conversation_revisits`, and a blanket rename swept these three lines with
+  // it — which broke them, correctly. 016 already wrote the rule down: **a migration is a record of what
+  // happened, not a description of now.** ⇒ ⛔ a test about a past migration must speak that migration's
+  // names; rewriting them would make the test assert about a file that never existed.
   assert.match(MIGRATION, /DROP INDEX IF EXISTS log_reflections_one_per_stretch_idx/)
   assert.match(MIGRATION, /log_reflections_one_inflight_per_stretch_idx[\s\S]{0,120}WHERE outcome IS NULL/)
   assert.match(MIGRATION, /log_reflections_one_completed_per_stretch_idx[\s\S]{0,120}WHERE outcome = 'completed'/)
+  // ⭐ …and 026 is what carried those indexes to the current names, asserted against ITS text.
+  assert.match(RENAME, /log_reflections_one_inflight_per_stretch_idx\s+RENAME TO log_conversation_revisits_one_inflight_idx/)
+  assert.match(RENAME, /log_reflections_one_completed_per_stretch_idx RENAME TO log_conversation_revisits_one_completed_idx/)
   // ⭐ and the claim names the partial index it means, or postgres cannot infer which one
   assert.match(hostCode, /ON CONFLICT \(conversation_id, up_to_rolling_id\) WHERE outcome IS NULL DO NOTHING/)
 })
@@ -208,4 +217,55 @@ test('⭐ the summary names the world without inventing one', () => {
   assert.match(line, /state=failed/)
   assert.match(line, /consecutive failure/)
   assert.equal(revisitSummaryLine(null), 'no derivation')
+})
+
+// ══ 7 · ⭐⭐ THE RENAME LEFT NO SECOND NAME (026) ══════════════════════════════════════════════════
+test('⭐⭐ no LIVE code still says `log_reflections` or `reflected_at`', () => {
+  // ⛔ `schema-naming-canon` is ONE NAME PER TABLE. A rename that leaves the old name working anywhere is
+  // two names for one thing, and a codebase ends up with half its queries on each.
+  // ⭐ MIGRATIONS ARE EXEMPT AND THAT IS NOT A LOOPHOLE: 016/017/025 are records of what happened, and
+  // rewriting them would make them describe a past that did not occur. Only LIVE code is scanned.
+  const roots = ['../../Backend/app', '../../test']
+  // ⭐ ONE NAMED EXEMPTION, AND IT IS THIS FILE. The historical assertions above must quote migration
+  // 025's and 026's own text, so the old name appears here inside regex literals — which comment-stripping
+  // correctly does not remove. ⛔ Exempting by FILE rather than by pattern, so the exemption cannot
+  // quietly cover a real reference somewhere else.
+  const EXEMPT = ['../../test/unit/revisit-lifecycle.test.mjs']
+  const offenders = []
+  const exemptHit = []
+  const walk = (dir) => {
+    for (const e of readdirSync(new URL(`${dir}/`, import.meta.url), { withFileTypes: true })) {
+      if (e.name === 'node_modules') continue
+      const child = `${dir}/${e.name}`
+      if (e.isDirectory()) { walk(child); continue }
+      if (!/\.(js|mjs)$/.test(e.name)) continue
+      const src = readFileSync(new URL(child, import.meta.url), 'utf8')
+      // ⛔ Strip comments: this very file explains the rename in prose, and so do several others.
+      const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+      // ⓘ …but a migration NAME inside a string is legitimate (a test reads 025 by filename), so the
+      // exemption is by what the reference IS, not by which file it sits in.
+      const stripped = code.replace(/0(16|17|25)_[a-z_]+\.sql/g, '')
+      if (!/log_reflections|\breflected_at\b/.test(stripped)) continue
+      if (EXEMPT.includes(child)) { exemptHit.push(child); continue }
+      offenders.push(child)
+    }
+  }
+  roots.forEach(walk)
+  assert.deepEqual(offenders, [], `still on the old name: ${offenders.join(', ')}`)
+  // ⛔ AND THE EXEMPTION MUST STILL BE EARNING ITS PLACE. A stale exemption is a note whose subject
+  // is gone — that assertion caught a speculative exemption of mine earlier today, on its first run.
+  assert.deepEqual(exemptHit, EXEMPT, 'an exemption no longer describes a real reference')
+})
+
+test('⛔ …while the migrations KEEP their history', () => {
+  // ⭐ The counter-assertion, so the scan above can never be "satisfied" by rewriting the past.
+  assert.match(MIGRATION, /log_reflections/, '025 must still describe the table by the name it had')
+  assert.match(RENAME, /ALTER TABLE log_reflections RENAME TO log_conversation_revisits/)
+  assert.match(RENAME, /RENAME COLUMN reflected_at TO requested_at/)
+  // ⛔ and 026 proves its own rename rather than asserting it
+  for (const guard of [
+    'log_reflections still exists — the rename left two names',
+    'dependent object(s) still carry the old prefix',
+    'the table is empty after the rename — data did not survive',
+  ]) assert.ok(RENAME.includes(guard), `026 must prove: ${guard}`)
 })

@@ -126,7 +126,7 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
   const USER = qualified(db.mst_users)
   // ⛔⛔ AND THIS IS WHERE THE FIRST VERSION OF THIS FILE WAS WRONG, IN THE WORST DIRECTION.
   //
-  // `txn_message_embeddings` and `log_reflections` are REAL TABLES that are NOT sequelize models —
+  // `txn_message_embeddings` and `log_conversation_revisits` are REAL TABLES that are NOT sequelize models —
   // they are reached by raw SQL elsewhere in the codebase. The first version gated their two rules on
   // `db.<name> ? … : null`, so both were SKIPPED and reported **0**. The lint said `orphan-embedding: 0`
   // while a raw query found **1**.
@@ -147,10 +147,10 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
     `SELECT tablename FROM pg_tables WHERE schemaname = :schema`,
     { type: seq.QueryTypes.SELECT, replacements: { schema } })).map((r) => r.tablename))
   const EMB = present.has('txn_message_embeddings') ? rawTable('txn_message_embeddings') : null
-  const REFL = present.has('log_reflections') ? rawTable('log_reflections') : null
+  const REFL = present.has('log_conversation_revisits') ? rawTable('log_conversation_revisits') : null
   const notRun = {}
   if (!EMB) notRun['orphan-embedding'] = 'table txn_message_embeddings not found'
-  if (!REFL) notRun['untraceable-persona-authorship'] = 'table log_reflections not found'
+  if (!REFL) notRun['untraceable-persona-authorship'] = 'table log_conversation_revisits not found'
 
   const Q = (sql, replacements = {}) => seq.query(sql, { type: seq.QueryTypes.SELECT, replacements })
   // ⭐ ONE owner filter, spelled once, so no rule can accidentally run unscoped.

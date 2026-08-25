@@ -14,7 +14,7 @@
 //   noticing     an OBSERVATION channel. Dry-run by construction, writes a JSONL, no tools, nothing
 //                persists, and its whole purpose is to sample her spontaneous structure.
 //   reflection   a real OCCASION. Her ordinary tools are in reach, the ordinary memory write lane is
-//                live, and the outcome persists in `log_reflections` whether or not a memory came of it.
+//                live, and the outcome persists in `log_conversation_revisits` whether or not a memory came of it.
 //
 // ⚠️⚠️ AND THEY ARE DIFFERENT INSTRUMENTS EVEN THOUGH THEY ASK THE SAME SENTENCE. A reflection turn
 // carries a TOOL LIST, and a list of named actions is a menu in exactly the way `revise|nuance` was a
