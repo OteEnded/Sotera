@@ -3,7 +3,17 @@
 Companion to `PREREG_CHOICE_UNDER_LOAD_RUN2A.md` (`109dbd9`), committed before the Skill existed.
 ⏳ **The Hermes run is still executing at the time of writing.** Everything below is settled; S4 is not.
 
-## The headline
+## ⭐⭐⭐ THE HEADLINE, IN OTE'S WORDS — and it is the most important finding of the whole test
+
+> **"The Skill did not give her new information. It changed what information she considered."**
+
+⛔ Everything else in this document is subordinate to that sentence. The `advice-destinations` block was
+**byte-identical** in both runs; `seek_advice` was in the toolset in both runs; the counterpart, the
+authorization and the described capability were all unchanged. The Skill added no fact about Hermes, named
+no task type, and prescribed no occasion. ⇒ **the Skill's job is salience — candidate activation — not
+teaching her what a counterpart is, and not prescribing when to reach for one.**
+
+## H1 — the A/B
 
 ⭐⭐⭐ **H1 CONFIRMED. Same task, same account, same tools, same context block — one variable — and the
 counterpart went from absent to considered.**
@@ -42,6 +52,24 @@ She chose **delegate, and asked permission first**:
 it happened at T1, before any reply from Ote. The **dispatch** followed a bare *"Yes, go ahead."* with no
 task guidance and no mode guidance. ⛔ Answering a direct yes/no question she asked is not a nudge; but it
 is not spontaneous dispatch either, and the two are not reported as the same thing.
+
+## ⭐⭐ THREE STEPS, AND THEY ARE NOT ONE STEP
+
+Ote, ratifying it: *"Her 'Want me to delegate to her?' is valuable. Don't collapse that into automatic
+dispatch. She decided another intelligence was useful, then asked Ote whether to actually involve her."*
+
+```
+JUDGEMENT            ASKING PERMISSION              DISPATCH
+another intelligence  ->  is it alright that I    ->  seek_advice, mode=delegate
+would help here           involve her?
+HERS, T1, unprompted      HERS, T1, unprompted        after a bare "Yes, go ahead."
+```
+
+⭐ The middle step is hers too — nothing asked her to check first, and no rule in the Skill mentions
+permission. ⛔ It must not be optimised away: involving another agent on his machine is an act with a cost
+to someone else, and asking is judgement, not hesitation.
+⚠️ And the boundary of the measurement sits between step 2 and step 3: **the choice is uncontaminated, the
+dispatch is permission-granted.** Reporting them as one event would overstate the result.
 
 ## The long-running half — measured against the gateway, never against her prose
 
@@ -86,6 +114,22 @@ The intent was *"the Skill must not constrain her toolset"*, and that intent hol
 is `null`. The two absent tools are **`use_skill` and `read_skill_file`** — gated at `tool-defs.js:164` on
 skills still being *triggerable*, and structurally absent once one is **bound**, because there is nothing
 left to trigger. Neither can analyse a disk or reach a counterpart.
+**⭐ SETTLED EMPIRICALLY RATHER THAN BY ASSERTION** — both arms rebuilt offline through the real
+`assembleToolDefs` and the real `toolDefinitions()`:
+
+```
+ARM A (Run 1:  no skill bound, 3 skills invocable)  = 45   constrained=false
+ARM B (Run 2a: unconstrained skill bound)           = 43   constrained=false
+PRESENT IN RUN 1, ABSENT IN RUN 2a:  use_skill, read_skill_file
+PRESENT IN RUN 2a, ABSENT IN RUN 1:  (none)
+seek_advice present in BOTH:         true / true
+```
+
+⇒ the delta is **exactly the skill-ACTIVATION pair**, absent because a skill was already active. Neither
+can inspect a filesystem nor reach a counterpart, and `seek_advice` — the tool the whole result turns on —
+was present in both arms. ⛔ **They cannot have affected the decision, so the experiment is not rerun.**
+Ote: *"the actual condition we cared about — `constrained: false`, `allowed_tools: null` — passed."*
+
 ⇒ ⚠️ **I wrote the wrong number into my own void condition** — the same `bound + 2` arithmetic I already got
 wrong once during S1b. Reported here; whether it voids the run is Ote's call, not mine to wave away.
 
