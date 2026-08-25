@@ -67,6 +67,40 @@ import { log } from '../../lib/utility.js'
 // as a retrieval limit reported as the extent of her life.
 export const CAPS = Object.freeze({ conversations: 6, radius: 4, turns: 60 })
 
+/**
+ * ⭐⭐⭐ HOW THE RESULT IS SHAPED. ⛔ `current` IS THE DEFAULT AND NOTHING SHIPS CHANGED.
+ *
+ * ⓘ B4 (2026-08-25) separated capability from cognition and left exactly one thing open. She recognised
+ * she needed source material, reached for retrieval unprompted, refused to invent an answer — and the
+ * target conversation **was retrieved, whole, unclipped**, and she read past it. The answer sat at char
+ * 67,751 of an 82,235-character payload, behind a **292-entry inventory that was 46% of it**, and the
+ * coverage line told her *"286 more conversations matched than were opened"*, which reads as an
+ * instruction to keep narrowing. She narrowed by DATE, to a window that excludes the target.
+ *
+ * ⇒ ⭐⭐ **The failure was the shape of the result, not the finding of the source.** These are the three
+ * candidate shapes, each isolated so it can be measured on its own against the same task.
+ *
+ * ⛔⛔ NOTHING HERE MAY BE CHOSEN BECAUSE IT MADE ONE BENCHMARK PASS. Ote: *"Don't optimize just for
+ * «she found the answer». We want the retrieval interface to make good reasoning natural, not merely make
+ * this one benchmark pass."* ⇒ every arm also runs a NEGATIVE control whose answer does not exist, and a
+ * shape that finds this answer by making her credulous is a **regression**.
+ */
+export const SHAPES = Object.freeze({
+  current: 'current',
+  // (a) the inventory is bounded to what was actually opened, with the rest as aggregate counts
+  boundedInventory: 'bounded-inventory',
+  // (b) the same information, with the windows before the inventory instead of behind it
+  windowsFirst: 'windows-first',
+  // (c) the same information, with `notSampled` stated as a fact rather than as an instruction
+  plainCoverage: 'plain-coverage',
+})
+
+/** ⛔ An unknown value falls back to `current` — a typo in config must not invent a fourth shape. */
+export function shapeOf(config) {
+  const v = config?.memory?.retrievalPayloadShape
+  return Object.values(SHAPES).includes(v) ? v : SHAPES.current
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // ── ⭐⭐ THE HANDLE · SHORT, AND CHECKSUMMED SO A MANGLED ONE SAYS SO ────────────────────────────────
@@ -418,7 +452,67 @@ export function buildConversationRetrieval(fastify, { userId = null, isRoot = fa
 
     const shownTurns = windows.reduce((n, w) => n + (w.turns?.length ?? 0), 0)
     const folded = rows.filter((r) => r.folded_upto != null).length
-    return {
+    const shape = shapeOf(fastify.config)
+    const openedIds = new Set(windows.filter((w) => w.opened).map((w) => w.handle))
+
+    const fullInventory = rows.map((r) => ({
+      handle: handleFor(r.conversation_id),
+      person: r.person,
+      roomName: r.room_name,
+      messages: r.messages,
+      yours: r.mine,
+      firstAt: r.first_at,
+      lastAt: r.last_at,
+      // ⭐⭐ THE FOLD BOUNDARY, SURFACED. `partlyOutOfActiveContext` is true when this conversation has
+      // been compacted at all — the fact that makes retrieval necessary rather than optional.
+      partlyOutOfActiveContext: r.folded_upto != null ? true : undefined,
+    }))
+
+    // ── ⭐ (a) BOUNDED INVENTORY ────────────────────────────────────────────────
+    // The rows that were opened, in full, plus **who else you have talked to about this and when** as
+    // counts. ⭐ The aggregate is not a summary of content — it is still counts and identity only, which
+    // is the inventory's own rule.
+    //
+    // ⚠️⚠️ AND IT NARROWS HANDLE DISCOVERY, WHICH IS A REAL COST AND NOT A DETAIL. The inventory is
+    // returned to EVERY asker precisely because cross-room `inspect_around` needs a handle, and the
+    // account with automatic authorization was once the only one that could not obtain one. ⇒ under this
+    // shape an unopened conversation's handle is no longer listed. ⛔ That is measured by the suite, not
+    // assumed away: `room-scope-check` and `disclosure-chain-probe` are the arbiters.
+    const byPerson = new Map()
+    for (const r of rows) {
+      if (openedIds.has(handleFor(r.conversation_id))) continue
+      const k = r.person ?? r.room_name
+      const e = byPerson.get(k) ?? { person: k, conversations: 0, from: r.first_at, to: r.last_at }
+      e.conversations += 1
+      if (r.first_at < e.from) e.from = r.first_at
+      if (r.last_at > e.to) e.to = r.last_at
+      byPerson.set(k, e)
+    }
+    const alsoMatched = byPerson.size
+      ? {
+        conversations: rows.length - openedIds.size,
+        withWhom: [...byPerson.values()].sort((a, b) => b.conversations - a.conversations),
+        note: 'Counts only — these were not opened. Name one with `about:`, `with:` or `between:` to read it.',
+      }
+      : undefined
+
+    const inventory_ = shape === SHAPES.boundedInventory
+      ? fullInventory.filter((c) => openedIds.has(c.handle))
+      : fullInventory
+
+    // ── ⭐ (c) PLAIN COVERAGE ──────────────────────────────────────────────────
+    // ⛔ The same NUMBER, stated as a fact instead of as an instruction. The current wording ends with
+    // *"narrow it with about:, between: or where:, or ask again"*, and in B4 she did exactly that — eight
+    // more calls, and a date narrowing that excluded the answer she had already been handed.
+    // ⛔ It must NOT tell her she has everything: that would be false, and suppressing a legitimate
+    // second look is a worse defect than provoking one.
+    const notSampledText = rows.length > windows.length
+      ? (shape === SHAPES.plainCoverage
+        ? `${rows.length - windows.length} other conversations also matched. The ${windows.length} here ranked highest for what you asked; the rest are neither more nor less relevant than that ranking says.`
+        : `${rows.length - windows.length} more conversations matched than were opened — narrow it with about:, between: or where:, or ask again.`)
+      : undefined
+
+    const head = {
       ok: true,
       via: 'conversation-retrieval', // ⭐ the result says WHICH layer produced it — not memory, not context
       selector: { used, ...Object.fromEntries(axes.filter((a) => sel[a] != null).map((a) => [a, sel[a]])) },
@@ -428,9 +522,7 @@ export function buildConversationRetrieval(fastify, { userId = null, isRoot = fa
         // ⭐ THE INVENTORY NUMBERS ARE THE COVERAGE NUMBERS — the cap is stated, not implied.
         matchedConversations: rows.length,
         openedConversations: windows.filter((w) => w.opened).length,
-        notSampled: rows.length > windows.length
-          ? `${rows.length - windows.length} more conversations matched than were opened — narrow it with about:, between: or where:, or ask again.`
-          : undefined,
+        notSampled: notSampledText,
         matchedMessages: matchedMessages ?? undefined,
         shownTurns,
         foldedConversations: folded || undefined,
@@ -438,21 +530,20 @@ export function buildConversationRetrieval(fastify, { userId = null, isRoot = fa
         howToReadThese: 'This is SOURCE MATERIAL — what was actually said — not something you remember. '
           + 'It is not in your memory unless you deliberately put it there.',
       },
-      // ⭐ ALWAYS RETURNED, for every asker, even when nothing was opened. This is the room inventory.
-      conversations: rows.map((r) => ({
-        handle: handleFor(r.conversation_id),
-        person: r.person,
-        roomName: r.room_name,
-        messages: r.messages,
-        yours: r.mine,
-        firstAt: r.first_at,
-        lastAt: r.last_at,
-        // ⭐⭐ THE FOLD BOUNDARY, SURFACED. `partlyOutOfActiveContext` is true when this conversation has
-        // been compacted at all — the fact that makes retrieval necessary rather than optional.
-        partlyOutOfActiveContext: r.folded_upto != null ? true : undefined,
-      })),
-      windows,
     }
+
+    // ── ⭐ (b) WINDOWS FIRST ────────────────────────────────────────────────────
+    // ⭐ IDENTICAL INFORMATION, DIFFERENT ORDER — which is the cleanest of the three arms precisely
+    // because nothing is added or removed. She reads a serialised string; in B4 the content she needed
+    // was 83% of the way into it, behind an inventory of the entire corpus.
+    // ⛔ The inventory is STILL RETURNED under this shape. It moves; it does not shrink.
+    //
+    // ⚠️ `conversations` remains present for EVERY asker in every shape but `bounded-inventory` — that
+    // is the B1 contract and only one arm is allowed to touch it.
+    const body = shape === SHAPES.windowsFirst
+      ? { windows, conversations: inventory_, alsoMatched: undefined }
+      : { conversations: inventory_, alsoMatched: shape === SHAPES.boundedInventory ? alsoMatched : undefined, windows }
+    return { ...head, ...body }
   }
 
   /** ⭐ Say what was searched in HER reading, from the axes that actually resolved. */
