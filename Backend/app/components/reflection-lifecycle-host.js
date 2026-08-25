@@ -101,12 +101,77 @@ function reflectionModel(config) {
   return cfg(config, 'reflectionModel', null) || registered(config, 'chat.defaultModel', null) || 'ollama/gemma4:e4b'
 }
 
-/** The highest watermark already reflected on in this conversation. 0 when she never has. */
+/**
+ * The highest watermark already reviewed in this conversation. 0 when she never has.
+ *
+ * ⭐⭐⭐ `WHERE outcome = 'completed'` IS LOAD-BEARING AND WAS ADDED WITH MIGRATION 025. Without it this
+ * read is `max()` over ALL rows — so the first FAILED attempt at watermark X would set the cursor to X
+ * and the conversation would never be revisited again. ⇒ the change that makes failure visible would
+ * have silently stalled the whole lane, permanently, one conversation at a time.
+ * ⭐ THE CURSOR MEANS "HOW FAR I HAVE ACTUALLY REVIEWED", never "how far I have tried".
+ */
 async function lastWatermark(seq, schema, conversationId) {
   const [row] = await seq.query(
-    `SELECT max(up_to_rolling_id)::bigint AS up_to FROM "${schema}"."log_reflections" WHERE conversation_id = :c`,
+    `SELECT max(up_to_rolling_id)::bigint AS up_to FROM "${schema}"."log_reflections"
+      WHERE conversation_id = :c AND outcome = 'completed'`,
     { replacements: { c: conversationId }, type: seq.QueryTypes.SELECT })
   return Number(row?.up_to ?? 0) || 0
+}
+
+/**
+ * ⭐⭐ RECORD AN ATTEMPT THAT FAILED, INCLUDING ONE THAT FAILED BEFORE IT WAS EVER CLAIMED.
+ *
+ * ⚠️⚠️ THIS IS THE HEADLINE REQUIREMENT, AND THE OLD CODE HAD EXACTLY THE HOLE OTE NAMED. A throw inside
+ * `reflectOnConversation` was caught by the scan loop, written to a LOG FILE and tallied as
+ * `skipped.error` — no row. ⇒ *"never tried"* and *"tried and broke"* were byte-identical in the
+ * database, which is the one collapse he asked us to make impossible.
+ * ⭐ And it matters most exactly where it is hardest to see: a conversation that fails every time looks,
+ * from the ledger, like a conversation nobody has ever gotten around to.
+ *
+ * ⛔ It never throws. A failure while recording a failure must not take the pass down — it degrades to a
+ * log line, which is what we had for everything before this.
+ */
+async function recordFailure(seq, schema, { conversationId, userId, upTo, from, reason, failure, claimId }) {
+  try {
+    const why = String(failure || 'unknown').slice(0, 2000)
+    if (claimId) {
+      await seq.query(
+        `UPDATE "${schema}"."log_reflections"
+            SET outcome = 'failed', failure = $2, completed_at = now()
+          WHERE id = $1::uuid AND outcome IS NULL`,
+        { bind: [claimId, why], type: seq.QueryTypes.UPDATE })
+      return
+    }
+    // ── ⭐⭐⭐ CLOSE THE OPEN ATTEMPT FIRST; INSERT ONLY IF THERE ISN'T ONE ───────────────────────────
+    //
+    // ⚠️⚠️ WITHOUT THIS ORDER, RECORDING FAILURES CREATES A WORSE BUG THAN IT CLOSES. The ledger row is
+    // claimed BEFORE the model call, so a turn that throws leaves it `outcome IS NULL`. A blind INSERT
+    // here would then produce TWO rows for one attempt — and the claimed one would stay in flight
+    // forever, where 025's in-flight unique index keeps its watermark permanently occupied.
+    // ⇒ **the lane would go silent for exactly the conversations that fail**, which is the failure mode
+    // this whole migration exists to make visible. ⭐ The attempt that opened a row closes that row.
+    // ⓘ `UPDATE … RETURNING` is what makes "was there one?" answerable without a separate SELECT and a
+    // race between the two.
+    const closed = await seq.query(
+      `UPDATE "${schema}"."log_reflections"
+          SET outcome = 'failed', failure = $3, completed_at = now()
+        WHERE conversation_id = $1 AND up_to_rolling_id = $2 AND outcome IS NULL
+        RETURNING id`,
+      { bind: [conversationId, Math.max(1, Number(upTo) || 1), why], type: seq.QueryTypes.SELECT })
+    if (closed?.length) return
+    await seq.query(
+      `INSERT INTO "${schema}"."log_reflections"
+         (conversation_id, user_id, up_to_rolling_id, from_rolling_id, text, prompt_generation,
+          reason, outcome, failure, completed_at)
+       VALUES ($1, $2, $3, $4, '', $5, $6, 'failed', $7, now())`,
+      {
+        bind: [conversationId, userId ?? null, Math.max(1, Number(upTo) || 1), from ?? null,
+          REFLECTION_GENERATION, reason ?? 'reflection', why],
+        type: seq.QueryTypes.INSERT,
+      })
+  } catch (e) {
+    await log(`[revisit] could not record a failure for ${conversationId}: ${e.message}`, import.meta.url)
+  }
 }
 
 /**
@@ -184,17 +249,39 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // empty `text` with `tools_used = {}` is identifiable as exactly that.
   const [claim] = await seq.query(
     `INSERT INTO "${schema}"."log_reflections"
-       (conversation_id, user_id, up_to_rolling_id, messages_considered, text,
-        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model)
-     VALUES ($1, $2, $3, $4, '', ARRAY[]::text[], false, $5, $6, $7)
-     ON CONFLICT (conversation_id, up_to_rolling_id) DO NOTHING
+       (conversation_id, user_id, up_to_rolling_id, from_rolling_id, messages_considered, text,
+        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, reason)
+     SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection'
+     -- ⭐⭐⭐ TWO GUARDS, BECAUSE SPLITTING THE INDEX SPLIT THE PROTECTION IT USED TO GIVE.
+     -- 016 had ONE unique index, so a re-run was refused AT THE CLAIM -- before a 35B generation and
+     -- before any tool could write. Splitting it into in-flight and completed (025) left ON CONFLICT
+     -- guarding only CONCURRENCY: a claim against a watermark that was already COMPLETED sailed through,
+     -- and the collision surfaced at the completion UPDATE -- after the turn was spent and after she may
+     -- already have written a memory. ⚠️ Measured: the check's forced re-run hit exactly that.
+     -- ⇒ the NOT EXISTS restores 016's guarantee (the loser learns first) and ON CONFLICT keeps the
+     -- concurrency arbitration. ⛔ Neither alone is sufficient, and it is not belt-and-braces: they
+     -- refuse two different things.
+     WHERE NOT EXISTS (
+       SELECT 1 FROM "${schema}"."log_reflections"
+        WHERE conversation_id = $1 AND up_to_rolling_id = $3 AND outcome = 'completed')
+     ON CONFLICT (conversation_id, up_to_rolling_id) WHERE outcome IS NULL DO NOTHING
      RETURNING id::text AS id, rolling_id`,
     {
+      // ⭐ `from_rolling_id` MAKES THE REVIEW INCREMENTAL — Ote: "I have already reviewed through 120.
+      // Review 121-145." `already` is the completed cursor, so the range starts just past it; 0 means
+      // she has never reviewed this conversation and the range starts at its beginning (null).
       bind: [conversationId, conv.user_id ?? null, top.rolling_id, considered,
-        REFLECTION_GENERATION, CODE_MTIME, reflectionModel(fastify.config)],
+        REFLECTION_GENERATION, CODE_MTIME, reflectionModel(fastify.config),
+        // ⛔ CLAMPED, AND THE CONSTRAINT CAUGHT THIS BEFORE A HUMAN DID. `already + 1` can exceed the
+        // top when the quiet+changed gate is bypassed (`force: true`, which every fixture uses) or when a
+        // completed cursor already sits at the newest message. ⇒ 025's `range_sane` CHECK rejected the
+        // insert, which is the guard working on its own author. ⭐ An empty range is written as NULL —
+        // "no lower bound recorded" — rather than as a backwards one that would read as coverage.
+        already > 0 && already + 1 <= top.rolling_id ? already + 1 : null],
       type: seq.QueryTypes.SELECT,
     })
   if (!claim) return { skipped: true, reason: 'already-reflected', upTo: top.rolling_id }
+
 
   // ── THE TOOL CONTEXT ────────────────────────────────────────────────────────────────────────────
   // ⚠️ `isRoot` comes from `isRootConnectedUser`, never from the shape of the owner id. That inference is
@@ -307,7 +394,14 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     try {
       res = await turnFn({ messages, tools })
     } catch (e) {
+      // ⭐⭐⭐ CLOSE THE CLAIM WE OPENED. ⚠️⚠️ MEASURED, NOT REASONED: a probe forced this path with an
+      // unresolvable model and left **two rows `outcome IS NULL` forever**, each permanently occupying
+      // its watermark under 025's in-flight unique index. ⇒ the conversations that fail would be exactly
+      // the ones that go silent — the failure mode the migration exists to expose, reproduced by the fix.
+      // ⛔ AND IT IS A `skipped` RETURN, NOT A THROW, which is why the scan loop's catch never saw it. I
+      // had predicted this bug and put the guard in the wrong place; only running it found the real one.
       await log(`[reflection] ${conversationId} llm error: ${e.message}`, import.meta.url)
+      await recordFailure(seq, schema, { claimId: claim.id, failure: `llm-error: ${e.message}` })
       return { skipped: true, reason: 'llm-error', error: e.message }
     }
     const msg = res?.message ?? {}
@@ -364,9 +458,14 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // impossible to lose; this is where what came of it is recorded. ⛔ Keyed by the claimed id, so it cannot
   // touch another run's row even if the watermark moved underneath it.
   const [row] = await seq.query(
+    // ⭐⭐ THE ATTEMPT TERMINATES HERE, AND IT SAYS SO. `blocked` is not a worse `completed`: she found
+    // material and a boundary refused her, which is neither an answer nor a breakage.
+    // ⛔ `completed` means she was ASKED AND ANSWERED. It never means she found something worth keeping
+    // -- that stays in `wrote_memory_id` (a fact) and in her own words (everything else).
     `UPDATE "${schema}"."log_reflections"
         SET text = $2, wrote_memory_id = $3, tools_used = $4::text[], blocked_by_disclosure = $5,
-            model = $6, messages_considered = $7
+            model = $6, messages_considered = $7,
+            outcome = CASE WHEN $5 THEN 'blocked' ELSE 'completed' END, completed_at = now()
       WHERE id = $1::uuid
      RETURNING id::text AS id, rolling_id`,
     {
@@ -376,7 +475,11 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       bind: [claim.id, text, written[0] ?? null, toolsUsed, blocked, modelId, considered],
       type: seq.QueryTypes.SELECT,
     })
-  if (!row) return { skipped: true, reason: 'claimed-row-vanished', upTo: top.rolling_id }
+  if (!row) {
+    // ⛔ The claim disappeared under us — nothing to close, and saying so is the honest record.
+    await log(`[reflection] ${conversationId} claimed row vanished before completion`, import.meta.url)
+    return { skipped: true, reason: 'claimed-row-vanished', upTo: top.rolling_id }
+  }
 
   await log(`[reflection] ${conversationId} upTo=${top.rolling_id} tools=${toolsUsed.join(',') || 'none'} `
     + `memory=${written[0] ? 'yes' : 'no'}${blocked ? ' blocked' : ''}`, import.meta.url)
@@ -412,6 +515,8 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
   if (!on && !force) return { skipped: true, reason: 'disabled' }
   const db = fastify.db
   if (!db?.txn_conversations) return { skipped: true, reason: 'no-db' }
+  // ⚠️ Needed by `recordFailure` in the catch below, which is the only reason it is read here.
+  const { schema } = db.txn_messages.getTableName()
   const quietMinutes = intCfg(fastify.config, 'reflectionQuietMinutes', 30)
 
   // ── ⚠⚠ A STARVATION BUG LIVED HERE, AND IT STOPPED THE PASS DEAD FOR ~8 HOURS ───────────────
@@ -456,7 +561,25 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
       if (r.blockedByDisclosure) tally.blocked++
       details.push({ conversationId: c.id, reflectionId: r.reflectionId, tools: r.toolsUsed, wrote: !!r.wroteMemoryId })
     } catch (e) {
+      // ⭐⭐⭐ THE FAILURE IS NOW WRITTEN DOWN, NOT ONLY LOGGED. This catch is precisely the hole Ote
+      // named: a throw anywhere inside `reflectOnConversation` produced a log line and a tally counter
+      // and NO ROW — so *"never tried"* and *"tried and broke"* were byte-identical in the database.
+      // ⚠️ And it hides worst where it matters most: a conversation that fails every single time looks,
+      // from the ledger, exactly like one nobody has gotten around to yet.
+      // ⓘ `topRollingId` is read here rather than threaded out of the thrower, because the throw may
+      // have happened before the transcript was ever shaped — the row must be writable even then.
       await log(`[reflection] ${c.id} failed: ${e.message}`, import.meta.url)
+      let topId = 1
+      try {
+        const [t] = await db.txn_messages.sequelize.query(
+          `SELECT max(rolling_id)::bigint AS r FROM "${schema}"."txn_messages" WHERE conversation_id = :c`,
+          { replacements: { c: c.id }, type: db.txn_messages.sequelize.QueryTypes.SELECT })
+        topId = Number(t?.r ?? 1) || 1
+      } catch { /* a failure while recording a failure must not take the pass down */ }
+      await recordFailure(db.txn_messages.sequelize, schema, {
+        conversationId: c.id, userId: c.user_id ?? null, upTo: topId,
+        reason: 'reflection', failure: `${e.name || 'Error'}: ${e.message}`,
+      })
       tally.skipped.error = (tally.skipped.error ?? 0) + 1
     }
   }

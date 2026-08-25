@@ -84,8 +84,25 @@ try {
     'N · ⭐ reflection carries its OWN generation counter, so bumping noticing cannot silently change this prompt',
     `generation ${REFLECTION_GENERATION}`)
   // ⛔ The reflection host must not write txn_memories itself — one write lane, and it is the tools'.
-  ok(!/INSERT\s+INTO[^;]*txn_memories/i.test(hostCode),
-    'N · ⭐⭐ the reflection host writes NO memory itself — retention happens because she called a tool')
+  //
+  // ⚠️⚠️ SCANNED PER SQL STATEMENT, AND THE PREVIOUS FORM WAS A LATENT FALSE POSITIVE. It was
+  // `/INSERT\s+INTO[^;]*txn_memories/i` — and `[^;]*` does not stop at the end of a statement, it runs to
+  // the next SEMICOLON, which in this semicolon-free codebase can be most of a file. It fired on
+  // 2026-08-25 the moment a new `INSERT INTO log_reflections` was added ABOVE an unrelated
+  // `db.txn_memories.sequelize`, and it had only ever passed because the existing INSERT happened to sit
+  // BELOW that line. ⇒ ⭐ **its verdict depended on the ORDER of two unrelated pieces of code** — the
+  // same family as a scan that reads prose, one layer along: a scan whose boundary is incidental layout
+  // can accuse correct code, which is worse than missing a defect.
+  // ⇒ each SQL template literal is judged on its own.
+  const BT = String.fromCharCode(96)
+  const statements = hostCode.match(new RegExp(`${BT}[^${BT}]*${BT}`, 'g')) ?? []
+  const writesMemory = statements.filter((q) => /INSERT\s+INTO|UPDATE\s+/i.test(q) && /txn_memories/i.test(q))
+  ok(writesMemory.length === 0,
+    'N · ⭐⭐ the reflection host writes NO memory itself — retention happens because she called a tool',
+    writesMemory.length ? writesMemory[0].replace(/\s+/g, ' ').slice(0, 90) : `${statements.length} statement(s) judged individually`)
+  // ⛔ NON-VACUOUS: the scan must actually have found write statements to judge.
+  ok(statements.some((q) => /INSERT\s+INTO/i.test(q)),
+    'N · ⛔ …and the scan found real INSERT statements — a scan over nothing is not a pass')
   ok(/log_reflections/.test(hostCode), 'N · …and it does write the reflection record')
 
   // ── T · THE TOOLSET IS AN ALLOWLIST, AND THE DESTRUCTIVE ONES ARE NOT ON IT ─────────────────────
@@ -164,9 +181,31 @@ try {
   // or the next addition arrives as a diff nobody reads instead of a decision somebody makes.
   // ⚠ NOT `RATIFIED` — that name is already the ratified QUESTION at the top of this file, and reusing it
   // is a hard SyntaxError rather than a subtle bug, which is the only pleasant kind.
+  // ── ⭐⭐ EXTENDED 2026-08-25 BY MIGRATION 025 · THE REVISIT LIFECYCLE ─────────────────────────────
+  // ⓘ THE GUARD WORKED EXACTLY AS DESIGNED: these six columns landed and it went red until the list was
+  // updated deliberately. That is the whole point of it being a counted property.
+  // Ote's ruling, which is what authorizes them: *"Generalize log_reflections; do not create another
+  // conversation_revisits table… I want the lifecycle to distinguish never_attempted → requested →
+  // started → completed / failed / blocked… Most importantly, a failed revisit must leave a record.
+  // «Never tried» and «tried but failed» must never collapse into the same database state."*
+  //
+  // ⛔⛔ AND THEY DO NOT REOPEN 016's REFUSAL, which stands: **`outcome` describes THE ATTEMPT** (did the
+  // machinery run, break, or get refused — mechanically observable, which is 016's own test for what
+  // earns a column). ⛔ It never describes HER DECISION; *nothing / undetermined / not now* still have no
+  // column and still live only in her words. A value like `nothing_to_remember` appearing here would be
+  // the contamination arriving one layer down, and 025's CHECK makes it impossible.
+  const REVISIT_COLUMNS = ['started_at', 'completed_at', 'outcome', 'reason', 'failure', 'from_rolling_id']
   const RATIFIED_COLUMNS = ['id', 'rolling_id', 'reflected_at', 'conversation_id', 'user_id', 'up_to_rolling_id',
     'messages_considered', 'text', 'wrote_memory_id', 'tools_used', 'blocked_by_disclosure',
-    'prompt_generation', 'code_mtime', 'model']
+    'prompt_generation', 'code_mtime', 'model', ...REVISIT_COLUMNS]
+  // ⭐ …and each of them must actually BE there, or "the list matches" would also be true of a migration
+  // that never ran. The guard has to bite in both directions.
+  const missingRevisit = REVISIT_COLUMNS.filter((c) => !cols.has(c))
+  ok(missingRevisit.length === 0,
+    'S · ⭐⭐ every revisit-lifecycle column from migration 025 is present',
+    missingRevisit.length ? `missing: ${missingRevisit.join(', ')}` : REVISIT_COLUMNS.join(', '))
+  ok(cols.get('outcome')?.is_nullable === 'YES',
+    'S · ⛔ `outcome` is NULLABLE — an attempt still in flight is a state, not a gap')
   ok(!cols.has('finish'),
     'S · ⭐⭐ `finish` is GONE — Ote removed the one column that was mine rather than ratified (017)')
   const extras = [...cols.keys()].filter((c) => !RATIFIED_COLUMNS.includes(c) && c !== 'created_at')
