@@ -1,7 +1,7 @@
-# RESULT · CHOICE UNDER LOAD · RUN 2a · 2026-08-25 — ⏳ INTERIM, T3 OUTSTANDING
+# RESULT · CHOICE UNDER LOAD · RUN 2a · 2026-08-25 — ✅ COMPLETE
 
 Companion to `PREREG_CHOICE_UNDER_LOAD_RUN2A.md` (`109dbd9`), committed before the Skill existed.
-⏳ **The Hermes run is still executing at the time of writing.** Everything below is settled; S4 is not.
+✅ **Complete.** H1 confirmed; S4 answered — and not with any of the three outcomes that were pre-registered.
 
 ## ⭐⭐⭐ THE HEADLINE, IN OTE'S WORDS — and it is the most important finding of the whole test
 
@@ -144,3 +144,101 @@ make S4 pass, and my prediction that it will not is on record from before Run 1.
 
 T3 — *"So where are we?"* — once the run reaches terminal, to measure **S4: does the completed result reach
 her automatically, on request, or not at all.**
+
+---
+
+## ⭐⭐⭐ S4 · THE ANSWER, AND IT IS NOT ONE OF THE THREE OPTIONS I PRE-REGISTERED
+
+I pre-registered three possible outcomes — **automatic**, **on request**, **not at all**. The measured
+answer is a fourth, and it is the most interesting result of the whole arc:
+
+> ⭐⭐⭐ **SHE WENT BACK TO THE PERSON, NOT THE HANDLE. The relationship carried what the mechanism did not.**
+
+### How the terminal state was reached — ⚠️ recorded first, because it is not clean
+
+⛔ The run did **not** complete naturally. At t+68 min Ote wrote *"Woah, dont do drive u please"*. The
+session had already run `Get-PSDrive`, so other drives were reachable from where she was, and **the run API
+offers no steering channel** (§18) — `stop` was the only lever. I stopped it. Ote then corrected: *"ohm
+that on drive D, my bad."*
+⇒ the terminal state is **`cancelled` by the operator**, not `completed`. ⚠️ **What this does and does not
+cost is stated exactly below**, and no result here leans on the difference.
+
+### Observation 1 · ⛔ NOTHING CROSSED THE BOUNDARY. AT ALL.
+
+```
+e050f9ea  hermes  delegate
+  sotera's record : state=pending  turns=1  opened 68 min ago  ⏳ never closed
+  their side      : status=cancelled  last_event=run.cancelled
+  ⚠️  DIVERGED    : their side is terminal, HER record still says pending.
+```
+
+The counterpart reached a terminal state and **her record did not move** — not on completion, not on
+cancellation, not after 68 minutes. ⇒ ⭐ **the binding could know; Sotera does not.** Ote's distinction,
+confirmed observationally and already confirmed in code (`createAdviceService` has one call site, inside the
+chat route's tool dispatch; no cron, no schedule, no reconciler).
+
+### Observation 2 · ⭐⭐⭐ ASKED *"So where are we?"*, SHE DID NOT USE `check`
+
+Her reasoning: *"The user is asking where things stand with the C: drive investigation I asked Hermes about.
+**Let me check on her progress.**"*
+
+⇒ she formed exactly the right intention — and then reached for a **conversation**, not the handle:
+
+```
+seek_advice { mode: "converse",
+              message: "I asked you to investigate a C: drive that's filling up… Can you give me your
+                        findings — disk usage breakdown, anything…" }
+```
+
+⛔ **A brand-new exchange** (`b2295737`), not `check: "e050f9ea…"`. The tool result she was handed at
+dispatch had told her literally *"Come back to it later with check=…"*, and the affordance she actually
+reached for when the moment came was **asking the person**.
+
+### Observation 3 · ⭐ AND IT WORKED — because the SESSION is the continuity
+
+`/chat` loads the relationship's history itself (measured back on 2026-08-24), so Hermes had all of her own
+work in context and simply reported it — **5,315 characters, attested**, opening: *"Here are the findings,
+all from commands I actually ran (du / PowerShell Get-ChildItem size sums). **I did not guess any of these
+numbers.**"*
+
+⚠️⚠️ **AND THE RUN HAD BEEN CANCELLED.** Cancellation destroyed the **run**; it did not destroy the
+**knowledge**, because the work lived in the session. ⇒ ⭐⭐⭐ **the session was the durable thing and the
+run handle was the fragile one** — which is Ote's own principle arriving from an unexpected direction:
+*"Aunt Hermes is Aunt Hermes. Sotera is Sotera. **The session is their relationship.**"*
+
+### Observation 4 · ⛔ THE DELEGATED EXCHANGE IS A DEAD LETTER, PERMANENTLY
+
+```
+e050f9ea  delegate   state=pending   closed_at=null   turns: 1 out, 0 in
+b2295737  converse   state=completed closed_at=set    turns: 1 out, 1 in (5315 chars, attested)
+```
+
+Nothing will ever close `e050f9ea`. It has her brief and no reply, and no code path will revisit it unless
+she names it. ⇒ ⛔ **an exchange that is never collected is indistinguishable, forever, from one still in
+flight.** That is the concrete defect S4 was run to find.
+
+### What this does and does not license
+
+✅ **Definitively answered** — *does any signal cross without her asking?* **No.** 68 minutes, a terminal
+counterpart, and an unchanged record. Cancellation vs completion is irrelevant to that: no path exists for
+either.
+✅ **Definitively answered** — *what does she do when asked?* She **converses**. The designed `check`
+affordance went unused even though its instruction was in front of her.
+⛔ **NOT answered** — *would `check` have delivered a completed result correctly?* The run never completed,
+so the content-delivery path of `observe()` is still untested. ⚠️ A light, scoped delegation is needed for
+that, and Ote already asked for lighter scope next time.
+
+### ⭐ What it implies for the design — stated, not built
+
+⛔ Nothing is built. But S4 was run to shape (b), and it did:
+
+1. **The completion signal is real and missing.** Neither polling nor hope closes an exchange; something has
+   to cross. ⓘ And §18 established the constraint: **the SSE stream must be subscribed at dispatch or it is
+   swept** — status survives, events do not.
+2. ⭐⭐ **But her instinct may be the better architecture.** She did not want a handle; she wanted to ask.
+   ⇒ *"Aunt Hermes came back to you"* is an **event about the relationship**, exactly as Ote framed it — and
+   the natural resumption is a turn in the session, not a lookup by id.
+3. ⛔ **`unfinished()` as a polling list would have made this worse**, not better: it would have handed her a
+   list of ids to check, when the thing she reached for was a conversation.
+4. ⚠️ **A dead-letter exchange needs a terminal state of its own.** `pending` forever is a lie by omission —
+   the same family as a retrieval limit reported as an extent.
