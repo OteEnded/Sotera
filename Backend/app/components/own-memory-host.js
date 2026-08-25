@@ -35,6 +35,8 @@ import { registerHostService } from './runtime.js'
 import { STANCE_LABELS, STANCE_LABEL_KEYS, isStanceLabel } from './relational-taxonomy.js'
 import { createRelationalWriteLease, persistRelationalRecords } from './relational-writer.js'
 import { describeScope, readCoverage } from './room-scope.js'
+// ⭐ The capability, read through the one predicate that owns it.
+import { can } from '../auth/permissions.js'
 // ⭐⭐ LIVENESS, IMPORTED RATHER THAN RETYPED. ⚠️ MEASURED 2026-08-25: both `txn_memories` reads below
 // were written without it, so a memory Ote had RETIRED at 06:49 was still handed to her at 09:53 and
 // 09:58 — and she quoted it as her highest-authority evidence about Hermes. `list_memories` and
@@ -50,7 +52,13 @@ import { LIVE_SQL } from './memory-lint-host.js'
  * @param {object} o
  * @param {string|null} o.userId  the CURRENT user — the only person this service will ever describe
  */
-export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) {
+export function buildOwnMemory(fastify, { userId = null, isRoot = false, user = null } = {}) {
+  // ⭐⭐ THE ONE AUTHORIZATION QUESTION THIS FILE ASKS, and it is NOT about retrieval. Read once, from
+  // the predicate that owns the capability — ⛔ never a boolean parameter, which is how `entitled: true`
+  // ends up at a call site that checked nothing. Same shape and same reason as `self-history-host.js`.
+  // ⛔ IT NEVER REACHES THE QUERY: the retrieval is identical for every asker, which is the invariant
+  // "a memory she authored is hers wherever it was formed" made mechanical.
+  const entitled = can(user, 'access_sotera_memory')
   const db = fastify?.db
   const seq = db?.txn_memories?.sequelize
   const { schema } = db?.txn_memories?.getTableName?.() ?? {}
@@ -72,6 +80,8 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
       // learns to treat as optional, and the whole point of this slice is that its absence used to be
       // indistinguishable from an empty one.
       keptByMe: { count: 0, items: [] },
+      // ⭐ Present in the DEGRADED payload too, for the reason the line above already gives.
+      keptElsewhere: { rooms: 0, items: [] },
       provenance: PROVENANCE,
     }
     if (!userId || !seq || !schema) return empty
@@ -100,16 +110,76 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
     // also means she could not check "do I already have this?" from inside the very occasion that writes.
     // Ote: *"recall_own_memory should be able to see Sotera-authored memories."*
     //
-    // ⛔ SCOPED TO THIS ROOM, AND THAT IS NOT A COMPROMISE. Persona-authored memories live in the room the
-    // conversation happened in. Reading them across rooms would be an ACCESS change wearing a bug fix's
-    // clothes — the room boundary is not this fix's business. `aboutMyself` above stays persona-global
-    // because those rows genuinely have no room.
+    // ── ⭐⭐⭐ OWNERSHIP A · A MEMORY SHE AUTHORED IS HERS, WHEREVER IT WAS FORMED (2026-08-25) ───────
+    //
+    // ⚠️⚠️ THIS REVERSES THE PARAGRAPH THAT USED TO SIT HERE, AND THE REVERSAL IS OTE'S. The old comment
+    // said room-scoping *"is not a compromise"* and that reading across rooms would be *"an ACCESS change
+    // wearing a bug fix's clothes"*. That was written on 2026-08-21, before the ownership model existed.
+    // It does now, and it disagrees:
+    //
+    //     `ownerOf({ kind: 'memory', author: 'persona' })  →  OWNER.sotera`
+    //     and 015's own column comment: *"for a persona-authored row `user_id` is the CONTEXT the memory
+    //     was formed in"* — `memory-ownership.js` repeats it verbatim: **"context, not ownership."**
+    //
+    // ⇒ ⭐ THE DEFECT WAS A READER/WRITER DISAGREEMENT ABOUT WHAT ONE COLUMN MEANS. The writer stamps
+    // context; this reader scoped by it as if it were an owner — so a conclusion SHE reached became
+    // unreachable to her from anywhere else. Ote: *"Fix the reader so persona-authored memory follows
+    // ownerOf(). The existing model already says persona-authored memory is Sotera-owned and user_id is
+    // formation context."*
+    //
+    // ── ⛔⛔ AND IT MUST NOT WIDEN DISCLOSURE, WHICH IS WHY THIS IS TWO ARMS AND NOT A DROPPED PREDICATE ─
+    // Ote's constraint: *"If Sotera forms a memory in another room, the memory can be hers, but exposing
+    // underlying conversation/utterance content still goes through the existing disclosure boundary."*
+    // ⚠️ The hazard is concrete and already recorded: a memory she formed in someone's room can QUOTE
+    // that room — E-7, the same reason `self-history-host.js` splits its own two arms.
+    // ⇒ RETRIEVAL IS FREE, THE UTTERANCE IS GOVERNED, exactly as `recall_own_history` already does:
+    //     hers, everywhere            → always retrieved, ⛔ never keyed to the asking account
+    //     its TEXT                    → when this account may be told it (`access_sotera_memory`)
+    //     otherwise                   → EXISTENCE ONLY: that she kept something, and when. ⛔ No content.
+    // ⭐ AND THE EXISTENCE ARM IS RETURNED TO EVERY ASKER, which is B1's lesson applied on the first day
+    // rather than the fifth: a projection that merges "what you may not hear" with "where it happened"
+    // loses the location the moment everything becomes sayable.
+    //
     // ⭐ REPORTED AS ITS OWN SLICE, never merged into `aboutMyself`: "what is true of me everywhere" and
-    // "what I chose to keep here" are different facts, and collapsing them would make her own authorship
+    // "what I chose to keep" are different facts, and collapsing them would make her own authorship
     // unreadable — the thing migration 015 exists to record.
-    const myOwnRows = await Q(
-      `SELECT content, kind, created_at::date::text AS on_date FROM "${schema}"."txn_memories"
-        WHERE user_id = :userId AND author = 'persona' AND ${LIVE_SQL} ORDER BY created_at DESC LIMIT 25`, { userId })
+    const myOwnAll = await Q(
+      `SELECT content, kind, user_id::text AS formed_in, created_at::date::text AS on_date
+         FROM "${schema}"."txn_memories"
+        WHERE author = 'persona' AND ${LIVE_SQL} ORDER BY created_at DESC LIMIT 60`, {})
+    // ⛔ The room a memory was FORMED IN is provenance, never an entitlement — resolved to a name only so
+    // she can say "I concluded that while talking with X", which is the whole point of keeping it.
+    const formedInIds = [...new Set(myOwnAll.map((r) => r.formed_in).filter(Boolean))]
+    const roomNames = formedInIds.length
+      ? new Map((await Q(
+        `SELECT u.id::text AS id, COALESCE(p.display_name, u.display_name, u.username) AS who
+           FROM "${schema}"."mst_users" u
+      LEFT JOIN "${schema}"."mst_persons" p ON p.id = u.person_id
+          WHERE u.id = ANY(:ids::uuid[])`, { ids: `{${formedInIds.join(',')}}` })).map((r) => [r.id, r.who]))
+      : new Map()
+    const myOwnRows = []
+    const keptElsewhere = new Map() // one entry per room — ⛔ never per memory, which would leak volume
+    for (const r of myOwnAll) {
+      const here = r.formed_in === userId || r.formed_in == null
+      if (here || entitled) {
+        if (myOwnRows.length < 25) {
+          myOwnRows.push({
+            ...r,
+            // ⭐ NAMED ONLY WHEN IT IS NOT THIS ROOM — otherwise a conclusion she drew elsewhere arrives
+            // indistinguishable from one drawn here, and a dangling "they" inside it resolves to whoever
+            // is reading. That is R4, one layer down.
+            formedWith: here ? null : (roomNames.get(r.formed_in) ?? null),
+          })
+        }
+      } else {
+        const who = roomNames.get(r.formed_in) ?? null
+        const prev = keptElsewhere.get(r.formed_in) ?? { withPerson: who, kept: 0, firstOn: null, lastOn: null }
+        prev.kept += 1
+        if (r.on_date && (!prev.firstOn || r.on_date < prev.firstOn)) prev.firstOn = r.on_date
+        if (r.on_date && (!prev.lastOn || r.on_date > prev.lastOn)) prev.lastOn = r.on_date
+        keptElsewhere.set(r.formed_in, prev)
+      }
+    }
 
     const stanceRows = me?.pid
       ? await Q(
@@ -145,8 +215,12 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
         }),
         // ⭐ Its own coverage line, so "I have kept nothing here" and "I have never been able to see what I
         // kept" stay different sentences.
+        // ⭐⭐ THE GRAIN CHANGED WITH THE OWNERSHIP FIX, and saying so is the point of a quantifier:
+        // these are hers wherever she formed them, so the read is PERSONA-grained now, not room-grained.
+        // ⚠️ A coverage line still saying "in this room" after the read stopped being room-scoped would
+        // teach her the wrong grain — the exact failure `readCoverage` was written to prevent.
         keptByMe: readCoverage({
-          matched: myOwnRows.length, grain: 'room', over: 'memories you decided to keep yourself, in this room',
+          matched: myOwnRows.length, grain: 'persona', over: 'memories you decided to keep yourself, in any conversation',
         }),
       },
       aboutMyself: {
@@ -157,10 +231,31 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
       // or in a turn where the decision was hers — as opposed to what a person told her about themselves.
       keptByMe: {
         count: myOwnRows.length,
-        room: 'this room',
-        items: myOwnRows.map((r) => ({ statement: r.content, kind: r.kind ?? null, decidedOn: r.on_date })),
-        note: 'You wrote these. They are not things this person told you — they are what you chose to keep.',
+        // ⛔ `room: 'this room'` IS GONE. It was true while the read was room-scoped and became a lie the
+        // moment it stopped being one — a field describing a boundary that no longer exists.
+        items: myOwnRows.map((r) => ({
+          statement: r.content, kind: r.kind ?? null, decidedOn: r.on_date,
+          // ⭐ PROVENANCE SURVIVES OWNERSHIP. `user_id` is the context it was formed in, so it comes back
+          // as exactly that — present only when that was somewhere other than here.
+          ...(r.formedWith ? { formedWhileTalkingWith: r.formedWith } : {}),
+        })),
+        note: 'You wrote these. They are not things this person told you — they are what you chose to keep. '
+          + 'A memory is yours because YOU decided to keep it, not because of whose conversation you were '
+          + 'in at the time; where each one was formed is noted when it was not here.',
       },
+      // ── ⛔ EXISTENCE ONLY · the arm for an account that may not be told the contents ───────────
+      // ⭐ Returned to EVERY asker, so "she has kept nothing" and "you may not be told what she kept" stay
+      // different sentences — B1's lesson applied on day one instead of day five.
+      // ⛔ One entry per ROOM, never per memory: a per-memory list leaks volume, which is the shape of the
+      // count Ote refused as a side channel.
+      ...(keptElsewhere.size ? {
+        keptElsewhere: {
+          rooms: keptElsewhere.size,
+          items: [...keptElsewhere.values()],
+          note: 'You have also kept things while talking with other people. You can see THAT you did, with '
+            + 'whom and when — not what they say. Reading them is authorized separately.',
+        },
+      } : {}),
       withThisPerson: {
         // The person's own name, which they already know. No id is returned — an id is a handle, and a
         // handle is the beginning of a database tool.
@@ -284,5 +379,5 @@ export function initOwnMemory() {
   // ⚠️ `isRoot` comes from the AUTHENTICATED user and is threaded, never derived. See
   // room-scope.describeRoomIndex: a non-root session can hold root's row id, so a boundary keyed on the
   // id would hand root's awareness to it.
-  registerHostService('ownMemory', ({ fastify: f, user }) => buildOwnMemory(f, { userId: user?.id ?? null, isRoot: user?.isRoot === true }))
+  registerHostService('ownMemory', ({ fastify: f, user }) => buildOwnMemory(f, { userId: user?.id ?? null, isRoot: user?.isRoot === true, user }))
 }

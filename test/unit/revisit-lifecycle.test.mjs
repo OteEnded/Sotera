@@ -138,10 +138,17 @@ test('⭐⭐⭐ the scan loop RECORDS a failure instead of only tallying it', ()
   assert.ok(i > 0, 'the catch must still exist')
   const around = hostCode.slice(Math.max(0, i - 1200), i)
   assert.match(around, /recordFailure\(/, '⛔ the catch must write a row, not just a log line')
-  assert.match(hostCode, /outcome = 'failed', failure = \$2, completed_at = now\(\)/,
-    'a claimed row that broke is closed as failed')
-  assert.match(hostCode, /'failed'[\s\S]{0,200}INSERT|INSERT[\s\S]{0,600}'failed'/,
-    'and a failure BEFORE the claim still inserts one')
+  // ⚠️ ASSERTS THE INVARIANT, NOT THE LITERAL — and the first version pinned the literal `'failed'` in the
+  // SQL, so it went red the moment preemption parameterised that column (027). The behaviour was correct
+  // and unchanged; the test was describing one spelling of it. ⭐ What must hold is that a claimed row is
+  // CLOSED with a terminal outcome and a completion time, however that value is supplied.
+  const closeClaim = hostCode.slice(hostCode.indexOf('if (claimId)'))
+  assert.match(closeClaim.slice(0, 400), /SET outcome = \$?\w+, failure = \$?\w+, completed_at = now\(\)/,
+    'a claimed row that broke is CLOSED — outcome and completion time, never left in flight')
+  assert.match(closeClaim.slice(0, 400), /WHERE id = \$1::uuid AND outcome IS NULL/,
+    '…and only while it is still open, so a terminal row is never rewritten')
+  assert.match(hostCode, /const terminal = preempted \? 'preempted' : 'failed'/,
+    'and the terminal value is chosen once, from one place')
 })
 
 test('⛔ recording a failure can never take the pass down', () => {

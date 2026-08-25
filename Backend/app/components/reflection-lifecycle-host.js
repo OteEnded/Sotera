@@ -40,6 +40,9 @@ import {
   REFLECTION_GENERATION, REFLECTION_TOOLS, buildReflectionTurnPrompt, isReadyToReflect,
   shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal,
 } from './reflection-lifecycle.js'
+// ⭐ THE EXECUTION GATE. ⛔ Imported, never reimplemented: the pure verdict lives in one file so a
+// check can drive "she has been idle six minutes" without waiting six minutes.
+import { checkIdleGate, gateSummaryLine } from './revisit-idle-gate.js'
 
 // ⭐ READ ONCE AT MODULE LOAD, NEVER PER ROW. Same rule and the same reason as the noticing pass: this
 // must report the code that is LOADED, not the file on disk. The manual version of this check failed three
@@ -131,15 +134,21 @@ async function lastWatermark(seq, schema, conversationId) {
  * ⛔ It never throws. A failure while recording a failure must not take the pass down — it degrades to a
  * log line, which is what we had for everything before this.
  */
-async function recordFailure(seq, schema, { conversationId, userId, upTo, from, reason, failure, claimId }) {
+async function recordFailure(seq, schema, { conversationId, userId, upTo, from, reason, failure, claimId, preempted = false }) {
   try {
-    const why = String(failure || 'unknown').slice(0, 2000)
+    // ⭐⭐ PREEMPTION IS A TERMINAL OUTCOME, NOT A FAILURE (migration 027). It carries NO `failure`
+    // diagnosis because nothing went wrong -- the lane yielded exactly as designed. ⛔ Folding it into
+    // `failed` would make a healthy lane look broken and would corrupt `consecutiveFailures`.
+    // ⛔ AND IT LEAVES THE CURSOR ALONE: the row is not `completed`, so `lastWatermark()` -- which reads
+    // `WHERE outcome = 'completed'` -- does not see it, and the same stretch is retried from where it was.
+    const terminal = preempted ? 'preempted' : 'failed'
+    const why = preempted ? null : String(failure || 'unknown').slice(0, 2000)
     if (claimId) {
       await seq.query(
         `UPDATE "${schema}"."log_conversation_revisits"
-            SET outcome = 'failed', failure = $2, completed_at = now()
+            SET outcome = $3, failure = $2, completed_at = now()
           WHERE id = $1::uuid AND outcome IS NULL`,
-        { bind: [claimId, why], type: seq.QueryTypes.UPDATE })
+        { bind: [claimId, why, terminal], type: seq.QueryTypes.UPDATE })
       return
     }
     // ── ⭐⭐⭐ CLOSE THE OPEN ATTEMPT FIRST; INSERT ONLY IF THERE ISN'T ONE ───────────────────────────
@@ -154,19 +163,19 @@ async function recordFailure(seq, schema, { conversationId, userId, upTo, from, 
     // race between the two.
     const closed = await seq.query(
       `UPDATE "${schema}"."log_conversation_revisits"
-          SET outcome = 'failed', failure = $3, completed_at = now()
+          SET outcome = $4, failure = $3, completed_at = now()
         WHERE conversation_id = $1 AND up_to_rolling_id = $2 AND outcome IS NULL
         RETURNING id`,
-      { bind: [conversationId, Math.max(1, Number(upTo) || 1), why], type: seq.QueryTypes.SELECT })
+      { bind: [conversationId, Math.max(1, Number(upTo) || 1), why, terminal], type: seq.QueryTypes.SELECT })
     if (closed?.length) return
     await seq.query(
       `INSERT INTO "${schema}"."log_conversation_revisits"
          (conversation_id, user_id, up_to_rolling_id, from_rolling_id, text, prompt_generation,
           reason, outcome, failure, completed_at)
-       VALUES ($1, $2, $3, $4, '', $5, $6, 'failed', $7, now())`,
+       VALUES ($1, $2, $3, $4, '', $5, $6, $8, $7, now())`,
       {
         bind: [conversationId, userId ?? null, Math.max(1, Number(upTo) || 1), from ?? null,
-          REFLECTION_GENERATION, reason ?? 'reflection', why],
+          REFLECTION_GENERATION, reason ?? 'reflection', why, terminal],
         type: seq.QueryTypes.INSERT,
       })
   } catch (e) {
@@ -389,7 +398,39 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     }
   })
 
+  // ── ⭐⭐⭐ PREEMPTION · USER INTERACTION HAS ABSOLUTE PRIORITY ────────────────────────────────────
+  //
+  // Ote: *"Sotera's passive cognition is always interruptible; user interaction is not delayed by it…
+  // Do not mark the revisit as failed — user preemption is an intentional control-flow outcome."*
+  //
+  // ⭐ EPOCH CAPTURED AT THE CLAIM, COMPARED AT EVERY ROUND BOUNDARY. An epoch rather than a flag because
+  // a flag would be cleared by the user's turn ENDING — so a turn that began and finished inside one long
+  // revisit round would go unnoticed. A monotonic counter cannot be un-rung.
+  //
+  // ⚠️⚠️ AND THE HONEST LIMIT, BECAUSE THE OBVIOUS CLAIM WOULD BE FALSE: `chat()` accepts **no abort
+  // signal**, so a provider call already in flight CANNOT be cancelled. Preemption is therefore sharp at
+  // round boundaries and no sharper — worst case a user waits out ONE round instead of all `maxRounds`.
+  // ⓘ Why that matters at all: ollama serialises generations on one model, so a running revisit round
+  // genuinely delays a person's first token. Bounding it to one round is the win; "instant" would need an
+  // AbortSignal threaded through `chat()` into the adapter's fetch, which is a provider-layer change and
+  // deliberately not made here.
+  const startEpoch = fastify?.steerReg?.interactiveEpoch?.() ?? null
+  const preemptedNow = () => {
+    const reg = fastify?.steerReg
+    if (!reg || startEpoch == null) return false
+    // ⛔ EITHER SIGNAL COUNTS: a turn running right now, or any turn that came and went since we claimed.
+    return reg.interactiveEpoch() !== startEpoch || reg.anyActive() === true
+  }
+  const yieldToUser = async () => {
+    await recordFailure(seq, schema, { claimId: claim.id, preempted: true })
+    await log(`[revisit] ${conversationId} yielded to a user interaction at watermark ${top.rolling_id} `
+      + '— not completed, cursor unmoved, will resume', import.meta.url)
+    return { skipped: true, reason: 'preempted', upTo: top.rolling_id }
+  }
+
   while (rounds <= maxRounds) {
+    // ⛔ CHECKED BEFORE SPENDING THE ROUND. The cheapest possible yield is the one that never starts.
+    if (preemptedNow()) return yieldToUser()
     let res
     try {
       res = await turnFn({ messages, tools })
@@ -404,6 +445,11 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       await recordFailure(seq, schema, { claimId: claim.id, failure: `llm-error: ${e.message}` })
       return { skipped: true, reason: 'llm-error', error: e.message }
     }
+    // ⭐ AND AGAIN THE MOMENT THE ROUND RETURNS. A user turn that arrived WHILE the provider was
+    // generating is exactly the case worth catching: the next round would compound the delay, and this is
+    // the first instant we can act on it. ⛔ The reply already produced is dropped -- an unfinished
+    // revisit retains nothing, which is why the cursor may not move.
+    if (preemptedNow()) return yieldToUser()
     const msg = res?.message ?? {}
     const calls = (Array.isArray(msg.tool_calls) ? msg.tool_calls : [])
       .map((c) => {
@@ -515,6 +561,27 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
   if (!on && !force) return { skipped: true, reason: 'disabled' }
   const db = fastify.db
   if (!db?.txn_conversations) return { skipped: true, reason: 'no-db' }
+
+  // ── ⭐⭐⭐ THE IDLE GATE · IS THIS A SAFE MOMENT? ⛔ NOT "IS ANYTHING ELIGIBLE?" ────────────────────
+  //
+  // Ote's ratified order: `anyActive() → cooldown → tick-time config → deriveRevisitState()`, and the
+  // split is the point — *"deriveRevisitState() remains the sole authority for whether a conversation is
+  // eligible. The idle gate only decides whether this is a safe time to execute."*
+  // ⛔ THE GATE IS ABOVE THE LOOP, NOT INSIDE IT. Put it per-conversation and it becomes a second
+  // eligibility rule; a background pass must not be able to say "this conversation is ineligible" when
+  // what it means is "Sotera is busy right now".
+  // ⭐ AND IT RETURNS A NAMED REASON, so `blocked-busy` and `nothing-eligible` stay different sentences.
+  // A merged predicate could only ever have said "no", and this project has paid for that already.
+  // ⚠️ `force` bypasses it, exactly as it bypasses the quiet+changed gate: a check or an operator asking
+  // for a pass NOW is itself an interactive act, and the gate exists to protect interaction.
+  const gate = checkIdleGate(fastify, fastify.steerReg)
+  if (!force && !gate.run) {
+    // ⭐ Logged only when it BLOCKED, so a quiet system stays quiet — but never silently, because "the
+    // pass did nothing" and "the pass was held back" are the two states this whole design keeps apart.
+    await log(`[revisit] held back — ${gateSummaryLine(gate)}`, import.meta.url)
+    return { skipped: true, reason: `gate-${gate.reason}`, waitMs: gate.waitMs, activeCount: gate.activeCount }
+  }
+
   // ⚠️ Needed by `recordFailure` in the catch below, which is the only reason it is read here.
   const { schema } = db.txn_messages.getTableName()
   const quietMinutes = intCfg(fastify.config, 'reflectionQuietMinutes', 30)

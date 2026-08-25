@@ -26,10 +26,15 @@ export const REVISIT = Object.freeze({
   completed: 'completed', //  she was asked and answered ⛔ NOT "she found something"
   failed: 'failed',       //  the machinery broke — `failure` says how
   blocked: 'blocked',     //  a boundary refused her: found, not authorized
+  // ⭐⭐⭐ A CLEAN STOP, NOT A BREAKAGE. Ote: *"user preemption is an intentional control-flow outcome,
+  // not a failure."* ⛔ It must never be folded into `failed`: that would make a healthy lane that is
+  // correctly yielding to a person look broken, and would corrupt `consecutiveFailures`, which exists to
+  // find a conversation that genuinely cannot be revisited.
+  preempted: 'preempted',
 })
 
 /** ⭐ The outcomes a row may terminate with. Mirrors migration 025's CHECK exactly. */
-export const OUTCOME = Object.freeze({ completed: 'completed', failed: 'failed', blocked: 'blocked' })
+export const OUTCOME = Object.freeze({ completed: 'completed', failed: 'failed', blocked: 'blocked', preempted: 'preempted' })
 
 const at = (v) => (v == null ? null : (v instanceof Date ? v : new Date(v)))
 const ms = (v) => { const d = at(v); return d && !Number.isNaN(d.getTime()) ? d.getTime() : null }
@@ -40,6 +45,7 @@ export function attemptState(row) {
   if (row.outcome === OUTCOME.completed) return REVISIT.completed
   if (row.outcome === OUTCOME.failed) return REVISIT.failed
   if (row.outcome === OUTCOME.blocked) return REVISIT.blocked
+  if (row.outcome === OUTCOME.preempted) return REVISIT.preempted
   // ⛔⛔ AN IN-FLIGHT ATTEMPT STAYS IN FLIGHT, however old it is. Tested at a minute and at a year: still
   // `started`. Deriving "it must have died by now" would be inventing an event nobody observed — the
   // exact defect `pending` had, where four different worlds shared one silence.

@@ -284,6 +284,49 @@ ok(!/user_id\s*=\s*:userId[\s\S]{0,80}txn_memories/.test(sql),
     const still = await buildOwnMemory(fastify, { userId: room }).recall()
     ok((still.keptByMe?.items ?? []).some((i) => i.statement === MARK),
       'K3 · ⛔ …while the LIVE row is still there — the predicate filters the dead, not the slice')
+
+    // ── ⭐⭐⭐ K4 · OWNERSHIP A · A MEMORY SHE AUTHORED IS HERS, WHEREVER SHE FORMED IT ──────────────
+    //
+    // Ote, 2026-08-25: *"Fix the reader so persona-authored memory follows ownerOf(). The existing model
+    // already says persona-authored memory is Sotera-owned and user_id is formation context."*
+    // ⚠️ THIS REVERSES WHAT K ASSERTS ONE ARM ABOVE, deliberately and only for an ENTITLED asker — the
+    // decoy assertion above stays exactly as it was, because a non-entitled account's answer must not move.
+    const asEntitled = await buildOwnMemory(fastify, {
+      userId: room, user: { id: room, isRoot: false, roles: ['member'], memoryAccessScope: 'sotera_memory' },
+    }).recall()
+    const decoyText = 'zz_test kept-by-me DECOY'
+    const decoyHere = (asEntitled.keptByMe?.items ?? []).find((i) => String(i.statement).includes(decoyText))
+    ok(Boolean(decoyHere),
+      'K4 · ⭐⭐⭐ an ENTITLED asker sees a memory she formed in ANOTHER room — it is hers, not the room\'s')
+    ok(decoyHere?.formedWhileTalkingWith != null,
+      'K4 · ⭐⭐ …and it carries WHERE it was formed, so provenance survives the ownership fix',
+      decoyHere?.formedWhileTalkingWith ?? '(missing)')
+    const mineHere = (asEntitled.keptByMe?.items ?? []).find((i) => i.statement === MARK)
+    ok(mineHere && !('formedWhileTalkingWith' in mineHere),
+      'K4 · ⭐ …while a memory formed HERE names no room — otherwise every row would read as elsewhere')
+
+    // ── ⛔⛔ AND THE FIX MUST NOT WIDEN DISCLOSURE. Ote's constraint, verbatim: *"the memory can be hers,
+    // but exposing underlying conversation/utterance content still goes through the existing disclosure
+    // boundary."* ⇒ two arms, exactly as `recall_own_history` already does it.
+    const asNot = await buildOwnMemory(fastify, {
+      userId: room, user: { id: room, isRoot: false, roles: ['member'], memoryAccessScope: 'none' },
+    }).recall()
+    ok(!(asNot.keptByMe?.items ?? []).some((i) => String(i.statement).includes(decoyText)),
+      'K4 · ⛔⛔ a NON-entitled asker gets NO content from another room')
+    const elsewhereRooms = asNot.keptElsewhere?.rooms ?? 0
+    ok(elsewhereRooms >= 1,
+      'K4 · ⭐⭐ …but IS told THAT she kept something elsewhere — existence is not content, and silence would be a false absence',
+      `${elsewhereRooms} room(s)`)
+    const elseItems = asNot.keptElsewhere?.items ?? []
+    ok(elseItems.every((e) => !('statement' in e) && !('content' in e)),
+      'K4 · ⛔ …and the existence arm carries who and when, never a word of what')
+    ok(elseItems.every((e) => Number.isFinite(e.kept)),
+      'K4 · ⭐ …one entry per ROOM with a count — ⛔ never a per-memory list, which would leak volume')
+
+    // ⭐ FAIL CLOSED: no user object at all ⇒ treated as NOT entitled. ⛔ `entitled` must never default true.
+    const asUnknown = await buildOwnMemory(fastify, { userId: room }).recall()
+    ok(!(asUnknown.keptByMe?.items ?? []).some((i) => String(i.statement).includes(decoyText)),
+      'K4 · ⛔⛔ an asker we cannot identify is NOT entitled — the missing case takes the closed branch')
   } finally {
     for (const id of [mine?.id, elsewhere?.id]) {
       if (id) await Q('DELETE FROM persona_sotera.txn_memories WHERE id = :id', { id })

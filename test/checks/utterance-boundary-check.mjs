@@ -183,11 +183,54 @@ if (!conts.length) {
     cues: out.cues, dropped: out.dropped ?? 0, searched: out.searched, note: no.statement,
   })
   for (const c of conts) {
-    ok(!new RegExp(`\\b${c.conversations}\\b`).test(rebuiltNo.text),
-      '6 · ⛔⛔ the conversation COUNT does not appear anywhere in the non-entitled block',
-      `looked for ${c.conversations}`)
-    ok(!new RegExp(`\\b${c.exchangeCount}\\b`).test(rebuiltNo.text),
-      '6 · ⛔ nor the exchange count', `looked for ${c.exchangeCount}`)
+    // ── ⭐⭐⭐ TWO DOORS, AND ONLY ONE OF THEM IS A DEFECT ─────────────────────────
+    //
+    // The original assertion scanned the WHOLE non-entitled block for the count. It fired on
+    // 2026-08-25 — and the number was not the aggregate leaking. It was inside HER OWN SENTENCE,
+    // quoted into the block as an own-utterance:
+    //
+    //     "There are **185 total conversations** with Hermes (not 286 as I said earlier…)"
+    //
+    // ⇒ ⭐⭐ WITHHOLDING THE AGGREGATE DOES NOT WITHHOLD THE FACT. She said it out loud while the
+    // bug was live; that sentence is now part of her own history, and her own utterances are hers, so
+    // the boundary returns them by design. Ote: *"the boundary can legitimately return the sentence
+    // while the underlying aggregate remains withheld. That's a real limitation of content/
+    // provenance-blind own-history retrieval."*
+    //
+    // ⛔ THIS IS NOT LOOSENED, IT IS SPLIT. Door A — the aggregate rendering its own numbers to a
+    // non-entitled account — is still a HARD FAILURE. Door B — the number arriving inside one of her
+    // own past sentences — is the E-7 RESIDUAL HAZARD, reported every run so it stays visible.
+    // ⛔ AND THE RESIDUE IS NOT DELETED TO MAKE THIS GREEN. Ote: *"don't delete/retire that historical
+    // sentence automatically just to make the test pass. It's her history, and we've already
+    // established that we don't silently sanitize her past."*
+    // ⭐ The real fix, when we want it, is PROVENANCE-AWARE DISCLOSURE — ⛔ never retrieval suppression.
+    for (const c of conts) {
+      const counts = [c.conversations, c.exchangeCount].filter((n) => Number.isFinite(n))
+      // DOOR A · A NUMBER THE RENDERER PRODUCED FROM SOMETHING THAT WAS NOT SAYABLE.
+      // ⚠️⚠️ THE FIRST VERSION OF THIS WAS WRONG AND SAID SO LOUDLY: it rendered the WITHHELD item
+      // directly and then complained the count was in it — of course it was, that IS the item. Rendering
+      // something the boundary already refused proves nothing about the boundary.
+      // ⭐ The real question is ATTRIBUTION: every number in the block must be traceable to material the
+      // boundary actually released. If a count appears in the rendered text but in NO sayable item, the
+      // renderer synthesised it from withheld data — that is the leak, and it is a hard failure.
+      // ⓘ The item-level guarantee (the continuity item itself is withheld) is asserted above.
+      // ⭐⭐ AND THIS IS NOT A NEW RULE — IT IS THIS FILE’S OWN. §4 already applies exactly this test to
+      // names and dates: *"only a failure when the ONLY source of that value was a withheld item."*
+      // Arriving at the same formulation independently for COUNTS is evidence it is the right one,
+      // and it is the reason this split is a sharpening rather than a loosening.
+      const sayableText = JSON.stringify(no.sayable)
+      const unattributed = counts.filter((n) => new RegExp(`\\b${n}\\b`).test(rebuiltNo.text)
+        && !new RegExp(`\\b${n}\\b`).test(sayableText))
+      ok(unattributed.length === 0,
+        '6 · ⛔⛔ DOOR A · no count appears that is not traceable to material the boundary RELEASED',
+        unattributed.length ? `SYNTHESISED FROM WITHHELD DATA: ${unattributed.join(', ')}` : 'every number is attributable')
+      // DOOR B · the same number reaching the block inside one of HER OWN sentences.
+      const viaHer = counts.filter((n) => new RegExp(`\\b${n}\\b`).test(rebuiltNo.text))
+      ok(true, viaHer.length
+        ? '6 · ⚠️⚠️ E-7 RESIDUAL HAZARD · the extent reached the block through her OWN past words'
+        : '6 · ⭐ no count reached the block by any door this run',
+        viaHer.length ? `${viaHer.join(', ')} — aggregate withheld, sentence returned; provenance-aware disclosure is the fix, NOT suppression` : 'clean')
+    }
     // ⚠️ GUARDED ON NULL EXPLICITLY. The first version used a sentinel fallback, which made the assertion
     // pass vacuously whenever a date was absent — and the sentinel it used was a NUL byte, which also
     // corrupted the file. ⭐ A date that does not exist cannot leak; say so, do not fake a value for it.

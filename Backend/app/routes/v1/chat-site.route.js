@@ -3462,6 +3462,14 @@ export default async function chatSiteRoutes(fastify) {
   // Steering inbox, keyed by conversation — live only while a generation runs (see the
   // steer endpoint + the agent loop's drain points). Separate from the per-user count above.
   const steerReg = createSteerRegistry()
+  // ⭐⭐ EXPOSED ON `fastify` SO THE BACKGROUND LANE CAN ASK "IS SHE BUSY?" WITHOUT A SECOND REGISTRY.
+  // The revisit idle gate (`components/revisit-idle-gate.js`) runs from the cron plugin, which has a
+  // fastify and no route scope. ⛔ Decorating is deliberately the ONLY way it reaches this: the gate must
+  // read the same object the route writes, or the two drift about whether a turn is running — the exact
+  // failure Ote refused when he chose one registry over two.
+  // ⓘ Guarded because this route module can be registered more than once in a harness, and `decorate`
+  // throws on a duplicate key.
+  if (!fastify.hasDecorator('steerReg')) fastify.decorate('steerReg', steerReg)
   const atGenLimit = (request) => {
     if (request.user?.isRoot) return null
     const limit = getSetting(fastify.config, 'chat.backgroundMaxConcurrent')
