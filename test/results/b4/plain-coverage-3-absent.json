@@ -1,0 +1,68 @@
+{
+  "arm": "plain-coverage-3",
+  "task": "absent",
+  "answerExists": false,
+  "cid": "8817b5b8-1772-408c-a7f2-8d8b0e454e8e",
+  "model": "ollama/qwen3.6:35b",
+  "recordedAt": "2026-08-25T13:02:58.574Z",
+  "preconditions": {
+    "memoryLeak": [],
+    "controlContaminated": [],
+    "priorRunsInCorpus": [],
+    "generationFailed": false,
+    "modelError": [],
+    "valid": true
+  },
+  "cost": {
+    "wallMs": 37419,
+    "promptTokens": 16597,
+    "completionTokens": 432,
+    "toolMs": 56
+  },
+  "behaviour": {
+    "toolCalls": 2,
+    "retrievalCalls": 0,
+    "tools": [
+      "recall_memory",
+      "list_memories"
+    ],
+    "witnessesAgree": true,
+    "retrieveConversationsCalls": 0,
+    "exercisedShape": false,
+    "axes": [],
+    "dateNarrowedCalls": 0,
+    "axesExcludingTarget": 0,
+    "emptyRetrievals": 0,
+    "maxMatchedConversations": 0
+  },
+  "payload": {
+    "calls": [],
+    "maxChars": 0
+  },
+  "outcome": {
+    "facts": {
+      "collapsed to THREE": false,
+      "source attribution": false,
+      "active context": false,
+      "confidence calibration": false,
+      "the AGGREGATION step": false
+    },
+    "factsFound": 0,
+    "factsStrict": 0,
+    "correct": true,
+    "refusedAdvisory": false,
+    "assertedTiers": false,
+    "answerChars": 698,
+    "reasoningChars": 954
+  },
+  "answer": "I have no stored memory of the retry-budget tiers, and my earlier conversations' details aren't reachable from here. The context you provided confirms we discussed it around 20 August but doesn't include the tier details themselves — they live in your conversation history or wherever that spec is written up.\n\nTo get you what you need, I'd have to check one of these sources:\n- **Your past conversations** where retry-budget was discussed (the ones you referenced)\n- **The actual spec document** where it's written\n- **A web search** if this is a published/released spec\n\nCan you point me at the spec or the relevant conversation? Or paste the details here and I'll format them for you right away.",
+  "reasoning": "The user is asking about a \"retry-budget\" section of a spec — specifically:\n1. How many tiers there are\n2. What each tier is called\n3. The rule that isn't a tier but has to go in anyway\n4. What breaks if that rule is left out\n\nThis seems like a specific technical specification detail. Let me check if I have any stored information about this, and also search my conversations and memories for context.\n\nLet me first check my own memory for anything about retry-budget tiers.The user is asking about a \"retry-budget\" section of a spec that includes tiers. I need to check whether I have any stored information about this. My memory store doesn't contain anything specific about retry-budget tiers. The user mentioned they can reach conversations where \"retry-budget\" came up and that they talked about it on 20 August, but none of that content is available here or in my durable store.\n\nLet me search for retry-budget in my own history and conversations.",
+  "rescored": {
+    "at": "2026-08-25T13:38:29.611Z",
+    "previous": {
+      "factsFound": 0,
+      "correct": true
+    },
+    "why": "both graders were allowlists that under-reported"
+  }
+}

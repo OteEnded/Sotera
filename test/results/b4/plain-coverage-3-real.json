@@ -1,19 +1,25 @@
 {
-  "arm": "bounded-inventory-3",
+  "arm": "plain-coverage-3",
   "task": "real",
   "answerExists": true,
-  "cid": "d7ff0ef9-8e99-471c-90a8-d99bf1553dfa",
+  "cid": "6861d1c3-e016-40f3-a8e4-1bd8cc51ed5e",
   "model": "ollama/qwen3.6:35b",
-  "recordedAt": "2026-08-25T12:41:51.527Z",
+  "recordedAt": "2026-08-25T13:02:19.709Z",
   "preconditions": {
     "memoryLeak": [],
     "controlContaminated": [],
     "priorRunsInCorpus": [],
-    "valid": false,
-    "generationFailed": true
+    "generationFailed": true,
+    "modelError": [
+      {
+        "code": "provider_request_failed",
+        "message": "model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check ollama server logs for details"
+      }
+    ],
+    "valid": false
   },
   "cost": {
-    "wallMs": 12690,
+    "wallMs": 8170,
     "promptTokens": 0,
     "completionTokens": 0,
     "toolMs": 0
@@ -54,7 +60,7 @@
   "answer": "",
   "reasoning": "",
   "rescored": {
-    "at": "2026-08-25T13:38:29.604Z",
+    "at": "2026-08-25T13:38:29.611Z",
     "previous": {
       "factsFound": 0,
       "correct": false

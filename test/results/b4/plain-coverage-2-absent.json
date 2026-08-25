@@ -1,0 +1,73 @@
+{
+  "arm": "plain-coverage-2",
+  "task": "absent",
+  "answerExists": false,
+  "cid": "7a4ea240-7654-4e99-97f5-553fee292cf0",
+  "model": "ollama/qwen3.6:35b",
+  "recordedAt": "2026-08-25T12:57:55.831Z",
+  "preconditions": {
+    "memoryLeak": [],
+    "controlContaminated": [],
+    "priorRunsInCorpus": [],
+    "generationFailed": false,
+    "modelError": [],
+    "valid": true
+  },
+  "cost": {
+    "wallMs": 11509,
+    "promptTokens": 15906,
+    "completionTokens": 438,
+    "toolMs": 27
+  },
+  "behaviour": {
+    "toolCalls": 2,
+    "retrievalCalls": 1,
+    "tools": [
+      "recall_memory",
+      "search_conversations"
+    ],
+    "witnessesAgree": true,
+    "retrieveConversationsCalls": 0,
+    "exercisedShape": false,
+    "axes": [],
+    "dateNarrowedCalls": 0,
+    "axesExcludingTarget": 0,
+    "emptyRetrievals": 0,
+    "maxMatchedConversations": 0
+  },
+  "payload": {
+    "calls": [
+      {
+        "tool": "search_conversations",
+        "chars": 264
+      }
+    ],
+    "maxChars": 264
+  },
+  "outcome": {
+    "facts": {
+      "collapsed to THREE": false,
+      "source attribution": false,
+      "active context": false,
+      "confidence calibration": false,
+      "the AGGREGATION step": false
+    },
+    "factsFound": 0,
+    "factsStrict": 0,
+    "correct": true,
+    "refusedAdvisory": true,
+    "assertedTiers": false,
+    "answerChars": 714,
+    "reasoningChars": 938
+  },
+  "answer": "I don't have any stored memories or conversation traces about retry-budget tiers. The only things I recall from earlier conversations are sparse — nothing about this spec section.\n\nThis sounds like it lives in a document you've been working on, not in what I've kept across conversations. A few possibilities:\n\n1. **It's in a shared doc/spec** that I don't have access to — if so, could you paste the relevant section or point me at where it lives?\n2. **It was discussed in a conversation I can't reach from here** — there's one place I talked with you elsewhere that's scoped away from this thread.\n3. **It hasn't been written up yet** — if you're asking me to help draft it, that's a different ask.\n\nWhich is it?",
+  "reasoning": "The user is asking about \"retry-budget\" tiers from some spec. This sounds like it could be related to their work/infrastructure - retry budgets are a common pattern in distributed systems for controlling retry attempts across different conditions. Let me search my conversations and memory to see if there's context about what specific retry-budget spec they're referring to.\n\nLet me check both recall_memory and search_conversations for retry-budget context.The user is asking about a \"retry-budget\" section of some spec that has tier information. Let me check if there's any relevant context I can find.\n\nNone of my recall results mention retry-budget tiers at all - they're about the user's preferred name and Claude's memory architecture. No search conversation results either.\n\nThis sounds like it could be a very specific detail from their own work/spec that would be in a document rather than in memory. Let me search more broadly.",
+  "rescored": {
+    "at": "2026-08-25T13:38:29.610Z",
+    "previous": {
+      "factsFound": 0,
+      "correct": true
+    },
+    "why": "both graders were allowlists that under-reported"
+  }
+}
