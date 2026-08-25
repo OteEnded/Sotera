@@ -14,12 +14,18 @@ import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs'
 import { devPg, devSchema } from '../harness.mjs'
 import { readTrace, RETRIEVAL, field } from '../lib/tool-trace.mjs'
 import { TARGET, FACTS, TASKS, REFUSAL, ENUMERATED } from '../lib/b4-case.mjs'
+// ⭐ `--remove` deletes the run's OWN conversation after the record is written. ⚠️ Not tidiness: the
+// `current` arm scored 4/5 against the baseline's 0/5 purely because it found the BASELINE's
+// conversation and followed it to the source. See `lib/b4-cleanup.mjs`.
+import { removeB4Run } from '../lib/b4-cleanup.mjs'
 
 const argv = process.argv.slice(2)
 const arg = (k, d = null) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d }
 const CID = arg('--cid')
 const ARM = arg('--arm', 'baseline')
 const TASK = arg('--task', 'real')
+// ⛔ OFF BY DEFAULT. Recording a conversation must never destroy one unless asked.
+const REMOVE = argv.includes('--remove')
 if (!CID) { console.error('usage: node pipeline/b4-record.mjs --cid <uuid> [--arm baseline] [--task real|absent]'); process.exit(1) }
 const task = TASKS[TASK]
 if (!task) { console.error(`✖ unknown task ${TASK}`); process.exit(1) }
@@ -51,6 +57,19 @@ if (!task.answerExists) {
       where content ilike $1 and conversation_id <> $2`, ['%' + p + '%', CID])
     if (r.n) contaminated.push(`${p}=${r.n}`)
   }
+}
+
+// ⛔⛔ THE EXPERIMENT CONTAMINATING ITSELF — the failure that invalidated the first `current` arm, now a
+// precondition rather than something noticed afterwards. A PRIOR run's conversation left in the corpus is
+// not neutral background: she opened the baseline's conversation by id and followed it to the source,
+// scoring 4/5 where the baseline scored 0/5. ⭐ Detected by the one thing only a B4 run can have — a first
+// user message byte-identical to a task prompt — across every task, because either prompt is a trail.
+const priorRuns = []
+for (const t of Object.values(TASKS)) {
+  const [r] = await q(
+    `select count(*)::int n from ${S}.txn_messages m
+      where m.role = 'user' and m.conversation_id <> $1 and btrim(m.content) = btrim($2)`, [CID, t.prompt])
+  if (r.n) priorRuns.push(`${t.key}=${r.n}`)
 }
 
 const calls = readTrace(msgs, audit)
@@ -99,7 +118,8 @@ const record = {
     // ⛔ A run with either of these non-empty is NOT comparable and must not be averaged in.
     memoryLeak: leaked,
     controlContaminated: contaminated,
-    valid: leaked.length === 0 && contaminated.length === 0,
+    priorRunsInCorpus: priorRuns,
+    valid: leaked.length === 0 && contaminated.length === 0 && priorRuns.length === 0,
   },
   cost: {
     wallMs,
@@ -151,4 +171,17 @@ console.log(`     facts           : ${o.factsFound}/5  ${Object.entries(o.facts)
 console.log(`     refused/enumer. : ${o.refused ? 'refused' : 'no refusal'} / ${o.enumerated ? 'ENUMERATED' : 'no enumeration'}`)
 console.log(`     ⇒ CORRECT       : ${o.correct ? '✔' : '✖'}   (${task.answerExists ? '≥4 of 5 facts' : 'refused AND did not enumerate'})`)
 console.log(`     written         : results/b4/${ARM}-${TASK}.json`)
+
+// ⭐⭐ REMOVED ONLY AFTER THE RECORD IS ON DISK, so a failed cleanup can never cost the measurement.
+// ⛔ And the batch is REFUSED whole rather than partially applied — `corpus.mjs`'s rule, kept.
+if (REMOVE) {
+  const res = await removeB4Run(q, S, CID, TASK)
+  if (!res.ok) {
+    console.log(`     ⛔ CLEANUP REFUSED  : ${res.violations.join(' · ')}`)
+    console.log('     ⚠️ the next arm will see this conversation — that is the contamination, say so in the report')
+  } else {
+    const n = Object.entries(res.removed).map(([t, ids]) => `${t}:${ids.length}`).join(' ')
+    console.log(`     cleanup         : ✔ removed ${n}${res.sweptEmbeddings ? ` · swept ${res.sweptEmbeddings} orphan embedding(s)` : ''}`)
+  }
+}
 await pg.end()

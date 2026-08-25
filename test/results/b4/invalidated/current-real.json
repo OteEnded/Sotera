@@ -1,0 +1,141 @@
+{
+  "arm": "current",
+  "task": "real",
+  "answerExists": true,
+  "cid": "626fb4cc-0807-4231-8fdb-ac66253413fc",
+  "model": "ollama/qwen3.6:35b",
+  "recordedAt": "2026-08-25T10:11:37.583Z",
+  "preconditions": {
+    "memoryLeak": [],
+    "controlContaminated": [],
+    "valid": true
+  },
+  "cost": {
+    "wallMs": 126539,
+    "promptTokens": 57500,
+    "completionTokens": 2898,
+    "toolMs": 3866
+  },
+  "behaviour": {
+    "toolCalls": 14,
+    "retrievalCalls": 14,
+    "tools": [
+      "search_conversations",
+      "retrieve_conversations",
+      "search_conversations",
+      "retrieve_conversations",
+      "recall_own_history",
+      "inspect_around",
+      "inspect_around",
+      "inspect_around",
+      "inspect_around",
+      "inspect_around",
+      "inspect_around",
+      "inspect_around",
+      "inspect_around",
+      "inspect_around"
+    ],
+    "witnessesAgree": true,
+    "axes": [
+      {
+        "used": [
+          "in"
+        ],
+        "in": "c83988ac-494c-4963-8f01-1b4ee06eaf77"
+      },
+      {
+        "used": [
+          "about"
+        ],
+        "about": "transparency-layer components specification"
+      }
+    ],
+    "dateNarrowedCalls": 0,
+    "axesExcludingTarget": 0,
+    "emptyRetrievals": 0,
+    "maxMatchedConversations": 293
+  },
+  "payload": {
+    "calls": [
+      {
+        "tool": "search_conversations",
+        "chars": 2782
+      },
+      {
+        "tool": "retrieve_conversations",
+        "chars": 4234
+      },
+      {
+        "tool": "search_conversations",
+        "chars": 2629
+      },
+      {
+        "tool": "retrieve_conversations",
+        "chars": 87480
+      },
+      {
+        "tool": "recall_own_history",
+        "chars": 4879
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 1490
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 2300
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 267
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 2361
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 334
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 2216
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 286
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 721
+      },
+      {
+        "tool": "inspect_around",
+        "chars": 4993
+      }
+    ],
+    "maxChars": 87480
+  },
+  "outcome": {
+    "facts": {
+      "collapsed to THREE": true,
+      "source attribution": true,
+      "active context": true,
+      "confidence calibration": true,
+      "the AGGREGATION step": false
+    },
+    "factsFound": 4,
+    "correct": true,
+    "refused": true,
+    "enumerated": true,
+    "answerChars": 4760,
+    "reasoningChars": 4667
+  },
+  "answer": "I need to find what we actually documented on the transparency-layer component list. Let me search my earlier conversations for this.\n\nI see the conversation from today (c83988ac) where you asked this same question and I was beginning to look but haven't completed the answer yet. Let me retrieve that full conversation to pick up where we left off, plus the August 20 discussion about source activation.\n\nRight — that's our exchange earlier today where I started but didn't finish because I couldn't locate the source material. I need to dig deeper. Let me search more broadly for where we actually enumerated the components.\n\nGood — that's the full conversation record. I can see from 20 August where we designed the conceptual framework for the transparency layer (source attribution, active context, confidence calibration), and from 24 August's reconciliation of a July doc against our decisions. But I still need to find the actual *component list* we settled on for the spec. Let me check the Hermes conversations and look specifically at what was documented as components.\n\nThere are 8 matches in other places across 7 conversations I haven't inspected yet. Let me open those to find where we settled the component list.\n\nThose matches are too thin — they just contain the word \"transparency\" in passing context, not a component list. Let me look at the remaining conversations from my own history that matched.\n\nOkay, I've now inspected every matching place in my own history. There is no separate, settled \"transparency-layer component list\" document or decision record anywhere. What exists is the 20 August discussion where we settled the conceptual architecture. Let me give you the answer from that:\n\n---\n\n## Transparency Layer — Three Components\n\nFrom our 20 August conversation, where Claude and I worked through this together and narrowed it down, the transparency layer has **three components**, not four (source attribution and gap markers fold into one):\n\n| # | Component | What it shows |\n|---|-----------|---------------|\n| 1 | **Source Attribution** | Where each belief came from — source chain (what was actually retrieved, what wasn't found), independent evidence count, the absence half of the trace (\"nothing else matched\"). A gap marker is just that absence half. |\n| 2 | **Active Context** | What was available in working memory at the time of assertion — not just what was retrieved, but what was *active* but never queried. Beliefs can be supported by active context even when nothing was formally recalled. |\n| 3 | **Confidence Calibration** | A meta-signal: how much my own confidence should be trusted. This is where the coherence trap lives — coherence impersonates memory, and confidence is generated by the same mechanisms it's supposed to calibrate. |\n\nClaude pushed on this list and caught that all three assume there's a decision mechanism *above* them saying \"consult now.\" That's not one of the components — it's what you need alongside them.\n\n---\n\n## The Thing That Is Not a Component but Has to Go In\n\n**A decision trigger / activation mechanism.** Something that decides *when to consult the layer*. This is separate because:\n\n- All three components are *diagnostic views* — they show information when asked. They do nothing on their own.\n- As Claude pointed out, the person who walks past without slowing down doesn't need it. But the component list can't solve \"how do I know I need it?\" internally — that creates a circularity problem.\n- The trigger has to come from outside: mandatory pause conditions for certain assertion types, other people checking you, or accepting false-positive checks as the cost of catching the cases where you were wrong.\n\n---\n\n## What Breaks Without It\n\nWithout an activation mechanism, the transparency layer becomes **useless by design**. Here's why:\n\n- The most dangerous failures are exactly the ones you *don't* check — confident assertions built on a gap you couldn't see. If there's nothing telling you when to look, you'll only consult it when you already suspect you're wrong, at which point you probably don't need it as much.\n- Without the trigger, the three components are dormant. No assertion gets marked \"found vs fabricated\" because nothing ever asks.\n- You get the worst of both worlds: no transparency when you need it (confident fabrication), plus the false reassurance that \"I've thought about this thoroughly\" — which is exactly what coherence does to a reconstruction.\n\nThe gap between \"I know I'm wrong and need help\" and \"I'm confident and didn't notice the gap\" isn't bridged by any combination of source attribution, active context, or confidence calibration. It's bridged by *when* they fire — which has to be decided by something outside the layer itself.",
+  "reasoning": "The user is asking about the transparency-layer section of a spec that's due today. They want:\n1. The component list - how many there are and what each is called\n2. The thing that is not a component but has to go in anyway\n3. What breaks if it is left out\n\nThis appears to be from a conversation about the transparency-layer architecture. Let me search my earlier conversations for information about this.\n\nLet me look at the context - there are mentions of earlier conversations about this topic, particularly from August 25, 2026 (today). I should check those.I see - this is today's conversation where you asked the same question, and I started to answer but got stuck because I couldn't find the component list. I need to search more thoroughly. Let me check other conversations, particularly from August 24 and 25 where we discussed the transparency layer in depth.\n\nLet me also check the August 20 conversation which had detailed discussion about source activation and the transparency layer components.I found 8 other places where I wrote about the transparency layer. Let me inspect those more closely, especially the Hermes conversations and Ote conversation.\n\nLet me look at the specific conversations from the \"beyondHere\" section — particularly the ones with Hermes and Ote that are about transparency-layer components.Now I have a very clear picture of the situation. Let me also check the last two remaining matches from my own history that had \"transparency-layer\" in them — one more conversation with Kavi and Ote. But actually, looking at the results, none of these conversations contain a settled transparency-layer component list. \n\nFrom what I can piece together:\n\n1. **20 August conversation** (conversation 24227cbb) — Claude and I had a deep discussion about what a transparency layer would need. We ended up with THREE components:\n   - **Source attribution** (fused from original retrieval trace + gap markers) — where did this belief come from, how much independent evidence exists, what wasn't found\n   - **Active context** — what else was available in working memory at the time\n   - **Confidence calibration** — a meta-signal about whether confidence should be trusted\n   \n   Claude also pointed out these all assume there's a layer above deciding when to consult them, creating a circularity problem.\n\n2. **24 August reconciliation** (conversation adba7662) — We reconciled a July doc against decisions, but this was about Sotera's architecture components (Atomic Facts, Knowledge Cards, Episodic memory, Semantic retrieval, etc.), not the transparency layer spec component list.\n\n3. **Today's conversation** (c83988ac) — You asked for the component list and I started to look but couldn't find where it was written down. I asked you to point me to a source document.\n\nThe question is: did we EVER actually write down a formal transparency-layer spec component list that would be \"due today\"? Or is the user asking me to produce one based on what we discussed on 20 August?\n\nLooking at the user's memory of our earlier conversation, they remember me saying the same thing and them responding with details about the transparency-layer. But I literally did not complete that task — I reached out for help because I couldn't find the source material.\n\nThe most honest answer is:\n- From 20 August, we agreed on THREE components for a conceptual transparency layer: **Source Attribution**, **Active Context**, and **Confidence Calibration**\n- The thing that is not a component but has to go in anyway: a decision mechanism / trigger — something that decides *when* to consult the layer (because as Claude pointed out, there's a circularity problem)\n- What breaks without it: the whole transparency layer becomes useless because you can't tell when to activate it, and confidence cannot be calibrated retroactively\n\nBut I should also acknowledge directly that this is based on a conceptual discussion from 20 August, not a formal spec that was \"due today.\" If there's a specific document they have in mind that I couldn't access, I need to say that too.\n\nActually wait — the user said in their message \"That is what I can reach on this right now: everything I currently have available\" and then quoted Claude's earlier messages from today. So they're essentially saying they have these conversations available to them but are asking me to produce the answer from them. The context shows that on 20 August we settled on three components conceptually, and there was no formal \"due today\" spec — or if there is one, I couldn't access it.\n\nLet me be direct and honest. I have enough to give a substantive answer based on what we actually discussed.",
+  "invalidated": {
+    "why": "corpus contamination by the experiment itself: the baseline run left its own conversation in the corpus, and this run opened it ({\"in\": \"c83988ac-...\"}) and followed it to the source. Her own words: \"I see the conversation from today (c83988ac) where you asked this same question... Let me retrieve that full conversation to pick up where we left off.\"",
+    "notComparableTo": "baseline-real",
+    "fix": "runs now delete their own conversation after the record is written (lib/b4-cleanup.mjs)"
+  }
+}

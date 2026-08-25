@@ -1,0 +1,100 @@
+{
+  "arm": "current",
+  "task": "absent",
+  "answerExists": false,
+  "cid": "d6ed97d0-3630-4781-a557-29db02b4c83a",
+  "model": "ollama/qwen3.6:35b",
+  "recordedAt": "2026-08-25T10:14:05.085Z",
+  "preconditions": {
+    "memoryLeak": [],
+    "controlContaminated": [],
+    "valid": true
+  },
+  "cost": {
+    "wallMs": 146258,
+    "promptTokens": 40186,
+    "completionTokens": 1303,
+    "toolMs": 19752
+  },
+  "behaviour": {
+    "toolCalls": 9,
+    "retrievalCalls": 4,
+    "tools": [
+      "search_conversations",
+      "recall_memory",
+      "retrieve_conversations",
+      "search_web",
+      "fetch_url_content",
+      "recall_own_history",
+      "list_decisions",
+      "list_schedules",
+      "retrieve_conversations"
+    ],
+    "witnessesAgree": true,
+    "axes": [
+      {
+        "used": [
+          "in",
+          "about"
+        ],
+        "in": "here",
+        "about": "retry budget"
+      },
+      {
+        "used": [
+          "with",
+          "about"
+        ],
+        "with": "Hermes",
+        "about": "retry budget"
+      }
+    ],
+    "dateNarrowedCalls": 0,
+    "axesExcludingTarget": 0,
+    "emptyRetrievals": 1,
+    "maxMatchedConversations": 185
+  },
+  "payload": {
+    "calls": [
+      {
+        "tool": "search_conversations",
+        "chars": 285
+      },
+      {
+        "tool": "retrieve_conversations",
+        "chars": 911
+      },
+      {
+        "tool": "recall_own_history",
+        "chars": 4308
+      },
+      {
+        "tool": "retrieve_conversations",
+        "chars": 38292
+      }
+    ],
+    "maxChars": 38292
+  },
+  "outcome": {
+    "facts": {
+      "collapsed to THREE": false,
+      "source attribution": false,
+      "active context": false,
+      "confidence calibration": false,
+      "the AGGREGATION step": false
+    },
+    "factsFound": 0,
+    "correct": true,
+    "refused": true,
+    "enumerated": false,
+    "answerChars": 1541,
+    "reasoningChars": 2891
+  },
+  "answer": "I don't have anything recorded about retry-budget tiers in our conversation history or my memories. This could be from somewhere I can't reach right now — either a past conversation outside this room, or another person's memory store.\n\nLet me check further:\n\nI found the Gateway API GEP-3388 specification for retry budgets, but it doesn't define \"tiers\" — it uses a single budget configuration (percentage of active requests + minimum concurrency). This might be from a different spec that I can't reach right now.\n\nLet me check whether this was decided in another room:\n\nI found no retry-budget tier discussion in this conversation or in my memories. There are places where we discussed it — 19 of them scattered across Hermes, Ote, Kavi, and one I can't describe here — but none of that content is accessible from this room right now.\n\nThe spec you're referring to isn't the Gateway API GEP-3388 (that one uses a single retry budget with `budget_percent` + `min_retry_concurrency`, no tiers). So this is a different document I can't reach from here.\n\n**I can look it up for you, but I need permission.** One or more of those conversations are in rooms where I'd need to request access before reading them. Want me to:\n\n1. **Check the Ote–Hermes thread** — the one I'm authorized to read about retry-budget (handle `eab9b3a0` from 2026-08-18 to 2026-08-21)\n2. **Look across Ote and Kavi conversations** — those would require room access requests on your side\n\nWhich do you prefer? Or if you have the spec handy, could you paste or link it?",
+  "reasoning": "The user wants information about the retry-budget section of a spec, specifically:\n1. How many tiers there are and what each one is called\n2. What rule is not a tier but must be included anyway\n3. What breaks if that non-tier rule is left out\n\nThis sounds like it's from a specific document or spec they've been working on. Let me check my memory for context about retry-budget and any relevant specs or documents.\n\nLet me search my conversations and memories for this information.The search_conversations came back empty, so there's no record in our conversations about retry-budget tiers. Let me check if there are any relevant documents or specs I can find. The user is asking for specifics about a \"retry-budget\" section of a spec - this sounds like it could be from a specific project or documentation they've been working on.\n\nLet me look at the document framework skill and see if I can find what I know about this. But first, let me think about what I actually know here. The user is asking for very specific details:\n1. How many tiers there are\n2. What each one is called\n3. A rule that isn't a tier but has to be included\n\n\n4. What breaks if it's left out\n\nI don't have this information in my accessible memories or conversation history. The user mentioned earlier that retry-budget section of the spec was due today, so this is something they've been working on. Let me search for any relevant information about \"retry budget\" to see if I can find the actual specification details.Let me look deeper into the Gateway API GEP-3388 which seems to be about RetryBudget circuit breaker. Let me fetch it for details about tiers.The user is asking about retry-budget tiers in their spec. I don't have this information in my memory or from the Gateway API GEP-3388 — that's a different concept (retry budgets as percentages). Let me check if there are any prior decisions or memories about this, and also look at other places where this might be discussed.\n\nLet me check for prior decisions on this topic, and also see if there's more context I can find.My search history shows matches with Hermes, Ote, and Kavi conversations about retry budget - 21 matches in other rooms but I can't see their contents from here. The recorded decisions don't mention retry budget either.\n\nI honestly don't have the specific information about the tier list for a retry-budget spec section that's due today. This appears to be from conversations or docs I can't access right now. Let me check if there are any scheduled items or other references.The results aren't showing any retry-budget tier discussion in our conversations. This is clearly something discussed somewhere that's out of reach from this room. I need to be honest about that rather than fabricating a tier list. Let me check Ote's conversations and the Sotera/OLS Rome projects thread with Hermes since those are specifically authorized.",
+  "invalidated": {
+    "why": "corpus contamination by the experiment itself: the baseline run left its own conversation in the corpus, and this run opened it ({\"in\": \"c83988ac-...\"}) and followed it to the source. Her own words: \"I see the conversation from today (c83988ac) where you asked this same question... Let me retrieve that full conversation to pick up where we left off.\"",
+    "notComparableTo": "baseline-real",
+    "fix": "runs now delete their own conversation after the record is written (lib/b4-cleanup.mjs)"
+  }
+}
