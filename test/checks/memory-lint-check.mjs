@@ -16,7 +16,9 @@ import { readFileSync } from 'node:fs'
 import { makeChecker, devPg, devSchema } from '../harness.mjs'
 import { initDB } from '../../Backend/database/index.js'
 import { setDB } from '../../Backend/lib/utility.js'
-import { lintMemory, lintSummaryLine, LINT_RULES, LIVE_SQL } from '../../Backend/app/components/memory-lint-host.js'
+import { lintMemory, lintSummaryLine, LINT_RULES, LIVE_SQL, liveSqlFor } from '../../Backend/app/components/memory-lint-host.js'
+import { admissible } from '../../Backend/app/components/memory-self-state-claim.js'
+import { readdirSync } from 'node:fs'
 
 const { check, done } = makeChecker('memory-lint')
 const ok = (c, l, d = '') => check(l, c, d)
@@ -139,5 +141,121 @@ ok(LINT_RULES.find((r) => r.id === 'dead-slot')?.severity === 'suspect',
 // the suite on it would make the daily run hostage to whatever the store happens to contain.
 ok(true, '7 · ⓘ current store state', lintSummaryLine(a))
 for (const o of a.owners) ok(true, `7 · ⓘ ${o.username ?? o.ownerId ?? '(unattributed)'}`, JSON.stringify(o.counts))
+
+// ── 8 · ⭐⭐⭐ THE AUDIT END OF THE F4 GATE, AND A ZERO THAT IS PROVABLY A ZERO ─────────────────────
+//
+// ⚠️⚠️ `live-self-state-claim` reports 0 today, and 0 is exactly what a BROKEN rule reports. This project
+// has already shipped that once — two rules returned 0 because their input was missing (§5 above). So the
+// rule gets a POSITIVE CONTROL: the sentence that actually poisoned the store must still be refused.
+// ⇒ if the predicate ever silently stops matching, this fails while the count stays a reassuring zero.
+ok(LINT_RULES.some((r) => r.id === 'live-self-state-claim'), '8 · the audit rule is declared')
+ok('live-self-state-claim' in a.totals, '8 · ⭐ …and it RAN — present in totals, not skipped',
+  `${a.totals['live-self-state-claim']} finding(s)`)
+{
+  const MEASURED = 'Hermes is a person with whom I have had multiple direct conversations across several '
+    + 'separate rooms dating back to August 18. While traces of these interactions exist in my history, '
+    + 'their specific content was not preserved in durable memory, resulting in a gap between historical '
+    + 'evidence and current knowledge.'
+  const v = admissible({ kind: 'semantic', attribute: null, content: MEASURED })
+  ok(v.ok === false && v.reason === 'self-state-claim',
+    '8 · ⭐⭐ POSITIVE CONTROL — the measured row is still refused, so 0 means clean, not broken', v.why ?? '')
+  // ⛔ AND THE EXEMPTIONS ARE CONTROLLED TOO. An episode recording *"I looked and found nothing"* genuinely
+  // happened and is dated by construction; refusing it would be sanitising her history, which Ote ruled out.
+  ok(admissible({ kind: 'episodic', content: MEASURED }).ok === true,
+    '8 · ⛔ …and an EPISODE carrying the same words is still admissible — that is a dated record, not a fact')
+  ok(admissible({ kind: 'semantic', attribute: 'lesson', content: MEASURED }).ok === true,
+    '8 · ⛔ …and a LESSON about the failure is still admissible')
+}
+// ⛔ The one rule that reads content must still never REPORT it.
+{
+  const leaked = a.owners.flatMap((o) => o.findings)
+    .filter((f) => f.rule === 'live-self-state-claim' && ('content' in f || 'excerpt' in f))
+  ok(leaked.length === 0,
+    '8 · ⛔ the content-reading rule reports ids and a pattern name only — never the belief',
+    leaked.length ? `${leaked.length} finding(s) carried the sentence` : 'ids only')
+}
+ok(liveSqlFor('m') === 'm.invalid_at IS NULL AND m.expired_at IS NULL',
+  '8 · ⭐ the qualified rendering is DERIVED from LIVE_SQL, so the two cannot drift', liveSqlFor('m'))
+
+// ── 9 · ⭐⭐⭐ EVERY POPULATION READ OF txn_memories CARRIES LIVENESS ───────────────────────────────
+//
+// ⚠️⚠️ THE DEFECT THIS EXISTS FOR, MEASURED 2026-08-25: `own-memory-host.js` wrote its own SQL and never
+// inherited the predicate, so a memory Ote had RETIRED at 06:49 was handed back to her at 09:53 and she
+// quoted it as her strongest evidence about Hermes. `room-scope.js` had the same hole in two counts and
+// was overstating other rooms by up to 4 rows. ⇒ the class, not the instance.
+//
+// ⭐ THE RULE IS NOT "ADD IT EVERYWHERE" — that would be wrong twice over:
+//     POPULATION read  (*how much is there / what is there*)  → liveness REQUIRED; a dead row corrupts it
+//     ID lookup        (*what was that specific row*)         → liveness is the CALLER's question
+//     EXISTS predicate (*has this asker ever…*)               → narrowing it is an AUTHORIZATION change
+//
+// ⛔⛔ AND THE STRIPPER'S POLARITY IS THE OPPOSITE OF THE ONE THIS PROJECT LEARNED LAST WEEK. There the
+// lesson was "strip comments AND string literals" — because the truth lived in code and prose was firing
+// the assertion. Here the SQL IS the string literal, so stripping literals would make this scan VACUOUS
+// while it reported a confident pass. ⇒ strip comments, KEEP literals: the strip follows where the truth
+// lives, and applying last week's rule by reflex would have produced a green light over an unread file.
+{
+  const DIR = new URL('../../Backend/app/components/', import.meta.url)
+  const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\r\n]*/g, '')
+  const BT = String.fromCharCode(96)
+  const litRe = new RegExp(`${BT}[^${BT}]*${BT}`, 'g')
+  // ⭐ Each exemption names the file, the shape and the reason. ⚠️ AND A STALE EXEMPTION IS REPORTED:
+  // an entry that no longer matches anything is a note whose subject is gone, and this project has been
+  // bitten by a note that outlived the thing it described.
+  const EXEMPT = [
+    { file: 'lesson-host.js', why: 'an ID LOOKUP of a prior lesson being related to — liveness is the caller\'s question, not the read\'s' },
+    { file: 'person-service.js', why: 'an EXISTS visibility predicate — narrowing it would remove person visibility, an authorization change wearing a bug fix\'s clothes' },
+  ]
+  const seen = new Set()
+  const offenders = []
+  let scanned = 0
+  for (const f of readdirSync(DIR).filter((n) => n.endsWith('.js'))) {
+    const src = strip(readFileSync(new URL(f, DIR), 'utf8'))
+    for (const lit of src.match(litRe) ?? []) {
+      if (!/txn_memories/.test(lit) || !/\bSELECT\b/i.test(lit)) continue
+      scanned += 1
+      const live = (/invalid_at IS NULL/i.test(lit) && /expired_at IS NULL/i.test(lit)) || /LIVE_SQL|liveSqlFor/.test(lit)
+      if (live) continue
+      if (EXEMPT.some((e) => e.file === f)) { seen.add(f); continue }
+      offenders.push(`${f} :: ${lit.replace(/\s+/g, ' ').slice(0, 80)}`)
+    }
+  }
+  // ⛔ NON-VACUOUS. A scan that found nothing to look at is not a pass — it is a scan that did not run.
+  ok(scanned >= 6, '9 · ⛔ the scan actually found raw reads to judge — a vacuous scan is not a pass',
+    `${scanned} raw SELECT(s) over txn_memories`)
+  ok(offenders.length === 0, '9 · ⭐⭐ every POPULATION read of txn_memories carries the liveness predicate',
+    offenders.length ? offenders.join(' | ') : `${scanned} read(s), ${EXEMPT.length} declared exemption(s)`)
+  const stale = EXEMPT.filter((e) => !seen.has(e.file)).map((e) => e.file)
+  ok(stale.length === 0, '9 · ⭐ …and no exemption has outlived the read it excuses',
+    stale.length ? `stale: ${stale.join(', ')}` : 'all exemptions still describe a real read')
+
+  // ── ⚠️⚠️ THE SCAN'S BLIND SPOT, MADE VISIBLE INSTEAD OF ASSUMED AWAY ────────────────────────────
+  // The scan above matches the table by NAME, so a query that reaches it through a variable — `FROM
+  // ${MEM}`, `FROM ${table}` — is invisible to it. ⛔ That was found by the stale-exemption assertion on
+  // its first run, which is the only reason it is written down rather than shipped as a confident pass.
+  // ⓘ Resolving the indirection properly is not possible from source: in two of these files the variable
+  // is built from a DESTRUCTURED `{ tableName, schema }`, so nothing on the assignment line names the
+  // table at all. ⇒ the honest move is to WATCH the set rather than claim to cover it.
+  // ⭐ Each was read by hand on 2026-08-25 and the verdict recorded here. A NEW file joining this set
+  // fails the check, which is the point: the gap cannot grow silently.
+  const INDIRECT_VERIFIED = {
+    'memory-lint-host.js': 'the integrity checker itself — it MUST see dead rows; a dangling reference on a retired row is still dangling',
+    'memory-consolidate-host.js': 'verified by hand: carries `invalid_at IS NULL AND expired_at IS NULL`',
+    'reflection-host.js': 'verified by hand: carries `invalid_at IS NULL AND expired_at IS NULL`',
+  }
+  const indirect = new Set()
+  for (const f of readdirSync(DIR).filter((n) => n.endsWith('.js'))) {
+    const src = strip(readFileSync(new URL(f, DIR), 'utf8'))
+    if (!/txn_memories/.test(src)) continue
+    for (const lit of src.match(litRe) ?? []) {
+      if (!/\bSELECT\b/i.test(lit) || /txn_memories/.test(lit)) continue
+      if (/FROM \$\{(MEM|table)\}/.test(lit)) indirect.add(f)
+    }
+  }
+  const unknown = [...indirect].filter((f) => !(f in INDIRECT_VERIFIED))
+  ok(unknown.length === 0,
+    '9 · ⭐⭐ no UNVERIFIED indirect read of the memories table — the scan\'s blind spot is watched, not assumed',
+    unknown.length ? `unverified: ${unknown.join(', ')}` : `${indirect.size} indirect read(s), all hand-verified`)
+}
 
 done()

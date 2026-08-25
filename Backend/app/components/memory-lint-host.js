@@ -36,12 +36,30 @@
 //                ⓘ `includeContent: true` exists for a human debugging ONE owner deliberately. The cron
 //                pass never sets it, and the shape of a logged line is counts only.
 
+// ⭐ THE ONLY IMPORT THIS FILE HAS, AND IT IS A PURE PREDICATE. `memory-self-state-claim.js` imports
+// nothing itself, so the linter stays side-effect free and cheap to load — the property that lets a check
+// read this module without booting anything.
+// ⛔ The rule is NOT reimplemented here. The write gate and this audit must agree by construction, because
+// the whole point of the audit is to find what the gate would refuse today.
+import { admissible } from './memory-self-state-claim.js'
+
 /**
  * ⭐ LIVENESS, WRITTEN ONCE. `memory-store-sequelize-host.js` defines `LIVE = { invalid_at: null,
  * expired_at: null }` — BOTH null. A supersede sets `invalid_at`; decay/archive sets `expired_at`.
  * ⛔ Checking only one of them is the mistake that produced a false canon violation on 2026-08-24.
  */
 export const LIVE_SQL = 'invalid_at IS NULL AND expired_at IS NULL'
+
+/**
+ * ⭐ THE SAME PREDICATE, QUALIFIED FOR A JOINED QUERY. Added 2026-08-25 for `room-scope.js`, where the
+ * memory count rides a LEFT JOIN beside `mst_users`.
+ * ⚠️ It exists so nobody relies on *"`mst_users` happens to have no `expired_at` today"* — an unqualified
+ * predicate that is unambiguous only by accident is a column-addition away from silently changing meaning.
+ * ⛔ Derived from `LIVE_SQL`, never retyped: one rule, two renderings, and the second cannot drift.
+ * ⛔ AND IT MUST RIDE THE JOIN, NOT THE WHERE, wherever the query also counts rooms — moving it to WHERE
+ * turns a LEFT JOIN into an inner one and silently drops every room that holds no live memory.
+ */
+export const liveSqlFor = (alias) => LIVE_SQL.replace(/\b(invalid_at|expired_at)\b/g, `${alias}.$1`)
 
 /**
  * The rules, declared as data so the report can name what it looked for even when it finds nothing —
@@ -69,6 +87,13 @@ export const LINT_RULES = Object.freeze([
     what: "a memory attributed to HER with no traceable occasion — no reflection link, no source string, and no resolvable source_message_id. Authorship must be earned by an occasion, never assigned" },
   { id: 'dead-slot', severity: 'suspect',
     what: 'a slot with no LIVE memory. ⚠️ SUSPECT: a slot is a NAME, and a name may legitimately outlive the belief it held. It needs a retention rule before it can be called a defect' },
+  // ⭐⭐⭐ THE OTHER END OF THE F4 GATE. `memory-self-state-claim.js` refuses these at the WRITE door as of
+  // 2026-08-25; nothing had ever looked at the rows written before it existed. A gate is not an audit —
+  // it protects the future and says nothing about the past, and the past is where the measured row lives.
+  // ⛔ SUSPECT, NOT DEFECT, AND DELIBERATELY: retiring a row is Ote's act, not the linter's. The gate's own
+  // text says so — *"an existing row is not hidden by this; the rows already written are Ote's to retire."*
+  { id: 'live-self-state-claim', severity: 'suspect',
+    what: "a LIVE semantic row asserting what her own memory contains or can reach — the shape the F4 write gate now refuses. ⚠️ SUSPECT: it names rows for a human to judge, and retiring one is a decision with an owner. ⓘ This is the ONE rule that reads content in order to decide; it still reports ids and a pattern name only, never the belief" },
 ])
 
 const qualified = (model) => {
@@ -146,7 +171,7 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
   add('duplicate-live-slot', await Q(
     `SELECT m.slot_id::text AS id, m.user_id::text AS owner_id, count(*)::int AS n
        FROM ${MEM} m
-      WHERE m.slot_id IS NOT NULL AND ${LIVE_SQL.replace(/(\w+_at)/g, 'm.$1')} ${own('m.user_id')}
+      WHERE m.slot_id IS NOT NULL AND ${liveSqlFor('m')} ${own('m.user_id')}
       GROUP BY 1, 2 HAVING count(*) > 1
       ORDER BY 1`, rep))
 
@@ -204,8 +229,41 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
        FROM ${SLOT} s
       WHERE NOT EXISTS (
         SELECT 1 FROM ${MEM} m
-         WHERE m.slot_id = s.id AND ${LIVE_SQL.replace(/(\w+_at)/g, 'm.$1')}) ${own('s.user_id')}
+         WHERE m.slot_id = s.id AND ${liveSqlFor('m')}) ${own('s.user_id')}
       ORDER BY s.id`, rep))
+
+  // ── 6 · live-self-state-claim ───────────────────────────────────────────────────────────────────
+  //
+  // ⚠️⚠️ THE ONE RULE THAT MUST READ CONTENT, AND THE GUARANTEE IS NARROWED IN WRITING RATHER THAN BROKEN.
+  // Everywhere else content is gated in the SQL so a belief never leaves the database. Here the predicate
+  // IS a text predicate, so the row's content is fetched, matched, and dropped on the floor: it is bound to
+  // a local, never reaches a finding, and `excerpt` still rides `includeContent` like every other rule.
+  // ⛔ THE ALTERNATIVE WAS WORSE. Translating seven JS regexes into Postgres `~*` would put the predicate in
+  // two dialects that agree until the day they quietly do not — and this project has paid for a duplicated
+  // predicate more than once. ⇒ ONE implementation, in the file that owns it, called from here.
+  //
+  // ⭐ `admissible()` is asked the whole question — kind, attribute and content together — rather than
+  // `isSelfStateClaim()` alone, so the exemptions (identity, episodic, lesson, practice, declined) are the
+  // gate's, not a second opinion. An episode recording *"I looked and found nothing"* is a true dated
+  // record and must never appear here.
+  {
+    const candidates = await Q(
+      `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.kind, m.attribute, m.content,
+              m.created_at${excerpt}
+         FROM ${MEM} m
+        WHERE ${liveSqlFor('m')} ${own('m.user_id')}
+        ORDER BY m.id`, rep)
+    const hits = []
+    for (const row of candidates) {
+      const verdict = admissible(row)
+      if (verdict.ok) continue
+      // ⛔ `content` is destructured OUT here. A finding carries the id, the owner, the date and WHICH
+      // pattern fired — never the sentence, which is the thing the report exists to avoid publishing.
+      const { content, ...safe } = row
+      hits.push({ ...safe, pattern: verdict.why })
+    }
+    add('live-self-state-claim', hits)
+  }
 
   // ── SHAPE THE REPORT · per owner, counts first ──────────────────────────────────────────────────
   const names = new Map()

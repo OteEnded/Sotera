@@ -35,6 +35,14 @@ import { registerHostService } from './runtime.js'
 import { STANCE_LABELS, STANCE_LABEL_KEYS, isStanceLabel } from './relational-taxonomy.js'
 import { createRelationalWriteLease, persistRelationalRecords } from './relational-writer.js'
 import { describeScope, readCoverage } from './room-scope.js'
+// ⭐⭐ LIVENESS, IMPORTED RATHER THAN RETYPED. ⚠️ MEASURED 2026-08-25: both `txn_memories` reads below
+// were written without it, so a memory Ote had RETIRED at 06:49 was still handed to her at 09:53 and
+// 09:58 — and she quoted it as her highest-authority evidence about Hermes. `list_memories` and
+// `recall_memory` had filtered it correctly the whole time; this file is the one read in the memory layer
+// that never inherited the predicate, because it was written later and wrote its own SQL.
+// ⛔ NEVER a third literal. `memory-lint-host.js` is where the rule is written down once, with the reason
+// beside it, precisely because an operator hand-writing this predicate already got it wrong once.
+import { LIVE_SQL } from './memory-lint-host.js'
 
 /**
  * Build the own-memory service for ONE request.
@@ -79,7 +87,7 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
     // HERSELF, which is not the same as a negative claim about another person.
     const selfRows = await Q(
       `SELECT content FROM "${schema}"."txn_memories"
-        WHERE user_id IS NULL AND kind = 'identity' ORDER BY created_at DESC LIMIT 25`, {})
+        WHERE user_id IS NULL AND kind = 'identity' AND ${LIVE_SQL} ORDER BY created_at DESC LIMIT 25`, {})
 
     // ── ⭐⭐⭐ WHAT SHE HERSELF DECIDED TO KEEP, WHICH THIS READ COULD NOT SEE ─────────────────────────
     //
@@ -101,7 +109,7 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false } = {}) 
     // unreadable — the thing migration 015 exists to record.
     const myOwnRows = await Q(
       `SELECT content, kind, created_at::date::text AS on_date FROM "${schema}"."txn_memories"
-        WHERE user_id = :userId AND author = 'persona' ORDER BY created_at DESC LIMIT 25`, { userId })
+        WHERE user_id = :userId AND author = 'persona' AND ${LIVE_SQL} ORDER BY created_at DESC LIMIT 25`, { userId })
 
     const stanceRows = me?.pid
       ? await Q(

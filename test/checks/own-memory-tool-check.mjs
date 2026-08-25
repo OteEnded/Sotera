@@ -246,6 +246,44 @@ ok(!/user_id\s*=\s*:userId[\s\S]{0,80}txn_memories/.test(sql),
       viaTool?.keptByMe === undefined ? '⛔ undefined at the tool boundary' : `${viaTool.keptByMe.count} item(s)`)
     ok((viaTool?.keptByMe?.items ?? []).some((i) => i.statement === MARK),
       'K2 · …and it is her row, intact through the projection')
+
+    // ── ⭐⭐⭐ K3 · A RETIRED MEMORY IS NOT HANDED BACK · THE MEASURED DEFECT, 2026-08-25 ─────────────
+    //
+    // ⚠️⚠️ WHAT ACTUALLY HAPPENED, and it is the whole reason this assertion exists. Ote retired a row at
+    // 06:49 — the one asserting *"their specific content was not preserved in durable memory"*. At 09:53
+    // and again at 09:58 she called `recall_own_memory`, got it back, and quoted it verbatim as her
+    // strongest evidence about Hermes. `list_memories` and `recall_memory` had been filtering it correctly
+    // the whole time; this read wrote its own SQL and never inherited the predicate.
+    // ⇒ ⭐ A SOFT RETIREMENT THAT ONE READ IGNORES IS NOT A RETIREMENT. It is worse than none, because the
+    // row is invisible to the operator who retired it and still authoritative to her.
+    // ⛔ BOTH DEATHS ARE TESTED, because checking only `expired_at` is the exact mistake that produced a
+    // false canon violation on 2026-08-24: a supersede sets `invalid_at`, decay/archive sets `expired_at`.
+    for (const [col, how] of [['expired_at', 'retired/archived'], ['invalid_at', 'superseded']]) {
+      const [dead] = await mk(room, `zz_test kept-by-me ${how.toUpperCase()} — must never be returned.`)
+      try {
+        await seq.query(`UPDATE persona_sotera.txn_memories SET ${col} = now() WHERE id = :id`,
+          { replacements: { id: dead.id } })
+        const after = await buildOwnMemory(fastify, { userId: room }).recall()
+        const back = (after.keptByMe?.items ?? []).some((i) => String(i.statement).includes(how.toUpperCase()))
+        ok(!back, `K3 · ⭐⭐ a ${how} memory (\`${col}\`) is NOT returned by recall_own_memory`,
+          back ? '⛔ handed back after being retired' : 'suppressed')
+        // ⚠️ THIS ONE ASSERTS AGREEMENT, NOT SUPPRESSION — and the mutation run proved it: with the fix
+        // reverted it still passed, at 5/5, because both numbers derive from the same query. ⛔ So it is
+        // NOT a second guard against the retired row; the assertion above is the only one that catches
+        // that. What it does guard is the two of them DIVERGING — a coverage line that counts live rows
+        // over a payload that counts all of them would say "1 more exists here" while showing nothing.
+        ok(after.coverage?.keptByMe?.matched === after.keptByMe.count,
+          `K3 · ⓘ …and the coverage count still agrees with the payload (⛔ agreement, not suppression)`,
+          `${after.coverage?.keptByMe?.matched}/${after.keptByMe.count}`)
+      } finally {
+        await Q('DELETE FROM persona_sotera.txn_memories WHERE id = :id', { id: dead.id })
+      }
+    }
+    // ⭐ AND THE LIVE ROW SURVIVED ALL OF THAT — a filter that suppressed everything would have passed
+    // every assertion above. The negative control is not optional.
+    const still = await buildOwnMemory(fastify, { userId: room }).recall()
+    ok((still.keptByMe?.items ?? []).some((i) => i.statement === MARK),
+      'K3 · ⛔ …while the LIVE row is still there — the predicate filters the dead, not the slice')
   } finally {
     for (const id of [mine?.id, elsewhere?.id]) {
       if (id) await Q('DELETE FROM persona_sotera.txn_memories WHERE id = :id', { id })

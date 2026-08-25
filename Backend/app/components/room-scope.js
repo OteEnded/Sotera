@@ -1,5 +1,17 @@
 // ROOM SCOPE — the answer to "who am I, who is this, which room am I in, and what is out of reach".
 //
+// ⚠️⚠️ LIVENESS, ADDED 2026-08-25 AFTER MEASURING THE COUNTS BELOW AGAINST THE STORE. Both memory counts
+// here are POPULATION reads she is told out loud — and both counted superseded and retired rows. Measured
+// that day: `ote` 23 counted / 21 live, `hermes` 22 / 18, `agent_dev` 22 / 21. ⇒ every other count of the
+// same rows is live-filtered, so this one was systematically OVERSTATING what another room holds — a false
+// PRESENCE in the layer that exists to prevent false absence, and two counts of the same thing that
+// disagree by construction.
+// ⭐ THE RULE THIS FOLLOWS, AND IT IS NOT "ADD IT EVERYWHERE": liveness belongs to **population reads**
+// (*how much is there*), never to an id lookup (*what was that row* — liveness is the caller's question)
+// and never to an existence predicate (*has this asker ever…* — narrowing that is an authorization change
+// wearing a bug fix's clothes). `lesson-host.js`'s priorId read and `person-service.js`'s visibility
+// EXISTS were both examined the same day and deliberately left alone for exactly those two reasons.
+//
 // ── WHY THIS MODULE EXISTS, IN HER OWN WORDS ───────────────────────────────────────────────────────
 // Ote's model, ratified 2026-08-20 (D-8): **the ROOM is the disclosure boundary**, root is a room with
 // broader explicit read authority, and *same Sotera does not mean same accessible knowledge*.
@@ -39,6 +51,9 @@
 //     Cross-PERSON awareness is L3, is undecided, and is deliberately absent here.
 //   · A room never learns the NAMES of the person's other rooms. It learns that there are N of them.
 //     Naming them is a disclosure act, and disclosure acts belong to root (D-4, still open).
+
+// ⛔ NEVER a second literal — the predicate is written down once, in the file that carries the reason.
+import { LIVE_SQL, liveSqlFor } from './memory-lint-host.js'
 
 const YOU = 'You are Sotera. You are the same persona in every room — one continuous person, not a copy per account.'
 
@@ -81,7 +96,7 @@ export async function describeScope(fastify, { userId = null, isRoot = false } =
       `SELECT count(DISTINCT u.id)::int AS rooms,
               count(m.id)::int          AS stored_memories
          FROM "${schema}"."mst_users" u
-         LEFT JOIN "${schema}"."txn_memories" m ON m.user_id = u.id
+         LEFT JOIN "${schema}"."txn_memories" m ON m.user_id = u.id AND ${liveSqlFor('m')}
         WHERE u.person_id = :pid AND u.id <> :userId`, { pid: me.pid, userId })
     elsewhere = { otherRoomsOfThisPerson: t?.rooms ?? 0, storedMemoriesYouCannotReadFromHere: t?.stored_memories ?? 0 }
   }
@@ -174,7 +189,7 @@ export async function describeRoomIndex(fastify, { userId = null, isRoot = false
 
   const rows = await Q(
     `SELECT u.username,
-            (SELECT count(*) FROM "${schema}"."txn_memories" m WHERE m.user_id = u.id)::int AS stored_memories,
+            (SELECT count(*) FROM "${schema}"."txn_memories" m WHERE m.user_id = u.id AND ${LIVE_SQL})::int AS stored_memories,
             (SELECT max(x.created_at)::date::text
                FROM "${schema}"."txn_messages" x
                JOIN "${schema}"."txn_conversations" c2 ON c2.id = x.conversation_id
