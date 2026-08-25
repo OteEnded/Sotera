@@ -119,7 +119,15 @@ const record = {
     memoryLeak: leaked,
     controlContaminated: contaminated,
     priorRunsInCorpus: priorRuns,
-    valid: leaked.length === 0 && contaminated.length === 0 && priorRuns.length === 0,
+    // ⚠️⚠️ A FAILED GENERATION IS NOT A ZERO SCORE. `bounded-inventory` replicate 3 produced an EMPTY
+    // answer with 0 tool calls, 0 prompt tokens and 13 seconds of wall clock, and it was about to be read
+    // as "this shape scored 0/5" — the third form today of *the treatment failed vs the treatment never
+    // ran*. ⛔ A turn that never reached the model is infrastructure, not behaviour, and must be excluded
+    // and RE-RUN rather than averaged in.
+    generationFailed: assistants.length === 0 || answer.trim() === '' || assistants.every((m) => !m.prompt_tokens),
+    modelError: assistants.map((m) => m.error).filter(Boolean),
+    valid: leaked.length === 0 && contaminated.length === 0 && priorRuns.length === 0
+      && assistants.length > 0 && answer.trim() !== '' && assistants.some((m) => m.prompt_tokens),
   },
   cost: {
     wallMs,

@@ -55,6 +55,11 @@ for (const f of files) {
   // ⛔ The same distinction the whole revisit lifecycle is built on: **"the treatment failed" and "the
   // treatment was never applied" must not collapse into one number.** ⚠️ Such a run is still REPORTED — it
   // is a real observation about salience — but it may not be counted for or against a shape.
+  // ⚠️ Re-derive the generation-failure flag for records frozen before the check existed.
+  const failed = String(rec.answer ?? '').trim() === '' || !rec.cost?.promptTokens
+  if (failed) {
+    rec.preconditions = { ...(rec.preconditions ?? {}), generationFailed: true, valid: false }
+  }
   const tools = rec.behaviour?.tools ?? []
   rec.behaviour.retrieveConversationsCalls = tools.filter((t) => t === 'retrieve_conversations').length
   rec.behaviour.exercisedShape = rec.behaviour.retrieveConversationsCalls > 0

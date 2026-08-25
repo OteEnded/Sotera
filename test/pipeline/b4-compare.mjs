@@ -29,13 +29,23 @@ const shapes = [...new Set(recs.map((r) => shapeOf(r.arm)))]
 
 const n = (v, w) => String(v ?? '–').padStart(w)
 const pad = (v, w) => String(v ?? '–').padEnd(w)
-const runsOf = (shape, task) => recs.filter((r) => shapeOf(r.arm) === shape && r.task === task)
+// ⛔ A FAILED GENERATION IS NOT A RESULT. `bounded-inventory` replicate 3 produced an empty answer with
+// 0 tool calls and 0 prompt tokens in 13 seconds; scoring it as 0/5 would have made an infrastructure
+// failure into evidence against a payload shape. ⭐ They are counted and named, never silently dropped.
+const failedRuns = recs.filter((r) => r.preconditions?.generationFailed === true)
+const runsOf = (shape, task) => recs.filter((r) => shapeOf(r.arm) === shape && r.task === task
+  && r.preconditions?.generationFailed !== true)
   .sort((a, b) => a.arm.localeCompare(b.arm))
 const med = (xs) => { const s = [...xs].sort((a, b) => a - b); return s.length ? s[(s.length - 1) >> 1] : null }
 
 console.log(`\n${'═'.repeat(118)}`)
 console.log('  B4 · PAYLOAD SHAPE COMPARISON — identical task, prompts, corpus, grader and harness conditions')
 console.log(`${'═'.repeat(118)}`)
+if (failedRuns.length) {
+  console.log(`
+  ⚠️ ${failedRuns.length} run(s) EXCLUDED — the generation never reached the model (empty answer, 0 prompt tokens):`)
+  for (const r of failedRuns) console.log(`     · ${r.arm}/${r.task}  ${Math.round(r.cost.wallMs / 1000)}s  ⇒ NEEDS RE-RUN, ⛔ not scored as a failure`)
+}
 
 // ══ 1 · ⛔ THE FLOOR, CHECKED BEFORE ANY EFFICIENCY NUMBER IS SHOWN ════════════════════════════════
 console.log(`\n  ── ⛔ CORRECTNESS FLOOR ${'─'.repeat(90)}`)
