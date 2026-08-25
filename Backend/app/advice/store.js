@@ -54,11 +54,32 @@ const turnView = (r) => (r ? {
   createdAt: r.created_at,
 } : null)
 
+/**
+ * ⛔⛔ AN OBSERVATION CARRIES NO CONTENT, AND THE SHAPE IS THE GUARANTEE. Every field below is a state
+ * name, an outcome, a timestamp or a number — there is deliberately no field a counterpart's words could
+ * be placed in. ⭐ A privacy/authority property enforced by the TYPE cannot be eroded by a later edit.
+ */
+const obsView = (r) => (r ? {
+  id: r.id,
+  exchangeId: r.exchange_id,
+  observedAt: r.observed_at,
+  contactResult: r.contact_result,
+  // ⓘ NULL unless contactResult === 'heard' — the schema refuses any other combination, so a state here
+  // is always something we actually heard rather than something we assumed.
+  heardState: r.heard_state ?? null,
+  heardLastEvent: r.heard_last_event ?? null,
+  askedHow: r.asked_how,
+  latencyMs: r.latency_ms ?? null,
+  note: r.note ?? null,
+} : null)
+
 export function createAdviceStore(db) {
   const seq = db.txn_memories.sequelize                     // any model gives us the connection
   const { schema } = db.txn_memories.getTableName()
   const EX = `"${schema}"."txn_advice_exchanges"`
   const TU = `"${schema}"."txn_advice_turns"`
+  // ⭐ The observation log is its OWN table so `peek` can stay literally read-only — option (c).
+  const OB = `"${schema}"."log_advice_observations"`
   const one = async (sql, replacements) => {
     const [rows] = await seq.query(sql, { replacements })
     return Array.isArray(rows) ? rows[0] : rows
@@ -115,6 +136,73 @@ export function createAdviceStore(db) {
       if ('closedAt' in patch) { sets.push('closed_at = :closedAt'); repl.closedAt = patch.closedAt }
       if (!sets.length) return this.findById(id)
       const row = await one(`UPDATE ${EX} SET ${sets.join(', ')} WHERE id = :id RETURNING ${EXCHANGE_FIELDS}`, repl)
+      return view(row)
+    },
+
+    // ══ ⭐⭐⭐ THE OBSERVATION LOG · what we asked, what we heard, and WHEN ═════════════════
+    //
+    // ⭐ RATIFIED AS OPTION (c): a SEPARATE table, so `peek` stays LITERALLY read-only. ⓘ It costs a join.
+    // That is the honest price of the word meaning what it says.
+    // ⛔⛔ NOTHING HERE MAY CARRY CONTENT. Every field is a state name, an outcome, a timestamp or a
+    // number — an observation that carried a counterpart's words would be a COLLECTION wearing another
+    // name, and the whole point of the split is that **looking is not receiving**.
+    async recordObservation(exchangeId, {
+      contactResult, heardState = null, heardLastEvent = null, askedHow = 'probe',
+      latencyMs = null, note = null,
+    }) {
+      const row = await one(
+        `INSERT INTO ${OB} (exchange_id, contact_result, heard_state, heard_last_event, asked_how, latency_ms, note)
+         VALUES (:exchangeId, :contactResult, :heardState, :heardLastEvent, :askedHow, :latencyMs, :note)
+         RETURNING id, exchange_id, observed_at, contact_result, heard_state, heard_last_event, asked_how, latency_ms, note`,
+        { exchangeId, contactResult, heardState, heardLastEvent, askedHow, latencyMs, note },
+      )
+      return obsView(row)
+    },
+
+    /**
+     * ⭐ THE LATEST OBSERVATION — the single fact the world is derived from.
+     * ⭐⭐ `heardStateEver` IS THE DISAMBIGUATING FACT, AND IT IS **OURS, NOT THEIRS**. A bare 404 is
+     * meaningless: swept-after-TTL, restarted-and-forgot, and wrong-id-never-dispatched all return the
+     * identical response. It only becomes information beside whether we EVER heard a state for this work
+     * — which distinguishes *"a result we lost"* from *"there was never anything there"*.
+     */
+    async latestObservation(exchangeId) {
+      const row = await one(
+        `SELECT id, exchange_id, observed_at, contact_result, heard_state, heard_last_event, asked_how, latency_ms, note
+           FROM ${OB} WHERE exchange_id = :exchangeId ORDER BY observed_at DESC, rolling_id DESC LIMIT 1`,
+        { exchangeId },
+      )
+      if (!row) return null
+      const ever = await one(
+        `SELECT 1 AS x FROM ${OB} WHERE exchange_id = :exchangeId AND heard_state IS NOT NULL LIMIT 1`,
+        { exchangeId },
+      )
+      return { ...obsView(row), heardStateEver: Boolean(ever) }
+    },
+
+    async observations(exchangeId, limit = 50) {
+      const [rows] = await seq.query(
+        `SELECT id, exchange_id, observed_at, contact_result, heard_state, heard_last_event, asked_how, latency_ms, note
+           FROM ${OB} WHERE exchange_id = :exchangeId ORDER BY observed_at DESC, rolling_id DESC LIMIT :limit`,
+        { replacements: { exchangeId, limit } },
+      )
+      return (rows || []).map(obsView)
+    },
+
+    /**
+     * ⭐⭐⭐ ABANDON — THE ONE ENDING WITH NO COUNTERPART SIGNAL BEHIND IT, and it is **Sotera's**.
+     * ⛔ NOT a timeout, ⛔ not inferred from silence, ⛔ not a policy that fires on its own. Every other
+     * terminal state is something the destination TOLD us; this one is a judgement about someone else's
+     * liveness. ⚠️ Hence the required `reason`: it must say what was OBSERVED, not merely that it was
+     * decided — and the schema refuses the row without it.
+     */
+    async abandon(id, reason) {
+      const row = await one(
+        `UPDATE ${EX} SET state = 'abandoned', abandoned_at = now(), abandoned_reason = :reason,
+                          closed_at = now(), close_reason = 'abandoned'
+          WHERE id = :id RETURNING ${EXCHANGE_FIELDS}`,
+        { id, reason },
+      )
       return view(row)
     },
 

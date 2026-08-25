@@ -10,6 +10,7 @@
 // Cogito must not change a line of it.
 
 import { createAdviceStore } from './store.js'
+import { deriveWorld } from './lifecycle.js'
 import { createHermesBinding } from './hermes.js'
 
 // ── ⭐ THE SELF-PRESENTATION — five stable slots. E4 (purpose) rides in the message, deliberately. ──
@@ -178,6 +179,110 @@ export function createAdviceService({ db, config, user }) {
       }
       await store.patch(ex.id, { state: o.state })
       return { ok: true, exchangeId: ex.id, state: o.state, mode: ex.mode }
+    },
+
+    // ══ ⭐⭐⭐ THE LIFECYCLE TRIO · peek / probe / abandon — and the split is the whole point ═════
+    //
+    //   peek     ⛔ PURE READ. No network, no write. Derives the world from what is already stored.
+    //   probe    the BINDING asks the counterpart and records an OBSERVATION. ⛔ never collects, never closes.
+    //   collect  ⭐ HER act — `observe()` above. Writes the inbound turn and closes the exchange.
+    //   abandon  ⭐ HER act — the one ending with no counterpart signal behind it.
+    //
+    // ⚠⚠ THE NEAR-MISS THAT FORCED THIS SPLIT: `observe()` reads like an inspection and IS A COMMIT. A
+    // status panel built the obvious way — poll observe() to render a chip — would have fetched the answer,
+    // written it into her exchange as an inbound turn and closed it, **because someone wanted a progress
+    // indicator**. ⛔ That is why `peek` may not touch the network and `probe` may not touch content.
+
+    /**
+     * ⭐ PEEK — what is this exchange doing, as far as we already know?
+     * ⛔ PURE: no HTTP, no writes, no state change. Anyone may call it: a UI, a status script, an operator.
+     * ⓘ It can be STALE by construction, and says so — `sinceHeardMs` is returned so a reader can see that
+     * the last thing we heard is ninety minutes old. ⛔ Nothing here turns that number into a conclusion.
+     */
+    async peek(exchangeId) {
+      const ex = await store.findById(exchangeId, user.id)
+      if (!ex) return { ok: false, reason: 'no such exchange' }
+      const latest = await store.latestObservation(ex.id)
+      const turns = await store.turns(ex.id)
+      const inbound = turns.filter((t) => t.direction === 'in').length
+      const derived = deriveWorld({ exchange: ex, latest, inboundTurns: inbound })
+      return {
+        ok: true,
+        exchangeId: ex.id,
+        destination: ex.destination,
+        mode: ex.mode,
+        // ⚠️ THE STORED STATE IS REPORTED AS WHAT IT IS — a record of the last ACT, not a live status.
+        recordedState: ex.state,
+        openedAt: ex.openedAt,
+        ...derived,
+        // ⛔ A COUNT, NEVER CONTENT. Whether she has it is an input to the world; delivering it is `collect`.
+        received: inbound,
+      }
+    },
+
+    /**
+     * ⭐⭐ PROBE — the BINDING's own recovery observation. ⛔ NOT Sotera polling.
+     *
+     * ⭐ Ote's framing: *"the binding could have a recovery watcher because the binding owns the
+     * relationship with the destination."* ⇒ this is housekeeping between two systems, categorically
+     * different from her going to look.
+     *
+     * ⛔⛔ IT NEVER COLLECTS. Even when the counterpart reports `completed` **and hands back the output**,
+     * this records only THAT they finished. The words stay theirs until she receives them.
+     * ⚠️ AND IT HAS A DEADLINE: the destination retains a terminal status for a bounded window
+     * (Hermes `64a6f42c`: 3600 s). A watcher slower than that loses a completed result to the reaper while
+     * both sides are perfectly healthy.
+     */
+    async probe(exchangeId) {
+      const ex = await store.findById(exchangeId, user.id)
+      if (!ex) return { ok: false, reason: 'no such exchange' }
+      const dest = resolveDestination(ex.destination)
+      const binding = dest && bindingFor(dest)
+      if (!binding || !ex.remoteWorkId) {
+        return { ok: false, reason: 'nothing detached to observe' }
+      }
+      const t0 = Date.now()
+      let o = null
+      try {
+        o = await binding.observe(ex.remoteWorkId)
+      } catch (e) {
+        // ⛔ A TRANSPORT FAILURE IS RECORDED AS A TRANSPORT FAILURE, never as a state. ⚠️ "unreachable"
+        // and "not_found" are DIFFERENT worlds — up-but-forgotten is permanent, not-there-at-all may be
+        // transient — and a model that merges them will get one of them wrong.
+        await store.recordObservation(ex.id, {
+          contactResult: 'unreachable', latencyMs: Date.now() - t0, note: String(e?.message ?? '').slice(0, 200),
+        })
+        return { ok: true, exchangeId: ex.id, observed: 'unreachable' }
+      }
+      const notFound = o?.state === 'failed' && o?.reason === 'run_not_found'
+      await store.recordObservation(ex.id, {
+        contactResult: notFound ? 'not_found' : (o?.state ? 'heard' : 'error'),
+        heardState: notFound ? null : (o?.state ?? null),
+        heardLastEvent: o?.lastEvent ?? null,
+        askedHow: 'probe',
+        latencyMs: Date.now() - t0,
+      })
+      // ⛔ THE RETURN CARRIES NO WORDS. `o.text` may be populated — it is deliberately dropped here.
+      return { ok: true, exchangeId: ex.id, observed: notFound ? 'not_found' : (o?.state ?? 'error') }
+    },
+
+    /**
+     * ⭐⭐⭐ ABANDON — **hers, explicitly.** ⛔ Never a timeout, never inferred from silence.
+     *
+     * ⚠⚠ SILENCE IS THE ONE THING ALL FOUR FAILURE WORLDS HAVE IN COMMON — unreachable, swept,
+     * blocked-and-ignored and still-thinking-slowly are indistinguishable from absence alone. ⓘ A
+     * 68-minute run sat apparently idle for six-minute stretches while working perfectly. ⇒ no clock may
+     * ever close an exchange; the layer's job is to make the evidence legible and let HER decide.
+     * ⛔ The reason is REQUIRED, and the schema refuses the row without it: an ending nobody can audit is
+     * not an act, it is a disappearance.
+     */
+    async abandon(exchangeId, reason) {
+      const ex = await store.findById(exchangeId, user.id)
+      if (!ex) return { ok: false, reason: 'no such exchange' }
+      const why = String(reason ?? '').trim()
+      if (!why) return { ok: false, reason: 'abandoning needs a reason — say what you observed' }
+      const done = await store.abandon(ex.id, why.slice(0, 500))
+      return { ok: true, exchangeId: done.id, state: done.state, reason: why }
     },
 
     /** Her unfinished exchanges — so "did Aunt Hermes come back to me?" is answerable. */
