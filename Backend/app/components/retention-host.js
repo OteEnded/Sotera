@@ -171,8 +171,20 @@ export function buildRetention(fastify, {
       }
       // ⭐ `about` becomes the ENTITY — the subject — and it stays free of the author. A fact she keeps as
       // HERS about Ote is `entity: 'Ote'`, `author: 'persona'`: about him, hers.
+      //
+      // ⚠️⚠️ AND THE DEFAULT FOLLOWS `mine`, WHICH IT DID NOT AT FIRST — caught live on 2026-08-26 by the
+      // very first row the follow-through produced. She kept a self-observation with `mine:true` and no
+      // `about`, and this defaulted the entity to `'user'`, so a row whose content reads *"I tend to
+      // deflect personal praise toward the work"* was filed as **`user's reaction_to_praise`** with
+      // `author='persona'`.
+      // ⛔ That is the family-lineage shape rebuilt by the very code written to prevent it: her own claim
+      // about herself, slotted under the person she was talking to.
+      // ⭐ An unstated subject is not "the user" — it is whoever the memory BELONGS to, which is exactly
+      // what `mine` already says. ⛔ It still does not override an explicit `about`, because ABOUT ≠ OWNER
+      // is the whole point: `mine:true` + `about:'Ote'` stays about him and hers.
+      const entity = about ? String(about) : (author === 'persona' ? 'sotera' : 'user')
       const out = await mem.reconcileFactAsync({
-        entity: about ? String(about) : 'user', attribute: String(attribute), value: content,
+        entity, attribute: String(attribute), value: content,
       })
       return { ok: out?.ok !== false, kind, author, via: 'remember_fact', result: out }
     }

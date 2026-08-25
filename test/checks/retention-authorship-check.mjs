@@ -159,6 +159,24 @@ const aboutOther = await R.keep({
 })
 ok(aboutOther.ok === true && aboutOther.author === 'persona',
   '5 · ⭐⭐⭐ a fact ABOUT someone else, kept as HERS, is persona-authored', JSON.stringify(aboutOther.author))
+// ── 5b · ⭐⭐⭐ AN UNSTATED SUBJECT FOLLOWS `mine`, NOT "the user" ─────────────────────────────────
+// ⚠️⚠️ MEASURED LIVE 2026-08-26, on the FIRST row the follow-through ever produced. She kept a
+// self-observation with `mine:true` and no `about`; the entity defaulted to `'user'`, and a row reading
+// *"I tend to deflect personal praise toward the work"* was filed as **`user's reaction_to_praise`**
+// with `author='persona'`. ⛔ The family-lineage shape, rebuilt by the code written to prevent it.
+const selfFact = await R.keep({
+  what: `${stamp} · I deflect praise toward the work`, kind: KINDS.fact, mine: true, attribute: 'reaction_to_praise',
+})
+ok(selfFact.ok === true, '5b · a self-fact with no `about` is accepted', JSON.stringify(selfFact.ok))
+const selfRows = await waitFor(`${stamp} · I deflect praise`)
+const selfEntities = await q(
+  `select entity, attribute, author from ${S}.txn_memories where content like $1`, [`%${stamp} · I deflect praise%`])
+ok(selfEntities.length > 0 && selfEntities.every((r) => r.entity !== 'user'),
+  '5b · ⭐⭐⭐ …and it is NOT filed under `user` — an unstated subject follows `mine`',
+  selfEntities.map((r) => `${r.entity}/${r.author}`).join(', ') || 'no row')
+ok(selfRows.length > 0 && selfRows.every((r) => r.author === 'persona'),
+  '5b · ⭐ …while the author is still the one she declared', selfRows.map((r) => r.author).join(', '))
+// ⛔ AND AN EXPLICIT `about` STILL WINS — the default must not quietly swallow ABOUT ≠ OWNER.
 const aboutRows = await waitFor(`${stamp} · what I make of him`)
 ok(aboutRows.length > 0 && aboutRows.every((r) => r.author === 'persona'),
   '5 · ⭐⭐ …and the store agrees — ABOUT ≠ OWNER, end to end',

@@ -46,6 +46,8 @@ import { initSelfHistory } from '../../components/self-history-host.js'
 import { initConversationRetrieval } from '../../components/conversation-retrieval.js'
 import { initDisclosure } from '../../components/disclosure-host.js'
 import { initRetention } from '../../components/retention-host.js'
+// ⭐ The occasion for a decision she already made — see the block beside the capture fallback.
+import { shouldFollowThrough, runFollowThrough } from '../../components/retention-followthrough.js'
 import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
@@ -3182,6 +3184,66 @@ export default async function chatSiteRoutes(fastify) {
           request.log?.info?.({ conversation: convo.id, facts: r?.facts ?? 0, actions: r?.actions ?? null, skipped: r?.skipped ?? false, error: r?.error ?? false }, '[memory] fallback capture result')
         })
         .catch(() => {})
+    }
+
+    // ══ ⭐⭐⭐ RETENTION FOLLOW-THROUGH — the same gap, in the other direction ═══════════════════════
+    //
+    // The fallback above gives a fact about the PERSON two chances: she writes it, or `captureFacts`
+    // extracts it. ⛔ A fact about HER has exactly one, and measurement says she does not take it:
+    // 0 writes across 8+ occasions where she had recognised the material, checked her store, and said in
+    // her own words *"it's worth keeping"*. The turn simply ended.
+    //
+    // ⭐ SO THIS ADDS AN OCCASION, NOT A WRITER. It fires only when SHE stated a decision and nothing was
+    // written, quotes her own sentence back, and offers `keep` and `decline_to_remember`. ⛔ It does not
+    // extract, does not infer, and passes no `memoryAuthor` — `mine` is hers to state and the retention
+    // host still refuses an undeclared owner.
+    // ⛔ It cannot fire on the negative controls, because they produce no stated decision: silence is an
+    // answer and nothing here manufactures one.
+    // ⚠️ Mutually exclusive with a write she already made, exactly as the capture fallback is — two
+    // writers in one turn is the 2026-07-24 race, and it duplicated rows.
+    const ft = shouldFollowThrough({
+      answer,
+      // ⭐ The occasion trigger reads what the PERSON said, not what she concluded — see the component.
+      userText: lastUserText,
+      wroteMemory: modelWroteMemory,
+      useMemory: settings.useMemory,
+      stopped,
+      enabled: getSetting(fastify.config, 'memory.retentionFollowThrough') !== false,
+    })
+    if (ft.fire) {
+      // ⛔ Fire-and-forget, AFTER the reply. A person is never waiting on her deciding what to keep.
+      runFollowThrough(fastify, {
+        user: request.user,
+        conversationId: convo.id,
+        messageId: lastUserMsg?.id ?? null,
+        answer,
+        evidence: ft.evidence,
+        // ⛔ Says whose sentence is being quoted. Presenting the person's claim as hers would attribute
+        // their observation to her — the family-lineage failure, rebuilt.
+        fromUser: ft.fromUser === true,
+        // ⚠️ `providerName` / `modelName` are the turn's ACTUAL resolved pair. My first draft wrote
+        // `usedProvider`/`usedModel`, which exist NOWHERE in this file — the follow-through would have
+        // been handed `undefined` for both and silently run on a different model than the turn it
+        // follows. Caught by grepping for the variables rather than assuming they existed.
+        provider: providerName ?? null,
+        model: modelName ?? null,
+      })
+        .then((r) => {
+          request.log?.info?.({
+            conversation: convo.id,
+            ran: r?.ran === true,
+            calls: (r?.calls ?? []).map((c) => `${c.name}${c.args?.mine === undefined ? '' : `(mine=${c.args.mine})`}`),
+            why: r?.why ?? null,
+            error: r?.error ?? null,
+            // ⭐ WHAT SHE DID WITH THE MOMENT. Without this, `calls: []` is indistinguishable between
+            // "she declined in prose", "she misread the frame" and "the step never reached her" — three
+            // findings that call for three different fixes.
+            said: String(r?.said ?? '').slice(0, 400),
+          }, '[retention] follow-through')
+        })
+        .catch((e) => request.log?.warn?.({ err: e?.message }, '[retention] follow-through failed'))
+    } else if (settings.useMemory && !stopped) {
+      request.log?.debug?.({ conversation: convo.id, why: ft.why }, '[retention] follow-through skipped')
     }
 
     // Output-cap surfacing (Ote's "ZAI times out" report — it wasn't a timeout): the provider

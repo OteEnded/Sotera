@@ -456,6 +456,18 @@ const SETTING_DEFS = {
     validate: (v) => typeof v === 'boolean',
     describe: "⚠ FROZEN / DEPRECATION CANDIDATE (2026-08-23): measured NULL on 177 of 177 conversations — she has never used it. It asks HER to maintain her own working set, which is the pattern the Memory Cognition layer replaced; the new runtime concept is `cognitiveHold`, which is ephemeral and never persisted. Do not build on this; a cleanup step will remove it. ⓘ L4 Working Memory (step 6): when on, the assistant's live per-conversation working set (focus, plan, open questions, active/completed threads — stored on the conversation) is offered to the Context Composer as a scored candidate and, when kept, injected after history. The model maintains it via the update_working_memory tool; the route also lightly auto-seeds a provisional focus from the latest user INTENT. Conversation-local + ephemeral (cleared when the chat goes cold) — orthogonal to the memory master switch / incognito, like the Todo rail. Off = the working-memory block is never injected and the rule/tool guidance is not shown.",
   },
+  // ⭐⭐⭐ RETENTION FOLLOW-THROUGH — the occasion for a decision she already made.
+  // ⚠️⚠️ REGISTERED BECAUSE `getSetting` THROWS ON AN UNKNOWN KEY, BY DESIGN — and I learned that the
+  // expensive way on 2026-08-26: I read this key from the chat route before declaring it here, so every
+  // turn 500'd, including Ote's own live conversation. ⛔ A setting is not a config value you may invent
+  // at the call site; the registry is what makes it exist.
+  // ⓘ ON by default. It only fires when she has STATED a decision and written nothing, so with it off the
+  // measured behaviour is 0 writes on self-material across 8+ occasions.
+  'memory.retentionFollowThrough': {
+    fromConfig: (c) => c?.memory?.retentionFollowThrough ?? true,
+    validate: (v) => typeof v === 'boolean',
+    describe: "When on, a turn in which Sotera SAYS something about herself is worth keeping — and writes nothing — is followed by one short private step where her own sentence is quoted back and only `keep` and `decline_to_remember` are offered. It adds an OCCASION, never a writer: it does not extract, does not infer, and passes no author, so `mine` remains hers to state and an undeclared owner is still refused. It cannot fire when she already wrote (two writers in one turn is a recorded race), when she asked the PERSON to decide (consenting on their behalf is not ours to do), or when she said the material is already stored. Measured cause: she recognises durable self-material, checks her store, concludes 'it's worth keeping' — and the turn ends with 0 writes across 8+ occasions, while facts about the USER get a second chance from the capture fallback. Off = that asymmetry stands.",
+  },
   'memory.composerTelemetry': {
     fromConfig: (c) => c?.memory?.composerTelemetry ?? true,
     validate: (v) => typeof v === 'boolean',
