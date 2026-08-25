@@ -95,10 +95,37 @@ export const SHAPES = Object.freeze({
   plainCoverage: 'plain-coverage',
 })
 
-/** ⛔ An unknown value falls back to `current` — a typo in config must not invent a fourth shape. */
+/**
+ * ⭐⭐⭐ THE SHIPPED DEFAULT IS `windows-first` (2026-08-25, Ote's ruling).
+ *
+ * ⭐ IT MEANS EXACTLY ONE THING: **same information → evidence first → inventory afterward.** ⛔ Nothing
+ * about coverage semantics, sampling or retrieval logic changed with it. Ote: *"the inventory wasn't too
+ * much information; it was in the wrong place… Keep the full information and simply put the actual
+ * evidence/windows before the inventory."*
+ *
+ * ── ⭐⭐ WHAT THE COMPARISON MEASURED (12 valid exercised runs, one variable) ────────────────────────
+ * Against `current`, `windows-first` held the correctness floor (5,4,5) and **every run beat every control
+ * run**: tool calls max 10 vs min 11 · retrieval calls max 7 vs min 8 · prompt tokens max 62,244 vs min
+ * 65,210 · badAxis 0,0,0 against 1,0,1. ⚠️ Wall clock did NOT separate, and that is stated rather than
+ * dropped. The payload is byte-for-byte the same size — the answer simply moves from **83% depth to 37%**.
+ *
+ * ⛔ AND THE TWO ARMS THAT REMOVED OR SOFTENED INFORMATION BOTH GOT WORSE: `plain-coverage` scored 3,3
+ * (both runs missing the same two facts) and `bounded-inventory` scored 1,5,0 while making the fewest tool
+ * calls of any arm. ⇒ **cutting the loop by cutting the signal removes the necessary part with it.**
+ * ⭐ They stay selectable because they are the experiment's apparatus, not dead code — see
+ * `test/results/b4/` for the frozen artifacts and `test/pipeline/b4-compare.mjs` to re-read them.
+ *
+ * ⚠️ ONE HONEST CAVEAT, PRESERVED: the floor holds 3-of-3 under the revised grader and 2-of-3 under the
+ * strict one, disagreeing on a single run. Ote: *"Don't silently choose whichever makes the result look
+ * cleaner."* Both gradings live in every record.
+ *
+ * ⛔ An unknown value still falls back to the DEFAULT — a typo in config must not invent a fifth shape.
+ */
+export const DEFAULT_SHAPE = SHAPES.windowsFirst
+
 export function shapeOf(config) {
   const v = config?.memory?.retrievalPayloadShape
-  return Object.values(SHAPES).includes(v) ? v : SHAPES.current
+  return Object.values(SHAPES).includes(v) ? v : DEFAULT_SHAPE
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

@@ -1,8 +1,10 @@
 // ⭐⭐⭐ THE PAYLOAD SHAPES ARE A CONTROLLED COMPARISON, SO THE CONTROL ARM MUST BE PROVABLY UNCHANGED.
 //
 // ⓘ B4 left one question open: when `about:` matches 292 of 298 conversations, what should come back?
-// Three candidate shapes now exist behind one config key. ⛔ `current` is the default and ships unchanged —
-// if that is not true, the recorded baseline is not a baseline and every arm is measured against nothing.
+// ⭐ ANSWERED AND SHIPPED 2026-08-25 — `windows-first` is the default. It removes nothing: same payload,
+// same full inventory, same coverage wording; the evidence simply comes before the inventory, which moved
+// the answer from 83% depth to 37%. ⛔ The losing arms stay SELECTABLE, because `current` is what the
+// frozen baseline in `test/results/b4/` was measured under and an unreproducible baseline is not one.
 //
 // ⛔ AND NO SHAPE MAY BE CHOSEN BECAUSE IT MADE ONE BENCHMARK PASS. Ote: *"We want the retrieval
 // interface to make good reasoning natural, not merely make this one benchmark pass."*
@@ -10,20 +12,44 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { SHAPES, shapeOf } from '../../Backend/app/components/conversation-retrieval.js'
+import { SHAPES, shapeOf, DEFAULT_SHAPE } from '../../Backend/app/components/conversation-retrieval.js'
 
 const SRC = readFileSync(new URL('../../Backend/app/components/conversation-retrieval.js', import.meta.url), 'utf8')
 // ⛔ Comments stripped: every assertion below is about the CODE, and this repo's most repeated defect is a
 // scan that matched its own explanatory prose.
 const code = SRC.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\r\n]*/g, '')
 
-test('⭐⭐⭐ the DEFAULT is `current` — absent config, empty config, and a typo all agree', () => {
-  assert.equal(shapeOf(undefined), SHAPES.current)
-  assert.equal(shapeOf({}), SHAPES.current)
-  assert.equal(shapeOf({ memory: {} }), SHAPES.current)
-  // ⛔ A typo must not invent a fourth shape and silently run an unmeasured arm in production.
-  assert.equal(shapeOf({ memory: { retrievalPayloadShape: 'windows_first' } }), SHAPES.current)
+test('⭐⭐⭐ the SHIPPED DEFAULT is `windows-first` — absent config, empty config, and a typo all agree', () => {
+  // ⭐ Ote's ruling, 2026-08-25, after the comparison: *"ship windows-first as the default … Keep the full
+  // information and simply put the actual evidence/windows before the inventory."*
+  assert.equal(DEFAULT_SHAPE, SHAPES.windowsFirst)
+  assert.equal(shapeOf(undefined), SHAPES.windowsFirst)
+  assert.equal(shapeOf({}), SHAPES.windowsFirst)
+  assert.equal(shapeOf({ memory: {} }), SHAPES.windowsFirst)
+  // ⛔ A typo must not invent a fifth shape and silently run an unmeasured arm in production.
+  assert.equal(shapeOf({ memory: { retrievalPayloadShape: 'windows_first' } }), SHAPES.windowsFirst)
   assert.equal(shapeOf({ memory: { retrievalPayloadShape: 'bounded-inventory' } }), SHAPES.boundedInventory)
+})
+
+test('⭐ every measured arm stays SELECTABLE, so the frozen benchmark can be reproduced', () => {
+  // ⛔ The losing shapes are the experiment's apparatus, not dead code. `current` in particular must
+  // remain reachable or the baseline in test/results/b4/ can never be re-run against.
+  for (const v of Object.values(SHAPES)) assert.equal(shapeOf({ memory: { retrievalPayloadShape: v } }), v)
+})
+
+test('⛔ shipping the default changed the SELECTION only — the payload branches are untouched', () => {
+  // Ote: *"don't change the payload beyond the tested windows-first behavior. I want this commit to mean
+  // exactly: same information → evidence first → inventory afterward, not «we also changed the coverage
+  // semantics / sampling / retrieval logic»."*
+  // ⇒ the windows-first branch must still be the same pure reordering that was measured, and the
+  // inventory it carries must still be the FULL one.
+  assert.match(code, /shape === SHAPES\.windowsFirst\s*\r?\n?\s*\? \{ windows, conversations: inventory_, alsoMatched: undefined \}/,
+    'the measured branch, unchanged')
+  assert.match(code, /const inventory_ = shape === SHAPES\.boundedInventory/,
+    '⛔ only bounded-inventory narrows the inventory — windows-first still carries all of it')
+  assert.match(code, /notSampled: notSampledText/, 'coverage still reports the same count')
+  assert.match(code, /narrow it with about:, between: or where:, or ask again/,
+    '⛔ the coverage WORDING is unchanged — plain-coverage was not shipped alongside')
 })
 
 test('⛔ exactly ONE arm is allowed to touch the B1 inventory contract', () => {

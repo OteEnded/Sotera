@@ -14,6 +14,11 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { FACTS, FACTS_STRICT, TASKS, REFUSAL, assertedTiers } from '../lib/b4-case.mjs'
 
 const DIR = new URL('../results/b4/', import.meta.url)
+// ⛔⛔ DRY RUN BY DEFAULT. Ote, 2026-08-25: *"preserve the B4 experiment artifacts and baseline exactly
+// as they are. This is now a useful benchmark for future retrieval-interface changes."* ⇒ re-grading is
+// still one command, but it REPORTS what would change and writes nothing unless `--write` is passed.
+// ⭐ A benchmark that any later run can silently rewrite is not a benchmark.
+const WRITE = process.argv.includes('--write')
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'))
 let changed = 0
 
@@ -69,6 +74,9 @@ for (const f of files) {
   rec.behaviour.exercisedShape = rec.behaviour.retrieveConversationsCalls > 0
 
   rec.rescored = { at: new Date().toISOString(), previous: before, why: 'both graders were allowlists that under-reported' }
-  writeFileSync(url, JSON.stringify(rec, null, 2))
+  if (WRITE) writeFileSync(url, JSON.stringify(rec, null, 2))
 }
 console.log(`\n  ${files.length} record(s) re-scored · ${changed} verdict(s) changed`)
+console.log(WRITE
+  ? '  ⚠️ WRITTEN — the frozen benchmark artifacts were modified'
+  : '  ✔ dry run — nothing written. Pass --write only when the benchmark is meant to change.')

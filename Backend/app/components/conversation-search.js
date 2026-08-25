@@ -401,18 +401,52 @@ export function embedMessagesEnabled(config) {
  * injectable seam (defaults to embedPendingMessages) so the drain/cap logic is unit-testable. Never throws.
  * @returns {{skipped?:boolean, reason?:string, embedded:number, scanned:number, batches:number, drained:boolean}}
  */
+// ⭐⭐⭐ ONE DRAIN AT A TIME, SHARED BY EVERY TRIGGER. ⛔ Module scope on purpose — the guard is useless
+// if each caller keeps its own.
+//
+// ⓘ THREE TRIGGERS ENTER HERE (Ote's diagram, 2026-08-25): the **5-minute live drain** (`message-embed-
+// fresh`, the primary freshness mechanism), the **daily catch-up** (`usage-retention`, for whatever a
+// restart or an error left behind), and the **post-revisit opportunity**. Before this they could overlap:
+// the 5-minute tick and the 04:10 pass can land on the same minute, and each batch re-queries for
+// unembedded rows, so the cost was duplicated EMBEDDER work rather than duplicate rows — wasteful, not
+// corrupting, which is exactly why it never surfaced.
+//
+// ⭐⭐ A SECOND CALLER SKIPS, IT DOES NOT QUEUE. The in-flight drain re-queries the same shared pending
+// set on every batch, so anything the skipped caller would have indexed is picked up by the drain
+// already running. Queueing would only add a second pass over rows that are already gone.
+//
+// ⚠️ THE CHECK AND THE SET ARE SYNCHRONOUS, WITH NO `await` BETWEEN THEM, and that is what makes a bare
+// boolean sufficient on a single-threaded runtime. ⛔ Do not insert an await between them; that is the
+// one edit that would silently reopen the race this closes.
+//
+// ⛔ AND THE GATE COMES FIRST: a disabled or db-less drain returns before the guard is ever taken, so a
+// no-op call can never block a real one. `force` bypasses the SETTING, never the guard — concurrency and
+// enablement are different questions.
+let drainInFlight = false
+
+/** ⛔ Tests only — a leaked guard from a thrown test would silently disable every later drain. */
+export function _resetDrainGuardForTest() { drainInFlight = false }
+export function _drainInFlightForTest() { return drainInFlight }
+
 export async function drainPendingEmbeddings(fastify, { batchLimit = 200, maxBatches = 10, force = false, userId = null, embedBatch = embedPendingMessages } = {}) {
   if (!force && !embedMessagesEnabled(fastify.config)) return { skipped: true, reason: 'disabled', embedded: 0, scanned: 0, batches: 0, drained: false }
   if (!fastify.db?.txn_messages) return { skipped: true, reason: 'no-db', embedded: 0, scanned: 0, batches: 0, drained: false }
+  if (drainInFlight) return { skipped: true, reason: 'in-flight', embedded: 0, scanned: 0, batches: 0, drained: false }
+  drainInFlight = true
   let embedded = 0
   let scanned = 0
   let batches = 0
   let drained = false
-  for (; batches < maxBatches; batches++) {
-    const r = await embedBatch(fastify, { userId, limit: batchLimit })
-    embedded += r.embedded
-    scanned += r.scanned
-    if (r.scanned < batchLimit) { drained = true; batches++; break } // fewer candidates than a full batch ⇒ nothing left
+  try {
+    for (; batches < maxBatches; batches++) {
+      const r = await embedBatch(fastify, { userId, limit: batchLimit })
+      embedded += r.embedded
+      scanned += r.scanned
+      if (r.scanned < batchLimit) { drained = true; batches++; break } // fewer candidates than a full batch ⇒ nothing left
+    }
+  } finally {
+    // ⛔ `finally`, so a throw inside a batch cannot strand the guard and disable every later drain.
+    drainInFlight = false
   }
   return { embedded, scanned, batches, drained }
 }

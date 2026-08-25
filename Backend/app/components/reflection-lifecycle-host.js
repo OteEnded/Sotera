@@ -48,6 +48,9 @@ import { checkIdleGate, gateSummaryLine } from './revisit-idle-gate.js'
 // ⭐ `admitToQueue` is the two-lane budget rule. ⛔ It lives beside the lifecycle, not here, so the
 // property Ote asked for — *"correct as the backlog grows"* — is testable without a database.
 import { stalledAttempts, admitToQueue } from './revisit-lifecycle.js'
+// ⭐ The SAME drain the 5-minute job and the daily catch-up call. ⛔ Not a second indexing path — Ote:
+// *"Keep the existing drainPendingEmbeddings mechanism. Do not build a second indexing pipeline."*
+import { drainPendingEmbeddings } from './conversation-search.js'
 
 // ⭐ READ ONCE AT MODULE LOAD, NEVER PER ROW. Same rule and the same reason as the noticing pass: this
 // must report the code that is LOADED, not the file on disk. The manual version of this check failed three
@@ -801,5 +804,31 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
     await log(`[reflection] heartbeat: scanned=${tally.scanned} reflected=0 `
       + `skipped=${JSON.stringify(tally.skipped)}`, import.meta.url)
   }
+  // ── ⭐⭐ POST-REVISIT: AN OPPORTUNITY TO INDEX, ⛔ NEVER A DEPENDENCY ─────────────────────
+  //
+  // Ote: *"revisit produces/changes conversation material → embedding drain gets an opportunity to index
+  // it immediately… The revisit trigger is an opportunity, not a dependency: revisit must not wait for
+  // embeddings and must remain successful if the embedder is unavailable."*
+  //
+  // ⛔ NOT AWAITED, AND THAT IS THE POINT. The round's outcome is already decided and written; making it
+  // wait on an embedder would let an unavailable model turn a completed revisit into a slow one, and a
+  // throwing one into a failed one. ⭐ The `.catch` is the contract, not defensive noise.
+  //
+  // ⓘ CALLED UNCONDITIONALLY because the drain is already cheap when idle: with nothing pending it is ONE
+  // indexed query and the embed loop never runs, so no embedder is woken. Deciding here whether work
+  // exists would be a second copy of that query, and two copies of a predicate is how they stop agreeing.
+  //
+  // ⚠️ THE 5-MINUTE JOB REMAINS THE PRIMARY FRESHNESS MECHANISM. This hook is an immediate opportunity,
+  // ⛔ not a replacement for it — measured the day it was added, pending was 0 and the index ran 3 minutes
+  // AHEAD of the newest message.
+  drainPendingEmbeddings(fastify)
+    .then((emb) => {
+      if (!emb.skipped && emb.embedded) return log(`[message-embed] (post-revisit) ${JSON.stringify(emb)}`, import.meta.url)
+      // ⓘ `in-flight` is a NORMAL outcome here, not a fault: the 5-minute tick may already be draining
+      // the same shared queue, and it will pick up anything this round produced.
+      return undefined
+    })
+    .catch((e) => log(`[message-embed] (post-revisit) error: ${e.message}`, import.meta.url).catch(() => {}))
+
   return { ...tally, details }
 }
