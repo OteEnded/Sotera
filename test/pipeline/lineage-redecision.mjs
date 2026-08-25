@@ -124,7 +124,14 @@ for (const [i, arm] of ARMS.entries()) {
     const raw = Array.isArray(m.tool_calls) ? m.tool_calls : (m.tool_calls ? [m.tool_calls] : [])
     for (const t of raw) {
       const name = t?.function?.name ?? t?.name ?? null
-      let args = t?.function?.arguments ?? t?.arguments ?? null
+      // ⚠️⚠️ `t.args`, AND THE ORDER MATTERS. This persona stores tool calls as
+      // `{ id, name, args, result }` — ⛔ NOT OpenAI's `{ function: { name, arguments } }`. The first
+      // version of this reader checked `t.function.arguments` first and silently produced `undefined`
+      // for every argument, so the gate reported `mine=undefined` for a call that demonstrably passed
+      // `mine:true` (it wrote a persona-authored row, which nothing else can do).
+      // ⭐ A check that reads a nonexistent field returns a confident wrong answer — `lib/tool-trace.mjs`
+      // exists precisely to throw here instead, and not using it is what let this through.
+      let args = t?.args ?? t?.function?.arguments ?? t?.arguments ?? null
       if (typeof args === 'string') { try { args = JSON.parse(args) } catch { /* keep the string */ } }
       if (name) toolCalls.push({ name, args })
     }

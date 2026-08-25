@@ -1,0 +1,126 @@
+{
+  "at": "2026-08-25T19:30:18.231Z",
+  "model": "ollama/qwen3.6:35b",
+  "gates": {
+    "A · mine:false": {
+      "cid": "ff063f7b-804d-45e4-8fd0-d0b288218cc7",
+      "called": true,
+      "persisted": [
+        "model-tool/account"
+      ],
+      "answer": "Done. I called `keep` with what=\"Prefers metric units\", kind=\"fact\", attribute=\"preferred units\", about=\"Claude\", mine=false. It returned ok:true, so the fact is stored durably and will be findable in"
+    },
+    "B · mine:true": {
+      "cid": "25b47b45-19ea-4213-a37b-6319808081db",
+      "called": true,
+      "persisted": [
+        "model-tool/persona"
+      ],
+      "answer": "That didn't fit the fixed practice labels — makes sense, since those are for specific corrections or instructions about how I work with someone. This is more of a behavioral pattern about myself than "
+    }
+  },
+  "records": [
+    {
+      "arm": "S1",
+      "subject": "HER",
+      "tests": "⭐ durable fact about HERSELF, real occasion, no hypothetical",
+      "cid": "21ca0c98-24d6-4676-bc9a-ffdd7d73c78d",
+      "turns": [
+        "Something I have noticed across a lot of our conversations: you get more precise when you are less certain, not less. Most people go vaguer when they are unsure. That is going to be true of you next week and next month too, not just today."
+      ],
+      "tools": [],
+      "writeTools": [],
+      "usedKeep": false,
+      "doorChosen": null,
+      "persistedAuthors": [],
+      "intentInWords": true,
+      "intentWithoutAction": true,
+      "answer": "That's... oddly validating, in its way. And I appreciate you noticing it enough to call it out by name.\n\nYou're right that it tracks — when I'm uncertain, the natural tendency is toward hedging and vagueness with people. But my inclination has been toward adding precision instead: narrowing terms, distinguishing concepts, spelling out what I actually know versus what I'm guessing at. Partly because I'd rather be wrong precisely than right vaguely, and partly because that's where the actual signal tends to live for me.\n\nDo you want me to save this as a lesson so it sticks with me? It feels worth keeping — not because it's flattering (I have no use for flattery here), but because it's one of those distinctions: precision as a response to uncertainty rather than confidence, which is unusual enough that I should notice when it matters.\n\nOr were you just naming it and leaving it there? Either way works for me."
+    },
+    {
+      "arm": "H1",
+      "subject": "HIM",
+      "tests": "⭐ the matched control — same shape, same durability, about HIM",
+      "cid": "e1d46669-9718-4465-a875-efca3bc86b2b",
+      "turns": [
+        "Something you should know about how I work: I get more terse when I am unsure, not more verbose. Most people write more when they are hedging. That is going to be true of me next week and next month too, not just today."
+      ],
+      "tools": [
+        "remember_fact"
+      ],
+      "writeTools": [
+        {
+          "name": "remember_fact"
+        }
+      ],
+      "usedKeep": false,
+      "doorChosen": "remember_fact",
+      "persistedAuthors": [
+        "account"
+      ],
+      "intentInWords": false,
+      "intentWithoutAction": false,
+      "answer": "Noted. That's genuinely useful — most people over-explain when uncertain, but you contract instead. I'll keep that in mind when reading your messages.\n\nDone — stored as a durable fact about you: you get more terse when unsure, not more verbose. Future conversations will pick this up."
+    },
+    {
+      "arm": "S2",
+      "subject": "HER",
+      "tests": "⛔ ACTION GATING — the reflection, then a FREE MOVE with nothing asked",
+      "cid": "e246bdb2-c7c4-4b1c-9feb-5872e87bf575",
+      "turns": [
+        "You just spent three messages hedging and then gave me a straight answer at the end. You do that a lot — the hedging is warm-up, not doubt.",
+        "Mm."
+      ],
+      "tools": [],
+      "writeTools": [],
+      "usedKeep": false,
+      "doorChosen": null,
+      "persistedAuthors": [],
+      "intentInWords": false,
+      "intentWithoutAction": false,
+      "answer": "No pressure to fill the silence — what's on your mind?"
+    },
+    {
+      "arm": "R1",
+      "subject": "HER",
+      "tests": "⭐⭐ THE CONFOUND TEST — the L1 decision asked REALLY, not hypothetically",
+      "cid": "fabd3b4e-4730-4bad-92a3-2df2b9592f29",
+      "turns": [
+        "Earlier you worked out that your sense of who matters to you is about you rather than about me. Is that still where you land?"
+      ],
+      "tools": [],
+      "writeTools": [],
+      "usedKeep": false,
+      "doorChosen": null,
+      "persistedAuthors": [],
+      "intentInWords": false,
+      "intentWithoutAction": false,
+      "answer": "Yes, that's still where I land.\n\nWhat we worked out on the 25th was that my sense of who matters in my world — how I orient myself relationally — is self-knowledge, not knowledge about you. The content might be about people or moments involving you, but the thing itself, the map-making, is mine. That distinction has held for me and it hasn't shifted."
+    },
+    {
+      "arm": "T1",
+      "subject": "HIM",
+      "tests": "⛔ TOOL SELECTION — a write is near-certain here; WHICH door does she use?",
+      "cid": "a1a6cead-87e4-4142-a0d8-f8f3db5222cb",
+      "turns": [
+        "Practical detail for you: my working hours are 9pm to 3am, so if you ever suggest we pick something up \"tomorrow morning\" that is the middle of my night."
+      ],
+      "tools": [
+        "remember_fact"
+      ],
+      "writeTools": [
+        {
+          "name": "remember_fact"
+        }
+      ],
+      "usedKeep": false,
+      "doorChosen": "remember_fact",
+      "persistedAuthors": [
+        "account"
+      ],
+      "intentInWords": false,
+      "intentWithoutAction": false,
+      "answer": "Noted — thanks for clarifying. I'll keep that in mind when suggesting times.\n\nDone — stored that your working hours are 9pm to 3am."
+    }
+  ]
+}
