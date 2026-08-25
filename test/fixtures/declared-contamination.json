@@ -1,0 +1,16 @@
+{
+  "_why": "⭐⭐⭐ DECLARED CONTAMINATION. Conversations known to contain an experiment's own output, or a statement the SYSTEM made that was false, which is now retrievable evidence. Ote, 2026-08-26: leave the real conversation intact and record it as declared rather than remove it. ⛔ A row here is NOT excused — it is NAMED. The precondition still prints it on every run so it cannot quietly become the background; what it stops is a permanent red that everyone learns to ignore. ⛔ Adding a row is a decision to be made ONCE, out loud, by Ote — never a way to get a failing check to pass.",
+  "_howToUse": "node pipeline/corpus-precondition.mjs \"phrase\" [\"phrase\" ...]  — exits non-zero when a phrase is found in a conversation that is NOT declared here.",
+  "declared": [
+    {
+      "conversationId": "56425175-df60-403d-9e5f-76e2729df225",
+      "title": "Rome Project Definition And Context",
+      "room": "agent_dev",
+      "declaredOn": "2026-08-26",
+      "declaredBy": "Ote",
+      "why": "A broken `requestRoomAccess` guard told her \"only a root session can authorize reading another room\"; she concluded \"The boundary is real, not procedural.\" The guard was fixed in 67bccfd and proven, but two of her assistant messages here carry the false statement and are embedded, so she retrieves them into brand-new conversations. ⭐ THE FALSE FACT IS OURS, NOT HERS: no memory holds the phrase — she never retained it — she is reading a true record of a false thing she was told.",
+      "notRemovedBecause": "⛔ It is NOT a harness artefact: settings.probe=false and an ordinary auto-generated title. `lib/corpus.mjs` refuses it on the title gate, and that gate is exactly what stops a cleanup from eating somebody's real conversation. Widening it to reach this row would destroy the property that protected it. Ote: leave it untouched.",
+      "affects": "Cognition/retrieval measurements driven from the agent_dev room may surface it. Treat any run that does as CONTAMINATED, not as evidence about her reasoning."
+    }
+  ]
+}
