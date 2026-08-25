@@ -68,6 +68,15 @@ export const REFLECTION_READ_TOOLS = [
   // the four Ote named, plus the two ordinary reads that answer "do I already have this?"
   'recall_own_memory', 'recall_own_history', 'search_conversations', 'inspect_around',
   'recall_memory', 'recall_lessons',
+  // ⭐⭐ THE SOURCE ITSELF (2026-08-25). Ote's model for a passive revisit is
+  //   `revisit lifecycle → retrieve_conversations → Sotera examines source material → decides`
+  // ⇒ she is handed a BOUNDED slice below, and this is how she goes and gets more when that slice is
+  // not enough — the earlier part of this conversation, or what she said to the same person elsewhere.
+  // ⛔ It grants no new access: it runs under the same disclosure boundary as an interactive retrieval,
+  // which is the baseline Ote ratified as TEMPORARY and explicitly not the final answer to what Sotera
+  // may examine of her own lived history.
+  // ⛔ AND WHAT IT RETURNS IS SOURCE MATERIAL, NOT MEMORY — every turn comes back `not-retained`.
+  'retrieve_conversations',
 ]
 export const REFLECTION_WRITE_TOOLS = [
   // ⭐ RETENTION AND NON-RETENTION ARE BOTH ACTIONS. `decline_to_remember` is here for the same reason
@@ -133,6 +142,42 @@ export function isReadyToReflect({
  * count and the text come out of the same function, so `messages_considered` cannot drift from the prompt.
  * PURE.
  */
+/**
+ * ⭐⭐⭐ THE UNREVIEWED RANGE — what makes a revisit INCREMENTAL rather than a re-read.
+ *
+ * Ote: *"Suppose a conversation has last_revisited_message_id = 120 and current_last_message_id = 145.
+ * Then the background revisit doesn't need to reread the entire conversation. It can say: I have
+ * already reviewed through message 120. Review 121–145."*
+ *
+ * ⚠⚠ UNTIL THIS EXISTED THE CURSOR WAS RECORDED AND NOT USED. `from_rolling_id` went into the ledger
+ * (025) while the turn still received EVERY message in the conversation — so the incremental model was
+ * true of the audit trail and false of the actual work. A cursor nothing reads is a comment.
+ *
+ * ⭐ CONTEXT BEFORE THE RANGE, AND IT IS BOUNDED. Handing her 121–145 with nothing before it invites
+ * exactly the misreading this project keeps finding — a dangling pronoun resolving to the wrong person.
+ * A few preceding turns cost little and are marked as context rather than as new material.
+ * ⛔ It is NOT the whole prior conversation: that would make the slice decorative.
+ * ⓘ `already === 0` (never reviewed) means the range IS the whole conversation, which is correct and
+ * needs no special case.
+ *
+ * @returns {{ slice: object[], contextCount: number, newCount: number, from: number|null }}
+ */
+export function unreviewedSlice(msgs = [], { already = 0, contextBefore = 6 } = {}) {
+  const rows = Array.isArray(msgs) ? msgs : []
+  if (!(already > 0)) return { slice: rows, contextCount: 0, newCount: rows.length, from: null }
+  const firstNew = rows.findIndex((m) => Number(m.rolling_id) > already)
+  // ⛔ NOTHING NEW ISN'T AN ERROR — the eligibility gate refuses this case upstream, and returning the
+  // whole conversation here "just in case" would silently undo the bound.
+  if (firstNew < 0) return { slice: [], contextCount: 0, newCount: 0, from: null }
+  const start = Math.max(0, firstNew - Math.max(0, contextBefore))
+  return {
+    slice: rows.slice(start),
+    contextCount: firstNew - start,
+    newCount: rows.length - firstNew,
+    from: Number(rows[firstNew].rolling_id),
+  }
+}
+
 export function shapeReflectionTranscript(msgs = [], { maxChars = 24000, lineClip = 1500, edge = 20 } = {}) {
   const line = (m) => `${m.role}: ${String(m.content || '').replace(/\s+/g, ' ').slice(0, lineClip)}`
   const lines = msgs.map(line)

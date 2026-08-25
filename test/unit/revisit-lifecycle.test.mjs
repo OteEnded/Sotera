@@ -276,3 +276,99 @@ test('⛔ …while the migrations KEEP their history', () => {
     'the table is empty after the rename — data did not survive',
   ]) assert.ok(RENAME.includes(guard), `026 must prove: ${guard}`)
 })
+
+// ══ 8 · ⭐⭐⭐ THE PASSIVE WORKER · a revisit reviews what it has NOT reviewed ═════════════════════
+//
+// Ote: *"I have already reviewed through message 120. Review 121–145."*
+// ⚠️⚠️ Until this existed the cursor was RECORDED AND NOT USED — `from_rolling_id` went into the ledger
+// while the turn still received every message in the conversation. The incremental model was true of the
+// audit trail and false of the actual work. ⭐ A cursor nothing reads is a comment.
+test('⭐⭐⭐ the revisit resumes at the cursor, not at the beginning', async () => {
+  const { unreviewedSlice } = await import('../../Backend/app/components/reflection-lifecycle.js')
+  const msgs = Array.from({ length: 45 }, (_, i) => ({ rolling_id: 101 + i, role: 'user', content: 'm' }))
+  const s = unreviewedSlice(msgs, { already: 120 })
+  assert.equal(s.from, 121, 'the first NEW message is 121')
+  assert.equal(s.newCount, 25)
+  assert.ok(s.slice.length < msgs.length, '⛔ she is not handed the whole conversation again')
+  assert.equal(s.slice[s.slice.length - 1].rolling_id, 145, 'and the range runs to the top')
+})
+
+test('⭐ a few turns of context precede the range, bounded', async () => {
+  const { unreviewedSlice } = await import('../../Backend/app/components/reflection-lifecycle.js')
+  const msgs = Array.from({ length: 45 }, (_, i) => ({ rolling_id: 101 + i, role: 'user', content: 'm' }))
+  const s = unreviewedSlice(msgs, { already: 120, contextBefore: 6 })
+  assert.equal(s.contextCount, 6)
+  assert.equal(s.slice[0].rolling_id, 115, 'context starts six before the first new message')
+  // ⛔ NOT THE WHOLE PRIOR CONVERSATION — that would make the slice decorative.
+  assert.equal(unreviewedSlice(msgs, { already: 120, contextBefore: 0 }).slice[0].rolling_id, 121)
+})
+
+test('⭐ never reviewed ⇒ the whole conversation, with no special case', async () => {
+  const { unreviewedSlice } = await import('../../Backend/app/components/reflection-lifecycle.js')
+  const msgs = Array.from({ length: 10 }, (_, i) => ({ rolling_id: i + 1, role: 'user', content: 'm' }))
+  const s = unreviewedSlice(msgs, { already: 0 })
+  assert.equal(s.slice.length, 10)
+  assert.equal(s.from, null, 'no lower bound is invented for a conversation that has none')
+})
+
+test('⛔ nothing new ⇒ EMPTY, never "everything just in case"', async () => {
+  const { unreviewedSlice } = await import('../../Backend/app/components/reflection-lifecycle.js')
+  const msgs = Array.from({ length: 10 }, (_, i) => ({ rolling_id: i + 1, role: 'user', content: 'm' }))
+  const s = unreviewedSlice(msgs, { already: 999 })
+  assert.equal(s.slice.length, 0)
+  assert.equal(s.newCount, 0)
+  // ⭐ The eligibility gate refuses this upstream; returning everything here would silently undo the bound.
+})
+
+test('⭐⭐ the host builds the transcript from the SLICE, not from every message', () => {
+  assert.match(hostCode, /unreviewedSlice\(msgs, \{ already \}\)/)
+  assert.match(hostCode, /shapeReflectionTranscript\(slice\)/,
+    '⛔ shapeReflectionTranscript(msgs) would re-read the whole conversation every tick')
+})
+
+test('⭐⭐⭐ she can reach the SOURCE from inside a revisit', async () => {
+  // Ote's arrow: revisit lifecycle → retrieve_conversations → Sotera examines source material → decides.
+  const { REFLECTION_TOOLS, REFLECTION_WRITE_TOOLS } = await import('../../Backend/app/components/reflection-lifecycle.js')
+  assert.ok(REFLECTION_TOOLS.includes('retrieve_conversations'))
+  // ⛔ AND IT IS A READ. Retrieval is source material; it must never be on the write side.
+  assert.ok(!REFLECTION_WRITE_TOOLS.includes('retrieve_conversations'),
+    'retrieval is not retention — what it returns comes back not-retained')
+  // ⛔ the destructive tools are still withheld from a background turn
+  for (const w of ['forget_memory', 'restore_memory', 'pin_memory', 'remember_fact']) {
+    assert.ok(!REFLECTION_TOOLS.includes(w), `${w} must stay out of a passive revisit`)
+  }
+})
+
+// ══ 9 · ⭐⭐ THE STALE SWEEP · an ACT that closes what a dead process left open ════════════════════
+test('⭐⭐ the sweep is wired, and it is an act rather than a derivation', () => {
+  // ⚠️⚠️ THE HOLE THIS CLOSES IS ONE 025 CREATED. Its in-flight partial unique index allows one open
+  // attempt per stretch — which is what stops two ticks both spending a 35B generation. But a process
+  // that dies mid-turn leaves that row `outcome IS NULL` forever, permanently occupying its watermark.
+  // ⭐ Measured on this lane: a probe left exactly two such rows behind earlier the same day.
+  assert.match(hostCode, /async function sweepStalled/)
+  assert.match(hostCode, /stalledAttempts\(open, \{ now: Date\.now\(\), staleAfterMs \}\)/,
+    'the pure selector chooses; the host performs the act')
+  assert.match(hostCode, /const swept = await sweepStalled/, 'and the tick calls it')
+  // ⛔ CLOSED AS FAILED WITH A DIAGNOSIS — never `completed` (nothing was reviewed, so the cursor must not
+  // move) and never `preempted` (nobody yielded to anyone).
+  assert.match(hostCode, /swept after \$\{Math\.round\(staleAfterMs \/ 60_000\)\} minutes open/)
+  assert.ok(!/sweepStalled[\s\S]{0,900}preempted: true/.test(hostCode),
+    '⛔ a sweep is not a preemption')
+})
+
+test('⭐ the allowance comes from the work’s own cadence, not a flat constant', () => {
+  // ⭐ Borrowed from Hermes's `sweep_stale_inflight`: `max(2 × cadence, floor)` — *"so a slow-but-healthy
+  // long-interval job is never clipped by the sweep."* A constant would either kill slow-but-fine
+  // revisits or let dead ones sit.
+  assert.match(hostCode, /Math\.max\(2 \* quietMinutes \* 60_000, floorMs\)/)
+})
+
+test('⛔⛔ derivation is STILL blind to age — the sweep did not smuggle a clock into it', () => {
+  // ⭐ The two must not converge: `attemptState` inventing an ending from silence is exactly the defect
+  // `pending` had. A sweep is something that HAPPENED, at a known time, and is written down.
+  const open = row({ outcome: null, started_at: '2020-01-01T00:00:00Z', requested_at: '2020-01-01T00:00:00Z' })
+  assert.equal(attemptState(open), REVISIT.started, 'six years open is still open until an act says otherwise')
+  const pure = readFileSync(new URL('../../Backend/app/components/revisit-lifecycle.js', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+  assert.ok(!/Date\.now\(\)/.test(pure), '⛔ the pure module has no clock of its own')
+})

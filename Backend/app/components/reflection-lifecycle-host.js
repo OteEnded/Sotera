@@ -38,11 +38,14 @@ import { buildToolContext, runTool, toolDefinitions } from './runtime.js'
 import { isRootConnectedUser } from '../auth/root-identity.js'
 import {
   REFLECTION_GENERATION, REFLECTION_TOOLS, buildReflectionTurnPrompt, isReadyToReflect,
-  shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal,
+  shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal, unreviewedSlice,
 } from './reflection-lifecycle.js'
 // ⭐ THE EXECUTION GATE. ⛔ Imported, never reimplemented: the pure verdict lives in one file so a
 // check can drive "she has been idle six minutes" without waiting six minutes.
 import { checkIdleGate, gateSummaryLine } from './revisit-idle-gate.js'
+// ⭐ The sweep's SELECTOR. ⛔ It decides nothing — see `sweepStalled` below for why the act and the
+// selection are deliberately different things.
+import { stalledAttempts } from './revisit-lifecycle.js'
 
 // ⭐ READ ONCE AT MODULE LOAD, NEVER PER ROW. Same rule and the same reason as the noticing pass: this
 // must report the code that is LOADED, not the file on disk. The manual version of this check failed three
@@ -184,6 +187,58 @@ async function recordFailure(seq, schema, { conversationId, userId, upTo, from, 
 }
 
 /**
+ * ⭐⭐⭐ CLOSE ATTEMPTS THAT WERE OPENED AND NEVER FINISHED. An ACT, not a derivation.
+ *
+ * ⚠️⚠️ THIS CLOSES A HOLE MIGRATION 025 CREATED. Its in-flight partial unique index allows exactly one
+ * open attempt per stretch — which is what keeps two concurrent ticks from both spending a 35B
+ * generation. But if the process dies mid-turn that row stays `outcome IS NULL` forever, and it
+ * permanently occupies its own watermark: the conversation goes quiet in the ledger and nothing can say
+ * why. ⭐ Measured on this very lane earlier today — a probe left two such rows behind.
+ *
+ * ⛔ AND IT IS NOT A DERIVATION, WHICH IS THE WHOLE POINT. `attemptState()` still returns `started` at one
+ * minute and at one year alike, because deriving death from silence invents an event nobody observed —
+ * the defect `pending` had. Here something DID happen: a sweep ran, at a known time, and wrote down that
+ * it ran. **Deriving death from silence and recording a sweep that happened are different things**, and
+ * only the second leaves an operator anything to audit.
+ *
+ * ⭐ THE ALLOWANCE IS DERIVED FROM THE WORK'S OWN CADENCE, borrowed from Hermes's `sweep_stale_inflight`:
+ * `max(2 × tick, floor)`, *"so a slow-but-healthy long-interval job is never clipped by the sweep."* A
+ * flat constant would either kill slow-but-fine revisits or let dead ones sit.
+ * ⛔ It closes them as `failed` with a diagnosis naming the sweep — never `completed` (nothing was
+ * reviewed, so the cursor must not move) and never `preempted` (nobody yielded to anyone).
+ */
+async function sweepStalled(fastify, { quietMinutes }) {
+  const db = fastify.db
+  const seq = db.txn_messages.sequelize
+  const { schema } = db.txn_messages.getTableName()
+  const floorMs = intCfg(fastify.config, 'revisitStaleMinutes', 60) * 60_000
+  const staleAfterMs = Math.max(2 * quietMinutes * 60_000, floorMs)
+  let open = []
+  try {
+    open = await seq.query(
+      `SELECT id::text AS id, conversation_id::text AS cid, requested_at, outcome
+         FROM "${schema}"."log_conversation_revisits" WHERE outcome IS NULL`,
+      { type: seq.QueryTypes.SELECT })
+  } catch (e) {
+    await log(`[revisit] stale sweep could not read: ${e.message}`, import.meta.url)
+    return 0
+  }
+  const stale = stalledAttempts(open, { now: Date.now(), staleAfterMs })
+  for (const row of stale) {
+    await recordFailure(seq, schema, {
+      claimId: row.id,
+      failure: `no completion recorded; swept after ${Math.round(staleAfterMs / 60_000)} minutes open`,
+    })
+  }
+  // ⛔ Logged only when it actually swept — a quiet lane stays quiet, and the heartbeat below is what
+  // distinguishes a quiet pass from a dead one.
+  if (stale.length) {
+    await log(`[revisit] swept ${stale.length} stalled attempt(s) after ${Math.round(staleAfterMs / 60_000)}m open`, import.meta.url)
+  }
+  return stale.length
+}
+
+/**
  * ⭐⭐ ONE REFLECTION OPPORTUNITY, END TO END.
  *
  * @param {{conversationId:string, force?:boolean}} o `force` skips the quiet+changed gate (checks and a
@@ -235,7 +290,13 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const who = owner?.display_name || owner?.username || 'them'
   // ⭐ The transcript and the COUNT come out of one function, so `messages_considered` can never claim she
   // read something the prompt elided. See shapeReflectionTranscript.
-  const { transcript, considered, elided } = shapeReflectionTranscript(msgs)
+  // ⭐⭐⭐ SHE REVIEWS WHAT SHE HAS NOT REVIEWED. `already` is the COMPLETED cursor, so this is the
+  // incremental model Ote described, applied to the work rather than only to the ledger.
+  // ⛔ The prompt itself is untouched — `buildReflectionTurnPrompt` is still who + transcript + the
+  // ratified question, byte for byte. What changed is WHICH messages the transcript is built from,
+  // which is an input, not a frame. A check asserts the prompt shape separately.
+  const { slice, contextCount, newCount } = unreviewedSlice(msgs, { already })
+  const { transcript, considered, elided } = shapeReflectionTranscript(slice)
   const prompt = buildReflectionTurnPrompt({ who, transcript })
 
   // ── ⭐⭐⭐ CLAIM THE LEDGER ROW **BEFORE** ANYTHING CAN BE WRITTEN ─────────────────────────────────
@@ -615,7 +676,10 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
     order: [['updated_at', 'ASC']], raw: true,
   })
 
-  const tally = { scanned: 0, reflected: 0, wroteMemory: 0, blocked: 0, skipped: {} }
+  // ⭐ SWEEP FIRST, so a stalled row from a dead process cannot keep its watermark out of this tick's
+  // reach. ⛔ After the gate, never before it: a sweep is still background work.
+  const swept = await sweepStalled(fastify, { quietMinutes })
+  const tally = { scanned: 0, reflected: 0, wroteMemory: 0, blocked: 0, swept, skipped: {} }
   const details = []
   for (const c of convos) {
     if (tally.reflected >= maxConvos) break
