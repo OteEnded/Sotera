@@ -142,6 +142,26 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 allowNull: true,
             },
             confidence: {
+                // ⚠️⚠️ AUDITED 2026-08-26 ACROSS ALL 92 ROWS, AND IT HELD TWO DIFFERENT QUANTITIES.
+                // Set `preferred_name` aside and confidence takes FOUR values in the entire store, every
+                // one a per-writer CONSTANT: 1.0×34 (document-ingest) · 0.6×37 (the `synthesized`
+                // ceiling) · 0.85×8 (`CONFIDENCE_DEFAULT.fact`, a literal) · null×4. ⇒ for 83 rows it
+                // carries no information that (writer, provenance) does not already carry.
+                // The 9 `preferred_name` rows held EVERY varying value there was — and that number was
+                // the identity interpreter's certainty **that a naming act occurred**, not that the
+                // captured value was right. Two live rows sit at 0.99 and 0.95 on values that are whole
+                // sentences rather than names.
+                //
+                // ⭐ Ote's ruling: no migration. *"Keep the existing scale; fix what confidence actually
+                // means going forward rather than pretending the existing numbers have more semantic
+                // resolution than they do."* ⇒ `memory-identity-host.js` stopped writing act-certainty
+                // here (it is carried as `context.actCertainty`), and ⛔ the existing values are left
+                // exactly as they are — they honestly record what the writers used to do.
+                //
+                // ⛔ DO NOT read this as a judgement about a claim's truth. It is a CEILING expressing
+                // one ordering: an inference may not present itself as certainly as something the person
+                // actually said. Everything richer belongs on `provenance` and `modality`.
+                //
                 // How much we TRUST this memory is true (0..1) — distinct from `importance`
                 // (salience). Set at capture by the write mechanism (explicit atomic fact > general
                 // remember), so recall/ranking can weight trust WITHOUT the model having to re-infer
@@ -164,6 +184,27 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
             // impersonating a quoted fact.
             provenance: {
                 type: DataTypes.ENUM('quoted', 'elicited', 'synthesized', 'observed'),
+                allowNull: true,
+            },
+            // ⭐⭐⭐ HOW THE SOURCE STATEMENT WAS MEANT TO BE TAKEN (migration 031). THE AXIS NOTHING ELSE
+            // COULD SUPPLY — and the one on which `7d383ce3` is the only thing wrong.
+            //
+            // ⛔ IT IS INDEPENDENT OF `provenance`, AND THE ROME ROW IS THE PROOF THEY CANNOT BE MERGED:
+            // *"i kinda want to build rome in one day"* is `provenance: quoted` — he really did say those
+            // words, and `classifyCapture` verifies the span — AND `modality: figurative/aspirational`.
+            // ⭐ *"did he say this?"* and *"did he mean it as a fact?"* are different questions, and a
+            // mechanism answering the first offers ZERO protection on the second.
+            //
+            // ⚠️⚠️ NULL MEANS "NOBODY RECORDED IT" AND MUST NEVER BE READ AS `asserted`. Unlike
+            // provenance — whose unknown normalizes to the WEAKEST class — modality has no safe default in
+            // either direction: `asserted` rebuilds the bug on every row, and anything else makes a claim
+            // about 92 rows nobody examined. `normalizeModality()` returns null, never a class.
+            //
+            // ⭐ THE SLOT RULE lives in the DATABASE (`txn_memories_modality_slot_ck`), not only in the
+            // store: a non-literal statement may be RETAINED and may NOT carry entity/attribute/value.
+            // A fact slot's `attribute` NAMES A CLAIM — putting a proverb in one is how this went wrong.
+            modality: {
+                type: DataTypes.ENUM('asserted', 'aspirational', 'figurative', 'reported', 'hypothetical'),
                 allowNull: true,
             },
             // [R5] When this claim was last checked AGAINST ITS OWN SOURCE TEXT. Null = never, which is

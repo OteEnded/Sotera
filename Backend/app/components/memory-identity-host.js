@@ -85,7 +85,35 @@ export function identityInterpreter(fastify, { source = null, userId = null, req
       onSkip: ({ reason, detail }) => fastify.log?.debug?.({ reason, detail }, 'memory.identity: turn not interpreted'),
     })
     if (!o) return null
-    return { ...o, type: OBSERVATION_TYPE.identity, source, context: { matched: o.matched, via: o.via } }
+    // ── ⭐⭐⭐ THE ACT'S CERTAINTY IS NOT THE BELIEF'S CONFIDENCE (decision C, 2026-08-26) ────────────
+    //
+    // ⚠️⚠️ MEASURED ACROSS ALL 92 ROWS. Set `preferred_name` aside and confidence takes FOUR values in
+    // the whole store, every one a per-writer constant. The `preferred_name` rows hold **every varying
+    // value there is** — 0.98, 0.99, 0.95, 0.9 — and every one of them came through this line.
+    //
+    // ⛔ AND IT ANSWERS A DIFFERENT QUESTION THAN THE COLUMN CLAIMS. The interpreter reports how sure it
+    // is that **a naming act occurred**; `confidence` means how much the stored belief may be trusted.
+    // The two come apart exactly where it matters: two rows are live at **0.99** and **0.95** whose
+    // captured value is a whole sentence, not a name. The interpreter was right that something
+    // naming-shaped happened and the value is still wrong — ⭐ which is *"did he say these words?"* vs
+    // *"did he mean them as a fact?"* in a second subsystem.
+    //
+    // ⇒ Ote: *"fix what confidence actually means going forward rather than pretending the existing
+    // numbers have more semantic resolution than they do."* ⭐ So the number is CARRIED, as a property of
+    // the ACT, where a reader can see what it is — and it no longer becomes the belief's confidence.
+    // ⛔ Existing rows are NOT migrated: they honestly record what this line used to do.
+    //
+    // ⚠️ Checked before changing it: nothing thresholds on `obs.confidence`. The identity resolver reads
+    // it in exactly two places — it passes it to `setIdentity` and it logs it — so adoption is decided
+    // by the ACT and the ask policy, never by this number. New rows land `confidence: null`, which is
+    // "unscored", and is a truer statement than 0.99 was.
+    const { confidence: actCertainty, ...obs } = o
+    return {
+      ...obs,
+      type: OBSERVATION_TYPE.identity,
+      source,
+      context: { matched: o.matched, via: o.via, actCertainty: actCertainty ?? null },
+    }
   }
 }
 

@@ -16,7 +16,7 @@ import { createEpisodicResolver } from '@ote/memory/cognition/memory-episodic-re
 import { createCardResolver } from '@ote/memory/cognition/memory-card-resolver.js'
 import { partitionMemoryRead } from './memory-decision-record.js'
 import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
-import { buildMemoryV2 } from './memory-v2-host.js'
+import { buildMemoryV2, buildMemoryStoreFor } from './memory-v2-host.js'
 import { reachTrace } from './room-scope.js'
 import { noteRetrieved } from './memory-retrieval-trace.js'
 
@@ -121,6 +121,34 @@ export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMes
  * ⓘ Shape-preserving: whichever array the read used, the count beside it is corrected to match, so no
  * downstream reader can see a count that disagrees with the list it describes.
  */
+/**
+ * ⭐⭐⭐ SAY THAT SOMETHING WAS WITHHELD AS CORRECTED — B2's visible half.
+ *
+ * ⛔ A FILTER NOBODY CAN SEE IS HOW *"I COVERED EVERYTHING"* GETS SAID ABOUT A FILTERED SET, and this
+ * project has paid for that twice: two tool calls over one room became *"Nothing about Hermes has EVER
+ * been stored"*, and three listed rows became *"exactly those 3 items"* in her whole database.
+ * `withheldDecisions` already reports the decline split; corrections get the same discipline.
+ *
+ * ⭐⭐ AND IT IS A COUNT, NEVER THE CONTENT. That is precisely Ote's constraint — *"I don't want us
+ * relying on Sotera correctly interpreting a prose marker"* — satisfied structurally: the repudiated
+ * claim is not in her context at all, and a separate integer tells her there is something to ask about.
+ * She reaches it deliberately, through `recall_corrections`, or not at all.
+ *
+ * ⚠️ ZERO IS OMITTED, not reported as `0`. A field that appears on every read stops being read; one that
+ * appears only when it means something is a signal.
+ */
+async function withCorrectionsWithheld(out, store) {
+  if (!out || typeof out !== 'object' || Array.isArray(out)) return out
+  try {
+    const n = await store.countContradicted()
+    return n > 0 ? { ...out, withheldCorrections: n } : out
+  } catch {
+    // ⛔ Best-effort: a failed count must never cost a memory read. Absent means "not measured", which
+    // is honest — it does not mean zero, and no caller may read it as zero.
+    return out
+  }
+}
+
 function withoutDecisions(out) {
   if (!out || typeof out !== 'object') return out
   for (const key of ['memories', 'matches', 'items', 'results']) {
@@ -136,6 +164,10 @@ function withoutDecisions(out) {
 
 export function buildMemoryToolService(fastify, { userId = null, persona, sourceMessageId = null, self = null, author = 'account' } = {}) {
   const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self, author })
+  // ⭐ A read-only store bound to the same scope, for the withheld-corrections count. ⛔ Not the service's
+  // store handed out — see `buildMemoryStoreFor`: a consumer that wants a query and no beliefs asks for a
+  // store, and everyone else keeps getting a service.
+  const readStore = buildMemoryStoreFor(fastify, { userId, persona })
   return {
     ...mem,
 
@@ -177,12 +209,12 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
     // ids: the route's passive recall mapped them to `.content` one line after retrieving them.
     // ⛔ Recording only, in-process, never durable, and it grants no read it did not already have.
     async search(query, opts = {}) {
-      const out = withoutDecisions(await mem.search(query, opts))
+      const out = await withCorrectionsWithheld(withoutDecisions(await mem.search(query, opts)), readStore)
       noteRetrieved(sourceMessageId, out?.memories ?? out?.matches ?? [], { via: 'recall_memory' })
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out) }))
     },
     async list(opts = {}) {
-      const out = withoutDecisions(await mem.list(opts))
+      const out = await withCorrectionsWithheld(withoutDecisions(await mem.list(opts)), readStore)
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out) }))
     },
     // ⚠️ `listArchived` WAS NOT WRAPPED BEFORE, AND IT IS ONE OF THE TWO CALLS THAT PRODUCED THE FALSE

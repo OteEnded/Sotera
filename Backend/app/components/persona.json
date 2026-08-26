@@ -23,6 +23,11 @@
       "source": "../../../../../PortableComponents/Tools/Retention"
     },
     {
+      "name": "Corrections",
+      "enabled": true,
+      "source": "../../../../../PortableComponents/Tools/Corrections"
+    },
+    {
       "name": "WebSearch",
       "enabled": true,
       "source": "../../../../../PortableComponents/Tools/WebSearch"

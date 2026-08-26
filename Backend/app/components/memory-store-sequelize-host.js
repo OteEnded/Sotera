@@ -41,9 +41,34 @@ import { admissible } from './memory-self-state-claim.js'
 // `provenance` today. ⛔ A field that has to pass three allowlists to reach the database will one day
 // not, and the failure will be silent because the row still writes.
 import { BASIS, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFromOf } from './memory-lineage.js'
+// ⭐⭐ AND THE SECOND PREDICATE THAT LIVES IN ITS OWN FILE — one predicate, one place, same discipline as
+// `memory-self-state-claim.js` and `memory-ownership.js`. This file holds the ENFORCEMENT and none of the
+// judgement about what a modality means.
+import { slotViolation } from './memory-modality.js'
 import { tracedMemoryIds } from './memory-retrieval-trace.js'
 
 const LIVE = { invalid_at: null, expired_at: null }
+
+// ── ⭐⭐⭐ B2 · A CONTRADICTED MEMORY DOES NOT PARTICIPATE IN NORMAL RETRIEVAL ──────────────────────
+//
+// Ote's ruling, 2026-08-26: *"If a memory has been contradicted, it should stay in the system and remain
+// available behind an explicit historical/why gate, but it should not participate in normal retrieval as
+// a current truth. **I don't want us relying on Sotera correctly interpreting a prose marker.**"*
+//
+// ⛔ SO IT IS A **WHERE CLAUSE, NOT A POST-FILTER**, and the difference is not stylistic. `recall({limit:
+// 6})` asks for six. Filtering afterwards hands back four and silently shrinks what she was given;
+// filtering in the query returns six LIVE ones. A post-filter also cannot bind the SQL search arms.
+//
+// ⚠️ AND IT IS SEPARATE FROM `LIVE`, DELIBERATELY. `invalid_at`/`expired_at` mean **replaced**;
+// `contradicted_at` means **disputed and still standing**. Folding it into LIVE would have made
+// `listArchived` — *"the ONLY read that returns the dead"* — start returning contradicted rows as though
+// they were superseded, collapsing the exact two states migration 030 exists to keep apart.
+//
+// ⭐ Where it does NOT apply, and why each is deliberate:
+//   · `findById` / `findAnyById` — naming an id IS the explicit gate. She can still inspect one.
+//   · `listArchived` — a different question about a different state.
+//   · `listContradicted` — the gate itself.
+const NOT_CONTRADICTED = { contradicted_at: null }
 const OWNED_KINDS = ['episodic', 'semantic', 'card'] // identity is persona-global, never "owned"
 
 // ── ⭐⭐ AND A ROW WITH **NO** KIND IS OWNED TOO — THE TRAP MIGRATION 016 WOULD OTHERWISE HAVE LAID ──
@@ -144,7 +169,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
    * because its SCOPE says so, not because of the kind it happens to be.
    */
   const visibleWhere = (kind, namespace) => {
-    const base = { ...LIVE, persona: P, ...(namespace ? { namespace } : {}) }
+    const base = { ...LIVE, ...NOT_CONTRADICTED, persona: P, ...(namespace ? { namespace } : {}) }
     const reachable = { [Op.or]: [{ user_id: U }, { scope: 'persona_global' }] }
     if (kind) return { ...base, kind, [Op.and]: [reachable] }
     return {
@@ -190,8 +215,12 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     },
 
     async findOwnLive({ kind = null, namespace = null } = {}) {
+      // ⭐ CONTRADICTED ROWS ARE EXCLUDED HERE TOO, and this one matters more than recall. `findOwnLive`
+      // feeds RECONCILE, episode clustering and card matching — so leaving them in would let a repudiated
+      // belief supersede, absorb or shape a NEW one. ⛔ A memory she has been told is wrong must not get
+      // to influence what replaces it.
       return txn_memories.findAll({
-        where: { ...LIVE, persona: P, user_id: U, ...(kind ? { kind } : {}), ...(namespace ? { namespace } : {}) },
+        where: { ...LIVE, ...NOT_CONTRADICTED, persona: P, user_id: U, ...(kind ? { kind } : {}), ...(namespace ? { namespace } : {}) },
         order: [['created_at', 'DESC']], // newest-first: reconcile's matches[0] must be the most recent
         raw: true,
       })
@@ -222,6 +251,57 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       return txn_memories.findAll({ where: { ...key, ...LIVE, persona: P }, raw: true })
     },
 
+    /**
+     * ⭐⭐⭐ THE EXPLICIT HISTORICAL GATE · B2's other half.
+     *
+     * Ote: *"it should stay in the system and remain available behind an explicit historical/why gate."*
+     * ⇒ this is that gate. A SEPARATE query, never a flag on a live read — same rule as `listArchived`,
+     * and for the same reason: a boolean that can switch off the exclusion is one bad default away from
+     * putting a repudiated belief back into a live prompt.
+     *
+     * ⭐ WHAT IT IS FOR: *"what have I been told I was wrong about?"* and *"why did I believe that?"* —
+     * questions about her own history, which stay answerable precisely because ⛔ nothing was deleted.
+     * `7d383ce3` will still say what it always said; what changes is that it stops being current truth.
+     *
+     * ⚠️ It returns rows that are otherwise LIVE. A contradicted row that was ALSO superseded is archived,
+     * and belongs to `listArchived` — two states, two reads, no overlap.
+     */
+    async listContradicted({ kind = null, namespace = null, limit = 50 } = {}) {
+      return txn_memories.findAll({
+        where: {
+          ...LIVE, persona: P,
+          contradicted_at: { [Op.ne]: null },
+          ...(kind ? { kind } : {}),
+          ...(namespace ? { namespace } : {}),
+          [Op.and]: [{ [Op.or]: [{ user_id: U }, { scope: 'persona_global' }] }],
+        },
+        order: [['contradicted_at', 'DESC']], // most recently corrected first — the freshest lesson
+        limit: Math.max(1, Math.min(limit, 200)),
+        raw: true,
+      })
+    },
+
+    /**
+     * ⭐⭐ HOW MANY WERE WITHHELD — so the exclusion is never SILENT.
+     *
+     * ⛔ A filter nobody can see is how *"I covered everything"* gets said about a filtered set, and this
+     * project has paid for that twice. `withheldDecisions` already reports the decline split; this is the
+     * same discipline for corrections. ⭐ It is a COUNT, not the content: the number tells her something
+     * exists to ask about without putting the repudiated claim back in front of her — which is exactly
+     * what Ote meant by *"I don't want us relying on Sotera correctly interpreting a prose marker."*
+     */
+    async countContradicted({ kind = null, namespace = null } = {}) {
+      return txn_memories.count({
+        where: {
+          ...LIVE, persona: P,
+          contradicted_at: { [Op.ne]: null },
+          ...(kind ? { kind } : {}),
+          ...(namespace ? { namespace } : {}),
+          [Op.and]: [{ [Op.or]: [{ user_id: U }, { scope: 'persona_global' }] }],
+        },
+      })
+    },
+
     async listArchived({ kind = null, namespace = null } = {}) {
       // The ONLY read that returns the dead. A SEPARATE query on purpose, never a flag on the live
       // reads — a boolean that can switch off the live filter is one bad default away from leaking a
@@ -247,12 +327,32 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       const { tableName, schema } = txn_memories.getTableName()
       const memTable = schema ? `"${schema}"."${tableName}"` : `"${tableName}"`
       const scopeClause = (kind, namespace, repl) => {
-        const where = ['persona IS NOT DISTINCT FROM :persona', 'invalid_at IS NULL', 'expired_at IS NULL']
+        // ⭐ `contradicted_at IS NULL` — B2, in the SQL arms as well as the ORM one. Both search arms feed
+        // recall, so a clause present in only one of them would make her answer depend on which index
+        // happened to be installed.
+        const where = ['persona IS NOT DISTINCT FROM :persona', 'invalid_at IS NULL', 'expired_at IS NULL',
+          'contradicted_at IS NULL']
         repl.persona = P
         if (namespace) { where.push('namespace = :ns'); repl.ns = namespace }
         if (kind) {
-          where.push('kind = :kind AND user_id IS NOT DISTINCT FROM :su')
-          repl.kind = kind; repl.su = kind === 'identity' ? null : U
+          // ⚠️⚠️ THIS LINE READ `user_id IS NOT DISTINCT FROM :su` WITH `:su = kind === 'identity' ? null : U`
+          // UNTIL 2026-08-26, AND MIGRATION 029 SILENTLY BROKE IT. 029 made `user_id` NOT NULL, so the
+          // identity branch asked for a row that can no longer exist: a kind-filtered search for `identity`
+          // returned **0** where the correct clause returns **1**. Measured, not reasoned.
+          //
+          // ⭐⭐⭐ AND THE CHECK BUILT TO CATCH EXACTLY THIS MISSED IT, FOR A REUSABLE REASON.
+          // `memory-scope-check` §4 is a source scan for the literals `user_id IS NULL` / `user_id: null`.
+          // Here the NULL arrived through a **bound parameter** — the SQL text says only `:su` — so the
+          // scan passed over the defect while reporting that no reader infers scope from a missing owner.
+          // ⇒ **a source scan cannot see a value that arrives through a parameter.** §4 now also asserts
+          // that no replacement in this file is conditionally set to null.
+          //
+          // ⭐ The fix is CONVERGENCE, not widening: `visibleWhere(kind)` — the ORM path 029 did update —
+          // has always applied the same reachability for a kind-filtered read. This arm had diverged.
+          where.push('kind = :kind')
+          repl.kind = kind
+          where.push("(user_id IS NOT DISTINCT FROM :u OR scope = 'persona_global')")
+          repl.u = U
         } else {
           // ⭐ `OR kind IS NULL` — the same no-kind-is-still-mine rule as visibleWhere; see
           // OWNED_KIND_OR_UNCLASSIFIED at the top of this file. An allowlist silently excludes NULL, and a
@@ -482,6 +582,36 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         err.code = 'SELF_STATE_CLAIM'
         err.reason = gate.reason
         throw err
+      }
+      // ── ⭐⭐⭐ THE MODALITY SLOT GATE · 031 · SAME PLACE, SAME REASON AS THE GATE ABOVE ────────────
+      //
+      // Ote, 2026-08-26: *"figurative material should still be retainable, but it must not be flattened
+      // into entity / attribute / value as though it were a literal fact."*
+      //
+      // ⛔ IT REFUSES RATHER THAN REWRITING, and the reason is measurable rather than stylistic: for a
+      // fact row `content` is GENERATED FROM the slot — `7d383ce3`'s content is literally *"user's
+      // current goal: build Rome in one day"* — so stripping entity/attribute/value would leave the
+      // flattening intact in the prose and the fix would be cosmetic. The alternative, rewriting
+      // `content` to the quoted span, is the store editing what a claim says, which is a larger power
+      // than declining to store it.
+      //
+      // ⭐⭐ AND NOTHING IS LOST BY REFUSING, WHICH IS WHAT SETTLES IT. **His words are in `txn_messages`
+      // permanently.** What is refused is a DERIVED assertion. The material stays reachable through the
+      // message store, through `recall_memory_source`, and through her own `keep()` as prose if she
+      // decides it matters — so *"still be retainable"* is satisfied by the prose route staying open.
+      // ⛔ What is closed is the slot.
+      //
+      // ⓘ The DATABASE enforces this too (`txn_memories_modality_slot_ck`). This half is the loud one
+      // that explains itself; that half survives a writer nobody has written yet.
+      const slotWhy = slotViolation(row)
+      if (slotWhy) {
+        log?.warn?.({ modality: row?.modality, entity: row?.entity, attribute: row?.attribute, author: AUTHOR,
+          content: String(row?.content ?? '').slice(0, 160) },
+        '[memory] refused a non-literal statement written into a fact slot')
+        const e2 = new Error(`refused: ${slotWhy}`)
+        e2.code = 'MODALITY_SLOT'
+        e2.reason = 'non-literal-in-slot'
+        throw e2
       }
       // THE STORE STAMPS SCOPE — the component must not pass persona/user_id, and the
       // identity-is-persona-global rule is enforced here rather than trusted to every caller.

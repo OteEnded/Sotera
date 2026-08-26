@@ -47,6 +47,7 @@ import { initSelfHistory } from '../../components/self-history-host.js'
 import { initConversationRetrieval } from '../../components/conversation-retrieval.js'
 import { initDisclosure } from '../../components/disclosure-host.js'
 import { initRetention } from '../../components/retention-host.js'
+import { initCorrections } from '../../components/corrections-host.js'
 // ⭐ The occasion for a decision she already made — see the block beside the capture fallback.
 import { shouldFollowThrough, runFollowThrough } from '../../components/retention-followthrough.js'
 import { initToolLog } from '../../audit/tool-log.js'
@@ -3947,6 +3948,11 @@ export default async function chatSiteRoutes(fastify) {
   // which is what stored her own family lineage as facts about the user. The specialised write tools
   // stay reachable underneath as the mechanisms this dispatches to.
   initRetention()
+  // ⭐⭐ `corrections` — THE EXPLICIT HISTORICAL GATE (B2). A contradicted memory leaves normal retrieval
+  // in the store's WHERE clauses and stays reachable here, so *"what have I been told I was wrong
+  // about?"* and *"why did I believe that?"* remain answerable while a repudiated belief stops being
+  // offered as current. ⛔ Not a prose marker she has to notice — the row is simply not in the result.
+  initCorrections()
   // by account is whether it may be TOLD them (`access_sotera_memory`), never whether she may find them.
   // Tool-call audit: the EventBus already emitted every call; nothing kept them. See audit/tool-log.js.
   initToolLog(fastify, attachToolAudit)

@@ -89,6 +89,15 @@ for (const [file, path] of [
   ok(/txn_memories|visibleWhere|scope/.test(src), `4 · ⛔ ANCHOR: the scan can still see ${file}`)
   ok(!/user_id IS NULL/i.test(src), `4 · ⭐⭐ ${file} never reads scope out of a missing owner`)
   ok(!/user_id:\s*null/.test(src), `4 · ⭐ …and never WRITES one either`, file)
+  // ⭐⭐⭐ AND THE ONE THIS SCAN COULD NOT SEE, ADDED 2026-08-26 AFTER IT LET A REAL DEFECT THROUGH.
+  // The store built `user_id IS NOT DISTINCT FROM :su` with `repl.su = kind === 'identity' ? null : U`.
+  // ⛔ The SQL text says only `:su` — so scanning for the literal `user_id IS NULL` passed over it and
+  // reported that no reader infers scope from a missing owner, while one did. 029 then made `user_id`
+  // NOT NULL and a kind-filtered identity search started returning 0 instead of 1, silently.
+  // ⇒ ⚠️ **A SOURCE SCAN CANNOT SEE A VALUE THAT ARRIVES THROUGH A PARAMETER.** A replacement that is
+  // conditionally set to null is the same claim written where the scan cannot read it.
+  ok(!/repl\.\w+\s*=\s*[^;\n]*\?\s*null\s*:/.test(src),
+    `4 · ⭐⭐⭐ ${file} smuggles no NULL through a bound parameter — the scan's own blind spot, now covered`)
 }
 
 // ── 5 · ⭐ THE AXES ARE STILL FOUR THINGS ────────────────────────────────────────────────────────

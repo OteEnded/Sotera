@@ -35,6 +35,21 @@ export const DEFAULT_PERSONA = null
 // a property of the occasion. ⛔ It is declared by the caller and never inferred from kind, room, or login.
 // ⚠️ Default stays 'account': six times in this project an omitted field has silently changed meaning, so
 // a caller that does not say gets the status quo and nothing can drift into being hers.
+/**
+ * ⭐ THE STORE ALONE, for readers that need a scoped query and none of the cognition.
+ *
+ * ⚠️ ADDED 2026-08-26 FOR `corrections-host.js`, and deliberately NOT by making the service expose its
+ * store: handing the store out through `buildMemoryV2` would let any consumer reach past the cognition
+ * into the database, which is the seam this file exists to hold. A caller that genuinely wants a query
+ * and no beliefs asks for a store; everyone else keeps getting a service.
+ *
+ * ⛔ `author` is not a parameter. This is a READ construction — nothing built here may write, and
+ * accepting an author would imply it could.
+ */
+export function buildMemoryStoreFor(fastify, { userId = null, persona = DEFAULT_PERSONA } = {}) {
+  return createSequelizeMemoryStore({ db: fastify.db, persona, userId, log: fastify.log })
+}
+
 export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSONA, sourceMessageId = null, self = null, actor = null, author = 'account' } = {}) {
   const embed = makeEmbedder(fastify, { userId })
   // RESOLUTION comes from the host so the CHAIN is assembled from settings (cosine → gray-zone → …).
