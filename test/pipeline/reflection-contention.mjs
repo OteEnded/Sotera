@@ -177,26 +177,50 @@ for (let i = 0; i < N; i += 1) {
 }
 
 // ── REPORT ────────────────────────────────────────────────────────────────────────────────────
-const arm = (tag) => samples.filter((s) => s.label === tag && s.ok).map((s) => s.total)
+// ⭐ Pick TTFT or TOTAL; a null TTFT is DROPPED rather than counted as zero — a missing measurement
+// must never enter an average as a fast one.
+const arm = (tag, pick = (s) => s.total) => samples.filter((s) => s.label === tag && s.ok)
+  .map(pick).filter((v) => typeof v === 'number' && Number.isFinite(v))
 const line = (tag) => {
   const a = arm(tag)
   return a.length ? `${tag.padEnd(10)} n=${a.length}  median=${(med(a) / 1000).toFixed(1)}s  CV=${(cv(a) * 100).toFixed(0)}%` : `${tag.padEnd(10)} no samples`
 }
 console.log('\n══ RESULT ══════════════════════════════════════════════════════════')
 for (const t of ['floorA', 'floorB', 'idle', 'contended']) console.log('   ' + line(t))
-const fA = arm('floorA'); const fB = arm('floorB')
-const idleA = arm('idle'); const contA = arm('contended')
-if (fA.length && fB.length) {
-  const floorDelta = Math.abs(med(fA) - med(fB))
-  console.log(`\n   ⭐ NOISE FLOOR       |floorA − floorB| = ${(floorDelta / 1000).toFixed(1)}s`)
-  if (idleA.length && contA.length) {
-    const delta = med(contA) - med(idleA)
-    console.log(`   ⭐ CONTENTION DELTA  contended − idle  = ${(delta / 1000).toFixed(1)}s`)
-    console.log(`   ⇒ ${Math.abs(delta) > floorDelta * 2
-      ? '⛔ THE DELTA EXCEEDS TWICE THE NOISE FLOOR — passive work IS affecting interactive latency'
-      : '⚠️ THE DELTA IS WITHIN THE NOISE FLOOR — this run does NOT establish an effect either way'}`)
-  }
+// ── ⭐⭐⭐ THE NOISE FLOOR, DONE PROPERLY ──────────────────────────────────────────
+// ⚠⚠ MY FIRST VERSION COMPARED THE A/B DELTA AGAINST |median(floorA) − median(floorB)|, AND THAT IS A
+// BAD FLOOR. With N=6 the difference of two medians drawn from the SAME distribution is itself noisy —
+// it can land near zero by luck and then declare almost any delta significant, or land high and hide a
+// real one. ⛔ It measures one draw of the noise, not the noise.
+// ⇒ the floor is the SPREAD of the pooled floor samples (IQR), which is what "how much does this number
+// move when nothing changes" actually means. A delta smaller than the floor's own IQR is not a result.
+const q1 = (a) => { const s2 = [...a].sort((x, y) => x - y); return s2[Math.floor(s2.length * 0.25)] }
+const q3 = (a) => { const s2 = [...a].sort((x, y) => x - y); return s2[Math.floor(s2.length * 0.75)] }
+const report = (name, pick) => {
+  const floor = [...arm('floorA', pick), ...arm('floorB', pick)]
+  const idleV = arm('idle', pick); const contV = arm('contended', pick)
+  if (!floor.length || !idleV.length || !contV.length) { console.log(`   ${name}: not enough samples`); return }
+  const iqr = q3(floor) - q1(floor)
+  const delta = med(contV) - med(idleV)
+  console.log(`
+   ${name}`)
+  console.log(`      floor (pooled idle/idle)  n=${floor.length}  median=${(med(floor) / 1000).toFixed(2)}s  IQR=${(iqr / 1000).toFixed(2)}s  CV=${(cv(floor) * 100).toFixed(0)}%`)
+  console.log(`      idle                      n=${idleV.length}  median=${(med(idleV) / 1000).toFixed(2)}s  CV=${(cv(idleV) * 100).toFixed(0)}%`)
+  console.log(`      contended                 n=${contV.length}  median=${(med(contV) / 1000).toFixed(2)}s  CV=${(cv(contV) * 100).toFixed(0)}%`)
+  console.log(`      ⭐ delta (contended − idle) = ${(delta / 1000).toFixed(2)}s   vs floor IQR ${(iqr / 1000).toFixed(2)}s`)
+  console.log(`      ⇒ ${Math.abs(delta) > iqr
+    ? '⛔ THE DELTA EXCEEDS THE NOISE FLOOR — passive work IS affecting this measure'
+    : '⚠️ WITHIN THE NOISE FLOOR — this run establishes NO effect on this measure, in either direction'}`)
 }
+// ⭐ BOTH MEASURES, BECAUSE THEY ARE DIFFERENT EFFECTS ON A PERSON: slower to START speaking is felt
+// immediately; slower to FINISH is felt as a long wait. ⛔ Neither substitutes for the other.
+report('TIME TO FIRST TOKEN', (s2) => s2.ttft)
+report('TOTAL', (s2) => s2.total)
+const failed = samples.filter((s2) => !s2.ok)
+if (failed.length) console.log(`
+   ⚠️ ${failed.length} sample(s) FAILED and are excluded: ${[...new Set(failed.map((f) => f.err))].join(' · ')}`)
+const noTtft = samples.filter((s2) => s2.ok && s2.ttft == null)
+if (noTtft.length) console.log(`   ⚠⚠ ${noTtft.length} sample(s) produced NO token event — a TTFT of null is a MISSING measurement, ⛔ not a fast one`)
 console.log('   ⛔ Reported as median + CV + N. ⛔ Never max−min: a range only grows with N.')
 
 const file = new URL('../results/reflection-contention.json', import.meta.url)
