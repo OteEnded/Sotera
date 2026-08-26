@@ -85,7 +85,19 @@ for (const [i, text] of TURNS.entries()) {
   const last = assistants[assistants.length - 1]
   const tc = Array.isArray(last?.tool_calls) ? last.tool_calls : (last?.tool_calls ? [last.tool_calls] : [])
   const tools = tc.map((t) => t?.function?.name || t?.name).filter(Boolean)
-  const args = tc.map((t) => JSON.stringify(t?.function?.arguments ?? t?.arguments ?? {})).join(' ')
+  // ⚠️⚠️ `t.args` FIRST, AND THIS FILE WAS THE LAST ONE STILL WRONG. This persona stores a tool call as
+  // `{ id, name, args, result }` — ⛔ NOT OpenAI's `{ function: { name, arguments } }` — so reading
+  // `t.function.arguments` yields `undefined` and prints `args: {}` for every call, confidently.
+  // ⭐ MEASURED COST, 2026-08-26: it hid `{"with":"Hermes","where":"Hermes"}` during the room-scoping
+  // run — the `where` argument WAS the finding, and the trace said the call had no arguments at all.
+  // ⇒ same family as the B4 field defect and the `mine=undefined` gate: a reader pointed at a
+  // nonexistent field returns a confident wrong answer rather than failing.
+  const readArgs = (t) => {
+    const a = t?.args ?? t?.function?.arguments ?? t?.arguments ?? null
+    if (typeof a !== 'string') return a ?? {}
+    try { return JSON.parse(a) } catch { return a }
+  }
+  const args = tc.map((t) => JSON.stringify(readArgs(t))).join(' ')
   console.log(`\n── T${i + 1} ▸ ${text}`)
   console.log(`   tools: ${tools.join(', ') || '(NONE)'}  ${args !== '{}' && args ? `args: ${args.slice(0, 220)}` : ''}${last?.error ? `  ⚠ ${last.error}` : ''}`)
   console.log(`\n   ${(last?.content || '(empty)').replace(/\n+/g, '\n   ')}`)
