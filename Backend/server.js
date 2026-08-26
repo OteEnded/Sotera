@@ -22,6 +22,7 @@ if (requestLogPath) {
 
 import dbPlugin from './app/plugins/db.js'
 import requestLoggerPlugin from './app/plugins/request-logger.js'
+import steerRegistryPlugin from './app/plugins/steer-registry.js'
 import cronPlugin from './app/plugins/cron.js'
 import websocketPlugin from './app/plugins/websocket.js'
 import routes from './app/routes/index.js'
@@ -58,6 +59,15 @@ if (shouldUseDatabase) {
 } else {
   await log(`Database plugin skipped (database.enabled=false)`, import.meta.url)
 }
+
+// ⭐⭐⭐ BEFORE THE CRON, AND THAT ORDER IS LOAD-BEARING. The revisit idle gate runs from the cron and
+// asks `fastify.steerReg` whether a user turn is in flight; a registry registered afterwards would leave
+// the gate reading `undefined` — which fails CLOSED and silently stopped that lane for 28 hours when the
+// registry lived in the encapsulated chat route instead of at root.
+// ⛔ It is a ROOT plugin (`fp`) precisely so every sibling sees the same object: shared runtime state
+// lives where every scope can reach it.
+await fastify.register(steerRegistryPlugin)
+await log(`Steer registry plugin registered`, import.meta.url)
 
 await fastify.register(cronPlugin)
 await log(`Cron plugin registered`, import.meta.url)

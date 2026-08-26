@@ -67,7 +67,16 @@
 export const GATE = Object.freeze({
   ok: 'ok',
   notEnforced: 'not-enforced',           // ⭐ the gate is switched off ⇒ the caller PROCEEDS
-  configUnreadable: 'config-unreadable', // ⛔ fail CLOSED — we could not tell, so we do not run
+  configUnreadable: 'config-unreadable', // ⛔ fail CLOSED — the CONFIG could not be read
+  // ⭐⭐⭐ ITS OWN VALUE SINCE 2026-08-26, BECAUSE SHARING ONE COST 28 HOURS OF A DEAD LANE.
+  // Both branches fail closed and that was right — but they have DIFFERENT CAUSES and different
+  // fixes, and the log said `config-unreadable` while the config was perfectly readable. The
+  // investigation went to the config, found nothing wrong, and the actual cause (a registry the
+  // caller could not see across a plugin scope) stayed invisible.
+  // ⛔ A reason code that answers two questions is undiagnosable exactly when you need it — the same
+  // overload this project has now fixed in `user_id`, `author`, `source_message_id`, `confidence`
+  // and `incognito`, here in an ERROR PATH where it is hardest to notice.
+  registryAbsent: 'registry-absent',     // ⛔ fail CLOSED — we cannot tell whether she is BUSY
   busy: 'busy',                          // a turn is in flight right now
   coolingDown: 'cooling-down',           // a turn ended too recently to be sure she is free
 })
@@ -145,8 +154,12 @@ export function checkIdleGate(fastify, registry, { now = Date.now() } = {}) {
   const cfg = readGateConfig(fastify)
   // ⛔ A MISSING REGISTRY IS NOT AN IDLE SOTERA. Without it we cannot tell whether she is busy, and
   // "cannot tell" takes the closed branch for the same reason an unreadable config does.
+  // ⚠️⚠️ BUT IT REPORTS A DIFFERENT REASON, AND THAT DISTINCTION IS THE WHOLE POINT. This branch fired
+  // on every tick for 28 hours while the log blamed the config — `fastify.steerReg` was decorated
+  // inside the ENCAPSULATED chat route and read from the ROOT cron plugin, so a child's decoration
+  // was invisible to a sibling. ⭐ Same closed branch, different cause, and now a different name.
   if (!registry || typeof registry.anyActive !== 'function') {
-    return { run: false, reason: GATE.configUnreadable, waitMs: 0, activeCount: null }
+    return { run: false, reason: GATE.registryAbsent, waitMs: 0, activeCount: null }
   }
   const verdict = evaluateIdleGate({
     ...cfg,

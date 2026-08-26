@@ -53,7 +53,8 @@ import { shouldFollowThrough, runFollowThrough } from '../../components/retentio
 import { initToolLog } from '../../audit/tool-log.js'
 import { getSetting } from '../../settings/index.js'
 import { checkTokenBudget } from '../../usage/limits.js'
-import { createSteerRegistry } from '../../chat/steer-registry.js'
+// ⛔ NO `createSteerRegistry` IMPORT ANY MORE, and its absence is the point: this module no longer owns
+// the registry. Importing the factory here would be a standing invitation to create a second one.
 import { describeToolInteraction, describeVisionInteraction } from '../../chat/interaction.js'
 import { descriptionsOf, descriptionText, describedImagesView } from '../../chat/vision-descriptions.js'
 import { canSetPersonalDefault, loadRootPrefs } from './me-prefs.route.js'
@@ -3560,15 +3561,20 @@ export default async function chatSiteRoutes(fastify) {
   const genKey = (request) => request.user?.id ?? 'root'
   // Steering inbox, keyed by conversation — live only while a generation runs (see the
   // steer endpoint + the agent loop's drain points). Separate from the per-user count above.
-  const steerReg = createSteerRegistry()
-  // ⭐⭐ EXPOSED ON `fastify` SO THE BACKGROUND LANE CAN ASK "IS SHE BUSY?" WITHOUT A SECOND REGISTRY.
-  // The revisit idle gate (`components/revisit-idle-gate.js`) runs from the cron plugin, which has a
-  // fastify and no route scope. ⛔ Decorating is deliberately the ONLY way it reaches this: the gate must
-  // read the same object the route writes, or the two drift about whether a turn is running — the exact
-  // failure Ote refused when he chose one registry over two.
-  // ⓘ Guarded because this route module can be registered more than once in a harness, and `decorate`
-  // throws on a duplicate key.
-  if (!fastify.hasDecorator('steerReg')) fastify.decorate('steerReg', steerReg)
+  //
+  // ⭐⭐⭐ READ, NOT CREATED. The registry is shared runtime state and lives in its own ROOT plugin
+  // (`app/plugins/steer-registry.js`) — Ote, 2026-08-26: *"'Is Sotera busy?' is shared runtime state, so
+  // it should be a first-class service rather than belonging to the chat route."*
+  //
+  // ⚠️⚠️ IT USED TO BE CREATED HERE AND DECORATED FROM HERE, AND THAT COST 28 HOURS OF A DEAD LANE.
+  // This module is `export default async function chatSiteRoutes(fastify)` — **encapsulated** — so the
+  // decoration landed on a CHILD scope, while `cron.js` is `fp`-wrapped at ROOT and read `undefined`.
+  // ⭐ A child's decoration is invisible to a sibling. The reflection idle gate then failed CLOSED —
+  // correctly — and stopped the lane in silence, with a log line naming the wrong cause.
+  //
+  // ⛔ STILL EXACTLY ONE REGISTRY. What moved is where it is created, not how many exist: two registries
+  // tracking one turn lifecycle is the drift Ote refused when he chose one source of truth.
+  const steerReg = fastify.steerReg
   const atGenLimit = (request) => {
     if (request.user?.isRoot) return null
     const limit = getSetting(fastify.config, 'chat.backgroundMaxConcurrent')
