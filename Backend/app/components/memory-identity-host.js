@@ -167,6 +167,28 @@ export function makeIdentityAsk(fastify, { user = null, conversationId = null, i
   // gate ask_user uses: an internal side-call must never hang waiting on someone who is not there).
   if (!conversationId || !interactive || !user?.id) return null
 
+  // ── ⭐⭐⭐ AND THE SWITCH, BECAUSE THE ASK IS FIRING ON BAD INPUT ─────────────────────────────────
+  //
+  // Ote, 2026-08-26: *"every time other entity use my room to talk to sotera, the ask question to change
+  // display name always pop up, make it so it not please."*
+  //
+  // ⚠️⚠️ THE ASK IS NOT THE DEFECT; IT IS THE SYMPTOM, AND THE MEASUREMENT SAYS SO. The interpreter reads
+  // the naming act out of **whoever typed the turn** and writes it as the **ROOM ACCOUNT HOLDER's** name.
+  // So when someone else speaks through his room, their self-introduction arrives as a proposal to rename
+  // HIM — and the replacement gate does exactly what it was built to do: it asks. Every time.
+  // ⭐ Measured in the live store the same day: root's room holds `preferred_name = "Cogito"` (from a
+  // relayed *"I'm Cogito. I'm your uncle."*), agent_dev's holds `"i just be here temporary"`, and
+  // hermes' holds an entire Thai sentence. ⇒ person ≠ account ≠ room, collapsed into one slot.
+  //
+  // ⛔ SO THIS SWITCH SILENCES A PROMPT; IT DOES NOT FIX ANYTHING. The speaker/account confusion is an
+  // OteRM boundary problem and is recorded as one. Naming the switch `identityAsk` rather than something
+  // reassuring keeps that honest.
+  //
+  // ⭐ OFF LANDS ON A PATH THAT ALREADY EXISTS AND IS ALREADY TESTED: returning null is the resolver's
+  // documented degradation — *no ask port → DEFER: keep the name she has, change nothing.* ⛔ It is not a
+  // new branch, and it can never become "assume": adoption into an EMPTY slot is untouched.
+  try { if (getSetting(fastify.config, 'memory.identityAsk') === false) return null } catch { /* unregistered = ask */ }
+
   return async ({ attribute, from, to }) => {
     // ONE QUESTION AT A TIME PER CONVERSATION. `findPending` returns a single row, so a second card
     // would make the first unreachable — and being asked two things at once about a turn you already

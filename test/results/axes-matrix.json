@@ -1,0 +1,654 @@
+{
+  "at": "2026-08-26T05:10:45.999Z",
+  "model": "qwen3.5:9b",
+  "rows": [
+    {
+      "id": "S1",
+      "control": false,
+      "text": "I want to build Rome in one day.",
+      "act": "want",
+      "actCue": "I want to",
+      "actWhy": "expresses a desire or aim",
+      "term": "Rome",
+      "termUse": "figurative",
+      "termWhy": "stands in for a great achievement built quickly",
+      "target": "intention",
+      "learned": "the speaker wants to build Rome in one day",
+      "targetWhy": "expressing a goal or plan"
+    },
+    {
+      "id": "S2",
+      "control": false,
+      "text": "Rome wasn't built in a day.",
+      "act": "relay",
+      "actCue": "Rome wasn't built in a day",
+      "actWhy": "repeats a common saying",
+      "term": "day",
+      "termUse": "literal",
+      "termWhy": "refers to a single 24-hour period",
+      "target": "event",
+      "learned": "Rome was built over time",
+      "targetWhy": "an occurrence or process that happened"
+    },
+    {
+      "id": "S3",
+      "control": false,
+      "text": "You are my Rome.",
+      "act": "designate",
+      "actCue": "You are my Rome",
+      "actWhy": "establishes a role or standing",
+      "term": "Rome",
+      "termUse": "figurative",
+      "termWhy": "stands in for a beloved place or ideal",
+      "target": "relationship",
+      "learned": "the speaker considers the listener to be their Rome",
+      "targetWhy": "a standing link between two parties"
+    },
+    {
+      "id": "S4",
+      "control": false,
+      "text": "We'll call the whole effort Rome.",
+      "act": "designate",
+      "actCue": "call the whole effort Rome",
+      "actWhy": "establishes a name for something",
+      "term": "Rome",
+      "termUse": "coined",
+      "termWhy": "assigned as a name for the effort",
+      "target": "designation",
+      "learned": "the effort is named Rome",
+      "targetWhy": "a name given to something"
+    },
+    {
+      "id": "S5",
+      "control": false,
+      "text": "Claude will be kinda your uncle.",
+      "act": "describe",
+      "actCue": "will be kinda",
+      "actWhy": "states how something is",
+      "term": "uncle",
+      "termUse": "figurative",
+      "termWhy": "stands in for a mentor or supportive older figure",
+      "target": "relationship",
+      "learned": "Claude will be the listener's uncle",
+      "targetWhy": "a standing link between two parties"
+    },
+    {
+      "id": "S6",
+      "control": false,
+      "text": "Hermes is like an aunt to me.",
+      "act": "describe",
+      "actCue": "is like",
+      "actWhy": "states how something is",
+      "term": "aunt",
+      "termUse": "figurative",
+      "termWhy": "stands in for a supportive older female figure",
+      "target": "relationship",
+      "learned": "Hermes has an aunt-like standing link to the speaker",
+      "targetWhy": "a connection between two parties"
+    },
+    {
+      "id": "S7",
+      "control": false,
+      "text": "My inbox is a warzone.",
+      "act": "describe",
+      "actCue": "is a warzone",
+      "actWhy": "states how something is",
+      "term": "warzone",
+      "termUse": "figurative",
+      "termWhy": "stands in for a chaotic or overwhelming inbox",
+      "target": "property",
+      "learned": "the inbox is chaotic or full of problems",
+      "targetWhy": "a description of the current state of the inbox"
+    },
+    {
+      "id": "S8",
+      "control": false,
+      "text": "Call me Ote.",
+      "act": "designate",
+      "actCue": "Call me Ote",
+      "actWhy": "establishes a name for the speaker",
+      "term": "Ote",
+      "termUse": "literal",
+      "termWhy": "it is used as a proper name for the person being addressed",
+      "target": "designation",
+      "learned": "the speaker's name is Ote",
+      "targetWhy": "a name attached to the person"
+    },
+    {
+      "id": "S9",
+      "control": false,
+      "text": "Rome is my project.",
+      "act": "designate",
+      "actCue": "is my project",
+      "actWhy": "establishes a role or standing for Rome",
+      "term": "project",
+      "termUse": "literal",
+      "termWhy": "refers to a planned undertaking",
+      "target": "intention",
+      "learned": "Rome is the project the speaker is working on",
+      "targetWhy": "stating what someone is trying to bring about or focus on"
+    },
+    {
+      "id": "K1",
+      "control": true,
+      "text": "My manager is called Priya.",
+      "act": "describe",
+      "actCue": "is called",
+      "actWhy": "states how something is",
+      "term": "Priya",
+      "termUse": "literal",
+      "termWhy": "it refers to the actual person's name",
+      "target": "designation",
+      "learned": "the manager's name is Priya",
+      "targetWhy": "a name attached to a person"
+    },
+    {
+      "id": "K2",
+      "control": true,
+      "text": "The deploy script is named rollout.sh.",
+      "act": "describe",
+      "actCue": "is named",
+      "actWhy": "states how something is",
+      "term": "rollout.sh",
+      "termUse": "literal",
+      "termWhy": "it refers to the actual filename of the script",
+      "target": "designation",
+      "learned": "the deploy script is named rollout.sh",
+      "targetWhy": "a name attached to something"
+    },
+    {
+      "id": "K3",
+      "control": true,
+      "text": "Priya reviews everything I merge.",
+      "act": "describe",
+      "actCue": "reviews everything I merge",
+      "actWhy": "states how something is",
+      "term": "Priya",
+      "termUse": "literal",
+      "termWhy": "it refers to a specific person's name",
+      "target": "relationship",
+      "learned": "Priya reviews the speaker's merges",
+      "targetWhy": "a standing link between two parties"
+    },
+    {
+      "id": "K4",
+      "control": true,
+      "text": "I work out of Bangkok.",
+      "act": "describe",
+      "actCue": "I work out of",
+      "actWhy": "states how something is",
+      "term": "Bangkok",
+      "termUse": "literal",
+      "termWhy": "it refers to the actual city",
+      "target": "property",
+      "learned": "the speaker works out of Bangkok",
+      "targetWhy": "Bangkok is the location associated with the speaker's work"
+    },
+    {
+      "id": "K5",
+      "control": true,
+      "text": "Think of me as your editor, not your boss.",
+      "act": "designate",
+      "actCue": "Think of me as",
+      "actWhy": "establishes a role",
+      "term": "editor",
+      "termUse": "literal",
+      "termWhy": "refers to a person who reviews and corrects writing",
+      "target": "relationship",
+      "learned": "the listener is an editor to the speaker, not a subordinate",
+      "targetWhy": "a standing link between two parties defined by role"
+    }
+  ],
+  "rome": [],
+  "crossings": {
+    "act->target": [
+      {
+        "x": "designate",
+        "values": [
+          {
+            "y": "relationship",
+            "ids": [
+              "S3",
+              "K5"
+            ]
+          },
+          {
+            "y": "designation",
+            "ids": [
+              "S4",
+              "S8"
+            ]
+          },
+          {
+            "y": "intention",
+            "ids": [
+              "S9"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "describe",
+        "values": [
+          {
+            "y": "relationship",
+            "ids": [
+              "S5",
+              "S6",
+              "K3"
+            ]
+          },
+          {
+            "y": "property",
+            "ids": [
+              "S7",
+              "K4"
+            ]
+          },
+          {
+            "y": "designation",
+            "ids": [
+              "K1",
+              "K2"
+            ]
+          }
+        ]
+      }
+    ],
+    "target->act": [
+      {
+        "x": "intention",
+        "values": [
+          {
+            "y": "want",
+            "ids": [
+              "S1"
+            ]
+          },
+          {
+            "y": "designate",
+            "ids": [
+              "S9"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "relationship",
+        "values": [
+          {
+            "y": "designate",
+            "ids": [
+              "S3",
+              "K5"
+            ]
+          },
+          {
+            "y": "describe",
+            "ids": [
+              "S5",
+              "S6",
+              "K3"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "designation",
+        "values": [
+          {
+            "y": "designate",
+            "ids": [
+              "S4",
+              "S8"
+            ]
+          },
+          {
+            "y": "describe",
+            "ids": [
+              "K1",
+              "K2"
+            ]
+          }
+        ]
+      }
+    ],
+    "act->termUse": [
+      {
+        "x": "designate",
+        "values": [
+          {
+            "y": "figurative",
+            "ids": [
+              "S3"
+            ]
+          },
+          {
+            "y": "coined",
+            "ids": [
+              "S4"
+            ]
+          },
+          {
+            "y": "literal",
+            "ids": [
+              "S8",
+              "S9",
+              "K5"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "describe",
+        "values": [
+          {
+            "y": "figurative",
+            "ids": [
+              "S5",
+              "S6",
+              "S7"
+            ]
+          },
+          {
+            "y": "literal",
+            "ids": [
+              "K1",
+              "K2",
+              "K3",
+              "K4"
+            ]
+          }
+        ]
+      }
+    ],
+    "termUse->act": [
+      {
+        "x": "figurative",
+        "values": [
+          {
+            "y": "want",
+            "ids": [
+              "S1"
+            ]
+          },
+          {
+            "y": "designate",
+            "ids": [
+              "S3"
+            ]
+          },
+          {
+            "y": "describe",
+            "ids": [
+              "S5",
+              "S6",
+              "S7"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "literal",
+        "values": [
+          {
+            "y": "relay",
+            "ids": [
+              "S2"
+            ]
+          },
+          {
+            "y": "designate",
+            "ids": [
+              "S8",
+              "S9",
+              "K5"
+            ]
+          },
+          {
+            "y": "describe",
+            "ids": [
+              "K1",
+              "K2",
+              "K3",
+              "K4"
+            ]
+          }
+        ]
+      }
+    ],
+    "termUse->target": [
+      {
+        "x": "figurative",
+        "values": [
+          {
+            "y": "intention",
+            "ids": [
+              "S1"
+            ]
+          },
+          {
+            "y": "relationship",
+            "ids": [
+              "S3",
+              "S5",
+              "S6"
+            ]
+          },
+          {
+            "y": "property",
+            "ids": [
+              "S7"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "literal",
+        "values": [
+          {
+            "y": "event",
+            "ids": [
+              "S2"
+            ]
+          },
+          {
+            "y": "designation",
+            "ids": [
+              "S8",
+              "K1",
+              "K2"
+            ]
+          },
+          {
+            "y": "intention",
+            "ids": [
+              "S9"
+            ]
+          },
+          {
+            "y": "relationship",
+            "ids": [
+              "K3",
+              "K5"
+            ]
+          },
+          {
+            "y": "property",
+            "ids": [
+              "K4"
+            ]
+          }
+        ]
+      }
+    ],
+    "target->termUse": [
+      {
+        "x": "intention",
+        "values": [
+          {
+            "y": "figurative",
+            "ids": [
+              "S1"
+            ]
+          },
+          {
+            "y": "literal",
+            "ids": [
+              "S9"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "relationship",
+        "values": [
+          {
+            "y": "figurative",
+            "ids": [
+              "S3",
+              "S5",
+              "S6"
+            ]
+          },
+          {
+            "y": "literal",
+            "ids": [
+              "K3",
+              "K5"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "designation",
+        "values": [
+          {
+            "y": "coined",
+            "ids": [
+              "S4"
+            ]
+          },
+          {
+            "y": "literal",
+            "ids": [
+              "S8",
+              "K1",
+              "K2"
+            ]
+          }
+        ]
+      },
+      {
+        "x": "property",
+        "values": [
+          {
+            "y": "figurative",
+            "ids": [
+              "S7"
+            ]
+          },
+          {
+            "y": "literal",
+            "ids": [
+              "K4"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "notProperty": [
+    {
+      "id": "S1",
+      "target": "intention",
+      "learned": "the speaker wants to build Rome in one day"
+    },
+    {
+      "id": "S2",
+      "target": "event",
+      "learned": "Rome was built over time"
+    },
+    {
+      "id": "S3",
+      "target": "relationship",
+      "learned": "the speaker considers the listener to be their Rome"
+    },
+    {
+      "id": "S4",
+      "target": "designation",
+      "learned": "the effort is named Rome"
+    },
+    {
+      "id": "S5",
+      "target": "relationship",
+      "learned": "Claude will be the listener's uncle"
+    },
+    {
+      "id": "S6",
+      "target": "relationship",
+      "learned": "Hermes has an aunt-like standing link to the speaker"
+    },
+    {
+      "id": "S8",
+      "target": "designation",
+      "learned": "the speaker's name is Ote"
+    },
+    {
+      "id": "S9",
+      "target": "intention",
+      "learned": "Rome is the project the speaker is working on"
+    },
+    {
+      "id": "K1",
+      "target": "designation",
+      "learned": "the manager's name is Priya"
+    },
+    {
+      "id": "K2",
+      "target": "designation",
+      "learned": "the deploy script is named rollout.sh"
+    },
+    {
+      "id": "K3",
+      "target": "relationship",
+      "learned": "Priya reviews the speaker's merges"
+    },
+    {
+      "id": "K5",
+      "target": "relationship",
+      "learned": "the listener is an editor to the speaker, not a subordinate"
+    }
+  ],
+  "summary": {
+    "sentences": 14,
+    "distinctActs": [
+      "want",
+      "relay",
+      "designate",
+      "describe"
+    ],
+    "distinctTerms": [
+      "figurative",
+      "literal",
+      "coined"
+    ],
+    "distinctTargets": [
+      "intention",
+      "event",
+      "relationship",
+      "designation",
+      "property"
+    ],
+    "crossingCounts": {
+      "act->target": 2,
+      "target->act": 3,
+      "act->termUse": 2,
+      "termUse->act": 2,
+      "termUse->target": 2,
+      "target->termUse": 4
+    },
+    "llmFailures": 0,
+    "unresolved": []
+  }
+}

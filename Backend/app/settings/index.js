@@ -215,6 +215,11 @@ const SETTING_DEFS = {
     validate: (v) => typeof v === 'boolean',
     describe: 'Interpret the naming ACT with a model (multilingual) instead of English regex patterns alone. MEASURED 2026-08-10: the pattern detector captured in 1 of 9 languages — Thai, Japanese, Chinese, Spanish, French and German all returned nothing, and a pattern list cannot be made multilingual by making it more precise. The model only INTERPRETS; adoption stays deterministic and a name must appear verbatim in the turn before it can be stored. Off = the English patterns alone (the pre-2026-08-12 behaviour), which is the fallback when the model is unavailable either way.',
   },
+  'memory.identityAsk': {
+    fromConfig: (c) => c?.memory?.identityAsk ?? true,
+    validate: (v) => typeof v === 'boolean',
+    describe: 'Whether the persona may PAUSE A TURN to ask which name to use when a turn proposes a name that would REPLACE the one she already holds. Off = the documented degradation with no ask port: DEFER — keep the current name, change nothing, ask nothing. Adoption into an EMPTY slot is unaffected either way; this governs only the replacement case. ⚠️ MEASURED 2026-08-26, and this is why the switch exists: the interpreter reads the naming act out of whoever typed the turn and writes it as the name of the ROOM ACCOUNT HOLDER — so a third party speaking through another persons room proposes renaming that rooms owner, and the card fires on every such turn. Ote: "every time other entity use my room to talk to sotera, the ask question to change display name always pop up." Turning this off silences the prompt; it does NOT fix the speaker/account confusion underneath, which is an OteRM boundary problem.',
+  },
   'memory.identityModel': {
     fromConfig: (c) => c?.memory?.identityModel ?? '',
     validate: (v) => typeof v === 'string' && (v === '' || MODEL_ID.test(v)),
