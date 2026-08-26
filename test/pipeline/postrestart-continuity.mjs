@@ -105,7 +105,27 @@ for (const r of rows) {
   chk('INVARIANT · every message <= up_to and > prev watermark was supplied, in full',
     missing.length === 0, `${shouldCover.length} in range, ${missing.length} missing`)
 
-  console.log(`      ⓘ ${sel.contextCount} context + ${sel.newCount} new` + (sel.truncated ? `  ·  backlog left: ${sel.remaining}` : '  ·  backlog fully drained'))
+  console.log(`      ⓘ ${sel.contextCount} context + ${sel.newCount} new`)
+
+  // ── ⭐⭐⭐ IS THIS THE OVERSIZED CASE? ──────────────────────────────────────────────────────────
+  // ⛔ NOT "up_to < head as it stands now" — the head moves, so a message that arrived AFTER the run
+  // would masquerade as material the run declined to review. ⭐ The honest test is what existed WHEN THE
+  // RUN STARTED: a message created before `requested_at` and sitting above `up_to` is one this run chose
+  // to leave behind, which is precisely the behaviour option B was built for and the old code could not
+  // produce.
+  const [left] = await q(
+    `select count(*)::int c, min(rolling_id)::bigint next_id from ${S}.txn_messages
+      where conversation_id = $1 and rolling_id > $2 and created_at < $3`,
+    [r.conversation_id, upTo, r.requested_at])
+  const leftBehind = Number(left?.c ?? 0)
+  if (leftBehind > 0) {
+    console.log(`      ⭐⭐⭐ OVERSIZED CASE: up_to=${upTo} < head-at-run-time — ${leftBehind} message(s) `
+      + `existed already and were deliberately NOT reviewed.`)
+    console.log(`         ⇒ the next run on this conversation must start at ${upTo + 1} (first unseen: ${left.next_id}).`)
+  } else {
+    console.log('      ⓘ backlog fully drained — ⛔ this run does NOT exercise the oversized case '
+      + '(up_to and the head coincide because everything fitted).')
+  }
 
   const list = perConv.get(r.cid) ?? []
   list.push({ row: r.rolling_id, from, upTo, at: r.requested_at })
