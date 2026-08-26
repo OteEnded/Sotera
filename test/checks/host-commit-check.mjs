@@ -16,7 +16,7 @@
 
 import { makeChecker } from '../harness.mjs'
 import { readFileSync } from 'node:fs'
-import { preflightCommit, readCommit, describeCommit, GB } from '../lib/host-commit.mjs'
+import { preflightCommit, readCommit, describeCommit, startCommitProbe, GB } from '../lib/host-commit.mjs'
 
 const { check, done } = makeChecker('host-commit')
 const ok = (c, l, d = '') => check(l, c, d)
@@ -106,5 +106,33 @@ if (live) {
 } else {
   ok(process.platform !== 'win32', '8 · no live reading, and that is expected off Windows', process.platform)
 }
+
+// ── 9 · ⭐⭐ THE STREAMING PROBE ACTUALLY STREAMS ────────────────────────────────────────────────
+// ⛔ THE PART MOST LIKELY TO FAIL SILENTLY. If the probe emits nothing, the experiment still produces a
+// full set of latency numbers — every one of them carrying `commitPct: null`. That is a complete-looking
+// result with no environment attached, which is precisely the shape this project keeps paying for:
+// `harness.readSSE` would have returned zero events and a TTFT of null forever, and looked fine doing it.
+// ⇒ so this asserts SAMPLES ARRIVED, ⛔ not merely that the object was constructed.
+const probe = startCommitProbe({ intervalSec: 1 })
+ok(probe.ok === true, '9 · the probe reports it started')
+const t0 = Date.now()
+await new Promise((r) => setTimeout(r, 5000))
+const t1 = Date.now()
+ok(probe.samples.length >= 2, '9 · ⭐ SAMPLES ACTUALLY ARRIVED over 5s', `n=${probe.samples.length}`)
+if (probe.samples.length) {
+  const s0 = probe.samples[0]
+  ok(s0.committed > 0 && s0.limit >= s0.committed && s0.pct > 0 && s0.pct <= 100,
+    '9 · a streamed sample is self-consistent', `${s0.pct.toFixed(1)}%`)
+  // ⭐ The stream and the one-shot must agree — two sources that merely coexist are not one measurement.
+  if (live) {
+    ok(Math.abs(s0.pct - live.pct) < 10,
+      '9 · ⭐ the stream agrees with the one-shot reader', `stream ${s0.pct.toFixed(1)}% vs one-shot ${live.pct.toFixed(1)}%`)
+  }
+  ok(probe.peakBetween(t0, t1) !== null, '9 · peakBetween finds the window it was given')
+}
+// ⛔ null, NOT zero, for a window with no samples — the distinction the whole design rests on.
+ok(probe.peakBetween(t1 + 3_600_000, t1 + 3_601_000) === null,
+  '9 · ⛔ an empty window returns null — a missing reading is not a low one')
+probe.stop()
 
 done()
