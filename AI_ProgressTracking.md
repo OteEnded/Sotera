@@ -2823,3 +2823,31 @@ requirement    : 8.0 GB
 - ⛔ **CONTENTION A/B: THE REFUSAL IS ACCEPTED AS A FINDING** and the harness is left ready for a future valid window. ⛔ No pagefile, keep-alive, Ollama placement, model-residency or threshold change was made to fit it.
 
 - **Next action:** ⏸ **OTE'S CALL ON THE LIFECYCLE OPTION (B / C / D).** Then continue characterizing the reflection lifecycle — ⛔ no manufactured data, no forced conditions, no schema change until he rules.
+
+## 2026-08-26 21:45 +0700 · B+C is live, and the first natural run proves it from the row rather than from the code
+
+- ✅ **RESTARTED AT A SAFE WINDOW, NOT A CONVENIENT ONE.** pid 34664 (16:31:50) → **pid 36148 (21:31:52)**. ⭐ The window was chosen by **the system's own definition of “not mid-conversation”** — the 30-minute quiet gate — rather than one I invented: waited until `7198c1b0` had been idle **25.3 min**, with the waiter set to ABORT if he typed. ⛔ Also confirmed **zero in-flight attempts** before terminating, so nothing was cut off mid-run. ⓘ The old process was **orphaned** (parent gone), so nothing would have auto-restarted it.
+- ⭐⭐⭐ **AND THE ROW ITSELF PROVES WHICH CODE RAN — not `/health`, not a newer PID.** `code_mtime = host=2026-08-26T14:10:58.799Z|pure=2026-08-26T14:03:10.079Z` = **21:10:58 and 21:03:10 +07**, exactly the two files edited for B+C. ⭐ This is the project's own answer to *“/health 200 says nothing about which code is loaded”*, and it answered it without being asked to.
+
+### ✅ THE ACTUAL ROW — `log_conversation_revisits` #661
+
+```
+rolling_id            661
+conversation_id       7198c1b0-2674-46c3-9e43-ba5e505443f3   (ote)
+from_rolling_id       6216          <- previous watermark 6215 + 1
+up_to_rolling_id      6217          <- reviewedTo
+messages_considered   8             <- 6 context + 2 new
+outcome               completed     reason=reflection
+model                 ollama/qwen3.6:35b      prompt_generation 3
+code_mtime            host=2026-08-26T14:10:58.799Z|pure=2026-08-26T14:03:10.079Z
+requested_at          14:40:00.494Z   completed_at 14:40:21.908Z   (21.4s)
+tools_used            []            wrote_memory_id null      text 2,695 chars
+```
+
+- ✅ **ALL SIX INVARIANTS PASS** (`pipeline/postrestart-continuity.mjs`): `from = prev + 1` (6215→6216) · `up_to = reviewedTo` (replay agrees: 6217) · **every message in (6216, 6217] actually supplied — 2 in range, 0 missing** · `messages_considered` = 8 = replay-shaped = replay-slice · **reconstructed `elided = false`** (2,727-char transcript) · coverage guard allowed the claim.
+- ⭐ **`elided` AND “GUARD PASSED” NEEDED A METHOD, NOT A COLUMN.** ⛔ No `elided` column exists and none was added. `elided` is proven by **reconstruction** — replaying the row's own range through the same `selectReviewableRange` + `shapeReflectionTranscript` the lane ran and requiring `elided === false` AND `considered === messages_considered`. “Guard passed” is proven **structurally**: the guard returns before the claim INSERT, so a `completed` row could not exist had it refused.
+- ⚠️⚠️ **THE HONEST LIMIT OF THIS RUN, STATED RATHER THAN GLOSSED: `up_to = 6217` AND THE CONVERSATION HEAD IS ALSO 6217.** The 2-message backlog fitted entirely, so the two numbers **coincide**. ⇒ this run proves `reviewedTo` was computed and that everything in range was supplied — ⛔ it does **NOT** yet prove `up_to` would STOP SHORT of the head, because there was nothing to stop short of. ⭐ That distinguishing evidence needs a backlog larger than the 24k budget, and per Ote it accumulates **naturally**: ⛔ no manufactured traffic.
+- ⓘ **A DEAD COLUMN, FOUND WHILE VERIFYING AND ⛔ NOT FIXED.** `started_at` is NULL on #661 — and on all nine rows before it today, which carry the **pre-change** `mtime=...T08:20:31.872Z`. ⛔ Not a regression: `grep started_at` in the host returns **nothing**, so the current code never writes it; the 67 rows that have it came from older code. ✅ Harmless — `stalledAttempts` ages against **`requested_at`**, not `started_at`, so the stale sweep is unaffected. ⚠️ But a column that reads as *“when did this attempt begin”* and is always null is a question the ledger silently stopped answering.
+- ⛔ **NOTHING MANUFACTURED.** No forced reflection — the 21:40:00 cron tick ran on its own, six seconds after the gate opened at 21:35:58. No historical rewind, no schema change, no environment change, and the 648 historically skipped messages are untouched.
+
+- **Next action:** ⏳ **WAIT FOR REAL TRAFFIC TO PRODUCE A BACKLOG > 24k CHARS**, then prove the chain `A→X, X+1→Y, Y+1→Z` with no gap and no overlap. ⛔ Not to be forced. ⓘ The contention A/B harness stays ready for a valid window; its preconditions remain incompatible on this box.
