@@ -1,0 +1,67 @@
+{
+  "record": "environmental condition · host commit pressure",
+  "box": "OTESMALLSERVER (OSS, small server, 2x RTX 5060 Ti, 63.7 GB RAM)",
+  "date": "2026-08-26",
+  "timezone": "+07",
+  "why": "Ote: 'record the current commit-pressure situation as an environmental condition, because if the experiment runs later, we need to know that the baseline was healthy enough to make the result meaningful.'",
+  "verdict": "UNHEALTHY DURING THIS WINDOW. Any contention A/B measured between 18:21 and 18:55 +07 would be uninterpretable: commit swung between 54.8% and 100% of a limit that was itself moving.",
+
+  "outage": {
+    "at": "2026-08-26T18:21:07+07:00",
+    "source": "Windows event log, Microsoft-Windows-Resource-Exhaustion-Detector",
+    "message": "Windows successfully diagnosed a low virtual memory condition",
+    "consumers": [
+      { "process": "llama-server.exe", "pid": 18900, "bytes": 29799571456, "gb": 27.75 },
+      { "process": "llama-server.exe", "pid": 16112, "bytes": 8494166016, "gb": 7.91 },
+      { "process": "claude.exe", "pid": 36912, "bytes": 2418552832, "gb": 2.25 }
+    ],
+    "casualties": [
+      "postgresql-x64-17 service killed - log ends mid-traffic at 18:21:06 with no shutdown line",
+      "VS Code window terminated (reason: oom, code -536870904)"
+    ],
+    "notCasualties": [
+      "OLS :8201 (pid 14460, up since 2026-08-24) - untouched",
+      "Sotera app :8210 (pid 34664, up since 16:31) - survived, pg pool reconnected on its own",
+      "ollama :11434 - survived"
+    ],
+    "dataIntegrity": "clean - on restart: 'database system was not properly shut down' then redo done in 0.01s, no PANIC, no FATAL, no stale postmaster.pid"
+  },
+
+  "commitTimeline": [
+    { "at": "18:34", "committedGB": 39.7, "limitGB": 71.7, "pct": 55.4, "source": "Win32_OperatingSystem", "note": "shortly after the crash, models unloaded" },
+    { "at": "18:41", "committedGB": 79.4, "limitGB": 79.7, "pct": 99.6, "source": "Win32_OperatingSystem", "note": "three models resident" },
+    { "at": "18:41", "committedGB": 79.5, "limitGB": 79.7, "pct": 100.0, "source": "Get-Counter", "note": "confirmed by a second counter; headroom 0.2 GB" },
+    { "at": "18:47", "committedGB": 52.9, "limitGB": 71.7, "pct": 73.8, "source": "Get-Counter", "note": "qwen3.5:9b keep-alive expired" },
+    { "at": "18:50", "committedGB": 72.2, "limitGB": 73.2, "pct": 98.6, "source": "Get-Counter", "note": "climbed again - the box was oscillating, not settling" },
+    { "at": "18:55", "committedGB": 39.3, "limitGB": 71.7, "pct": 54.8, "source": "Get-Counter", "note": "all keep-alives expired, 0 models resident" }
+  ],
+
+  "residentModelsAtPeak": {
+    "observedAt": "18:42",
+    "models": [
+      { "name": "qwen3.6:35b", "totalGB": 25.66, "vramGB": 25.66, "cpuGB": 0.0, "placement": "GPU", "expires": "18:51:21" },
+      { "name": "qwen3.5:9b", "totalGB": 6.19, "vramGB": 0.0, "cpuGB": 6.19, "placement": "CPU", "expires": "18:46:28" },
+      { "name": "qwen3-embedding:4b", "totalGB": 3.94, "vramGB": 0.0, "cpuGB": 3.94, "placement": "CPU", "expires": "19:10:42" }
+    ],
+    "note": "Two of three were CPU-placed. The 35B was correctly on the GPU and STILL contributed ~29 GB of host commit for its mapping - which is the whole reason host commit is now a measured axis."
+  },
+
+  "pagefile": {
+    "path": "C:\\pagefile.sys",
+    "allocatedMB": 16384,
+    "peakUsageMB": 2353,
+    "systemManaged": true,
+    "finding": "The commit LIMIT is not a constant. Observed at 71.7, 73.2 and 79.7 GB within twenty minutes as the system-managed pagefile grew under pressure and contracted afterwards. Headroom therefore moves for two independent reasons - usage falling AND the limit changing - so any guard that caches the limit will silently misreport."
+  },
+
+  "changesMade": "NONE. Ote: 'Leave Ollama, keep-alives, pagefile, and the resident models untouched for now - I don't want environmental changes mixed into the measurement.' No model was stopped, no keep-alive altered, no pagefile resized, ollama never started or killed.",
+
+  "gateForALaterRun": {
+    "instrument": "test/pipeline/reflection-contention.mjs --dry",
+    "guard": "test/lib/host-commit.mjs preflightCommit()",
+    "refusals": ["requirement-unknown", "commit-unreadable", "commit-pressure", "insufficient-headroom", "projected-pressure"],
+    "maxPct": 85,
+    "abortPct": 95,
+    "lastDryRun": { "at": "18:55", "verdict": "REFUSED", "reason": "projected-pressure", "detail": "54.8% now, but loading the 22.3 GB model would reach 85.9%, above the 85% ceiling" }
+  }
+}

@@ -33,6 +33,7 @@
 
 import { writeFileSync, readFileSync } from 'node:fs'
 import { devPg, devSchema, ollamaHost, BASE } from '../harness.mjs'
+import { startCommitProbe, preflightCommit, describeCommit, GB } from '../lib/host-commit.mjs'
 
 const argv = process.argv.slice(2)
 const DRY = argv.includes('--dry')
@@ -52,7 +53,99 @@ console.log(`   chat model       : ${CHAT_MODEL}`)
 console.log(`   ⇒ ${REFLECT_MODEL === CHAT_MODEL ? '⭐ SAME MODEL — contention is for SLOTS, not weights (no reload stall)' : '⚠️ DIFFERENT MODELS — eviction/reload is in play, a different failure entirely'}`)
 console.log(`   pairs            : ${N} per arm, alternating, after an IDLE/IDLE noise floor`)
 console.log('   ⛔ writes no reflection row · ⛔ the cursor test stays clean\n')
-if (DRY) { console.log('   --dry: design printed, nothing run.'); process.exit(0) }
+// ── ⭐⭐⭐ PREFLIGHT · HOST COMMIT, AND IT FAILS CLOSED ──────────────────────────────────────────
+// Ote, 2026-08-26: *"Do not run the contention A/B while commit is near 100%… The guard should fail
+// closed and clearly report why it refused to start."*
+//
+// ⛔ THIS EXISTS BECAUSE THE BOX ALREADY FELL OVER ONCE TODAY. At 18:21:07 +07 Windows diagnosed low
+// virtual memory; **Postgres was killed** and Ote's editor died. This experiment deliberately runs a
+// background generation DURING an interactive turn — the very shape that caused it — so it must satisfy
+// itself about headroom BEFORE it adds any load, and refuse out loud when it cannot.
+//
+// ⭐⭐ THE REQUIREMENT IS DERIVED FROM WHAT IS ACTUALLY RESIDENT, ⛔ NOT A MAGIC NUMBER.
+//   model already resident → the run adds a SLOT, not weights ⇒ a modest reserve is enough.
+//   model NOT resident     → the run will LOAD it ⇒ reserve its full size on top.
+// ⛔ And if Ollama cannot be read at all, the requirement is UNKNOWN and the guard refuses — an
+// unmeasurable environment is never certified as healthy.
+const RESERVE_GB = 8          // slack for the interactive turn, its KV cache, and the rest of the box
+const ABORT_PCT = 95          // ⛔ mid-run: stop rather than push the box over a second time
+
+const residentModels = async () => {
+  try {
+    const r = await fetch(`${HOST}/api/ps`, { signal: AbortSignal.timeout(5000) })
+    if (!r.ok) return null
+    const d = await r.json()
+    return Array.isArray(d?.models) ? d.models : null
+  } catch { return null }
+}
+
+// ⚠️ `/api/ps` lists only what is LOADED, so it cannot tell us the size of a model that is absent —
+// that comes from `/api/tags`. ⛔ The first version of this reached for `hit.size` in the branch where
+// `hit` is undefined by construction: dead code that silently fell through to a hard-coded 30 GB.
+const catalogueSizeGB = async (name) => {
+  try {
+    const r = await fetch(`${HOST}/api/tags`, { signal: AbortSignal.timeout(5000) })
+    if (!r.ok) return null
+    const d = await r.json()
+    const m = (d?.models ?? []).find((x) => String(x.name) === name)
+    const bytes = Number(m?.size ?? 0)
+    return bytes > 0 ? bytes / GB : null
+  } catch { return null }
+}
+
+const resident = await residentModels()
+const hit = resident?.find((m) => String(m.name) === REFLECT_MODEL)
+let requiredHeadroomGB
+let expectedLoadGB = 0
+if (resident === null) {
+  requiredHeadroomGB = undefined                    // ⛔ unknown ⇒ the guard refuses
+} else if (hit) {
+  requiredHeadroomGB = RESERVE_GB                   // weights are already paid for
+} else {
+  const sizeGB = await catalogueSizeGB(REFLECT_MODEL)
+  // ⛔ If the catalogue cannot size it either, we do NOT guess a comfortable number — unknown refuses.
+  requiredHeadroomGB = sizeGB === null ? undefined : RESERVE_GB + sizeGB
+  expectedLoadGB = sizeGB ?? 0
+}
+
+const pre = preflightCommit({ requiredHeadroomGB, expectedLoadGB })
+console.log('   ── preflight · host commit ─────────────────────────────────')
+console.log(`      ollama /api/ps : ${resident === null ? '⛔ UNREADABLE' : `${resident.length} model(s) resident`}`)
+if (resident?.length) {
+  for (const m of resident) {
+    const vram = Number(m.size_vram ?? 0); const total = Number(m.size ?? 0)
+    console.log(`         ${String(m.name).padEnd(22)} ${(total / 1e9).toFixed(2)}GB  ${vram > 0 ? `gpu ${(vram / 1e9).toFixed(2)}GB` : '⚠️ CPU-placed'}`)
+  }
+}
+console.log(`      reflect model  : ${hit ? '⭐ already resident — this run adds a SLOT, not weights' : '⚠️ NOT resident — this run would LOAD it'}`)
+console.log(`      commit         : ${describeCommit(pre.reading)}`)
+console.log(`      requirement    : ${Number.isFinite(requiredHeadroomGB) ? `${requiredHeadroomGB.toFixed(1)} GB` : '⛔ could not be established'}`)
+console.log(`      this run adds  : ${expectedLoadGB > 0 ? `~${expectedLoadGB.toFixed(1)} GB (model load) ⇒ projected ${pre.projectedPct ? `${pre.projectedPct.toFixed(1)}%` : '?'}` : 'no model load — weights already resident'}`)
+console.log(`      ⇒ ${pre.ok ? '✅ PREFLIGHT PASSES' : `⛔ REFUSED — ${pre.reason}`}`)
+console.log(`         ${pre.detail}`)
+
+if (DRY) {
+  console.log(`\n   --dry: design and preflight printed, ⛔ nothing run.`)
+  console.log(`   ⇒ ${pre.ok ? '⭐ the heavy run would be allowed to start right now.' : '⛔ the heavy run would REFUSE to start right now.'}`)
+  process.exit(pre.ok ? 0 : 3)
+}
+if (!pre.ok) {
+  console.error(`\n⛔⛔ REFUSING TO RUN THE CONTENTION A/B — ${pre.reason}`)
+  console.error(`   ${pre.detail}`)
+  console.error('   ⛔ Nothing was started: no login, no conversation, no background generation.')
+  console.error('   ⭐ This is the guard working. Re-check with `--dry` once the box has headroom.')
+  process.exit(2)
+}
+
+// ⭐ The probe runs for the whole experiment, on its own process, so every sample carries the commit it
+// was measured under. ⛔ A latency number without its environment is not reproducible.
+const probe = startCommitProbe({ intervalSec: 2 })
+if (!probe.ok) {
+  console.error('⛔ REFUSING: the commit probe could not start, so samples would carry no environment.')
+  process.exit(2)
+}
+const stopProbe = () => probe.stop()
+process.on('exit', stopProbe)
 
 // ── THE BACKGROUND LOAD — the lane's resource profile, without the lane ────────────────────────
 // ⛔ Fire-and-forget on purpose: the interactive turn must start while this is still generating, which is
@@ -143,7 +236,22 @@ const sample = async (label) => {
       }
     }
   }
-  return { label, ok: true, ttft, total: Date.now() - t0, tokens }
+  const t1 = Date.now()
+  // ⭐ The commit peak is taken from the SEPARATE probe process over this sample's window — ⛔ never
+  // sampled inline, which would put a PowerShell launch inside the latency being measured.
+  // ⛔ `null` when the window caught no tick: a missing reading is not a low one.
+  const peak = probe.peakBetween(t0, t1)
+  return { label, ok: true, ttft, total: t1 - t0, tokens, commitPct: peak ? peak.pct : null, commitGB: peak ? peak.committed / GB : null }
+}
+
+// ⛔ MID-RUN ABORT. The preflight only proves the box was safe at the START; this experiment then
+// deliberately adds load. ⭐ If commit crosses the abort line the run STOPS and reports what it has —
+// a partial result honestly labelled beats a complete one bought with a second outage.
+let aborted = null
+const commitTripped = () => {
+  const now = probe.latest()
+  if (now && now.pct >= ABORT_PCT) { aborted = now; return true }
+  return false
 }
 
 const samples = []
@@ -152,28 +260,38 @@ const cv = (a) => { const m = a.reduce((x, y) => x + y, 0) / a.length; const sd 
 
 // ── ⭐ PHASE 1 · THE NOISE FLOOR (IDLE vs IDLE) ────────────────────────────────────────────────
 console.log('   ── noise floor: IDLE vs IDLE ───────────────────────────────')
-for (let i = 0; i < N; i += 1) {
+for (let i = 0; i < N && !aborted; i += 1) {
   for (const tag of ['floorA', 'floorB']) {
     const s = await sample(tag)
     samples.push(s)
-    console.log(`      ${tag}  ${s.ok ? `${(s.total / 1000).toFixed(1)}s` : `✖ ${s.err}`}`)
+    const env = s.commitPct == null ? 'commit ?' : `commit ${s.commitPct.toFixed(0)}%`
+    console.log(`      ${tag}  ${s.ok ? `${(s.total / 1000).toFixed(1)}s` : `✖ ${s.err}`}   ${env}`)
+    if (commitTripped()) break
   }
 }
 
 // ── ⭐ PHASE 2 · IDLE vs CONTENDED, ALTERNATING ────────────────────────────────────────────────
 console.log('\n   ── IDLE vs CONTENDED (alternating) ─────────────────────────')
-for (let i = 0; i < N; i += 1) {
+for (let i = 0; i < N && !aborted; i += 1) {
   const idle = await sample('idle')
   samples.push(idle)
-  console.log(`      idle       ${idle.ok ? `${(idle.total / 1000).toFixed(1)}s` : `✖ ${idle.err}`}`)
+  console.log(`      idle       ${idle.ok ? `${(idle.total / 1000).toFixed(1)}s` : `✖ ${idle.err}`}   ${idle.commitPct == null ? 'commit ?' : `commit ${idle.commitPct.toFixed(0)}%`}`)
+  if (commitTripped()) break
 
   const load = startLoad()
   await new Promise((r) => setTimeout(r, 1500)) // let the background generation actually start
   const cont = await sample('contended')
   samples.push(cont)
-  console.log(`      contended  ${cont.ok ? `${(cont.total / 1000).toFixed(1)}s` : `✖ ${cont.err}`}`)
+  console.log(`      contended  ${cont.ok ? `${(cont.total / 1000).toFixed(1)}s` : `✖ ${cont.err}`}   ${cont.commitPct == null ? 'commit ?' : `commit ${cont.commitPct.toFixed(0)}%`}`)
+  // ⭐ The background load is released BEFORE the abort check, so a trip never leaves a generation
+  // running against a box that is already in trouble.
   load.ctl.abort()
   await load.p
+  if (commitTripped()) break
+}
+if (aborted) {
+  console.log(`\n   ⛔⛔ ABORTED MID-RUN — commit reached ${aborted.pct.toFixed(1)}% (≥ ${ABORT_PCT}% abort line).`)
+  console.log('   ⭐ Background load released. The samples below are PARTIAL and are labelled as such.')
 }
 
 // ── REPORT ────────────────────────────────────────────────────────────────────────────────────
@@ -223,8 +341,45 @@ const noTtft = samples.filter((s2) => s2.ok && s2.ttft == null)
 if (noTtft.length) console.log(`   ⚠⚠ ${noTtft.length} sample(s) produced NO token event — a TTFT of null is a MISSING measurement, ⛔ not a fast one`)
 console.log('   ⛔ Reported as median + CV + N. ⛔ Never max−min: a range only grows with N.')
 
+// ── ⭐⭐ THE ENVIRONMENT THE RESULT WAS BOUGHT IN ────────────────────────────────────────────────
+// Ote: *"if the experiment runs later, we need to know that the baseline was healthy enough to make the
+// result meaningful."* ⇒ the run reports its own commit envelope, and a run whose commit CLIMBED across
+// the experiment is not comparable with one that held steady, even if the latencies match.
+const commitOf = (tag) => samples.filter((s2) => s2.label === tag && typeof s2.commitPct === 'number').map((s2) => s2.commitPct)
+console.log('\n   HOST COMMIT DURING THE RUN')
+for (const t of ['floorA', 'floorB', 'idle', 'contended']) {
+  const a = commitOf(t)
+  console.log(`      ${t.padEnd(10)} ${a.length ? `n=${a.length}  median=${med(a).toFixed(1)}%  max=${Math.max(...a).toFixed(1)}%` : '⛔ no reading'}`)
+}
+const allPct = probe.samples.map((s2) => s2.pct)
+if (allPct.length) {
+  const drift = allPct[allPct.length - 1] - allPct[0]
+  console.log(`      whole run  start=${allPct[0].toFixed(1)}%  end=${allPct[allPct.length - 1].toFixed(1)}%  peak=${Math.max(...allPct).toFixed(1)}%`)
+  console.log(`      ⇒ ${Math.abs(drift) < 5
+    ? '⭐ commit held steady — the arms were measured under comparable conditions'
+    : `⚠️ commit DRIFTED ${drift > 0 ? '+' : ''}${drift.toFixed(1)} points across the run — ⛔ the arms were NOT measured under the same environment`}`)
+}
+const noEnv = samples.filter((s2) => s2.ok && s2.commitPct == null)
+if (noEnv.length) console.log(`      ⚠️ ${noEnv.length} sample(s) carry NO commit reading — ⛔ a missing environment, not a quiet one`)
+if (aborted) console.log(`   ⛔⛔ THIS RUN IS PARTIAL: aborted at ${aborted.pct.toFixed(1)}% commit. ⛔ Do not report it as a completed A/B.`)
+
 const file = new URL('../results/reflection-contention.json', import.meta.url)
-writeFileSync(file, JSON.stringify({ at: new Date().toISOString(), reflectModel: REFLECT_MODEL, chatModel: CHAT_MODEL, numCtx: NUM_CTX, maxTok: MAX_TOK, samples }, null, 2), 'utf8')
+writeFileSync(file, JSON.stringify({
+  at: new Date().toISOString(),
+  reflectModel: REFLECT_MODEL, chatModel: CHAT_MODEL, numCtx: NUM_CTX, maxTok: MAX_TOK,
+  // ⭐ THE ENVIRONMENT TRAVELS WITH THE RESULT. A latency file that does not say what the box was doing
+  // cannot be compared with another one later, and this box moved between 73% and 100% commit inside
+  // twenty minutes today.
+  environment: {
+    preflight: { ok: pre.ok, reason: pre.reason, detail: pre.detail, reading: pre.reading, requiredHeadroomGB },
+    residentAtStart: resident,
+    abortPct: ABORT_PCT,
+    aborted,
+    commitTrace: probe.samples,
+  },
+  samples,
+}, null, 2), 'utf8')
 console.log(`\n  wrote ${file.pathname.replace(/^\//, '')}`)
 await pg.query(`delete from ${S}.txn_conversations where id = $1`, [cid]).catch(() => {})
 await pg.end()
+stopProbe()   // ⛔ explicit, not left to the exit hook — see the unref note in lib/host-commit.mjs
