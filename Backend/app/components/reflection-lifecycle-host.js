@@ -51,6 +51,7 @@ import { stalledAttempts, admitToQueue } from './revisit-lifecycle.js'
 // ⭐ The SAME drain the 5-minute job and the daily catch-up call. ⛔ Not a second indexing path — Ote:
 // *"Keep the existing drainPendingEmbeddings mechanism. Do not build a second indexing pipeline."*
 import { drainPendingEmbeddings } from './conversation-search.js'
+import { EVIDENTIAL_WHERE, evidentialSql } from './corpus-eligibility.js'
 
 // ⭐ READ ONCE AT MODULE LOAD, NEVER PER ROW. Same rule and the same reason as the noticing pass: this
 // must report the code that is LOADED, not the file on disk. The manual version of this check failed three
@@ -684,7 +685,7 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
     // background cognition walking into it is the opposite of respecting that.
     // ⭐ INELIGIBLE, NOT MARKED. No row is written for them, so if archived history ever becomes
     // revisitable they are simply eligible again — nothing has to be undone.
-    where: { incognito: false, archived_at: null, updated_at: { [Op.lte]: until, [Op.gte]: since } },
+    where: { ...EVIDENTIAL_WHERE, archived_at: null, updated_at: { [Op.lte]: until, [Op.gte]: since } },
     order: [['updated_at', 'ASC']], raw: true,
   })
 
@@ -719,7 +720,7 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
       backlog = await db.txn_messages.sequelize.query(
         `SELECT c.id::text AS id, c.user_id::text AS user_id
            FROM "${schema}"."txn_conversations" c
-          WHERE c.incognito = false
+          WHERE ${evidentialSql('c')}
             AND c.archived_at IS NULL
             AND c.updated_at < :since
             AND NOT EXISTS (SELECT 1 FROM "${schema}"."log_conversation_revisits" r

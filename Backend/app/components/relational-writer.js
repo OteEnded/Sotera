@@ -29,6 +29,7 @@
 
 import { validateRelationalRecord, STANCE_LABELS, STANCE_LABEL_KEYS, FREQUENCY_FLOOR, TAXONOMY_VERSION } from './relational-taxonomy.js'
 import { buildMemoryV2, DEFAULT_PERSONA } from './memory-v2-host.js'
+import { evidentialSql } from './corpus-eligibility.js'
 
 export const DERIVER_VERSION = 'stance-writer-0.1'
 
@@ -163,7 +164,7 @@ export async function abstractStance({
   // module that reads anyone else's conversation, and no parameter that could name one.
   const convs = await Q(
     `SELECT c.id::text FROM "${schema}"."txn_conversations" c
-      WHERE c.user_id = :subjectUserId AND c.incognito = false
+      WHERE c.user_id = :subjectUserId AND ${evidentialSql('c')}
       ORDER BY c.updated_at DESC LIMIT :maxConversations`, { subjectUserId, maxConversations })
 
   const [person] = await Q(

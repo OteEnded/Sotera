@@ -55,6 +55,7 @@ import { autoAuthorizes, mayRaiseDisclosureCard, disclosureMode } from './disclo
 // wrong: this door had its own idea of what a handle is (a uuid, nothing else) while `handleFor` was
 // handing her a 10-character checksummed one. See `conversation-handle.js`.
 import { resolveHandle, isUuid } from './conversation-handle.js'
+import { isEvidential } from './corpus-eligibility.js'
 
 // ⭐ The affirmative option's label is a CONSTANT, not free text, because matching on prose is how prose
 // becomes authorization. The card must offer this exact string for the grant to verify.
@@ -108,11 +109,14 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
     })
     if (!msg) return { found: false }
     const conv = await db.txn_conversations.findOne({
-      where: { id: msg.conversation_id }, attributes: ['id', 'user_id', 'incognito'], raw: true,
+      where: { id: msg.conversation_id }, attributes: ['id', 'user_id', 'incognito', 'excluded_from_evidence_at'], raw: true,
     })
     // ⛔ FAIL CLOSED. A conversation whose owner cannot be established is not readable, and an incognito
     // conversation is off the record for every purpose, including this one.
-    if (!conv || !conv.user_id || conv.incognito) return { found: false }
+    // ⭐ 033: an EXCLUDED conversation is not evidence either, so it cannot cross a room boundary.
+    // ⛔ `isEvidential` rather than a second `conv.incognito` test — one predicate, one place, or the
+    // two arms of this file drift apart the first time somebody edits only one of them.
+    if (!conv || !conv.user_id || !isEvidential(conv)) return { found: false }
     const owner = await db.mst_users.findOne({
       where: { id: conv.user_id }, attributes: ['id', 'username', 'display_name'], raw: true,
     })
@@ -172,10 +176,13 @@ export function buildDisclosure(fastify, { userId = null, isRoot = false, userna
       id = r.id
     }
     const conv = await db.txn_conversations.findOne({
-      where: { id }, attributes: ['id', 'user_id', 'incognito'], raw: true,
+      where: { id }, attributes: ['id', 'user_id', 'incognito', 'excluded_from_evidence_at'], raw: true,
     })
     // ⛔ FAIL CLOSED, exactly as `locate` does.
-    if (!conv || !conv.user_id || conv.incognito) return { found: false }
+    // ⭐ 033: an EXCLUDED conversation is not evidence either, so it cannot cross a room boundary.
+    // ⛔ `isEvidential` rather than a second `conv.incognito` test — one predicate, one place, or the
+    // two arms of this file drift apart the first time somebody edits only one of them.
+    if (!conv || !conv.user_id || !isEvidential(conv)) return { found: false }
     const owner = await db.mst_users.findOne({
       where: { id: conv.user_id }, attributes: ['id', 'username', 'display_name'], raw: true,
     })

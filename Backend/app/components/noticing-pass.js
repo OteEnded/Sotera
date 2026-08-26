@@ -30,6 +30,7 @@ import { Op } from 'sequelize'
 import { log } from '../../lib/utility.js'
 import { noticeConversation } from './noticing-host.js'
 import { buildLesson } from './lesson-host.js'
+import { EVIDENTIAL_WHERE } from './corpus-eligibility.js'
 
 // ⚠️ RESOLVED FROM THE MODULE, NOT `process.cwd()`. The first version used cwd and the log landed in
 // `Personas/test/results` when the pass was invoked from a script instead of from `Backend/` — a path that
@@ -185,7 +186,7 @@ export async function noticeAll(fastify, { maxConvos = 5, lookbackHours = 6, for
   const marks = readWatermarks(records)
   const since = new Date(Date.now() - lookbackHours * 3600e3)
   const convos = await db.txn_conversations.findAll({
-    where: { incognito: false, updated_at: { [Op.gte]: since } },
+    where: { ...EVIDENTIAL_WHERE, updated_at: { [Op.gte]: since } },
     order: [['updated_at', 'DESC']], limit: maxConvos * 3, raw: true,
   })
 

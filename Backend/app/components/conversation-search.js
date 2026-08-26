@@ -12,6 +12,7 @@ import { registerHostService } from './runtime.js'
 import { makeEmbedder } from './memory-embed-host.js' // shared embedding utility (same model/dims/CPU config)
 import { rrfFuse } from '@ote/memory/cognition/memory-rank.js'       // shared rank-fusion (lexical ⊕ dense)
 import { getSetting } from '../settings/index.js'
+import { evidentialSql } from './corpus-eligibility.js'
 
 const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim()
 
@@ -210,7 +211,7 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
   // for persona-level self-history, where the ROLE filter is what makes the result hers.
   const ROOM = acrossRooms ? 'TRUE' : 'c.user_id IS NOT DISTINCT FROM :userId'
   const SCOPE = `${ROOM}
-          AND c.incognito = false
+          AND ${evidentialSql('c')}
           AND ${ROLE_IN}
           AND (:excludeConversationId::uuid IS NULL OR m.conversation_id <> :excludeConversationId::uuid)
           AND (:onlyConversationId::uuid IS NULL OR m.conversation_id = :onlyConversationId::uuid)
@@ -352,7 +353,7 @@ export async function embedPendingMessages(fastify, { userId = null, limit = 200
        JOIN ${CONV} c ON c.id = m.conversation_id
        LEFT JOIN ${ME} me ON me.message_id = m.id
       WHERE me.message_id IS NULL
-        AND c.incognito = false
+        AND ${evidentialSql('c')}
         AND m.role IN ('user','assistant')
         AND length(m.content) >= :minChars
         AND (:userId::uuid IS NULL OR c.user_id = :userId::uuid)

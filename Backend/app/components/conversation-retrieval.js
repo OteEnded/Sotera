@@ -68,6 +68,7 @@ import { handleFor, resolveHandle } from './conversation-handle.js'
 export { handleFor, resolveHandle }
 import { SOURCE, BASIS, AVAILABILITY, RETENTION } from './memory-cognition-axes.js'
 import { log } from '../../lib/utility.js'
+import { evidentialSql } from './corpus-eligibility.js'
 
 // ── ⭐ THE CAPS, AND THEY ARE OBSERVABLE ─────────────────────────────────────────────────────────────
 // Ote: *"Hard caps are important so `with: Hermes` across 185 conversations doesn't turn into a
@@ -250,7 +251,9 @@ export function buildConversationRetrieval(fastify, { userId = null, isRoot = fa
   // ⇒ ⭐ **A projection that merges "what you may not hear" with "where it happened" loses the location
   // the moment everything becomes sayable.** Inventory and disclosure are now separate questions.
   async function inventory({ resolved }) {
-    const where = ['c.incognito = false']
+    // ⭐ 033: eligibility is TWO questions now — *“was this ever recorded?”* and *“may it be reasoned
+    // from?”* ⛔ One clause, one place (`corpus-eligibility.js`), so no retrieval arm can drift.
+    const where = [evidentialSql('c')]
     const rep = {}
     if (resolved.roomUserIds) {
       if (!resolved.roomUserIds.length) return [] // an intersection that emptied matches nothing

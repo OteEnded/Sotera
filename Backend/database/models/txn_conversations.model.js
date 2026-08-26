@@ -87,6 +87,34 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 allowNull: false,
                 defaultValue: false,
             },
+            // ⭐⭐⭐ "THIS HAPPENED, AND IT IS NOT EVIDENCE" (migration 033) — the corpus state that did
+            // not exist, and whose absence corrupted three separate measurements.
+            //
+            // ⚠️⚠️ IT IS NOT `incognito`, AND MERGING THEM WOULD BREAK BOTH:
+            //   `incognito`                 "should this be recorded at all?"    — a PRIVACY promise,
+            //                               fixed at create and deliberately unsettable, because a
+            //                               promise you can revoke later is not a promise.
+            //   `excluded_from_evidence_at` "may this be RETRIEVED as evidence?" — settable AFTER the
+            //                               fact, which is the entire point.
+            //
+            // ⛔ Everything else that looks like an exclusion governs WRITING, not reading: `archived_at`
+            // gates the revisit lanes, `settings.probe` gates noticing and reflection. Neither one removes
+            // a conversation from retrieval — which is why a harness run's own conversations kept coming
+            // back as material, once OUTRANKING her real ones 73-to-38 in the same room.
+            //
+            // ⭐ A TIMESTAMP, not a boolean, for the same reason as `contradicted_at`: it records that
+            // somebody DID this, and when. NULL means nobody has excluded it — ⛔ which is not the same as
+            // "considered and kept", and the two must never collapse.
+            excluded_from_evidence_at: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            },
+            // ⛔ An exclusion nobody can justify later is indistinguishable from data being quietly
+            // curated to make a number come out, so the writer requires one.
+            exclusion_reason: {
+                type: DataTypes.TEXT,
+                allowNull: true,
+            },
         },
         {
             tableName: "txn_conversations",

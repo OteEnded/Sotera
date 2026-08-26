@@ -20,6 +20,7 @@ import { Op } from 'sequelize'
 import {
   shapeTranscript, buildEpisodePrompt, classifyEpisodeReply, episodeSource, episodeWatermarks,
 } from '@ote/memory/cognition/memory-distill.js'
+import { EVIDENTIAL_WHERE } from './corpus-eligibility.js'
 
 const DAY = 864e5
 const DEFAULT_DISTILL_MODEL = 'ollama/gemma4:e4b'
@@ -88,7 +89,7 @@ export async function distillAll(fastify, { maxConvos = 25, lookbackDays = 2, dr
 
   const cutoff = new Date(Date.now() - lookbackDays * DAY)
   const convos = await db.txn_conversations.findAll({
-    where: { incognito: false, updated_at: { [Op.gte]: cutoff } },
+    where: { ...EVIDENTIAL_WHERE, updated_at: { [Op.gte]: cutoff } },
     order: [['updated_at', 'DESC']], raw: true,
   })
   const truncated = Math.max(0, convos.length - maxConvos)

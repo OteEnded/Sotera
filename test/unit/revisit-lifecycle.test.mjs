@@ -429,6 +429,26 @@ test('⭐⭐ the backlog SEARCH is unbounded — no LIMIT above the filter', () 
 
 test('⛔ archived conversations are ineligible in BOTH lanes', () => {
   // Ote: *"Exclude archived conversations for now."* Two lanes ⇒ two independent places to forget it.
-  assert.match(hostCode, /where: \{ incognito: false, archived_at: null,/, 'the ordinary lane')
+  //
+  // ⚠️⚠️ THIS ASSERTION PINNED A LITERAL SOURCE LINE AND WENT RED WHEN MIGRATION 033 LANDED, correctly:
+  // `where: { incognito: false, archived_at: null, … }` became `where: { ...EVIDENTIAL_WHERE, archived_at:
+  // null, … }` when eligibility stopped being one flag. ⭐ The thing it protects — **archived is
+  // ineligible in both lanes** — is unchanged, so the assertion is REPOINTED rather than deleted.
+  // ⛔ And it is deliberately not loosened to `/archived_at/`: a pattern that would match a comment is a
+  // scan that has already gone vacuous.
+  assert.match(hostCode, /where: \{ \.\.\.EVIDENTIAL_WHERE, archived_at: null,/, 'the ordinary lane')
   assert.match(hostCode, /c\.archived_at IS NULL/, 'the backlog lane')
+})
+
+test('⭐ 033 · and BOTH lanes narrow through the shared eligibility predicate', () => {
+  // ⭐⭐ The companion to the assertion above, added with it. `incognito` used to be spelled out at every
+  // reader, which is how an eighth site eventually gets forgotten — the ordinary lane and the backlog
+  // lane are two independent places to forget it, exactly as the archived rule already proved.
+  assert.match(hostCode, /EVIDENTIAL_WHERE/, 'the ordinary lane uses the shared ORM fragment')
+  assert.match(hostCode, /evidentialSql\('c'\)/, 'the backlog lane uses the shared SQL fragment')
+  // ⛔ AND NO BARE CLAUSE SURVIVES. "This happened and it is not evidence" is a state a reader must not
+  // be able to miss by writing the old predicate from memory.
+  const body = hostCode.replace(/^\s*\/\/[^\n]*$/gm, '')
+  assert.ok(!/incognito\s*=\s*false|incognito:\s*false/.test(body),
+    '⛔ no reader in this file spells the eligibility clause itself any more')
 })
