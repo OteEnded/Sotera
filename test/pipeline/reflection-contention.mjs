@@ -32,7 +32,7 @@
 // ③ REPORT median + CV + N. ⛔ NEVER max−min as a "spread" — a range only grows with N.
 
 import { writeFileSync, readFileSync } from 'node:fs'
-import { makeClient, asAgent, devPg, devSchema, ollamaHost, BASE } from '../harness.mjs'
+import { devPg, devSchema, ollamaHost, BASE } from '../harness.mjs'
 
 const argv = process.argv.slice(2)
 const DRY = argv.includes('--dry')
@@ -73,34 +73,77 @@ const startLoad = () => {
   return { ctl, p }
 }
 
-const call = makeClient()
-const jar = await asAgent(call)
+// ── ⭐⭐ AUTH AND STREAMING, DONE HERE RATHER THAN THROUGH THE SHARED HELPERS ────────────────────
+// ⚠️ `harness.readSSE` cannot read THIS endpoint: it requires an `event:` line and skips any block
+// without one (`if (!evLine) continue`), while the chat route writes `data: {…}` only. It would have
+// returned ZERO events and a TTFT of null forever — a silent empty measurement, which is the shape this
+// project keeps paying for. ⛔ Not fixed here (nothing calls it); noted, and worked around deliberately.
+const BASE_URL = BASE
+const login = await fetch(`${BASE_URL}/v1/auth/login`, {
+  method: 'POST', headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ username: 'agent_dev', password: 'agentdev123' }),
+})
+if (!login.ok) { console.error(`\u2716 agent_dev login failed (${login.status})`); process.exit(1) }
+const COOKIE = (login.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ')
+if (!COOKIE) { console.error('\u2716 no session cookie'); process.exit(1) }
+
+const post = (path, body) => fetch(`${BASE_URL}${path}`, {
+  method: 'POST', headers: { 'content-type': 'application/json', cookie: COOKIE }, body: JSON.stringify(body),
+})
+
 const pg = devPg(); await pg.connect()
 const S = devSchema()
 
-// ⭐ ONE conversation reused for every sample, so prompt size and history are not a moving variable.
-const conv = await call(jar, 'POST', '/v1/chat/conversations', {
+// \u2b50 ONE conversation reused for every sample, so prompt size and history are not a moving variable.
+const convRes = await post('/v1/chat/conversations', {
   title: 'CONTENTION', model: cfg?.chat?.defaultModel,
-  settings: { stream: true, toolsEnabled: false, useMemory: false, reasoning: { enabled: false } },
+  settings: { stream: true, toolsEnabled: false, useMemory: false, reasoning: { enabled: false }, probe: true },
 })
-const cid = conv.json?.conversation?.id ?? conv.json?.id
-if (!cid) { console.error('✖ could not open a conversation'); process.exit(1) }
+const convJson = await convRes.json().catch(() => ({}))
+const cid = convJson?.conversation?.id ?? convJson?.id
+if (!cid) { console.error('\u2716 could not open a conversation'); process.exit(1) }
+console.log(`   conversation ${String(cid).slice(0, 8)} (probe:true \u2014 gated out of noticing and reflection)\n`)
 
-// ⭐ TTFT from the SSE stream — the first token event, not the whole reply. Latency a person feels is
-// when she starts speaking, not when she stops.
+/**
+ * \u2b50\u2b50\u2b50 ONE SAMPLE \u2014 AND IT MEASURES TIME-TO-FIRST-TOKEN, NOT TOTAL.
+ *
+ * Ote: *"measure actual interactive latency \u2014 not just message overlap."* \u2b50 The latency a person feels
+ * is when she STARTS speaking, not when she stops: a reply that begins in 1s and runs for 30s feels
+ * responsive, and one that begins in 20s does not, even if both finish together. \u26d4 Total alone would
+ * average those two into the same number.
+ * \u24d8 TOTAL is recorded too, because a contended run can also be slower to FINISH without being slower to
+ * start, and those are different effects on a person.
+ */
 const sample = async (label) => {
   const t0 = Date.now()
   let ttft = null
-  const res = await fetch(`${BASE}/v1/chat/conversations/${cid}/messages`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', cookie: call.jarFor ? call.jarFor(jar) : '' },
-    body: JSON.stringify({ content: 'In one sentence: what is a rolling restart?' }),
-  }).catch((e) => ({ ok: false, err: e?.message }))
-  const total = Date.now() - t0
-  if (!res || res.ok === false) return { label, ok: false, total, err: res?.err ?? 'request failed' }
-  await res.text()
-  ttft = null // ⚠️ non-streaming fallback: this endpoint returns once. TOTAL is the honest measure here.
-  return { label, ok: true, ttft, total }
+  let tokens = 0
+  let res
+  try {
+    res = await post(`/v1/chat/conversations/${cid}/messages`, { content: 'In one sentence: what is a rolling restart?' })
+  } catch (e) { return { label, ok: false, err: e?.message } }
+  if (!res.ok || !res.body) return { label, ok: false, err: `status ${res.status}` }
+  const reader = res.body.getReader()
+  const dec = new TextDecoder()
+  let buf = ''
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buf += dec.decode(value, { stream: true })
+    let sep
+    while ((sep = buf.indexOf('\n\n')) !== -1) {
+      const block = buf.slice(0, sep); buf = buf.slice(sep + 2)
+      const line = block.split('\n').find((l) => l.startsWith('data: '))
+      if (!line) continue
+      let d = null
+      try { d = JSON.parse(line.slice(6)) } catch { continue }
+      if (d?.type === 'token') {
+        tokens += 1
+        if (ttft == null) ttft = Date.now() - t0   // \u2b50 the moment she starts speaking
+      }
+    }
+  }
+  return { label, ok: true, ttft, total: Date.now() - t0, tokens }
 }
 
 const samples = []

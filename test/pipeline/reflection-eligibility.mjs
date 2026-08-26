@@ -49,8 +49,18 @@ for (const r of eligible.slice(0, 12)) {
 }
 const reflected = scored.filter((r) => r.watermark > 0)
 console.log(`\n   conversations already reflected at least once: ${reflected.length}`)
+// ⚠⚠ THIS LINE USED TO SAY "ELIGIBLE" ON THE STRENGTH OF `unreviewed > 0` ALONE, AND THAT WAS FALSE.
+// `7198c1b0` was annotated ELIGIBLE while sitting 24 minutes into a 30-minute quiet gate — it was not in
+// the eligible list two lines above, and the two halves of my own instrument disagreed on screen.
+// ⛔ An annotation that states a conclusion the filter beside it contradicts is worse than no annotation.
+// ⇒ it now names the SPECIFIC reason, and "waiting on the quiet gate" is a different fact from "fully
+// reviewed" — one resolves on its own, the other needs somebody to speak.
 for (const r of reflected) {
-  console.log(`   ${r.cid}  ${String(r.room).padEnd(12)} watermark=${r.watermark} unreviewed=${r.unreviewed}  ${r.unreviewed > 0 ? '⭐ ELIGIBLE FOR A SECOND, CURSORED RUN' : 'ⓘ fully reviewed — a second run needs NEW messages'}`)
+  const why = r.unreviewed === 0 ? 'ⓘ fully reviewed — a second run needs NEW messages'
+    : r.skipped ? `ⓘ ${r.unreviewed} unreviewed, but skipped by the pass (${r.skipped})`
+      : (r.quietFor ?? 0) < QUIET_MIN ? `⏳ ${r.unreviewed} unreviewed — waiting on the quiet gate (${r.quietFor}m of ${QUIET_MIN}m)`
+        : `⭐ ELIGIBLE FOR A SECOND, CURSORED RUN (${r.unreviewed} unreviewed, quiet ${r.quietFor}m)`
+  console.log(`   ${r.cid}  ${String(r.room).padEnd(12)} watermark=${String(r.watermark).padStart(5)} ${why}`)
 }
 const skipped = scored.filter((r) => r.skipped && r.msgs >= MIN_MSGS)
 console.log(`\n   skipped by the pass itself: ${skipped.length}  (${[...new Set(skipped.map((r) => r.skipped))].join(', ')})`)
