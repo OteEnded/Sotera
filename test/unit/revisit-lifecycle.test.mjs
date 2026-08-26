@@ -321,9 +321,48 @@ test('⛔ nothing new ⇒ EMPTY, never "everything just in case"', async () => {
 })
 
 test('⭐⭐ the host builds the transcript from the SLICE, not from every message', () => {
-  assert.match(hostCode, /unreviewedSlice\(msgs, \{ already \}\)/)
+  // ⚠️⚠️ THIS TEST USED TO ASSERT THE LITERAL CALL `unreviewedSlice(msgs, { already })`, and it broke the
+  // moment option B renamed the selector — while the PROPERTY it names in its own title was still true.
+  // ⭐ It asserted the LINE, not the PROPERTY: the same defect that let the steerReg test pass for 28
+  // hours over a decoration on a scope nobody could read. ⇒ rewritten to assert what it claims.
   assert.match(hostCode, /shapeReflectionTranscript\(slice\)/,
     '⛔ shapeReflectionTranscript(msgs) would re-read the whole conversation every tick')
+  // the slice is chosen from the unreviewed range, whatever the selector is called
+  assert.match(hostCode, /selectReviewableRange\(msgs, \{ already \}\)/,
+    'the slice must come from the range selector, bounded by the completed cursor')
+})
+
+test('⭐⭐⭐ the LEDGER watermark is reviewedTo, never the top of the conversation', () => {
+  // ⭐ THE INVARIANT OF OPTION B, asserted structurally rather than by a live run:
+  //   every message with rolling_id <= reviewedTo was present, in full, in the prompt.
+  // ⛔ 648 messages were lost because `up_to_rolling_id` was bound to `top.rolling_id`, which advanced
+  // over material the prompt had elided. The gate still needs the true top; the LEDGER must not have it.
+  assert.ok(!/up_to_rolling_id[\s\S]{0,400}?bind:[\s\S]{0,200}?top\.rolling_id/.test(hostCode),
+    '⛔ the claim INSERT must not bind top.rolling_id as the watermark')
+  assert.match(hostCode, /bind: \[conversationId, conv\.user_id \?\? null, reviewedTo, considered,/,
+    'the claim must record reviewedTo as up_to_rolling_id')
+  // ⭐ and the eligibility gate keeps the real top — it asks "is there anything new at all?"
+  assert.match(hostCode, /topRollingId: top\?\.rolling_id \?\? 0/,
+    'the gate must still see the true top, or a busy room would look fully reviewed')
+})
+
+test('⭐⭐ the coverage guard is present and FAILS CLOSED', () => {
+  // Ote: "Keep an explicit coverage/elision diagnostic as a guard, even though the normal path should
+  // eliminate transcript elision."
+  assert.match(hostCode, /coverage-guard/, 'the refusal must have its own reason code')
+  assert.match(hostCode, /if \(elided \|\| considered !== slice\.length\)/,
+    'the guard must check BOTH elision and the count actually supplied')
+  // ⛔ and it must refuse BEFORE the row is claimed, so a guarded run cannot advance a watermark.
+  // ⚠️ ANCHORED ON THE CLAIM'S BIND, NOT ON `INSERT INTO … log_conversation_revisits`: there are TWO
+  // such INSERTs in this file and `indexOf` found the one inside `recordFailure`, which sits far above
+  // the guard — so the first version of this assertion failed against correct code. ⭐ An anchor that
+  // matches more than one site is not an anchor.
+  const guardAt = hostCode.indexOf('coverage-guard')
+  const claimAt = hostCode.indexOf('bind: [conversationId, conv.user_id ?? null, reviewedTo, considered,')
+  assert.ok(guardAt > 0, 'the guard must exist')
+  assert.ok(claimAt > 0, 'the claim bind must exist')
+  assert.ok(guardAt < claimAt,
+    '⛔ the coverage guard must run before the claim, or it cannot prevent the watermark moving')
 })
 
 test('⭐⭐⭐ she can reach the SOURCE from inside a revisit', async () => {

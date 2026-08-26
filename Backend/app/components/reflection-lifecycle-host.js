@@ -38,7 +38,12 @@ import { buildToolContext, runTool, toolDefinitions } from './runtime.js'
 import { isRootConnectedUser } from '../auth/root-identity.js'
 import {
   REFLECTION_GENERATION, REFLECTION_TOOLS, buildReflectionTurnPrompt, isReadyToReflect,
-  shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal, unreviewedSlice,
+  // ⓘ `unreviewedSlice` is no longer imported here — `selectReviewableRange` supersedes it on the live
+  // path. It remains EXPORTED because `pipeline/elision-exposure.mjs` needs it to replay historical rows
+  // faithfully: those rows were produced by it, and a replay that used the new selector would be
+  // measuring today's code against yesterday's ledger.
+  shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal,
+  selectReviewableRange,
 } from './reflection-lifecycle.js'
 // ⭐ THE EXECUTION GATE. ⛔ Imported, never reimplemented: the pure verdict lives in one file so a
 // check can drive "she has been idle six minutes" without waiting six minutes.
@@ -301,8 +306,25 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // ⛔ The prompt itself is untouched — `buildReflectionTurnPrompt` is still who + transcript + the
   // ratified question, byte for byte. What changed is WHICH messages the transcript is built from,
   // which is an input, not a frame. A check asserts the prompt shape separately.
-  const { slice, contextCount, newCount } = unreviewedSlice(msgs, { already })
+  // ⭐⭐⭐ BOUND THE RANGE, NOT THE TRANSCRIPT (Ote's option B, 2026-08-26). The window is chosen so that
+  // everything in it fits the budget in full, and `reviewedTo` is the last message actually shown to her.
+  const { slice, contextCount, newCount, reviewedTo, remaining, truncated } =
+    selectReviewableRange(msgs, { already })
+  if (!slice.length || reviewedTo == null) return { skipped: true, reason: 'nothing-new' }
   const { transcript, considered, elided } = shapeReflectionTranscript(slice)
+
+  // ── ⭐⭐ THE COVERAGE GUARD (Ote's option C) — kept even though the normal path cannot reach it ────
+  // Ote: *"Keep an explicit coverage/elision diagnostic as a guard, even though the normal path should
+  // eliminate transcript elision."*
+  // ⛔ FAILS CLOSED. If the range selector and the shaper ever disagree about what fits, the honest move
+  // is to refuse the run — ⛔ never to advance a watermark over material that was silently dropped,
+  // which is the exact defect this replaced. `considered` must also equal what was supplied, or
+  // `messages_considered` is describing a different prompt than the one she was given.
+  if (elided || considered !== slice.length) {
+    await log(`[revisit] ${conversationId} REFUSED — coverage guard: elided=${elided} `
+      + `considered=${considered} supplied=${slice.length}. ⛔ watermark NOT advanced.`, 'error', import.meta.url)
+    return { skipped: true, reason: 'coverage-guard', elided, considered, supplied: slice.length }
+  }
   const prompt = buildReflectionTurnPrompt({ who, transcript })
 
   // ── ⭐⭐⭐ CLAIM THE LEDGER ROW **BEFORE** ANYTHING CAN BE WRITTEN ─────────────────────────────────
@@ -346,17 +368,17 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       // ⭐ `from_rolling_id` MAKES THE REVIEW INCREMENTAL — Ote: "I have already reviewed through 120.
       // Review 121-145." `already` is the completed cursor, so the range starts just past it; 0 means
       // she has never reviewed this conversation and the range starts at its beginning (null).
-      bind: [conversationId, conv.user_id ?? null, top.rolling_id, considered,
+      bind: [conversationId, conv.user_id ?? null, reviewedTo, considered,
         REFLECTION_GENERATION, CODE_MTIME, reflectionModel(fastify.config),
         // ⛔ CLAMPED, AND THE CONSTRAINT CAUGHT THIS BEFORE A HUMAN DID. `already + 1` can exceed the
         // top when the quiet+changed gate is bypassed (`force: true`, which every fixture uses) or when a
         // completed cursor already sits at the newest message. ⇒ 025's `range_sane` CHECK rejected the
         // insert, which is the guard working on its own author. ⭐ An empty range is written as NULL —
         // "no lower bound recorded" — rather than as a backwards one that would read as coverage.
-        already > 0 && already + 1 <= top.rolling_id ? already + 1 : null],
+        already > 0 && already + 1 <= reviewedTo ? already + 1 : null],
       type: seq.QueryTypes.SELECT,
     })
-  if (!claim) return { skipped: true, reason: 'already-reflected', upTo: top.rolling_id }
+  if (!claim) return { skipped: true, reason: 'already-reflected', upTo: reviewedTo }
 
 
   // ── THE TOOL CONTEXT ────────────────────────────────────────────────────────────────────────────
@@ -490,9 +512,9 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   }
   const yieldToUser = async () => {
     await recordFailure(seq, schema, { claimId: claim.id, preempted: true })
-    await log(`[revisit] ${conversationId} yielded to a user interaction at watermark ${top.rolling_id} `
+    await log(`[revisit] ${conversationId} yielded to a user interaction at watermark ${reviewedTo} `
       + '— not completed, cursor unmoved, will resume', import.meta.url)
-    return { skipped: true, reason: 'preempted', upTo: top.rolling_id }
+    return { skipped: true, reason: 'preempted', upTo: reviewedTo }
   }
 
   while (rounds <= maxRounds) {
@@ -591,17 +613,26 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   if (!row) {
     // ⛔ The claim disappeared under us — nothing to close, and saying so is the honest record.
     await log(`[reflection] ${conversationId} claimed row vanished before completion`, import.meta.url)
-    return { skipped: true, reason: 'claimed-row-vanished', upTo: top.rolling_id }
+    return { skipped: true, reason: 'claimed-row-vanished', upTo: reviewedTo }
   }
 
-  await log(`[reflection] ${conversationId} upTo=${top.rolling_id} tools=${toolsUsed.join(',') || 'none'} `
-    + `memory=${written[0] ? 'yes' : 'no'}${blocked ? ' blocked' : ''}`, import.meta.url)
+  // ⭐ `remaining` is the honest half of the new model: the watermark advanced only over what she saw, so
+  // a large room legitimately leaves backlog behind and drains it on later sweeps. ⛔ Under the old
+  // behaviour this number could not exist — everything was "reviewed" whether shown or not.
+  await log(`[reflection] ${conversationId} upTo=${reviewedTo} considered=${considered} `
+    + `(${contextCount} context + ${newCount} new)${truncated ? ` backlog=${remaining} left` : ''} `
+    + `tools=${toolsUsed.join(',') || 'none'} `
+    + `memory=${written[0] ? 'yes' : 'no'}${blocked ? ' blocked' : ''}`, 'info', import.meta.url)
   return {
     ok: true,
     reflectionId: row.id,
     conversationId,
-    upTo: top.rolling_id,
+    upTo: reviewedTo,
     messagesConsidered: considered,
+    contextCount,
+    newCount,
+    remaining,
+    truncated,
     elided,
     text,
     // ⭐ EVERY id she wrote is returned even though the column holds one — the caller (and a check) can see

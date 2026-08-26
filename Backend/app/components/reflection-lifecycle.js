@@ -178,17 +178,98 @@ export function unreviewedSlice(msgs = [], { already = 0, contextBefore = 6 } = 
   }
 }
 
+/** ⭐ ONE definition of a transcript line, so the BUDGET and the PROMPT can never disagree about cost. */
+export const transcriptLine = (m, lineClip = 1500) =>
+  `${m.role}: ${String(m.content || '').replace(/\s+/g, ' ').slice(0, lineClip)}`
+
+/**
+ * ⚠️⚠️ THE ELISION BRANCH IS NOW A SAFETY NET, NOT THE NORMAL PATH. `selectReviewableRange` bounds the
+ * RANGE so the chosen messages always fit, and the host asserts `elided === false`. This stays because a
+ * guard that has been made unreachable is still worth keeping honest — ⛔ and it was NOT honest.
+ *
+ * ⛔ THE DEFECT, MEASURED 2026-08-26 ON ROW #82: `lines.slice(0, 20)` and `lines.slice(-20)` OVERLAP when
+ * there are fewer than 40 lines, and `considered` was `head.length + tail.length` unconditionally.
+ *   slice = 36 messages → claimed 40 · transcript had 40 lines of which 36 distinct ⇒ 4 DUPLICATED
+ *   whole = 26,193 chars → shaped = 28,351 chars  ⇒ the size cap made it 2,158 chars BIGGER.
+ * ⇒ three lies in one branch: a count larger than the input, a prompt showing four messages twice as if
+ * they were two moments, and `elided: true` when nothing had been dropped.
+ *
+ * ⭐ `tailStart` can never precede the head now, `considered` can never exceed `msgs.length`, and
+ * `elided` is true only when something was genuinely dropped.
+ */
 export function shapeReflectionTranscript(msgs = [], { maxChars = 24000, lineClip = 1500, edge = 20 } = {}) {
-  const line = (m) => `${m.role}: ${String(m.content || '').replace(/\s+/g, ' ').slice(0, lineClip)}`
-  const lines = msgs.map(line)
+  const lines = msgs.map((m) => transcriptLine(m, lineClip))
   const whole = lines.join('\n')
   if (whole.length <= maxChars) return { transcript: whole, considered: msgs.length, elided: false }
   const head = lines.slice(0, edge)
-  const tail = lines.slice(-edge)
+  const tailStart = Math.max(edge, lines.length - edge)   // ⭐ never rewinds into the head
+  const tail = lines.slice(tailStart)
+  const dropped = lines.length - head.length - tail.length
   return {
-    transcript: `${head.join('\n')}\n…\n${tail.join('\n')}`,
+    transcript: dropped > 0 ? `${head.join('\n')}\n…\n${tail.join('\n')}` : [...head, ...tail].join('\n'),
     considered: head.length + tail.length,
-    elided: true,
+    elided: dropped > 0,
+  }
+}
+
+/**
+ * ⭐⭐⭐ BOUND THE RANGE, NOT THE TRANSCRIPT — Ote's option B, 2026-08-26.
+ *
+ * ⛔ THE PROBLEM IT REPLACES: the lane took every unreviewed message, elided the middle when the
+ * transcript exceeded the budget, and advanced `up_to_rolling_id` over ALL of them anyway. Measured
+ * across 76 completed revisits: **15 elided, 648 messages swept below a watermark having never been
+ * shown to her**. ⇒ `up_to` was answering two questions at once — *how far did the sweep advance* and
+ * *how much has she actually reviewed* — which are the same number only while nothing is dropped.
+ *
+ * ⭐ THE INVARIANT THIS ESTABLISHES:
+ *     **every message with rolling_id <= reviewedTo was present, in full, in the prompt.**
+ * `up_to_rolling_id` may therefore only ever be set to `reviewedTo`, never to the conversation's top.
+ *
+ * ⭐⭐ AND IT CANNOT WEDGE. The first unreviewed message is taken unconditionally, before the budget is
+ * consulted at all, so every run advances by at least one message no matter how large that message is.
+ * Structurally the floor is far higher: `lineClip` caps a line at ~1,511 chars, so a 24,000-char budget
+ * always fits at least 15. ⇒ a backlog drains monotonically; ⛔ there is no stall state.
+ *
+ * ⓘ `contextBefore` messages preceding the first unreviewed one are included as framing and DO consume
+ * budget. They are already below the watermark, so they never move `reviewedTo`.
+ *
+ * @returns {{slice: object[], considered: number, reviewedTo: number|null, contextCount: number,
+ *            newCount: number, remaining: number, truncated: boolean}}
+ */
+export function selectReviewableRange(msgs = [], { already = 0, contextBefore = 6, maxChars = 24000, lineClip = 1500 } = {}) {
+  const rows = Array.isArray(msgs) ? msgs : []
+  const empty = { slice: [], considered: 0, reviewedTo: null, contextCount: 0, newCount: 0, remaining: 0, truncated: false }
+  if (!rows.length) return empty
+  const firstNew = already > 0 ? rows.findIndex((m) => Number(m.rolling_id) > already) : 0
+  // ⛔ NOTHING NEW ISN'T AN ERROR — the eligibility gate refuses this upstream, and returning the whole
+  // conversation "just in case" would silently undo the bound.
+  if (firstNew < 0) return empty
+
+  const start = Math.max(0, firstNew - Math.max(0, contextBefore))
+  const context = rows.slice(start, firstNew)
+  const fresh = rows.slice(firstNew)
+
+  const cost = (m) => transcriptLine(m, lineClip).length + 1   // +1 for the '\n' the join adds
+  let used = context.reduce((a, m) => a + cost(m), 0)
+  let take = 0
+  for (const m of fresh) {
+    const c = cost(m)
+    // ⭐ THE PROGRESS GUARANTEE, and it is deliberately the first clause: message #1 is taken before the
+    // budget is consulted. ⛔ Without this an oversized first message would stall the cursor forever.
+    if (take > 0 && used + c > maxChars) break
+    used += c
+    take += 1
+  }
+
+  const chosen = fresh.slice(0, take)
+  return {
+    slice: [...context, ...chosen],
+    considered: context.length + chosen.length,
+    reviewedTo: chosen.length ? Number(chosen[chosen.length - 1].rolling_id) : null,
+    contextCount: context.length,
+    newCount: chosen.length,
+    remaining: fresh.length - chosen.length,
+    truncated: fresh.length > chosen.length,
   }
 }
 
