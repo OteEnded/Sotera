@@ -18,6 +18,7 @@ import { partitionMemoryRead } from './memory-decision-record.js'
 import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { buildMemoryV2 } from './memory-v2-host.js'
 import { reachTrace } from './room-scope.js'
+import { noteRetrieved } from './memory-retrieval-trace.js'
 
 /**
  * commitToMemory — the fused Owner→Resolution→Conflict→Persistence tail (today: reconcileFact).
@@ -170,8 +171,14 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
     // shared with OteLLMServices and the host owns what the host returns.
     // ⛔ AND THE SPLIT IS REPORTED, never silent — `withheldDecisions` says how many, because a filter nobody
     // can see is how "I covered everything" gets said about a filtered set.
+    // ⭐⭐ AND THE READ IS RECORDED — see memory-retrieval-trace.js. What she was SHOWN is the only
+    // honest candidate set for "what was this person correcting?", and the only honest answer to "what
+    // could this synthesis have rested on?". Both questions were unanswerable because nothing kept the
+    // ids: the route's passive recall mapped them to `.content` one line after retrieving them.
+    // ⛔ Recording only, in-process, never durable, and it grants no read it did not already have.
     async search(query, opts = {}) {
       const out = withoutDecisions(await mem.search(query, opts))
+      noteRetrieved(sourceMessageId, out?.memories ?? out?.matches ?? [], { via: 'recall_memory' })
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out) }))
     },
     async list(opts = {}) {

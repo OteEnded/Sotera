@@ -34,6 +34,14 @@ import { Op } from 'sequelize'
 // contains. ⛔ The predicate lives in its own file — one predicate, one place, the same discipline as
 // `memory-ownership.js` — so this file holds the ENFORCEMENT and none of the judgement.
 import { admissible } from './memory-self-state-claim.js'
+// ⭐⭐ LINEAGE IS STAMPED HERE FOR THE SAME REASON THE SELF-STATE GATE IS: this is the ONE point every
+// writer passes through. The alternative — attaching it upstream in the observation pipeline — was
+// measured and rejected: `makeObservation`, `commitToMemory` and the episodic resolver are each an
+// EXPLICIT FIELD LIST, three doors any new field has to survive, and the episodic one is dropping
+// `provenance` today. ⛔ A field that has to pass three allowlists to reach the database will one day
+// not, and the failure will be silent because the row still writes.
+import { BASIS, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFromOf } from './memory-lineage.js'
+import { tracedMemoryIds } from './memory-retrieval-trace.js'
 
 const LIVE = { invalid_at: null, expired_at: null }
 const OWNED_KINDS = ['episodic', 'semantic', 'card'] // identity is persona-global, never "owned"
@@ -147,6 +155,33 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
 
   /** In scope to READ this row? This room, or persona-global. Mirrors visibleWhere for single-row fetches. */
   const inScope = (row) => !!row && (row.user_id === U || row.scope === 'persona_global')
+
+  /**
+   * ⭐⭐ lineageFor — attach `evidence.derivedFrom` to a row being written, or leave it exactly as it came.
+   *
+   * ── ⛔ THREE REFUSALS, EACH ONE LOAD-BEARING ─────────────────────────────────────────────────────
+   * 1. ⛔ A WRITER'S OWN `evidence` IS NEVER CLOBBERED. Four unrelated payloads already live in that
+   *    column — card membership, slot-mint metadata, document-ingest fields, decline reasons — with no
+   *    discriminator between them. The merge is additive, under one key, or it is a data-loss bug.
+   * 2. ⛔ EXTRACTION IS SKIPPED. An extracted fact derives from the TURN, which `source_message_id`
+   *    already records; stamping the turn's retrieved memories on it would claim a derivation that did
+   *    not happen, and stamping the turn itself would restate the occasion under a second name.
+   * 3. ⛔ NO TRACE, NO LINEAGE. An unobserved turn yields nothing, not an empty envelope — "it rests on
+   *    nothing" and "nobody recorded what it rests on" must never look alike.
+   */
+  const lineageFor = (row) => {
+    // The turn key IS the occasion id: the same anchor the trace is recorded under, so the derivation is
+    // found THROUGH the occasion while staying a separate answer from it.
+    const turnKey = row?.source_message_id ?? null
+    if (!turnKey || derivedFromOf(row?.evidence)) return row?.evidence ?? null
+    const mech = mechanismOf(row?.source)
+    // ⭐ Synthesis lanes only. `document`, `consolidation` and `episode` describe their own derivation
+    // already and know it better than a presence record does.
+    if (mech !== MECHANISM.modelTool && mech !== MECHANISM.unrecorded) return row?.evidence ?? null
+    const memoryIds = tracedMemoryIds(turnKey)
+    if (!memoryIds.length) return row?.evidence ?? null
+    return withDerivedFrom(row.evidence, derivedFrom({ basis: BASIS.inContext, memoryIds, via: 'turn-retrieval' }))
+  }
 
   return {
     // ── READS ────────────────────────────────────────────────────────────────────────────────
@@ -469,6 +504,20 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         : (row.entity === 'user' ? subjects.user : null)
       const created = await txn_memories.create({
         ...row,
+        // ⭐⭐⭐ THE DERIVATION AXIS — what this row rests on, kept apart from the OCCASION it was written on.
+        //
+        // ⚠️⚠️ THE MEASURED FAILURE: `676e17b9` says *"we will build 'Rome' together as our shared project
+        // and life's mission"* and its `source_message_id` points at a message from **sixteen days after**
+        // the metaphor was coined. That id is a perfectly correct answer to *when was this written* and a
+        // completely wrong answer to *what is this based on* — she was synthesising from memories already
+        // in her context, not from that turn. ⇒ asking one column both questions is how a row comes to
+        // cite a message that does not contain it.
+        //
+        // ⛔ AND IT RECORDS PRESENCE, NEVER USAGE. `in-context` means *these were in front of her when she
+        // wrote this* — a fact — and deliberately not *she derived this from them*, which nothing here can
+        // know. Manufacturing a derivation would be a small version of the failure this whole arc exists
+        // to fix: an inference quietly acquiring an observation's authority.
+        evidence: lineageFor(row),
         persona: P,
         // ⚠️ `user_id` MEANS TWO DIFFERENT THINGS DEPENDING ON THE AUTHOR, and migration 015's comment on
         // the column says so: for an account-authored row it is the owner; for a persona-authored one it is
@@ -504,6 +553,49 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       if (!list.length) return 0
       const [n] = await txn_memories.update(patch, { where: { id: list } })
       return n
+    },
+
+    /**
+     * ⭐⭐⭐ markContradicted — record that a memory was repudiated. Migration 030's write path.
+     *
+     * ⚠️⚠️ THE ABSENCE THIS CLOSES: `contradicted_by` has existed since migration 003 and has been
+     * written **zero times in 92 rows**. `7d383ce3` was repudiated in conversation twenty minutes after
+     * it was written and is still live seventeen days later. ⇒ the pipeline captured assertions and
+     * silently dropped retractions — not by deciding against recording one, but because no path existed.
+     *
+     * ── ⭐ WHAT IT DOES AND DOES NOT DO ──────────────────────────────────────────────────────────
+     * ⛔ It does NOT delete, rewrite, invalidate or re-word anything. The row keeps its content, its
+     *    author, its confidence and its dates. It gains a pointer to the evidence and a timestamp.
+     * ⛔ It does NOT set `invalid_at`. "Somebody said this is wrong" and "this was replaced" are two
+     *    different states, and collapsing them would lose the ability to answer *why did I believe that?*
+     * ⛔ It does NOT change what recall returns. That is an open decision as of 030 and is not this
+     *    function's to make; nothing filters on `contradicted_at` yet.
+     *
+     * ⚠️ SCOPED LIKE EVERY OTHER WRITE. A row outside this store's scope reads as absent and cannot be
+     * marked — a correction spoken in one room must not reach into another's beliefs.
+     *
+     * @param {object} o
+     * @param {string} o.id             the memory being contradicted
+     * @param {string} [o.byMessageId]  ⭐ the MESSAGE that repudiated it — the evidence
+     * @param {string} [o.byMemoryId]   a later MEMORY that disputes it (rarer; see the model comment)
+     * @returns {Promise<{ok:boolean, reason?:string, id?:string}>}
+     */
+    async markContradicted({ id, byMessageId = null, byMemoryId = null } = {}) {
+      if (!id) return { ok: false, reason: 'no memory id' }
+      // ⛔ A CONTRADICTION THAT CANNOT NAME ITS OPPONENT IS A FEELING. Migration 003 said so about
+      // `contradicted_by`; it is just as true here. Refuse rather than mark a row on nothing.
+      if (!byMessageId && !byMemoryId) return { ok: false, reason: 'a contradiction must name its evidence' }
+      const row = await txn_memories.findOne({ where: { id }, raw: true })
+      if (!inScope(row)) return { ok: false, reason: 'not found in this scope' }
+      // ⭐ FIRST WINS, and re-marking is a no-op rather than an error. The earliest recorded
+      // contradiction is the one that carries the correction; a later pass re-observing the same
+      // repudiation must not overwrite when it happened.
+      if (row.contradicted_at) return { ok: true, id, alreadyMarked: true, at: row.contradicted_at }
+      const patch = { contradicted_at: new Date(now()) }
+      if (byMessageId) patch.contradicted_by_message_id = byMessageId
+      if (byMemoryId) patch.contradicted_by = byMemoryId
+      const [n] = await txn_memories.update(patch, { where: { id } })
+      return n ? { ok: true, id, at: patch.contradicted_at } : { ok: false, reason: 'update affected no row' }
     },
 
     async touch(ids) {

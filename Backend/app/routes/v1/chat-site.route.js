@@ -19,6 +19,7 @@ import { createAdviceService, adviceContextBlock } from '../../advice/index.js'
 import { ownerIdOf, ownedBy } from '../../auth/owner.js'
 import { buildMemoryV2 } from '../../components/memory-v2-host.js'
 import { captureFacts } from '../../components/memory-extract-host.js'
+import { noteRetrieved } from '../../components/memory-retrieval-trace.js'
 import { recordTurn, recordCapture, recordAuto } from '@ote/memory/cognition/memory-capture-telemetry.js'
 import { captureIdentity } from '../../components/memory-identity-host.js'
 import { composeSystemContext, composeRuntimeTail, composeAdaptiveContext, rankRelevance } from '../../components/context-composer.js'
@@ -1413,6 +1414,13 @@ export default async function chatSiteRoutes(fastify) {
           new Promise((res) => setTimeout(() => res(null), 4000)),
         ])
         const hits = recall?.memories || []
+        // ⭐⭐⭐ RECORD THE IDS **BEFORE** THEY ARE MAPPED AWAY. The two lines below reduce every hit to
+        // its prose, and until 2026-08-26 that was the end of the ids: from here on no layer knew WHICH
+        // rows were in front of her. Two mechanisms Ote asked for both needed exactly that fact —
+        // *"what could this synthesis have rested on?"* and *"what could this person be correcting?"* —
+        // and both were unanswerable because the record died in a `.map()`.
+        // ⛔ In-process only, never durable, and it grants no read. See memory-retrieval-trace.js.
+        noteRetrieved(lastUserMsg?.id ?? null, hits, { via: 'passive-recall' })
         recallCards = hits.filter((m) => m.kind === 'card').map((m) => m.content)
         recallMemories = hits.filter((m) => m.kind !== 'card').map((m) => m.content)
       } catch { /* memory is best-effort — never block the turn */ }

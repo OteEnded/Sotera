@@ -180,6 +180,32 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.UUID,
                 allowNull: true,
             },
+            // ⭐⭐ THE MESSAGE THAT REPUDIATED THIS ROW (migration 030) — evidence, not a verdict.
+            //
+            // ⛔ SEPARATE FROM `contradicted_by` ON PURPOSE. That column can only point at another MEMORY,
+            // and the thing that contradicted `7d383ce3` ("build Rome in one day") is a MESSAGE Ote sent.
+            // Routing it through a memory would mean minting an interpretation and then letting that
+            // interpretation invalidate an observation — inverting the one authority order this arc has
+            // spent a week defending: a stored belief must never outrank what somebody actually said.
+            //
+            // Loose ref, no FK: deleting a conversation must DEGRADE this to "contradicted, source no
+            // longer available" and never erase the fact that a correction happened.
+            //
+            // ⚠️ AND IT IS DECLARED HERE BEFORE THE FIRST WRITE, not after. `subject_person_id` sat in the
+            // database for half a day undeclared and every write silently dropped it — seven memories lost
+            // their subject with no error. **A column the ORM does not declare does not exist.**
+            contradicted_by_message_id: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
+            // When a contradiction was RECORDED. ⛔ NULL means none has been — which is NOT the same as
+            // "checked and found consistent", and the two must never collapse into one absent value.
+            // Independent of `invalid_at`: contradicted = superseded-in-meaning and still readable AS
+            // contradicted; invalid_at = replaced. Whether recall filters on this is UNDECIDED as of 030.
+            contradicted_at: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            },
             // WHO this belief is ABOUT (migration 004). NOT ownership and NOT visibility — `user_id`
             // still answers both of those, unchanged.
             //

@@ -1,0 +1,177 @@
+{
+  "at": "2026-08-26T02:51:33.515Z",
+  "byWriter": [
+    {
+      "writer": "document-ingest",
+      "n": 34,
+      "distinct_conf": 1,
+      "vals": [
+        1
+      ],
+      "null_conf": 0,
+      "provs": [
+        "(null)"
+      ]
+    },
+    {
+      "writer": "model-tool",
+      "n": 33,
+      "distinct_conf": 2,
+      "vals": [
+        0.6,
+        0.85,
+        null
+      ],
+      "null_conf": 1,
+      "provs": [
+        "(null)",
+        "synthesized"
+      ],
+      "judgedCells": 1
+    },
+    {
+      "writer": "extraction",
+      "n": 19,
+      "distinct_conf": 6,
+      "vals": [
+        0.6,
+        0.85,
+        0.9,
+        0.95,
+        0.98,
+        0.99
+      ],
+      "null_conf": 0,
+      "provs": [
+        "(null)",
+        "elicited",
+        "quoted",
+        "synthesized"
+      ],
+      "judgedCells": 3
+    },
+    {
+      "writer": "lesson",
+      "n": 3,
+      "distinct_conf": 0,
+      "vals": [
+        null
+      ],
+      "null_conf": 3,
+      "provs": [
+        "(null)"
+      ]
+    },
+    {
+      "writer": "(none recorded)",
+      "n": 2,
+      "distinct_conf": 1,
+      "vals": [
+        0.6
+      ],
+      "null_conf": 0,
+      "provs": [
+        "synthesized"
+      ]
+    },
+    {
+      "writer": "decline-record",
+      "n": 1,
+      "distinct_conf": 0,
+      "vals": [
+        null
+      ],
+      "null_conf": 1,
+      "provs": [
+        "(null)"
+      ]
+    }
+  ],
+  "judgedCells": {
+    "model-tool": 1,
+    "extraction": 3
+  },
+  "verifiedByProvenance": [
+    {
+      "prov": "(null)",
+      "n": 42,
+      "verified": 0,
+      "walkable": 4
+    },
+    {
+      "prov": "synthesized",
+      "n": 38,
+      "verified": 0,
+      "walkable": 35
+    },
+    {
+      "prov": "quoted",
+      "n": 10,
+      "verified": 10,
+      "walkable": 10
+    },
+    {
+      "prov": "elicited",
+      "n": 2,
+      "verified": 2,
+      "walkable": 2
+    }
+  ],
+  "provenanceGaps": {
+    "cutoff": "2026-08-18T03:37:14.045Z",
+    "gaps": [
+      {
+        "writer": "document-ingest",
+        "n": 34,
+        "no_prov": 34,
+        "no_prov_after_003": 34,
+        "newest_null": "2026-08-24T07:09:17.641Z"
+      },
+      {
+        "writer": "extraction",
+        "n": 19,
+        "no_prov": 3,
+        "no_prov_after_003": 0,
+        "newest_null": "2026-08-09T20:33:44.267Z"
+      },
+      {
+        "writer": "lesson",
+        "n": 3,
+        "no_prov": 3,
+        "no_prov_after_003": 3,
+        "newest_null": "2026-08-23T21:20:33.204Z"
+      },
+      {
+        "writer": "decline-record",
+        "n": 1,
+        "no_prov": 1,
+        "no_prov_after_003": 1,
+        "newest_null": "2026-08-21T07:40:12.193Z"
+      },
+      {
+        "writer": "model-tool",
+        "n": 33,
+        "no_prov": 1,
+        "no_prov_after_003": 0,
+        "newest_null": "2026-08-09T20:35:02.532Z"
+      }
+    ]
+  },
+  "evidenceShapes": [
+    {
+      "shape": "commit,decidedOn,kind,path,quote,repo,status",
+      "n": 34,
+      "writer": "document-ingest"
+    },
+    {
+      "shape": "references,theDistinction,whatHappened,whatIDoDifferently,whatILearned",
+      "n": 3,
+      "writer": "lesson"
+    },
+    {
+      "shape": "declineKind,meaning",
+      "n": 1,
+      "writer": "decline-record"
+    }
+  ]
+}
