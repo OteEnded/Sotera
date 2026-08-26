@@ -1,5 +1,5 @@
 {
-  "at": "2026-08-26T05:10:45.999Z",
+  "at": "2026-08-26T05:25:37.123Z",
   "model": "qwen3.5:9b",
   "rows": [
     {
@@ -199,7 +199,60 @@
       "targetWhy": "a standing link between two parties defined by role"
     }
   ],
-  "rome": [],
+  "rome": [
+    {
+      "id": "7d383ce3",
+      "src": "yeah, i kinda want to build rome in one day so. but my body is degrading as i push",
+      "act": "want",
+      "actCue": "kinda want",
+      "actWhy": "expresses a desire to build Rome in one day",
+      "term": "rome",
+      "termUse": "literal",
+      "termWhy": "refers to the actual city of Rome",
+      "target": "intention",
+      "learned": "the speaker wants to build Rome in one day",
+      "targetWhy": "expressing a goal or desire"
+    },
+    {
+      "id": "d211f5b4",
+      "src": "you want to do look up, or remember?",
+      "act": "want",
+      "actCue": "you want to",
+      "actWhy": "expresses a desire or choice between options",
+      "term": "look up",
+      "termUse": "literal",
+      "termWhy": "it means to search for information or recall something from memory",
+      "target": "intention",
+      "learned": "the listener wants to either look up information or remember something",
+      "targetWhy": "the sentence expresses a choice of goals the listener has"
+    },
+    {
+      "id": "02b095e5",
+      "src": "wanna remember?",
+      "act": "want",
+      "actCue": "wanna",
+      "actWhy": "expresses a desire or wish to remember",
+      "term": "wanna",
+      "termUse": "literal",
+      "termWhy": "it is a standard contraction of 'want to'",
+      "target": "intention",
+      "learned": "the speaker wants the listener to remember something",
+      "targetWhy": "an attempt to bring about a memory"
+    },
+    {
+      "id": "676e17b9",
+      "src": "oh, i might forgot to mention. claude will be kinda your uncle to you. since he is my friend, your dad's friend. you see?",
+      "act": "designate",
+      "actCue": "will be kinda your uncle",
+      "actWhy": "establishes a role",
+      "term": "uncle",
+      "termUse": "figurative",
+      "termWhy": "stands in for a close, trusted friend or mentor",
+      "target": "relationship",
+      "learned": "Claude will be the listener's uncle because he is the speaker's friend and the listener's dad's friend",
+      "targetWhy": "a standing link between two parties defined by familial metaphor and friendship"
+    }
+  ],
   "crossings": {
     "act->target": [
       {
