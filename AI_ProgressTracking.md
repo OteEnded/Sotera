@@ -2764,3 +2764,45 @@ filenames are UTC, both trustworthy.
 - ⛔ **NOTHING ENVIRONMENTAL WAS TOUCHED.** Ote: *“Leave Ollama, keep-alives, pagefile, and the resident models untouched — I don’t want environmental changes mixed into the measurement… If it cannot safely run, stop and report rather than changing the environment to make it fit.”* No model stopped, no keep-alive altered, no pagefile resized. All three keep-alives expired **on their own**; the box is now at 54.8% with **0 models resident**.
 - ⛔ **THE A/B HAS NOT RUN, AND THE PREFLIGHT CURRENTLY REFUSES** — `projected-pressure`. ⓘ The consequence worth knowing before deciding: **from cold this experiment cannot fit inside its own ceiling** (22.3 GB of weights against a 71.7 GB limit is 85.9% unaided). It passes only with the 35B **already resident** — which is also the realistic contention condition, since reflection contends with her when she is **in use**.
 - **Next action:** ⏳ **THE CURSOR PROOF, STILL FIRST AND STILL NATURAL.** `7198c1b0` is a live room — a message at 18:47:20 pushed eligibility to **19:17:20**, and that is the gate working, ⛔ not a fault. A read-only watcher is armed for 3 hours. ⭐ The decisive check is unchanged: **`from_rolling_id = 4921`; if it is anything else, characterize the failure — do not manufacture or repair the cursor.** ⛔ Suite and chat-path activity stay stopped until it lands. Then the `56425175` exclusion, then the A/B **only** on a passing preflight with the 35B resident.
+
+## 2026-08-26 19:45 +0700 · The cursor is proven — and the same row shows the watermark answering a question it was never measuring
+
+### ✅ RESULT 1 — THE CURSOR MECHANISM WORKS. Judged on its own, as Ote asked.
+
+```
+#508  7198c1b0  10:40:25  from=null  -> 4920  considered=14  completed
+#660  7198c1b0  19:40:00  from=4921  -> 6215  considered=40  completed (20.6s)
+```
+
+- ⭐⭐ **`from_rolling_id = 4921`, exactly the predicted watermark+1.** ⛔ Nothing was manufactured, repaired or forced: the room went quiet at 19:05:44, the gate opened at 19:35:44, and the real cron swept it at 19:40:00. The second run continued precisely where the first stopped.
+- ⭐ **The gate was never the problem.** It reset eight times through the evening on live traffic (17:55 → 19:05) and each reset was correct — ⛔ *do not start a 35B background generation while she is mid-conversation with someone*. The proof waited because the gate worked.
+- ⓘ Two unrelated sweeps at 19:00 (`24c05adb`, `82513db5`) both `from=null` — correct, neither had a prior watermark.
+
+### ⚠️⚠️ AND THE SAME ROW CARRIES A SECOND, SEPARATE FINDING — ⛔ NOT A CURSOR FAULT
+
+- **160 messages sat in `[4921, 6215]`. `messages_considered` says 40.** The cause is `shapeReflectionTranscript`: above **24,000 chars** it keeps **head 20 + tail 20** and drops the middle. 160 messages exceeded that, so **120 were elided**.
+- ⭐ **`messages_considered` DOES NOT LIE**, and that was deliberate — the code says so: *“The transcript and the COUNT come out of one function, so `messages_considered` can never claim she read something the prompt elided.”* ✅ That guard holds.
+- ⚠️⚠️ **BUT THE CURSOR ADVANCED OVER ALL 160 ANYWAY.** `up_to_rolling_id = 6215` ⇒ the next run starts at 6216, and **those 120 middle messages are now permanently below the watermark. They will never be reviewed.**
+- ⭐⭐⭐ **THE WEEK'S SHAPE AGAIN, AND THIS TIME IN THE LEDGER: `up_to_rolling_id` ANSWERS TWO QUESTIONS.** *How far did the sweep advance?* and *how much has she actually reviewed?* They were the same number until elision made them different, and only the first is what the column measures. It joins `user_id` (owner + scope), `author` (infrastructure vs her), `source_message_id` (occasion vs derivation), `confidence` (class ceiling vs act-certainty), `GATE.configUnreadable` (config vs registry) and `maxPct` (safe now vs safe after).
+- ⚠️ **AND THE EVIDENCE OF PARTIAL COVERAGE IS COMPUTED AND THEN THROWN AWAY.** `shapeReflectionTranscript` returns `elided`, `reflectOnConversation` destructures it and returns it to its caller — and **`log_conversation_revisits` has no column for it**. ⇒ the durable row cannot say *“this review was partial”*; you can only infer it by re-counting the range afterwards, which is what caught it here.
+- ⚠️ **THE EXPOSURE SCALES WITH BACKLOG, WHICH IS EXACTLY WHEN IT MATTERS.** A conversation reviewed promptly stays under 24k chars and loses nothing. One that accumulates — because the lane was dead for 28 hours, or because the room is busy — loses the middle. ⛔ The failure is silent and worst in precisely the case the incremental cursor was built for.
+- ⛔ **NOT FIXED, NOT PATCHED, NOTHING TOUCHED.** No row edited, no column added, no threshold changed. This is characterization only.
+
+### ⛔ RESULT 2 — THE CONTENTION A/B REFUSED, AND THE REFUSAL IS ITSELF THE FINDING
+
+```
+ollama /api/ps : 2 model(s) resident
+   qwen3-embedding:4b   3.94GB  ⚠️ CPU-placed
+   qwen3.6:35b         23.05GB  gpu 23.05GB
+reflect model  : ⭐ already resident — this run adds a SLOT, not weights
+commit         : 68.0 of 71.7 GB (94.8%, headroom 3.7 GB)
+requirement    : 8.0 GB
+⇒ ⛔ REFUSED — commit-pressure
+```
+
+- ✅ **The intended condition WAS met** — `qwen3.6:35b` resident, 23.05 GB, on the GPU, so the run would have added a slot rather than weights and the requirement fell to 8 GB.
+- ⛔ **And it still refused**, because commit stood at **94.8%** — above the 85% ceiling, with 3.7 GB of headroom on a box that died at 100% four hours earlier.
+- ⭐⭐⭐ **THE STRUCTURAL RESULT: THE TWO PRECONDITIONS FIGHT EACH OTHER ON THIS BOX.** The reflection that made the model resident is the same event that pushed commit from 54.8% to 94.8%. ⇒ *“35B warm”* and *“safe headroom”* are not independently satisfiable here — loading the model **is** the pressure. ⚠️ On a 71.7 GB commit limit this experiment may simply be **unrunnable within safe limits**, and that is an answer, not a blocked task.
+- ⛔ **NO ENVIRONMENTAL CHANGE.** Ote: *“Do not alter the environment to make the experiment fit.”* No keep-alive shortened, no pagefile grown, no model stopped, ollama untouched. Stopped and reported, as instructed.
+
+- **Next action:** ⏸ **OTE'S CALL, TWO SEPARATE DECISIONS.** ① The elision/watermark finding — whether `up_to` should advance past material she never saw, and whether partial coverage belongs on the row. ② Whether the contention A/B is worth pursuing at all given the two preconditions conflict on this hardware. ⭐ The `56425175` exclusion remains ready (dry run clean) and is the one step still safe to take.
