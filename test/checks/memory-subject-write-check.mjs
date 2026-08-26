@@ -46,11 +46,17 @@ try {
     txn_memories: {
       create: async (row) => {
         const r = await one(
-          `insert into ${S}.txn_memories (id, persona, user_id, kind, entity, attribute, value, content, subject_person_id, created_at, updated_at)
-           values (gen_random_uuid(),$1,$2,$3,$4,$5,$6,$7,$8, now(), now())
-           returning id, user_id, entity, subject_person_id`,
-          [row.persona, row.user_id, row.kind || 'semantic', row.entity ?? null, row.attribute ?? null,
-            row.value ?? null, row.content, row.subject_person_id ?? null])
+          // ⚠️⚠️ `scope` HAD TO BE ADDED HERE, and its absence is the recorded defect in miniature:
+          // this stub is an EXPLICIT COLUMN LIST, so the store's new field was silently dropped and
+          // the DB default `room` applied. The check then reported that an identity row was not
+          // persona-global — a true statement about a row the FIXTURE had written wrong.
+          // ⭐ 'An explicit field list drops what it was not told about' — tenth instance, first one
+          // inside a test double.
+          `insert into ${S}.txn_memories (id, persona, user_id, scope, kind, entity, attribute, value, content, subject_person_id, created_at, updated_at)
+           values (gen_random_uuid(),$1,$2,$3,$4,$5,$6,$7,$8,$9, now(), now())
+           returning id, user_id, scope, entity, subject_person_id`,
+          [row.persona, row.user_id, row.scope ?? 'room', row.kind || 'semantic', row.entity ?? null,
+            row.attribute ?? null, row.value ?? null, row.content, row.subject_person_id ?? null])
         MADE.memories.push(r.id); rows.push(r); return r
       },
     },
@@ -94,9 +100,15 @@ try {
   // ── 6 · persona-global identity → the PERSONA is the subject ────────────────────────────────────
   const persona = await one(`select id from ${S}.mst_persons where kind='persona' limit 1`)
   const f = await store.create({ kind: 'identity', entity: 'self', content: 'zz_test_ something she noticed about herself' })
-  const fRow = await one(`select user_id, subject_person_id from ${S}.txn_memories where id=$1`, [f.id])
-  check('⭐ a persona-global identity row is about the PERSONA, and owned by no account',
-    fRow.user_id === null && fRow.subject_person_id === persona.id)
+  const fRow = await one(`select user_id, scope, subject_person_id from ${S}.txn_memories where id=$1`, [f.id])
+  // ⭐⭐ 029: SUBJECT AND SCOPE ARE TWO ANSWERS, and this used to check them with one field. The row
+  // is ABOUT the persona (subject) and reachable from every room (scope); ⛔ 'owned by no account'
+  // was only ever the null-owner proxy for the second of those.
+  check('⭐ a persona-global identity row is about the PERSONA',
+    fRow.subject_person_id === persona.id)
+  check('⭐ …and is reachable from every room, while still recording where it was formed',
+    fRow.scope === 'persona_global' && !!fRow.user_id,
+    `scope=${fRow.scope} user_id=${String(fRow.user_id).slice(0, 8)}`)
 
   // ── 7 · VISIBILITY IS UNCHANGED — subject grants nothing ────────────────────────────────────────
   const other = await one(`select id from ${S}.mst_users where username='ote'`)

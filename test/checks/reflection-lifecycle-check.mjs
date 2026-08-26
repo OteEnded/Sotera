@@ -244,8 +244,11 @@ try {
   const storeCode = strip(storeSrc)
   ok(/kind IN \('episodic','semantic','card'\) OR kind IS NULL/.test(storeCode),
     'K · ⭐⭐ the search scope does not exclude a kind-less row of her own')
-  ok(/OWNED_KIND_OR_UNCLASSIFIED/.test(storeCode) && /user_id: null, kind: 'identity'/.test(storeCode),
-    'K · ⭐ …and the persona-global/identity branch is untouched, so nothing became broadcast')
+  // ⭐⭐ 029: THE GLOBAL BRANCH IS NOW `scope`, and the claim is the same one — a kind-less row of
+  // hers became searchable WITHOUT the persona-global branch widening. ⛔ The anchor moved with the
+  // architecture; it did not soften.
+  ok(/OWNED_KIND_OR_UNCLASSIFIED/.test(storeCode) && /scope: 'persona_global'/.test(storeCode),
+    'K · ⭐ …and the persona-global branch is untouched, so nothing became broadcast')
 
   // ── THE TWO TESTS OTE NAMED, ON A REAL CONVERSATION ────────────────────────────────────────────
   const [me] = await Q(`SELECT id::text AS id FROM ${S}.mst_users WHERE username = 'agent_dev'`)

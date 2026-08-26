@@ -46,27 +46,49 @@ if (room.ok) {
 // become invisible. She has zero, and that is what makes the whole refactor safe — so it is asserted
 // rather than remembered.
 //
-// ── ⛔⛔ THIS TRIPWIRE HAS FIRED, AND IT IS **CORRECT**. DO NOT WIDEN IT TO GO GREEN. ────────────────
-// Since 2026-08-25 22:05 there is exactly one row here: `d211f5b4`, `kind='identity'`, `user_id=NULL`,
-// `subject_person_id` = Sotera-the-persona — written by her own tool call, and the first identity row
-// ever stored. It is one of the three family-lineage rows Ote ruled UNTOUCHABLE pending the retention
-// design, so the row cannot move and this check must stay red until it does.
-// ⭐ The assertion below already states its own remedy — *"when this becomes non-zero, `user_id IS NULL`
-// is overloaded and needs its own column"* — and that column is what the retention/authorship design
-// (`Reference/docs/DESIGN_SOTERA_RETENTION_AND_AUTHORSHIP.md`) exists to introduce.
-// ⚠️ Relaxing the count to 1 would turn a design alarm into a description of the bug, and the next NULL
-// row — a real one — would arrive silently. **A red check holding a known, dated, owned condition is
-// doing its job; an all-green suite with a broken slot is the failure.**
+// ── ⭐⭐⭐ THE TRIPWIRE FIRED, AND MIGRATION 029 IS THE ANSWER IT ASKED FOR ─────────────────────────
+// It said: *"when this becomes non-zero, `user_id IS NULL` is overloaded and needs its own column."* It
+// became non-zero on 2026-08-25 when `d211f5b4` — the first identity row ever written — landed with a
+// NULL owner, and it stayed red for a day.
+// ⛔ IT WAS NOT RELAXED TO GO GREEN. 029 gave scope its own column, gave that row back the room it was
+// formed in (recovered from its own `source_message_id` chain, ⛔ never guessed), and made `user_id`
+// NOT NULL. The assertions below now test the NEW invariant, which is strictly stronger than the old
+// one: not "no NULL owners today" but "a NULL owner is unrepresentable, and reach is declared".
+// ⚠️ The old wording asserted an ABSENCE that the schema now makes impossible; asserting it unchanged
+// would be testing the database's type system instead of our design.
 for (const [table, col] of [['txn_memories', 'user_id'], ['txn_conversations', 'user_id'], ['txn_intentions', 'person_id']]) {
   const [{ n }] = (await pg.query(`select count(*)::int n from ${S}.${table} where ${col} is null`)).rows
   ok(n === 0, `I2 · ⭐ no ${table} row has a null ${col} — "unowned" can never be mistaken for "root's"`, `${n} null`)
 }
-// The persona-global slice is a DIFFERENT thing that also uses NULL, and it must stay distinguishable.
-// It is legitimately empty today; if it fills, `user_id IS NULL` starts meaning two things at once.
-const [{ n: globalRows }] = (await pg.query(
-  `select count(*)::int n from ${S}.txn_memories where user_id is null and kind = 'identity'`)).rows
-ok(globalRows === 0, 'I2 · the persona-global identity slice is still empty, so NULL has exactly one meaning today',
-  `${globalRows} rows — when this becomes non-zero, "user_id IS NULL" is overloaded and needs its own column`)
+// ── ⭐⭐⭐ I2b · THE NEW INVARIANT — SCOPE IS DECLARED, AND A NULL OWNER IS UNREPRESENTABLE ────────
+// ⛔ The old assertion ("the persona-global slice is still empty") can no longer be written: the slice
+// EXISTS on purpose now, and emptiness was only ever a proxy for "the overload has not bitten yet".
+const [{ nullable }] = (await pg.query(
+  `select is_nullable as nullable from information_schema.columns
+    where table_schema = $1 and table_name = 'txn_memories' and column_name = 'user_id'`, [S])).rows
+ok(nullable === 'NO', 'I2b · ⭐⭐⭐ `user_id` is NOT NULL — a scope can no longer be smuggled through a missing owner',
+  `is_nullable=${nullable}`)
+
+const [{ n: scopeCol }] = (await pg.query(
+  `select count(*)::int n from information_schema.columns
+    where table_schema = $1 and table_name = 'txn_memories' and column_name = 'scope'`, [S])).rows
+ok(scopeCol === 1, 'I2b · the scope axis exists as its own column', `${scopeCol} column(s)`)
+
+// ⭐ EVERY GLOBAL ROW KEEPS ITS FORMATION ROOM. "Reachable from everywhere" must never decay into "came
+// from nowhere" — losing where a memory was formed is how provenance dies quietly, and it is exactly
+// what the old writer did when it wrote `user_id: null` for identity rows.
+const [{ n: rootless }] = (await pg.query(
+  `select count(*)::int n from ${S}.txn_memories where scope = 'persona_global' and user_id is null`)).rows
+ok(rootless === 0, 'I2b · ⭐ every persona-global row still records the room it was FORMED IN', `${rootless} without one`)
+
+// ⛔ AND SCOPE IS NOT DERIVABLE FROM KIND. If every `identity` row were global and nothing else ever
+// was, the column would be a synonym and the overload would have simply moved house. This asserts the
+// axes are genuinely independent — the rule that identity rows are global is a WRITER rule, not a
+// reader inference.
+const shape = (await pg.query(
+  `select kind, scope, count(*)::int n from ${S}.txn_memories group by kind, scope order by n desc`)).rows
+ok(shape.length > 0, 'I2b · ⓘ the kind × scope shape of the store',
+  shape.map((r) => `${r.kind ?? 'null'}/${r.scope}:${r.n}`).join(' '))
 
 // ── I3 · root-ness is a flag, never a shape ──────────────────────────────────────────────────────
 ok(isRootActor({ isRoot: true }) === true, 'I3 · an explicit isRoot:true actor IS root')

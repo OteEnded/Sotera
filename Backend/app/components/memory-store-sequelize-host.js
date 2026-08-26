@@ -123,18 +123,30 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     return subjectCache
   }
 
-  /** VISIBLE: mine ∪ persona-global identity. `kind` narrows; identity is always user_id null. */
+  /**
+   * VISIBLE: this room ∪ persona-global.
+   *
+   * ⭐⭐⭐ SCOPE IS READ FROM THE `scope` COLUMN, ⛔ NEVER INFERRED FROM A MISSING `user_id` (029).
+   * ⚠️ It used to say `user_id: null` for the global arm, which made "nobody owns this" and "everybody can
+   * read this" the same query. `auth/root-identity.js` named that collision on 2026-08-06 — *"`user_id IS
+   * NULL` means TWO different things"* — and it stayed latent only while zero identity rows existed. The
+   * first one was written 2026-08-25 and four assertions went red the same day.
+   * ⭐ `user_id` now means one thing everywhere: the room the memory was FORMED IN, and it is NOT NULL.
+   * ⛔ ABOUT ≠ OWNER ≠ SCOPE: `kind` no longer implies reachability either — an `identity` row is global
+   * because its SCOPE says so, not because of the kind it happens to be.
+   */
   const visibleWhere = (kind, namespace) => {
     const base = { ...LIVE, persona: P, ...(namespace ? { namespace } : {}) }
-    if (kind) return { ...base, kind, user_id: kind === 'identity' ? null : U }
+    const reachable = { [Op.or]: [{ user_id: U }, { scope: 'persona_global' }] }
+    if (kind) return { ...base, kind, [Op.and]: [reachable] }
     return {
       ...base,
-      [Op.and]: [{ [Op.or]: [{ user_id: U, kind: OWNED_KIND_OR_UNCLASSIFIED }, { user_id: null, kind: 'identity' }] }],
+      [Op.and]: [{ [Op.or]: [{ user_id: U, kind: OWNED_KIND_OR_UNCLASSIFIED }, { scope: 'persona_global' }] }],
     }
   }
 
-  /** In scope to READ this row? Mine, or persona-global. Mirrors visibleWhere for single-row fetches. */
-  const inScope = (row) => !!row && (row.user_id === U || row.user_id === null)
+  /** In scope to READ this row? This room, or persona-global. Mirrors visibleWhere for single-row fetches. */
+  const inScope = (row) => !!row && (row.user_id === U || row.scope === 'persona_global')
 
   return {
     // ── READS ────────────────────────────────────────────────────────────────────────────────
@@ -185,7 +197,8 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
           [Op.or]: [{ invalid_at: { [Op.ne]: null } }, { expired_at: { [Op.ne]: null } }],
           ...(kind ? { kind } : {}),
           ...(namespace ? { namespace } : {}),
-          [Op.and]: [{ [Op.or]: [{ user_id: U }, { user_id: null, kind: 'identity' }] }],
+          // 029: reachability is the scope column, never a missing owner.
+          [Op.and]: [{ [Op.or]: [{ user_id: U }, { scope: 'persona_global' }] }],
         },
         order: [['created_at', 'DESC']],
         raw: true,
@@ -209,7 +222,9 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
           // ⭐ `OR kind IS NULL` — the same no-kind-is-still-mine rule as visibleWhere; see
           // OWNED_KIND_OR_UNCLASSIFIED at the top of this file. An allowlist silently excludes NULL, and a
           // memory she wrote without a tier would have been searchable by nothing.
-          where.push("((user_id IS NOT DISTINCT FROM :u AND (kind IN ('episodic','semantic','card') OR kind IS NULL)) OR (user_id IS NULL AND kind = 'identity'))")
+          // ⭐ 029: the global arm is `scope`, not `user_id IS NULL`. ⛔ `IS NOT DISTINCT FROM` is kept
+          // on the room arm only because it is still the null-safe comparison for :u itself.
+          where.push("((user_id IS NOT DISTINCT FROM :u AND (kind IN ('episodic','semantic','card') OR kind IS NULL)) OR scope = 'persona_global')")
           repl.u = U
         }
         return where
@@ -459,7 +474,18 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         // the column says so: for an account-authored row it is the owner; for a persona-authored one it is
         // the CONTEXT the memory was formed in. Same value, different job — which is why 015 needed no
         // data migration and why provenance came for free on all 35 existing rows.
-        user_id: isPersonaGlobal ? null : U,
+        //
+        // ⭐⭐⭐ 029: IT IS ALWAYS THE ROOM, AND NEVER NULL. This used to write `null` for an identity row
+        // so that `visibleWhere`'s global arm would match it — ⛔ scope smuggled through the owner column.
+        // That is the overload `auth/root-identity.js` named on 2026-08-06, and it cost the store the one
+        // thing it could not afford to lose: WHERE a global memory was formed. `d211f5b4` had to have its
+        // room recovered from its `source_message_id` chain because this line threw it away.
+        // ⇒ the room is recorded, and reachability is declared separately, below.
+        user_id: U,
+        // ⭐ SCOPE IS DECLARED, NOT INFERRED. ⛔ `kind === 'identity'` remains the RULE for what is global
+        // — that part was always right and is enforced here rather than trusted to every caller — but it
+        // is now written into a column that means reachability and nothing else.
+        scope: isPersonaGlobal ? 'persona_global' : 'room',
         // ⭐ OWNERSHIP FOLLOWS AUTHORSHIP. Declared by the writer at construction (see the header), never
         // inferred from `kind`, from the room, or from who happened to be logged in.
         author: AUTHOR,

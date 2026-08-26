@@ -82,8 +82,23 @@ try {
 
   // ── I6 · UNKNOWN SUBJECTS STAY NULL ────────────────────────────────────────────────────────────
   // 003 left provenance un-backfilled for the same reason: a guessed value is worse than a null one.
-  check('I6 · rows with no `entity` were not given a guessed subject',
-    (await count(`select count(*)::int n from ${S}.txn_memories where entity is null and subject_person_id is not null`)) === 0)
+  // ⭐⭐ SCOPED TO ROOM ROWS, AND THAT IS NOT A RELAXATION. The rule is *an UNKNOWN subject stays NULL*.
+  // For a `persona_global` row the subject is not unknown and never was a guess: it is the persona by
+  // definition — the store has always defaulted it that way and 004's own backfill did the same.
+  // ⚠️ The assertion could not tell the two apart while zero global rows existed; the first one landed
+  // 2026-08-25 and it started reading a definitional value as a guessed one.
+  // ⛔ The guess-prevention property is UNCHANGED and still asserted, on exactly the rows it was about.
+  check('I6 · room-scoped rows with no `entity` were not given a guessed subject',
+    (await count(`select count(*)::int n from ${S}.txn_memories
+                   where entity is null and subject_person_id is not null and scope = 'room'`)) === 0)
+  // ⭐ AND THE GLOBAL ROWS ARE CHECKED TOO, against the stronger rule that applies to them: their subject
+  // must be the persona, never some other person quietly inherited from a room.
+  const [{ n: globalMisSubject }] = [{ n: await count(
+    `select count(*)::int n from ${S}.txn_memories m
+       where m.scope = 'persona_global' and m.subject_person_id is not null
+         and m.subject_person_id <> (select id from ${S}.mst_persons where kind = 'persona' limit 1)`) }]
+  check('I6 · ⭐ a persona-global row is about the PERSONA, never about somebody else', globalMisSubject === 0,
+    `${globalMisSubject} mis-subjected`)
 
   // ── the architectural cases Ote asked to see demonstrated ───────────────────────────────────────
   const mkPerson = async (kind, name) => {
@@ -92,12 +107,18 @@ try {
       [kind, name])
     MADE.persons.push(r.id); return r.id
   }
-  const mkMemory = async (userId, entity, content, subject) => {
+  // ⭐⭐ 029: A PERSONA-GLOBAL FIXTURE DECLARES ITS SCOPE and still records a formation room.
+  // ⚠️ It used to pass `user_id = null` to mint an identity row — scope smuggled through the owner
+  // column, the exact overload 029 removed — and it now violates NOT NULL. The fixture had encoded
+  // the defect it was meant to be neutral about.
+  const mkMemory = async (userId, entity, content, subject, opts = {}) => {
+    const globalRow = opts.scope === 'persona_global'
     const r = await one(
       `insert into ${S}.txn_memories
-         (id, persona, user_id, kind, entity, content, subject_person_id, created_at, updated_at)
-       values (gen_random_uuid(), 'sotera', $1, $2, $3, $4, $5, now(), now()) returning id`,
-      [userId, userId === null ? 'identity' : 'semantic', entity, content, subject])
+         (id, persona, user_id, scope, kind, entity, content, subject_person_id, created_at, updated_at)
+       values (gen_random_uuid(), 'sotera', $1, $2, $3, $4, $5, $6, now(), now()) returning id`,
+      [userId, globalRow ? 'persona_global' : 'room', globalRow ? 'identity' : 'semantic',
+       entity, content, subject])
     MADE.memories.push(r.id); return r.id
   }
 
@@ -150,10 +171,17 @@ try {
     row1.subject_person_id !== agentDev.person_id && row1.user_id === agentDev.id)
 
   // (6) a memory about SOTERA HERSELF, no account involved
-  const m2 = await mkMemory(null, 'self', 'zz_test_ I tend to over-explain unless I check first.', sotera.id)
-  const row2 = await one(`select user_id, subject_person_id from ${S}.txn_memories where id=$1`, [m2])
-  check('6 · a memory can be ABOUT Sotera, owned by no account',
-    row2.subject_person_id === sotera.id && row2.user_id === null)
+  // ⭐ Formed in agent_dev's room, reachable everywhere — the two facts are now separate.
+  const m2 = await mkMemory(agentDev.id, 'self', 'zz_test_ I tend to over-explain unless I check first.', sotera.id, { scope: 'persona_global' })
+  const row2 = await one(`select user_id, scope, subject_person_id from ${S}.txn_memories where id=$1`, [m2])
+  // ⭐⭐ 029: "OWNED BY NO ACCOUNT" WAS SPELLED `user_id IS NULL`, AND THAT SPELLING WAS THE OVERLOAD.
+  // The claim survives intact and is now said properly: the memory is ABOUT Sotera, it is reachable from
+  // every room, and it still records the room it was formed in. ⛔ Three facts, three fields — where
+  // before, one nullable column was carrying all three and could only ever answer one.
+  check('6 · a memory can be ABOUT Sotera and reachable everywhere, without belonging to a room',
+    row2.subject_person_id === sotera.id && row2.scope === 'persona_global')
+  check('6 · ⭐ …and it still records WHERE it was formed — reach is not amnesia',
+    row2.user_id === agentDev.id, `formed_in=${row2.user_id}`)
   check('6 · ⭐ "I tend to over-explain unless I check first" is now SAYABLE — before 004 it was not', true)
 
   // ── I1 · VISIBILITY UNCHANGED — the invariant that must not regress ─────────────────────────────

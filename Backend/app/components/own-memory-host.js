@@ -95,9 +95,16 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false, user = 
     // ⭐ HER OWN, PERSONA-GLOBAL. Not scoped to the asker — this is the slice that is hers no matter who
     // she is talking to. It has never been written to; reporting it as empty is a true statement about
     // HERSELF, which is not the same as a negative claim about another person.
+    // ⭐⭐ 029: THE PERSONA-GLOBAL SLICE IS THE `scope` COLUMN, ⛔ not a missing owner.
+    // ⚠️ It read "user_id IS NULL AND kind = 'identity'" — two proxies for one question, and the first
+    // was the overload auth/root-identity.js named in August. Reading it by scope means a global row now
+    // KEEPS the room it was formed in, which d211f5b4 had to have recovered from its own provenance
+    // chain because the old writer discarded it.
+    // ⛔ The comment lives OUT here on purpose: backticks inside a template literal end the string, and
+    // putting one in a SQL comment took this whole check down with a syntax error.
     const selfRows = await Q(
       `SELECT content FROM "${schema}"."txn_memories"
-        WHERE user_id IS NULL AND kind = 'identity' AND ${LIVE_SQL} ORDER BY created_at DESC LIMIT 25`, {})
+        WHERE scope = 'persona_global' AND ${LIVE_SQL} ORDER BY created_at DESC LIMIT 25`, {})
 
     // ── ⭐⭐⭐ WHAT SHE HERSELF DECIDED TO KEEP, WHICH THIS READ COULD NOT SEE ─────────────────────────
     //

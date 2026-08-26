@@ -68,9 +68,32 @@ ok(svcMina.recall.length === 0, 'T4 · ⭐ `recall()` accepts no argument — th
 ok(Object.keys(svcMina).sort().join(',') === 'note,recall,retract',
   'T4 · ⭐ the service exposes EXACTLY recall/note/retract — no search, no list, no lookup, no by-id', Object.keys(svcMina).join(', '))
 
-// ── T5 · empty is reported as HER emptiness, not as a claim about anyone ─────────────────────────
-ok(mina.aboutMyself.count === 0 && Array.isArray(mina.aboutMyself.items),
-  'T5 · the persona-global slice is reported and is empty', 'true of HERSELF, not a negative claim about others')
+// ── T5 · ⭐⭐⭐ THE PERSONA-GLOBAL SLICE, AFTER MIGRATION 029 ─────────────────────────────────────
+// ⚠️ THIS USED TO ASSERT THE SLICE WAS EMPTY, and emptiness was only ever a proxy: while nothing was
+// persona-global, `user_id IS NULL` could not yet collide with "unowned". The first identity row landed
+// 2026-08-25 and the proxy failed. ⛔ 029 did not relax the check — it gave scope its own column, so the
+// slice now legitimately HAS a row and the honest assertion is about REACH, not emptiness.
+//
+// ⭐⭐ AND THIS IS THE STRONGER TEST: a persona-global memory is reachable from a room that did not form
+// it. `d211f5b4` was formed in Ote's room; Mina's store must see it, because "true of her wherever she
+// is" is exactly what the scope means.
+ok(Array.isArray(mina.aboutMyself.items),
+  'T5 · the persona-global slice is reported as a slice', `count=${mina.aboutMyself.count}`)
+ok(mina.aboutMyself.count >= 1,
+  'T5 · ⭐⭐⭐ a persona-global row IS reachable from a room that did not form it — that is what scope means',
+  `${mina.aboutMyself.count} item(s) visible to a third room`)
+// ⛔⛔ AND 029 MUST NOT HAVE WIDENED ANYTHING. Before the migration the global arm was
+// `{ user_id: null, kind: 'identity' }` and it matched this same row for every account; after, it is
+// `{ scope: 'persona_global' }` and matches the same row. Reachability is IDENTICAL — the migration made
+// an existing reach explicit, it did not grant a new one. Asserted by checking that what Mina can see is
+// exactly the global set and contains nothing scoped to another room.
+const { schema: memSchema } = db.txn_memories.getTableName()
+const [{ n: globalIds }] = await Q(
+  `select count(*)::int n from "${memSchema}"."txn_memories" where scope = 'persona_global'
+     and invalid_at is null and expired_at is null`, {})
+ok(mina.aboutMyself.count === globalIds,
+  'T5 · ⛔ …and she sees EXACTLY the global set — no room-scoped row leaked in',
+  `saw ${mina.aboutMyself.count}, global set is ${globalIds}`)
 ok(/have not stored anything of this kind yet/i.test(mina.provenance.ifEmpty),
   'T5 · ⭐ empty is framed as "I have not stored this", never as "that does not exist"')
 
@@ -80,8 +103,15 @@ const sql = hostSrc.split('\n').filter((l) => !l.trim().startsWith('//') && !l.t
 ok(!/txn_messages/.test(sql), 'T6 · ⭐ it never touches txn_messages — no path to a conversation')
 ok(!/txn_message_embeddings|embedding/.test(sql), 'T6 · ⭐ it never touches embeddings')
 // It DOES read txn_memories, but only the persona-global identity slice, which is hers by definition.
-ok(/user_id IS NULL AND kind = 'identity'/.test(sql),
-  'T6 · its only txn_memories read is the PERSONA-GLOBAL identity slice — hers regardless of who is asking')
+// ⭐⭐ THE ANCHOR MOVED WITH THE ARCHITECTURE, AND IT FAILED LOUDLY WHEN IT DID — which is the good
+// version of this failure mode. A source scan whose anchor silently stops matching reports a confident
+// pass over nothing; this one named itself the moment 029 changed the predicate.
+ok(/scope = 'persona_global'/.test(sql),
+  'T6 · its only txn_memories read is the PERSONA-GLOBAL slice — hers regardless of who is asking')
+// ⛔ AND THE OLD PROXY IS GONE FROM THE SQL ENTIRELY. Leaving it beside the new predicate would mean the
+// overload still had a reader, and the migration would be half-applied in the place that matters most.
+ok(!/user_id IS NULL/.test(sql),
+  'T6 · ⛔ …and it no longer reads scope out of a missing owner')
 ok(!/user_id\s*=\s*:userId[\s\S]{0,80}txn_memories/.test(sql),
   'T6 · it never reads another account\'s scoped memories')
 

@@ -139,7 +139,14 @@ test('...and enforces identity-is-persona-global rather than trusting every call
   const { db, calls } = fakeDb()
   const s = createSequelizeMemoryStore({ db, persona: 'p1', userId: 'u1' })
   await s.create({ kind: 'identity', content: 'x' })
-  assert.equal(calls.create[0].user_id, null, 'identity rows belong to the persona, not to a user')
+  // ⭐⭐ 029: THE RULE IS UNCHANGED — an identity row is persona-global, enforced here and not trusted to
+  // callers. What changed is that it is now SAID rather than smuggled.
+  assert.equal(calls.create[0].scope, 'persona_global', 'identity rows are reachable from every room')
+  // ⚠️ IT USED TO ASSERT `user_id === null`, and that assertion was the overload in miniature: the store
+  // expressed "reachable everywhere" by discarding "where it came from". `d211f5b4` had to have its
+  // formation room recovered from its `source_message_id` chain precisely because this line passed.
+  // ⛔ A global memory must keep its provenance — reach is not amnesia.
+  assert.equal(calls.create[0].user_id, 'u1', 'a global row still records the room it was formed in')
 })
 
 test('update() takes IDS, never a predicate — and no ids is a no-op, not a full-table write', async () => {

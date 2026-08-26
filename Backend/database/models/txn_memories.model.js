@@ -57,9 +57,20 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.STRING,
                 allowNull: true, // null = default/platform persona
             },
+            // ⭐⭐ 029: THE ROOM THIS MEMORY WAS FORMED IN. Always present.
+            // ⛔ It is no longer a scope proxy and no longer "null = root": root has a real users row, and
+            // reachability moved to `scope`. The old comment described BOTH meanings at once, which is
+            // exactly the overload the migration removed.
             user_id: {
                 type: DataTypes.UUID,
-                allowNull: true, // the person this memory is ABOUT / shared WITH; null = root
+                allowNull: false,
+            },
+            // ⭐⭐⭐ WHERE IT IS REACHABLE FROM — the axis that used to be smuggled through a NULL owner.
+            // ⛔ ABOUT ≠ OWNER ≠ SCOPE: this says nothing about who authored it or what it concerns.
+            scope: {
+                type: DataTypes.ENUM("room", "persona_global"),
+                allowNull: false,
+                defaultValue: "room", // a row that forgets loses reach, never gains it
             },
             namespace: {
                 type: DataTypes.STRING,
