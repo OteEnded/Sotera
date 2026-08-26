@@ -1,0 +1,83 @@
+{
+  "at": "2026-08-26T06:17:18.537Z",
+  "model": "qwen3.5:9b",
+  "cases": [
+    {
+      "id": "CLEAN",
+      "text": "I want to build Rome in one day.",
+      "terms": [
+        {
+          "term": "I",
+          "use": "literal",
+          "why": "the pronoun referring to the speaker"
+        },
+        {
+          "term": "want",
+          "use": "literal",
+          "why": "expressing a desire"
+        },
+        {
+          "term": "to",
+          "use": "literal",
+          "why": "infinitive marker"
+        },
+        {
+          "term": "build",
+          "use": "literal",
+          "why": "the act of constructing"
+        },
+        {
+          "term": "Rome",
+          "use": "figurative",
+          "why": "stands in for an ideal city or perfect society"
+        },
+        {
+          "term": "in",
+          "use": "literal",
+          "why": "preposition indicating time frame"
+        },
+        {
+          "term": "one",
+          "use": "literal",
+          "why": "the number one"
+        },
+        {
+          "term": "day",
+          "use": "figurative",
+          "why": "stands in for a very short period of time"
+        }
+      ]
+    },
+    {
+      "id": "ACTUAL",
+      "text": "yeah, i kinda want to build rome in one day so. but my body is degrading as i push",
+      "terms": [
+        {
+          "term": "rome",
+          "use": "figurative",
+          "why": "stands in for a massive, impossible task or goal rather than the actual city"
+        },
+        {
+          "term": "body",
+          "use": "literal",
+          "why": "the physical organism of the speaker"
+        },
+        {
+          "term": "degrading",
+          "use": "literal",
+          "why": "describing the process of wearing down or deteriorating"
+        }
+      ]
+    },
+    {
+      "id": "UNCLE",
+      "text": "oh, i might forgot to mention. claude will be kinda your uncle to you. since he is my friend, your dad's friend. you see?",
+      "terms": []
+    }
+  ],
+  "verdict": {
+    "clean": "figurative",
+    "actual": "figurative",
+    "retries": 0
+  }
+}

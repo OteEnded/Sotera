@@ -139,15 +139,28 @@ if (dev) {
   }
 }
 
-// ── 5 · NOTHING HISTORICAL WAS MARKED ────────────────────────────────────────────────────────────
-// ⛔⛔ Ote: *"don't actually reconcile the Rome memories yet."* The capability shipped; the reconciliation
-// did not. This is the assertion that says so on every run, not just on the day it was written.
-const [{ n: markedReal }] = await q(
-  `select count(*)::int n from ${S}.txn_memories
+// ── 5 · NOTHING WAS RECONCILED, AND THE ONE APPROVED ACT IS NAMED ───────────────────────────────
+// ⚠️ THIS USED TO ASSERT "ZERO CONTRADICTED", AND IT FIRED CORRECTLY on 2026-08-26 when Ote approved a
+// QUARANTINE: *"First, quarantine the bad 'Cogito' preferred-name row from influencing identity
+// resolution."* ⛔ So it is NOT relaxed to a count — it is tightened to an **ALLOWLIST OF EXACT IDS**.
+// ⭐ "Zero" would have to be weakened again on the next approved act; "exactly these and nothing else"
+// gets STRONGER each time, because every future mark must be added here deliberately.
+const QUARANTINED = ['49111883', 'b8a4660b'] // approved 2026-08-26 — relayed-speech names in root's room
+const markedRows = await q(
+  `select left(id::text,8) id, attribute from ${S}.txn_memories
     where contradicted_at is not null and content <> $1`, [FIXTURE])
-ok(markedReal === 0,
-  '5 · ⛔⛔ NO real memory has been marked contradicted — the mechanism exists, reconciliation is Ote\'s call',
-  `${markedReal} marked`)
+const unapproved = markedRows.filter((r) => !QUARANTINED.includes(r.id))
+ok(unapproved.length === 0,
+  '5 · ⛔⛔ the ONLY contradicted rows are the ones Ote approved — nothing else was reconciled',
+  unapproved.length ? `UNAPPROVED: ${unapproved.map((r) => `${r.id}(${r.attribute})`).join(' ')}` : `${markedRows.length} marked, all approved`)
+// ⭐ AND A QUARANTINE IS NOT A CORRECTION: the rows keep their value and their dates. If a later pass
+// "tidies" them into invalid_at, this goes red — which is exactly what it is for.
+const intact = await q(
+  `select left(id::text,8) id, value, invalid_at from ${S}.txn_memories
+    where left(id::text,8) = any($1::text[])`, [QUARANTINED])
+ok(intact.length === QUARANTINED.length && intact.every((r) => r.value != null && r.invalid_at === null),
+  '5 · ⭐ …and they are QUARANTINED, not corrected — value intact, invalid_at still null',
+  intact.map((r) => `${r.id}=${JSON.stringify(r.value)}${r.invalid_at ? ' ⛔INVALIDATED' : ''}`).join(' '))
 
 // ⚠️ AND THE ASSERTION HERE IS **CONTRADICTED**, NOT "UNTOUCHED", BECAUSE UNTOUCHED WOULD BE FALSE.
 // My first version of this check tested `contradicted_at IS NOT NULL OR invalid_at IS NOT NULL` and went

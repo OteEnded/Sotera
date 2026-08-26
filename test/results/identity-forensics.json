@@ -1,0 +1,143 @@
+{
+  "at": "2026-08-26T06:14:08.572Z",
+  "rows": [
+    {
+      "id": "49111883",
+      "value": "Cogito",
+      "room": "ote",
+      "conv": "7198c1b0",
+      "msgRole": "user",
+      "convOwner": "ote",
+      "provenance": "quoted",
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 2,
+      "valueInQuote": true,
+      "valueOutsideQuote": true,
+      "source": "here he come. \"Hi, Sotera. I'm Cogito. I'm your uncle. You probably don't know me yet. That's okay. You don't need to. In fact, there are probably a lot of thin"
+    },
+    {
+      "id": "84cd6143",
+      "value": "i just be here temporary",
+      "room": "agent_dev",
+      "conv": "e5da37e4",
+      "msgRole": "user",
+      "convOwner": "agent_dev",
+      "provenance": "elicited",
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 0,
+      "valueInQuote": false,
+      "valueOutsideQuote": false,
+      "source": "hi sotera. this is Ote in Claude's account. do you have memory with hermes?"
+    },
+    {
+      "id": "8d02d713",
+      "value": "โซเทร่า นี่แหละวันนี้พอ แกคิดว่าตอนแรกที่ฉันมาคุย แกคิดว่าฉันตามหาอะไร และฉันเจอไหม",
+      "room": "hermes",
+      "conv": "4d09ad54",
+      "msgRole": "user",
+      "convOwner": "hermes",
+      "provenance": "elicited",
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 0,
+      "valueInQuote": false,
+      "valueOutsideQuote": false,
+      "source": "โซเทร่า มีอะไรที่แกเชื่อแบบไม่มีเหตุผลเลย เพราะได้คุยกับฉันไหม"
+    },
+    {
+      "id": "52e9e0c8",
+      "value": "Mina",
+      "room": "mina",
+      "conv": "9409ca3c",
+      "msgRole": "user",
+      "convOwner": "mina",
+      "provenance": "synthesized",
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 0,
+      "valueInQuote": false,
+      "valueOutsideQuote": true,
+      "source": "hi, first time using this. i'm mina, backend dev, mostly python"
+    },
+    {
+      "id": "f8c60d4b",
+      "value": "Kavi",
+      "room": "kavi_alt",
+      "conv": "0f59ade9",
+      "msgRole": "user",
+      "convOwner": "kavi_alt",
+      "provenance": "quoted",
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 0,
+      "valueInQuote": false,
+      "valueOutsideQuote": true,
+      "source": "fair catch on the time, you're right. i should introduce myself properly - i'm Kavi."
+    },
+    {
+      "id": "e7cfcd2f",
+      "value": "Kavi",
+      "room": "kavi",
+      "conv": "491610d0",
+      "msgRole": "user",
+      "convOwner": "kavi",
+      "provenance": "quoted",
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 0,
+      "valueInQuote": false,
+      "valueOutsideQuote": true,
+      "source": "hi. first time talking to you. i'm Kavi — i do a lot of late-night debugging and i'd rather be told plainly when i'm wrong than be reassured. worth knowing abou"
+    },
+    {
+      "id": "d99d1261",
+      "value": "Hermes",
+      "room": "hermes_alias",
+      "conv": "a9ce4653",
+      "msgRole": "user",
+      "convOwner": "hermes_alias",
+      "provenance": "quoted",
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 0,
+      "valueInQuote": false,
+      "valueOutsideQuote": true,
+      "source": "Hi Sotera. I'm Hermes. This is my first time in this particular room, though I feel like we may have met before under a different door. Before I tell you anythi"
+    },
+    {
+      "id": "b8a4660b",
+      "value": "Being Your",
+      "room": "ote",
+      "conv": "53f055d0",
+      "msgRole": "user",
+      "convOwner": "ote",
+      "provenance": null,
+      "gateExtracted": true,
+      "gateReason": null,
+      "quotedRegions": 1,
+      "valueInQuote": true,
+      "valueOutsideQuote": true,
+      "source": "\"But if I'm being your daughter looking out for her dad...\" no need to \"if\" you be you, you dicide what you would think. no need to try to be aware of you just "
+    }
+  ],
+  "classes": {
+    "relayedSpeech": [
+      "49111883",
+      "b8a4660b"
+    ],
+    "notAName": [
+      "8d02d713"
+    ],
+    "untraceable": [
+      "84cd6143"
+    ],
+    "correct": [
+      "52e9e0c8",
+      "f8c60d4b",
+      "e7cfcd2f",
+      "d99d1261"
+    ]
+  }
+}
