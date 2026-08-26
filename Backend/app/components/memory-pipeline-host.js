@@ -162,6 +162,66 @@ function withoutDecisions(out) {
   return out
 }
 
+// ── ⭐⭐⭐ THE WRITE LANE, MADE OBSERVABLE ──────────────────────────────────────────
+//
+// ⚠⚠ THE MEASURED HAZARD, 2026-08-26. `keep()` returned `{ok:true, queued:true}`, the row never landed
+// for **60 seconds**, and **nothing was logged**. The cause turned out to be my own load — 59 CPU-placed
+// aux calls had starved the embedder — but Ote's point stands and is the reason this exists:
+//
+//     *"`ok:true, queued:true` followed by no row for 60 seconds with no logging makes **writer is
+//      broken** indistinguishable from **writer is healthy but starved**. We need that distinction
+//      before we trust any retention-rate measurement."*
+//
+// ⭐ So the lane now says when a job STARTS, when it FINISHES, and how long it took. Those three facts
+// separate the two cases completely:
+//   · enqueued, never started        ⇒ STARVED (something ahead of it, or the embedder is not answering)
+//   · started, threw                  ⇒ BROKEN
+//   · started, finished, no row       ⇒ REFUSED or DEDUPED — and both of those already say so
+//
+// ⛔ IT CHANGES NO BEHAVIOUR. Same queue, same fire-and-forget, same swallow — the job is wrapped, not
+// rerouted. And it is HOST-side: the lane itself lives in `@ote/memory`, shared with the frozen OLS
+// platform, so instrumenting it there would be a cross-project edit for a Sotera measurement.
+let writeSeq = 0
+const PENDING = new Map() // seq → { label, at }
+
+/** ⭐ What the lane is doing right now. Counts and ages only — ⛔ never content. */
+export function writeLaneStats(now = Date.now()) {
+  const ages = [...PENDING.values()].map((p) => now - p.at)
+  return {
+    pending: PENDING.size,
+    oldestMs: ages.length ? Math.max(...ages) : 0,
+    labels: [...PENDING.values()].map((p) => p.label),
+  }
+}
+
+/** Wrap one enqueued job so its lifecycle is visible. PURE of behaviour; only observation is added. */
+function traced(label, fn, log) {
+  const seq = ++writeSeq
+  return async () => {
+    const started = Date.now()
+    PENDING.set(seq, { label, at: started })
+    log?.debug?.({ label, seq, pending: PENDING.size }, '[memory.lane] start')
+    try {
+      const r = await fn()
+      const ms = Date.now() - started
+      // ⭐ A SLOW WRITE IS REPORTED AT `warn`, because the failure mode this exists for is a write that
+      // is technically fine and arrives after everyone has stopped looking.
+      const line = { label, seq, ms, pending: PENDING.size - 1 }
+      if (ms > 10_000) log?.warn?.(line, '[memory.lane] finished LATE — a measurement taken before this landed would have read as a missing write')
+      else log?.debug?.(line, '[memory.lane] done')
+      return r
+    } catch (e) {
+      // ⛔ LOUD, AND DISTINGUISHABLE FROM STARVATION: this one STARTED. The lane's own catch will still
+      // swallow it — that is its contract — but it can no longer do so silently.
+      log?.warn?.({ label, seq, ms: Date.now() - started, err: e?.message, code: e?.code },
+        '[memory.lane] job THREW — the writer ran and failed (this is BROKEN, not starved)')
+      throw e
+    } finally {
+      PENDING.delete(seq)
+    }
+  }
+}
+
 export function buildMemoryToolService(fastify, { userId = null, persona, sourceMessageId = null, self = null, author = 'account' } = {}) {
   const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self, author })
   // ⭐ A read-only store bound to the same scope, for the withheld-corrections count. ⛔ Not the service's
@@ -227,13 +287,13 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
     },
     rememberAsync(opts = {}) {
       if (!opts.content || !String(opts.content).trim()) throw new Error('content is required')
-      mem.enqueue('pipeline.remember', () => pipeline.ingest({ ...opts, type: OBSERVATION_TYPE.episodic, source: opts.source ?? 'model-tool' }))
+      mem.enqueue('pipeline.remember', traced('remember', () => pipeline.ingest({ ...opts, type: OBSERVATION_TYPE.episodic, source: opts.source ?? 'model-tool' }), fastify?.log))
       return { ok: true, queued: true }
     },
     reconcileFactAsync(opts = {}) {
       const { entity, attribute, value } = opts
       if (!entity || !attribute || value == null || !String(value).trim()) throw new Error('entity, attribute, value are required')
-      mem.enqueue('pipeline.reconcileFact', () => pipeline.ingest({ ...opts, owner: entity, type: OBSERVATION_TYPE.fact, source: opts.source ?? 'model-tool' }))
+      mem.enqueue('pipeline.reconcileFact', traced('reconcileFact', () => pipeline.ingest({ ...opts, owner: entity, type: OBSERVATION_TYPE.fact, source: opts.source ?? 'model-tool' }), fastify?.log))
       return { ok: true, queued: true }
     },
   }

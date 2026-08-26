@@ -45,6 +45,11 @@ import { BASIS, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFro
 // `memory-self-state-claim.js` and `memory-ownership.js`. This file holds the ENFORCEMENT and none of the
 // judgement about what a modality means.
 import { slotViolation } from './memory-modality.js'
+// ⭐⭐⭐ THE OWNERSHIP BOUNDARY — what ordinary semantic memory does NOT own. Ote, 2026-08-26: *"make it
+// know what it does not own instead of corrupting the meaning to fit the storage it happens to have."*
+// ⛔ The judgement is in the predicate; this file holds only the enforcement and the recording.
+import { admissibleToSlot } from './memory-ownership-boundary.js'
+import { recordRefusal, describeRefusal } from './memory-refusal-record.js'
 import { tracedMemoryIds } from './memory-retrieval-trace.js'
 
 const LIVE = { invalid_at: null, expired_at: null }
@@ -603,6 +608,35 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       //
       // ⓘ The DATABASE enforces this too (`txn_memories_modality_slot_ck`). This half is the loud one
       // that explains itself; that half survives a writer nobody has written yet.
+      // ── ⭐⭐⭐ THE OWNERSHIP BOUNDARY · 032 · THIRD GATE, SAME PLACE, SAME REASON ───────────────
+      //
+      // ⭐⭐ ONE TEST GENERATES ALL FIVE REFUSALS: **does a later statement REPLACE this one, or ACCUMULATE
+      // beside it?** Properties replace — which is exactly what `entity/attribute/value` and
+      // reconcile-in-place are for. Intentions, relationships and designations ACCUMULATE, and forcing
+      // them through a replacing slot is why `02b095e5` superseded the family lineage instead of
+      // extending it.
+      //
+      // ⛔ A REFUSAL IS NOT A DELETION. The material stays in `txn_messages`, and 032 keeps the proposed
+      // content too — what is refused is the property-shaped representation, never the words.
+      // ⭐ And the refusal is RECORDED: a dropped observation and one that was never made must not look
+      // alike, which this project has paid for three times.
+      const refusal = admissibleToSlot(row, {
+        target: row.semanticTarget ?? null,
+        sourceText: row.sourceText ?? null,
+        subjectEstablished: row.subjectEstablished ?? null,
+      })
+      if (refusal) {
+        const recorded = await recordRefusal(db, { refusal, row, userId: U, persona: P, author: AUTHOR, log })
+        log?.warn?.({ class: refusal.class, belongsTo: refusal.belongsTo, destinationExists: refusal.destinationExists,
+          recorded, entity: row?.entity, attribute: row?.attribute },
+        `[memory] ${describeRefusal(refusal)}`)
+        const e3 = new Error(describeRefusal(refusal))
+        e3.code = 'OWNERSHIP_BOUNDARY'
+        e3.reason = refusal.class
+        e3.refusal = refusal
+        e3.recorded = recorded
+        throw e3
+      }
       const slotWhy = slotViolation(row)
       if (slotWhy) {
         log?.warn?.({ modality: row?.modality, entity: row?.entity, attribute: row?.attribute, author: AUTHOR,
@@ -632,8 +666,13 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // the honest record of not knowing. A third-party subject arrives explicitly or not at all.
       const subjectDefault = isPersonaGlobal ? subjects.persona
         : (row.entity === 'user' ? subjects.user : null)
+      // ⚠️ THE BOUNDARY'S INPUTS ARE TRANSPORT, NOT COLUMNS. `semanticTarget`, `sourceText` and
+      // `subjectEstablished` are how a producer DECLARES what it knows; none of them is a field on this
+      // table, and letting them through would either be silently dropped by the ORM (the
+      // `subject_person_id` failure, which cost seven memories) or rejected. Stripped explicitly.
+      const { semanticTarget: _st, sourceText: _sx, subjectEstablished: _se, ...persistable } = row
       const created = await txn_memories.create({
-        ...row,
+        ...persistable,
         // ⭐⭐⭐ THE DERIVATION AXIS — what this row rests on, kept apart from the OCCASION it was written on.
         //
         // ⚠️⚠️ THE MEASURED FAILURE: `676e17b9` says *"we will build 'Rome' together as our shared project
