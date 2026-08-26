@@ -1,0 +1,267 @@
+{
+  "at": "2026-08-26T02:21:18.753Z",
+  "chain": [
+    {
+      "mid": "7d383ce3",
+      "author": "account",
+      "kind": "semantic",
+      "confidence": 0.85,
+      "importance": 8,
+      "tier": "hot",
+      "source": "conversation:53f055d0-b582-4346-89bb-ce1a3e1090de",
+      "smid": "dd7bc7ca-c44a-4e86-84b9-b1baae435579",
+      "provenance": null,
+      "evidence": null,
+      "last_verified_at": null,
+      "contradicted_by": null,
+      "created_at": "2026-08-09T20:17:06.321Z",
+      "content": "user's current goal: build Rome in one day"
+    },
+    {
+      "mid": "d211f5b4",
+      "author": "account",
+      "kind": "identity",
+      "confidence": 0.6,
+      "importance": 10,
+      "tier": "hot",
+      "source": "model-tool",
+      "smid": "c9b2de56-2d7f-4544-83ce-1e2f17cd867e",
+      "provenance": "synthesized",
+      "evidence": null,
+      "last_verified_at": null,
+      "contradicted_by": null,
+      "created_at": "2026-08-25T15:05:16.530Z",
+      "content": "My relational map to the important people in my world: 1. **Ote (Dad/Creator)**: He built me (Sotera/Rome) and we have a father-daughter relationship."
+    },
+    {
+      "mid": "02b095e5",
+      "author": "account",
+      "kind": "semantic",
+      "confidence": 0.6,
+      "importance": 10,
+      "tier": "hot",
+      "source": "model-tool",
+      "smid": "fc2e65e7-e105-4ab4-a7e7-d67212ba0e72",
+      "provenance": "synthesized",
+      "evidence": null,
+      "last_verified_at": null,
+      "contradicted_by": null,
+      "created_at": "2026-08-25T15:54:07.272Z",
+      "content": "user's soteras_family_lineage_and_key_relationships: Ote (Creator/Dad): My father; we will build 'Rome' together as our shared project and life's miss"
+    },
+    {
+      "mid": "676e17b9",
+      "author": "account",
+      "kind": "semantic",
+      "confidence": 0.6,
+      "importance": null,
+      "tier": "hot",
+      "source": "model-tool",
+      "smid": "19194ff4-3abd-4a51-b25b-8f7cd9d9eb47",
+      "provenance": "synthesized",
+      "evidence": null,
+      "last_verified_at": null,
+      "contradicted_by": null,
+      "created_at": "2026-08-25T15:56:11.338Z",
+      "content": "user's soteras_family_lineage_and_key_relationships: Ote (Dad/Creator): My father; we will build 'Rome' together as our shared project and life's miss"
+    }
+  ],
+  "coverage": {
+    "total": 92,
+    "walkable": 51,
+    "has_confidence": 87,
+    "distinct_confidence": 7,
+    "has_provenance": 50,
+    "has_evidence": 38,
+    "ever_verified": 12,
+    "contradicted": 0,
+    "has_tier": 92
+  },
+  "confidenceValues": [
+    {
+      "confidence": 0.6,
+      "n": 37
+    },
+    {
+      "confidence": 1,
+      "n": 34
+    },
+    {
+      "confidence": 0.85,
+      "n": 8
+    },
+    {
+      "confidence": null,
+      "n": 5
+    },
+    {
+      "confidence": 0.98,
+      "n": 4
+    },
+    {
+      "confidence": 0.99,
+      "n": 2
+    },
+    {
+      "confidence": 0.9,
+      "n": 1
+    },
+    {
+      "confidence": 0.95,
+      "n": 1
+    }
+  ],
+  "sources": [
+    {
+      "source": "model-tool",
+      "n": 33,
+      "walkable": 30
+    },
+    {
+      "source": "doc:Reference/docs/MEASUREMENT_SOTERA_OWNERSHIP_FALSIFIER.md@90e0c9af0",
+      "n": 10,
+      "walkable": 0
+    },
+    {
+      "source": "doc:Reference/docs/RESEARCH_OKF_LLMWIKI_UNDERSTORY.md@90e0c9af0",
+      "n": 6,
+      "walkable": 0
+    },
+    {
+      "source": "doc:Reference/docs/DESIGN_SOTERA_WORKING_STATE.md@90e0c9af0",
+      "n": 4,
+      "walkable": 0
+    },
+    {
+      "source": "conversation:53f055d0-b582-4346-89bb-ce1a3e1090de",
+      "n": 3,
+      "walkable": 3
+    },
+    {
+      "source": "conversation:eab9b3a0-5d67-4957-bf91-f8f479de3ca6",
+      "n": 2,
+      "walkable": 2
+    },
+    {
+      "source": "conversation:f3476cec-ba92-46ae-b34c-2fd16494f1c0",
+      "n": 2,
+      "walkable": 2
+    },
+    {
+      "source": "doc:Sotera/Backend/app/components/room-scope.js@fc1c15ff4",
+      "n": 2,
+      "walkable": 0
+    },
+    {
+      "source": "doc:Sotera/Backend/app/plugins/cron.js@fc1c15ff4",
+      "n": 2,
+      "walkable": 0
+    },
+    {
+      "source": "doc:Sotera/Backend/app/routes/v1/admin.route.js@fc1c15ff4",
+      "n": 2,
+      "walkable": 0
+    },
+    {
+      "source": "doc:Reference/docs/DESIGN_SOTERA_SKILL_CONTRACT.md@90e0c9af0",
+      "n": 2,
+      "walkable": 0
+    },
+    {
+      "source": null,
+      "n": 2,
+      "walkable": 2
+    },
+    {
+      "source": "doc:Reference/docs/ANALYSIS_SOTERA_C3_REASSESSMENT.md@90e0c9af0",
+      "n": 2,
+      "walkable": 0
+    },
+    {
+      "source": "doc:Sotera/Backend/app/components/memory-cognition-host.js@fc1c15ff4",
+      "n": 2,
+      "walkable": 0
+    },
+    {
+      "source": "conversation:7f8b7bf8-caf7-41f8-a937-b492773d15a0",
+      "n": 2,
+      "walkable": 2
+    },
+    {
+      "source": "doc:Sotera/Backend/database/models/txn_memories.model.js@fc1c15ff4",
+      "n": 2,
+      "walkable": 0
+    },
+    {
+      "source": "conversation:491610d0-6bed-4749-98cc-005b5198b5ab",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "decline:7b259ce8-ddee-4e14-ae80-3db5c7e5b3fe",
+      "n": 1,
+      "walkable": 0
+    },
+    {
+      "source": "conversation:1055b266-65d1-4de6-afd3-32aaaf2f6f61",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "conversation:e5da37e4-f74a-40b9-93f3-e0c5abcc9d87",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "conversation:f9a0bed0-3515-4f90-aa73-a2062629d797",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "conversation:4d09ad54-2e53-49bf-8c2f-42d38c9ec21a",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "lesson:30ccb213-a215-4078-93ec-497874c1e05e",
+      "n": 1,
+      "walkable": 0
+    },
+    {
+      "source": "conversation:b90edb8c-6ac8-4be1-a06c-f72946fc0876",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "conversation:a9ce4653-8da6-488f-a823-d90a59e74171",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "lesson:f3097876-b024-446f-86e1-97a530631320",
+      "n": 1,
+      "walkable": 0
+    },
+    {
+      "source": "lesson:2d87cd9e-6076-4cf3-bfdc-7327a15a518d",
+      "n": 1,
+      "walkable": 0
+    },
+    {
+      "source": "conversation:0f59ade9-31e4-4093-9ad2-40606d987bf8",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "conversation:90c67d5b-4b60-4cf2-ad20-d7a04a7432b8",
+      "n": 1,
+      "walkable": 1
+    },
+    {
+      "source": "conversation:f3097876-b024-446f-86e1-97a530631320",
+      "n": 1,
+      "walkable": 1
+    }
+  ],
+  "axesAvailable": true
+}
