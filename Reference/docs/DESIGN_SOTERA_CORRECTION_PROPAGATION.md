@@ -105,6 +105,39 @@ vocabulary ends up being, **extraction must say that it is an extraction.**
 
 ---
 
+## 3b · ⚠⚠ THE EXISTING PROVENANCE AXIS WOULD NOT HAVE CAUGHT ROME — IT WOULD HAVE AMPLIFIED IT
+
+⭐ **A full provenance system already exists** and I nearly recommended wiring it as the fix.
+`PROVENANCE` = `quoted | elicited | observed | synthesized`, with `CONFIDENCE_CEILING` (quoted/elicited/
+observed → 1, synthesized → 0.6) and `classifyCapture` verifying that a quoted span really appears in
+the user’s words. ⇒ design Q6, *“confidence derived from evidence kind”*, is **already built**.
+
+⛔ **AND IT IS THE WRONG AXIS FOR THIS FAILURE.** Run on the real row, verbatim:
+
+```
+sourceText: "yeah, i kinda want to build rome in one day so. but my body is degrading as i push"
+value:      "build Rome in one day"
+classifyCapture -> { provenance: "quoted", verified: true,
+                     reason: "the span is the user's own words and contains the value" }
+capConfidence(1, quoted) -> 1
+```
+
+⭐⭐⭐ **`quoted` is TRUE of the metaphor.** He really did say those words, in that order. So the
+classifier is correct and offers **no protection whatsoever** — and had provenance been wired on that
+row it would have been stored as `quoted` at a ceiling of **1.0** instead of the `NULL`/0.85 it actually
+got. ⚠️ **Wiring the existing axis would have made Rome worse, not better.**
+
+⇒ the existing axis answers **“did the user really say these words?”** — fidelity of transcription.
+It does ⛔ **not** answer **“did the user mean this as a fact?”** — modality of assertion.
+⭐ **Modality is therefore a genuinely NEW axis, not a re-use of provenance**, and §8’s rule applies to
+it immediately: ⛔ modality must not be read off provenance, and provenance must not be read off
+modality. A row can be perfectly `quoted` and completely `figurative` at the same time.
+
+⚠️ This also revises §9: **“wire `provenance` on extraction” is no longer the safe first step.** It is
+still worth doing for the 3 `conversation:*` rows and 34 `doc:*` rows that carry none — but on its own it
+raises confidence on exactly the rows this design exists to distrust, so it must land **with** modality
+or after it.
+
 ## 4 · Evidence lineage on synthesis
 
 Today a synthesized row's `source_message_id` anchors to the turn where she was **told to remember** —
