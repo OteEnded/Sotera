@@ -34,11 +34,28 @@ const excl = cols.find((c) => c.column_name === 'excluded_from_evidence_at')
 ok(excl?.is_nullable === 'YES' && excl?.column_default === null,
   '1 · ⭐ nullable, no default — NULL means "nobody excluded this", ⛔ not "considered and kept"',
   `nullable=${excl?.is_nullable} default=${excl?.column_default ?? 'none'}`)
-const [{ n: alreadyExcluded }] = await q(
-  `select count(*)::int n from ${S}.txn_conversations where excluded_from_evidence_at is not null`)
-ok(alreadyExcluded === 0,
-  '1 · ⛔⛔ NOTHING is excluded — the capability shipped, every use of it is a separate deliberate act',
-  `${alreadyExcluded} excluded`)
+// ── ⚠️⚠️ THIS ASSERTION WAS WRONG, AND IT WENT RED THE FIRST TIME THE CAPABILITY WAS USED ─────────
+// It read `alreadyExcluded === 0` — *"NOTHING is excluded"* — which was true of the migration and was
+// never true of the system. 033 excluded nothing; that is a fact about the MIGRATION, and the migration
+// asserts it itself. Encoding it here turned a **migration-time fact into a standing invariant**, so the
+// first legitimate exclusion (`56425175`, 2026-08-26) broke the check that proves the capability works.
+//
+// ⭐⭐ THE ACTUAL INVARIANT IS THE ONE THE CAPABILITY PROMISES: **every exclusion carries a reason a
+// person can evaluate later.** ⛔ *"There are none"* is not an invariant — it is a count, and a count that
+// only ever goes up. ⓘ Same family as the note that called a file disposable and outlived it: an
+// assertion with an expiry date.
+const excludedRows = await q(
+  `select id, exclusion_reason from ${S}.txn_conversations where excluded_from_evidence_at is not null`)
+const unreasoned = excludedRows.filter((r) => !r.exclusion_reason || r.exclusion_reason.trim().length < 8)
+ok(unreasoned.length === 0,
+  '1 · ⭐⭐ EVERY exclusion carries a reason a person can evaluate later — ⛔ an unjustifiable one is '
+  + 'indistinguishable from curating the data',
+  `${excludedRows.length} excluded, ${unreasoned.length} without a reason`)
+// ⛔ AND DELIBERATELY NO COUNT ASSERTION. A bulk-exclusion tripwire is a real concern, but `count <= N`
+// for any fixed N is the SAME defect as the line above — a number that only goes up, going red on a
+// legitimate use. ⇒ the count is REPORTED, never asserted; a sweep shows as a jump a person can see.
+ok(true, '1 · ⓘ how many are excluded — reported, ⛔ never asserted (a count is not an invariant)',
+  `${excludedRows.length} excluded: ${excludedRows.map((r) => String(r.id).slice(0, 8)).join(' ') || 'none'}`)
 
 // ⭐⭐ THE TWO AXES MUST STAY SEPARATE. `incognito` is a privacy promise fixed at create; a promise you
 // can revoke later is not a promise, which is exactly why it cannot double as the experiment's tool.
