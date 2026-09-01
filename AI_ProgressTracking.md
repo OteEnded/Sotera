@@ -3790,3 +3790,38 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - `OBSERVATION` (typed, measured) → `PROPOSITION` (closed grammar) → **`WORTH COMMITTING` ← ⛔ EVERY current form fails HERE, and only here** → `MEMORY PLAN` (`resolveConflict`, inside the memory layer) → `PERSISTENCE` (⛔ not reached in M2). ⇒ ⭐⭐ **the machinery is right and the CRITERION was missing.**
 
 - **Next action:** ⏸ **AWAITING OTE — the INPUT-TIER question: may Dreaming be handed anything above T0, and at what scope?** ⛔ Still open: **M2-1** · the **`persona_global` route** · **R1–R3** · **P1** (separate) · the **lesson-slot hazard** (⛔ memory layer's). ⛔ M1 unchanged · M2 dry-run only · no commitment writing · no activation · no cron.
+
+## 2026-09-01 22:40 +0700 · THE INPUT TIER — ⭐⭐⭐ the smallest sufficient evidence, DERIVED FROM THE REAL CASE
+
+### ⭐⭐⭐ MEASURED FIRST, ⛔ NOT ASSUMED — the English-preference pattern
+- ⓘ Structural pre-selection over **admissible** conversations, user turns only — ⭐ **counted, ⛔ nothing read into a prompt:** **5 matched messages · 3 distinct conversations · 2 rooms.** Split: **`ote` → 2 conversations, 2026-08-25 → 2026-09-01** · `agent_dev` → 1 conversation, all 2026-08-20.
+- ⭐⭐⭐ **OTE'S ROOM ALONE HOLDS TWO INDEPENDENT ROOTS, ONE WEEK APART — exactly the minimum O-2 requires.** ⇒ **a ROOM-SCOPED Dreaming can discover this pattern with NO cross-room disclosure at all.**
+- ⇒ **Three facts fall out of one measurement:** ⛔ **T0 cannot see it** (no field encodes *“a language preference was expressed”*) · ⛔ **existing memory cannot see it** — ⓘ **no language-preference row exists**, which is **P1**, and Dreaming must not compensate · ⭐⭐ **the room boundary excludes the RIGHT root** — the third is `agent_dev`, ⓘ the harness account **O2 already measured as 73% of the user corpus and mostly instrument.** **The disclosure boundary and the corpus-quality finding AGREE, independently.**
+- ⇒ ⭐⭐ **the room frame is not a compromise here — it is SUFFICIENT for the real case.**
+
+### THE TIERS, and where each stops
+- **T0** typed structural fields ⇒ ⛔ measurements, not beliefs. **T0.5** ⭐ **slot METADATA** (which slots, supersession depth, which lane) — above T0, **still no prose** ⇒ ⛔ **too sparse to use**: ⓘ only **54 of 115** rows carry a `slot_id`, deepest chain **3 rows**, and ⚠️ one of the two `preferred_name` supersessions is very likely the **known speaker-attribution defect** ⇒ a **MECHANISM, not her** — ⭐ **the choice/mechanism rule generalises to this tier unchanged.** **T1** slot **VALUES** ⇒ ⚠️ carry third-party content (ⓘ *“piano, violin… ระนาด ซอ”* is a `value`). **T2** ⭐ **bounded prose EXCERPTS** ⇒ ✅ already exists. **T3** full messages ⇒ ⛔ **not needed.**
+
+### ✅ EVERYTHING ALREADY EXISTS — in pieces
+- ⭐⭐ **`toEvidence(row, {excerptChars: 300})`** in `conversation-search.js` — a **300-character excerpt**, **already the shape the COMPOSER receives every turn** as scored evidence candidates. ⭐ **`conversation-search` selects candidates FIRST and returns excerpts SECOND** — which is exactly *“prose only from episodes selected structurally first”*. ⭐ `evidentialSql` governs admissibility · room confinement is the same search **without** `acrossRooms` · the cross-room door (`disclosure-host`) is ⛔ **not needed at room scope and not weakened.**
+- ⛔ **THE ONE MISSING PIECE: a consumer that keeps evidence GROUPED BY ROOT.** ⇒ ⭐⭐ **this is not a new boundary — it is a new ARRANGEMENT of boundaries that already exist, and the gap is a GROUPING, ⛔ not an authorization.**
+- ✅ **And evidence stays TEMPORARY by construction:** an excerpt handed to a prompt is **written nowhere** — the commitment cites **identities**, the ledger records **identities** ⇒ **no path puts it into corpus or memory**, so no new rule is needed to keep it out.
+
+### ⭐⭐⭐ INDEPENDENCE SURVIVES — by BUCKETS, not by counting
+- Ote's stated fear, exactly: *“many messages → one big context → model says **this keeps happening**”*. ⇒ **THE FIX: hand the model PER-ROOT BUCKETS, and let the SYSTEM count the roots.** `independent_roots = evidence.length`, computed by the caller.
+- ⇒ ⛔ **the model is NEVER GIVEN THE AGGREGATE, so it cannot assert one.** It says what it sees **within each bucket**; the slot is filled by the system. ⭐ ***The model proposes; the system counts*** — the same split the whole arc runs on, applied to independence. ⭐ **And it degrades honestly:** one bucket ⇒ `independent_roots = 1` ⇒ **O-2 refuses**, whatever the model says about the prose.
+
+### ⭐⭐ O-2 TURNS OUT TO BE THE P1 BOUNDARY
+- **ONE root ⇒ ⛔ P1's** — Reflection saw that episode and did not retain it; Dreaming restating it is **compensation**. **≥2 INDEPENDENT roots ⇒ ⭐ Dreaming's own job** — a **cross-episode** pattern is precisely what Reflection **cannot see by construction**, because Reflection only ever sees one episode.
+- ⇒ ⭐⭐⭐ **NO SEPARATE RULE IS NEEDED: the same predicate that stops one event manufacturing recurrence stops Dreaming becoming Reflection's patch.** ⓘ And the measured case is **2 independent roots in Ote's room** ⇒ **legitimately Dreaming's.**
+
+### ⚠️ WHAT IS GENUINELY GIVEN UP — stated, ⛔ not softened
+- ⛔ **T0's disclosure guarantee is GONE.** T0 was safe because **the model saw no prose**; at T2 it reads words, so *“it cannot leak what it was never handed”* **no longer applies.** ⭐ **It is REPLACED, ⛔ not abandoned: the guarantee becomes THE ROOM** — the reader already has this room's prose — ⚠️ **weaker than T0**, ⭐ and **the same guarantee `conversation-search` already relies on every turn.**
+- ⛔ **The output side does NOT relax:** evidence → **structured proposition** → reconciliation → plan → persistence. **Bounded prose IN does not mean prose OUT.** ⛔ **And global publication does not follow** — reaching `persona_global` still needs the route **and** the asked-vs-unasked ruling, **both still open.**
+
+### ⇒ THE SMALLEST SUFFICIENT BOUNDARY
+- **For each of ≥2 independent root conversations WITHIN ONE ROOM: the 300-character excerpt of the specific structurally-matched turn, plus its identity — GROUPED BY ROOT.** ⛔ Not the conversation · ⛔ not the surrounding turns · ⛔ not other rooms · ⛔ not full messages · ⛔ not memory `value`s.
+- ⭐ **Authority given: NONE that does not already exist.** Same predicate, same excerpt shape, same room confinement the Composer uses every turn. ⭐ **Information given: strictly LESS than the Composer already receives**, because selection is structural first and excerpts come only from matched turns.
+- ⚠️ **And the honest caveat: 2 roots is EXACTLY the minimum.** ⓘ A third exists, in another room, and O2 independently found that room's corpus mostly instrument. ⭐ **The pattern is real; the evidence for it is THIN, and a first commitment built on it would be defensible but not comfortable.**
+
+- **Next action:** ⏸ **AWAITING OTE.** ⛔ Still open: the **per-root bucketing consumer** (a grouping, ⛔ not an authorization) · the **`persona_global` route** + **asked-vs-unasked** · **M2-1** · **R1–R3** · **P1** · the **lesson-slot hazard**. ⛔ No schema, no new disclosure mechanism, no activation, no cron, no commitment writing. **M1 unchanged · M2 dry-run only.**
