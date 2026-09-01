@@ -238,8 +238,31 @@ ok(memAware.length === 0,
 
 // ══ 9 · WHAT DOES NOT EXIST YET — pinned so that building it is a visible event ══════════════════
 const tables = (await q(`select tablename from pg_tables where schemaname = $1`, [S])).map((r) => r.tablename)
-ok(!tables.some((t) => /dream/i.test(t)),
-  '9 · ⛔ no Dreaming table exists — DESIGN phase, and the contract is still the only artifact', `${tables.length} tables`)
+// ── ⚠️ THIS ASSERTION FIRED ON 2026-09-01, AND THAT WAS IT WORKING ───────────────────────────────
+// It read "no Dreaming table exists — DESIGN phase". Migration 034 created `log_dreaming_passes` for
+// M1 step 2, so it went red. ⭐ That is exactly what a boundary assertion is FOR: the count was a
+// boundary somebody had to cross deliberately, and somebody did, with authorization.
+// ⇒ the boundary MOVES to where it now matters: ONE dreaming table, and DREAMING STILL NOT ENABLED.
+const dreamTables = tables.filter((t) => /dream/i.test(t))
+ok(dreamTables.length === 1 && dreamTables[0] === 'log_dreaming_passes',
+  '9 · ⭐ exactly ONE Dreaming table — the PASS LEDGER, and no other', dreamTables.join(' ') || 'none')
+const dreamCols = (await q(
+  `select column_name from information_schema.columns
+    where table_schema = $1 and table_name = 'log_dreaming_passes'`, [S])).map((r) => r.column_name)
+ok(dreamCols.includes('run_state') && dreamCols.includes('outcome'),
+  '9 · ⭐⭐ …with EXECUTION and CONCLUSION on separate axes', 'run_state + outcome')
+ok(!dreamCols.some((c) => /admissib|e3_|excluded/i.test(c)),
+  '9 · ⛔ …and NO admissibility column — E3 is computed at read time, never stamped')
+// ⛔⛔ THE ONE THAT MATTERS MOST NOW: a table is not an activation.
+const dreamSettings = (await q(
+  `select key from ${S}.mst_settings where key ilike '%dreaming%'`).catch(() => [])) ?? []
+ok(dreamSettings.length === 0,
+  '9 · ⛔⛔ DREAMING IS NOT ENABLED — no `memory.dreaming*` setting exists. A table is not an activation',
+  dreamSettings.map((r) => r.key).join(' ') || 'no dreaming setting')
+const cron = src('Backend/app/plugins/cron.js')
+ok(!!cron, '9 · ⛔ ANCHOR: the scan can still see cron.js')
+ok(!!cron && !/dreaming|runOnePass/i.test(code(cron)),
+  '9 · ⛔⛔ …and NOTHING SCHEDULES IT — cron does not mention Dreaming')
 const [{ n_episodic, n_card }] = await q(
   `select count(*) filter (where kind = 'episodic')::int n_episodic,
           count(*) filter (where kind = 'card')::int n_card from ${S}.txn_memories`)
