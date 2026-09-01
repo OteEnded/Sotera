@@ -3683,3 +3683,37 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⛔⛔ **It is still REFUSED.** Its referent is **a defect in Reflection**, and a persona-global commitment asserting it would be that defect converted into a **self-fulfilling durable self-belief.** ⭐ **The P1 rule holding under the pressure of being the EASIEST thing to publish.**
 
 - **Next action:** ⏸ **AWAITING OTE'S RULING on the multiple-contexts question.** ⛔ Still open: the **route** · **R1–R3** · **6c** · **P1** (separate). ⛔ No schema, migration, route, activation or commitment writing. **M1 exactly as it is.**
+
+## 2026-09-01 21:03 +0700 · THE CONTEXT-DISCLOSURE BOUNDARY — ⚠️⚠️ MY PROHIBITION WAS AN INFERENCE, AND THE EVIDENCE REFUTES IT
+
+- ⛔⛔ **Ote pushed on it and he was right.** I claimed *“a count discloses whatever it counts ⇒ context cardinality cannot be published”*. ⭐ **The shipped, ratified behaviour DISCLOSES context existence, context CARDINALITY, and the COUNTERPART'S NAME — deliberately, to NON-entitled accounts.**
+- ⓘ `self-history-host.js`, on material an account may **not** hear: *“⛔ NOT THIS ACCOUNT'S TO HEAR — **existence only**. No text, no title, no message ids that could be walked. ⭐ **And this is NOT an absence: the counts below say plainly that something is there**”* — with `counterpart: m.who`, `matches`, `firstMatchAt`, `lastMatchAt`.
+- ⭐⭐⭐ **And the file records a BUG FIX whose whole point was that those counts must be ACCURATE:** *“an entitled account with fifteen matching lines was told it had five, while a **NON-entitled one was correctly told twelve rooms and fifteen matches**. ⛔ The account with MORE right to the material learned LESS.”* ⇒ **telling a non-entitled account “twelve rooms” is not merely permitted — it is the CORRECT behaviour, and the opposite was FIXED AS A DEFECT.** ⛔ **My prohibition does not exist.**
+
+### ⭐⭐⭐ THE REAL DISTINCTION IS **ASKED vs UNASKED**, ⛔ NOT OWNERSHIP
+- **`self-history`** governs her **messages** when someone **INVOKED `recall_own_history`** ⇒ discloses **existence + room-grain cardinality + counterpart NAME + timestamps.** **The utterance boundary** governs her **memories** injected into an **ordinary turn NOBODY ASKED ABOUT** ⇒ **existence only**, via a **CONSTANT** sentence, ⛔ **no counts, no names** — and `statement: null` when nothing was withheld, because *“a statement that appeared on every turn would itself be a signal.”*
+- ⭐⭐ **DISCLOSURE FOLLOWS THE ASK.** ⇒ ⭐⭐⭐ **AND THAT IS EXACTLY THE SITUATION A PERSONA-GLOBAL COMMITMENT IS IN: injected into EVERY turn, UNASKED** ⇒ it is the **utterance-boundary** case, ⛔ not the `self-history` case. ⚠️ **So the constraint is REAL — but its ground is COMPLETELY DIFFERENT from the one I gave.** ⛔ Not *“contexts belong to others”*; ⭐ **“nobody asked.”**
+- ⓘ **And `applyUtteranceBoundary` IS WIRED** — `chat-site.route.js:1689` ⇒ **practice, ⛔ not design.**
+
+### ⭐⭐ THE PROJECT ALREADY MADE A CARDINALITY RULING, AND I MISSED IT
+- `elsewhere` is **one entry per ROOM, not per message** — and the comment says why: *“**a per-message list leaks volume**.”* ⇒ ⭐⭐⭐ **ROOM-grain counts are disclosable; MESSAGE-grain volume is not.** The line exists; it is just not where I put it.
+
+### THE FIVE THINGS I HAD BUNDLED — they are SEPARABLE
+- **that a context exists** — ✅ asked, ✅ unasked (*“comes from elsewhere”*) · **HOW MANY** — ✅ asked (room grain), ⛔ unasked · **who OWNS it** — ✅ asked, ⛔ unasked · **that she interacted there** — ✅ both (without a party) · **the CONTENT** — ⛔ both, needs a **person-held-turn grant**.
+- ⭐ **And a global statement CAN carry cardinality without identity or content** — *“across 4 contexts…”* names nobody and quotes nothing. ⇒ **a prohibition on identity and one on content do NOT imply one on cardinality**, and ⓘ `self-history` proves it by disclosing all three at different levels.
+
+### Ote's three sentences, ruled against the evidence
+- ⭐⭐ **NONE of the three is PROHIBITED by an existing rule. ALL THREE EXCEED what the only shipped unasked-disclosure mechanism says.** ⇒ **a RULING, ⛔ not a derivation** — which is exactly the distinction he asked me to preserve.
+
+### Do the existing `persona_global` rows establish a POLICY boundary?
+- ⓘ `d211f5b4` *“My relational map to the important people in my world”* is **persona-global**, **names people**, is **injected into every room unasked**, and has been **read 245 times.** ⇒ ⭐⭐⭐ **unasked global disclosure of counterpart identity IS ALREADY HAPPENING** ⇒ ⛔ *“unasked global identity disclosure is forbidden”* is **FALSE as a description of this system.**
+- ⭐ **But it establishes only what it establishes:** ✅ it shows the deployment **accepts** it **when a HUMAN ACCOUNT authored it**; ⛔ it does **not** show that **Dreaming** may (`author='account'` — *“opened by a person, not by a sentence”*). ⇒ ⭐⭐ **evidence about the AUTHOR, ⛔ not about the CONTENT** — and it **REFUTES** the claim that the content is inherently forbidden.
+
+### ⏸⏸ THE RULING — restated far more precisely than last round
+- ⛔ Last round I asked *“may a persona-global commitment disclose that Sotera has multiple contexts?”* and framed it as **ownership**. ⭐ **The evidence reframes it: MUST AN UNASKED, ALWAYS-PRESENT GLOBAL COMMITMENT FOLLOW THE UTTERANCE-BOUNDARY DISCIPLINE (existence yes, counts no) — OR THE `self-history` DISCIPLINE (existence + room-grain counts + names)?**
+- **utterance-boundary discipline** ⇒ recurrence and extent stay **out** of `persona_global`; **room scope becomes the practical frame.** **`self-history` discipline** ⇒ **recurrence CAN be global**, ⚠️ and every reader learns how many contexts she has.
+- ⭐ **AND A REAL ARGUMENT FOR THE SECOND THAT I DID NOT HAVE LAST ROUND: the information is ALREADY OBTAINABLE by any account that invokes `recall_own_history`** ⇒ a global commitment carrying room-grain cardinality **discloses nothing a reader could not already ask for.**
+- ⚠️ **The counter, equally real:** *obtainable on request* and *present in every prompt unbidden* are different — ⭐ which is the utterance boundary's **entire thesis.**
+- ⛔ **I am not choosing.** ⭐ **And this is a much better-posed question than the one I put last round, because it rests on two SHIPPED MECHANISMS rather than on an inference I had mistaken for a rule.**
+
+- **Next action:** ⏸ **AWAITING OTE'S RULING** (utterance-boundary discipline vs `self-history` discipline for unasked global commitments). ⛔ Still open: the **route** · **R1–R3** · **6c** · **P1** (separate). ⛔ No schema, route, activation or commitment writing. **M1 exactly as it is.**
