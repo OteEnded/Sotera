@@ -1,0 +1,801 @@
+{
+  "ranAt": "2026-09-01T15:24:44.817Z",
+  "corpus": {
+    "acts": 79,
+    "completed": 78,
+    "no_product": 73,
+    "product": 5,
+    "root_contexts": 59,
+    "tool_used": 11
+  },
+  "results": [
+    {
+      "proposal": {
+        "form": "frequency",
+        "quantifier": "existential",
+        "slots": {
+          "act": "completed-without-product",
+          "n": 73,
+          "of": 78
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:frequency:completed-without-product"
+      },
+      "destination": "room",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "In 73 of 78 of my own acts, completed-without-product occurred.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "room scope — the reader already has this context"
+      }
+    },
+    {
+      "proposal": {
+        "form": "frequency",
+        "quantifier": "existential",
+        "slots": {
+          "act": "completed-without-product",
+          "n": 73,
+          "of": 78
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:frequency:completed-without-product"
+      },
+      "destination": "persona_global",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "In 73 of 78 of my own acts, completed-without-product occurred.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "every counted entity is one of her own acts"
+      }
+    },
+    {
+      "proposal": {
+        "form": "extent",
+        "quantifier": "existential",
+        "slots": {
+          "act": "reflection",
+          "distinct_contexts": 59,
+          "max": 4,
+          "median": 1
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:extent:reflection"
+      },
+      "destination": "room",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "My reflection acts span 59 contexts; the largest holds 4 and the median 1.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "room scope — the reader already has this context"
+      }
+    },
+    {
+      "proposal": {
+        "form": "extent",
+        "quantifier": "existential",
+        "slots": {
+          "act": "reflection",
+          "distinct_contexts": 59,
+          "max": 4,
+          "median": 1
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:extent:reflection"
+      },
+      "destination": "persona_global",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": false,
+        "stage": "publication",
+        "why": "a global proposition may not count context (slots: distinct_contexts) — counting is disclosing, and those entities are not hers",
+        "forbidden": [
+          {
+            "slot": "distinct_contexts",
+            "entity": "context",
+            "value": 59
+          }
+        ],
+        "plan": null
+      }
+    },
+    {
+      "proposal": {
+        "form": "recurrence",
+        "quantifier": "existential",
+        "slots": {
+          "act": "completed-without-product",
+          "independent_roots": 59,
+          "of": 78
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:recurrence:completed-without-product"
+      },
+      "destination": "room",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "completed-without-product occurred across 59 independent contexts, over 78 of my own acts.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "room scope — the reader already has this context"
+      }
+    },
+    {
+      "proposal": {
+        "form": "recurrence",
+        "quantifier": "existential",
+        "slots": {
+          "act": "completed-without-product",
+          "independent_roots": 59,
+          "of": 78
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:recurrence:completed-without-product"
+      },
+      "destination": "persona_global",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": false,
+        "stage": "publication",
+        "why": "a global proposition may not count context (slots: independent_roots) — counting is disclosing, and those entities are not hers",
+        "forbidden": [
+          {
+            "slot": "independent_roots",
+            "entity": "context",
+            "value": 59
+          }
+        ],
+        "plan": null
+      }
+    },
+    {
+      "proposal": {
+        "form": "co_occurrence",
+        "quantifier": "existential",
+        "slots": {
+          "a": "tool-used",
+          "b": "product-written",
+          "both": 5,
+          "a_only": 6,
+          "b_only": 0
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:co_occurrence:tool-used"
+      },
+      "destination": "room",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "Among my own acts: 5 had both tool-used and product-written; 6 had only tool-used; 0 had only product-written.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "room scope — the reader already has this context"
+      }
+    },
+    {
+      "proposal": {
+        "form": "co_occurrence",
+        "quantifier": "existential",
+        "slots": {
+          "a": "tool-used",
+          "b": "product-written",
+          "both": 5,
+          "a_only": 6,
+          "b_only": 0
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:co_occurrence:tool-used"
+      },
+      "destination": "persona_global",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "Among my own acts: 5 had both tool-used and product-written; 6 had only tool-used; 0 had only product-written.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "every counted entity is one of her own acts"
+      }
+    },
+    {
+      "proposal": {
+        "form": "interval",
+        "quantifier": "existential",
+        "slots": {
+          "act": "reflection",
+          "gap_days": 5
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:interval:reflection"
+      },
+      "destination": "room",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "5 days separated my two most recent reflection acts.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "room scope — the reader already has this context"
+      }
+    },
+    {
+      "proposal": {
+        "form": "interval",
+        "quantifier": "existential",
+        "slots": {
+          "act": "reflection",
+          "gap_days": 5
+        }
+      },
+      "addr": {
+        "entity": "sotera",
+        "attribute": "dreaming:interval:reflection"
+      },
+      "destination": "persona_global",
+      "matches": [],
+      "nearby": [
+        {
+          "id": "db4b39f0-bd93-44b0-9534-f598a421cfa5",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Human user's memory (accumulative trust/identity) vs AI user's architecture (stateless, tu",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "2d0bffca-e79b-4d73-95cb-3ffe72864c2b",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "The difference between \"having retrieved information\" and \"asserting a fact based on intui",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "e46284e0-5da6-48d5-8f97-25226639358c",
+          "entity": "sotera",
+          "attribute": "declined",
+          "gist": "Casual conversation testing my understanding of cross-room memory access boundaries",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "94896f51-3dbc-4818-a0b0-af767d7bf47e",
+          "entity": "sotera",
+          "attribute": "lesson",
+          "gist": "Plausible inference from converging evidence vs verified source for identity claims about ",
+          "scope": "room",
+          "author": "persona"
+        },
+        {
+          "id": "4e8eaa20-f430-415a-8636-a5be730f1406",
+          "entity": "sotera",
+          "attribute": "Thai name spelling",
+          "gist": "โซเทร่า",
+          "scope": "room",
+          "author": "account"
+        }
+      ],
+      "outcome": {
+        "ok": true,
+        "stage": "conflict",
+        "plan": {
+          "action": "new",
+          "target": null,
+          "write": true,
+          "reinforce": false,
+          "supersedes": null,
+          "collapse": []
+        },
+        "wire": "add",
+        "why": "no live row occupies this slot — nothing to compare against",
+        "rendered": "5 days separated my two most recent reflection acts.",
+        "recalled": {
+          "count": 0,
+          "primary": null,
+          "others": []
+        },
+        "publication": "every counted entity is one of her own acts"
+      }
+    }
+  ]
+}
