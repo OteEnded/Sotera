@@ -3955,3 +3955,40 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⚠️⚠️ **AND THE TRAP I ALMOST HANDED OVER: a LABEL is not a QUESTION.** `user/the kid — who she is and the voice to hold` **reveals that there is a kid** before any value is read. ⇒ **a definition layer keyed on the room's LABEL would be a persona-global object that LEAKS.** The definition must be the **question-form**, ⛔ never the room's phrasing.
 
 - **Next action:** ⏸ **AWAITING OTE on M2-10's seven answers.** ⛔ **M2-11 opened and deliberately NOT guessed: in what NOTATION is a question-form written down?** — ⚠️ the exact place a `string|enum|number` taxonomy would sneak back in. ⛔ Still separate: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **asked-vs-unasked** · **R1–R3**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · 0 rows superseded · 706 tests green · nothing in cron.** ✅ **Pushed and current with origin.**
+
+## 2026-09-01 23:57 +0700 · ✅ M2-10 LOCKED · ⭐⭐⭐ M2-11 — THE NOTATION IS A DECLARATION AN EXISTING GATE IS ALREADY MISSING
+
+- ⛔ **Investigation + documentation only.** ⛔ No notation built · no schema · no writer · no change to `resolveConflict`. **706 unit tests, 0 failures.**
+
+### ✅✅ M2-10 LOCKED
+- ⭐⭐⭐ **“Kind is the QUESTION a slot asks, ⛔ not the datatype of its value”** — plus the whole lifecycle (minting ≠ declaring · immutable · new definition + repointing · never re-validated · **warrants untouched** · conflicts refused and recorded · unknown ⇒ DEFER · ⛔ no inference/classifier/backfill) and the **two-layer model**.
+- ⭐ His words on why the two-layer model matters: *“I still want Sotera to eventually be genuinely Sotera… but ⛔ I don't want to achieve that by weakening room disclosure rules. **A subject-free definition is a much cleaner global object.**”*
+
+### ⭐⭐⭐ M2-11 — THE ANSWER IS NOT A NEW MECHANISM
+- ⭐⭐⭐ **`admissibleToSlot` ALREADY does everything a question-form needs a gate to do** — refuses by **named class**, records the refusal, names **where the material belongs**, states **whether that destination exists**, says **what is still retained**, and reports **which checks it could not run**. It is **wired into the live write path** and ⓘ **has fired ZERO times.** Its own comment says why: *“three of the five refusals need an axis **no producer sets in production yet**… ⛔ the boundary does not GUESS one.”*
+- ⇒ ⭐⭐ **A question-form IS that missing declaration — ⛔ not a new type system, ⛔ not a second gate.**
+
+### ⓘ THE EXPERIMENT — 12 real pathological rows, every axis declared favourably: **3 caught, 9 through**
+- ✅ **Caught:** `preferred_name = Cogito` from the relayed turn (`relayed-speech-as-self-fact`) · `core_commitments` declared as an intention (`intention-as-property`) · *build Rome in one day* as figurative (`figurative-as-literal-property`).
+- ⛔ **Missed:** `preferred_name = “i just be here temporary”` · `timezone = “User's timezone is Bangkok (Asia/Bangkok).”` · `creation_date` = a **215-char paragraph** · `core_commitments` declared as property · `relational_principle` ending in an imperative.
+- ⭐⭐⭐ **AND EVERY CATCH IS *“this doesn't belong in a slot at all”* WHILE EVERY MISS IS *“it belongs in a slot but isn't an answer to THIS slot's question”*** ⇒ the gap is **demonstrated, ⛔ not asserted.** `admissibleToSlot` never receives the attribute's **question** — only the row.
+- ⚠️ **The most informative row: `preferred_name = “i just be here temporary”` is ADMITTED with `target=designation`, `subjectEstablished=true` and a matching `sourceText`.** ⇒ **no amount of declaring the EXISTING axes catches it** — the missing information is a property of the **question** (*a name is a thing you'd be CALLED, not a sentence you'd SAY*), ⛔ not an axis of the claim.
+
+### ⛔⛔ THE MEASURED INVERSION — today, “the question is known” means CHECK **LESS**
+- ⓘ **Every `preferred_name` row ever (11 rows; `identity` is the ONLY non-default namespace in the store): 2 of 2 `elicited` are MALFORMED (83 chars of Thai conversation · `i just be here temporary`) and 0 of 5 `quoted` are.** ⚠️ n=2 — a tiny sample, ⛔ not a law, but it points at a real mechanism.
+- ⓘ **The mechanism, in two shipped lines:** `classifyCapture` believes `elicited` **“by construction” with no text check at all**; and identity capture drops `requireCue` because *“when SHE asked the question, the next turn does not have to earn it.”*
+- ⭐⭐⭐ ⇒ **the answers to a question SHE ASKED are the malformed ones. A question-form must make *the question is known* mean CHECK DIFFERENTLY, ⛔ never check less. That inversion is the notation's actual job.**
+
+### ⏸ THE PROPOSED NOTATION — ⛔ not a type, and ⛔ not invented
+- ⓘ **THREE shipped components already express “what counts as a valid answer” and ⛔ NOT ONE uses a type:** the ownership boundary (**five named ways an answer fails**, each with why/where/exists/retain) · `slotViolation` (**a predicate → `null`-or-a-reason**; *“⛔ IT REFUSES; IT DOES NOT REWRITE”*) · `memory-identity-llm` (**a NEAR-MISS list** + a containment check). ⇒ ⭐⭐ **all three define a valid answer by enumerating the ways something FAILS to be one.**
+- ⏸ **So: the question in words + an ordered list of DISQUALIFIERS from a CLOSED vocabulary of checks that already exist**, each carrying why · where it belongs · whether that destination exists · what is retained. ⭐⭐ **Clause ③ is the one that keeps it honest: a disqualifier that cannot be checked mechanically is INADMISSIBLE** ⇒ the vocabulary grows by **building a check**, ⛔ never by naming a wish. ⭐ It yields `questionViolation(row, ctx) → null | {class, why, belongsTo, …}` — **the signature the store already calls**, so the call site does not change shape.
+- ⭐⭐⭐ **Subject-free safety in one clause:** *a question-form's text must be expressible without naming any person, room or particular — and a definition that cannot be phrased that way is **NOT a definition; it is a slot instance wearing one**.* (*“what is this person called?”* ✅ vs ⚠️ *“what should I call the kid?”*).
+- **Declarers:** an eliciting question declares **by being asked** — ⓘ and `memory-identity-llm`'s prompt **already contains a disqualifier list, in production** (*“belongs to someone else · quoted · pasted · asked about”*) ⇒ ⛔ nothing is invented, it is lifted out and written down · `project-decision` declares **what it already enforces** · a human declares through `log_memory_changes`, **with an author**.
+- **Unknown = an EMPTY disqualifier list**, reported the way `unevaluated()` already reports — ⛔ never as silence. ⓘ Verified: run against `dry dock` with nothing declared it correctly named all three missing axes. ⭐ *“'not refused' and 'not examined' stay distinguishable.”*
+- **Identity YES, version NO.** ⭐⭐ A `v2` would assert **the same thing changed**, which M2-10 forbids ⇒ **a `supersedes` link instead**, reusing the locked mechanism — ⭐ and it makes M2-10 Q3 mechanical: old memory → definition **A**, new instance → **B**, **nothing re-validated because nothing moved.**
+
+### ⚠️ STATED, NOT SMOOTHED
+- ⛔ **The notation does not itself catch the nine misses** — it gives them a place to be **declared**. `timezone`-as-a-sentence, `creation_date`-as-a-paragraph and `preferred_name`-as-an-utterance have **no existing check**, so under clause ③ they stay at **unknown ⇒ DEFER** — ⭐ the correct state, ⛔ not a shortfall.
+- ⚠️ **One unrelated cosmetic defect observed and ⛔ NOT fixed:** the refusal log renders **`retain: [object Object]`** — an object interpolated into a string in the refusal-describing path.
+
+- **Next action:** ⏸ **AWAITING OTE on M2-11.** ⛔ Still open: **in what serialized form a disqualifier list is stored** · **who may extend the vocabulary** · whether a definition may carry more than one phrasing. ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · the **`persona_global` route** · **asked-vs-unasked** · **R1–R3**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
