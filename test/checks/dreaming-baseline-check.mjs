@@ -43,10 +43,11 @@ const code = (text) => String(text ?? '')
 const excluded = await q(
   `select id, excluded_from_evidence_at, exclusion_reason, incognito, archived_at
      from ${S}.txn_conversations where excluded_from_evidence_at is not null order by id`)
-ok(excluded.length === 1, '1 · exactly ONE conversation is excluded', `${excluded.length}`)
-const EX = excluded[0]
-ok(!!EX && String(EX.id).startsWith('56425175'),
-  '1 · ⭐ …and it is 56425175 — the harness-driven reflection probe', String(EX?.id).slice(0, 8))
+// ⛔ REPORTED, NEVER ASSERTED. A count of exclusions only goes up, and asserting today's value is the
+// defect this file exists to catch elsewhere. The INVARIANT is that 56425175 is among them.
+ok(true, '1 · ⓘ how many conversations are excluded — reported, ⛔ not asserted', `${excluded.length}`)
+const EX = excluded.find((r) => String(r.id).startsWith('56425175'))
+ok(!!EX, '1 · ⭐ 56425175 — the locked E3 reference case — is excluded', String(EX?.id ?? 'ABSENT').slice(0, 8))
 ok(!!EX?.exclusion_reason && EX.exclusion_reason.trim().length >= 8,
   '1 · ⭐ …it carries a reason a person can evaluate later', EX?.exclusion_reason?.slice(0, 60))
 // ⭐⭐ THE POINT OF 033: excluded is NOT deleted, NOT archived, NOT incognito.
@@ -83,10 +84,13 @@ const E = e3[0]
 ok(E.total > 0 && E.admissible + E.withheld === E.total,
   '2 · ⭐ the E3 traversal runs on existing links — revisits ⋈ conversations, no new column',
   `total=${E.total} admissible=${E.admissible} withheld=${E.withheld}`)
-ok(E.withheld === 1, '2 · ⭐⭐ …and it withholds exactly ONE act record today', `withheld=${E.withheld}`)
+ok(true, '2 · ⓘ how many act records are withheld — reported, ⛔ not asserted', `withheld=${E.withheld}`)
 
 // ⛔⛔ THE ORDERING CONSTRAINT (§8.2): withheld must be COUNTED, never silently dropped. A traversal that
 // returned only `admissible` would make 6a ("exists, not allowed") indistinguishable from 6d ("nothing").
+// ⭐ The INVARIANT: M is admitted + withheld, and withheld is separately visible. ⛔ Not "withheld is 1".
+// The `> 0` is safe as an assertion because #656 guarantees at least one for as long as 56425175 is
+// excluded — and if that is ever released, this SHOULD go red so a person re-reads it.
 ok(E.total === E.admissible + E.withheld && E.withheld > 0,
   '2 · ⭐⭐⭐ WITHHELD IS COUNTABLE alongside admissible ⇒ 6a stays distinguishable from 6d',
   `M=${E.total} admitted=${E.admissible} withheld=${E.withheld}`)
@@ -113,12 +117,13 @@ const [tools] = await q(
           count(*) filter (where tools_used && $1::text[])::int as with_read_tool,
           count(*) filter (where tools_used && array['search_conversations','recall_own_history'])::int as cross_conv
      from ${S}.log_conversation_revisits`, [READ_TOOLS])
-ok(tools.with_read_tool === 5,
-  '3 · ⭐ Q1 bound holds: 5 of 78 act records used a READ tool — the residual gap, ⛔ not recoverable',
-  `${tools.with_read_tool} of ${tools.total}`)
-ok(tools.cross_conv === 2,
-  '3 · ⭐ …and 2 reached beyond their conversation via search_conversations (#652, #657)',
-  `${tools.cross_conv}`)
+// ⛔ REPORTED, NOT ASSERTED — these grow with traffic. ⭐ The INVARIANT is that the residual gap is a
+// STRICT MINORITY and non-zero: non-zero means Q1's gap is real, minority means it is bounded.
+ok(tools.with_read_tool > 0 && tools.with_read_tool < tools.total,
+  '3 · ⭐ Q1 gap is REAL and BOUNDED: some act records used a READ tool, most did not',
+  `${tools.with_read_tool} of ${tools.total} used a read tool`)
+ok(true, '3 · ⓘ how many reached beyond their conversation — reported, ⛔ not asserted',
+  `${tools.cross_conv} via search_conversations / recall_own_history`)
 // ⛔⛔ WHY THE GAP IS NOT RECOVERABLE: the ledger records tool NAMES, never tool RESULTS.
 ok(!ledgerCols.some((c) => /tool_result|tool_output|reached/i.test(c)),
   '3 · ⛔⛔ …and NOTHING records what a tool RETURNED ⇒ ⛔ the gap cannot be narrowed from current data',
@@ -172,15 +177,24 @@ const outcomes = await q(
           count(*) filter (where wrote_memory_id is null)::int wrote_nothing
      from ${S}.log_conversation_revisits group by 1 order by 2 desc`)
 const byOutcome = Object.fromEntries(outcomes.map((r) => [r.outcome, r]))
-ok(outcomes.length === 2 && byOutcome.completed && byOutcome.failed,
-  '6 · ⭐ the DATA carries two outcome values only', outcomes.map((r) => `${r.outcome}=${r.n}`).join(' '))
+ok(!!byOutcome.completed && !!byOutcome.failed,
+  '6 · ⭐ the DATA carries `completed` and `failed`', outcomes.map((r) => `${r.outcome}=${r.n}`).join(' '))
 // ⭐ …while the CODE can emit four. `blocked` and `preempted` have never occurred.
 const codeOutcomes = ['completed', 'failed', 'blocked', 'preempted'].filter((o) => rlhCode.includes(`'${o}'`))
 ok(codeOutcomes.length === 4,
   '6 · ⭐ …while the CODE can emit four — blocked and preempted have never occurred', codeOutcomes.join(' '))
-ok(byOutcome.completed?.wrote_nothing === 72,
-  '6 · ⭐⭐⭐ 72 of 77 COMPLETED acts wrote NOTHING ⇒ 93.5% of the corpus is one undifferentiated outcome',
-  `${byOutcome.completed?.wrote_nothing} of ${byOutcome.completed?.n}`)
+// ⚠⚠ THIS ASSERTION USED TO READ `wrote_nothing === 72`, AND REFLECTION #662 TURNED IT RED ON 2026-09-01.
+// ⛔ That was the same defect this file was written to catch in `corpus-eligibility-check` — a count that
+// only goes up, asserted as though it were an invariant.
+// ⭐⭐⭐ THE REAL INVARIANT IS STRUCTURAL AND NEVER GOES STALE: within the single value `completed`
+// there are acts that wrote something AND acts that wrote nothing ⇒ **the outcome axis does not
+// distinguish what an act CONCLUDED.** That is the finding; 72 was only today's evidence for it.
+const wroteNothing = byOutcome.completed?.wrote_nothing ?? 0
+const wroteSomething = (byOutcome.completed?.n ?? 0) - wroteNothing
+ok(wroteNothing > 0 && wroteSomething > 0,
+  '6 · ⭐⭐⭐ `completed` contains BOTH acts that wrote and acts that did not ⇒ the outcome axis '
+  + 'records EXECUTION, ⛔ not conclusion',
+  `${wroteNothing} wrote nothing, ${wroteSomething} wrote something, of ${byOutcome.completed?.n} completed`)
 // ⚠️ `reason` is named for a justification and carries a lane label.
 const [{ distinct_reasons, constant }] = await q(
   `select count(distinct reason)::int distinct_reasons, min(reason) constant
