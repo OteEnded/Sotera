@@ -3751,3 +3751,42 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⭐⭐ **M2.c is what makes M2 defensible: it produces the evidence for M2.d WITHOUT the risk of M2.g — and it exists only because `resolveConflict` is already pure.**
 
 - **Next action:** ⏸ **AWAITING OTE** on the three new decisions + the two carried rulings. ⛔ Dreaming not activated · no cron · no commitment writer · memory semantics unmodified · no second reconciliation mechanism · room not adopted as the frame · **P1 parked and separate** · **M1 exactly as it is.**
+
+## 2026-09-01 22:34 +0700 · ✅ M2.a–M2.c SHIPPED · then WHAT MAKES AN OBSERVATION WORTH REMEMBERING
+
+### ✅ M2.a–M2.c BUILT AND RUN — 26 new tests, **695** in the suite, 0 failures
+- **M2.a `dreaming-resolver.js`** — a resolver **SIBLING** with its own type (⛔ not `card`). **`commit()` always returns `CONFLICT.IGNORE`**, and the module **imports no store** ⇒ ⭐ **there is no write path to disable — it is ABSENT.** ✅ **6c reuses the memory layer's reserved `IGNORE`**, ⛔ no parallel vocabulary.
+- **M2.b `dreaming-proposal.js`** — a **closed grammar**: 5 forms, typed slots, ⛔ **no free-text field anywhere**, prose **rendered deterministically**. ⛔ No causal form/slot · ⛔ no universal or negative quantifier (`#653`) · a **label must be a kebab token** (⭐ vocabulary closure, mechanised) · slots **all-or-none** · **two allowlists** — T0 for reading, **counted-entity-type for publishing, as a STATIC TYPE CHECK.**
+- **M2.c** the dry run **recalls → resolves through the memory layer's own pure `resolveConflict` → reports the plan WITH its reasoning.** ⛔⛔ **It writes NOTHING — not a commitment, not a memory, not even a pass row** (M1's ledger constrains `outcome` to 6a–6e and a plan-only run's honest conclusion is **6f**). ✅ Verified after: memories **115**, pass rows **1**, tables **46** — unchanged.
+- ⚠️ **Two fixture bugs the tests caught:** `reconcilePlan` compares **`existing.value`** and I set **`content`** ⇒ NOOP/DUPLICATE were passing or failing **for the wrong reason.** ✅ Fixed — and **`planFor` now reports WHICH FIELD the conflict stage actually compared**, because surfacing one it did not use is the *reader-and-test-shared-a-lens* trap one layer up.
+- ⓘ **RESULT:** room **NEW ×5** · persona_global **NEW ×3, REFUSED-publication ×2** — ⭐ `extent` and `recurrence` refused globally because they **count contexts.** **The smallest-safe rule fired on real data, for the right reason.**
+
+### ⭐⭐⭐ SIGNIFICANCE IS NOT A THRESHOLD — IT IS A PROPERTY OF THE **SEQUENCE OF PLANS**
+- **A proposition worth believing is one that, RE-PROPOSED LATER, resolves to `NOOP`.** ⇒ always **NEW** = the **slot address** is unstable (a naming problem) · always **UPDATE** = ⛔ **TELEMETRY**, the value moves every time you look · **NEW → NOOP → NOOP** = ⭐⭐ **a durable pattern.**
+- ⭐⭐ **No threshold, no new mechanism: `resolveConflict`'s own output IS the significance signal** — `NOOP` is the memory layer saying *“you already believe this and it has not changed.”*
+- ⭐ **AND THE CONSEQUENCE: the FIRST proposal of anything is never committable.** Significance needs a **second look** — **O-2's own shape, lifted from the EVIDENCE to the CLAIM.** ⇒ **the dry run's all-`NEW` is CORRECT, ⛔ not disappointing.**
+
+### ⛔ ALL FIVE CANDIDATES FAIL THAT TEST — tested, not assumed
+- ⓘ Real values: `frequency 73/78` · `extent 59 contexts, max 4, **median 1**` · `recurrence 59 roots of 78` · `co_occurrence both=5, a_only=6, **b_only=0**` · `interval 5 days`.
+- **frequency/extent/recurrence/interval ⇒ ⛔ TELEMETRY** — every new act changes a count ⇒ **UPDATE forever**; `extent` is **monotonic**; and ⭐ **`recurrence` is also VACUOUS — `median = 1` means the “independent contexts” are mostly SINGLE acts** (*“she reflected 79 times in 59 conversations”*, wearing the word *recurrence*).
+- ⭐⭐ **`co_occurrence` is the ONLY one with a RELATION in it — and the relation is FORBIDDEN.** `b_only = 0` says *“no act wrote a product without using a tool”* — a relation that could survive the counts growing — ⛔⛔ **but it is a NEGATIVE CLAIM**, which the grammar already excludes because `#653` makes *no row* and *did not happen* indistinguishable. ⇒ **the one relation-shaped cell in the whole grammar is the one thing the grammar already forbids, and forbids CORRECTLY.**
+- ⇒ ⭐⭐⭐ **THE STRUCTURAL REQUIREMENT: A DURABLE PROPOSITION'S *VALUE* MUST NOT CONTAIN ITS OWN *EVIDENCE*.** Every current form renders its **counts into the value**, so the value moves whenever any count moves. ⭐ **That is *cite-not-contain*, applied to COUNTS instead of PROSE — the arc's own pattern, a FIFTH time and on a new axis.**
+
+### ⭐⭐⭐ THE HARD CONCLUSION: **T0 SUPPORTS MEASUREMENTS, NOT BELIEFS**
+- T0 gives **counts, timestamps, ids, enumerated outcomes.** A belief needs a **relation** that is **not a count and not an absence.** What remains is a **DISPOSITION** — which the grammar forbids, **correctly**, because T0 cannot ground one.
+- ⭐⭐ **THE T0 CONSTRAINT WAS ADOPTED TO PREVENT DISCLOSURE. IT ALSO PREVENTS BELIEF. It is ONE constraint doing BOTH jobs, and you cannot keep the first without the second — unless the INPUT TIER changes.** ⇒ ⛔ **the missing piece is not a threshold and not another form — it is a KIND OF INPUT the constraint excludes.**
+- ⭐⭐⭐ **AND THAT RESOLVES THE FRAME QUESTION FROM THE OPPOSITE END:** beliefs need prose-derived material; prose **cannot be globalised** (`#662` quotes Ote verbatim). ⇒ **ROOM IS THE ONLY SCOPE IN WHICH DREAMING CAN BE HANDED WHAT IT NEEDS IN ORDER TO BELIEVE ANYTHING** — ⚠️ **⛔ not because room is cheaper**, which Ote explicitly refused, but because **inside a room the reader already has the prose.** Not *what may Dreaming publish*, but ***what may Dreaming be given.***
+
+### ⭐ THE P1 BOUNDARY, GENERALISED — **CHOICE vs MECHANISM** (⛔ no special case)
+- **A claim about her acts is about HER only if the dimension it counts records a CHOICE SHE MADE. A dimension that records a MECHANISM'S RESULT is a claim about the mechanism, wearing her name.**
+- ✅ `tool_names` = **CHOICE** · ⛔ `wrote_memory_id_present` = **MECHANISM** (ⓘ and `#653` proves it fails silently) · ⛔ `outcome`, `messages_considered` = mechanism · ⛔ `created_at`/`gap_days` = **the world's** · ⛔ `conversation_id`/`user_id` = not hers.
+- ⇒ **`73/78 completed-without-product` is refused for a GENERAL reason: its truth-maker is REFLECTION'S WRITE PATH, ⛔ not Sotera.** Exactly P1, **excluded without naming it.** ⚠️ **And of twelve T0 fields, `tool_names` is very nearly the ONLY choice dimension** — which **independently confirms** the T0 conclusion above.
+
+### ⛔⛔ A MEASURED HAZARD FOUND ALONG THE WAY — existing behaviour, ⛔ NOT FIXED
+- **Three lessons share ONE slot** — `entity=sotera, attribute=lesson`, **all with `value = NULL`.** Run through the memory layer's own stage: `resolveConflict({matches:[3 lessons], value:'…'})` → **`{action:'update', supersedes:'db4b39f0', collapse:['2d0bffca','94896f51']}`**.
+- ⇒ ⛔ **ANY fact-shaped write resolving to `sotera/lesson` would SUPERSEDE one lesson and INVALIDATE the other two**, because the stage compares `value` and all three are NULL. ⚠️ **Reachable today by `reconcileFact`.** ⛔ **Not mine to fix** — ⭐ and it is the **decisive** reason Dreaming must **not** reconcile against lessons through the slot mechanism.
+
+### ⭐ THE CHAIN, EXPLICIT — and every failure is at ONE stage
+- `OBSERVATION` (typed, measured) → `PROPOSITION` (closed grammar) → **`WORTH COMMITTING` ← ⛔ EVERY current form fails HERE, and only here** → `MEMORY PLAN` (`resolveConflict`, inside the memory layer) → `PERSISTENCE` (⛔ not reached in M2). ⇒ ⭐⭐ **the machinery is right and the CRITERION was missing.**
+
+- **Next action:** ⏸ **AWAITING OTE — the INPUT-TIER question: may Dreaming be handed anything above T0, and at what scope?** ⛔ Still open: **M2-1** · the **`persona_global` route** · **R1–R3** · **P1** (separate) · the **lesson-slot hazard** (⛔ memory layer's). ⛔ M1 unchanged · M2 dry-run only · no commitment writing · no activation · no cron.
