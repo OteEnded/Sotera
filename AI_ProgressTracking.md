@@ -3482,3 +3482,44 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⚠️ **And I am flagging my own bias:** room also happens to be the cheapest to build (`user_id` is already on the act record). ⛔ **That is convenience, and convenience is explicitly not a reason** — it is recorded so it cannot masquerade as an argument.
 
 - **Next action:** ⏸ **AWAITING OTE ON O-13(a′) — the cross-room CITATION ruling**, which decides the frame. ⛔ Still parked: **M2-1** · **P1**. ⛔ No implementation, no schema, no activation, no commitment writing.
+
+## 2026-09-01 16:25 +0700 · O-13(a′) — **Dreaming may CITE across rooms; it may not CONTAIN across rooms**
+
+- ⭐⭐⭐ **ROOM IS THE CURRENT SAFE DEFAULT, ⛔ NOT THE SEMANTIC BOUNDARY.** The line the codebase already draws is between **IDENTITY and CONTENT**, ⛔ never between rooms.
+
+### ⭐⭐ The door already exists — and it is used 2,971 times
+- `disclosure-host.js`: *“**THE ONLY DOOR BETWEEN ROOMS, AND IT IS OPENED BY A PERSON, NOT BY A SENTENCE.**”* ⓘ **2,971 disclosure events**, with a schema-level guarantee that an event **crosses rooms by definition** (`CHECK (from_room_user_id <> into_room_user_id)`).
+- ⭐⭐ **And its own first paragraph draws the line this question needed:** *“**`recall_own_history` establishes THAT she spoke with someone in another room. Disclosure is the separate step that turns one of those handles into readable CONTENT.**”* ⇒ **only *WHAT* needs a grant.**
+
+### ⭐⭐⭐ THE DECISIVE STRUCTURAL FACT: THERE IS NO STANDING DISCLOSURE
+- ⓘ **`enum disclosure_lifetime = turn | conversation`** — ⛔ **no `standing` value.** In use: conversation **2,936**, turn **35**.
+- ⚠️ **And 028's `standing_grant` does not contradict it — it IS the distinction:** *“the grant changes **WHO authorized it**, never **WHETHER** it is recorded”* + *“**the enum still has no standing value, so no grant can outlive** [its window]”*. ⇒ ⭐⭐⭐ **the architecture already separates STANDING AUTHORIZATION from STANDING DISCLOSURE — you may hold permanent permission to open the door; what comes through it still expires.**
+- ⇒ ⭐⭐ **A durable commitment is, BY DEFINITION, a standing disclosure of whatever it CONTAINS.**
+
+### The three cases, kept strictly apart
+- **① FIND / READ cross-room Sotera-authored material — ✅ already permitted and already built** (`self-history-host`, ownership follows authorship). ⛔ Unchanged by any of this.
+- **③ Cross-room material involving OTHER AUTHORS — ⛔⛔ NO, and it is not a policy choice I am making: the SCHEMA CANNOT EXPRESS IT.** ① a commitment would be a **standing disclosure** and no such lifetime exists; ② **Dreaming could not obtain a grant anyway** — the door is opened by *a person on a held turn*, and **a batch pass has no turn and no person present.** ⚠️ The door's rationale names exactly who is protected: *“the material belongs to the person in the OTHER room, and **they are not present to consent**.”*
+- **② SOTERA-AUTHORED, for a commitment ABOUT SOTERA — the actual question.** ⭐ The door's rationale **does not reach it**: where the material is hers and the commitment is about her, **there is no absent third party whose consent is required.** ⛔ **But E-7 does reach it** — *“her own messages routinely contain the other person's words verbatim… **no authorship filter can fix it**.”*
+
+### ⭐⭐⭐ THE RESOLUTION, AND IT IS ALREADY IN THE VOCABULARY
+- **E-7 is a statement about returning her TEXT. A citation does not return text.** ⇒ **a CITATION names an IDENTITY** — the *THAT* side, **no grant needed**; **the COMMITMENT'S CONTENT** is the *WHAT* side, **standing**, ⛔ and no lifetime exists for it.
+- ⇒ ⭐⭐⭐ **DREAMING MAY CITE ACROSS ROOMS. IT MAY NOT CONTAIN ACROSS ROOMS.** ⭐ **The FOURTH application of the arc's own pattern:** *the index returns identities and scores, never content* · *lineage cites the source, never the index* · *a rejected item is named, never quoted* · **and now: a commitment cites an identity, never the words.**
+- ⭐⭐ **And the reader's boundary does the rest:** a reader in room B who resolves a citation **meets the existing door**. ⇒ **the commitment can be `scope='persona_global'` while its evidence stays room-bound and UNOPENABLE** — *“this rests on 3 items; you may open 1”* — ⭐ **the withheld-is-counted pattern from E3, one layer up: the citation is honest about what it cannot show you.**
+- ⚠️ ⇒ **a REFINEMENT of self-history's warning, ⛔ not a contradiction:** *“no authorship filter can fix it”* is true of **returning her text** and does not bear on **citing its identity**.
+- ⛔ **And `mayCite` in `dreaming-scope.js` keys on the WRONG AXIS** — it refuses on `crossRoom`, which is wrong **in both directions**: ⛔ **false permit** (a same-room message of hers quoting Ote contains his words) · ⛔ **false refuse** (a cross-room citation by identity discloses nothing). ⛔ **Not changed** — it was the conservative choice while the ruling did not exist.
+
+### ⓘ THE DESTINATION ALREADY EXISTS AND IS ALREADY IN USE
+- **`scope='persona_global'` holds 2 rows — both commitments about Sotera's own persistent state**: *“My relational map to the important people in my world”* (**access_count 245**) and *“My family lineage and the meaning of Rome”* (**27**), **readable from every room** via `visibleWhere`'s global arm. ⇒ ⭐⭐ **cross-room standing statements about Sotera are ALREADY being made and read. The category is neither hypothetical nor new.**
+
+### ⚠️ AND A FOURTH FRAME CANDIDATE THE EARLIER COMPARISON COULD NOT SEE
+- ⭐⭐⭐ **THE PERSONA FRAME — if the commitment is about Sotera's own persistent state, its subject is SOTERA, and Sotera is not a room.** M = **all Sotera-authored material, across every room**; destination = **`persona_global`**. ⇒ it passes **all seven criteria**: episodes ✅ (79 acts / 8 rooms) · M structural ✅ (*authored by the persona* — and **reflection output all is**) · ownership ⭐ · **reflection output IS the corpus** ⭐⭐ · **destination already exists** ⭐⭐ · **spans by design, only over HER material** ⭐ · **no hidden parameter** ✅.
+- ⚠️ **Its cost, plainly: it can only make commitments ABOUT SOTERA, ⛔ never about a user.** ⭐ Which may be **correct rather than limiting — different KINDS of commitment may need different frames**, and this arc has been hunting for one frame to serve all of them.
+- ⛔ **NOT CHOSEN.** Ote said do not resolve the frame. ⓘ The earlier comparison could not see it because it asked *room-or-subject-or-window* and never asked ***what if the subject is Sotera.***
+
+### ⛔ What this does NOT settle
+- ⛔ Permitting cross-room citation does **not** by itself make the **subject** frame viable — ⚠️ act records still carry **no subject axis**.
+- ⛔ **No mechanism exists for keeping a commitment's CONTENT free of third-party material.** ⭐ That is a **generation-time** constraint and ⚠️ **nothing exists for it** — the one thing Case ② genuinely needs and does not have.
+- ⚠️ **A commitment about Sotera can still be about her relationship to someone** — *“my relational map to the important people in my world”* names people. ⛔ Where the line falls **inside** such a statement is not settled.
+- ⓘ **The *who is this about* axis exists in THREE places and is populated in none Dreaming would need:** `log_disclosure_events.subject_person_id` **0 of 2,971** · all **11** persona-authored memories have none · act records have **no such column at all**.
+
+- **Next action:** ⏸ **AWAITING OTE.** ⛔ Nothing implemented, no schema, no subject field, no frame chosen, no activation. ⛔ Still parked: **M2-1** · **P1**.
