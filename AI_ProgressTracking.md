@@ -3457,3 +3457,28 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⛔ **Nothing is rebuilt.** M1's pass is correct; it ran with the **EMPTY frame**, which is now a **named case** rather than an unexamined default. ⇒ when a frame is chosen, the host takes it as **an input** — the counting, the partition, the outcome rules and the ledger are **unchanged**. ⭐ ***It should cost the implementation a PARAMETER, not a REWRITE.***
 
 - **Next action:** ⏸ **AWAITING OTE — which frame dimension** (subject / room / window / a combination). ⛔ Still parked: **M2-1** (the successful-commitment outcome) · **P1** (Reflection). ⛔ No schema, no activation, no commitment writing, no cleanup, no rename.
+
+## 2026-09-01 16:19 +0700 · The three frame candidates — and the frame turns out to be ONE MISSING RULING
+
+- ✅ **`Reference/docs/ANALYSIS_SOTERA_FRAME_CANDIDATES.md`** — subject · room · window against all seven criteria. ⛔ **The frame is NOT chosen.**
+- **SCORECARD: room passes all 7 · subject fails 2 (on ONE structural fact) · window fails 4.**
+
+### ⛔ SUBJECT FAILS — and the cause is one fact, stated once rather than counted twice
+- ⛔⛔ **`log_conversation_revisits` carries NO person or subject column at all.** Two routes, both fail: ① **equate subject with the ROOM OWNER** — ⓘ **measurably wrong: 2 of 45 subject-bearing memories have a room owner who is NOT the subject**, so *whose room* and *who it is about* are **demonstrably different questions**; ② **judge what the act is about** — a **relevance judgement**, so **M would be computed by the instrument and `N ≥ M` would compare a number against itself.**
+- ⭐⭐ **And it matters because REFLECTION OUTPUT IS DREAMING'S DEFINING CORPUS** (locked decision ②) ⇒ **a frame that cannot admit it excludes the one source Dreaming was designed around.** ⓘ `mst_users.person_id` *does* exist, so the path is structural — it is just **the wrong question**.
+
+### ⛔⛔ WINDOW FAILS — and the arc already MEASURED the defect
+- ⛔ **A window has a LENGTH, and the length is a number nobody has justified.** ⓘ O1 measured **1,734 inter-message gaps**: **one mode at 16–32 s and a heavy monotonic tail — NO KNEE** ⇒ the 30-minute gate *“sits far out in the flat tail… **a policy about when to spend a GPU**, ⛔ not a discovered boundary.”* ⚠️ And the worse property O1 named: **a threshold is RETROACTIVELY MUTABLE** — *“a definition that can be edited after the fact is not a definition”* ⇒ ⭐⭐⭐ **a window frame would make that mutable at the level of what counts as RECURRENCE, which is Dreaming's defining output.**
+- ⛔ It also **spans rooms at every useful width** (ⓘ 3 rooms at 7 d, 8 at 30 d) ⇒ **every pass refuses under O-13(c)** ⇒ ⚠️ **it reproduces M1's degeneracy — 6a, true, about nothing — by a different mechanism.**
+
+### ⭐ ROOM PASSES ALL SEVEN
+- ⓘ **7 of 8 rooms hold ≥2 conversations** (median 7 acts, max 28) ⇒ multiple **independent** episodes are actually available (⭐ the criterion is ≥2 CONVERSATIONS, since O1's C3 presumes two reviews of one conversation are the same occasion). `user_id` is a **column** on the act record ⇒ **M is a direct count, no judgement**. **Ownership is preserved BY CONSTRUCTION** — a room frame cannot cross the boundary. ⭐⭐⭐ **And uniquely: THE FRAME IS THE DESTINATION** — evidence cannot span rooms, so **O-13(c) is satisfied by construction rather than by a check that can fail.** ⛔ Nothing to tune.
+- ⛔ **Composites do not rescue the others:** `room × window` inherits the hidden parameter intact; `subject within room` **collapses into room** for act records.
+
+### ⚠️⚠️ BUT ROOM'S CLEAN SCORECARD HIDES A REAL COST — stated as loudly
+- ⭐⭐⭐ **A ROOM FRAME CANNOT DISCOVER A CROSS-ROOM PATTERN.** If Ote says the same thing in three rooms, a room-framed Dreaming sees **three separate single instances** and — correctly, under O-2 — **concludes nothing.**
+- ⚠️ **And that sits directly against canon:** *“Sotera is the persistent subject; people, rooms and accounts are **contexts** in which her life happens.”* ⇒ **a room-framed Dreaming cannot see her own life across contexts** — the very failure `self-history-host` was built to end.
+- ⭐⭐⭐ **⇒ THE FRAME IS NOT THREE OPTIONS. IT IS ONE MISSING RULING WITH TWO CONSEQUENCES**, and the ruling is about **DISCLOSURE, ⛔ not about Dreaming: O-13(a′) — may Dreaming CITE cross-room Sotera-authored material?** **Room wins today because a ruling is MISSING, ⛔ not because it is right.** If citation stays refused ⇒ **room is the only viable frame and Dreaming is permanently room-bound**; if it is permitted under a stated boundary ⇒ **subject becomes viable** — ⚠️ but only after reflection output gains a subject axis it does not have.
+- ⚠️ **And I am flagging my own bias:** room also happens to be the cheapest to build (`user_id` is already on the act record). ⛔ **That is convenience, and convenience is explicitly not a reason** — it is recorded so it cannot masquerade as an argument.
+
+- **Next action:** ⏸ **AWAITING OTE ON O-13(a′) — the cross-room CITATION ruling**, which decides the frame. ⛔ Still parked: **M2-1** · **P1**. ⛔ No implementation, no schema, no activation, no commitment writing.
