@@ -3717,3 +3717,37 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⛔ **I am not choosing.** ⭐ **And this is a much better-posed question than the one I put last round, because it rests on two SHIPPED MECHANISMS rather than on an inference I had mistaken for a rule.**
 
 - **Next action:** ⏸ **AWAITING OTE'S RULING** (utterance-boundary discipline vs `self-history` discipline for unasked global commitments). ⛔ Still open: the **route** · **R1–R3** · **6c** · **P1** (separate). ⛔ No schema, route, activation or commitment writing. **M1 exactly as it is.**
+
+## 2026-09-01 22:16 +0700 · RECALL-BEFORE-REMEMBER — ⭐⭐⭐ it is ALREADY the pipeline's declared architecture
+
+- ⭐⭐⭐ **HEADLINE: Ote's model is NOT NEW. `memory-pipeline.js` declares it in its own header** — `INTERPRETATION → NORMALIZATION → OWNER RESOLUTION → RESOLUTION (which slot?) → **CONFLICT — how does it relate to what we know? → a PLAN** → PERSISTENCE (execute the plan)`. ⛔ *“looks important → INSERT”* appears **nowhere** in the declared design.
+- ⭐⭐ **AND THE PLAN VOCABULARY IS ALREADY EXTRACTED AND PURE** — `memory-conflict.js`: *“decide **HOW the new claim relates to what we already believe** — and return a semantic **PLAN**. Persistence then just executes it.”* **Shipped: `NEW` · `NOOP` · `DUPLICATE` · `UPDATE`. Reserved BY NAME: `CONTRADICTION` · `VERSION` · `APPEND` · `IGNORE` · `DEFER` · `ASK/CONFIRM`.** ⇒ **his three-way branch maps EXACTLY onto the shipped four** (already-represented → `NOOP`/`DUPLICATE` · new → `NEW` · stale/conflicting → `UPDATE`).
+- ⭐⭐⭐ **AND THE RESERVED `IGNORE` IS DREAMING'S 6c** — *“**perceived but not worth believing**”*. ⇒ **the memory layer already NAMES 6c**, and Dreaming has been inventing a parallel vocabulary for a value that already has a home.
+- ⭐⭐⭐ **THE REUSE ANSWER IS WRITTEN IN THE CODEBASE.** `memory-resolver-router.js`: ***“THE PIPELINE NEVER CHANGES. ONLY THE RESOLVER MAP GROWS”*** · *“relationship | … → (future siblings, added to the map — nothing else changes)”*. ⇒ **DREAMING REGISTERS A RESOLVER. It does NOT build a writer.**
+
+### Does Reflection already recall before writing? ✅ YES — and it differs BY TYPE
+- ⓘ **Reflection's writes DO go through the pipeline** (`reflection-host.js:102` → `pipeline.ingest`; the model's tools wrapped the same way at `memory-pipeline-host.js:290/296`).
+- **FACT / slot (`reconcileFact`) — ⭐⭐ FULL:** reads live rows · **canonicalises owners so legacy phrasings still match** · resolves the **slot** · fetches that slot's rows · **`resolveConflict` → a PLAN**. **PROSE / episodic (`remember`) — ⚠️ WEAK:** a **cosine near-identity dedup only**, ⛔ no slot, ⛔ no plan. **CARD (`commitCard`) — ⚠️ its OWN:** centroid-vs-card match and **its own supersede.**
+- ⭐⭐ **AND THIS SHARPENS P1 RATHER THAN ABSORBING IT.** Reflection writes as `type:'episodic'` ⇒ gets the weak path — ⛔ **but P1 is not a missing-recall problem: in `#662` NO WRITE WAS ATTEMPTED AT ALL.** ⇒ **the recall step EXISTS; P1 is that the write is never attempted.** ⛔ P1 stays exactly where it is.
+
+### ⛔ WHAT IS MISSING
+- **G1 ⭐⭐⭐ ONE VOCABULARY, THREE IMPLEMENTATIONS.** `resolveConflict` is called in **EXACTLY ONE PLACE** (`memory-v2-service.js:385`). Episodic computes `noop`/`add` from **cosine**; cards from a **centroid**. **The wire words agree; ⛔ the PLANS are computed by three different mechanisms.**
+- **G2** the episodic path has **no slot and no plan** ⇒ *“already represented”* means *“looks nearly identical”*, ⛔ not *“occupies the same slot”*. **G3** `IGNORE`/`DEFER`/`CONTRADICTION`/`VERSION`/`APPEND` **reserved and unimplemented** — ⭐ and Dreaming needs **IGNORE**. **G4** ⛔ **no resolver exists for a Dreaming observation type** (the map has `identity` + `default`). **G5** ⚠️ **the plan is not recorded on the memory** — answerable only via `log_memory_changes` (ⓘ **12 rows**, and `commitCard`'s expiry writes **none**). **G6** **R1–R3** unchanged.
+
+### Would anything conflict with *“reconciliation belongs to the memory layer”*?
+- ✅ **For Dreaming: NO — and the split does the work.** If Dreaming registers a **resolver**, the **plan** is computed by the conflict stage and **executed** by persistence ⇒ **Dreaming proposes; the memory layer decides and acts.** ⭐ Reconciliation stays where Ote put it **by construction**, ⛔ not by discipline.
+- ⚠️ **THE TENSION THAT LOOKS LIKE A CONFLICT AND IS NOT:** O-1 says Dreaming may not withdraw — but `UPDATE`/`DUPLICATE` **supersede an existing row**, so a Dreaming proposal could cause one to be invalidated. ⭐⭐ **That is not Dreaming withdrawing: Dreaming submitted an OBSERVATION, the CONFLICT stage decided, PERSISTENCE executed** — *the LLM proposes, the pipeline decides*, doing exactly the job O-1 needs. ⏸ **Worth Ote's explicit confirmation rather than my assertion.**
+- ⛔ **AND ONE EXISTING BEHAVIOUR DOES CONFLICT — ⚠️ Consolidation's, not Dreaming's:** `commitCard` **supersedes the prior card and expires its members ITSELF**, reconciliation performed **by a consumer**, ⓘ **writing no change record.** ⛔ **Out of scope, not to be fixed here** — ⭐ recorded because **Dreaming must not copy it**, and it is the one place the *don't-invent-a-second-reconciliation* rule is **already broken**.
+
+### ⭐⭐⭐ AND THE ARCHITECTURE ALREADY PERMITS A ZERO-WRITE DRY RUN
+- **`resolveConflict` is PURE** — `({matches, value}) → plan`. ⇒ given a proposal and the live rows, **the plan can be COMPUTED and REPORTED without executing anything.** ⭐⭐ **Dreaming can be run to *“here is the plan I would have executed”* with ZERO writes** — the same shape as M1's dry run, one layer up, ⛔ **needing no new mechanism.**
+
+### ⏸ SEMANTIC DECISIONS REMAINING
+- **Carried:** the **`persona_global` route** · **asked-vs-unasked** disclosure discipline · **R1–R3**.
+- **New here:** ① **does Dreaming get its OWN resolver or route to `default`?** (⭐ its conflict semantics differ — a consolidation is not a slot value — which argues for a sibling, ⛔ but it is a ruling) · ② **is a supersede caused by a Dreaming proposal acceptable under O-1?** (⭐ I argue yes; ⛔ not assuming it) · ③ **does Dreaming's 6c become `CONFLICT.IGNORE`?** ⭐ **implement the reserved value rather than inventing a parallel one.**
+
+### ⭐ RECOMMENDED M2 SEQUENCE — every step before the last writes NOTHING
+- **M2.a** a Dreaming observation type + a resolver that **always returns `IGNORE`** ⇒ proves routing end-to-end, ⛔ writes nothing · **M2.b** the **T0 allowlist + closed grammar** as pure components with tests ⇒ nothing · **M2.c ⭐⭐ PLAN-ONLY DRY RUN** — Dreaming proposes, the conflict stage computes a plan, the pass ledger records **which plan it WOULD have executed** ⇒ **one pass row only** · **M2.d** ⏸ **Ote reads the plans** — *would these have been duplicates? updates? genuinely new?* — ⭐ **answerable BEFORE anything is written** · **M2.e** ⏸ the two destination rulings · **M2.f** implement the reserved **`CONFLICT.IGNORE`** (⭐ the fact path needs it anyway) — ⚠️ a memory-layer change, **separately reviewed** · **M2.g** ⏸ **the first commitment.**
+- ⭐⭐ **M2.c is what makes M2 defensible: it produces the evidence for M2.d WITHOUT the risk of M2.g — and it exists only because `resolveConflict` is already pure.**
+
+- **Next action:** ⏸ **AWAITING OTE** on the three new decisions + the two carried rulings. ⛔ Dreaming not activated · no cron · no commitment writer · memory semantics unmodified · no second reconciliation mechanism · room not adopted as the frame · **P1 parked and separate** · **M1 exactly as it is.**
