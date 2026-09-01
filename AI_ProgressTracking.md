@@ -3647,3 +3647,39 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⭐ **The through-line now holds end to end:** **safe inputs** (T0 allowlist, fails closed) → **independent roots** (conversation grain, already computable for act records) → **valid conclusion** (6a–6f, three axes) → **bounded proposition** (closed grammar, typed slots, **no free-text field**) → **explicit destination** (one-party ⇒ `persona_global`) → **commitment product** (recorded separately ⇒ **makes `#653` visible**).
 
 - **Next action:** ⏸ **AWAITING OTE.** ⛔ Still open: **§5's SECOND allowlist** (what may be **published**, as distinct from what may be **read**) · **the route** to `persona_global` · **R1–R3** for memory-derived claims · **6c** (*worth committing*) · **P1**, separate. ⛔ No schema, migration, route, activation or commitment writing. **M1 exactly as it is.**
+
+## 2026-09-01 17:59 +0700 · THE PUBLICATION ALLOWLIST — and the smallest-safe persona-global class comes out EMPTY
+
+- ⭐⭐ **READ vs COMMIT are different questions and one list cannot serve both.** The **INPUT** allowlist protects against **CONTAINMENT** (the generator cannot reproduce what it never saw); the **PUBLICATION** allowlist protects against **DISCLOSURE** (a standing commitment is read by people the evidence was never readable to). ⓘ `withheld(1 of 79)` is **fully T0 ⇒ safe to READ**, and publishing it globally tells every room **that an exclusion happened.**
+
+### ⭐⭐⭐ WHAT MAKES A T0 FACT UNSAFE TO PUBLISH
+- ⛔ *“its subject is Sotera”* is **insufficient** — `withheld(1 of 79)` **is** about her records, and **the thing that MAKES IT TRUE is an OPERATOR'S act.**
+- ⭐⭐⭐ **THE RULE THAT SURVIVES EVERY TEST: a T0 fact may be published only if EVERY ENTITY IT COUNTS IS HERS.** ✅ her **acts** · ✅ her **conclusions** · ⛔ **contexts/rooms** (a context **someone else owns**) · ⛔ **persons** · ⛔ **exclusions / boundary state** (an **operator's** act) · ⛔ **messages**.
+- ⭐ **AND IT IS NOT A NEW RULE — the project already holds it, twice:** the utterance boundary on what a refusal must not leak — ***“⛔ no counts — *three things* is a measurement of someone's life”*** — and the standing rule ***counting is disclosing***. ⇒ ⭐⭐ **T0 IS MADE OF COUNTS, and a count discloses whatever it counts.**
+- ✅ **AND IT IS STRUCTURAL — more cleanly than the input side.** Every slot in the grammar is **typed**, so **the type of the counted entity is known STATICALLY** ⇒ the rule is a **TYPE CHECK ON THE FORM**: *a proposition destined for `persona_global` may carry only slots whose counted entity type is `act`.* ⛔ Not a prompt instruction — **a form that counts contexts CANNOT be given a global destination.** ⭐ *Impossible rather than forbidden*, and it **fails closed** (a new entity type is unpublishable until someone adds it — a capability gap, ⛔ never a leak).
+- ⭐⭐ **The publication allowlist is therefore an allowlist of ENTITY TYPES, ⛔ not of fields** — a cleaner object than expected.
+
+### ⚠️⚠️ TWO CONSEQUENCES I DID NOT EXPECT, REPORTED AS THEY CAME OUT
+- ⛔ **THIS REVERSES MY OWN CONCLUSION FROM TWO ROUNDS AGO.** I wrote *“the relational **SHAPE** of her life is expressible globally; the relational **MAP** is not”* and offered *“across 4 independent contexts I have sustained long-running collaborations”* as **admissible**. **It is not** — it **counts CONTEXTS**, and it tells every room that **four of them exist.** ⭐⭐ **NAMING WAS NEVER THE ONLY LEAK — THE CARDINALITY WAS.**
+- ⛔⛔ **AND THE CASUALTY IS DREAMING'S DEFINING OUTPUT: `recurrence(act, independent_roots=4)` counts ROOTS · a root is a CONVERSATION · a conversation is a context SOMEONE ELSE OWNS.** ⇒ ⭐⭐⭐ **A RECURRENCE CLAIM CANNOT BE PERSONA-GLOBAL UNDER THE SMALLEST-SAFE RULE** — and recurrence is **the thing Dreaming exists to produce.** ⚠️ Weakening it does not escape: an **unquantified** *“this has recurred”* still entails **≥ 2 contexts**, and the completeness contract requires the counts anyway ⇒ **the disclosure shrinks from “4” to “more than one”; it does not vanish.**
+
+### THE FOUR GATES IN SERIES — true · derivable · allowed to publish · worth committing
+- **TRUE but ⛔ not derivable:** *“Ote created me”* (no T0 term expresses it) · **DERIVABLE but ⛔ not publishable:** `extent(distinct_contexts=8)` · **PUBLISHABLE but ⛔ not worth committing:** `frequency(act=X, n=1, of=77)` — true, safe, **trivial** ⇒ **6c** · **WORTH COMMITTING:** ⭐ and the set is very small.
+- ⭐ **Four gates, each removing something the previous one let through** — ⓘ **and the arc had been treating *derivable* and *publishable* as ONE gate for six rounds.**
+
+### ⇒ THE SMALLEST SAFE PUBLICATION CLASS
+- ✅ **At ROOM scope — non-empty and useful.** ⭐ **The reader already HAS the room**, so a count confined to it **discloses nothing new** ⇒ frequencies, extents and co-occurrences over her acts **within that room** are publishable. ⚠️ **This is the consideration the frame comparison never included** — ⛔ not a reversal of it: **room scored best on the seven criteria, persona scored best semantically, and PUBLICATION SAFETY POINTS BACK AT ROOM.** ⭐ Three different questions, and only now do all three have answers.
+- ⛔⛔ **At `persona_global` — VERY NEARLY EMPTY.** A survivor must count **only her acts** AND **must not aggregate across contexts the reader cannot see** — ⚠️ **and a lifetime total is itself an aggregate over invisible contexts.** ⇒ ⭐⭐⭐ **Under the smallest-safe rule as derived, I could not identify a SINGLE T0-derived proposition that is safe at `persona_global`. ⛔ Not *few* — NONE. I am reporting that rather than softening it.**
+
+### ⏸⏸ THE RULING THIS NEEDS — presented, ⛔ NOT assumed
+- **MAY A PERSONA-GLOBAL COMMITMENT DISCLOSE THAT SOTERA HAS MULTIPLE CONTEXTS?**
+- **NO** ⇒ ⭐ the smallest-safe reading: **the persona-global T0 class is EMPTY**, ⛔ recurrence cannot be global, and **Dreaming's destination is ROOM scope** — the persona frame surviving as a *semantic* frame that currently has **nothing it may publish**.
+- **YES, cardinality only** ⇒ counts of **contexts** become publishable while **identities** stay out ⇒ **recurrence and relational shape become global**, ⚠️ and every reader learns **how many contexts she has**.
+- **YES, above a floor** ⇒ ⚠️ *“more than one”* publishable, an exact count not — ⛔ **and a floor is a threshold nobody has justified**, which is **the exact defect that removed the time-window frame from contention.** ⛔ Probably should not be chosen at all.
+- ⚠️ **My reading, offered as a reading:** **NO** is the smallest safe class and matches the goal as stated — ⚠️ **but it makes the persona frame publish nothing**, which is a real cost and belongs in the decision, ⛔ not in my recommendation. **I am not choosing.**
+
+### ⛔ ARCHITECTURE PRESERVED — and the P1 rule held under pressure
+- ⚠️ **The temptation was present and is recorded: `frequency(act=completed-without-product, 72 of 77)` is THE MOST PUBLISHABLE PROPOSITION IN THE ENTIRE ANALYSIS** — it counts **only her acts**, needs **no context dimension**, and is **exactly P1's finding.**
+- ⛔⛔ **It is still REFUSED.** Its referent is **a defect in Reflection**, and a persona-global commitment asserting it would be that defect converted into a **self-fulfilling durable self-belief.** ⭐ **The P1 rule holding under the pressure of being the EASIEST thing to publish.**
+
+- **Next action:** ⏸ **AWAITING OTE'S RULING on the multiple-contexts question.** ⛔ Still open: the **route** · **R1–R3** · **6c** · **P1** (separate). ⛔ No schema, migration, route, activation or commitment writing. **M1 exactly as it is.**
