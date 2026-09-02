@@ -74,6 +74,28 @@ const CAPABILITIES = {
   // ⚠️ FAILS CLOSED. `=== true` — a user object missing the field (an older session, a mock, a
   // different allowlist) reads as NO GRANT rather than as one.
   sotera_cross_room_conversations: (u) => u?.crossRoomConversations === true,
+
+  // ── ⭐⭐⭐ 035 · MAY A WRITE FROM THIS ROOM CHANGE WHAT IS TRUE OF SOTERA EVERYWHERE? ─────────────
+  //
+  // Ote, 2026-09-02: *"persona_global isn't just another storage scope. It is universally readable, so
+  // writing it changes Sotera's globally reachable self-state. I don't want ordinary admin authority to
+  // be enough for that in the first version."* ⇒ root always; otherwise an explicit standing grant.
+  //
+  // ⛔⛔ THE FIRST CAPABILITY HERE THAT GOVERNS A WRITE. The two above govern READING — *may this
+  // account be TOLD her memories* and *may she cross a room to READ*. Ote: *"don't reuse the existing
+  // 'may be told about Sotera's own history' permission… that should remain separate from permission to
+  // modify Sotera's globally reachable state."* ⭐ A grant to be told something is not a grant to change
+  // it, and 028's line above already states the general rule: one lever answering two questions is
+  // unreadable the first time they disagree.
+  //
+  // ⛔ ROLE IS NOT SUFFICIENT, AND MUST NOT BECOME SO. `admin` is deliberately absent — Ote refused it
+  // by name. ⛔ And root is resolved from config (`auth.root.userConnected`), ⛔ never from a NULL role
+  // or any other shape of account data.
+  //
+  // ⚠️ FAILS CLOSED. `=== true` — a user object missing the field reads as NO GRANT rather than as one.
+  // ⭐ THIS IS THE SESSION-SHAPED HALF ONLY. The store enforces the same rule ROOM-shaped, deriving it
+  // from config plus the room's own row, so that no caller can hand the authority in as a claim.
+  write_persona_global_memory: (u) => Boolean(u?.isRoot) || u?.personaGlobalWrite === true,
 }
 
 export function can(user, capability) {

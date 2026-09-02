@@ -44,6 +44,10 @@ import { registerHostService } from './runtime.js'
 // for the same reason. Caught here before it ran, by reading the factory rather than assuming its shape.
 import { buildLesson } from './lesson-host.js'
 import { buildOwnMemory } from './own-memory-host.js'
+// ⭐ 035 · the SAME capability mechanism every other account-level permission uses. Ote: *"If we already
+// have a suitable generic account-permission mechanism, reuse it rather than creating another
+// authorization framework."* ⇒ `can()`, one new predicate, ⛔ no second framework.
+import { can } from '../auth/permissions.js'
 
 /** The retention shapes. ⛔ A closed vocabulary — an unknown kind is refused, never coerced to a default. */
 export const KINDS = Object.freeze({ fact: 'fact', note: 'note', practice: 'practice', lesson: 'lesson' })
@@ -65,6 +69,23 @@ export function authorFor(mine) {
   return null   // ⛔ not a default — the caller must refuse
 }
 
+/**
+ * ⭐⭐⭐ 035 · WHERE IS THIS REACHABLE FROM? — a THIRD question, and it is not `mine`.
+ *
+ * ⛔ `mine` says WHOSE the memory is; this says WHERE it is true. 029 keeps them apart by name:
+ * *ABOUT ≠ OWNER ≠ SCOPE.* A memory she authored, about Ote, formed in his room, is hers AND room-scoped
+ * — `mine:true` must never widen reach on its own, which is what the header above already warns.
+ *
+ * ⚠️ AND THE DEFAULT IS THE OPPOSITE OF `mine`'s, DELIBERATELY. `mine` refuses to guess because both its
+ * answers are consequential. Here one answer is genuinely safe, and 029 already chose it: *"a row that
+ * forgets to declare its scope becomes reachable from ONE room, never from all of them — the failure
+ * direction that LOSES a memory rather than the one that LEAKS it."*
+ * ⇒ absent ⇒ `room`. ⛔ `persona_global` must be ASKED FOR, and asking can be refused.
+ */
+export function scopeFor(everywhere) {
+  return everywhere === true ? 'persona_global' : 'room'
+}
+
 export const OWNERSHIP_QUESTION = 'I need to know whose memory this is before I can keep it. Say mine:true '
   + 'if it belongs to me — something about myself, my own view, my own relationships — or mine:false if it '
   + 'is something about the person I am talking to. I will not guess: filing it under the wrong one is how '
@@ -80,13 +101,16 @@ export function buildRetention(fastify, {
   const lesson = () => { try { return buildLesson(fastify, { userId, conversationId }) } catch { return null } }
   const ownMemory = () => { try { return buildOwnMemory(fastify, { userId, isRoot, user }) } catch { return null } }
 
-  const memoryFor = (author) => buildMemoryToolService(fastify, { userId, sourceMessageId, self, author })
+  // ⭐ 035 · scope joins author on the CONSTRUCTION path, for the reason the header above gives about
+  // author: honouring a per-call decision means building the store that already means what she said,
+  // ⛔ never reaching in and reassigning a field afterwards.
+  const memoryFor = (author, scope = 'room') => buildMemoryToolService(fastify, { userId, sourceMessageId, self, author, scope })
 
   /**
    * keep({ what, kind, about, mine, attribute })
    * @returns {Promise<object>} the outcome, including the author actually recorded
    */
-  async function keep({ what, kind, about = null, mine, attribute = null } = {}) {
+  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false } = {}) {
     const content = String(what ?? '').trim()
     if (!content) return { ok: false, refused: 'nothing_to_keep', why: 'There is no content to keep — say what you want kept.' }
 
@@ -103,6 +127,43 @@ export function buildRetention(fastify, {
     const author = authorFor(mine)
     if (author === null) {
       return { ok: false, refused: 'ownership_undeclared', why: OWNERSHIP_QUESTION, kind, about }
+    }
+
+    // ── ⭐⭐ 035 · THE PERSONA-GLOBAL DECLARATION, CHECKED EARLY SO THE ANSWER IS A SENTENCE ──────
+    // ⚠️ THIS IS NOT THE ENFORCEMENT POINT. The STORE is, and it derives the authority itself from config
+    // and the room's own row rather than trusting anything decided here — four writers reach that store and
+    // a rule living in only one of them leaves three doors open. ⛔ This exists so a refusal arrives as a
+    // plain-language sentence she can act on instead of a thrown error, and the live check proves the
+    // store still refuses when this pre-check is bypassed.
+    const scope = scopeFor(everywhere)
+    if (scope === 'persona_global') {
+      if (author !== 'persona') {
+        return {
+          ok: false,
+          refused: 'global_requires_mine',
+          why: 'Something true of me everywhere has to be mine. Say mine:true, or keep it as a memory of '
+            + 'this room instead — where it is true and whose it is are different questions.',
+          kind,
+        }
+      }
+      if (!can(user, 'write_persona_global_memory')) {
+        return {
+          ok: false,
+          refused: 'global_not_authorized',
+          why: 'I cannot record something as true of me everywhere from this room. I can keep it here, '
+            + 'as a memory of this conversation, and it stays exactly as durable.',
+          kind,
+        }
+      }
+      if (kind !== KINDS.fact && kind !== KINDS.note) {
+        return {
+          ok: false,
+          refused: 'global_kind_unsupported',
+          why: `A ${kind} has its own destination and is already mine by construction — only a fact or a `
+            + 'note can be kept as true of me everywhere.',
+          kind,
+        }
+      }
     }
 
     // ── kind: practice ────────────────────────────────────────────────────────────────────────────
@@ -154,7 +215,7 @@ export function buildRetention(fastify, {
     }
 
     // ── kind: fact and note — the two that travel the memory store ────────────────────────────────
-    const mem = memoryFor(author)
+    const mem = memoryFor(author, scope)
 
     if (kind === KINDS.fact) {
       // ⛔ REFUSE RATHER THAN INVENT AN ATTRIBUTE. A fact is subject-attribute-value; with only prose the

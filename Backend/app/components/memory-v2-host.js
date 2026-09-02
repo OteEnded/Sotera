@@ -50,7 +50,7 @@ export function buildMemoryStoreFor(fastify, { userId = null, persona = DEFAULT_
   return createSequelizeMemoryStore({ db: fastify.db, persona, userId, log: fastify.log })
 }
 
-export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSONA, sourceMessageId = null, self = null, actor = null, author = 'account' } = {}) {
+export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSONA, sourceMessageId = null, self = null, actor = null, author = 'account', scope = 'room' } = {}) {
   const embed = makeEmbedder(fastify, { userId })
   // RESOLUTION comes from the host so the CHAIN is assembled from settings (cosine → gray-zone → …).
   // With `memory.resolver.grayZoneMode` off (the default) this is exactly the cosine resolver: no added
@@ -62,7 +62,10 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
   //   store     REQUIRED — memory is broken without it. Owns scope + every query.
   //   slotStore OPTIONAL — absent means facts write with slot_id null, as before Phase 6.
   //   auditLog  OPTIONAL — absent means beliefs still change, the trail is missing.
-  const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, author, log })
+  // ⭐ 035 · `scope` rides beside `author` — declared once by the caller that knows the occasion, never
+  // a per-row field. `config` goes with it because the store DERIVES root-ness itself rather than being
+  // told: an authority handed in as a parameter is an authority a caller can get wrong.
+  const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, author, scope, config: fastify.config, log })
   const slotStore = createSlotStore({ db: fastify.db, persona, userId, log })
   // Bind the writer to THIS host's storage. The cognition calls `auditLog(entry)` and never learns that
   // a database was involved. ⚠️ It used to call `logMemoryChange(db, …)` directly with a `db` the

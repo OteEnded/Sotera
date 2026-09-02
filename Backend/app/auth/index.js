@@ -221,6 +221,10 @@ async function loadInternalUser(request) {
     // ⚠️ Both builders must carry it — a field list that forgets one makes `can()` read `undefined`,
     // which is this project's most repeated defect wearing a boolean.
     crossRoomConversations: user.cross_room_conversations === true,
+    // ⭐⭐ 035 · may a write from this account's room reach EVERY room. ⛔ A THIRD question, and the
+    // first that governs a WRITE rather than a read — see the 035 header for why it is not either of
+    // the two above. ⚠️ Both builders must carry it, for the same reason the line above says.
+    personaGlobalWrite: user.persona_global_write === true,
     isRoot: false,
   }
 }
@@ -260,6 +264,10 @@ async function loadSessionUser(request) {
     // ⚠️ Both builders must carry it — a field list that forgets one makes `can()` read `undefined`,
     // which is this project's most repeated defect wearing a boolean.
     crossRoomConversations: user.cross_room_conversations === true,
+    // ⭐⭐ 035 · may a write from this account's room reach EVERY room. ⛔ A THIRD question, and the
+    // first that governs a WRITE rather than a read — see the 035 header for why it is not either of
+    // the two above. ⚠️ Both builders must carry it, for the same reason the line above says.
+    personaGlobalWrite: user.persona_global_write === true,
     isRoot: false,
   }
 }

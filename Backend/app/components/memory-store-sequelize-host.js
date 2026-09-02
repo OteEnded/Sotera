@@ -51,6 +51,10 @@ import { slotViolation } from './memory-modality.js'
 import { admissibleToSlot } from './memory-ownership-boundary.js'
 import { recordRefusal, describeRefusal } from './memory-refusal-record.js'
 import { tracedMemoryIds } from './memory-retrieval-trace.js'
+// ⭐ 035 · THE ONE LEGAL WAY TO ASK "IS THIS ROOM ROOT'S?" — config-defined, and that module's whole
+// point is what it REFUSES to look at. ⛔ Root-ness must never be inferred from a NULL role or a missing
+// id here, any more than it may be anywhere else.
+import { isRootConnectedUser } from '../auth/root-identity.js'
 
 const LIVE = { invalid_at: null, expired_at: null }
 
@@ -99,7 +103,7 @@ const OWNED_KIND_OR_UNCLASSIFIED = { [Op.or]: [{ [Op.in]: OWNED_KINDS }, { [Op.i
  * @param {object|null} [deps.log]
  * @param {()=>number}  [deps.now]
  */
-export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', log = null, now = () => Date.now() } = {}) {
+export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', scope = 'room', config = null, log = null, now = () => Date.now() } = {}) {
   const txn_memories = db?.txn_memories
   if (!txn_memories) throw new TypeError('createSequelizeMemoryStore: db.txn_memories is required')
   const P = persona ?? null
@@ -122,6 +126,63 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     throw new TypeError(`createSequelizeMemoryStore: author must be 'account' or 'persona', got ${JSON.stringify(author)}`)
   }
   const AUTHOR = author
+
+  // ── ⭐⭐⭐ 035 · SCOPE IS DECLARED AT CONSTRUCTION, EXACTLY AS AUTHOR IS ────────────────────────
+  //
+  // ⭐ THE SHAPE IS NOT A CHOICE, IT IS THE ONE THIS FILE ALREADY ARGUES FOR, six lines above: *"the
+  // author must arrive with the write, not be assigned by whoever remembers to"*. A per-row `scope`
+  // field would have to survive `makeObservation`'s common shape, `normalizeObservation`, the resolver
+  // router and `commitToMemory`'s explicit arg list — FOUR allowlists, each of which is an instance of
+  // the defect this project has now recorded eleven times. ⛔ Declaring it once, on the store that means
+  // it, has no allowlist to survive.
+  //
+  // ⚠️ AND THE DEFAULT IS THE STATUS QUO, in the safe direction 029 already chose: *"a row that forgets
+  // to declare its scope becomes reachable from ONE room, never from all of them — the failure direction
+  // that LOSES a memory rather than the one that LEAKS it."*
+  if (scope !== 'room' && scope !== 'persona_global') {
+    throw new TypeError(`createSequelizeMemoryStore: scope must be 'room' or 'persona_global', got ${JSON.stringify(scope)}`)
+  }
+  const DECLARED_SCOPE = scope
+
+  // ── ⭐⭐⭐ AND THE AUTHORITY IS DERIVED HERE, ⛔ NEVER ACCEPTED AS A CLAIM ──────────────────────
+  //
+  // Ote, 2026-09-02: *"Root: always authorized. Explicit account permission: authorized when the account
+  // has the dedicated permission… No permission: REFUSE."* ⛔ *"Never downgrade an unauthorized global
+  // write into room scope."*
+  //
+  // ⭐ Both halves are DERIVED from things this store already holds — config, and the room id `U` — so
+  // there is no `authorized: true` parameter for a caller to get wrong or a test to fake. That is the
+  // difference between this and `author`: authorship is a DECISION the caller is entitled to make;
+  // authority is a FACT the caller is not.
+  //   · root      `isRootConnectedUser(config, U)` — config-defined. ⛔ NEVER from a NULL role, a missing
+  //               id, or any other shape of account data (nine recorded sites, one of which turned an
+  //               unowned row into a privilege grant).
+  //   · granted   `mst_users.persona_global_write === true` — the standing grant (035).
+  //
+  // ⚠️ FAILS CLOSED IN EVERY DIRECTION. No config, no db, no row, a thrown query, a non-boolean value —
+  // all read as NOT authorized. ⛔ An authority that can be satisfied by an absence is not an authority.
+  let globalAuthCache = null
+  const resolveGlobalAuthority = async () => {
+    if (globalAuthCache) return globalAuthCache
+    if (config && U && isRootConnectedUser(config, U)) {
+      globalAuthCache = { ok: true, via: 'root' }
+      return globalAuthCache
+    }
+    let granted = false
+    try {
+      if (U && db.mst_users) {
+        const row = await db.mst_users.findOne({ where: { id: U }, attributes: ['persona_global_write'] })
+        granted = row?.persona_global_write === true
+      }
+    } catch (e) {
+      // ⛔ A failed lookup is NOT a grant. Logged loudly, because "the permission check broke" and
+      // "the account has no permission" are the same refusal but very different operational facts.
+      log?.error?.({ err: e?.message, userId: U }, '[memory] could not read the persona-global write grant — refusing')
+      granted = false
+    }
+    globalAuthCache = granted ? { ok: true, via: 'standing_grant' } : { ok: false, via: null }
+    return globalAuthCache
+  }
 
   // Capability latches. Set once, warned once — see the degradation contract above.
   let lexicalDisabled = false
@@ -647,12 +708,66 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         e2.reason = 'non-literal-in-slot'
         throw e2
       }
+      // ── ⭐⭐⭐ THE PERSONA-GLOBAL GATE · 035 · FOURTH GATE, SAME PLACE, SAME REASON ──────────────
+      //
+      // ⚠️⚠️ WHY A WRITE NEEDS A GATE AT ALL, WHEN THE OTHER THREE GUARD MEANING: this destination is
+      // UNIVERSALLY READABLE. `own-memory-host` reads her self-memory as `WHERE scope='persona_global'`
+      // with no author, user or room filter — because that is what 029 defines the scope to MEAN. ⇒ a
+      // persona_global write is the one write in this store whose effect is not confined to the room it
+      // happened in, and Ote's word for that is *"Sotera's globally reachable self-state"*.
+      //
+      // ⛔ IT REFUSES, IT NEVER DOWNGRADES. Ote: *"Never downgrade an unauthorized global write into room
+      // scope."* ⭐ A silent downgrade would file the memory somewhere the writer did not ask for and
+      // report success — the same shape as the swallow M2-17 just removed one layer up.
+      //
+      // ⛔ AND THE GATE IS HERE, beside the other three, for the reason the self-state gate states: the
+      // extractor, the distiller, the reflection lane and her own tools are four writers, and a rule
+      // placed in any one of them leaves three doors open.
+      if (DECLARED_SCOPE === 'persona_global') {
+        // ⭐ AUTHOR FIRST, because it is the cheaper check and the more fundamental error. A global row
+        // authored by the ACCOUNT is a contradiction, not merely a permission problem: it publishes one
+        // person's claim into everyone else's room. ⓘ Both legacy rows in this destination are exactly
+        // that shape — first-person self-claims carrying `author='account'` — which is why this is a
+        // refusal and not a default.
+        const authority = AUTHOR !== 'persona'
+          ? { cls: 'persona-global-requires-persona-author',
+            why: 'a memory reachable from every room must be hers — author=persona (mine:true), not the account holder\'s' }
+          : (await resolveGlobalAuthority()).ok
+            ? null
+            : { cls: 'persona-global-unauthorized-room',
+              why: 'this room may not write memory that is reachable from every room — root, or an account holding the persona-global write grant, is required' }
+        if (authority) {
+          const refusal = {
+            class: authority.cls,
+            why: authority.why,
+            belongsTo: null,
+            destinationExists: true, // ⭐ the destination is real and reachable; the AUTHORITY is what is missing
+            destinationNote: 'scope=persona_global exists (029); this refusal is about who may write it (035)',
+            retainAs: 'room', // ⛔ a SUGGESTION for the writer, ⛔ never applied here — see "refuses, never downgrades"
+          }
+          const recorded = await recordRefusal(db, { refusal, row, userId: U, persona: P, author: AUTHOR, log })
+          log?.warn?.({ class: refusal.class, author: AUTHOR, recorded, entity: row?.entity, attribute: row?.attribute },
+            `[memory] refused a persona-global write: ${refusal.why}`)
+          const e4 = new Error(`refused: ${refusal.why}`)
+          e4.code = 'PERSONA_GLOBAL_SCOPE'
+          e4.reason = refusal.class
+          e4.recorded = recorded
+          throw e4
+        }
+      }
+
       // THE STORE STAMPS SCOPE — the component must not pass persona/user_id, and the
       // identity-is-persona-global rule is enforced here rather than trusted to every caller.
       // PRESERVE an explicit subject, otherwise DEFAULT it (see resolveSubjects above). `??` not `||`
       // so a caller can never be silently overridden, and so a deliberate null stays null.
       const subjects = await resolveSubjects()
-      const isPersonaGlobal = row.kind === 'identity'
+      // ⭐⭐ 035: the destination is now DECLARED as well as inferred. ⛔ 029's rule is UNCHANGED and
+      // deliberately kept first — `kind = 'identity'` still means persona-global, because that is what it
+      // was written to mean and Ote asked for no silent redefinition. What is NEW is the second arm: a
+      // caller may now ASK for the destination, and having asked, can be REFUSED (the gate above).
+      // ⇒ before this, scope could only be acquired as a side effect of another axis, which is how the
+      // two legacy rows in the destination got there.
+      const isPersonaGlobal = row.kind === 'identity' || DECLARED_SCOPE === 'persona_global'
       // ⚠️ DEFAULT ONLY WHERE THE SUBJECT IS ACTUALLY KNOWN, which is narrower than it first looks.
       // The first version defaulted EVERY non-identity row to the account holder, and the
       // person-subject check caught it: a free-form `remember` carries `entity = null`, and the

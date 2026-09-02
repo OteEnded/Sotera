@@ -56,11 +56,11 @@ export function commitToMemory(mem, obs) {
  * would make that function wait on its own queue slot: a deadlock, not a slowdown.
  * @returns {{ mem: object, pipeline: { ingest:Function, observe:Function }, router: object }}
  */
-export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMessageId = null, self = null, serializeCommits = false, ask = null, author = 'account' } = {}) {
+export function buildMemoryPipeline(fastify, { userId = null, persona, sourceMessageId = null, self = null, serializeCommits = false, ask = null, author = 'account', scope = 'room' } = {}) {
   const log = fastify?.log ?? null
   // `author` rides through untouched — see buildMemoryV2: authorship follows the OCCASION, so the caller
   // that knows what occasion this is declares it, and everything below stays unaware.
-  const mem = buildMemoryV2(fastify, { userId, persona, sourceMessageId, self, author })
+  const mem = buildMemoryV2(fastify, { userId, persona, sourceMessageId, self, author, scope })
   // `ask` is the Identity Resolver's OPTIONAL port for the one case it must not decide alone: a name
   // that would REPLACE a name she already has. Null is the ordinary state — most callers (the model's
   // remember_fact, the fact extractor, a maintenance pass) have no conversation and no human attached,
@@ -222,8 +222,8 @@ function traced(label, fn, log) {
   }
 }
 
-export function buildMemoryToolService(fastify, { userId = null, persona, sourceMessageId = null, self = null, author = 'account' } = {}) {
-  const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self, author })
+export function buildMemoryToolService(fastify, { userId = null, persona, sourceMessageId = null, self = null, author = 'account', scope = 'room' } = {}) {
+  const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, self, author, scope })
   // ⭐ A read-only store bound to the same scope, for the withheld-corrections count. ⛔ Not the service's
   // store handed out — see `buildMemoryStoreFor`: a consumer that wants a query and no beliefs asks for a
   // store, and everyone else keeps getting a service.

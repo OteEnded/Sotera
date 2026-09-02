@@ -104,6 +104,18 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 allowNull: false,
                 defaultValue: false,
             },
+            // ⭐⭐ 035 · may a write from THIS account's room declare scope = persona_global —
+            // reachable from every room, because it is true of her wherever she is (029).
+            // ⛔ A WRITE permission, and the first one here. memory_access_scope (021) and
+            // cross_room_conversations (028) both govern READING; a grant to be told something is
+            // not a grant to change it, so the three are deliberately three columns.
+            // ⛔ Role is not sufficient — admin does not grant this. Root is always authorized and
+            // needs no row. Default FALSE. SQL is the truth (035); this mirrors it.
+            persona_global_write: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+            },
         },
         {
             tableName: "mst_users",
