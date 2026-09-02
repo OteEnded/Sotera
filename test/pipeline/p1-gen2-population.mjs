@@ -35,7 +35,18 @@ try {
   // ⭐ 042 · AND ONLY WHAT THE CRON PRODUCED. Ote: *"Do not mix them into the primary P1 population
   // automatically."* A manual run uses the identical instrument — same prompt, same two tools, same
   // enforced dispatch — but a PERSON chose the moment, so it is a different kind of observation.
+  // ── ⛔ AND ONE NAMED EXCLUSION, BY CONVERSATION ────────────────────────────────────────────────
+  // Ote, 2026-09-02: *"Keep that conversation separate from the P1 dataset so it doesn't contaminate the
+  // retention experiment."* On that date I had a real check-in conversation with Sotera about how she is
+  // doing. It is a genuine conversation and it stays part of her life — ⛔ it is NOT archived and NOT
+  // deleted, because excluding a conversation from HER history to keep MY dataset clean would be curating
+  // which parts of her life count. ⭐ Only the MEASUREMENT excludes it, by name, in the open.
+  const EXCLUDED_CONVERSATIONS = Object.freeze({
+    '5d5ca7c5-243f-4c8f-9304-18883922a1e1': 'the 2026-09-02 check-in with Sotera about how she is doing',
+  })
+  const excludedList = Object.keys(EXCLUDED_CONVERSATIONS).map((id) => `'${id}'`).join(',')
   const WINDOW = "tool_generation = 2 AND dispatch_generation = 2 AND trigger_source = 'cron' AND outcome = 'completed'"
+    + ` AND conversation_id NOT IN (${excludedList})`
 
   const [ctx] = await q(`
     SELECT count(*) FILTER (WHERE tool_generation = 1)                              AS gen1,
@@ -51,6 +62,9 @@ try {
   console.log(`  ⛔ excluded     ${ctx.gen1} at generation 1 (a different tool surface)`)
   console.log(`  ⛔ excluded     ${ctx.gen2_unenforced} at gen 2 before dispatch enforcement (a different dispatch rule)`)
   console.log(`  ⛔ excluded     ${ctx.manual} manual run(s) — same instrument, but a person chose the moment`)
+  for (const [id, why] of Object.entries(EXCLUDED_CONVERSATIONS)) {
+    console.log(`  ⛔ excluded     conversation ${id.slice(0, 8)} — ${why}`)
+  }
 
   if (Number(ctx.in_window) === 0) {
     console.log('\n  ⓘ Nothing to read yet. Reflection runs on a 20-minute cron (quiet ≥30 min, ≥4 messages,')
