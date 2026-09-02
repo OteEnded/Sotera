@@ -32,12 +32,17 @@ try {
   // *"Keep the measurement window exactly: tool_generation=2 AND dispatch_generation=2."*
   // ⛔ Generation 1 is a different surface and generation-2-before-enforcement is a different dispatch
   // rule; pooling either would measure the system changing rather than her.
-  const WINDOW = "tool_generation = 2 AND dispatch_generation = 2 AND outcome = 'completed'"
+  // ⭐ 042 · AND ONLY WHAT THE CRON PRODUCED. Ote: *"Do not mix them into the primary P1 population
+  // automatically."* A manual run uses the identical instrument — same prompt, same two tools, same
+  // enforced dispatch — but a PERSON chose the moment, so it is a different kind of observation.
+  const WINDOW = "tool_generation = 2 AND dispatch_generation = 2 AND trigger_source = 'cron' AND outcome = 'completed'"
 
   const [ctx] = await q(`
     SELECT count(*) FILTER (WHERE tool_generation = 1)                              AS gen1,
            count(*) FILTER (WHERE tool_generation = 2 AND dispatch_generation = 1)  AS gen2_unenforced,
-           count(*) FILTER (WHERE tool_generation = 2 AND dispatch_generation = 2)  AS in_window
+           count(*) FILTER (WHERE tool_generation = 2 AND dispatch_generation = 2
+                              AND trigger_source = 'cron')                          AS in_window,
+           count(*) FILTER (WHERE trigger_source = 'manual')                        AS manual
       FROM ${S}.log_conversation_revisits`)
 
   console.log('\n⭐ P1 · GEN-2 POPULATION  (read-only)\n')
@@ -45,6 +50,7 @@ try {
   console.log(`  in window       ${ctx.in_window}`)
   console.log(`  ⛔ excluded     ${ctx.gen1} at generation 1 (a different tool surface)`)
   console.log(`  ⛔ excluded     ${ctx.gen2_unenforced} at gen 2 before dispatch enforcement (a different dispatch rule)`)
+  console.log(`  ⛔ excluded     ${ctx.manual} manual run(s) — same instrument, but a person chose the moment`)
 
   if (Number(ctx.in_window) === 0) {
     console.log('\n  ⓘ Nothing to read yet. Reflection runs on a 20-minute cron (quiet ≥30 min, ≥4 messages,')

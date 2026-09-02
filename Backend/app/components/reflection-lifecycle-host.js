@@ -43,7 +43,7 @@ import {
   // faithfully: those rows were produced by it, and a replay that used the new selector would be
   // measuring today's code against yesterday's ledger.
   shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal, REFLECTION_TOOL_GENERATION,
-  selectReviewableRange,
+  selectReviewableRange, TRIGGER_SOURCES,
 } from './reflection-lifecycle.js'
 // ⭐⭐ THE DISPATCH BOUNDARY, imported rather than written here — the same rule the follow-through uses,
 // stated once with its evidence beside it.
@@ -154,7 +154,7 @@ async function lastWatermark(seq, schema, conversationId) {
  * ⛔ It never throws. A failure while recording a failure must not take the pass down — it degrades to a
  * log line, which is what we had for everything before this.
  */
-async function recordFailure(seq, schema, { conversationId, userId, upTo, from, reason, failure, claimId, preempted = false }) {
+async function recordFailure(seq, schema, { conversationId, userId, upTo, from, reason, failure, claimId, preempted = false, triggerSource = null }) {
   try {
     // ⭐⭐ PREEMPTION IS A TERMINAL OUTCOME, NOT A FAILURE (migration 027). It carries NO `failure`
     // diagnosis because nothing went wrong -- the lane yielded exactly as designed. ⛔ Folding it into
@@ -191,11 +191,14 @@ async function recordFailure(seq, schema, { conversationId, userId, upTo, from, 
     await seq.query(
       `INSERT INTO "${schema}"."log_conversation_revisits"
          (conversation_id, user_id, up_to_rolling_id, from_rolling_id, text, prompt_generation,
-          reason, outcome, failure, completed_at)
-       VALUES ($1, $2, $3, $4, '', $5, $6, $8, $7, now())`,
+          reason, outcome, failure, completed_at, trigger_source)
+       VALUES ($1, $2, $3, $4, '', $5, $6, $8, $7, now(), $9)`,
       {
         bind: [conversationId, userId ?? null, Math.max(1, Number(upTo) || 1), from ?? null,
-          REFLECTION_GENERATION, reason ?? 'reflection', why, terminal],
+          // ⛔ NO SILENT DEFAULT. Every caller of this path now declares its source; a null here means a
+          // new caller forgot, and `unmarked` is refused by 042's CHECK so it fails loudly instead of
+          // quietly joining the cron population.
+          REFLECTION_GENERATION, reason ?? 'reflection', why, terminal, triggerSource ?? 'unmarked'],
         type: seq.QueryTypes.INSERT,
       })
   } catch (e) {
@@ -262,7 +265,16 @@ async function sweepStalled(fastify, { quietMinutes }) {
  *        deliberate manual run); it does NOT skip incognito, probe fixtures or the memory master switch,
  *        because those are not timing conditions.
  */
-export async function reflectOnConversation(fastify, { conversationId, force = false, turn = null } = {}) {
+export async function reflectOnConversation(fastify, { conversationId, force = false, turn = null, triggerSource } = {}) {
+  // ── ⭐⭐ WHO ASKED (042) · REQUIRED, ⛔ NEVER DEFAULTED ─────────────────────────────────────────
+  // Ote: *"mark the run with a clear trigger_source=manual so manual runs can be separated from normal
+  // cron-generated reflections. Do not mix them into the primary P1 population automatically."*
+  // ⛔ A DEFAULT WOULD DEFEAT THE COLUMN. A caller added later that forgot to say would have its rows
+  // labelled as natural cron observations and quietly contaminate the P1 population — the silent-default
+  // failure this project has paid for repeatedly. ⇒ a missing source is a wiring bug and it is LOUD.
+  if (!TRIGGER_SOURCES.includes(triggerSource)) {
+    throw new TypeError(`reflectOnConversation: triggerSource must be one of ${TRIGGER_SOURCES.join('|')} -- say who asked`)
+  }
   const db = fastify.db
   if (!db?.txn_conversations) return { skipped: true, reason: 'no-db' }
   const seq = db.txn_memories.sequelize
@@ -359,12 +371,12 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     `INSERT INTO "${schema}"."log_conversation_revisits"
        (conversation_id, user_id, up_to_rolling_id, from_rolling_id, messages_considered, text,
         tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, reason, tool_generation,
-        dispatch_generation)
+        dispatch_generation, trigger_source)
      -- tool_generation is stamped at the claim, beside the prompt generation and for the same reason.
      -- dispatch_generation joins them: 1 = the offered set was advertised, 2 = it is enforced.
      -- (The prose lives OUTSIDE this template literal: a backtick in a SQL comment ends the string, which
      -- this file already warns about a few lines up. I made that exact mistake here.)
-     SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection', $9, $10
+     SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection', $9, $10, $11
      -- ⭐⭐⭐ TWO GUARDS, BECAUSE SPLITTING THE INDEX SPLIT THE PROTECTION IT USED TO GIVE.
      -- 016 had ONE unique index, so a re-run was refused AT THE CLAIM -- before a 35B generation and
      -- before any tool could write. Splitting it into in-flight and completed (025) left ON CONFLICT
@@ -392,7 +404,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
         // "no lower bound recorded" — rather than as a backwards one that would read as coverage.
         already > 0 && already + 1 <= reviewedTo ? already + 1 : null,
         // ⭐ $9 — which write-tool surface this pass was offered. ⛔ Never derived from anything else.
-        REFLECTION_TOOL_GENERATION, DISPATCH_GENERATION],
+        REFLECTION_TOOL_GENERATION, DISPATCH_GENERATION, triggerSource],
       type: seq.QueryTypes.SELECT,
     })
   if (!claim) return { skipped: true, reason: 'already-reflected', upTo: reviewedTo }
@@ -533,7 +545,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     return reg.interactiveEpoch() !== startEpoch || reg.anyActive() === true
   }
   const yieldToUser = async () => {
-    await recordFailure(seq, schema, { claimId: claim.id, preempted: true })
+    await recordFailure(seq, schema, { claimId: claim.id, preempted: true, triggerSource })
     await log(`[revisit] ${conversationId} yielded to a user interaction at watermark ${reviewedTo} `
       + '— not completed, cursor unmoved, will resume', import.meta.url)
     return { skipped: true, reason: 'preempted', upTo: reviewedTo }
@@ -553,7 +565,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       // ⛔ AND IT IS A `skipped` RETURN, NOT A THROW, which is why the scan loop's catch never saw it. I
       // had predicted this bug and put the guard in the wrong place; only running it found the real one.
       await log(`[reflection] ${conversationId} llm error: ${e.message}`, import.meta.url)
-      await recordFailure(seq, schema, { claimId: claim.id, failure: `llm-error: ${e.message}` })
+      await recordFailure(seq, schema, { claimId: claim.id, failure: `llm-error: ${e.message}`, triggerSource })
       return { skipped: true, reason: 'llm-error', error: e.message }
     }
     // ⭐ AND AGAIN THE MOMENT THE ROUND RETURNS. A user turn that arrived WHILE the provider was
@@ -697,7 +709,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
  * ⚠️ `enabled` defaults FALSE at the config level. This makes LLM calls on her chat model AND can write
  * durable memory — a pass that starts itself on deployment is a decision nobody made.
  */
-export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 48, force = false } = {}) {
+export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 48, force = false, triggerSource = 'cron' } = {}) {
   const on = fastify.config?.memory?.reflectionEnabled === true
   if (!on && !force) return { skipped: true, reason: 'disabled' }
   const db = fastify.db
@@ -835,7 +847,7 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
     if (admit === 'skip') continue
     tally.scanned++
     try {
-      const r = await reflectOnConversation(fastify, { conversationId: c.id })
+      const r = await reflectOnConversation(fastify, { conversationId: c.id, triggerSource })
       if (r.skipped) { tally.skipped[r.reason] = (tally.skipped[r.reason] ?? 0) + 1; continue }
       tally.reflected++
       // ⚠️ Counted where the WORK happened, not where it was offered: a backlog row the gate skipped
@@ -863,7 +875,9 @@ export async function reflectAllQuiet(fastify, { maxConvos = 3, lookbackHours = 
       } catch { /* a failure while recording a failure must not take the pass down */ }
       await recordFailure(db.txn_messages.sequelize, schema, {
         conversationId: c.id, userId: c.user_id ?? null, upTo: topId,
-        reason: 'reflection', failure: `${e.name || 'Error'}: ${e.message}`,
+        // ⭐ THE PASS SAYS WHO ASKED, on its failure rows too. A failed reflection is still an observation
+        // of an occasion, and one whose provenance is guessed is one that can contaminate a population.
+        reason: 'reflection', failure: `${e.name || 'Error'}: ${e.message}`, triggerSource,
       })
       tally.skipped.error = (tally.skipped.error ?? 0) + 1
     }

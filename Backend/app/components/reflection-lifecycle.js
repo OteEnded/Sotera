@@ -112,6 +112,20 @@ export const REFLECTION_WRITE_TOOLS = [
  * discipline as the prompt's.
  */
 export const REFLECTION_TOOL_GENERATION = 2
+
+/**
+ * ⭐⭐ WHO ASKED FOR A REFLECTION (042). ⛔ Not a generation — the generations describe the INSTRUMENT
+ * (prompt, offered tools, dispatch); this describes the OCCASION.
+ *
+ *   cron    the 20-minute pass, on a conversation that went quiet on its own — ⭐ the P1 population
+ *   manual  an operator asked for one NOW. Identical instrument, ⛔ a different kind of observation:
+ *           a person chose the moment, so it is never pooled with the natural ones.
+ *   check   a deterministic harness with an injected turn. ⛔ Never a model, never a population.
+ *   legacy  recorded before this column existed (042's backfill) — ⛔ a fact, not a guess about which.
+ *
+ * Ote: *"Do not mix them into the primary P1 population automatically."*
+ */
+export const TRIGGER_SOURCES = Object.freeze(['cron', 'manual', 'check', 'legacy'])
 /**
  * ⛔ AND WHAT IS DELIBERATELY WITHHELD, because an unattended pass should not be able to do it:
  *   forget_memory · retract_own_practice · restore_memory · pin_memory   destructive or curatorial —

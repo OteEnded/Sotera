@@ -223,7 +223,9 @@ try {
     // was offered · model emitted/called it · dispatch authorized it · action actually succeeded"* — so
     // `tools_used` keeps meaning EXECUTED and the refused emissions get their own array; and the third
     // generation counter marks the boundary so gen-2-before and gen-2-after enforcement are separable.
-    'prompt_generation', 'tool_generation', 'dispatch_generation', 'tools_refused',
+    // ⭐ 042 · `trigger_source` — WHO ASKED. ⛔ Not a generation: the generations describe the instrument,
+    // this describes the occasion, and a manual run uses the identical instrument at a moment a person chose.
+    'prompt_generation', 'tool_generation', 'dispatch_generation', 'tools_refused', 'trigger_source',
     'code_mtime', 'model', ...REVISIT_COLUMNS]
   // ⭐ …and each of them must actually BE there, or "the list matches" would also be true of a migration
   // that never ran. The guard has to bite in both directions.
@@ -308,6 +310,8 @@ try {
     const NOTHING = 'zz_test There is nothing here I want to carry forward.'
     const quiet = await mkConversation('zz_test reflection — nothing kept')
     const r1 = await reflectOnConversation(fastify, {
+      // ⭐ 042 · a harness says so. ⛔ Its rows must never look like natural cron observations.
+      triggerSource: 'check',
       conversationId: quiet,
       turn: async () => ({ message: { content: NOTHING }, doneReason: 'stop' }),
     })
@@ -329,6 +333,8 @@ try {
 
     // ⭐ ONE OPPORTUNITY PER QUIET STRETCH — a second run on the same watermark must not reflect again.
     const again = await reflectOnConversation(fastify, {
+      // ⭐ 042 · a harness says so. ⛔ Its rows must never look like natural cron observations.
+      triggerSource: 'check',
       conversationId: quiet,
       turn: async () => ({ message: { content: 'zz_test this must never be stored' }, doneReason: 'stop' }),
     })
@@ -350,6 +356,8 @@ try {
     const saving = await mkConversation('zz_test reflection — something kept')
     let round = 0
     const r2 = await reflectOnConversation(fastify, {
+      // ⭐ 042 · a harness says so. ⛔ Its rows must never look like natural cron observations.
+      triggerSource: 'check',
       conversationId: saving,
       turn: async ({ tools }) => {
         round++
@@ -429,6 +437,8 @@ try {
     // but it means the UNIQUE index never gets exercised and this test would pass while asserting nothing
     // about the claim. ⇒ force past the timing gate so the DATASTORE is what refuses.
     const dup = await reflectOnConversation(fastify, {
+      // ⭐ 042 · a harness says so. ⛔ Its rows must never look like natural cron observations.
+      triggerSource: 'check',
       conversationId: saving,
       force: true,
       turn: async () => {

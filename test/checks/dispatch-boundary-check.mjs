@@ -98,6 +98,8 @@ try {
   let seenOffer = false
   let seenWriteSurface = false
   const res = await reflectOnConversation(fastify, {
+    // ⭐ 042 · a harness says so. ⛔ Its rows must never look like natural cron observations.
+    triggerSource: 'check',
     conversationId: convo,
     force: true,
     turn: async ({ tools }) => {
@@ -151,6 +153,7 @@ try {
   const convo2 = await mkConversation(`${MARK}offered call`)
   const KEPT = `${MARK}the boundary is enforced at dispatch, not advertised`
   const r2 = await reflectOnConversation(fastify, {
+    triggerSource: 'check',
     conversationId: convo2,
     force: true,
     turn: async ({ tools }) => {
