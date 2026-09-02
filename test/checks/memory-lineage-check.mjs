@@ -145,11 +145,18 @@ if (dev) {
 // resolution."* ⛔ So it is NOT relaxed to a count — it is tightened to an **ALLOWLIST OF EXACT IDS**.
 // ⭐ "Zero" would have to be weakened again on the next approved act; "exactly these and nothing else"
 // gets STRONGER each time, because every future mark must be added here deliberately.
-const QUARANTINED = ['49111883', 'b8a4660b'] // approved 2026-08-26 — relayed-speech names in root's room
+// ⭐ APPROVED CONTRADICTIONS, and they had two DIFFERENT approved treatments — which is why one list
+// cannot carry both. `49111883`/`b8a4660b` (2026-08-26, relayed-speech names) were QUARANTINED: marked and
+// left live. `7d383ce3` (2026-09-02, the Rome root) was marked AND superseded, because a fact slot cannot
+// hold two live rows. ⛔ Merging them would make "value intact, invalid_at null" false and hide the fact
+// that Ote ruled differently on purpose.
+const QUARANTINED = ['49111883', 'b8a4660b'] // marked, still live
+const RECONCILED = ['7d383ce3']              // marked AND superseded — Rome, 2026-09-02
+const APPROVED_CONTRADICTIONS = [...QUARANTINED, ...RECONCILED]
 const markedRows = await q(
   `select left(id::text,8) id, attribute from ${S}.txn_memories
     where contradicted_at is not null and content <> $1`, [FIXTURE])
-const unapproved = markedRows.filter((r) => !QUARANTINED.includes(r.id))
+const unapproved = markedRows.filter((r) => !APPROVED_CONTRADICTIONS.includes(r.id))
 ok(unapproved.length === 0,
   '5 · ⛔⛔ the ONLY contradicted rows are the ones Ote approved — nothing else was reconciled',
   unapproved.length ? `UNAPPROVED: ${unapproved.map((r) => `${r.id}(${r.attribute})`).join(' ')}` : `${markedRows.length} marked, all approved`)
@@ -173,19 +180,39 @@ ok(intact.length === QUARANTINED.length && intact.every((r) => r.value != null &
 const rome = await q(
   `select left(id::text,8) id, contradicted_at, invalid_at, supersedes_id from ${S}.txn_memories
     where content ~* '\\mrome\\M' order by created_at`)
-const romeContradicted = rome.filter((r) => r.contradicted_at).length
-ok(romeContradicted === 0,
-  '5 · ⛔⛔ no Rome row is marked CONTRADICTED — the reconciliation is reserved to Ote',
+// ⚠️⚠️ THIS ASSERTION SAID "no Rome row is marked CONTRADICTED — the reconciliation is reserved to Ote",
+// and it was written to become false only when he approved one. ⭐ He did, on 2026-09-02, and only for the
+// ROOT. ⇒ the assertion is now the tighter one: exactly ONE Rome row is contradicted and it is the root.
+// ⛔ `475ce0a9` in particular is held back deliberately, so the competing "shared project" reading can be
+// re-observed rather than assumed away.
+const romeContra = rome.filter((r) => r.contradicted_at).map((r) => r.id)
+ok(romeContra.length === 1 && romeContra[0] === '7d383ce3',
+  '5 · ⛔⛔ exactly ONE Rome row is contradicted — the root Ote approved, and nothing else',
   rome.map((r) => `${r.id}:${r.contradicted_at ? 'CONTRA' : 'clean'}`).join(' '))
 
 // ⭐⭐⭐ AND THE FINDING ITSELF IS ASSERTED RATHER THAN NARRATED. `7d383ce3` — the proverb stored as a
 // goal — is STILL LIVE, seventeen days after being repudiated in conversation. ⛔ This assertion is
 // meant to be true right now and to become false only when Ote approves a reconciliation. It is here so
 // the drift stays visible on every run instead of living in a document nobody re-reads.
-const origin = rome.find((r) => r.id === '7d383ce3')
-ok(!!origin && !origin.invalid_at && !origin.contradicted_at,
-  '5 · ⭐⭐ `7d383ce3` is STILL LIVE and unmarked — the drift is present, recorded, and not yet repaired',
-  origin ? `invalid_at=${origin.invalid_at ?? 'null'} contradicted_at=${origin.contradicted_at ?? 'null'}` : 'row missing')
+// ⭐⭐⭐ AND THE REPAIR IS NOW ASSERTED WHERE THE DRIFT USED TO BE. This said `7d383ce3` was STILL LIVE
+// and unmarked, and was written to stay true *"only until Ote approves a reconciliation."* ⇒ it now
+// asserts the reconciliation instead: marked, superseded, and — the load-bearing half — ⛔ NOT REWRITTEN.
+const origin = await one(
+  `select left(id::text,8) id, invalid_at, contradicted_at, contradicted_by_message_id::text cbm,
+          value, content, author::text author, source, supersedes_id
+     from ${S}.txn_memories where id = '7d383ce3-bed2-4b7c-b5bc-0d23d1b3f700'`)
+ok(!!origin?.contradicted_at && !!origin?.invalid_at
+   && origin.cbm === 'f8612ddd-a01e-453d-b793-1d9ba064a41e',
+  '5 · ⭐⭐ `7d383ce3` is RECONCILED — contradicted by the message that supplied the referent, and superseded',
+  origin ? `contradicted_by=${String(origin.cbm).slice(0, 8)} invalid_at=${origin.invalid_at ? 'set' : 'null'}` : 'row missing')
+ok(origin?.value === 'build Rome in one day' && origin?.author === 'account'
+   && origin?.source === 'conversation:53f055d0-b582-4346-89bb-ce1a3e1090de' && !origin?.supersedes_id,
+  '5 · ⛔⛔ …and its VALUE, AUTHOR and PROVENANCE are untouched — the semantic model was corrected, ⛔ not history',
+  `value=${JSON.stringify(origin?.value)} author=${origin?.author}`)
+const successor = await one(
+  `select left(id::text,8) id from ${S}.txn_memories
+    where supersedes_id = '7d383ce3-bed2-4b7c-b5bc-0d23d1b3f700'`)
+ok(!!successor, '5 · ⭐ the chain is walkable forward — a successor names it', `→ ${successor?.id ?? 'none'}`)
 
 // ── 6 · THE TRACE IS WIRED WHERE THE IDS WERE BEING DROPPED ──────────────────────────────────────
 // ⚠️ A MECHANISM IMPORTED BY NOTHING IS THE TRAP THIS PROJECT ALREADY FELL INTO ONCE: two files each

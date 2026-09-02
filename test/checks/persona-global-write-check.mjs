@@ -208,8 +208,22 @@ try {
     keptOrdinary?.ok === true && ordinaryRow?.scope === 'room', `ok=${keptOrdinary?.ok} scope=${ordinaryRow?.scope}`)
 
   // ── ⑨ 029 IS UNCHANGED ────────────────────────────────────────────────────────────────────────
-  check('⑨ ⛔ the two LEGACY persona_global rows were not touched',
-    Number((await one(`select count(*)::int n from ${S}.txn_memories where scope='persona_global' and kind='identity'`)).n) === 2)
+  // ⚠️ THE COUNT WAS 2 AND IS NOW 3, AND THE THIRD IS THE POINT. The Rome reconciliation added a
+  // persona-global identity row whose scope was **DECLARED** under 035 — ⛔ not acquired as a side effect of
+  // `kind='identity'`, which is exactly how the two legacy rows got there. ⇒ asserting a bare count would
+  // now be asserting that 035 never got used. ⭐ What must stay true is that the two LEGACY rows are
+  // untouched and that anything new arrived through the declared route.
+  const globalIdentity = await q(
+    `select left(id::text,8) id, author::text author, source, modality::text modality
+       from ${S}.txn_memories where scope='persona_global' and kind='identity' order by created_at`)
+  const legacy = globalIdentity.filter((r) => !String(r.source ?? '').startsWith('reconcile:'))
+  check('⑨ ⛔ the two LEGACY persona_global rows are still exactly two, and untouched',
+    legacy.length === 2 && legacy.every((r) => r.author === 'account' && r.modality === null),
+    legacy.map((r) => `${r.id}:${r.author}`).join(' '))
+  check('⑨b ⭐⭐ and any newer one came through the DECLARED route — hers, and modality-marked',
+    globalIdentity.filter((r) => String(r.source ?? '').startsWith('reconcile:'))
+      .every((r) => r.author === 'persona' && r.modality === 'figurative'),
+    globalIdentity.map((r) => `${r.id}:${r.author}/${r.modality ?? '—'}`).join(' '))
 } catch (e) {
   check('the check ran to completion', false, e?.stack ?? String(e))
 } finally {

@@ -43,10 +43,24 @@ ok([...enumVals].sort().join() === [...MODALITY_VALUES].sort().join(),
   '1 · ⭐ …and the database enum matches `memory-modality.js` exactly',
   `db=[${enumVals}] js=[${MODALITY_VALUES}]`)
 
-const [{ n: classified }] = await q(`select count(*)::int n from ${S}.txn_memories where modality is not null`)
+// ⭐⭐ THE ASSERTION IS ABOUT HISTORICAL ROWS, AND THE DISTINCTION IS THE POINT. Inferring a modality
+// from stored prose would be the original flattening run a second time and called a repair — so ⛔ no
+// row that already existed may acquire one. ⚠️ The Rome reconciliation (2026-09-02, ratified by Ote) wrote
+// THREE NEW rows whose modality was DECLARED at authorship from his own ruling, ⛔ never inferred from an
+// old row's text. Those are excluded by their `source`, which names the ruling — ⛔ not by an id list that
+// would silently widen the moment somebody added a fourth.
+const [{ n: classified }] = await q(
+  `select count(*)::int n from ${S}.txn_memories
+    where modality is not null and (source is null or source not like 'reconcile:%')`)
 ok(classified === 0,
   '1 · ⛔⛔ NO historical row was classified — inferring a modality from stored prose would be the '
   + 'original flattening run a second time and called a repair', `${classified} classified`)
+// ⭐ And the declared ones are declared: every modality in the store belongs to a ratified reconciliation.
+const declared = await q(
+  `select left(id::text,8) id, modality::text m, source from ${S}.txn_memories where modality is not null`)
+ok(declared.every((r) => String(r.source).startsWith('reconcile:')),
+  '1 · ⭐⭐ …and every row that DOES carry one was authored with it, by a named ruling',
+  declared.map((r) => `${r.id}:${r.m}`).join(' ') || 'none')
 
 // ── 2 · THE SLOT RULE IS IN THE DATABASE, NOT ONLY IN THE STORE ──────────────────────────────────
 // ⭐ The store gate is the loud half that explains itself; this half survives a writer nobody has

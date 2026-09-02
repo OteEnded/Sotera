@@ -36,6 +36,13 @@ export const MECHANISM = Object.freeze({
   lesson: 'lesson',               // a lesson she drew about her own practice
   decline: 'decline',             // a record that she DECLINED to remember something
   consolidation: 'consolidation', // a Knowledge Card built from member memories
+  // ⭐⭐ AN OPERATOR RECONCILIATION, RATIFIED BY OTE. ⛔ Not extraction (nothing was extracted), not
+  // `model-tool` (she did not call anything), not `consolidation` (no member memories). It is a distinct
+  // mechanism — a correction authored outside a conversation because a semantic ruling required it — and
+  // it earns a name for the reason this list exists: an unrecognised tag must stay `unknown`, and
+  // `unknown` must keep meaning *a writer no reader here has ever heard of*.
+  // ⚠️ Its occasion is the RULING, not a turn: `reconcile:rome-2026-09-02`.
+  reconciliation: 'reconciliation',
   unrecorded: 'unrecorded',       // `source` is null — the honest record of a writer that said nothing
   unknown: 'unknown',             // a tag no reader here recognises ⇒ see `UNKNOWN_IS_A_FAILURE` below
 })
@@ -50,6 +57,7 @@ const PREFIXED = Object.freeze([
   ['episode:', MECHANISM.episode],
   ['lesson:', MECHANISM.lesson],
   ['decline:', MECHANISM.decline],
+  ['reconcile:', MECHANISM.reconciliation],
 ])
 const EXACT = Object.freeze({
   'model-tool': MECHANISM.modelTool,
