@@ -149,12 +149,74 @@ export function buildFollowThroughMessages({ answer, evidence, fromUser = false 
 }
 
 /**
+ * ⭐⭐⭐ 036 · RECORD THAT THE OCCASION HAPPENED — including when it produced NOTHING.
+ *
+ * ⚠️⚠️ Before this, a firing that ended in prose left NO ROW ANYWHERE: only the resulting tool call
+ * reached `log_tool_calls`, so SILENCE was invisible and the mechanism read as *"6 keeps, 0 declines"* —
+ * a mechanism that always keeps. ⓘ Reconstructing the denominator by replaying the pure gate over 152
+ * stored turns gave ~23 occasions ⇒ ~17 produced no call at all. ⭐ That recovery was possible only
+ * because the gate happens to be PURE. ⛔ Luck is not an instrument, so the occasion now records itself.
+ *
+ * ⛔ BEST-EFFORT BY CONSTRUCTION, AND THAT IS LOAD-BEARING. Failing to record an occasion must never fail
+ * the occasion — this is observability, and the moment it can break retention it has become a dependency
+ * rather than a measurement.
+ * ⛔ It decides nothing and is read by nothing.
+ */
+async function recordOccasion(fastify, { conversationId, messageId, user, why, fromUser, outcome, calls = [], offered = [], said = '', error = null }) {
+  try {
+    const seq = fastify?.db?.txn_memories?.sequelize
+    const { schema } = fastify?.db?.txn_memories?.getTableName?.() ?? {}
+    if (!seq || !schema) return false
+    await seq.query(
+      `INSERT INTO "${schema}"."log_retention_occasions"
+         (conversation_id, message_id, user_id, why, from_user, outcome, tools_called, tools_offered, said, error)
+       VALUES (:conversationId, :messageId, :userId, :why, :fromUser, :outcome, :tools, :offered, :said, :error)`,
+      {
+        replacements: {
+          conversationId: conversationId ?? null,
+          messageId: messageId ?? null,
+          userId: user?.id ?? null,
+          why: String(why ?? 'unrecorded'),
+          fromUser: fromUser === true,
+          outcome,
+          // ⭐ postgres array literal; an empty list stays an empty array, ⛔ never NULL, so "she called
+          // nothing" and "we did not record what she called" stay distinguishable.
+          tools: `{${calls.map((c) => `"${String(c).replace(/"/g, '')}"`).join(',')}}`,
+          // ⭐ WHAT WAS ON THE TABLE. ⛔ Without it a door that was never offered records as `silence` —
+          // proved by removing the decline door and watching the outcome say exactly that.
+          offered: `{${offered.map((c) => `"${String(c).replace(/"/g, '')}"`).join(',')}}`,
+          said: String(said ?? '').slice(0, 4000) || null,
+          error: error ? String(error).slice(0, 500) : null,
+        },
+      })
+    return true
+  } catch (e) {
+    try { await log(`[retention-followthrough] could not record the occasion: ${e?.message}`, import.meta.url) } catch { /* nothing left to try */ }
+    return false
+  }
+}
+
+/** ⭐ THE THREE OUTCOMES, from what she actually called. `both` is possible and must not be flattened. */
+function outcomeOf(calls) {
+  const names = new Set(calls.map((c) => c.name))
+  const kept = names.has('keep')
+  const declined = names.has('decline_to_remember')
+  if (kept && declined) return 'both'
+  if (kept) return 'keep'
+  if (declined) return 'decline'
+  return 'silence'
+}
+
+/**
  * Run the follow-through. ⛔ Off the hot path — the reply is already delivered.
  * @returns {Promise<{ran:boolean, why?:string, calls?:Array, error?:string}>}
  */
 export async function runFollowThrough(fastify, {
   user, conversationId, messageId, answer, evidence, fromUser = false, provider, model, maxTokens = 700,
   turn = null,
+  // ⭐ 036 · WHICH TRIGGER FIRED. It was computed at the call site and thrown away, and the route logged
+  // it on the SKIP branch only — so on the branch that matters it was never recorded at all.
+  why = 'unrecorded',
 }) {
   // ⚠️ The tool context is the REAL one — same builder, same services, same audit trail. ⛔ A follow-through
   // that ran against a stub would prove only that the stub works.
@@ -168,8 +230,12 @@ export async function runFollowThrough(fastify, {
   const tools = all.filter((d) => FOLLOWTHROUGH_TOOLS.includes(d?.function?.name))
   // ⛔ AN EMPTY TOOL LIST WOULD MAKE THIS A SILENT NO-OP THAT STILL BURNED A GENERATION. If the doors are
   // not installed, say so and do not spend the call.
-  if (!tools.length) return { ran: false, why: 'no-retention-tools-installed' }
+  if (!tools.length) {
+    await recordOccasion(fastify, { conversationId, messageId, user, why, fromUser, outcome: 'not-run', error: 'no-retention-tools-installed' })
+    return { ran: false, why: 'no-retention-tools-installed' }
+  }
 
+  const offeredNames = tools.map((d) => d?.function?.name).filter(Boolean)
   const messages = buildFollowThroughMessages({ answer, evidence, fromUser })
   const call = turn || (async ({ messages: ms, tools: ts }) => {
     const res = await chat({
@@ -191,6 +257,9 @@ export async function runFollowThrough(fastify, {
     msg = await call({ messages, tools })
   } catch (e) {
     await log(`[retention-followthrough] model call failed: ${e?.message}`, import.meta.url)
+    // ⭐ A FIRING THAT FAILED IS STILL A FIRING. Losing it here would put the failure back into the
+    // silence bucket, which is the one distinction 036 exists to make.
+    await recordOccasion(fastify, { conversationId, messageId, user, why, fromUser, outcome: 'error', offered: offeredNames, error: e?.message })
     return { ran: false, error: e?.message || 'model call failed' }
   }
 
@@ -209,5 +278,10 @@ export async function runFollowThrough(fastify, {
     }
     calls.push({ name, args, result })
   }
-  return { ran: true, calls, said: typeof msg?.content === 'string' ? msg.content : '' }
+  const said = typeof msg?.content === 'string' ? msg.content : ''
+  // ⭐⭐ THE ONE THAT MATTERS: when `calls` is empty this records `silence` — an OUTCOME, ⛔ not an
+  // absence of data. Everything above it existed before; only this row makes the denominator real.
+  await recordOccasion(fastify, { conversationId, messageId, user, why, fromUser,
+    outcome: outcomeOf(calls), calls: calls.map((c) => c.name), offered: offeredNames, said })
+  return { ran: true, calls, said }
 }

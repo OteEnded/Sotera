@@ -3237,6 +3237,10 @@ export default async function chatSiteRoutes(fastify) {
         // follows. Caught by grepping for the variables rather than assuming they existed.
         provider: providerName ?? null,
         model: modelName ?? null,
+        // ⭐ 036 · the trigger travels WITH the firing. It was computed here and dropped, and the log
+        // below carries `r.why`, which runFollowThrough sets only when it does NOT run — so on the fire
+        // branch the trigger was recorded nowhere at all.
+        why: ft.why,
       })
         .then((r) => {
           request.log?.info?.({
