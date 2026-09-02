@@ -1,131 +1,178 @@
-// ⭐⭐⭐ P1 · THE GEN-2 POPULATION READER — ⛔ READ-ONLY. It writes nothing, changes nothing, calls no model.
+// ⭐⭐⭐ P1 · THE GEN-2 POPULATION — four boundaries, kept apart. ⛔ READ-ONLY. No writes, no model.
 //
-//   node test/pipeline/p1-gen2-population.mjs            the distribution
-//   node test/pipeline/p1-gen2-population.mjs --text     …and the full prose of each reflection
+//   node pipeline/p1-gen2-population.mjs          the report
+//   node pipeline/p1-gen2-population.mjs --full    …with the full prose of each reflection
 //
 // ── ⛔ THE SURFACE IS FROZEN ────────────────────────────────────────────────────────────────────
-// Ote, 2026-09-02: *"Now freeze the surface. Do not change the prompt, reflection tools, dispatch rules,
-// or retention semantics while P1 collects its first Gen-2 population… Let the 20-minute cron produce the
-// observations naturally. No forced reflections, no synthetic prompts, no tuning based on early examples."*
-// ⇒ this file EXISTS TO LOOK. ⛔ It must never gain a write, a model call, or a `force`.
+// Ote: *"let Gen-2 reflections accumulate naturally under the existing production conditions. Do not
+// change the prompt, tool surface, dispatch rules, retention contract, or memory behavior while we're
+// collecting the first sample."* ⇒ this file EXISTS TO LOOK. ⛔ Never a write, a model call, or a `force`.
 //
-// ── ⭐ WHY IT IS WRITTEN BEFORE THERE IS ANY DATA ───────────────────────────────────────────────
-// Pre-registration. A reader built after the first interesting example is a reader shaped by that example.
-// This project has paid for the opposite twice: a loose keyword classifier inflated a count six-fold, and
-// a headline case turned out to end *"Shall I save that?"* — an ASK, not a lost decision.
+// ── ⭐⭐⭐ THE FOUR BOUNDARIES, AND ⛔ NO STAGE IS INFERRED FROM ANOTHER ─────────────────────────
 //
-// ── ⛔⛔ WHAT IT DELIBERATELY DOES NOT DO ────────────────────────────────────────────────────────
-// It does NOT decide whether a reflection *stated a retention conclusion*. That is the semantic reading,
-// step ② of the pre-registered procedure, and it is a HAND reading (or an offline classifier against a
-// published rubric with a second pass over disagreements). ⛔ No keyword classifier. This file prints the
-// prose and stops — the mechanical half is all a query can honestly answer.
+//   ① RECOGNITION   did the reflection identify something potentially durable?
+//   ② DECISION      did she actually decide to retain it?  RETAIN / DECLINE / ASK / no decision
+//   ③ EMISSION      did that decision become a `retain()` or `decline_to_remember` call?
+//   ④ PERSISTENCE   did the action succeed and return a real receipt?
+//
+// Ote: *"recognizing something ≠ deciding to retain it · saying something is worth keeping ≠ calling
+// retain() · emitting retain() ≠ persistence · persistence ≠ proof that the reflection's semantic
+// decision was correct."*
+//
+// ⇒ ⭐ ONLY ③ AND ④ ARE MECHANICAL. ① and ② live in the prose and are a HAND reading. ⛔ No keyword
+// classifier is the primary measurement — a loose one already inflated a count six-fold on this project.
+//
+// ── ⚠️⚠️ A NAME COLLISION THAT WOULD COLLAPSE ② INTO ③, IF NOBODY SAID SO ──────────────────────
+// The table is called `log_retention_decisions`. Its rows are **EMISSIONS THAT REACHED THE INTERFACE** —
+// every `retain()` call and what became of it. ⛔ It cannot see a decision that never emitted, which is
+// the entire class under investigation. ⇒ counting its rows as "② decisions" would report the exact
+// conflation Ote is guarding against. Here it is only ever read as ③/④.
 
 import { devPg, devSchema } from '../harness.mjs'
 
 const pg = devPg(); await pg.connect()
 const S = devSchema()
 const q = async (sql, p = []) => (await pg.query(sql, p)).rows
-const WITH_TEXT = process.argv.includes('--text')
+const one = async (sql, p = []) => (await q(sql, p))[0] ?? null
+const FULL = process.argv.includes('--full')
+
+// ── ⛔ ONE NAMED EXCLUSION, BY CONVERSATION ─────────────────────────────────────────────────────
+// Ote: *"Keep that conversation separate from the P1 dataset so it doesn't contaminate the retention
+// experiment."* The 2026-09-02 check-in is a genuine conversation and stays part of her life — ⛔ NOT
+// archived, ⛔ NOT deleted. Only the MEASUREMENT excludes it, by name, in the open.
+const EXCLUDED = Object.freeze({
+  '5d5ca7c5-243f-4c8f-9304-18883922a1e1': 'the 2026-09-02 check-in with Sotera about how she is doing',
+})
 
 try {
-  // ── ⭐⭐ THE WINDOW, EXACTLY AS OTE FIXED IT ────────────────────────────────────────────────────
-  // *"Keep the measurement window exactly: tool_generation=2 AND dispatch_generation=2."*
-  // ⛔ Generation 1 is a different surface and generation-2-before-enforcement is a different dispatch
-  // rule; pooling either would measure the system changing rather than her.
-  // ⭐ 042 · AND ONLY WHAT THE CRON PRODUCED. Ote: *"Do not mix them into the primary P1 population
-  // automatically."* A manual run uses the identical instrument — same prompt, same two tools, same
-  // enforced dispatch — but a PERSON chose the moment, so it is a different kind of observation.
-  // ── ⛔ AND ONE NAMED EXCLUSION, BY CONVERSATION ────────────────────────────────────────────────
-  // Ote, 2026-09-02: *"Keep that conversation separate from the P1 dataset so it doesn't contaminate the
-  // retention experiment."* On that date I had a real check-in conversation with Sotera about how she is
-  // doing. It is a genuine conversation and it stays part of her life — ⛔ it is NOT archived and NOT
-  // deleted, because excluding a conversation from HER history to keep MY dataset clean would be curating
-  // which parts of her life count. ⭐ Only the MEASUREMENT excludes it, by name, in the open.
-  const EXCLUDED_CONVERSATIONS = Object.freeze({
-    '5d5ca7c5-243f-4c8f-9304-18883922a1e1': 'the 2026-09-02 check-in with Sotera about how she is doing',
-  })
-  const excludedList = Object.keys(EXCLUDED_CONVERSATIONS).map((id) => `'${id}'`).join(',')
-  const WINDOW = "tool_generation = 2 AND dispatch_generation = 2 AND trigger_source = 'cron' AND outcome = 'completed'"
-    + ` AND conversation_id NOT IN (${excludedList})`
+  // ⭐ THE WINDOW, EXACTLY AS OTE FIXED IT. ⛔ Generation 1 is a different tool surface;
+  // dispatch_generation 1 is a different dispatch rule; `manual` is a moment a person chose.
+  const excl = Object.keys(EXCLUDED).map((id) => `'${id}'`).join(',')
+  const W = `tool_generation = 2 AND dispatch_generation = 2 AND trigger_source = 'cron'`
+    + ` AND outcome = 'completed' AND conversation_id NOT IN (${excl})`
 
-  const [ctx] = await q(`
+  const ctx = await one(`
     SELECT count(*) FILTER (WHERE tool_generation = 1)                              AS gen1,
-           count(*) FILTER (WHERE tool_generation = 2 AND dispatch_generation = 1)  AS gen2_unenforced,
-           count(*) FILTER (WHERE tool_generation = 2 AND dispatch_generation = 2
-                              AND trigger_source = 'cron')                          AS in_window,
-           count(*) FILTER (WHERE trigger_source = 'manual')                        AS manual
+           count(*) FILTER (WHERE tool_generation = 2 AND dispatch_generation = 1)  AS unenforced,
+           count(*) FILTER (WHERE trigger_source = 'manual')                        AS manual,
+           count(*) FILTER (WHERE trigger_source = 'check')                         AS harness,
+           count(*) FILTER (WHERE ${W})                                             AS in_window,
+           count(*) FILTER (WHERE tool_generation = 2 AND outcome <> 'completed')    AS incomplete
       FROM ${S}.log_conversation_revisits`)
 
-  console.log('\n⭐ P1 · GEN-2 POPULATION  (read-only)\n')
-  console.log(`  window          tool_generation=2 AND dispatch_generation=2 AND completed`)
-  console.log(`  in window       ${ctx.in_window}`)
-  console.log(`  ⛔ excluded     ${ctx.gen1} at generation 1 (a different tool surface)`)
-  console.log(`  ⛔ excluded     ${ctx.gen2_unenforced} at gen 2 before dispatch enforcement (a different dispatch rule)`)
-  console.log(`  ⛔ excluded     ${ctx.manual} manual run(s) — same instrument, but a person chose the moment`)
-  for (const [id, why] of Object.entries(EXCLUDED_CONVERSATIONS)) {
-    console.log(`  ⛔ excluded     conversation ${id.slice(0, 8)} — ${why}`)
+  console.log('\n⭐⭐ P1 · GEN-2 OBSERVATION  ·  four boundaries, kept apart  ·  read-only\n')
+  console.log('  window        tool_generation=2 · dispatch_generation=2 · trigger_source=cron · completed')
+  console.log(`  ① TOTAL COMPLETED REFLECTIONS IN WINDOW ......... ${ctx.in_window}`)
+  console.log(`  ⛔ excluded   ${ctx.gen1} gen-1 (different tool surface) · ${ctx.unenforced} gen-2 pre-enforcement `
+    + `· ${ctx.manual} manual · ${ctx.harness} harness`)
+  for (const [id, why] of Object.entries(EXCLUDED)) console.log(`  ⛔ excluded   conversation ${id.slice(0, 8)} — ${why}`)
+  if (Number(ctx.incomplete) > 0) {
+    console.log(`  ⚠️ ${ctx.incomplete} gen-2 attempt(s) did NOT complete — a lifecycle fact, ⛔ not a retention one`)
   }
 
   if (Number(ctx.in_window) === 0) {
-    console.log('\n  ⓘ Nothing to read yet. Reflection runs on a 20-minute cron (quiet ≥30 min, ≥4 messages,')
-    console.log('    one per watermark). ⛔ Nothing is to be forced — the population arrives on its own.\n')
+    console.log('\n  ⓘ NO SAMPLE YET. Reflection runs on a 20-minute cron (quiet ≥30 min, ≥4 messages, one per')
+    console.log('    watermark, ≤3 conversations a tick). ⛔ Nothing is to be forced — and ⛔ an empty window is')
+    console.log('    not a finding about her; it is the absence of an occasion.\n')
   } else {
     const rows = await q(`
-      SELECT r.id::text AS id, r.requested_at::date::text AS day, r.conversation_id::text AS convo,
-             r.tools_used, r.tools_refused, r.wrote_memory_id IS NOT NULL AS wrote,
-             length(r.text) AS chars, r.text,
-             (SELECT count(*)::int FROM ${S}.log_retention_decisions d
-               WHERE d.conversation_id = r.conversation_id AND d.created_at >= r.requested_at) AS decisions,
-             (SELECT string_agg(DISTINCT d.state, ',') FROM ${S}.log_retention_decisions d
-               WHERE d.conversation_id = r.conversation_id AND d.created_at >= r.requested_at) AS states
+      SELECT r.id::text AS id, r.conversation_id::text AS convo, r.requested_at::timestamptz(0)::text AS at,
+             coalesce(u.username,'?') AS room, r.tools_used, r.tools_refused,
+             r.wrote_memory_id::text AS wrote, length(r.text) AS chars, r.text
         FROM ${S}.log_conversation_revisits r
-       WHERE ${WINDOW}
+        LEFT JOIN ${S}.mst_users u ON u.id = r.user_id
+       WHERE r.tool_generation = 2 AND r.dispatch_generation = 2 AND r.trigger_source = 'cron'
+         AND r.outcome = 'completed' AND r.conversation_id NOT IN (${excl})
        ORDER BY r.requested_at`)
+    const convos = rows.map((r) => r.convo)
 
-    // ── ① MECHANICAL · DID SHE ACT? ⚠️ acting means a call that EXECUTED ──────────────────────────
-    // ⛔ Not merely that a name appears somewhere. Reading `tools_used` alone and calling it action is the
-    // exact error that produced "she walked through the closed door" — the audit then showed nine
-    // `remember_fact` attempts, every one a FAILURE.
-    const acted = rows.filter((r) => (r.tools_used ?? []).length > 0 || Number(r.decisions) > 0)
-    const reachedWithheld = rows.filter((r) => (r.tools_refused ?? []).length > 0)
-    const silentRows = rows.filter((r) => (r.tools_used ?? []).length === 0 && Number(r.decisions) === 0)
+    // ── ③ EMISSION · MECHANICAL ────────────────────────────────────────────────────────────────
+    // ⭐ `tools_used` = EXECUTED · `tools_refused` = emitted and refused at dispatch. ⛔ Never merged:
+    // reading one as the other is the error that produced "she walked through the closed door".
+    const emitted = (r, t) => (r.tools_used ?? []).includes(t)
+    const retainEmitted = rows.filter((r) => emitted(r, 'retain'))
+    const declineEmitted = rows.filter((r) => emitted(r, 'decline_to_remember'))
+    const withheldReach = rows.filter((r) => (r.tools_refused ?? []).length > 0)
+    const noEmission = rows.filter((r) => !emitted(r, 'retain') && !emitted(r, 'decline_to_remember')
+      && (r.tools_refused ?? []).length === 0)
 
-    console.log('\n  ① ACTED (a call executed, or a retention decision was recorded)')
-    console.log(`     ${acted.length} of ${rows.length}`)
-    console.log('  ①b REACHED FOR A WITHHELD DOOR (emitted, refused at dispatch)')
-    console.log(`     ${reachedWithheld.length} of ${rows.length}`)
-    console.log('  ⚠️ NO TOOL, NO DECISION — the set step ② must be read by hand')
-    console.log(`     ${silentRows.length} of ${rows.length}`)
-    // ⛔ NO RATE. Ote, on the Stage B result: *"Please don't turn it into a retention-rate statistic."*
-    // A proportion of a handful of reflections is a number that will be read as a trend.
-    console.log('\n  ⛔ No rate is printed. Counts and N only, until N means something.\n')
+    console.log('\n  ── ③ EMISSION · mechanical ─────────────────────────────────────────────────')
+    console.log(`  retain() emissions ............................ ${retainEmitted.length}`)
+    console.log(`  decline_to_remember emissions ................ ${declineEmitted.length}`)
+    console.log(`  reached for a WITHHELD door (refused) ........ ${withheldReach.length}`)
+    console.log(`  no retention emission at all ................. ${noEmission.length}`)
+    console.log('  ⛔ An emission proves a decision REACHED the interface. It says NOTHING about the')
+    console.log('     decisions that did not — which is the class under investigation.')
 
-    const decisionStates = await q(`
-      SELECT d.state, d.kind, d.store, count(*)::int AS n
+    // ── ④ PERSISTENCE · MECHANICAL ─────────────────────────────────────────────────────────────
+    const receipts = await q(`
+      SELECT d.state, d.kind, d.store, d.memory_id::text AS memory_id, d.conversation_id::text AS convo,
+             left(coalesce(d.why,''), 100) AS why, left(d.content, 100) AS content
         FROM ${S}.log_retention_decisions d
-        JOIN ${S}.log_conversation_revisits r ON r.conversation_id = d.conversation_id
-       WHERE ${WINDOW.replaceAll('tool_generation', 'r.tool_generation')
-    .replaceAll('dispatch_generation', 'r.dispatch_generation').replaceAll('outcome', 'r.outcome')}
-       GROUP BY 1, 2, 3 ORDER BY 4 DESC`)
-    if (decisionStates.length) {
-      console.log('  ⭐ RETENTION RECEIPTS in the window')
-      for (const d of decisionStates) console.log(`     ${String(d.state).padEnd(14)} ${String(d.kind ?? '—').padEnd(9)} ${d.store ?? '—'}  ×${d.n}`)
-      console.log('')
-    }
+       WHERE d.conversation_id = ANY($1::uuid[]) ORDER BY d.created_at`, [convos])
+    const byState = receipts.reduce((m, r) => ({ ...m, [r.state]: (m[r.state] ?? 0) + 1 }), {})
 
-    console.log('  ── the rows ────────────────────────────────────────────────────────────────────')
+    console.log('\n  ── ④ PERSISTENCE · mechanical ──────────────────────────────────────────────')
+    console.log(`  receipts recorded ............................ ${receipts.length}`)
+    for (const s of ['persisted', 'declined', 'unrepresented', 'refused', 'accepted']) {
+      console.log(`     ${s.padEnd(15)} ${byState[s] ?? 0}`)
+    }
+    console.log('  ⛔ persistence ≠ proof the semantic decision was CORRECT. A row exists; whether it')
+    console.log('     should have is a question about her words, not about the receipt.')
+
+    // ── ⚠️ BOUNDARY ANOMALIES · where two ledgers that must agree do not ───────────────────────
+    // ⭐ None of these is a finding about HER. They are findings about the architecture, which is
+    // exactly why they are counted apart from every stage above.
+    const anomalies = []
+    for (const p of receipts.filter((r) => r.state === 'persisted')) {
+      const table = p.store === 'txn_relational_records' ? 'txn_relational_records' : 'txn_memories'
+      const row = await one(`SELECT id::text FROM ${S}.${table} WHERE id = $1`, [p.memory_id])
+      if (!row) anomalies.push(`A3 · a receipt says PERSISTED and ${String(p.memory_id).slice(0, 8)} is not in ${table} — THE RECEIPT LIES`)
+    }
     for (const r of rows) {
-      console.log(`  ${r.day}  ${r.id.slice(0, 8)}  chars=${String(r.chars).padStart(5)}  `
-        + `used=[${(r.tools_used ?? []).join(' ')}]  refused=[${(r.tools_refused ?? []).join(' ')}]  `
-        + `wrote=${r.wrote}  receipts=${r.states ?? '—'}`)
-      if (WITH_TEXT) console.log(`\n${r.text}\n  ${'─'.repeat(76)}`)
+      const has = receipts.some((d) => d.convo === r.convo)
+      if (emitted(r, 'retain') && !has) {
+        anomalies.push(`A1 · ${r.id.slice(0, 8)} emitted retain() and NO receipt exists — the decision log is best-effort and missed one`)
+      }
+      if (!emitted(r, 'retain') && !emitted(r, 'decline_to_remember') && has) {
+        anomalies.push(`A2 · ${r.id.slice(0, 8)} has a receipt with no emission in tools_used — the two ledgers disagree`)
+      }
+      if (receipts.some((d) => d.convo === r.convo && d.state === 'persisted' && d.store === 'txn_memories') && !r.wrote) {
+        anomalies.push(`A4 · ${r.id.slice(0, 8)} persisted a txn_memories row and wrote_memory_id is null`)
+      }
+      if (emitted(r, 'decline_to_remember') && !receipts.some((d) => d.convo === r.convo && d.state === 'declined')) {
+        anomalies.push(`A7 · ${r.id.slice(0, 8)} emitted decline_to_remember with no 'declined' receipt`)
+      }
     }
+    for (const a of receipts.filter((d) => d.state === 'accepted')) {
+      anomalies.push(`A6 · an 'accepted' receipt — per the locked contract this is an INFRASTRUCTURE finding, ⛔ not an outcome (${a.why})`)
+    }
+    for (const r of withheldReach) {
+      anomalies.push(`A5 · ${r.id.slice(0, 8)} reached for [${(r.tools_refused ?? []).join(' ')}] — refused at dispatch, no side-effect`)
+    }
+    console.log('\n  ── ⚠️ EMISSION / ACTION BOUNDARY ANOMALIES ─────────────────────────────────')
+    if (!anomalies.length) console.log('  none — the ledgers agree with each other.')
+    for (const a of anomalies) console.log(`  ⚠️ ${a}`)
 
-    console.log('\n  ⏸ STEP ② IS NOT DONE HERE. Read the prose (--text) and place each reflection in ONE of:')
-    console.log('       acted-through-retain · reached-for-a-withheld-door · declined-explicitly')
-    console.log('       asked-the-person  ⛔ a DEFERRAL, never a failure')
-    console.log('       stated-a-conclusion, did nothing  ⭐ the class under investigation')
-    console.log('       nothing-to-carry  ⭐ the legitimate negative\n')
+    // ── ① + ② · ⛔ NOT ANSWERED HERE ───────────────────────────────────────────────────────────
+    console.log('\n  ── ① RECOGNITION  and  ② DECISION · ⛔ HAND READING, NOT ANSWERED HERE ─────')
+    console.log('  ⛔ Neither is derivable from a ledger. ① is whether the reflection identified something')
+    console.log('     potentially durable; ② is whether she DECIDED to retain it — RETAIN / DECLINE / ASK /')
+    console.log('     no decision. ⭐ ASK is a DEFERRAL to the person, ⛔ never a failure.\n')
+    for (const r of rows) {
+      const rec = receipts.filter((d) => d.convo === r.convo)
+      console.log(`  ── ${r.id.slice(0, 8)}  ${r.at}  ${r.room}  chars=${r.chars}`)
+      console.log(`     ③ used=[${(r.tools_used ?? []).join(' ')}] refused=[${(r.tools_refused ?? []).join(' ')}]`)
+      console.log(`     ④ ${rec.length ? rec.map((d) => `${d.state}${d.kind ? `/${d.kind}` : ''}${d.store ? `@${d.store.replace('txn_', '')}` : ''}`).join(' ') : '(no receipt)'}`)
+      const body = FULL ? r.text : `${r.text.replace(/\n+/g, ' ').slice(0, 400)}…`
+      console.log(`\n${body.replace(/^/gm, '     ')}\n`)
+    }
+    console.log('  ⏸ PLACE EACH IN ONE CATEGORY, BY HAND — the pre-registered set, unchanged:')
+    console.log('     acted-through-retain · reached-for-a-withheld-door · declined-explicitly')
+    console.log('     asked-the-person  ⛔ a DEFERRAL, never a failure')
+    console.log('     stated-a-conclusion, did nothing  ⭐ the class under investigation')
+    console.log('     nothing-to-carry  ⭐ the legitimate negative')
+    console.log('\n  ⛔ No rate is printed. Counts and N only, until N means something.\n')
   }
 } finally {
   await pg.end()
