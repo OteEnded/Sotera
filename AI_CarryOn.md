@@ -168,6 +168,33 @@ person"* is its own category, never a loss.
 
 ---
 
+# 4.5 · ⛔ RETENTION RATIONALE — ruled OUT OF SCOPE, with the trigger pre-registered
+
+⭐⭐⭐ **Ote's definition, VERBATIM. ⛔ Do not paraphrase it, and ⛔ do not report on anything else:**
+
+> **Retention-rationale loss = the significance/reason for retaining a memory is neither attached to the
+> durable memory nor recoverable from the originating reflection.**
+
+⛔ **"No dedicated field" is NOT a finding** — *"the actual observation we care about is semantic loss, not
+schema absence."* ⛔ No schema change, ⛔ no `reason` field. ⓘ *"Reason" would become an overloaded bucket
+for truth, importance, provenance, retention rationale, supersession rationale and relevance.*
+
+⚠️ **`log_retention_decisions.why` is NOT this.** Verified: every `why` the retention host writes is the
+**architecture's voice** explaining an emission's outcome — ⛔ never her reason for keeping something. And
+it cannot see a decision that never emitted.
+
+⭐ **Three states, and they predict where a loss would appear first:**
+
+```
+① a LESSON              `distinction` already preserves a rationale FRAGMENT, in its own field
+② ANY kind              the rationale may survive INSIDE `content` — ⚠️ inseparable from the claim
+③ fact/note/practice    no field — ⓘ but the ORIGINATING REFLECTION can still preserve it
+```
+
+⭐ No instrument change was needed: the reader already prints the full reflection prose beside the receipt.
+
+---
+
 # 5 · ⚠️ PARKED TRACKS — none expanded, all still open
 
 `intention-host` returning `{ok:true}` after a failed INSERT · `lesson-host` → `retention-host` null ·
