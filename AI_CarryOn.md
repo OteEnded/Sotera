@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-02 22:14 (+07:00).** ⭐ Read this first after a context compaction.
+**Rewritten 2026-09-02 23:22 (+07:00).** ⭐ Read this first after a context compaction.
 
 ---
 
@@ -11,78 +11,88 @@
 ✅ retain() + `persisted`     the decision-shaped retention interface, receipts, and the store ruling
 ✅ DISPATCH BOUNDARY (040)    only an OFFERED tool may execute; a missing offered set THROWS
 ✅ PRACTICE PROVENANCE (041)  observed · instructed · reflection — the OCCASION sets it
-✅ ROME RECONCILED (043→…)    figurative referent · asserted goal · aspirational want; root contradicted
+✅ ROME RECONCILED            figurative referent · asserted goal · aspirational want; root contradicted
 ✅ EMPTY TURNS (043/044)      an empty assistant turn now says WHY
-✅ 55 of 55 SUITES PASS       zero residue
-▶  NEXT: DREAMING             ⭐ the highest-priority unfinished ARCHITECTURAL item (§1)
-▶  BACKGROUND: P1             observation only, window 5 (§2)
-▶  BACKGROUND: ROME           observation only, referent read 0 times (§3)
+✅ M1 BUILT + WIRED, INERT    045 · the gate · the ledger guards · the bounded read · one cron entry (§1)
+✅ M1-F MEASURED              §13.1's "the corpus is empty" does NOT survive contact with the data (§1.4)
+✅ 56 of 56 SUITES PASS       zero residue
+⏸  STOP: OTE INSPECTS         then O-iii.a → dense-arm hardening → M2 semantics. ⛔ Not before
+▶  BACKGROUND: P1             observation only, window 6 (§2)
+▶  BACKGROUND: ROME           observation only (§3)
 ```
 
-**Live:** `:8210` Sotera PID **10460** (22:03) · `:8201` OLS PID **26644** (21:14) — ⭐ **both started by
-me** after the 21:07 reboot; ⓘ Ote said the reboot was his. ⛔ ollama is HIS to run — never start or kill it.
-
-⚠️ **Three `llama-server` `0xc0000409` faults today** (16:46 · 18:04 · 19:56). ollama survived each.
+**Live:** `:8210` Sotera PID **10460** · `:8201` OLS PID **26644**. ⛔ ollama is HIS to run — never touch.
+⚠️ `:8210` has **NOT** been restarted since the cron change; the plugin's import graph was verified
+without booting instead, because Ote was mid-conversation. **The cron entry takes effect at his next
+restart, and it is inert either way.**
 
 ---
 
-# 1 · ▶ NEXT — DREAMING (agreed as the next roadmap item, 2026-09-02)
+# 1 · ✅ DREAMING M1 — BUILT, WIRED, AND DELIBERATELY INERT
 
-⭐ **Why it is next:** the four mechanisms are *Reflection records episodes · **Dreaming finds patterns
-ACROSS them** · Composer uses commitments · reconciliation fixes stale state.* Reflection is running and
-instrumented; retention has a receipt contract; **Dreaming is the only one of the four with nothing running
-at all.** It is the next layer up, ⛔ not a sideways fix. It is on Ote's own holding list.
+## 1.1 · ⛔ THE ACTIVATION BOUNDARY — two deliberate acts, and neither is a UI click
 
-## ✅ Built and DRY-RUN ONLY
+```
+memory.dreamingEnabled is ABSENT from config.json  ⇒  the cron job is NEVER REGISTERED
+                                                      ⛔ not registered-and-returning-early
+dreamingCronEnabled(config) is `=== true`          ⇒  ⛔ "true", 1, "yes" all leave it OFF
+the gate IMPORTS NOTHING                           ⇒  ⛔ it CANNOT read mst_settings
+                                                   ⇒  activation costs a config edit AND a restart
+```
 
-**Nine modules** — `dreaming-eligibility · evidence · host · independence · outcome · pass-host ·
-proposal · resolver · scope`. **Migration 034** = `log_dreaming_passes`. **M1 steps 0–2 and M2.a–M2.d**
-built. ⛔ **Not wired to anything**: no cron entry, no route; the only importer of `dreaming-host` is
-`test/pipeline/dreaming-m1-step2.mjs`. **One row, ever**, from a manual dry run.
+⭐ **`mst_settings` overrides `config.json` elsewhere in this app** — that is why the gate is handed a
+plain config object and never `fastify.db`. A gate that read the *effective* setting could be flipped
+from the admin surface with no restart and no review.
 
-**Seven docs in `Reference/docs/`:** `CONTRACT_SOTERA_DREAMING_MINIMUM_SEMANTIC` (⭐ §12 = the live state) ·
-`ANALYSIS_..._THREE_BLOCKERS` · `ANALYSIS_..._OPEN_QUESTION_DEPENDENCIES` (⭐ the dependency graph) ·
-`ANALYSIS_..._O3J_WHAT_A_DREAMING_ACT_IS` · `DESIGN_..._CONSUMER_CONTRACT` ·
-`DECISION_..._O8_SHIPPED_VS_DESIGNED` · `PLAN_..._IMPLEMENTATION` (⚠️ its banner says what is superseded).
+## 1.2 · ⭐ WHAT M1 IS, AND WHAT IT WRITES
 
-## ⭐⭐ THE DISTINCTION ALREADY DECIDED — do not re-litigate
+**One pass:** claim → count **M** (a VIEW fact, before retrieval) → fetch **N** (⛔ measured from
+`fetched.length`, never assumed) → partition by **E3** (withheld COUNTED, never pre-filtered) → conclude
+**6a–6e** → write **one row**. ⛔ Its only write target in the world is `log_dreaming_passes`.
 
-> **shipped "Dreaming" COMPRESSES** (a card *replaces* its members, which are archived).
-> **designed Dreaming COMMITS** (a consolidation *coexists* with its evidence, which must stay resolvable).
-> ⇒ *"one is a storage economy, the other is an epistemic act."*
-
-⚠️ And the same word sits on opposite sides of a line: **shipped gives reinterpretation to Reflection; the
-arc gives cross-episode inference to Dreaming.**
-
-## ⭐ M1 IS THE INSTRUMENT, NOT THE REASONER
-
-> *"M1 exercises every locked invariant — E3, the ordering constraint, M/N, all five outcomes, the pass
-> ledger — while being incapable of putting a wrong thing in the store."* Rollback = drop one table.
-> ⛔ M2 is not planned in detail, because its precondition is not met.
-
-## ⏸ FIVE OPEN ITEMS — and O-iii.a is the ROOT (five of seven depend on it)
-
-| **O-iii.a** ⭐ FIRST | **view or materialization**, and how exclusion staleness is bounded |
+| **`concludeFrom()` owns the ordering** | the host no longer re-spells it. ⭐ M1's ONE licensed deviation is a **narrowing**: where it says **6b**, an instrument with no reasoner says **6e** — *"I formulated no claim, so no absence is mine to assert."* ⛔ Never 6c |
 | --- | --- |
-| **O-i.a** | which lineage recovery route — snapshot / hash / journal / supersession (⛔ S1 eliminated) |
-| **O-v** | are the noticing records corpus, and **citable or only readable** |
-| **O-vi.2** | may Dreaming mark contradiction using **its own** derived commitment |
-| **O-vii** | exclusion's second-order behaviour |
+| **`claim()` guards CONCURRENCY, ⛔ not repetition** | a pass ledger is append-only and repeated passes SHOULD produce repeated rows. A second claim while one is in flight is **refused and inserts nothing**; `conclude()` guards rewriting |
+| **`staleClaimMinutes` (15)** | ⛔ **crash recovery, NEVER an admission or evidence-staleness guarantee.** Correctness cannot depend on it: preempting too early can only LOSE a pass, never corrupt one |
+| **`trigger_source NOT NULL`** | cron · manual · check · legacy. ⭐ 045 closed on this table the NULL hole 042 still has on its own |
 
-⚠️ Also unresolved: the contract's **M2-7** — *"Dreaming may need no forms of its own: an ordinary slot
-claim plus a warrant"* — which puts §1.1's five bespoke proposition forms in question. ⛔ Do not build M2
-forms before that is settled.
+**Run it:** `node test/pipeline/dreaming-pass.mjs [--limit N] [--series]` — the `--series` view prints the
+two quantities O-iii.a needs and says out loud that they are **evidence, not a threshold**.
 
-## ⭐ MY RECOMMENDATION, PUT TO OTE AND NOT YET ANSWERED
+## 1.3 · ⭐⭐⭐ THE THREE DEFECTS THE RED-PROOFS CAUGHT — ALL IN MY OWN INSTRUMENTS
 
-**Ship M1 wired for real** — it needs none of the five, runs safely against the live corpus, and turns
-*"we think Dreaming would be nearly silent"* into a measurement. Decide **O-iii.a** in parallel.
-
-## ⚠️⚠️ AND THE P1 BOUNDARY — a real one, stated before it is discovered
-
-| **M1** | ✅ **safe.** Reads, and writes one row in its own ledger. ⛔ No memory, no reflection, no prompt or tool change. Nothing it does can enter P1's window |
+| ⚠️⚠️ **a source regex matched what it was meant to exclude** | the probe for *"the host accepts an injected ledger"* matched the host's **own internal line**, so the check ran **two real passes into the production series**. ⭐ The rows are ACCURATE and were **NOT deleted**; the defect was that the ledger could not say what triggered a pass. ⇒ `trigger_source`, and the host now **DECLARES** `RUN_ONE_PASS_DEPS`. 🔑 **the boundary is "write it, LABELLED", never "hope it never writes"** |
 | --- | --- |
-| **M2** | ⚠️ **NOT obviously safe.** A commitment is a `txn_memories` row ⇒ **retrievable**, and `recall({limit:6})` runs on EVERY turn ⇒ it can enter her context, change what she says, and so change what later reflections reflect *on*. ⇒ **M2 needs an explicit ruling on whether it may run while P1 observes** |
+| ⚠️ **a scanner cannot tell code from commentary — 3× in one run** | a module *mentioning* `conversation-search`; then the gate indicted for **naming** `getSetting`/`mst_settings`/`fastify.db` **while explaining why it avoids them**; then the same inside an exported intent STRING. ⭐ **The better a module documents its boundary, the more a naive scan accuses it.** ⇒ two strippers, and **a presence check and an absence check need opposite ones** |
+| ⚠️ **`empty-turn-cause-check` E2 had NEVER been green** | it asserted `>= 13` ambiguous rows; the real split is **13 `(null error)` / 12 ambiguous / 6 provider** — two counts transposed. ⛔ And it rode in a report that said *55 of 55 passed* |
+
+## 1.4 · ⭐⭐ M1-F — THE MEASUREMENT, AND WHAT IT DOES **NOT** SAY
+
+```
+66 live slots · 0 unprobeable · 17 truncated (⇒ roots UNDERSTATED, never overstated)
+O-2 floor (2 independent roots):   strict 35/66   ·   loose 62/66
+top room: agent_dev 20 · hermes 7 · ote 6 · hermes_alias 2
+22 of 35 clear the floor in a NON-agent_dev room · top root counts 43 · 24 · 21
+```
+
+⚠️⚠️ **CANDIDATE VOLUME, ⛔ NOT RECURRENCE.** Term co-occurrence across roots is a **structural upper
+bound**; §13.1's *"5 substantive repeats"* was a **semantic** judgement made by reading. ⇒ what is
+refuted is the premise *"the corpus is empty"* — ⛔ **not** established is that any of it IS recurrence.
+That needs a reasoner, which is M2, which is exactly what M1 was built not to be.
+
+⚠️ **Slot labels are not all identifiers** — p50 17 · p95 42 · **max 77**, the longest prose-shaped. ⇒ the
+emission guard is **provenance, not length**: every emitted label must be verbatim a stored one.
+
+## 1.5 · ⏸ WHAT IS STILL OPEN, IN OTE'S ORDER
+
+| **1 · inspect** | ⏸ **HERE.** Ote reads the measurements. ⛔ Nothing proceeds without that |
+| --- | --- |
+| **2 · O-iii.a** | ✅ the **staleness contract is RULED**: *index/corpus may rank → a CURRENT view decides admission → audit provides citation*, and ⛔ **no staleness window is derived from event frequency**. ⏸ What remains is applying it |
+| **3 · dense-arm hardening** | ⚠️ a REAL defect, separately classified. `VECTOR_SCOPE` carries `role`/`conversation_id`/`room_user_id` and ⛔ **not `excluded_from_evidence_at`**; the writer applies the predicate, the reader never does, and there is no re-derivation ⇒ **the stale window is UNBOUNDED**. 🔑 **a denormalised scope column may only carry an IRREVERSIBLE fact.** ⛔ `56425175` stays excluded and is NOT reclassified |
+| **4 · M2** | ⛔ not before the above. **M2-7 unresolved** ⇒ ⛔ no proposition forms. ⚠️ **M2 needs its own P1 ruling**: a commitment is a retrievable `txn_memories` row and `recall({limit:6})` runs every turn |
+
+⏸ Still open beneath O-iii.a: **O-i.a** (lineage recovery route) · **O-v** (noticing records citable?) ·
+**O-vi.2** (contradiction from its own commitment) · **O-vii** (exclusion's second-order behaviour).
 
 ---
 

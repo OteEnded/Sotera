@@ -36,6 +36,19 @@ export const RUN_STATE = Object.freeze({ ran: 'ran', failed: 'failed', preempted
 export const RUN_STATES = Object.freeze(Object.values(RUN_STATE))
 
 /**
+ * ⭐⭐ WHAT TRIGGERED A PASS — a third axis, disjoint from both of the above.
+ *
+ * ⛔ `cron` is the scheduled lane · `manual` a deliberate on-demand run · `check` a test harness ·
+ * `legacy` a row written before this column existed, whose trigger is genuinely unknown.
+ *
+ * ⚠️ THE SAME VOCABULARY 042 PUT ON `log_conversation_revisits`, deliberately — not a second spelling.
+ * ⓘ This table needed it within a day of existing: a red-proof's own source probe misfired and wrote
+ * two real passes into the production series, and nothing in the ledger could tell them apart from
+ * Dreaming's own. ⭐ The boundary is *write it, LABELLED*, ⛔ never *hope it never writes*.
+ */
+export const TRIGGER_SOURCES = Object.freeze(['cron', 'manual', 'check', 'legacy'])
+
+/**
  * ⭐ ONE definition of the table, so a test schema and a future migration cannot drift apart.
  * ⛔ This function CREATES NOTHING. It returns SQL; only a caller that executes it creates anything.
  */
@@ -54,6 +67,14 @@ CREATE TABLE IF NOT EXISTS ${t} (
   -- ⭐ CONCLUSION. Exactly one of 6a-6e, and NULL while in flight or if the run failed.
   outcome                  text CHECK (outcome IN ('6a','6b','6c','6d','6e')),
   outcome_why              text,
+  -- ⭐⭐ WHAT TRIGGERED THIS LOOK. ⛔ NOT NULL, because a ledger that cannot say whether a pass came
+  -- from the scheduled lane or from a test harness cannot be stratified afterwards — and this table
+  -- needed the column within a day of existing, when a red-proof's own source-regex misfired and wrote
+  -- two real passes into the production series. ⓘ Migration 045; 042 needed the same column on
+  -- log_conversation_revisits for the same reason.
+  -- ⚠️ NO BACKTICKS ANYWHERE IN THIS STRING: it is a template literal, and a backtick in a SQL comment
+  -- silently terminates it. node --check caught that within a minute of it being written.
+  trigger_source           text NOT NULL CHECK (trigger_source IN ('cron','manual','check','legacy')),
   -- ⭐⭐ THE COMPLETENESS CONTRACT. withheld is stored BESIDE M, because M = admitted + withheld and a
   -- ledger that dropped it would make 6a indistinguishable from 6d after the fact.
   m_count                  integer,
@@ -62,6 +83,11 @@ CREATE TABLE IF NOT EXISTS ${t} (
   completeness             text CHECK (completeness IN ('exhaustive','bounded','unknown')),
   -- ⭐ E3 IS NOT STABLE ACROSS READS, so the moment it was evaluated is part of the record.
   eligibility_evaluated_at timestamptz,
+  -- ⭐ What the exhaustive VIEW READ cost, in MICROSECONDS. Evidence for O-iii.a, accumulated one pass
+  -- at a time. ⚠️ Microseconds because the read measured 0.151 ms: an integer millisecond column would
+  -- have stored 0 for every pass through the whole observation window.
+  -- ⛔ Not a threshold, and nothing reads it to decide anything. NULL-safe by explicit test (044).
+  view_read_us             integer CHECK (view_read_us IS NULL OR view_read_us >= 0),
   -- ⭐ The boundary as it stood, so a later reader can still tell a 6a from a 6d after a release.
   boundary                 jsonb,
   -- ⛔ IDENTITIES ONLY, NEVER CONTENT.
@@ -98,13 +124,79 @@ export function buildPassLedger({ query, schema, now = () => new Date() } = {}) 
   if (!schema) throw new Error('buildPassLedger requires a schema')
   const T = `"${schema}"."log_dreaming_passes"`
 
-  /** ⭐ Open a pass. In flight: run_state NULL, outcome NULL, completed_at NULL. */
-  async function claim({ startedAt = null } = {}) {
+  /**
+   * ⭐⭐ Open a pass. In flight: run_state NULL, outcome NULL, completed_at NULL.
+   *
+   * ── ⛔⛔ ONE IN-FLIGHT PASS AT A TIME ──────────────────────────────────────────────────────────
+   * Two overlapping passes would each enumerate M independently and each write, so the ledger would
+   * hold TWO records of what was really ONE look — and every count derived from it afterwards would
+   * double. ⭐ The guard refuses, and a refusal INSERTS NOTHING: "refused" that still writes a row is
+   * the same defect wearing an apology.
+   *
+   * ── ⭐ WHY THIS IS NOT A CONTRADICTION OF "APPEND-ONLY" ───────────────────────────────────────
+   * A pass ledger is append-only and repeated passes are SUPPOSED to produce repeated rows — a look
+   * that happened is a fact. What is guarded here is CONCURRENCY, not repetition; `conclude()` guards
+   * REWRITING. Those are three different questions and only two of them are refusals.
+   *
+   * ── ⚠️ AND THE STALE BOUND IS CRASH RECOVERY, ⛔ NEVER AN ADMISSION GUARANTEE ─────────────────
+   * A killed process cannot run its own `catch`, so an in-flight row can outlive its runner forever and
+   * the lane goes silent for exactly the runs that failed — the trap the reflection ledger already paid
+   * for. ⇒ an in-flight row older than the bound is marked `preempted` (a RUN_STATE that has existed
+   * since day one and has never been used) and the new pass proceeds.
+   *
+   * ⭐⭐ CORRECTNESS DOES NOT DEPEND ON THE NUMBER, and that is what makes it safe to pick one:
+   * preempting TOO EARLY can only LOSE a pass, never corrupt one — a preempted pass concludes nothing,
+   * so nothing false enters the ledger. Same fail-direction discipline as O-2's fail-toward-shared-roots.
+   * ⛔ Ote, 2026-09-02: *"staleClaimMinutes is crash recovery only, never an admission/evidence-staleness
+   * guarantee."* It must never be cited as one.
+   *
+   * @param {object} o
+   * @param {'cron'|'manual'|'check'|'legacy'} o.triggerSource  ⛔ required — see the column comment
+   * @param {number} [o.staleClaimMinutes]  crash-recovery bound, ⛔ not an admission window
+   * @returns {Promise<{id, rolling_id}|{refused: true, why: string}>}
+   */
+  async function claim({ startedAt = null, triggerSource, staleClaimMinutes = 15 } = {}) {
+    // ⛔ REQUIRED, AND IT THROWS. A default here would be the allowlist defect in miniature: the next
+    // caller would inherit somebody else's provenance silently, which is the exact thing this column
+    // exists to prevent. Same shape as `reflectOnConversation`'s trigger guard.
+    if (!TRIGGER_SOURCES.includes(triggerSource)) {
+      throw new TypeError(`claim requires triggerSource, one of ${TRIGGER_SOURCES.join(' ')} `
+        + `(got ${JSON.stringify(triggerSource)}) — a pass whose trigger is unrecorded cannot be `
+        + 'stratified afterwards, and a check\'s pass must never be mistaken for Dreaming\'s')
+    }
+    if (!Number.isFinite(staleClaimMinutes) || staleClaimMinutes <= 0) {
+      throw new TypeError(`staleClaimMinutes must be a positive number (got ${staleClaimMinutes})`)
+    }
+
+    // ⭐ PREEMPT FIRST, THEN LOOK. Doing it in this order means one statement decides, rather than a
+    // read-then-write pair that another pass could interleave with.
+    const staleBefore = new Date(now().getTime() - staleClaimMinutes * 60_000)
+    const { rows: preempted } = await query(
+      // ⛔ `outcome` is untouched and stays NULL: a preempted pass concluded NOTHING, and a terminated
+      // row that carried a conclusion it never reached would be worse than no row at all.
+      `UPDATE ${T} SET run_state = $1, failure = $2, completed_at = $3
+        WHERE completed_at IS NULL AND started_at < $4
+        RETURNING id::text AS id, rolling_id`,
+      [RUN_STATE.preempted,
+        `preempted: in flight for more than ${staleClaimMinutes} minute(s) — its runner did not terminate it`,
+        now(), staleBefore])
+
+    const { rows: live } = await query(
+      `SELECT id::text AS id, rolling_id, started_at FROM ${T} WHERE completed_at IS NULL LIMIT 1`)
+    if (live.length) {
+      const at = live[0].started_at
+      return {
+        refused: true,
+        why: `a pass is already in flight (#${live[0].rolling_id}, started ${at?.toISOString?.() ?? at})`
+          + ' — two overlapping passes would record one look twice',
+      }
+    }
+
     const { rows } = await query(
-      `INSERT INTO ${T} (created_at, started_at) VALUES ($1, $2)
+      `INSERT INTO ${T} (created_at, started_at, trigger_source) VALUES ($1, $2, $3)
        RETURNING id::text AS id, rolling_id`,
-      [now(), startedAt ?? now()])
-    return rows[0]
+      [now(), startedAt ?? now(), triggerSource])
+    return { ...rows[0], preempted: preempted.map((p) => p.rolling_id) }
   }
 
   /**
@@ -114,7 +206,7 @@ export function buildPassLedger({ query, schema, now = () => new Date() } = {}) 
    */
   async function conclude({
     id, outcome, why = '', M, N = null, withheld = 0,
-    evaluatedAt = null, boundary = null, rejectedIds = [],
+    evaluatedAt = null, boundary = null, rejectedIds = [], viewReadUs = null,
   } = {}) {
     if (!id) throw new Error('conclude requires the claimed pass id')
     if (!OUTCOMES.includes(outcome)) throw new Error(`refused: ${outcome} is not one of ${OUTCOMES.join(' ')}`)
@@ -137,11 +229,16 @@ export function buildPassLedger({ query, schema, now = () => new Date() } = {}) 
           SET run_state = 'ran', outcome = $2, outcome_why = $3,
               m_count = $4, n_count = $5, withheld_count = $6, completeness = $7,
               eligibility_evaluated_at = $8, boundary = $9::jsonb, rejected_ids = $10::text[],
-              completed_at = $11
+              view_read_us = $11, completed_at = $12
         WHERE id = $1::uuid AND completed_at IS NULL
-        RETURNING id::text AS id, outcome, completeness`,
+        RETURNING id::text AS id, outcome, completeness, trigger_source, view_read_us`,
       [id, outcome, String(why).slice(0, 2000), M ?? null, N, withheld, comp.kind,
-        evaluatedAt, boundary ? JSON.stringify(boundary) : null, rejectedIds ?? [], now()])
+        evaluatedAt, boundary ? JSON.stringify(boundary) : null, rejectedIds ?? [],
+        // ⭐ MICROSECONDS, so a sub-millisecond read survives the integer column. ⛔ A millisecond unit
+        // would round 151 us to 0, and `0` reads as "not measured" beside the NULLs that genuinely mean
+        // that — a measurement indistinguishable from its own absence.
+        Number.isFinite(viewReadUs) ? Math.max(0, Math.round(viewReadUs)) : null,
+        now()])
     // ⛔ NO ROW MEANS THE PASS HAD ALREADY TERMINATED. That is not a success, and it is not a crash —
     // it is a refusal with a name, so a caller cannot read "0 rows" as "written".
     return rows[0] ?? { refused: true, why: 'the pass had already terminated — a concluded act is never rewritten' }

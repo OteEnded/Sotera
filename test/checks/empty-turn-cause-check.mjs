@@ -153,11 +153,38 @@ try {
      where role='assistant' and coalesce(length(content),0)=0 and conversation_id <> $1`, [convo])
   check('E1 · ⛔⛔ NOT ONE historical empty row was classified — the fix is for future observations',
     legacy?.classified === 0, `${legacy?.n} legacy empty row(s), ${legacy?.classified} classified`)
-  const stillAmbiguous = await one(
+  // ── ⚠️⚠️ E2 WAS WRONG FROM THE MOMENT IT WAS WRITTEN, AND IT WAS REPORTED AS GREEN ──────────────
+  // It asserted `>= 13` rows carrying the old ambiguous text. The real distribution of the 31 empty
+  // assistant rows is:
+  //     13  `(null error)`                        — empty, with no error recorded at all
+  //     12  "no output was produced — the client disconnected before the first token…"
+  //      6  provider_request_failed
+  // ⇒ ⭐ **13 was the OTHER class.** Two counts from the same measurement got transposed into one
+  // assertion, so this line has NEVER been able to pass — and it was nonetheless carried in a report
+  // that said 55 of 55 suites passed. ⓘ Recorded here rather than quietly corrected, because the
+  // reporting error is the more expensive half.
+  //
+  // ⭐ AND THE DEEPER FIX IS THE SHAPE, NOT THE NUMBER. A frozen count asserts THE ANSWER (*there are
+  // 13*) when the invariant is a STATE (*this fix did not rewrite history*). A user deleting their own
+  // conversation would legitimately move any such count, and this check must not go red for that.
+  // ⇒ the classes are asserted to still EXIST, their sizes are REPORTED, and what is actually asserted
+  // is that ⛔ nothing was converted into the new vocabulary.
+  const legacyClasses = await one(
+    `select count(*) filter (where error::text like '%no output was produced%')::int as ambiguous,
+            count(*) filter (where error is null)::int as no_error,
+            count(*) filter (where error->>'code' = 'provider_request_failed')::int as provider
+       from ${S}.txn_messages
+      where role='assistant' and coalesce(length(content),0)=0 and conversation_id <> $1`, [convo])
+  check('E2 · ⭐ the historical classes all still exist, with their original text — ⛔ sizes REPORTED, not frozen',
+    legacyClasses?.ambiguous > 0 && legacyClasses?.no_error > 0 && legacyClasses?.provider > 0,
+    `ambiguous=${legacyClasses?.ambiguous} no-error=${legacyClasses?.no_error} provider=${legacyClasses?.provider}`)
+  // ⭐⭐ THE ASSERTION THAT ACTUALLY GUARDS THE RULING *"don't rewrite the historical rows"*: the new
+  // vocabulary must appear on NOTHING that predates the fix. ⛔ Zero, and zero is the whole point.
+  const retroWritten = await one(
     `select count(*)::int as n from ${S}.txn_messages
-      where error::text like '%no output was produced%'`)
-  check('E2 · ⭐ and the 13 old ambiguous rows keep their original text, untouched',
-    Number(stillAmbiguous?.n) >= 13, `${stillAmbiguous?.n} rows`)
+      where conversation_id <> $1 and (error->>'code' = 'generation_empty' or empty_turn is not null)`, [convo])
+  check('E2 · ⛔⛔ NOT ONE historical row was converted to the new vocabulary — the fix is forward-only',
+    retroWritten?.n === 0, `${retroWritten?.n} row(s)`)
 } catch (e) {
   check('the check ran to completion', false, e?.stack ?? String(e))
 } finally {

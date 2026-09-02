@@ -261,8 +261,30 @@ ok(dreamSettings.length === 0,
   dreamSettings.map((r) => r.key).join(' ') || 'no dreaming setting')
 const cron = src('Backend/app/plugins/cron.js')
 ok(!!cron, '9 · ⛔ ANCHOR: the scan can still see cron.js')
-ok(!!cron && !/dreaming|runOnePass/i.test(code(cron)),
-  '9 · ⛔⛔ …and NOTHING SCHEDULES IT — cron does not mention Dreaming')
+// ── ⚠️⚠️ MEANING CHANGE, 2026-09-02 — RECORDED, ⛔ NOT WEAKENED ──────────────────────────────────
+// This used to assert *"cron does not mention Dreaming"*, and M1 made that false ON PURPOSE: the job is
+// now REGISTERED, behind `dreamingCronEnabled(fastify.config)`, with the setting ABSENT.
+//
+// ⭐ The invariant being protected was never "the word does not appear" — it was **Dreaming does not
+// run**. So the assertion moves to the thing that actually guarantees that, and gets STRONGER in the
+// process, because it now names the mechanism instead of the symptom:
+//   ① the registration is gated on the config predicate, ⛔ not on a truthy value;
+//   ② the setting is ABSENT from config.json, so the job is never created at all — ⛔ not created and
+//      returning early;
+//   ③ ⭐ the gate cannot consult `mst_settings`, so it cannot be switched on from the admin surface.
+// ⓘ Ote, 2026-09-02: *"don't let the M1 cron become effectively active just because it is registered."*
+// ⛔ A bare "the word is absent" test would have to be deleted here; this one still fails if Dreaming
+// ever becomes reachable without two deliberate acts.
+const cronCode = code(cron)
+ok(!!cron && /if\s*\(\s*dreamingCronEnabled\(\s*fastify\.config\s*\)\s*\)/.test(cronCode),
+  '9 · ⭐⭐ Dreaming is scheduled ONLY behind the config gate — ⛔ never on a truthy value')
+const cfgMemory = JSON.parse(src('Backend/config.json') ?? '{}')?.memory ?? {}
+ok(cfgMemory.dreamingEnabled === undefined,
+  '9 · ⛔⛔ DREAMING IS NOT ENABLED — `memory.dreamingEnabled` is ABSENT, so the job is never registered',
+  `value=${JSON.stringify(cfgMemory.dreamingEnabled)}`)
+const gateSrc = src('Backend/app/components/dreaming-gate.js')
+ok(!!gateSrc && [...gateSrc.matchAll(/^\s*import\s/gm)].length === 0,
+  '9 · ⭐⭐⭐ …and the gate IMPORTS NOTHING, so it cannot read mst_settings and cannot be flipped from the UI')
 const [{ n_episodic, n_card }] = await q(
   `select count(*) filter (where kind = 'episodic')::int n_episodic,
           count(*) filter (where kind = 'card')::int n_card from ${S}.txn_memories`)

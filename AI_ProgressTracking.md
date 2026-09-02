@@ -4454,3 +4454,65 @@ questions; **O-iii.a (view or materialization) is the root** — five of seven d
 ⚠️⚠️ **M1 is safe for P1; M2 is not** — a commitment is a retrievable `txn_memories` row, and
 `recall({limit:6})` runs on every turn, so M2 can change what she says and therefore what later reflections
 reflect on. **M2 needs an explicit ruling before it runs alongside P1.**
+
+---
+
+## 2026-09-02 23:22 (+07:00) — ✅ M1 BUILT AND WIRED, INERT · M1-F MEASURED
+
+**Ote's rulings, all preserved:** `dreamingEnabled` absent/off · the gate reads `fastify.config` only ·
+`staleClaimMinutes` is crash recovery, ⛔ never an admission guarantee · `concludeFrom()` is the single
+source of outcome ordering, with only the no-reasoner **6b→6e** narrowing · **N from `fetched.length`** ·
+M1 writes nothing but `log_dreaming_passes` · ⛔ no memory read path · `56425175` and the dense-arm defect
+untouched and separately classified · M1-F uses the admission path, ⛔ never the dense arm.
+
+**Built:** migration **045** (`view_read_us` + `trigger_source NOT NULL`) · `dreaming-gate.js` ·
+`claim()` in-flight guard + stale preemption · bounded read · timing · one cron entry behind the gate ·
+`test/pipeline/dreaming-pass.mjs` · `dreaming-candidate-host.js` · **`dreaming-m1-check` (124 assertions)**
+and **`dreaming-m1f-check`**. **56 of 56 suites green, zero residue.**
+
+### ⭐⭐⭐ WHAT THE RED-PROOFS CAUGHT — THREE DEFECTS, ALL IN MY OWN INSTRUMENTS
+
+⚠️⚠️ **A source regex matched the thing it was meant to exclude.** The probe for *"the host accepts an
+injected ledger"* was `/ledger\s*=\s*buildPassLedger\(/` — which matched the host's **own internal line**,
+returned true, and let the check run **two real passes into the production series**. ⇒ ⭐ the rows were
+**accurate and were NOT deleted**; the defect was that the ledger could not say what triggered a pass.
+**045 added `trigger_source NOT NULL`** and the host now **declares** `RUN_ONE_PASS_DEPS` rather than
+being pattern-matched. 🔑 **The boundary is "write it, LABELLED", never "hope it never writes."**
+
+⚠️ **A boundary scanner cannot tell code from commentary — three times in one run.** A module *mentioning*
+`conversation-search` in prose; then `dreaming-gate`, whose entire purpose is to avoid `getSetting` /
+`mst_settings` / `fastify.db`, indicted for **naming all three while explaining why**; then the same trap
+inside an exported intent STRING. ⇒ ⭐ **the better a module documents its boundary, the more a naive scan
+accuses it.** Two strippers now, for two different questions — and **a presence check and an absence check
+need opposite ones** (the `evidentialSql` call lives inside a template literal).
+
+⚠️ **`empty-turn-cause-check` E2 had NEVER been green** — it asserted `>= 13` ambiguous rows when the real
+distribution is 13 `(null error)` / **12** ambiguous / 6 provider. Two counts transposed. ⛔ **And it was
+carried in a report that said 55 of 55 passed.** The reporting error is the more expensive half.
+
+### ⭐ MEASURED
+
+```
+view read   561–1200us (microseconds — an integer ms column would have stored 0 for a month)
+corpus      M 79 → 87 over 1.29 days = 6.2/day
+6e reached honestly for the first time: bounded(3 of 87), and ⛔ NOT 6a — completeness outranks withheld
+```
+
+### ⭐⭐ M1-F — §13.1's ESTIMATE DOES NOT SURVIVE CONTACT WITH THE CORPUS
+
+```
+66 live slots · 0 unprobeable · 17 truncated (⇒ roots UNDERSTATED)
+clearing the O-2 floor of 2 independent roots:  strict 35/66 · loose 62/66
+top room: agent_dev 20 · hermes 7 · ote 6 · hermes_alias 2
+22 of 35 clear the floor in a NON-agent_dev room · top root counts 43 · 24 · 21
+```
+
+⚠️⚠️ **This is CANDIDATE VOLUME, ⛔ not recurrence.** Term co-occurrence across roots is a **structural
+upper bound**; §13.1's *"5 substantive repeats"* was a **semantic** judgement made by reading. They answer
+different questions. ⇒ what is refuted is only the premise *"the corpus is empty"* — ⛔ **not** established
+is that any of it constitutes recurrence, which needs a reasoner, which is M2.
+
+⚠️ **Slot labels are not all identifiers**: length p50 17 · p95 42 · **max 77**, and the longest is prose.
+⇒ the emission guard is **provenance, not length** — every emitted label must be verbatim a stored one.
+
+⏸ **STOP HERE.** Ote: inspect the measurements before O-iii.a / dense-arm hardening / M2.

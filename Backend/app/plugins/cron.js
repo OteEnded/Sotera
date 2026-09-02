@@ -12,6 +12,8 @@ import { REFLECTION_GENERATION, REFLECTION_TOOLS } from '../components/reflectio
 import { runHealthSuite } from '../maintenance/health-suite.js'
 import { decayWorkingMemory } from '../components/working-memory-host.js'
 import { lintMemory, lintSummaryLine } from '../components/memory-lint-host.js'
+import { runOnePass, makeSequelizeQuery } from '../components/dreaming-host.js'
+import { dreamingCronEnabled } from '../components/dreaming-gate.js'
 
 export default fp(async function (fastify, opts) {
 
@@ -252,6 +254,51 @@ export default fp(async function (fastify, opts) {
           }
         } catch (e) {
           await log(`[reflection] error: ${e.message}`, import.meta.url)
+        }
+      }, { isLog: true })
+    }
+
+    // ── ⭐⭐ HOURLY · THE DREAMING PASS — M1, THE INSTRUMENT ────────────────────────────────────────
+    // ⭐ Reflection records episodes; DREAMING FINDS PATTERNS ACROSS THEM. M1 is the instrument, ⛔ not
+    // the reasoner: one pass reads the reflection act corpus, computes M / N / withheld, concludes one of
+    // 6a–6e, and writes ONE row in its own ledger. ⛔ It creates no memory, marks no lifecycle state,
+    // calls no model, and touches nothing else — every remaining semantic uncertainty is unreachable here
+    // BY CONSTRUCTION, which is the argument for running it at all.
+    //
+    // ⛔⛔ AND IT IS NOT ENABLED. `memory.dreamingEnabled` is ABSENT from config.json, so this job is
+    // never REGISTERED — ⛔ not registered-and-returning-early. Ote, 2026-09-02: *"don't let the M1 cron
+    // become effectively active just because it is registered. The setting must remain explicitly
+    // off/absent until we make a separate decision to activate real Dreaming."*
+    //
+    // ⭐ THE GATE READS `fastify.config` AND NOTHING ELSE, and that is load-bearing: `mst_settings`
+    // overrides config.json for effective settings elsewhere in this app, so a gate that read the
+    // EFFECTIVE setting could be flipped from the admin surface with no restart and no review. ⇒
+    // activation costs a config edit AND a restart — two deliberate acts. See `dreaming-gate.js`.
+    //
+    // ⚠️ NO BOOT PASS. Unlike retention, a restart is exactly when someone is watching and exactly when
+    // a half-written corpus is most likely; the hourly tick is the only trigger. And a pass is cheap —
+    // one indexed read (0.151 ms measured at M=87) plus one insert, ⛔ no LLM call and ⛔ no embedder
+    // call — so it can never evict her chat model or cost her next turn.
+    if (dreamingCronEnabled(fastify.config)) {
+      cronManager.createJob('dreaming', '0 0 * * * *', async () => {
+        try {
+          const seq = fastify.db.txn_conversations.sequelize
+          const r = await runOnePass({
+            query: makeSequelizeQuery(seq),
+            schema: fastify.db.txn_conversations.getTableName().schema,
+            triggerSource: 'cron',
+            dryRun: true,
+          })
+          // ⛔ A REFUSAL IS NOT AN ERROR AND NOT A SUCCESS. A concurrent tick is a correct decision, and
+          // logging it as a failure would train the next reader to ignore this line.
+          if (r?.refused) {
+            await log(`[dreaming] skipped — ${r.why}`, import.meta.url)
+          } else if (r?.ok) {
+            await log(`[dreaming] pass #${r.rollingId} ${r.outcome} — M=${r.M} N=${r.N} `
+              + `withheld=${r.withheld} ${r.written?.completeness} view_read=${r.viewReadUs}us`, import.meta.url)
+          }
+        } catch (e) {
+          await log(`[dreaming] error: ${e.message}`, import.meta.url)
         }
       }, { isLog: true })
     }

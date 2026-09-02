@@ -58,6 +58,11 @@ try {
     prodBefore.exists ? `${PROD}: present, ${prodBefore.rows} pass(es) — migration 034` : `${PROD}: absent`)
 
   const ledger = buildPassLedger({ query, schema: TEST_SCHEMA })
+  // ⚠️ CONTRACT CHANGE, 2026-09-02 (migration 045): `claim()` now REQUIRES a trigger source, and throws
+  // without one. ⛔ No default — a pass whose trigger is unrecorded cannot be stratified afterwards, and
+  // this table learned that the hard way when a red-proof's own misfire put two check-passes into the
+  // production series with nothing to distinguish them from Dreaming's. ⭐ Every claim here is a CHECK.
+  const CLAIM = { triggerSource: 'check' }
 
   // ── 1 · EXECUTION AND CONCLUSION ARE SEPARATE COLUMNS ──────────────────────────────────────────
   const { rows: cols } = await query(
@@ -75,7 +80,7 @@ try {
     '1 · ⛔⛔ NO admissibility column — E3 is computed at read time, ⛔ never stamped', names.join(' '))
 
   // ── 2 · CLAIM → CONCLUDE ────────────────────────────────────────────────────────────────────────
-  const p1 = await ledger.claim()
+  const p1 = await ledger.claim(CLAIM)
   ok(!!p1?.id, '2 · a pass can be claimed', p1?.id?.slice(0, 8))
   const inFlight = await ledger.read(p1.id)
   ok(inFlight.completed_at === null && inFlight.run_state === null && inFlight.outcome === null,
@@ -106,7 +111,7 @@ try {
 
   // ⛔ THE HOLE THE REFLECTION LEDGER HAS, TESTED FROM THE OTHER SIDE: a FAILED pass sets no outcome, so
   // a guard on `outcome IS NULL` would still let a late completion overwrite it. `completed_at` does not.
-  const p2 = await ledger.claim()
+  const p2 = await ledger.claim(CLAIM)
   await ledger.fail({ id: p2.id, failure: 'model unavailable' })
   const failed = await ledger.read(p2.id)
   ok(failed.run_state === RUN_STATE.failed && failed.outcome === null,
@@ -117,13 +122,13 @@ try {
     '3 · ⭐⭐⭐ …and a LATE COMPLETION cannot overwrite it — the guard `outcome IS NULL` would have let it through',
     lateCompletion?.why ?? '⛔ NOT REFUSED')
 
-  const p3 = await ledger.claim()
+  const p3 = await ledger.claim(CLAIM)
   await ledger.fail({ id: p3.id, preempted: true })
   ok((await ledger.read(p3.id)).run_state === RUN_STATE.preempted,
     '3 · preempted is its own run state — ⛔ not a worse failure')
 
   // ── 4 · THE COMPLETENESS CONTRACT, ENFORCED AT THE WRITE ───────────────────────────────────────
-  const p4 = await ledger.claim()
+  const p4 = await ledger.claim(CLAIM)
   let refusedB = null
   try { await ledger.conclude({ id: p4.id, outcome: OUTCOME.insufficient, M: 10, N: 4, withheld: 0 }) }
   catch (e) { refusedB = e.message }
@@ -143,7 +148,7 @@ try {
     `${c4?.outcome} ${c4?.completeness}`)
 
   // ── 5 · THE ORDERING CONSTRAINT, ENFORCED RATHER THAN DOCUMENTED ───────────────────────────────
-  const p5 = await ledger.claim()
+  const p5 = await ledger.claim(CLAIM)
   let refusedOver = null
   try { await ledger.conclude({ id: p5.id, outcome: OUTCOME.notAdmissible, M: 2, N: 2, withheld: 5 }) }
   catch (e) { refusedOver = e.message }
