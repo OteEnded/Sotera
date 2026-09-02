@@ -86,6 +86,17 @@ export function scopeFor(everywhere) {
   return everywhere === true ? 'persona_global' : 'room'
 }
 
+/**
+ * ⭐ THE BOUNDED WAIT. A reflection is UNATTENDED — nobody is waiting on it — so it can afford to await a
+ * write and report the truth instead of a queued receipt. ⛔ But "can afford to wait" is not "may hang":
+ * the lane is shared and serial, and a stuck write must degrade to `accepted` rather than block the pass.
+ * ⓘ Sized against the measured cost of the work it waits on: a CPU embed is ~1–2s and the reconcile adds
+ * a little, so this is generous by an order of magnitude and still bounded.
+ */
+const RETAIN_WAIT_MS = 20000
+/** ⭐ A private sentinel, so a timeout can never be confused with a value the write returned. */
+const RETAIN_TIMEOUT = Symbol('retain-timeout')
+
 export const OWNERSHIP_QUESTION = 'I need to know whose memory this is before I can keep it. Say mine:true '
   + 'if it belongs to me — something about myself, my own view, my own relationships — or mine:false if it '
   + 'is something about the person I am talking to. I will not guess: filing it under the wrong one is how '
@@ -262,7 +273,186 @@ export function buildRetention(fastify, {
     return { ok: out?.ok !== false, kind, author, via: 'remember', result: out }
   }
 
-  return { keep, authorFor, KINDS }
+  /**
+   * ⭐⭐⭐ `retain` — THE DECISION-SHAPED INTERFACE FOR REFLECTION. Ote, 2026-09-02:
+   * *"Reflection decides what is worth carrying forward and in what semantic kind. It should not decide
+   * which memory tool to invoke."*
+   *
+   * ── ⚠️⚠️ THE MEASURED GAP IT CLOSES ──────────────────────────────────────────────────────────────
+   * A hand audit of 78 reflections found ~32 in which she recognised something durable, named it
+   * precisely — sometimes with kind, importance and the exact wording — and acted on nothing. ⭐ And the
+   * two halves split by KIND: a lesson about herself was REACHABLE (`save_lesson` fits, and two of the
+   * texts filled its three required fields IN PROSE and never submitted them), while a fact about the
+   * person had NO DOOR she is told she may use.
+   * ⇒ ⛔ this does not give her a new door to a tool. It gives the DECISION somewhere to be received.
+   *
+   * ── ⭐ IT IS `keep` WITH THREE DIFFERENCES, AND ONLY THREE ───────────────────────────────────────
+   *   ① it AWAITS the write, so `persisted` means a row EXISTS rather than "the tool accepted it"
+   *   ② it maps the outcome to a RECEIPT whose states cannot be confused with one another
+   *   ③ it RECORDS the decision — whatever became of it — where it can never be read as a memory
+   * ⛔ Everything else routes through `keep`: `authorFor(mine)` still refuses an undeclared owner, the
+   * specialised hosts are unchanged, and every store gate runs exactly where it already runs. ⛔ Not one
+   * rule is re-implemented here.
+   *
+   * ⛔ NO `everywhere`. Reflection is room-reachable in v1 — ⓘ a REACHABILITY decision, ⛔ not an
+   * ownership one: what she retains is HERS (`author='persona'`), formed in this room, and her own
+   * ownership read reaches it from anywhere regardless of scope.
+   *
+   * @returns {Promise<{state:'persisted'|'declined'|'unrepresented'|'refused'|'accepted', …}>}
+   */
+  async function retain({ content, kind, mine, about = null, attribute = null, distinction = null } = {}) {
+    // ⭐ The decision as she stated it, kept verbatim for the record regardless of outcome.
+    const decision = { content, kind, mine, about, attribute, distinction }
+    // ⭐ `distinction` is the honest name for what `keep` calls `attribute` on a lesson. The interface
+    // speaks the decision's vocabulary; the mapping is this file's job, ⛔ not hers.
+    const slot = kind === KINDS.lesson ? (distinction ?? attribute) : attribute
+
+    // ── ⭐⭐⭐ A REFLECTION DECISION IS ALWAYS HERS — and the live run proved this needed enforcing ──
+    //
+    // Ote, locking the contract: *"Reflection retention is Sotera-owned"* — the OCCASION is hers, so the
+    // AUTHOR is hers. ⛔ `about` carries who it is about; ⛔ `user_id` carries the room; ⛔ `scope` carries
+    // reachability. Four axes, and only one of them is ownership.
+    //
+    // ⚠️⚠️ MEASURED ON THE FIRST LIVE PASS: she reasoned that a user preference was *about them, not about
+    // me*, said `mine:false`, and the row landed `author='account'` — a reflection's conclusion filed as
+    // the ACCOUNT'S memory. ⭐ That is the family-lineage shape exactly, rebuilt through a new door, and
+    // it is the one thing `recall_own_memory` filters out — so she could not have reached it as her own.
+    //
+    // ⛔ SO IT IS REFUSED, ⛔ NOT SILENTLY CORRECTED. Flipping `mine` for her would be the architecture
+    // deciding what she meant, which is the whole thing this interface exists not to do. ⭐ The answer is
+    // a question: *about* is where "this is about them" belongs.
+    if (mine === false) {
+      return record({ content, kind, mine, about, attribute, distinction }, {
+        state: 'refused',
+        why: 'Everything I carry forward from a reflection is mine — the occasion is mine, so the memory '
+          + 'is too. If this is about them rather than about me, say so with `about`: a memory of mine '
+          + 'about someone else is still mine.',
+      })
+    }
+    let out
+    try {
+      out = await keep({ what: content, kind, about, mine, attribute: slot })
+    } catch (e) {
+      // ⭐ A store gate threw — a REFUSAL with a class, not a bug. It is already recorded in
+      // `log_memory_refusals` by the store; here it becomes a receipt.
+      return record(decision, { state: 'refused', why: e?.message || 'the write was refused', code: e?.code ?? null })
+    }
+
+    // ── ⛔ REFUSED — the decision could not be ACCEPTED ────────────────────────────────────────────
+    if (out?.refused) return record(decision, { state: 'refused', why: out.why, refused: out.refused })
+
+    // ── ⭐⭐ UNREPRESENTED — the decision is VALID and there is nowhere to put it ───────────────────
+    // ⚠️ Today this is the practice path: `note_own_practice` takes a label from a CLOSED SET of ~10, and
+    // `keep` passes her prose straight into it. ⇒ a NOVEL practice observation cannot be expressed at all.
+    // ⛔ We do NOT invent a label, and ⛔ we do NOT quietly fall back to a note — either would be the
+    // architecture deciding what she meant. ⭐ The decision is recorded and nothing is persisted.
+    const inner = out?.result
+    if (inner && inner.ok === false && Array.isArray(inner.allowed)) {
+      return record(decision, {
+        state: 'unrepresented',
+        why: `${inner.reason}. This was a real decision with no destination: nothing was stored, and the `
+          + 'decision itself has been recorded.',
+        allowed: inner.allowed,
+      })
+    }
+    if (out?.ok === false) return record(decision, { state: 'refused', why: inner?.reason || 'the write did not succeed' })
+
+    // ── ⭐ PERSISTED — but only with a real id ─────────────────────────────────────────────────────
+    // ⓘ lesson/practice already awaited and carry their id. fact/note answer with a QUEUED receipt and
+    // hand back `settled` — see memory-pipeline-host.
+    let id = idOf(inner)
+    if (!id && inner?.settled) {
+      try {
+        // ⚠️ BOUNDED. The lane is shared and serial; an unattended pass may wait, ⛔ but it may not hang.
+        const settled = await Promise.race([
+          inner.settled,
+          new Promise((r) => { setTimeout(() => r(RETAIN_TIMEOUT), RETAIN_WAIT_MS) }),
+        ])
+        if (settled === RETAIN_TIMEOUT) {
+          // ⛔⛔ `accepted` IS NOT SUCCESS. We stopped waiting and do not know whether a row exists, so we
+          // say exactly that and carry NO id. ⓘ If this ever appears in a normal reflection it is an
+          // infrastructure finding about the write lane, not an outcome.
+          return record(decision, { state: 'accepted', why: 'the write was still in flight when the wait elapsed' })
+        }
+        if (settled?.ok === false) {
+          return record(decision, { state: 'refused', why: settled.error || 'the write failed', code: settled.code ?? null })
+        }
+        id = idOf(settled?.result) ?? idOf(settled)
+      } catch (e) {
+        return record(decision, { state: 'refused', why: e?.message || 'the write failed', code: e?.code ?? null })
+      }
+    }
+    // ⭐⭐ NO ID, NO `persisted`. The database enforces this too (038's receipt CHECK) — ⓘ the third time
+    // this project has paid for "the tool accepted it" being read as "a row exists".
+    if (!id) return record(decision, { state: 'accepted', why: 'the write reported no row id' })
+
+    return record(decision, { state: 'persisted', memoryId: id, kind: out.kind, author: out.author, via: out.via })
+  }
+
+  /**
+   * ⭐ Record the decision — EVERY state, not only the ones that failed — and return the receipt.
+   * ⛔ BEST-EFFORT BY CONSTRUCTION: failing to record a decision must never fail the decision.
+   * ⛔ It writes to `log_retention_decisions`, ⛔ NEVER to `txn_memories`: a decision placed in the memory
+   * table is reachable by default and excluded only by remembering to exclude it — which is precisely why
+   * `withoutDecisions()` had to be added at three read sites.
+   */
+  async function record(decision, receipt) {
+    // ⛔ A GUARD ON MY OWN MISTAKE. A bulk edit missed this function's second argument at one call site,
+    // so `receipt` was undefined, the insert threw inside the catch below, and `retain` returned
+    // `undefined` — a receipt-shaped hole where a state should be. ⭐ Fail loudly instead: a caller that
+    // cannot read the state is worse than a crash.
+    if (!receipt || typeof receipt.state !== 'string') {
+      throw new TypeError('retain: record() needs a receipt with a state — this is a wiring bug, not a refusal')
+    }
+    try {
+      const seq = fastify?.db?.txn_memories?.sequelize
+      const { schema } = fastify?.db?.txn_memories?.getTableName?.() ?? {}
+      if (seq && schema) {
+        await seq.query(
+          `INSERT INTO "${schema}"."log_retention_decisions"
+             (content, kind, mine, about, attribute, distinction, state, why, memory_id,
+              user_id, conversation_id, source)
+           VALUES (:content, :kind, :mine, :about, :attribute, :distinction, :state, :why, :memoryId,
+                   :userId, :conversationId, :source)`,
+          {
+            replacements: {
+              content: String(decision.content ?? '').slice(0, 8000),
+              kind: decision.kind ?? null,
+              mine: decision.mine === true ? true : (decision.mine === false ? false : null),
+              about: decision.about ?? null,
+              attribute: decision.attribute ?? null,
+              distinction: decision.distinction ?? null,
+              state: receipt.state,
+              why: receipt.why ? String(receipt.why).slice(0, 2000) : null,
+              // ⭐⭐ THE RECEIPT CONTRACT, HELD HERE TOO: an id may accompany `persisted` and nothing else.
+              // ⛔ 038's CHECK enforces it in the database as well — two guards, because this is the third
+              // time this project has paid for "accepted" being read as "a row exists".
+              memoryId: receipt.state === 'persisted' ? (receipt.memoryId ?? null) : null,
+              userId: userId ?? null,
+              conversationId: conversationId ?? null,
+              source: 'retain',
+            },
+          })
+      }
+    } catch (e) {
+      // ⛔ Observability must never be load-bearing. A decision that could not be logged still happened.
+      try { fastify?.log?.error?.({ err: e?.message, state: receipt.state }, '[retain] could not record the decision') } catch { /* no logger */ }
+    }
+    return receipt
+  }
+
+  /** ⭐ A row id, from whichever shape the layer beneath answered in. PURE. */
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  function idOf(r) {
+    if (!r || typeof r !== 'object') return null
+    for (const k of ['id', 'memoryId', 'memory_id']) {
+      const v = r[k]
+      if (typeof v === 'string' && UUID.test(v.trim())) return v.trim().toLowerCase()
+    }
+    return null
+  }
+
+  return { keep, retain, authorFor, KINDS }
 }
 
 let initialized = false

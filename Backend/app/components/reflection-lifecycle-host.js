@@ -42,7 +42,7 @@ import {
   // path. It remains EXPORTED because `pipeline/elision-exposure.mjs` needs it to replay historical rows
   // faithfully: those rows were produced by it, and a replay that used the new selector would be
   // measuring today's code against yesterday's ledger.
-  shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal,
+  shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal, REFLECTION_TOOL_GENERATION,
   selectReviewableRange,
 } from './reflection-lifecycle.js'
 // ⭐ THE EXECUTION GATE. ⛔ Imported, never reimplemented: the pure verdict lives in one file so a
@@ -345,11 +345,18 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   // with empty text, and the UNIQUE index will not let that watermark be retried. That is the right trade —
   // an occasion recorded as incomplete is honest, and a durable memory with no ledger row is not — and an
   // empty `text` with `tools_used = {}` is identifiable as exactly that.
+  // ⭐⭐ `tool_generation` IS STAMPED AT THE CLAIM, beside the prompt generation and for the same reason:
+  // the prompt TEXT and the offered WRITE-TOOL SET are two instruments answering two questions, and
+  // reflections gathered on different surfaces are ⛔ not comparable on retention behaviour.
+  // ⓘ 038 backfilled every pre-existing row to 1; everything from here carries 2.
   const [claim] = await seq.query(
     `INSERT INTO "${schema}"."log_conversation_revisits"
        (conversation_id, user_id, up_to_rolling_id, from_rolling_id, messages_considered, text,
-        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, reason)
-     SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection'
+        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, reason, tool_generation)
+     -- tool_generation is stamped at the claim, beside the prompt generation and for the same reason.
+     -- (The prose lives OUTSIDE this template literal: a backtick in a SQL comment ends the string, which
+     -- this file already warns about a few lines up. I made that exact mistake here.)
+     SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection', $9
      -- ⭐⭐⭐ TWO GUARDS, BECAUSE SPLITTING THE INDEX SPLIT THE PROTECTION IT USED TO GIVE.
      -- 016 had ONE unique index, so a re-run was refused AT THE CLAIM -- before a 35B generation and
      -- before any tool could write. Splitting it into in-flight and completed (025) left ON CONFLICT
@@ -375,7 +382,9 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
         // completed cursor already sits at the newest message. ⇒ 025's `range_sane` CHECK rejected the
         // insert, which is the guard working on its own author. ⭐ An empty range is written as NULL —
         // "no lower bound recorded" — rather than as a backwards one that would read as coverage.
-        already > 0 && already + 1 <= reviewedTo ? already + 1 : null],
+        already > 0 && already + 1 <= reviewedTo ? already + 1 : null,
+        // ⭐ $9 — which write-tool surface this pass was offered. ⛔ Never derived from anything else.
+        REFLECTION_TOOL_GENERATION],
       type: seq.QueryTypes.SELECT,
     })
   if (!claim) return { skipped: true, reason: 'already-reflected', upTo: reviewedTo }

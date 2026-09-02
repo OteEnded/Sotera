@@ -57,6 +57,8 @@ try {
   const agent = await one(`select id::text, username from ${S}.mst_users where username='agent_dev'`)
   const user = { id: agent.id, username: agent.username, isRoot: false, roles: ['admin'] }
   check('agent_dev resolves — ⛔ this check never runs as root', Boolean(agent?.id))
+  // ⭐ The corpus size as it is NOW — the baseline this run must not move.
+  const corpusBefore = Number((await one(`select count(*)::int n from ${S}.log_conversation_revisits where prompt_generation=3`)).n)
 
   const declinedRows = async () => q(
     `select id::text, author, attribute, content, evidence from ${S}.txn_memories
@@ -236,8 +238,13 @@ try {
     detectToolCallText(['decline_to_remember', 'about: x', 'kind: not_worth_keeping'].join(NL)).found === false)
 
   // ── 7 · ⛔ THE GENERATION-3 CORPUS IS UNTOUCHED ────────────────────────────────────────────────
+  // ⚠️ THIS ASSERTED A FROZEN COUNT (77) AND WENT RED WHEN SOTERA SIMPLY KEPT RUNNING. ⛔ A number taken
+  // at the moment a check was written is a claim about the past that expires. ⭐ What it MEANS is "this
+  // experiment did not touch the corpus" — so measure that, by comparing against the count taken at the
+  // top of this run.
   check('7 · ⛔ the reflection corpus is untouched — this experiment is isolated from it',
-    Number((await one(`select count(*)::int n from ${S}.log_conversation_revisits where prompt_generation=3`)).n) === 77)
+    Number((await one(`select count(*)::int n from ${S}.log_conversation_revisits where prompt_generation=3`)).n) === corpusBefore,
+    `${corpusBefore} → unchanged`)
   // ⭐ PROOF THAT NO MODEL RAN, rather than an assertion that it did not: the text on the record is the
   // exact string the injected turn returned. ⛔ A generation could not have produced it.
   check('7 · ⛔ NO MODEL WAS CALLED — the recorded text is verbatim what the injected turn returned',

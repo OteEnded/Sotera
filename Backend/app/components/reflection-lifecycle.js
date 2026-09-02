@@ -82,8 +82,36 @@ export const REFLECTION_WRITE_TOOLS = [
   // ⭐ RETENTION AND NON-RETENTION ARE BOTH ACTIONS. `decline_to_remember` is here for the same reason
   // Ote ratified it: *"her own memory formation can include a deliberate refusal to retain something."*
   // Without it, "I don't want to keep this" has no way to be anything but silence.
-  'remember', 'save_lesson', 'propose_lesson', 'note_own_practice', 'decline_to_remember',
+  // ⭐⭐⭐ TOOL GENERATION 2 — ONE DECISION-SHAPED DOOR, replacing the five specialised ones.
+  //
+  // Ote, 2026-09-02: *"Reflection decides what is worth carrying forward and in what semantic kind. It
+  // should not decide which memory tool to invoke."*
+  //
+  // ⚠️⚠️ WHAT GENERATION 1 MEASURED. Across 78 completed reflections she recognised something durable in
+  // ~32, named it precisely — sometimes with the kind, the importance and the exact wording — and acted on
+  // nothing. ⭐ And the halves split by KIND: a lesson about herself was REACHABLE (two of the texts filled
+  // `save_lesson`'s three required fields IN PROSE and never submitted them), while a fact about the
+  // person had NO DOOR she is told she may use. ⇒ the five doors were not the shape of her decisions.
+  //
+  // ⛔ WHAT IS NOT LOST: `retain` routes through the same retention host as `keep`, so every one of these
+  // five is still REACHED — as a mechanism, chosen by the memory layer from the kind she declared. ⛔ And
+  // `remember_fact` stays withheld exactly as before, for exactly the reason below.
+  'retain', 'decline_to_remember',
 ]
+
+/**
+ * ⭐ THE WRITE-TOOL SURFACE GENERATION, counted for reflection and nobody else's instrument.
+ *   1 — remember · save_lesson · propose_lesson · note_own_practice · decline_to_remember
+ *   2 — retain · decline_to_remember
+ *
+ * ⚠️⚠️ SEPARATE FROM `REFLECTION_GENERATION`, AND THAT IS THE POINT. The prompt TEXT is unchanged, so the
+ * prompt generation correctly stays 3 — but the tool surface is part of what was being measured, and
+ * reflections gathered on the two surfaces are ⛔ NOT comparable on retention behaviour. Two instruments,
+ * two counters, ⛔ and they must never be silently pooled.
+ * ⭐ **Bump this whenever the offered write-tool set changes**, for the same reason and with the same
+ * discipline as the prompt's.
+ */
+export const REFLECTION_TOOL_GENERATION = 2
 /**
  * ⛔ AND WHAT IS DELIBERATELY WITHHELD, because an unattended pass should not be able to do it:
  *   forget_memory · retract_own_practice · restore_memory · pin_memory   destructive or curatorial —

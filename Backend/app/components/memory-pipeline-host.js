@@ -285,16 +285,28 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
       const out = withoutDecisions(await mem.listArchived(opts))
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out), }))
     },
+    // ⭐⭐ `settled` — THE SAME QUEUED WRITE, ALSO HANDED BACK AS A PROMISE.
+    //
+    // ⛔ THE RETURN SHAPE IS OTHERWISE UNCHANGED and every existing caller keeps the queued receipt it
+    // already has: `keep()` ignores this field entirely, so the chat path behaves exactly as before.
+    // ⭐ It exists for ONE caller — `retain()`, the reflection interface — which is an UNATTENDED pass
+    // with nobody waiting and therefore able to await the truth. ⓘ Reflection already drains this same
+    // lane at the end of every pass *"so a queued remember has finished and reported its id BEFORE the
+    // reflection row claims there was no memory"*; this moves that wait earlier and makes it per-write.
+    //
+    // ⚠️ Awaiting it is SAFE ONLY BECAUSE OF M2-17: before the lane rethrew, awaiting returned `null` and
+    // a failed write read as a success. ⛔ And leaving it unawaited is safe for the same reason — the
+    // lane's own chain guard absorbs the rejection, so no caller has to handle it.
     rememberAsync(opts = {}) {
       if (!opts.content || !String(opts.content).trim()) throw new Error('content is required')
-      mem.enqueue('pipeline.remember', traced('remember', () => pipeline.ingest({ ...opts, type: OBSERVATION_TYPE.episodic, source: opts.source ?? 'model-tool' }), fastify?.log))
-      return { ok: true, queued: true }
+      const settled = mem.enqueue('pipeline.remember', traced('remember', () => pipeline.ingest({ ...opts, type: OBSERVATION_TYPE.episodic, source: opts.source ?? 'model-tool' }), fastify?.log))
+      return { ok: true, queued: true, settled }
     },
     reconcileFactAsync(opts = {}) {
       const { entity, attribute, value } = opts
       if (!entity || !attribute || value == null || !String(value).trim()) throw new Error('entity, attribute, value are required')
-      mem.enqueue('pipeline.reconcileFact', traced('reconcileFact', () => pipeline.ingest({ ...opts, owner: entity, type: OBSERVATION_TYPE.fact, source: opts.source ?? 'model-tool' }), fastify?.log))
-      return { ok: true, queued: true }
+      const settled = mem.enqueue('pipeline.reconcileFact', traced('reconcileFact', () => pipeline.ingest({ ...opts, owner: entity, type: OBSERVATION_TYPE.fact, source: opts.source ?? 'model-tool' }), fastify?.log))
+      return { ok: true, queued: true, settled }
     },
   }
 }
