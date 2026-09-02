@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera · P1 retention arc
 
-**Rewritten 2026-09-02 15:40 (+07:00).** ⭐ Read this first after a context compaction.
+**Rewritten 2026-09-02 16:50 (+07:00).** ⭐ Read this first after a context compaction.
 
 ---
 
@@ -14,6 +14,7 @@
 ✅ DISPATCH BOUNDARY (040)       only an OFFERED tool may execute — and a missing offered set THROWS
 ✅ PRACTICE PROVENANCE (041)     observed · instructed · reflection — the OCCASION sets it
 ✅ 52 of 52 SUITES PASS          both old "pre-existing failures" were stale assertions, three of them MINE
+✅ ROME RECONCILED (2026-09-02)  three-way split: figurative referent · asserted goal · aspirational want
 ⛔ SURFACE FROZEN (2026-09-02)   prompt · reflection tools · dispatch rules · retention semantics
 ▶  P1 · the ~14                  OBSERVING. 0 rows in the window; the cron brings them
 ⏸ AWAITING OTE                   nothing. Both rulings are in.
@@ -29,7 +30,9 @@
 > **representative cases** for *stated-a-conclusion, did nothing*. ⛔ Not a rate. Read it with
 > `node test/pipeline/p1-gen2-population.mjs --text` (read-only: no writes, no model, ⛔ no `force`).
 
-**Live now:** `:8210` PID **59576**, started **15:35:47**, fresher than every module.
+**Live now:** `:8210` PID **59576**, started **15:35:47**. ⚠️ **`memory-lineage.js` changed after that** —
+a restart is PENDING and deliberately deferred: Ote was mid-conversation, and the only runtime consumer
+(`lineageFor`) treats `unknown` and `reconcile:` identically, so nothing reads wrong meanwhile.
 ⛔ `:8201` is **OLS — Ote's, never touched.**
 
 ---
@@ -110,6 +113,33 @@ authorized   the two arrays are DISJOINT             succeeded  log_tool_calls.o
 `observed` (the abstractor, past the floor) · `instructed` (someone told her) · `reflection` (she derived
 it herself). **The OCCASION sets it** — `retain` → `reflection`, `note_own_practice` → `instructed` — ⛔
 never a parameter the model can reach. ⛔ Ownership unchanged: a practice is hers however she came by it.
+
+# 3.4 · ✅ THE ROME RECONCILIATION (ratified, applied)
+
+**⭐ The finding:** the store kept the misreading and the conversation kept the correction. `7d383ce3` was
+written **31 s** after Ote's first sentence; he corrected it at **+26 s** (*a proverb*) and at **+2m22s**
+(*"building you. **you are my rome**, you know?"* = `f8612ddd`). Neither correction reached the store, and
+every derived Rome row names `7d383ce3` in its own `evidence.derivedFrom`.
+
+```
+6f441dc5  identity  figurative    persona_global  persona   no slot   ← "Rome is Ote's name for me…"
+8362691d  semantic  asserted      room            account   user/current goal
+2457529c  semantic  aspirational  room            account   no slot   ← his sentence, verbatim
+7d383ce3  contradicted by f8612ddd · superseded · ⛔ VALUE UNTOUCHED
+```
+
+⭐⭐ **The structural guarantee is the `modality` CHECK**: a non-`asserted` row may not hold
+`entity/attribute/value`, so *"Rome = Sotera"* as a literal slot **cannot be written**. ⚠️ And the same
+CHECK **refuses to let `7d383ce3` carry its own true modality** — which is the diagnosis: a row that cannot
+be labelled truthfully has the wrong shape. ⇒ contradict + supersede, ⛔ never an in-place edit.
+
+⛔ **UNTOUCHED, deliberately:** `475ce0a9` (104 accesses, still says *"shared project"*, reaches every room)
+· `d211f5b4` (the one row that carried *"He built me (Sotera/Rome)"* through) · the five descendants · every
+evidence chain · the 2026-08-10 conversation.
+
+⭐ **THE OPEN OBSERVATION — ⛔ ask her nothing.** Both persona-global Rome rows were retrieved during the
+check-in (`last_access 16:03:16`). The question is whether her language moves from *"still building Rome
+with Ote"* toward *"Rome is what he calls me"* — ⚠️ **read, never prompted.**
 
 # 4 · ▶ P1 · THE ~14 — open, and the first answer is "not yet"
 

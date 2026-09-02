@@ -4350,3 +4350,47 @@ it"* for an origin it does not recognise.
 The measurement population is **`tool_generation = 2 AND dispatch_generation = 2`**. ⭐ Nothing forced —
 reflection runs on its own 20-minute cron. The next useful evidence is what she does when `retain` and
 `decline_to_remember` are all she has and the boundary is real.
+
+---
+
+## 2026-09-02 16:50 (+07:00) · ✅ THE ROME RECONCILIATION — semantic model corrected, history intact
+
+**Ote ratified all four acts.** The three-way separation he asked for now exists:
+
+```
+6f441dc5  identity  figurative    persona_global  persona   no slot
+8362691d  semantic  asserted      room            account   user / current goal
+2457529c  semantic  aspirational  room            account   no slot
+7d383ce3  contradicted by f8612ddd · superseded · ⛔ value, author, source, dates, evidence UNTOUCHED
+```
+
+⭐⭐ **The mechanism was already there and had never been used.** Migration 031's `modality` enum plus
+`txn_memories_modality_slot_ck` — *a non-asserted row may not occupy a fact slot*. All 122 rows carried
+`modality = NULL`. And `memory-modality.js` had been written from this very incident: it already named all
+three sentences (`aspirational` · `figurative` · `reported`) in its own comments.
+
+⭐⭐⭐ **Three probes, all rolled back before anything was applied.** The literal shape Ote rejected was
+**REFUSED** by the CHECK; the same meaning as prose was **ACCEPTED**; and — the finding —
+`UPDATE 7d383ce3 SET modality='aspirational'` was **REFUSED**, because it holds a slot. ⇒ **a row that
+cannot carry its own true modality has the wrong shape**, so contradict + supersede is the only path that
+respects both the truth and the history.
+
+⚠️ **A correction to my own audit.** I told him the retrieval trace is in-memory only so I could not prove
+which row fired. `txn_memories` keeps `access_count`/`last_access`: `d211f5b4` (331) and `475ce0a9` (104)
+both read **16:03:16** — inside the check-in conversation. **Both** were retrieved on the turn where she
+said *"still building Rome with Ote."*
+
+**Also learned:** `embedding_hv` is a **GENERATED** column and is what dense retrieval actually reads — so a
+hand-written row without a real `embedding` would have been **invisible**, which would have defeated the
+whole reconciliation. The script uses the project's own `makeEmbedder`; `slot_embedding` for the goal row is
+**copied** from the row it supersedes, so the slot is identical rather than approximately so.
+
+`memory-lineage` gained a **`reconcile:`** mechanism — an operator correction is not extraction, not
+`model-tool`, not `consolidation`, and an unrecognised tag must stay `unknown`.
+
+**54 of 54 suites pass. Zero residue.** Three checks had been written to go false the day Ote approved a
+reconciliation; each now asserts the post-approval truth, and the two 2026-08-26 quarantines stay
+distinguishable from this supersession because he ruled differently on purpose.
+
+⏭ **Nothing else touched.** P1 still frozen, still zero gen-2 reflections. ⚠️ A `:8210` restart is pending
+and deferred — Ote was mid-conversation and no runtime reader is affected.
