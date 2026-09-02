@@ -14,9 +14,20 @@
 ✅ DISPATCH BOUNDARY (040)       only an OFFERED tool may execute — and a missing offered set THROWS
 ✅ PRACTICE PROVENANCE (041)     observed · instructed · reflection — the OCCASION sets it
 ✅ 52 of 52 SUITES PASS          both old "pre-existing failures" were stale assertions, three of them MINE
-▶  P1 · the ~14                  OPEN. ⛔ cannot be answered yet: 0 rows in the measurement window
+⛔ SURFACE FROZEN (2026-09-02)   prompt · reflection tools · dispatch rules · retention semantics
+▶  P1 · the ~14                  OBSERVING. 0 rows in the window; the cron brings them
 ⏸ AWAITING OTE                   nothing. Both rulings are in.
 ```
+
+> ⛔⛔ **FREEZE IN FORCE.** Ote: *"Do not change the prompt, reflection tools, dispatch rules, or retention
+> semantics while P1 collects its first Gen-2 population… No forced reflections, no synthetic prompts, no
+> tuning based on early examples."* ⭐ Every frozen thing is already pinned by a live assertion — the prompt
+> **byte for byte**, the write surface as an exact list, `remember_fact` withheld, the generations, the
+> receipt states, the provenance vocabulary. ⇒ a drift turns a check red; ⛔ nothing new was added to hold it.
+>
+> ⭐ **The next deliverable is his:** once the population is meaningful, bring the **raw distribution** and
+> **representative cases** for *stated-a-conclusion, did nothing*. ⛔ Not a rate. Read it with
+> `node test/pipeline/p1-gen2-population.mjs --text` (read-only: no writes, no model, ⛔ no `force`).
 
 **Live now:** `:8210` PID **59576**, started **15:35:47**, fresher than every module.
 ⛔ `:8201` is **OLS — Ote's, never touched.**
