@@ -221,6 +221,37 @@ because no `probe=true` conversation has been created since 2026-08-26.
 
 ---
 
+# 4.7 - RAG AND PROVENANCE: two distinctions Ote asked to keep (2026-09-02)
+
+**Automatic RAG appears to be WORKING.** `chat-site.route.js:1415` runs
+`memR.recall({ query: lastUserText, limit: 6 })` on EVERY ordinary turn - hybrid lexical + dense cosine
+over `embedding_hv` - and the Composer injects it before the model sees the turn. A second automatic arm,
+`conversation-search`, vector-searches MESSAGE text. **No tool call is needed for her to HAVE a memory;**
+the tools are for deliberately LOOKING (`recall_memory`) and for WRITING.
+
+> **1. Sotera's knowledge of something does not imply that Sotera can accurately introspect or report the
+> retrieval mechanism that supplied that knowledge.**
+>
+> **2. `access_count` means activation/touch, NOT definitive proof of model-context injection.**
+
+```
+memory exists -> automatic retrieval may surface it -> the composer gives it to the model
+-> the model KNOWS it -> the model does NOT necessarily know WHICH SUBSYSTEM supplied it
+```
+
+`access_count` is bumped by `recall()` (reinforces what it surfaces), by dedup-on-write AND by slot
+update. A non-zero bump is POSITIVE evidence of activation; **a ZERO proves nothing** - conversation-search
+can supply the same information without touching the memory row.
+
+**She said *"I just checked my notes"* with no tool call, then denied having details that WERE stored.**
+Neither statement is authoritative about provenance, and **neither is a retrieval failure.**
+
+⛔ **No provenance investigation** unless a concrete reason requires the guarantee. If she must one day
+truthfully distinguish *"I remembered this"* / *"this was retrieved for me"* / *"I inferred this"*, that is
+a **separate capability to design deliberately.**
+
+---
+
 # 5 · ⚠️ PARKED TRACKS — none expanded, all still open
 
 `intention-host` returning `{ok:true}` after a failed INSERT · `lesson-host` → `retention-host` null ·
