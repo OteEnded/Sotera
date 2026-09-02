@@ -4128,3 +4128,44 @@ one-of-declared-vocabulary (project-decision)       34       54       0
 - ⭐ **Honest framing of its value:** ⛔ it does not make the definition layer worth building. ⭐ It closes **one real, named, still-unfixed defect** and turns **one of five** refusal branches from *unevaluable* into *live* — **a memory-layer improvement that happened to be found by looking at the definition layer's inputs.**
 
 - **Next action:** ⏸ **AWAITING OTE on M2-14.** ⏸ Open inside it: whether **throw-on-refusal is acceptable for an automatic writer**, or whether the extract path should **record rather than fail**; ⛔ the other two axes are untouched and still have **zero producers**; ⓘ whether `model-tool` could supply an asserted text at all (⭐ it has no turn of its own — ⛔ not investigated). ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
+
+## 2026-09-02 09:07 +0700 · ✅ M2-14 LOCKED · ⭐⭐⭐ M2-15: THE SYSTEM IS ALREADY *B*, ACHIEVED BY *A* · ✅ MB-1: THE MODEL BOUNDARY
+
+- ⛔ **Investigation only.** ⛔ No production change · no gate redesign · no registry · no producer change · no contract · no schema. **706 unit tests, 0 failures.**
+
+### ✅ M2-14 LOCKED
+- ⭐ *“`asserted.text` is already the correctly scoped haystack; `row.sourceText` simply isn't receiving it”* ⇒ **threading `asserted.text` and ONLY that is defensible; ⛔ never substitute the raw turn.** ⚠️ **It does not unblock the definition layer, and is ⛔ not an excuse to start building the registry.**
+
+### ⭐⭐⭐ M2-15 · A · THE SYSTEM ALREADY HAS *B*'s BEHAVIOUR, FROM *A*'s MECHANISM
+- ⓘ **MEASURED:** the store's `throw` is **caught PER OBSERVATION** by `memory-pipeline.ingest` and becomes `{ok:false, stage:'commit'}` — **it never propagates.** `captureFacts` then flattens to `{error:true}`.
+- ⭐⭐ **The architecture states the split explicitly.** `recordRefusal`: *“⭐ **AND IT NEVER THROWS.** A refusal that fails to record is still a refusal. ⛔ But it must not become a SUCCESS: **the caller throws either way**…”* ⇒ **the THROW is the safety mechanism, the RECORD is the disclosure mechanism, and they are ⛔ not alternatives.** ⇒ **B would delete the safety half and keep only the disclosure.**
+
+### ⓘ B · TRANSACTIONS — B's premise does not hold here
+- **There is NO explicit transaction anywhere in the store's write path**, and the refusal is **strictly BEFORE the insert**: `admissibleToSlot` 623 → `recordRefusal` 629 → `throw` 634 → `create` **674**. ⇒ ⭐ **no partial write of the memory row is possible — there is nothing to roll back.** ⓘ The only write on the refusal path is `recordRefusal`'s own disclosure row, deliberately **raw SQL on a table with no foreign keys**.
+
+### ⓘ C · MULTI-FACT — already correct today
+- `observe()` ingests each observation independently and `ingest` catches its own commit failure ⇒ **one refused fact does NOT stop the others.** ⭐ And the precedent Ote asked for is the pipeline's **founding rule**, in its own comments: *“a malformed observation is **DROPPED here (never throws)**: perception is probabilistic, so the pipeline's mouth is the right place to reject”* · *“one throwing interpreter never stops the others.”*
+
+### ⚠️⚠️ Q5 INVERTS — the conflation ALREADY EXISTS, in the other direction
+- `ingest`'s catch keeps **only `e.message`** and discards **`e.code` (`OWNERSHIP_BOUNDARY`), `e.reason`, `e.refusal`, `e.recorded`**; `captureFacts` then flattens everything to `{error:true}`. ⇒ **a deliberate refusal, a modality violation, a database outage and a bug arrive IDENTICALLY.**
+- ⭐⭐⭐ **That is the very defect the gate's own comment says this project has *“paid for three times”* — reproduced one frame above the gate.**
+
+### ⭐⭐ D · `model-tool` — measured, ⛔ not assumed (he was right to push)
+- ⓘ **It DOES carry a `source_message_id`** — **26 of the 54** source-bearing rows — so my earlier *“no turn of its own”* was **too quick.**
+- ⚠️ **But it is the wrong message, and the store already says so:** `676e17b9`'s id points at a message **sixteen days after** the metaphor was coined — *“a perfectly correct answer to **WHEN** this was written and a completely wrong answer to **WHAT it is based on**.”* ⇒ ⭐⭐⭐ **for `model-tool`, `source_message_id` records the OCCASION, ⛔ never the BASIS; using it as `sourceText` would re-merge the two axes the `evidence`/`lineageFor` split was built to separate.**
+- ✅ **Recorded as a measured architectural boundary: the model-tool path has NO legitimate `sourceText` equivalent** — ⛔ not because no text is reachable, but because **the only reachable text answers a different question.** Its 26 rows stay outside the relayed-speech check, and that is **correct**, ⛔ not a gap.
+
+### ⏸ E · RECOMMENDATION — keep the throw; the CATCH is what is wrong
+- ⏸ **KEEP THE THROW, ⛔ do not adopt B.** The system already has B's behaviour from A's mechanism; replacing the throw would keep the behaviour and **lose the guarantee** — moving safety from *“the write cannot complete”* to *“we remembered to return early”*. ⚠️ And this store already has a disclosure table sitting wired and **silent for weeks** (`log_memory_refusals`, **0 rows**).
+- ⏸ **The smallest correct change (stated, ⛔ NOT proposed as work): let `ingest` preserve the refusal's CLASS** so `{ok:false}` can say *why*. A **differentiation** fix, ⛔ not a control-flow change.
+- ⚠️ **And it is a PREREQUISITE for threading `sourceText`, ⛔ not a follow-up** — otherwise the first thing the newly-active gate produces is an undifferentiated `{error:true}`.
+
+### ✅ MB-1 · THE MODEL BOUNDARY — he asked, and his read of the GPU was correct
+- ⓘ **MEASURED: the ENTIRE M1/M2 arc is deterministic — ZERO model calls.** Across the three dreaming pipelines, all seven scratchpad harnesses and all nine dreaming components, the only *“model”* reference is **a COMMENT saying there is no model.**
+- ⭐ **And for these conclusions that is the point:** every M2 result is an **invariant** — something that must hold **regardless of what a model does.** Inference would have made them **weaker**, since a passing run would prove only that one sampling of one model happened not to violate it.
+- ⚠️⚠️ **NOT EXERCISED — and the big one: a model has NEVER been asked to produce a Dreaming proposal.** Every dry run used **her own existing slot values** as stand-ins ⇒ **the generative half of Dreaming — the part that is actually cognition — is entirely untested.** ⛔ Deliberately excluded: nothing may be generated before the proposal's shape is ruled, or we would measure a model against a contract that did not exist — and **prompt contamination is a first-class experimental failure here.**
+- ⭐⭐⭐ **AND A HOLE IN M2-8 THAT ONLY A MODEL-BACKED TEST CAN REVEAL: a containment check proves the span is IN the bucket — it does ⛔ NOT prove the model READ it.** A model that copies the first 50 chars of each bucket **passes every check and cites nothing meaningful**, and the system would count those roots as *verified* ⇒ **M2-8's subtractive guarantee would hold FORMALLY while meaning NOTHING** — the same shape as *a root count can be true and empty*.
+- ⓘ Other model-backed paths untouched: **`extractFacts`** and **`interpretIdentity`** (**both run in production**; read, ⛔ never invoked) · `interpretModality` (⛔ not wired, his ruling) · Reflection's generation (**P1**) · the noticing pass. ⏸ **The measured trigger: the first time Dreaming is asked to PROPOSE.**
+- ⭐⭐ **The honest framing: the arc has built and verified the CONSTRAINTS AROUND cognition. It has ⛔ not tested cognition — and the reason is that its contract was only finished this week.**
+
+- **Next action:** ⏸ **AWAITING OTE on M2-15.** ⏸ Open inside it: whether the differentiation fix belongs to `ingest` or to the store's error shape; ⛔ whether `captureFacts`' bare `catch {}` should also distinguish (ⓘ a second, separate loss of information). ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
