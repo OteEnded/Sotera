@@ -4093,3 +4093,38 @@ one-of-declared-vocabulary (project-decision)       34       54       0
 - ⚠️⚠️ **A PROVEN DEPENDENCY, reported ⛔ NOT proposed as work:** `sourceText` is **already** produced by the extract host, and the relayed-speech branch is the one `admissibleToSlot` branch needing **no declared axis** ⇒ making that supply unconditional would light up an **already-shipped** check across **54 of 88** rows with ⛔ **no definition layer, no notation and no registry** — and would generate the evidence for whether definitions are worth registering at all. ⛔ **It touches the extraction path and is entirely his call.**
 
 - **Next action:** ⏸ **AWAITING OTE on M2-13** (the home, and the timing precondition). ⛔ Still open inside it: **where a reviewed data file physically sits** · **whether the lock is a file or a table** (ⓘ `persona.lock.json` is a file because the SDK writes it at install; a definition lock is written by a run against a database — a different lifetime) · **whether the axis-supply dependency is work he wants at all.** ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
+
+## 2026-09-02 08:44 +0700 · ✅✅ M2-13 LOCKED · ⭐⭐⭐ M2-14 — TWO GUARANTEES WEARING ONE NAME
+
+- ⛔ **Investigation only · scratchpad harness, read-only, writes nothing.** ⛔ No production change · no registry · no command · no lock · no producer contract · no schema · no change to `admissibleToSlot`/`slotViolation`/`resolveConflict`/`assertionGate`. **706 unit tests, 0 failures.**
+
+### ✅✅ M2-13 LOCKED
+- ✅ **Home: ③ a reviewed data file + a deliberate registration command**, with the seeder's **all-or-nothing / dry-run / verify** discipline **plus a LOCK** recording the resolved check vocabulary at registration. ✅ **Migration disqualified on the staleness guarantee, ⛔ not preference.**
+- ✅✅ **Do NOT register the initial definitions yet.** ⭐⭐⭐ His framing: *“the dependency is **producer declares what it knows → check can evaluate → definition can meaningfully constrain the slot**. **We designed the second half before the first half existed.**”* ⚠️ And he **did not approve** changing `sourceText` — ruling that reporting it as a measured dependency rather than turning it into work was correct.
+
+### ⚠️⚠️ M2-14 — AND IT OPENS WITH A CORRECTION TO MY OWN §D.2
+- ⓘ I said `sourceText` was *“already produced by the extract host”* and the change would be making it *“unconditional”*. **Both wrong.** The extract host computes an assertion-gated text and **consumes it LOCALLY as an argument to `classifyCapture`** — it **never sets `row.sourceText`**, and **nothing anywhere assigns it.** ⇒ ⭐⭐ **the ownership boundary has ZERO suppliers, and the change would be THREADING an existing value, ⛔ not widening a conditional one.**
+
+### ⓘ MEASURED (today)
+- **Why it looks conditional:** the ternary `asserted.extract ? … : ''` is **unreachable in practice** — `extractFacts` calls `assertionGate` itself and returns `[]` on refusal. ⓘ **The gate refuses 0 of 1,003 user turns.** The real narrowing is `split.asserted` (fences · blockquotes · blobs · transcribed blocks · inline code), touching **7 of 1,003 (0.7%)**.
+- **What it guarantees when present:** *“a fact cannot be 'quoted' from a region that was stripped as somebody else's document.”* ⇒ ⭐ it is **the haystack a quotation claim is checked against**, ⛔ not “the message”.
+- **Which branches have it:** the **extract** path computes it (28 of 54 source-bearing rows); **model-tool** computes none (26); **lesson/decline/doc-seed genuinely have no turn to point at.**
+
+### ⓘ MEASURED (if threaded) — the before/after harness over 54 rows
+- **`asserted.text` and the raw turn are IDENTICAL for 54 of 54**, and for **99.3% of the whole corpus.** ⇒ ⭐⭐ **threading EXPOSES information that already exists; it ⛔ does NOT change extraction semantics.** `classifyCapture` verdicts: **unchanged × 54**.
+- ⭐ It would newly fire on **1** row — ⚠️ **and not a random one:** `user/preferred_name = “Cogito”`, **`provenance = quoted`**, from a turn beginning *“from your unc “ Oh, absolutely…”* ⇒ **the known `speaker-is-not-the-account-holder` defect — the room owner renamed from somebody the account holder was QUOTING. Silenced, never fixed.**
+
+### ⭐⭐⭐ THE SHARP FINDING — TWO GUARANTEES WEARING ONE NAME
+- > **“They really typed these words” ≠ “they were asserting them.”** `classifyCapture` verifies the **first** — and it was **RIGHT** to call that row `quoted`. `onlyInsideQuotes` catches the **second**. **Only the first is wired.**
+- ⇒ **Q7's answer: ⛔ no, and the risk runs the other way.** ✅ Thread **`asserted.text`** and the guarantee is preserved exactly. ⛔⛔ **Thread the RAW turn and a fact could earn `quoted` from inside a stripped code fence on those 7 turns — the exact defect the gate exists to prevent.** ⚠️ And **0.7% is a property of THIS corpus, ⛔ not a guarantee** — the rule must hold on the guarantee.
+
+### ⚠️⚠️ THE CONSEQUENCE THAT IS NOT TELEMETRY
+- **A refusal `throw`s** (`code: 'OWNERSHIP_BOUNDARY'`) ⇒ **a write that succeeds today would begin to FAIL.** ⓘ **1 of 28** extract-path rows retrospectively; ⛔ the prospective rate is unknown and ⛔ I did not estimate one.
+- ⭐ **Cost: ZERO storage** — the store strips these inputs explicitly (*“THE BOUNDARY'S INPUTS ARE TRANSPORT, NOT COLUMNS”*), and ⛔ **no new material crosses any boundary**: the write path already sees the turn's `content` and a `value` derived from it.
+
+### ⭐ INFERRED · ⏸ PROPOSED
+- ⛔ **It does NOT unblock the definition layer.** It closes **one branch of one check**; **`semanticTarget` still has ZERO producers** and **0 of 88** rows carry a `modality`, so three of the five refusal classes stay unevaluable. ⛔ **And it changes the question-form model not at all** — *question → declared deterministic checks → complete evaluation → ALLOW/REFUSE/DEFER* is untouched.
+- ⏸ **PROPOSED: a qualified yes — thread `asserted.text`, ⛔ NEVER the raw turn** — ⚠️ with the **throw-on-refusal** behaviour named as the real cost, and ⏸ a way to **observe refusals before they refuse** wanted first (the boundary already has `unevaluated`/`describeRefusal` for it) — ⛔ **not proposed as work.**
+- ⭐ **Honest framing of its value:** ⛔ it does not make the definition layer worth building. ⭐ It closes **one real, named, still-unfixed defect** and turns **one of five** refusal branches from *unevaluable* into *live* — **a memory-layer improvement that happened to be found by looking at the definition layer's inputs.**
+
+- **Next action:** ⏸ **AWAITING OTE on M2-14.** ⏸ Open inside it: whether **throw-on-refusal is acceptable for an automatic writer**, or whether the extract path should **record rather than fail**; ⛔ the other two axes are untouched and still have **zero producers**; ⓘ whether `model-tool` could supply an asserted text at all (⭐ it has no turn of its own — ⛔ not investigated). ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
