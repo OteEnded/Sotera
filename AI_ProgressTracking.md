@@ -4295,3 +4295,58 @@ pooling them would measure the surface changing. What the old corpus *does* esta
 is not the mechanism** (acting reflections are the LONGER ones, 2052 vs 1146 chars — a clean negative), and
 the withheld-door hole makes the new ledger unsound alone. Procedure **pre-registered before any gen-2 data
 exists**. ⭐ Nothing forced — reflection runs on its own 20-minute cron.
+
+---
+
+## 2026-09-02 15:40 (+07:00) · ⭐ THE DISPATCH BOUNDARY IS REAL · provenance gains `reflection`
+
+**Both of Ote's rulings shipped.** And the first one came with a correction to what I had told him.
+
+### ⚠️⚠️ The withheld door never opened — I had read one instrument and stopped
+
+I reported *"`remember_fact` called in 4 reflections, wrote rows in 3"* from `tools_used`. The **tool
+audit** says: **9 attempts across 3 days, and every single one FAILED** — all with
+`entity, attribute, value are required`, under **five invented argument shapes**
+(`{attribute,name,value}` · `{category,name,value}` · `{key,type,value}` · `{content}` · `{content,kind}`).
+
+> ⭐⭐⭐ **She was guessing the argument names of a tool she had never been shown.** A withheld tool's
+> schema is never sent — while **`remember`'s own description tells her to use `remember_fact`** for
+> subject-attribute-value facts. The last four attempts fall back to `{content}`: the shape of the tool she
+> *does* have. ⇒ ⛔ *"She walked through the closed door"* is FALSE. She knocked nine times and got a
+> validation error that could not tell her the door was not hers.
+
+⭐ **`tools_used` says she REACHED for something; only `log_tool_calls` says whether it WORKED.**
+
+### ✅ 040 · the boundary, and the four facts kept apart
+
+`authorizeToolCall({offered, name})` — one pure rule, used by the reflection loop and by the follow-through
+(which had enforced it **silently**, so an attempt left no trace anywhere). ⛔ A **missing** offered set
+**throws**: it must never fail open. The refusal **names the boundary and lists what IS available** — the
+answer those nine errors could never give.
+
+```
+offered      REFLECTION_TOOLS, stamped per row by tool_generation
+emitted      tools_used ∪ tools_refused, plus log_tool_calls.arg_keys
+authorized   the two arrays are DISJOINT by construction
+succeeded    log_tool_calls.ok · wrote_memory_id · log_retention_decisions.state
+```
+
+⭐ `tools_used` **keeps meaning EXECUTED** — 81 historical rows mean it that way. And
+`dispatch_generation` (1 advertised · 2 enforced) marks the boundary, ⛔ **not** a bump of
+`tool_generation`: the offered SET did not change, only whether it binds.
+
+### ✅ 041 · `observed` · `instructed` · `reflection`
+
+`note()` hard-coded `instructed`, so a conclusion she reached in a reflection came back **from her own
+memory tool** as something the user had told her. **The occasion sets it** — `retain` passes `reflection`,
+`note_own_practice` still defaults to `instructed` — and it is ⛔ not a parameter the model can reach.
+Ownership unchanged. `howLearned` gains its third sentence and ⛔ no longer falls through to *"you inferred
+it"* for an origin it does not recognise.
+
+**52 of 52 suites pass. Zero residue.** New `dispatch-boundary-check`: 26 assertions.
+
+### ⏭ P1 · unchanged, and now with a dated window
+
+The measurement population is **`tool_generation = 2 AND dispatch_generation = 2`**. ⭐ Nothing forced —
+reflection runs on its own 20-minute cron. The next useful evidence is what she does when `retain` and
+`decline_to_remember` are all she has and the boundary is real.

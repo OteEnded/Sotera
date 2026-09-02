@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera · P1 retention arc
 
-**Rewritten 2026-09-02 15:08 (+07:00).** ⭐ Read this first after a context compaction.
+**Rewritten 2026-09-02 15:40 (+07:00).** ⭐ Read this first after a context compaction.
 
 ---
 
@@ -11,12 +11,14 @@
 ✅ retain() SHIPPED + LIVE       the decision-shaped interface for reflection
 ✅ `persisted` RULED (039)       = durable Sotera-owned state, in ANY store — the ruling was CONDITIONAL
                                  on a reachability measurement, and the measurement passed
-✅ 51 of 51 SUITES PASS          both "pre-existing failures" were stale assertions, three of them MINE
-▶  P1 · the ~14                  OPEN as measurement + design. ⛔ cannot be answered yet: 0 gen-2 reflections
-⏸ AWAITING OTE                   two findings, neither ruled (§3)
+✅ DISPATCH BOUNDARY (040)       only an OFFERED tool may execute — and a missing offered set THROWS
+✅ PRACTICE PROVENANCE (041)     observed · instructed · reflection — the OCCASION sets it
+✅ 52 of 52 SUITES PASS          both old "pre-existing failures" were stale assertions, three of them MINE
+▶  P1 · the ~14                  OPEN. ⛔ cannot be answered yet: 0 rows in the measurement window
+⏸ AWAITING OTE                   nothing. Both rulings are in.
 ```
 
-**Live now:** `:8210` PID **61760**, started **15:03:44**, fresher than every module.
+**Live now:** `:8210` PID **59576**, started **15:35:47**, fresher than every module.
 ⛔ `:8201` is **OLS — Ote's, never touched.**
 
 ---
@@ -62,13 +64,41 @@ FIVE RECEIPT STATES          persisted (durable state, in ANY store — and it N
 
 ---
 
-# 3 · ⏸ THE TWO THINGS WAITING ON OTE
+# 3 · ✅ THE TWO RULINGS, AND THE CORRECTION THAT CAME WITH THE FIRST
 
-| ⚠️⚠️ **`remember_fact` — WITHHELD — WAS CALLED** | **4 reflections, 3 separate days, all prompt gen 3.** `toolDefinitions(REFLECTION_TOOLS)` filters the **offer**; `runTool(call.name, …)` filters **nothing**. ⭐ Advertisement is not authorization, and it is **not theoretical**. ⛔ I did not touch dispatch: enforcing the offered set is a behaviour change, and doing it mid-investigation would move the thing being measured |
-| --- | --- |
-| ⚠️ **provenance of a retained practice** | `note()` hard-codes `origin:'instructed'` → rendered as *"this person told you about your practice directly."* **False** for a practice she concluded in a reflection, and it spends the audit the frequency floor rests on. The enum is `('observed','instructed')` and a reflection-derived practice is **neither**. ⛔ Not fixed — a third origin is a vocabulary decision. Pinned by `F1`/`F2` as a characterisation so the day it changes, they turn red |
+## 3.1 · ⚠️⚠️ The withheld door NEVER OPENED — I read one instrument and stopped
 
----
+I reported *"`remember_fact` called in 4 reflections, wrote rows in 3"* from `tools_used`. The **tool
+audit** says **9 attempts across 3 days and every one FAILED** — all `entity, attribute, value are
+required`, under **five invented argument shapes** (`{attribute,name,value}` · `{category,name,value}` ·
+`{key,type,value}` · `{content}` · `{content,kind}`).
+
+> ⭐⭐⭐ **She was guessing the argument names of a tool she had never been shown.** A withheld tool's
+> schema is never sent — and **`remember`'s own description tells her to use `remember_fact`**. The last
+> four attempts fall back to `{content}`: the shape of the tool she *does* have.
+
+⭐ **`tools_used` says she REACHED; only `log_tool_calls` says whether it WORKED.**
+
+## 3.2 · ✅ 040 · the dispatch boundary
+
+`authorizeToolCall({offered, name})` — one pure rule, used by the reflection loop **and** the
+follow-through, which had enforced it **silently** (an attempt left no trace anywhere). ⛔ A **missing**
+offered set **THROWS** — it must never fail open. The refusal **names the boundary and lists what IS
+available**.
+
+```
+offered      REFLECTION_TOOLS + tool_generation      emitted    tools_used ∪ tools_refused (+ arg_keys)
+authorized   the two arrays are DISJOINT             succeeded  log_tool_calls.ok · wrote_memory_id
+```
+
+⭐ `tools_used` **still means EXECUTED** (81 rows mean it that way). `dispatch_generation`: **1 advertised
+· 2 enforced** — ⛔ NOT a bump of `tool_generation`, because the offered SET did not change.
+
+## 3.3 · ✅ 041 · provenance says what happened
+
+`observed` (the abstractor, past the floor) · `instructed` (someone told her) · `reflection` (she derived
+it herself). **The OCCASION sets it** — `retain` → `reflection`, `note_own_practice` → `instructed` — ⛔
+never a parameter the model can reach. ⛔ Ownership unchanged: a practice is hers however she came by it.
 
 # 4 · ▶ P1 · THE ~14 — open, and the first answer is "not yet"
 
@@ -76,7 +106,8 @@ FIVE RECEIPT STATES          persisted (durable state, in ANY store — and it N
 > investigation forward-only."*
 
 ```
-81 reflections · tool_generation 1 → 81 · tool_generation 2 → 0 · log_retention_decisions → 0 rows
+THE MEASUREMENT WINDOW:  tool_generation = 2  AND  dispatch_generation = 2   →  0 rows so far
+81 reflections · tool_generation 1 → 81 · dispatch_generation 1 → 81
 ```
 
 ⛔ **Every reflection that exists met the OLD surface**, and pooling the two would measure the surface
@@ -86,10 +117,9 @@ changing, not her. ⓘ Gen-2 rows accumulate on their own — reflection is a **
 **What the old corpus DID settle** — ⛔ **the output budget is not the mechanism**: the reflections that
 ACTED are the **longer** ones (2,052 vs 1,146 avg chars). Truncation is closed before the measurement starts.
 
-**Three blind spots, named:** ⛔ a recognised-but-not-invoked decision leaves **no row anywhere** but the
-prose · acting through a **withheld door** leaves no decision row and scores as "did not invoke" ·
-`wrote_memory_id` keeps only `written[0]`. ⇒ **measure with BOTH ledgers** (`tools_used` ∪
-`log_retention_decisions`) — costs nothing, changes no behaviour.
+**Blind spots:** ✅ the withheld-door one is CLOSED by 040 (`tools_refused` + the audit) · ⓘ
+`wrote_memory_id` keeps only `written[0]`, so ⛔ never attribute a row to a call from it · ⛔ **B1 remains
+and no ledger can close it**: a decision she recognises and does not act on exists only in the prose.
 
 ⭐ **The procedure is PRE-REGISTERED** in `INVESTIGATION_SOTERA_P1_RECOGNISED_BUT_NOT_INVOKED.md`, written
 before any gen-2 data exists so it cannot be tuned to a result. ⛔ No keyword classifier. ⛔ *"Asked the
@@ -116,6 +146,7 @@ consumers ①②③ of M2-16 · **`think:false` A/B** (⛔ explicitly not run).
 | ⚠️ **a harness must match production** | a missing `persona` drained an empty lane; a missing `conversationId` produced an unrecognised `source` tag |
 | ⭐ **read the EFFECTIVE setting, not the default** | `mst_settings` overrides `config.json`; hydrate via `initSettings(db)` |
 | ⛔ **no backticks in SQL inside a template literal** | the codebase warns about it; I did it anyway |
+| ⭐⭐ **one ledger answers one question** | `tools_used` = reached · `log_tool_calls.ok` = worked. I read the first, reported *"she walked through the closed door"*, and the second said every one of those nine calls **failed** |
 | ⭐ **restart by PID/port, never cmdline** | assert **process start > module mtime**, ⛔ never `/health`. ⚠️ Check for an in-flight turn first — I killed one of Ote's on 2026-09-02 |
 
 ---
