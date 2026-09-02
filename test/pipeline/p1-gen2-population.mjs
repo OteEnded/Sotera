@@ -167,8 +167,10 @@ try {
       // THE ELLIPSIS IS CONDITIONAL. It was unconditional, so a reflection SHORTER than the cap was
       // displayed as if it had been cut off - an instrument implying its own truncation is a false
       // signal, and the very first sample (378 chars) hit it immediately.
-      const flat = r.text.replace(/
-+/g, ' ')
+      // NOTE: written with String.fromCharCode(10) and no backslash escapes on purpose - a shell
+      // heredoc silently ate the escape in an earlier patch and turned a regex literal into a real
+      // line break, which broke this file for ~45 minutes.
+      const flat = r.text.split(String.fromCharCode(10)).join(' ').split(String.fromCharCode(13)).join(' ')
       const body = (FULL || flat.length <= 400) ? r.text : (flat.slice(0, 400) + '…')
       console.log(`\n${body.replace(/^/gm, '     ')}\n`)
     }
