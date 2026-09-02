@@ -1,184 +1,128 @@
-// ⭐⭐⭐ THE DREAMING PROPOSITION GRAMMAR — a closed vocabulary, ⛔ not a prompt instruction.
+// ⭐⭐⭐ WHAT DREAMING PROPOSES — an ORDINARY SLOT CLAIM. (M2-7, locked 2026-09-01; built 2026-09-03)
 //
-// M2.b. PURE: no stores, no IO, no config, no model.
+// PURE. No stores, no IO, no config, no model.
 //
-// ── ⭐⭐ WHY A GRAMMAR AT ALL ─────────────────────────────────────────────────────────────────────
-// The shipped consolidation path emits a typed observation object — the right shape — and then leaves
-// `summary` as FREE TEXT, and every disclosure and confabulation risk in this arc fits through that one
-// field. ⇒ ⭐ the fix is not a better instruction for filling it. It is NOT HAVING IT.
+// ── ⚠️⚠️ THE FIVE BESPOKE FORMS ARE GONE, AND THAT IS A DELIBERATE ACT ──────────────────────────
+// This module used to hold a CLOSED GRAMMAR: five forms (`recurrence` and friends), typed slots, and a
+// deterministic renderer, so that *"the model never produces a sentence."* ⭐ It was a good design for
+// the wrong frame, and Ote retired it:
 //
-//     the model SELECTS A FORM and FILLS TYPED SLOTS.  ⛔ It never writes a sentence.
-//     prose is RENDERED from the form, deterministically.
+//     *"Ordinary memory claim + separate warrant/provenance. ⛔ **No Dreaming-specific memory
+//      vocabulary.**"* · *"Warrant: separate provenance object. ⛔ Don't put evidence/provenance into
+//      the memory's **value**."*
 //
-// That is the codebase's own split carried one step further: *the LLM proposes, the pipeline decides* —
-// and here, **the renderer speaks.**
+// ⭐⭐ WHY THE GRAMMAR WAS WRONG, MEASURED (M2.d): `recurrence` rendered *"…of my own acts"* while the
+// evidence was **the other party's turns.** The forms assumed the PERSONA frame (subject = Sotera), but
+// **the room frame's natural subject is THE ROOM'S OWNER** — which is what every `user/*` memory already
+// is, and a claim about the room's owner IN their own room discloses nothing.
+// ⇒ once the subject is right, Dreaming needs no vocabulary of its own: it proposes what any writer
+// proposes, and `recurrence` becomes the WARRANT rather than the claim.
 //
-// ── ⭐ WHAT THE CLOSURE BUYS, STRUCTURALLY ───────────────────────────────────────────────────────
-//   ⛔ cannot contain third-party content   slots take T0 values; there is nowhere for prose
-//   ⛔ cannot express causation             no causal form, no causal slot, no free text
-//   ⛔ cannot claim a property of a person   no form has a person-property slot
-//   ⛔ cannot exceed its evidence            the quantifier is a FIELD, checked against completeness
-//   ⛔ cannot make a negative claim          the form does not exist — see NEGATIVES below
-//   ⭐ an unparseable proposal is REFUSED    there is no fallback that accepts prose
-//
-// ── ⛔⛔ NEGATIVES ARE ABSENT, NOT GATED ─────────────────────────────────────────────────────────
-// A negative claim needs "absence of a row" to mean "absence of the act". ⓘ `#653` proves it does not —
-// `remember_fact` called, ZERO rows written, `failure = null`. ⇒ while a silent write-failure exists
-// anywhere in the path, *no row* and *did not happen* are indistinguishable, and NO amount of
-// completeness repairs it. ⛔ So there is no negative form, and no `universal` quantifier.
-//
-// ── ⚠️ TWO ALLOWLISTS, NOT ONE ──────────────────────────────────────────────────────────────────
-// `T0_FIELDS` governs what may be READ into a proposal. `PUBLISHABLE_ENTITY_TYPES` governs what a
-// proposal may COUNT when its destination is global. They are different questions: the first prevents
-// CONTAINMENT, the second prevents DISCLOSURE. ⓘ `withheld(1 of 79)` is fully T0 and still discloses that
-// an exclusion happened.
-//
-// ⛔ NOTHING HERE DECIDES THE DESTINATION RULING. `PUBLISHABLE_ENTITY_TYPES` encodes the SMALLEST-SAFE
-// reading (acts only) so the dry run cannot accidentally assume the wider one; Ote's ruling on
-// asked-vs-unasked disclosure is still open and would change exactly this constant.
+// ── ⚠️⚠️ AND THE GUARANTEE THIS COSTS, STATED PLAINLY ───────────────────────────────────────────
+// The closed grammar guaranteed **no prose leaves the model**. An ordinary claim's `value` IS
+// model-produced prose, so ⛔ that guarantee is GONE and this file does not pretend otherwise.
+// ⭐ What replaces it is not a promise but a mechanism: **M2-8 span verification** — every cited span is
+// checked against the bucket it claims to come from, unverifiable roots are DISCARDED, and the roots are
+// RECOUNTED before the floor is applied. ⓘ Prose is admitted because it is CHECKED, ⛔ not because it is
+// trusted. See `dreaming-verify.js`.
+// ⓘ And the old worry was already moot: `value` has been model-produced prose since long before
+// Dreaming — measured, `synthesized` n=38, median 74 chars, with two live rows truncated mid-word at 400.
 
-/** ⭐ The input allowlist. Fields a proposal may be BUILT from. ⛔ Free-text columns are absent on purpose. */
+/**
+ * ⭐ The structural fields a proposal may be BUILT from.
+ * ⚠️ It no longer governs the VALUE — under M2-7 the value comes from bounded evidence, not from these.
+ * ⓘ Kept because it still says which act-record columns may be read at all; ⛔ free-text columns
+ * (`text`, `reason`, `failure`) remain absent on purpose.
+ */
 export const T0_FIELDS = Object.freeze([
   'rolling_id', 'conversation_id', 'user_id', 'created_at', 'completed_at',
   'outcome', 'messages_considered', 'from_rolling_id', 'up_to_rolling_id',
   'wrote_memory_id_present', 'tool_names', 'model',
 ])
-// ⛔ DELIBERATELY EXCLUDED, and each for a reason: `text` (her prose — E-7) · `reason` / `failure`
-// (free text) · anything from `txn_messages` · any memory `content` or `value`.
 
-/** ⭐ The entity types a GLOBAL proposition may count. ⛔ Fails closed: a new type is unpublishable. */
-export const PUBLISHABLE_ENTITY_TYPES = Object.freeze(['act'])
-/** ⓘ Named so a refusal can say WHICH type it refused, rather than "not allowed". */
-export const ENTITY_TYPES = Object.freeze(['act', 'context', 'person', 'exclusion', 'message'])
-
-export const QUANTIFIER = Object.freeze({ existential: 'existential' })
+/** ⭐ A slot address is `entity/attribute`. ⛔ Kebab/snake identifiers only — a phrase is where prose hides. */
+const ADDRESS_RE = /^[a-z0-9][a-z0-9_.-]{0,63}$/i
 
 /**
- * ⭐ THE FORMS. Each declares its slots AND the ENTITY TYPE each count is a count OF — which is what makes
- * the publication rule a static type check rather than a judgement.
+ * ⭐⭐⭐ validateClaim — the shape of an ORDINARY claim, plus its citations.
+ *
+ * `{ entity, attribute, value, kind, cites: [{root, span}] }`
+ *
+ * ⛔ There is no `form`, no `quantifier` and no Dreaming-specific field. That is the whole point of
+ * M2-7: what comes out of Dreaming must be indistinguishable IN SHAPE from what any other writer
+ * proposes, so the memory layer's ordinary pipeline can handle it without knowing who sent it.
  */
-export const FORMS = Object.freeze({
-  frequency: {
-    slots: { act: 'label', n: 'count:act', of: 'count:act' },
-    render: (s) => `In ${s.n} of ${s.of} of my own acts, ${s.act} occurred.`,
-  },
-  extent: {
-    slots: { act: 'label', distinct_contexts: 'count:context', max: 'count:act', median: 'count:act' },
-    render: (s) => `My ${s.act} acts span ${s.distinct_contexts} contexts; the largest holds ${s.max} and the median ${s.median}.`,
-  },
-  recurrence: {
-    slots: { act: 'label', independent_roots: 'count:context', of: 'count:act' },
-    render: (s) => `${s.act} occurred across ${s.independent_roots} independent contexts, over ${s.of} of my own acts.`,
-  },
-  co_occurrence: {
-    slots: { a: 'label', b: 'label', both: 'count:act', a_only: 'count:act', b_only: 'count:act' },
-    // ⛔ ALL COUNTS RENDERED, ALWAYS. A conditional is a correlation wearing a rule, and omitting the
-    // negative cells is how "when A, B" gets read as a rule.
-    render: (s) => `Among my own acts: ${s.both} had both ${s.a} and ${s.b}; ${s.a_only} had only ${s.a}; ${s.b_only} had only ${s.b}.`,
-  },
-  interval: {
-    slots: { act: 'label', gap_days: 'count:act' },
-    render: (s) => `${s.gap_days} days separated my two most recent ${s.act} acts.`,
-  },
-})
-
-/** Parse a slot type declaration into `{kind, entity}`. */
-const slotType = (decl) => {
-  const [kind, entity] = String(decl).split(':')
-  return { kind, entity: entity ?? null }
-}
-
-/** ⛔ A label must be a short enumerated token — ⛔ never a phrase, which is where prose would hide. */
-const LABEL_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-
-/**
- * ⭐⭐ VALIDATE a proposal. Returns `{ok, why, form, counted}` — ⛔ never throws, so a malformed proposal
- * is a REFUSAL WITH A REASON rather than a crash three frames away.
- */
-export function validateProposal(p = {}) {
-  const form = FORMS[p?.form]
-  if (!form) return { ok: false, why: `unknown form ${p?.form} — the grammar is closed` }
-  if (p.quantifier !== QUANTIFIER.existential) {
-    // ⛔ Universals and negatives assert an ABSENCE, and §NEGATIVES says the ledger cannot establish one.
-    return { ok: false, why: `quantifier must be existential — a universal or negative claim asserts an absence the ledger cannot establish` }
+export function validateClaim(claim = {}) {
+  const { entity, attribute, value, kind, cites } = claim ?? {}
+  if (typeof entity !== 'string' || !ADDRESS_RE.test(entity)) {
+    return { ok: false, why: 'a claim must name a valid `entity` — the subject the slot is about' }
   }
-  const slots = p.slots ?? {}
-  const declared = Object.keys(form.slots)
-  const given = Object.keys(slots)
-  // ⛔ ALL-OR-NONE. A form's slots travel together: reporting `max` while omitting `median` is honest
-  // per-field and misleading overall, and no instruction fixes that.
-  const missing = declared.filter((k) => !(k in slots))
-  const extra = given.filter((k) => !declared.includes(k))
-  if (missing.length) return { ok: false, why: `missing slots: ${missing.join(', ')} — a form's slots are all-or-none` }
-  if (extra.length) return { ok: false, why: `undeclared slots: ${extra.join(', ')}` }
-
-  const counted = []
-  for (const [k, decl] of Object.entries(form.slots)) {
-    const t = slotType(decl)
-    const v = slots[k]
-    if (t.kind === 'count') {
-      if (!Number.isInteger(v) || v < 0) return { ok: false, why: `slot ${k} must be a non-negative integer count` }
-      if (!ENTITY_TYPES.includes(t.entity)) return { ok: false, why: `slot ${k} counts an unknown entity type ${t.entity}` }
-      counted.push({ slot: k, entity: t.entity, value: v })
-    } else if (t.kind === 'label') {
-      // ⛔ THE VOCABULARY-CLOSURE TEST, MECHANISED: a label is an enumerated token, so it cannot carry a
-      // term that is not in the evidence. A phrase would be exactly that.
-      if (typeof v !== 'string' || !LABEL_RE.test(v)) {
-        return { ok: false, why: `slot ${k} must be a kebab-case enumerated label — a phrase is where prose hides` }
-      }
+  if (typeof attribute !== 'string' || !ADDRESS_RE.test(attribute)) {
+    return { ok: false, why: 'a claim must name a valid `attribute` — the question the slot asks' }
+  }
+  // ⛔⛔ AND IT MAY NOT BE A DREAMING-SPECIFIC ADDRESS. This is M2-7 made mechanical: minting
+  // `dreaming:<form>` would re-create the vocabulary the ruling removed, one layer down.
+  if (/^dreaming[:/]/i.test(attribute) || /^dreaming[:/]/i.test(entity)) {
+    return { ok: false, why: 'a `dreaming:`-prefixed address is a Dreaming-specific vocabulary — M2-7 removed it' }
+  }
+  if (typeof value !== 'string' || !value.trim()) {
+    return { ok: false, why: 'a claim must carry a value' }
+  }
+  // ⛔ KIND IS DECLARED BY THE CLAIM, and the memory layer's precondition compares it to the SLOT's kind.
+  // ⛔ It is never inferred here — M2-10 forbids inferring a kind from a value.
+  if (typeof kind !== 'string' || !kind.trim()) {
+    return { ok: false, why: 'a claim must declare its `kind` — what question it answers. ⛔ Never inferred' }
+  }
+  if (!Array.isArray(cites) || !cites.length) {
+    return { ok: false, why: 'a claim must carry citations — an unwarranted claim is not Dreaming\'s to make' }
+  }
+  for (const c of cites) {
+    if (!c?.root || typeof c.span !== 'string' || !c.span.trim()) {
+      return { ok: false, why: 'every cite must name a root and quote a span from it' }
     }
   }
-  return { ok: true, why: '', form: p.form, counted }
+  // ⛔ THE VALUE MAY NOT CARRY ITS OWN WARRANT. Ote: *"Don't put evidence/provenance into the memory's
+  // value."* A value that argues for itself is a claim and a receipt fused into one field, and the two
+  // have different lifetimes — the receipt is about a moment, the claim is not.
+  if (/\b(\d+\s+(independent\s+)?(roots?|conversations?|episodes?)|verified across)\b/i.test(value)) {
+    return { ok: false, why: 'the value states its own evidence — the warrant is a SEPARATE object (M2-7)' }
+  }
+  return { ok: true, why: 'an ordinary slot claim with citations', entity, attribute, kind }
 }
 
 /**
- * ⭐⭐⭐ THE PUBLICATION CHECK — a STATIC TYPE CHECK, ⛔ not an instruction.
- * A global destination may only carry counts of entities that are HERS.
+ * ⭐⭐ THE PUBLICATION CHECK, and it FAILS CLOSED.
+ *
+ * ⭐ A room-scoped claim about the room's owner, in their own room, discloses nothing — which is what
+ * every `user/*` memory already is.
+ * ⛔⛔ `persona_global` is REFUSED. O-13's no-claims-about-another-party was a persona-global constraint,
+ * and the disclosure ruling for a PROSE claim reaching every room does not exist. ⚠️ The closed grammar
+ * could be checked statically (counts of typed entities); a prose value cannot. ⇒ the smallest-safe
+ * reading holds until Ote rules, and this refusal is where that ruling would land.
  */
-export function mayPublish(p = {}, { destination = 'room' } = {}) {
-  const v = validateProposal(p)
+export function mayPublish(claim = {}, { destination = 'room' } = {}) {
+  const v = validateClaim(claim)
   if (!v.ok) return { ok: false, why: v.why }
-  if (destination !== 'persona_global') return { ok: true, why: 'room scope — the reader already has this context' }
-  const forbidden = v.counted.filter((c) => !PUBLISHABLE_ENTITY_TYPES.includes(c.entity))
-  if (forbidden.length) {
+  if (destination === 'persona_global') {
     return {
       ok: false,
-      // ⭐ Says WHICH type and WHY, because "not allowed" is unactionable and this refusal is the whole point.
-      why: `a global proposition may not count ${[...new Set(forbidden.map((f) => f.entity))].join('/')} `
-        + `(slots: ${forbidden.map((f) => f.slot).join(', ')}) — counting is disclosing, and those entities are not hers`,
-      forbidden,
+      why: 'a prose claim may not be published persona_global — the closed grammar could be checked '
+        + 'statically and a prose value cannot, and the disclosure ruling for this does not exist',
     }
   }
-  return { ok: true, why: 'every counted entity is one of her own acts' }
+  return { ok: true, why: 'room scope — a claim about the room\'s owner, in their own room' }
 }
 
-/** ⭐ Render DETERMINISTICALLY from the form. ⛔ The model never produces this string. */
-export function renderProposal(p = {}) {
-  const v = validateProposal(p)
-  if (!v.ok) return null
-  return FORMS[p.form].render(p.slots)
-}
-
-/**
- * ⭐⭐ THE WRITER TEST, mechanised: every term in the rendered sentence must come from the form's own
- * template or from a slot value. ⛔ Because the renderer owns the template, this can only fail if a slot
- * value smuggled a term — which `LABEL_RE` already prevents. ⓘ Asserted anyway: the test is cheap and it
- * is the claim the whole design rests on.
- */
-export function writerTest(p = {}) {
-  const rendered = renderProposal(p)
-  if (!rendered) return { ok: false, why: 'proposal does not render' }
-  const slotWords = Object.values(p.slots ?? {}).map((x) => String(x).replace(/-/g, ' '))
-  const templateOnly = rendered
-  for (const w of slotWords) if (w) { /* values are substituted in; presence is expected */ }
-  return { ok: true, why: 'rendered from a fixed template plus enumerated slot values', rendered: templateOnly }
-}
+/** ⭐ The value a claim asserts. ⛔ No rendering: under M2-7 the value IS the value. */
+export const valueOfClaim = (claim) => (validateClaim(claim).ok ? String(claim.value).trim() : null)
 
 /** ⛔ Exported so a check can assert the INTENT, not merely the branching. */
-export const A_GRAMMAR_NOT_AN_INSTRUCTION =
-  'Dreaming selects a form and fills typed slots; it never writes a sentence. Prose is rendered from the '
-  + 'form deterministically, so a proposition cannot contain content it was never given, cannot express '
-  + 'causation because no form has a causal slot, and cannot make a negative claim because no negative '
-  + 'form exists -- while a silent write-failure exists, no row and did not happen are indistinguishable. '
-  + 'Two allowlists, not one: T0 governs what may be read, and the counted entity type governs what may '
-  + 'be published.'
+export const AN_ORDINARY_CLAIM_PLUS_A_WARRANT =
+  'Dreaming proposes an ordinary slot claim plus a separate warrant, and nothing else. '
+  + 'It proposes what any other writer proposes: an entity, an attribute, a value and a declared '
+  + 'kind, with citations attached separately. It has no form, no quantifier and no vocabulary of its '
+  + 'own, so the memory layer can handle its proposal without knowing who sent it. The closed grammar '
+  + 'that guaranteed no prose leaves the model is gone, and what replaces it is verification rather than '
+  + 'a promise: every cited span is checked against the bucket it claims to come from and unverifiable '
+  + 'roots are discarded before the floor is applied. The value may not argue for itself, because a claim '
+  + 'and its receipt have different lifetimes.'

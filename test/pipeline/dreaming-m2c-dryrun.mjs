@@ -1,3 +1,18 @@
+// ⚠️⚠️ SUPERSEDED 2026-09-03 — THIS SCRIPT CANNOT RUN, AND IT IS KEPT ANYWAY.
+//
+// It drove the CLOSED GRAMMAR (five bespoke forms, typed slots, a deterministic renderer). **M2-7
+// retired that grammar on 2026-09-01** and the code was removed on 2026-09-03, so the imports below no
+// longer resolve.
+//
+// ⛔ NOT DELETED, because this is a RECORD OF AN INVESTIGATION THAT HAPPENED — the M2.c/M2.d dry runs
+// are where the measured findings came from that produced M2-5, M2-7 and M2-8 in the first place
+// (⭐ the `Cogito` quantity becoming `UPDATE, supersedes`; ⭐ `recurrence` rendering *"of my own acts"*
+// while the evidence was the other party's turns). Deleting the instrument would leave the findings
+// with no provenance.
+//
+// ⇒ ⭐ the LIVE equivalents are `test/checks/dreaming-m2-7-check.mjs` (the retirement, red-proofed) and
+// `test/checks/dreaming-m2-semantics-check.mjs` (every locked M2 ruling, executable).
+
 // ⭐⭐⭐ M2.c — THE PLAN-ONLY DRY RUN, against the real corpus.
 //
 //   node test/pipeline/dreaming-m2c-dryrun.mjs

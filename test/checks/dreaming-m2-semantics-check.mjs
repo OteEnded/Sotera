@@ -105,14 +105,28 @@ try {
   // predates the ruling and nothing has been built since. ⭐ Recorded so that removing them is a
   // DELIBERATE visible change, and so nobody reads a green suite as *"M2-7 is satisfied"*.
   const resolverCode = codeOnly(src('dreaming-resolver.js') ?? '')
-  spec.push('M2-7 · retire the five bespoke FORMS — the claim becomes an ordinary slot claim + a warrant')
-  check('M2-7 · ⚠️⚠️ DIVERGENCE: the five bespoke FORMS are STILL EXPORTED although M2-7 retired them',
-    /export const FORMS\s*=/.test(proposalCode),
-    'when this goes RED the forms were removed — swap in the positive red-proof at that moment')
-  spec.push('M2-7 · stop minting `dreaming:<form>` slot addresses — no Dreaming-specific vocabulary')
-  check('M2-7 · ⚠️ DIVERGENCE: `slotAddressFor` still mints `dreaming:<form>` addresses',
-    /dreaming:/.test(resolverCode),
-    'the dry-run resolver never wrote one — proven against the store below')
+  // ✅ CLOSED 2026-09-03. The divergence this register characterized is gone: the forms are retired and
+  // the `dreaming:<form>` minting with them. ⭐ The DELIBERATE change has its own red-proof —
+  // `dreaming-m2-7-check` — as Ote required, so the removal left an artifact behind to inspect rather
+  // than being a deletion nobody can review.
+  check('M2-7 · ⛔⛔ the five bespoke FORMS are GONE — a locked ruling retired them',
+    !/export const FORMS\s*=/.test(proposalCode))
+  // ⚠️ ASKED BEHAVIOURALLY, ⛔ NOT BY REGEX — and this is the FOURTH time today a text scan matched
+  // something that merely LOOKED like its target. `/dreaming:/` catches the log namespace
+  // `memory.dreaming:`, which is a perfectly legitimate logger prefix and not a slot address at all.
+  // ⭐ So the question is put to the code: what address does it actually mint, and does validation
+  // refuse the old one?
+  const proposalMod = await tryImport('dreaming-proposal.js')
+  const resolverMod = await tryImport('dreaming-resolver.js')
+  const minted = resolverMod?.slotAddressFor?.({ entity: 'user', attribute: 'review-style' })
+  check('M2-7 · ⛔⛔ the minted address is the claim\'s OWN — ⛔ no `dreaming:<form>` is invented',
+    minted?.entity === 'user' && minted?.attribute === 'review-style', JSON.stringify(minted))
+  check('M2-7 · ⛔⛔ …and a `dreaming:`-prefixed address is REFUSED, so the vocabulary cannot return',
+    proposalMod?.validateClaim?.({
+      entity: 'user', attribute: 'dreaming:recurrence', value: 'x', kind: 'habit',
+      cites: [{ root: 'r1', span: 's' }],
+    })?.ok === false)
+  void resolverCode
   // ⛔ AND THE STORE MUST NEVER HAVE ACCEPTED ONE. Asserted against production, not just the source.
   const dreamingSlots = await one(
     `select count(*)::int as n from ${S}.txn_memories where attribute like 'dreaming:%'`)

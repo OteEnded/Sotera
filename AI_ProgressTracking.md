@@ -4632,3 +4632,51 @@ P1 window at ruling time: 6 · synthesized persona-authored rows already live: 1
 counting problem a `WHERE` clause on the reader could fix.
 
 **58 of 58 suites green**, verified per-suite by its pass line.
+
+---
+
+## 2026-09-03 01:05 (+07:00) — ✅ ALL SIX LOCKED M2 ITEMS BUILT · ⛔ M2 IS STILL NOT A WRITER
+
+**M2-12 ruled by Ote:** **12a NO** (⛔ no commitments into the live persona while P1 observes) ·
+**12b YES** (proposal-only against the live corpus, no persistence side effect, aux model CPU-side) ·
+**12c YES** (isolated persona for end-to-end validation, isolation **structural**, ⛔ not a filtered query).
+
+### ✅ BUILT — the register's build list went **7 → 0**
+
+| **M2-5** | `memory-kind-precondition.js` — a slot's `(entity, attribute)` is a QUESTION and its kind is what a valid ANSWER looks like. Unknown/mismatched ⇒ **DEFER**. ⛔ Exact match only: no coercion, no compatibility table — every one of those is an inference, and M2-10 forbids inferring a kind. ⛔ Binds EVERY writer, and asserts it is not gated on Dreaming |
+| --- | --- |
+| **M2-8** | `dreaming-verify.js` — per-root span verification, **discard, RECOUNT, then the floor**. ⭐ Per-root is the load-bearing word: a global check would let a sentence from root B verify a citation attributed to root A, manufacturing exactly the independence O-2 protects |
+| **M2-11** | `memory-question-checks.js` — `Object.create(null)` **plus** `Object.hasOwn`, so `toString` cannot resolve as a check · validated at declaration · **unknown/unrunnable ⇒ DEFER** · **REFUSE beats DEFER** · `ran` independent of the result. ⭐ A check that THREW is unrunnable, ⛔ never a check that passed |
+| **M2-9** | migration **046** — a warrant ledger keyed by `memory_id`, with `value_at_warrant` so a stale warrant is DETECTABLE, `pass_id`, and selected/verified/discarded. ⛔⛔ **NO score-shaped column, enforced by the migration's own proof block** — a truth score is UNREPRESENTABLE, not merely unused. ⭐ `verified <= selected` and `verified + discarded = selected` |
+| **M2-10** | migration **047** — `mst_slot_questions` (subject-free) + `mst_slots.question_id`. ⛔ Lands **EMPTY and unbackfilled**, and the proof block fails if either is untrue: declaring is an act by something that knows the question, and **a migration knows nothing** |
+| **M2-7** | the grammar **retired**, with **its own red-proof** as Ote required |
+
+### ⭐⭐⭐ M2-7 — THE RETIREMENT, AND WHY IT GOT ITS OWN FILE
+
+⛔ **Removing code is the easiest change to make invisibly and the easiest to get wrong: a deletion
+leaves no artifact to inspect.** `dreaming-m2-7-check` IS that artifact, and it asserts **both halves** —
+the old vocabulary is gone AND what replaced it works.
+
+⭐⭐ **The vocabulary cannot come back through the door:** `validateClaim` REFUSES a `dreaming:`-prefixed
+address on either side, so no caller can reintroduce the convention a deletion alone would only
+discourage.
+
+⚠️⚠️ **And the guarantee this cost is stated as a cost.** The closed grammar guaranteed *no prose leaves
+the model*; an ordinary claim's `value` IS model-produced prose, so ⛔ **that guarantee is gone.** What
+replaces it is a mechanism, not a promise: **prose is admitted because it is CHECKED (M2-8), ⛔ not
+because it is trusted.** A red-proof asserts the module SAYS this rather than implying an upgrade.
+
+### ⚠️ THE FOURTH TEXT-SCAN FALSE POSITIVE IN TWO DAYS
+
+`/dreaming:/` in the register matched the **log namespace** `memory.dreaming:` — a legitimate logger
+prefix, not a slot address. ⇒ the assertion is now **behavioural**: mint an address and try to validate a
+forbidden one. 🔑 **When a scan keeps accusing correct code, the scan is the defect.**
+
+### ⛔ WHAT IS DELIBERATELY *NOT* BUILT
+
+⛔ **No reasoner.** ⛔ No model call. ⛔ Nothing ran against the natural corpus. ⛔ M2 is not wired to
+anything and cannot write a commitment. 12b and 12c are AUTHORISED and ⏸ **not yet exercised.**
+⚠️ Superseded M2.c/M2.d dry-runs kept and bannered — they are the record of the investigation that
+produced M2-5, M2-7 and M2-8, and deleting the instrument would leave the findings with no provenance.
+
+**59 of 59 checks · 688 of 688 unit tests.**

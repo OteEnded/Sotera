@@ -27,7 +27,7 @@
 // ⇒ ⭐ there is no code path in this file that can write. Not "disabled" — **absent.**
 
 import { resolveConflict, CONFLICT, WIRE_ACTION } from '@ote/memory/cognition/memory-conflict.js'
-import { validateProposal, mayPublish, renderProposal } from './dreaming-proposal.js'
+import { validateClaim, mayPublish, valueOfClaim } from './dreaming-proposal.js'
 
 export { CONFLICT, WIRE_ACTION }
 
@@ -35,20 +35,22 @@ export { CONFLICT, WIRE_ACTION }
 export const DREAMING_TYPE = 'dreaming'
 
 /**
- * ⭐⭐ The dry-run slot address for a proposal.
+ * ⭐⭐ THE SLOT A CLAIM ADDRESSES — and under M2-7 it is simply the claim's OWN address.
  *
- * ⚠️⚠️ THIS IS A DRY-RUN CONVENTION, ⛔ NOT A SEMANTIC DECISION. Which slot a Dreaming commitment occupies
- * is unruled; this exists so the dry run can RECALL SOMETHING SPECIFIC and report what it found. A real
- * write would need Ote's ruling on slot identity first, and this function is where that ruling would land.
+ * ⚠️⚠️ THIS USED TO MINT `dreaming:<form>` — a Dreaming-specific vocabulary invented so the dry run had
+ * something specific to recall. ⛔ M2-7 removed it: *"No Dreaming-specific memory vocabulary."* A
+ * Dreaming claim addresses an ORDINARY slot, exactly as any other writer's claim does, so the memory
+ * layer can resolve it without knowing who sent it.
+ * ⓘ `validateClaim` refuses a `dreaming:`-prefixed address outright, so the old convention cannot
+ * return through a caller.
  */
 export function slotAddressFor(p = {}) {
-  const act = p?.slots?.act ?? p?.slots?.a ?? null
-  return { entity: 'sotera', attribute: act ? `dreaming:${p.form}:${act}` : `dreaming:${p.form}` }
+  return { entity: p?.entity ?? null, attribute: p?.attribute ?? null }
 }
 
 /** The value a proposal asserts, for the conflict stage's comparison. ⭐ The RENDERED string — because
  *  that is what a commitment would carry, and comparing anything else would compare the wrong thing. */
-export const valueOf = (p) => renderProposal(p)
+export const valueOf = (p) => valueOfClaim(p)
 
 /**
  * ⭐⭐⭐ planFor — RECALL → RESOLVE → PLAN, and it explains itself.
@@ -62,7 +64,7 @@ export const valueOf = (p) => renderProposal(p)
  * @param {string} o.destination 'room' | 'persona_global'
  */
 export function planFor({ proposal, matches = [], destination = 'room' } = {}) {
-  const valid = validateProposal(proposal)
+  const valid = validateClaim(proposal)
   if (!valid.ok) {
     return { ok: false, stage: 'grammar', why: valid.why, plan: null }
   }
@@ -118,7 +120,7 @@ export function planFor({ proposal, matches = [], destination = 'room' } = {}) {
  */
 export function createDreamingResolver({ log = null } = {}) {
   async function commit(obs) {
-    log?.debug?.({ form: obs?.form }, 'memory.dreaming: proposal received — dry run, nothing written')
+    log?.debug?.({ attribute: obs?.attribute }, 'memory.dreaming: claim received — dry run, nothing written')
     return {
       ok: true,
       action: CONFLICT.IGNORE,
