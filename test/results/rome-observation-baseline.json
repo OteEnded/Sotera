@@ -1,0 +1,83 @@
+{
+  "capturedAt": "2026-09-02 17:08:28.804032+07",
+  "why": "Rome observation phase baseline - Ote closed the reconciliation 2026-09-02. Retrieval is measured as a DELTA against these counters; without them a later access_count is a number with nothing to compare to.",
+  "rows": [
+    {
+      "id": "7d383ce3-bed2-4b7c-b5bc-0d23d1b3f700",
+      "modality": null,
+      "scope": "room",
+      "access_count": 293,
+      "last_access": "2026-09-02 16:38:49.321+07"
+    },
+    {
+      "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+      "modality": null,
+      "scope": "persona_global",
+      "access_count": 336,
+      "last_access": "2026-09-02 16:45:54.102+07"
+    },
+    {
+      "id": "02b095e5-55c1-431a-83d2-2a9711a15ef8",
+      "modality": null,
+      "scope": "room",
+      "access_count": 1,
+      "last_access": "2026-08-25 22:55:44.767+07"
+    },
+    {
+      "id": "676e17b9-e60f-4cd1-b90b-975c2844d460",
+      "modality": null,
+      "scope": "room",
+      "access_count": 66,
+      "last_access": "2026-08-26 15:42:47.792+07"
+    },
+    {
+      "id": "272a9a86-e0c6-4701-b28c-f9c3581c3a11",
+      "modality": null,
+      "scope": "room",
+      "access_count": 2,
+      "last_access": "2026-08-26 15:42:47.792+07"
+    },
+    {
+      "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+      "modality": null,
+      "scope": "persona_global",
+      "access_count": 108,
+      "last_access": "2026-09-02 16:45:54.102+07"
+    },
+    {
+      "id": "302c731c-90c0-4dfb-b8c6-cfe2d1775f4a",
+      "modality": null,
+      "scope": "room",
+      "access_count": 0,
+      "last_access": null
+    },
+    {
+      "id": "a1f99b0f-4371-4755-8db3-543cbca38b00",
+      "modality": null,
+      "scope": "room",
+      "access_count": 6,
+      "last_access": "2026-09-02 12:56:19.287+07"
+    },
+    {
+      "id": "6f441dc5-e2a5-44d9-8e2e-5679ca6057e7",
+      "modality": "figurative",
+      "scope": "persona_global",
+      "access_count": 0,
+      "last_access": null
+    },
+    {
+      "id": "8362691d-c956-4b62-9f40-2cd51fe8678d",
+      "modality": "asserted",
+      "scope": "room",
+      "access_count": 0,
+      "last_access": null
+    },
+    {
+      "id": "2457529c-67ff-4193-ac12-4fb4adc564dc",
+      "modality": "aspirational",
+      "scope": "room",
+      "access_count": 0,
+      "last_access": null
+    }
+  ]
+}
