@@ -61,7 +61,7 @@ import { canSetPersonalDefault, loadRootPrefs } from './me-prefs.route.js'
 import { subscribeChatEvents, chatSubscriberCount, notifyChatEvent } from '../../chat/notify.js'
 import { getTodo, clearTodo, initTodo, userMayTodo } from '../../todo/index.js'
 import { initInteraction, getPendingInteraction, answerInteraction, INTERACTIVE_TOOL_NAMES } from '../../interaction/index.js'
-import { looksDegenerate, trimDegenerateTail, DEGENERATE_NOTE, watchFirstToken, wakeOteLine, scrubTemplateTail, scrubToolCallText, answerBlockJoin, makeStreamScrubber } from '../../chat/stream-guards.js'
+import { looksDegenerate, trimDegenerateTail, DEGENERATE_NOTE, watchFirstToken, wakeOteLine, scrubTemplateTail, scrubToolCallText, detectToolCallText, answerBlockJoin, makeStreamScrubber } from '../../chat/stream-guards.js'
 import { maybeStartMarathon, isMarathonActive } from '../../chat/marathon.js'
 import { recoverInterruptedTurns } from '../../chat/recovery.js'
 import { schedulesTargeting, deactivateSchedulesForConversation } from '../../schedules/index.js'
@@ -3289,6 +3289,14 @@ export default async function chatSiteRoutes(fastify) {
       write({ type: 'error', code: 'blank_reply', message: 'The model finished without producing a reply. Nothing was generated — try again, or switch model.' })
     }
 
+    // ⭐⭐⭐ RECORD WHAT THE SCRUB IS ABOUT TO DESTROY — 037, observability only.
+    // ⚠️ The scrub below removes tool calls the model TYPED AS PROSE. Those are calls it meant to make:
+    // they reach neither the user nor the dispatcher, and until now the persisted row did not contain
+    // them either, so the chat path was the one place a decision could vanish without trace.
+    // ⛔ NOTHING IS DISPATCHED OR RECOVERED. This notes THAT it happened; the reply is scrubbed exactly
+    // as before, and dispatch behaviour is unchanged.
+    const emittedAsProse = detectToolCallText(answer)
+
     // scrub trailing template-token debris off the full reply (the persisted truth —
     // segments were scrubbed at push time; the live stream may have shown the junk briefly)
     answer = scrubToolCallText(scrubTemplateTail(answer))
@@ -3348,6 +3356,13 @@ export default async function chatSiteRoutes(fastify) {
       promptTokens: usage?.promptTokens ?? null,
       completionTokens,
       stopped: stopped || undefined,
+      // ⭐⭐ 037 · A TOOL CALL THE MODEL TYPED AS PROSE, recorded BEFORE the scrub removed it.
+      // ⚠️ Undefined when it did not happen, so the field's PRESENCE is the signal and ordinary turns
+      // carry no extra weight. ⛔ It records that a call was emitted and erased — it does not say what
+      // the call was for, and nothing acts on it.
+      toolCallAsProse: emittedAsProse.found
+        ? { shapes: emittedAsProse.shapes, removedChars: emittedAsProse.removedChars }
+        : undefined,
       // prompt exceeded the model's context window — the reply may have "read" only part
       contextOverflow: contextOverflow || undefined,
       // provider hit its output-token cap with nothing left for the answer (budget spent

@@ -65,7 +65,7 @@ try {
     `select id::text, author, attribute, value from ${S}.txn_memories
       where attribute like $1 and attribute <> 'declined'`, [`${MARK}%`])
   const occasions = async () => q(
-    `select why, from_user, outcome, tools_called, tools_offered, said, error from ${S}.log_retention_occasions
+    `select why, from_user, outcome, tools_called, tools_effected, tools_offered, said, said_names_tool, error from ${S}.log_retention_occasions
       where why like $1 order by fired_at`, [`${MARK}%`])
   const toolCalls = async () => q(
     `select tool, origin, ok from ${S}.log_tool_calls
@@ -152,7 +152,88 @@ try {
   check('6 · ⭐⭐ and the SECOND still ran — a refusal isolates to its own call',
     r4?.calls?.[1]?.result?.ok === true)
   const occ4 = (await occasions()).find((o) => o.why === `${MARK}isolation`)
-  check('6 · the occasion records BOTH doors, ⛔ not flattened to one', occ4?.outcome === 'both', `${occ4?.outcome}`)
+  // ⚠️⚠️ THIS ASSERTION USED TO EXPECT `both`, AND IT WAS ASSERTING THE DEFECT. The keep here is REFUSED
+  // for an undeclared owner; only the decline is effected. Under 037's result-based derivation the honest
+  // answer is `decline`, and the attempt is still fully visible in `tools_called`.
+  // ⭐ The fix made this test go red on its own, in exactly the place the defect lived.
+  check('6 · ⭐ the occasion records what was EFFECTED — the refused keep is not counted as a keep',
+    occ4?.outcome === 'decline', `${occ4?.outcome}`)
+  check('6 · ⭐ and BOTH attempts remain visible, so the pair is not lost',
+    (occ4?.tools_called ?? []).length === 2 && (occ4?.tools_effected ?? []).join(',') === 'decline_to_remember',
+    `called=${(occ4?.tools_called ?? []).join('+')} effected=${(occ4?.tools_effected ?? []).join('+')}`)
+
+  // ── 8 · ⭐⭐⭐ 037 · THE STATES THAT WERE PREVIOUSLY INVISIBLE ──────────────────────────────────
+  // ⚠️ Before 037, `outcome` was derived from tool NAMES: a REFUSED keep recorded as `keep`, and a
+  // decision typed as prose recorded as `silence`. Both are now their own state.
+  const { saidNamesOfferedTool } = await import('../../Backend/app/components/retention-followthrough.js')
+
+  // 8a · REFUSED — she reached for a door and nothing landed. ⛔ Previously reported as `keep`.
+  const r5 = await fire(emits({ name: 'keep', args: { what: `${MARK}no owner declared`, kind: 'fact' } }), `${MARK}refused`)
+  check('8a · the call was attempted', (r5?.calls ?? []).length === 1)
+  check('8a · ⛔ and REFUSED by the ownership gate', r5?.calls?.[0]?.result?.refused === 'ownership_undeclared')
+  const occ5 = (await occasions()).find((o) => o.why === `${MARK}refused`)
+  check('8a · ⭐⭐ outcome is REFUSED, ⛔ not "keep" — attempted ≠ effected',
+    occ5?.outcome === 'refused', `${occ5?.outcome}`)
+  check('8a · ⭐ tools_called records the attempt and tools_effected is EMPTY',
+    (occ5?.tools_called ?? []).includes('keep') && (occ5?.tools_effected ?? []).length === 0,
+    `called=${(occ5?.tools_called ?? []).join(',')} effected=${(occ5?.tools_effected ?? []).join(',')}`)
+
+  // 8b · ⭐⭐ MIXED — one door landed, one did not. The pair must stay readable.
+  const r6 = await fire(emits(
+    { name: 'keep', args: { what: `${MARK}still no owner`, kind: 'fact' } },                       // ⛔ refused
+    { name: 'decline_to_remember', args: { about: `${MARK}but this one lands`, kind: 'not_worth_keeping' } },
+  ), `${MARK}mixed`)
+  check('8b · both attempted', (r6?.calls ?? []).length === 2)
+  const occ6 = (await occasions()).find((o) => o.why === `${MARK}mixed`)
+  check('8b · ⭐⭐ outcome is DECLINE — only what was EFFECTED counts (⛔ previously "both")',
+    occ6?.outcome === 'decline', `${occ6?.outcome}`)
+  check('8b · ⭐ and the pair is fully readable: attempted both, effected one',
+    (occ6?.tools_called ?? []).length === 2 && (occ6?.tools_effected ?? []).join(',') === 'decline_to_remember',
+    `called=${(occ6?.tools_called ?? []).length} effected=${(occ6?.tools_effected ?? []).join(',')}`)
+
+  // 8c · ⭐⭐⭐ PROSE — the measured live failure, reproduced deterministically.
+  const PROSE = [
+    'Therefore there is nothing here I need to carry forward.',
+    '',
+    'decline_to_remember',
+    'about: a procedural phrase',
+    'kind: not_worth_keeping',
+  ].join('\n')
+  const r7 = await fire(async () => ({ content: PROSE, tool_calls: [] }), `${MARK}prose`)
+  check('8c · she called nothing', (r7?.calls ?? []).length === 0)
+  const occ7 = (await occasions()).find((o) => o.why === `${MARK}prose`)
+  check('8c · ⭐⭐⭐ outcome is PROSE, ⛔ not silence — a decision that never became an action',
+    occ7?.outcome === 'prose', `${occ7?.outcome}`)
+  check('8c · ⭐ the flag is stored, and the RAW TEXT is kept beside it for audit',
+    occ7?.said_names_tool === true && /decline_to_remember/.test(String(occ7?.said ?? '')))
+  check('8c · ⛔⛔ AND NOTHING WAS DISPATCHED — prose is observed, never executed',
+    (occ7?.tools_called ?? []).length === 0 && (occ7?.tools_effected ?? []).length === 0)
+
+  // 8d · ⛔ and ordinary silence still reads as silence — the classifier must not swallow it
+  const occ3b = (await occasions()).find((o) => o.why === `${MARK}silence`)
+  check('8d · ⛔ a reply naming NO door is still `silence`', occ3b?.outcome === 'silence' && occ3b?.said_names_tool === false,
+    `${occ3b?.outcome}/${occ3b?.said_names_tool}`)
+
+  // 8e · ⭐ the classifier is PURE and narrow — only doors that were actually offered
+  check('8e · ⭐ it matches an OFFERED name', saidNamesOfferedTool('I will decline_to_remember this', ['keep', 'decline_to_remember']) === true)
+  check('8e · ⛔ and ignores a tool that was NOT offered — a mention is not a decision',
+    saidNamesOfferedTool('I could use remember_fact here', ['keep', 'decline_to_remember']) === false)
+  check('8e · ⛔ empty text is not a decision', saidNamesOfferedTool('', ['keep']) === false)
+
+  // ── 9 · ⭐⭐ THE CHAT SCRUBBER NO LONGER DESTROYS ITS OWN EVIDENCE ──────────────────────────────
+  const { detectToolCallText, scrubToolCallText } = await import('../../Backend/app/chat/stream-guards.js')
+  const NL = String.fromCharCode(10)
+  const TAGGED = ['Let me save that.', '<tool_call>{"name": "remember_fact", "parameters": {"entity":"user"}}</tool_call>'].join(NL)
+  const d = detectToolCallText(TAGGED)
+  check('9 · ⭐ the detector sees what the scrub will remove', d.found === true && d.removedChars > 0,
+    `${d.shapes.join(',')} −${d.removedChars} chars`)
+  check('9 · ⛔ and the scrub still removes it, unchanged', !scrubToolCallText(TAGGED).includes('tool_call'))
+  check('9 · ⛔ an ordinary reply is NOT flagged — a user asking about JSON keeps their JSON',
+    detectToolCallText('Here is some JSON: {"name":"x","parameters":{}}').found === false)
+  // ⚠️ THE HONEST LIMIT, asserted so it cannot be quietly overstated: the detector reports only what the
+  // scrubber actually removes. The plain form measured on the retention path is NOT one of those shapes.
+  check('9 · ⚠️ and it does NOT claim the plain prose form — the scrubber never touched that one',
+    detectToolCallText(['decline_to_remember', 'about: x', 'kind: not_worth_keeping'].join(NL)).found === false)
 
   // ── 7 · ⛔ THE GENERATION-3 CORPUS IS UNTOUCHED ────────────────────────────────────────────────
   check('7 · ⛔ the reflection corpus is untouched — this experiment is isolated from it',

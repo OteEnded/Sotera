@@ -162,15 +162,17 @@ export function buildFollowThroughMessages({ answer, evidence, fromUser = false 
  * rather than a measurement.
  * ⛔ It decides nothing and is read by nothing.
  */
-async function recordOccasion(fastify, { conversationId, messageId, user, why, fromUser, outcome, calls = [], offered = [], said = '', error = null }) {
+async function recordOccasion(fastify, { conversationId, messageId, user, why, fromUser, outcome, calls = [], done = [], offered = [], said = '', saidNamesTool = null, error = null }) {
   try {
     const seq = fastify?.db?.txn_memories?.sequelize
     const { schema } = fastify?.db?.txn_memories?.getTableName?.() ?? {}
     if (!seq || !schema) return false
     await seq.query(
       `INSERT INTO "${schema}"."log_retention_occasions"
-         (conversation_id, message_id, user_id, why, from_user, outcome, tools_called, tools_offered, said, error)
-       VALUES (:conversationId, :messageId, :userId, :why, :fromUser, :outcome, :tools, :offered, :said, :error)`,
+         (conversation_id, message_id, user_id, why, from_user, outcome,
+          tools_called, tools_effected, tools_offered, said, said_names_tool, error)
+       VALUES (:conversationId, :messageId, :userId, :why, :fromUser, :outcome,
+               :tools, :done, :offered, :said, :saidNamesTool, :error)`,
       {
         replacements: {
           conversationId: conversationId ?? null,
@@ -185,6 +187,9 @@ async function recordOccasion(fastify, { conversationId, messageId, user, why, f
           // ⭐ WHAT WAS ON THE TABLE. ⛔ Without it a door that was never offered records as `silence` —
           // proved by removing the decline door and watching the outcome say exactly that.
           offered: `{${offered.map((c) => `"${String(c).replace(/"/g, '')}"`).join(',')}}`,
+          // ⭐ what actually landed, beside what was reached for
+          done: `{${done.map((c) => `"${String(c).replace(/"/g, '')}"`).join(',')}}`,
+          saidNamesTool: saidNamesTool === null ? null : saidNamesTool === true,
           said: String(said ?? '').slice(0, 4000) || null,
           error: error ? String(error).slice(0, 500) : null,
         },
@@ -196,15 +201,71 @@ async function recordOccasion(fastify, { conversationId, messageId, user, why, f
   }
 }
 
-/** ⭐ THE THREE OUTCOMES, from what she actually called. `both` is possible and must not be flattened. */
-function outcomeOf(calls) {
-  const names = new Set(calls.map((c) => c.name))
-  const kept = names.has('keep')
-  const declined = names.has('decline_to_remember')
+/**
+ * ⭐ DID THIS CALL ACTUALLY DO ANYTHING? PURE.
+ *
+ * ⚠️ The tools answer in three different shapes and all three have to be read: a thrown error becomes
+ * `{ok:false, error}`, `keep` refuses with `{ok:false, refused:'…', why}`, and a success is `{ok:true}`.
+ * ⛔ `ok !== false` alone would count a refusal as an act, which is the defect this replaces.
+ *
+ * ⚠️⚠️ AND THE HONEST LIMIT, STATED: `keep` answers with a QUEUED RECEIPT — the write lands later on the
+ * serial lane. ⇒ `effected` here means **the tool accepted the act**, ⛔ not that a row exists. That is the
+ * separately-tracked `queued ≠ written` gap and 037 does not close it.
+ */
+function effected(result) {
+  if (!result || typeof result !== 'object') return false
+  if (result.ok === false || result.error || result.refused) return false
+  return true
+}
+
+/**
+ * ⭐⭐⭐ WHAT WAS EFFECTED — ⛔ NOT what was named. 037.
+ *
+ * ⚠️ It used to read `calls.map(c => c.name)`, so a REFUSED keep recorded `outcome:'keep'`. Stage A §6 is
+ * the proof: the keep was refused for an undeclared owner, the decline succeeded, and the row said
+ * `both` — meaning *"two doors were named"*, ⛔ not *"two acts completed"*.
+ *
+ * ⭐ `refused` is a state of its own: she reached for something and NOTHING happened. ⛔ Reporting that as
+ * `silence` would put a failed act in the same bucket as no act, which is the whole error 036/037 exist
+ * to end.
+ *
+ * @param {Array} calls           what she called, with results
+ * @param {boolean} namedInProse  ⭐ she called nothing, but her text named a door that was offered
+ */
+function outcomeOf(calls, namedInProse = false) {
+  const done = new Set(calls.filter((c) => effected(c.result)).map((c) => c.name))
+  const kept = done.has('keep')
+  const declined = done.has('decline_to_remember')
   if (kept && declined) return 'both'
   if (kept) return 'keep'
   if (declined) return 'decline'
+  // ⭐ she acted and nothing landed — a THIRD thing, and previously invisible
+  if (calls.length > 0) return 'refused'
+  // ⭐⭐ she decided and said so, and it never became a call. ⛔ OBSERVED, never dispatched.
+  if (namedInProse) return 'prose'
   return 'silence'
+}
+
+/**
+ * ⭐⭐⭐ DID SHE NAME A DOOR WITHOUT WALKING THROUGH IT? PURE, DETERMINISTIC, ⛔ NEVER A DISPATCHER.
+ *
+ * ⚠️⚠️ MEASURED LIVE: handed her own phrase, she reasoned to a correct decline and then wrote
+ *     decline_to_remember / about: … / kind: not_worth_keeping
+ * as TEXT. ⛔ No dispatch, no row, and the occasion recorded `silence`. ⭐ The same input on the next run
+ * produced a proper structured call — so the DECISION was stable and only the EMISSION varied.
+ *
+ * ⛔⛔ THIS DOES NOT PARSE, RECOVER OR EXECUTE ANYTHING. Ote: *"Observe only; never dispatch prose as a
+ * tool call… I want observability first, not a clever recovery mechanism."* It answers one question —
+ * *is there a decision in there that the dispatcher could not see?* — and the raw text is kept beside the
+ * answer so a human reads the evidence, ⛔ not the flag.
+ *
+ * ⚠️ Deliberately NARROW: only the names that were ACTUALLY OFFERED at this firing. ⛔ A global tool
+ * vocabulary would match her merely discussing a tool, and this must not turn a mention into a decision.
+ */
+export function saidNamesOfferedTool(said, offered = []) {
+  const t = String(said ?? '')
+  if (!t.trim()) return false
+  return offered.some((name) => typeof name === 'string' && name && t.includes(name))
 }
 
 /**
@@ -279,9 +340,14 @@ export async function runFollowThrough(fastify, {
     calls.push({ name, args, result })
   }
   const said = typeof msg?.content === 'string' ? msg.content : ''
-  // ⭐⭐ THE ONE THAT MATTERS: when `calls` is empty this records `silence` — an OUTCOME, ⛔ not an
-  // absence of data. Everything above it existed before; only this row makes the denominator real.
+  // ⭐⭐ 037: the classification happens only when NOTHING was called — a decision that DID become an
+  // action needs no inference about prose, and asking anyway would let a stray mention override a real act.
+  const namedInProse = calls.length === 0 && saidNamesOfferedTool(said, offeredNames)
   await recordOccasion(fastify, { conversationId, messageId, user, why, fromUser,
-    outcome: outcomeOf(calls), calls: calls.map((c) => c.name), offered: offeredNames, said })
+    outcome: outcomeOf(calls, namedInProse),
+    calls: calls.map((c) => c.name),
+    // ⭐ ATTEMPTED and EFFECTED are two facts and they are stored as two columns.
+    done: calls.filter((c) => effected(c.result)).map((c) => c.name),
+    offered: offeredNames, said, saidNamesTool: namedInProse })
   return { ran: true, calls, said }
 }

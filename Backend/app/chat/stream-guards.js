@@ -80,6 +80,42 @@ const TOOL_CALL_BLOCK = /<tool_call>[\s\S]*?<\/tool_call>/gi
 const ORPHAN_TOOL_JSON = /\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"(?:parameters|arguments)"\s*:[\s\S]*?\}\s*<\/tool_call>/gi
 const ORPHAN_TOOL_TAG = /<\/?tool_call>/gi
 
+/**
+ * ⭐⭐⭐ WHAT THE SCRUB IS ABOUT TO DESTROY — PURE, and it removes nothing.
+ *
+ * ⚠️⚠️ THE MEASURED PROBLEM: the scrubber below exists because this model types tool calls as prose, and
+ * its answer is to ERASE them. ⇒ on the chat path a call the model MEANT to make reaches neither the user
+ * nor the dispatcher, and the persisted row does not contain it either. ⛔ The evidence is destroyed by
+ * the very code that proves the behaviour happens.
+ *
+ * ⭐ Measured on the retention occasion the same day: a reasoned, correct `decline_to_remember` was
+ * emitted as text, dispatched nothing, and recorded as `silence`. ⇒ *a decision can exist without an
+ * action*, and the chat path is the one place that fact cannot even be counted.
+ *
+ * ⛔⛔ IT DOES NOT DISPATCH, PARSE INTO ARGUMENTS, OR RECOVER ANYTHING. Ote: *"Don't change dispatch
+ * behavior yet… I want observability first, not a clever recovery mechanism."* It reports THAT something
+ * was removed and HOW MUCH, so the caller can record it before `scrubToolCallText` takes it away.
+ *
+ * ⚠️ It reports only the shapes the scrubber ACTUALLY removes. ⓘ The plain `toolname
+key: value` form
+ * measured on the retention path is NOT one of them — the scrubber leaves that untouched, so there is
+ * nothing here to warn about and claiming otherwise would overstate the detector.
+ *
+ * @returns {{found:boolean, shapes:string[], removedChars:number}}
+ */
+export function detectToolCallText(text) {
+  const t = typeof text === 'string' ? text : ''
+  if (!t) return { found: false, shapes: [], removedChars: 0 }
+  const shapes = []
+  // ⚠️ Fresh regexes: the module-level ones carry the /g flag, and a shared `lastIndex` makes a repeated
+  // `.test()` alternate true/false. That is a real bug class and this file is not going to add one.
+  if (/<tool_call>[\s\S]*?<\/tool_call>/i.test(t)) shapes.push('tool_call_block')
+  if (/\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"(?:parameters|arguments)"\s*:[\s\S]*?\}\s*<\/tool_call>/i.test(t)) shapes.push('orphan_tool_json')
+  if (!shapes.length && /<\/?tool_call>/i.test(t)) shapes.push('orphan_tool_tag')
+  if (!shapes.length) return { found: false, shapes: [], removedChars: 0 }
+  return { found: true, shapes, removedChars: Math.max(0, t.length - scrubToolCallText(t).length) }
+}
+
 export function scrubToolCallText(text) {
   if (typeof text !== 'string' || !text) return text
   let out = text.replace(TOOL_CALL_BLOCK, '').replace(ORPHAN_TOOL_JSON, '').replace(ORPHAN_TOOL_TAG, '')
