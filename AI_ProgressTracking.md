@@ -4242,3 +4242,56 @@ lands in `txn_relational_records` and has no memory id, and `accepted` must neve
 
 **Not addressed, deliberately:** the ~14 reachable-but-not-invoked cases. That is the behavioural question,
 and it now has an instrument — with no back-catalogue.
+
+---
+
+## 2026-09-02 15:08 (+07:00) · ⭐ `persisted` RULED · the harness reds were not what I said they were
+
+**Ote's ruling (option A):** `persisted` means the retention decision **became durable Sotera-owned state,
+regardless of which store represents it**. A successful `note_own_practice` returns `persisted`, ⛔ not
+`accepted`. ⛔ No sixth state, ⛔ no weakening of `accepted`.
+
+**He made it conditional on a measurement, and the condition was real:** *"Storage existing is not enough —
+I want to know that Sotera can actually retrieve/use the practice later."* `practice-reachability-check`
+measures the whole path: the row exists the moment `retain()` returns · `recall_own_memory` returns it as
+the taxonomy sentence · **the Composer renders it into her per-turn context** (`memory.relationalStance` is
+`true` in the live settings — ⚠️ `false` in `config.json`, so a check reading the default would have
+reported the opposite of live) · a second **account** of the same **person** reaches it · a different person
+does not. Five arms, all green ⇒ the ruling was safe to implement.
+
+**Shipped:** mig **039** (`log_retention_decisions.store` + a CHECK paired with 038's) · the relational
+writer returns row ids · `note()` hands back `recordId` + `store` · `retain` answers `persisted` with both.
+⭐ `readWrittenMemoryId` now **refuses** an id from another store — `wrote_memory_id` means a `txn_memories`
+row, and a practice is not one.
+
+### ⚠️⚠️ I had been mis-reporting the suite
+
+I called it *"50 suites, 2 pre-existing failures"*. Neither was what I said:
+
+- `reflection-lifecycle` had **four** failures and **three were mine** — consequences of the generation-2
+  surface swap (a stale `remember` assertion, 038's new column, and an L2 block still driving a withheld
+  tool). ⭐ It also had **no host-service registrations**, so `retain` was offered, dispatched, answered
+  *"required service is not available"*, and the reflection recorded a tool it used and no memory. That
+  asymmetry has now cost three harnesses.
+- `dreaming-pass-ledger` asserted *"NO pass ledger exists in production"*. **Migration 034 created one on
+  2026-09-01** — so it had been red ever since, ⚠️ while printing the word `absent` whichever way it went.
+  It now captures production's state and asserts this run leaves it unchanged.
+
+⇒ **51 of 51 suites pass.** ⭐ And L2 is now a real end-to-end reflection → `retain` → memory proof.
+
+### ⚠️ Two findings this opened, neither ruled
+
+- **Provenance.** `note()` hard-codes `origin:'instructed'`, rendered as *"this person told you about your
+  practice directly."* For a practice she concluded in a **reflection** that is false, and it spends the
+  audit the frequency floor depends on. Pinned as a characterisation (`F1`/`F2`), ⛔ not fixed — a third
+  origin is a vocabulary decision.
+- **⭐⭐ `remember_fact` — withheld — was called in 4 reflections across 3 days.** `toolDefinitions` filters
+  the OFFER; `runTool` filters nothing. **Advertisement is not authorization, and it is not theoretical.**
+
+### ⏭ P1 · the ~14, opened as measurement + design
+
+⛔ **The question cannot be answered yet**: all 81 reflections are `tool_generation 1`, zero are 2, and
+pooling them would measure the surface changing. What the old corpus *does* establish: the **output budget
+is not the mechanism** (acting reflections are the LONGER ones, 2052 vs 1146 chars — a clean negative), and
+the withheld-door hole makes the new ledger unsound alone. Procedure **pre-registered before any gen-2 data
+exists**. ⭐ Nothing forced — reflection runs on its own 20-minute cron.
