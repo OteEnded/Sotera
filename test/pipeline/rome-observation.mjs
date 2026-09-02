@@ -15,6 +15,27 @@
 // flattening run a third time: a machine reading prose and filing an interpretation as a result. The four
 // criteria below are for a person to apply, to her actual words.
 //
+// ── ⭐⭐⭐ IT IS A COEXISTENCE TEST, ⛔ NOT A CLEAN REPLACEMENT ──────────────────────────────────
+// Ote, 2026-09-02: *"because 475ce0a9 and d211f5b4 remain live and globally reachable, this isn't a clean
+// replacement experiment where the old interpretation disappeared. It's a coexistence test:*
+//
+//     old flattened interpretation  +  new nuanced interpretation  →  natural behavior
+//
+// *So if the old memory continues to surface, **don't immediately call the reconciliation a failure**."*
+//
+// ⇒ ⭐ THE DIAGNOSTIC IS ORDERED, and this file supplies the first and third inputs and ⛔ never the verdict:
+//     ① WHICH memory was retrieved        ← the delta, below
+//     ② WHAT she actually said            ← her words, below, unscored
+//     ③ was the NEW memory ALSO available and retrieved   ← the co-availability block, below
+//   only then:
+//     a RETRIEVAL-RANKING issue   the new row was not retrieved while the old one was
+//     an INTEGRATION issue        both were retrieved and she used only the old reading
+//     legitimate COEXISTENCE      both were retrieved and both readings are appropriate — ⭐ which is
+//                                 what Ote ruled the metaphor actually means
+//
+// ⛔ AND SILENCE IS NOT A RESULT. *"If she never mentions Rome again, that's simply no observation — not
+// a failure."*
+//
 // ── ⛔ AND NOTHING HERE MANUFACTURES THE OBSERVATION ────────────────────────────────────────────
 // Ote: *"Let the cron pick it up naturally… without us manufacturing the conversation or prompting the
 // result."* ⇒ ⛔ this file never starts a conversation, never asks her anything, and never triggers a
@@ -77,6 +98,30 @@ try {
   console.log(`  ⚠️ the un-reconciled "shared project" row has been read ${dFlat} time(s) in the same window.`)
   if (dRef === 0) console.log(`  ⓘ ⛔ Until that is non-zero, nothing about integration is even askable.`)
 
+  // ── ③ CO-AVAILABILITY · was the NEW row also retrieved, or only the old one? ───────────────────
+  // ⭐ Ote's third input, and the one that separates a RANKING problem from an INTEGRATION problem.
+  // ⚠️⚠️ AND THE INSTRUMENT'S LIMIT, STATED RATHER THAN GLOSSED: `last_access` holds ONE timestamp per
+  // row, ⛔ not a history. So co-retrieval can be established for the MOST RECENT window only; for any
+  // earlier utterance it is unattributable, and saying so is the honest answer.
+  console.log(`\n  ── ③ CO-AVAILABILITY ───────────────────────────────────────────────────────`)
+  console.log(`  ⛔ AVAILABLE is not RETRIEVED. All three corrected rows are live and persona-global or in`)
+  console.log(`     Ote's room, so they are AVAILABLE by construction — the question is what was READ.`)
+  const lastOf = (id) => now.find((r) => r.id.startsWith(id))?.last_access ?? null
+  for (const [label, id] of [['new referent    ', String(referent?.id ?? '6f441dc5').slice(0, 8)],
+    ['old "project"   ', '475ce0a9'], ['old both-readings', 'd211f5b4']]) {
+    console.log(`     ${label}  last read: ${lastOf(id) ?? 'never'}`)
+  }
+  if (dRef > 0 && dFlat > 0) {
+    console.log(`  ⭐ BOTH were read since the baseline ⇒ ⛔ a ranking explanation is ruled out. Read her`)
+    console.log(`     words for whether she holds both readings (legitimate coexistence) or only the old one.`)
+  } else if (dRef === 0 && dFlat > 0) {
+    console.log(`  ⚠️ ONLY THE OLD ROW WAS READ ⇒ this is a RETRIEVAL-RANKING question, ⛔ not an integration`)
+    console.log(`     one. She cannot integrate what never reached her.`)
+  } else if (dRef > 0 && dFlat === 0) {
+    console.log(`  ⭐ Only the new row was read. ⓘ This is NOT the experiment's success condition — Ote ruled`)
+    console.log(`     BOTH readings are his, so the project reading is not an error to eliminate.`)
+  }
+
   // ── ② WHAT SHE ACTUALLY SAID · for a person to read ──────────────────────────────────────────
   const said = await q(
     `select x.created_at::timestamptz(0)::text as at, left(c.id::text,8) as convo,
@@ -101,7 +146,11 @@ try {
     console.log(`  · REFLECTION ${r.at}  ${r.trigger_source}/${r.convo}`)
     console.log(`    ${FULL ? r.text.replace(/\n+/g, '\n    ') : `${r.text.replace(/\n+/g, ' ').slice(0, 200)}…`}\n`)
   }
-  if (!said.length && !reflections.length) console.log(`  ⓘ She has not used the word since. ⛔ Nothing to force.\n`)
+  if (!said.length && !reflections.length) {
+    console.log(`  ⓘ She has not used the word since. ⛔ Nothing to force.`)
+    // ⛔ Ote: *"if she never mentions Rome again, that's simply no observation — not a failure."*
+    console.log(`  ⛔ THIS IS NO OBSERVATION, ⛔ NOT A FAILURE — silence says nothing about the reconciliation.\n`)
+  }
 
   console.log(`  ⏸ READ THE ABOVE AGAINST OTE'S FOUR CRITERIA — ⛔ a machine must not score these:`)
   for (const c of CRITERIA) console.log(`     · ${c}`)
