@@ -219,7 +219,12 @@ try {
     // ⭐ 038 · `tool_generation` sits BESIDE `prompt_generation` and is not a second name for it: the prompt
     // text and the write-tool surface are two instruments that moved at different times, and pooling
     // measurements across either boundary is how a surface change gets read as a behaviour change.
-    'prompt_generation', 'tool_generation', 'code_mtime', 'model', ...REVISIT_COLUMNS]
+    // ⭐ 040 · `tools_refused` and `dispatch_generation`. Ote: *"preserve the distinction between: tool
+    // was offered · model emitted/called it · dispatch authorized it · action actually succeeded"* — so
+    // `tools_used` keeps meaning EXECUTED and the refused emissions get their own array; and the third
+    // generation counter marks the boundary so gen-2-before and gen-2-after enforcement are separable.
+    'prompt_generation', 'tool_generation', 'dispatch_generation', 'tools_refused',
+    'code_mtime', 'model', ...REVISIT_COLUMNS]
   // ⭐ …and each of them must actually BE there, or "the list matches" would also be true of a migration
   // that never ran. The guard has to bite in both directions.
   const missingRevisit = REVISIT_COLUMNS.filter((c) => !cols.has(c))

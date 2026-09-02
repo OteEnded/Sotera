@@ -33,6 +33,15 @@ import { evidentialSql } from './corpus-eligibility.js'
 
 export const DERIVER_VERSION = 'stance-writer-0.1'
 
+/**
+ * ⭐⭐ HOW SHE CAME BY A PRACTICE — the `relational_origin` vocabulary, in one place (041).
+ * ⛔ Not a ranking and ⛔ not a confidence: three different things that actually happen.
+ *   `instructed` someone directly taught or told her · `observed` she obtained it through observation ·
+ *   `reflection` she derived it through her own reflection.
+ * ⛔ It says nothing about OWNERSHIP: a practice is hers however she came by it.
+ */
+export const RELATIONAL_ORIGINS = Object.freeze(['observed', 'instructed', 'reflection'])
+
 // ── ⭐ B16 / ONE WRITER: RESOLVED, AND WITHOUT A NEW AUTHORITY ──────────────────────────────────────
 //
 // The single-writer architecture already existed; it just had no relational door. `@ote/memory`'s
@@ -256,7 +265,10 @@ export async function abstractStance({
  * its comments said.
  */
 export async function persistRelationalRecords({ db, records = [], lease, origin = 'observed' } = {}) {
-  if (origin !== 'observed' && origin !== 'instructed') throw new Error(`relational-writer: origin must be observed|instructed, got "${origin}"`)
+  // ⭐ THREE ORIGINS, AND THEY DESCRIBE WHAT HAPPENED — ⛔ not a strength scale.
+  //   instructed  someone told her directly · observed  the abstractor, past the floor
+  //   reflection  she derived it herself in a reflection (041)
+  if (!RELATIONAL_ORIGINS.includes(origin)) throw new Error(`relational-writer: origin must be one of ${RELATIONAL_ORIGINS.join('|')}, got "${origin}"`)
   // ⭐ NO LANE, NO WRITE. This is the whole guard: you cannot persist without holding a lane that was
   // constructed inside the subject's scope. There is no token to forge and no parameter to point elsewhere.
   if (!lease || typeof lease.enqueue !== 'function' || !lease.subjectPersonId) {
@@ -302,13 +314,22 @@ export async function persistRelationalRecords({ db, records = [], lease, origin
                    :origin::persona_sotera.relational_origin)
            ON CONFLICT (subject_person_id, tier, label) WHERE subject_person_id IS NOT NULL
            DO UPDATE SET conversation_count = GREATEST(txn_relational_records.conversation_count, EXCLUDED.conversation_count),
-                         -- ⭐ instructed IS STICKY. A person stating something about her practice is
-                         -- STRONGER evidence than three inferences, so a later observed pass must never
-                         -- quietly downgrade it, and the floor's exception must stay visible.
+                         -- ⭐ A DELIBERATE ACT IS NEVER DOWNGRADED TO A BACKGROUND OBSERVATION. instructed
+                         -- stays sticky (a person stating something about her practice is stronger evidence
+                         -- than three inferences, and the floor's exception must stay visible); 041 gives
+                         -- reflection the same protection, so an ordinary observed pass cannot erase the
+                         -- record that she reached this herself. Between the two deliberate acts, what a
+                         -- person said outranks what she inferred.
+                         -- ⚠️ ONE COLUMN CANNOT HOLD TWO PROVENANCES. A practice that was both observed
+                         -- five times and reached in a reflection keeps the reflection label; that is a
+                         -- stated limit of this schema, not a hidden one.
                          -- (No backticks in here: this is inside a JS template literal, and one backtick
                          --  in a SQL comment terminates the string. It did, and it took a minute to see.)
-                         origin = CASE WHEN txn_relational_records.origin = 'instructed'
-                                         OR EXCLUDED.origin = 'instructed' THEN 'instructed'::persona_sotera.relational_origin
+                         origin = CASE
+                                    WHEN txn_relational_records.origin = 'instructed'
+                                      OR EXCLUDED.origin = 'instructed' THEN 'instructed'::persona_sotera.relational_origin
+                                    WHEN txn_relational_records.origin = 'reflection'
+                                      OR EXCLUDED.origin = 'reflection' THEN 'reflection'::persona_sotera.relational_origin
                                     ELSE 'observed'::persona_sotera.relational_origin END,
                          window_start       = LEAST(txn_relational_records.window_start, EXCLUDED.window_start),
                          window_end         = GREATEST(txn_relational_records.window_end, EXCLUDED.window_end),

@@ -121,7 +121,10 @@ export function buildRetention(fastify, {
    * keep({ what, kind, about, mine, attribute })
    * @returns {Promise<object>} the outcome, including the author actually recorded
    */
-  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false } = {}) {
+  // ⚠️ `practiceOrigin` IS AN OCCASION FACT, NOT A PARAMETER SHE CAN SET. The `keep` tool's handler passes
+  // an explicit field list and this is not on it, so nothing the model emits can reach it; `retain` sets
+  // it to `reflection` because that is what its occasion IS. ⭐ 041: provenance describes what happened.
+  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false, practiceOrigin = 'instructed' } = {}) {
     const content = String(what ?? '').trim()
     if (!content) return { ok: false, refused: 'nothing_to_keep', why: 'There is no content to keep — say what you want kept.' }
 
@@ -192,7 +195,7 @@ export function buildRetention(fastify, {
       }
       const svc = ownMemory()
       if (!svc) return { ok: false, refused: 'unavailable', why: 'I cannot record a practice note here.' }
-      const out = await svc.note({ label: content })
+      const out = await svc.note({ label: content, origin: practiceOrigin })
       return { ok: out?.ok !== false, kind, author: 'persona', via: 'note_own_practice', result: out }
     }
 
@@ -331,7 +334,12 @@ export function buildRetention(fastify, {
     }
     let out
     try {
-      out = await keep({ what: content, kind, about, mine, attribute: slot })
+      // ⭐⭐ 041 · THE OCCASION SETS THE PROVENANCE. A practice reached HERE was reached in a reflection —
+      // ⛔ nobody told her it. `note()` used to stamp every practice `instructed`, so her own memory tool
+      // answered *"this person told you about your practice directly"* about her own conclusion.
+      // ⛔ It changes no ownership: a practice is hers however she came by it. Ote: *"Keep this as a
+      // vocabulary/provenance change, not a change to retention ownership."*
+      out = await keep({ what: content, kind, about, mine, attribute: slot, practiceOrigin: 'reflection' })
     } catch (e) {
       // ⭐ A store gate threw — a REFUSAL with a class, not a bug. It is already recorded in
       // `log_memory_refusals` by the store; here it becomes a receipt.

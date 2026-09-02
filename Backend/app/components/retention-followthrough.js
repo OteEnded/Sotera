@@ -40,6 +40,9 @@ import { chat } from '../chat-runtime/index.js'
 import { buildToolContext, runTool, toolDefinitions } from './runtime.js'
 import { log } from '../../lib/utility.js'
 import { classifyRetentionSignal } from './retention-signal.js'
+// ⭐ The dispatch boundary, shared with the reflection path so the rule is written once.
+import { authorizeToolCall } from './tool-authorization.js'
+import { recordToolCall } from '../audit/tool-log.js'
 
 /** ⭐ The only doors this step opens. `keep` is the front door and `decline_to_remember` is the honest
  *  other answer — a step that could only say yes would be a nudge wearing a mechanism's clothes. */
@@ -328,9 +331,22 @@ export async function runFollowThrough(fastify, {
   const calls = []
   for (const t of raw) {
     const name = t?.function?.name ?? t?.name ?? null
-    if (!name || !FOLLOWTHROUGH_TOOLS.includes(name)) continue
     let args = t?.args ?? t?.function?.arguments ?? {}
     if (typeof args === 'string') { try { args = JSON.parse(args) } catch { args = {} } }
+    // ── ⭐⭐ THE SAME DISPATCH BOUNDARY, AND IT WAS ALREADY HERE — SILENTLY ────────────────────────
+    // This path has always refused an unoffered call. ⚠️ It did it with a bare `continue`, so an ATTEMPT
+    // left no trace anywhere: the occasion recorded `silence` for a reach that actually happened, which
+    // is precisely the conflation 036/037 exist to remove. ⭐ The refusal is unchanged; what is new is
+    // that it is now WRITTEN DOWN, in the same audit every other call goes to.
+    // ⛔ The occasion's outcome vocabulary is NOT extended — Ote closed it in 037, and the audit row is
+    // enough to recover the attempt without reopening a ratified enum.
+    const refusal = authorizeToolCall({ offered: FOLLOWTHROUGH_TOOLS, name })
+    if (refusal) {
+      recordToolCall(fastify, {
+        name: name || 'unknown', caller: ctx?.caller ?? {}, args, ok: false, error: `not-offered: ${refusal.refused}`,
+      }).catch(() => {})
+      continue
+    }
     let result = null
     try {
       result = await runTool(name, args, ctx)

@@ -45,6 +45,12 @@ import {
   shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal, REFLECTION_TOOL_GENERATION,
   selectReviewableRange,
 } from './reflection-lifecycle.js'
+// ⭐⭐ THE DISPATCH BOUNDARY, imported rather than written here — the same rule the follow-through uses,
+// stated once with its evidence beside it.
+import { authorizeToolCall, DISPATCH_GENERATION } from './tool-authorization.js'
+// ⭐ The refused ATTEMPT goes in the ordinary tool audit. ⛔ Not a second ledger: "she reached for a tool"
+// already has a home, and a refusal is that event with `ok = false`.
+import { recordToolCall } from '../audit/tool-log.js'
 // ⭐ THE EXECUTION GATE. ⛔ Imported, never reimplemented: the pure verdict lives in one file so a
 // check can drive "she has been idle six minutes" without waiting six minutes.
 import { checkIdleGate, gateSummaryLine } from './revisit-idle-gate.js'
@@ -352,11 +358,13 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const [claim] = await seq.query(
     `INSERT INTO "${schema}"."log_conversation_revisits"
        (conversation_id, user_id, up_to_rolling_id, from_rolling_id, messages_considered, text,
-        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, reason, tool_generation)
+        tools_used, blocked_by_disclosure, prompt_generation, code_mtime, model, reason, tool_generation,
+        dispatch_generation)
      -- tool_generation is stamped at the claim, beside the prompt generation and for the same reason.
+     -- dispatch_generation joins them: 1 = the offered set was advertised, 2 = it is enforced.
      -- (The prose lives OUTSIDE this template literal: a backtick in a SQL comment ends the string, which
      -- this file already warns about a few lines up. I made that exact mistake here.)
-     SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection', $9
+     SELECT $1, $2, $3, $8, $4, '', ARRAY[]::text[], false, $5, $6, $7, 'reflection', $9, $10
      -- ⭐⭐⭐ TWO GUARDS, BECAUSE SPLITTING THE INDEX SPLIT THE PROTECTION IT USED TO GIVE.
      -- 016 had ONE unique index, so a re-run was refused AT THE CLAIM -- before a 35B generation and
      -- before any tool could write. Splitting it into in-flight and completed (025) left ON CONFLICT
@@ -384,7 +392,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
         // "no lower bound recorded" — rather than as a backwards one that would read as coverage.
         already > 0 && already + 1 <= reviewedTo ? already + 1 : null,
         // ⭐ $9 — which write-tool surface this pass was offered. ⛔ Never derived from anything else.
-        REFLECTION_TOOL_GENERATION],
+        REFLECTION_TOOL_GENERATION, DISPATCH_GENERATION],
       type: seq.QueryTypes.SELECT,
     })
   if (!claim) return { skipped: true, reason: 'already-reflected', upTo: reviewedTo }
@@ -449,7 +457,12 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const numCtx = intCfg(fastify.config, 'reflectionNumCtx', 16384)
 
   const messages = [{ role: 'user', content: prompt }]
+  // ⭐ EXECUTED. ⛔ Not "emitted" — 81 historical rows mean it this way and the comparison depends on it.
   const toolsUsed = []
+  // ⭐⭐ EMITTED AND REFUSED, which is a different fact and therefore a different array. Ote: *"preserve
+  // the distinction between: tool was offered · model emitted/called it · dispatch authorized it · action
+  // actually succeeded… rather than collapsing them into one `tools_used` signal."*
+  const toolsRefused = []
   let blocked = false
   let text = ''
   // ⛔ NOT A RECORD FIELD ANY MORE — migration 017 dropped the `finish` column on Ote's instruction
@@ -571,6 +584,27 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     rounds++
     messages.push({ role: 'assistant', content: said, tool_calls: calls })
     for (const call of calls) {
+      // ── ⭐⭐⭐ THE DISPATCH BOUNDARY · ONLY AN OFFERED TOOL MAY EXECUTE ───────────────────────────
+      // Ote, 2026-09-02: *"If the model emits a tool that was not offered, it must not execute. Refuse it
+      // safely and record the event/attempt so it remains observable."*
+      // ⚠️ The offered set was filtered into `tools` above and, until now, filtered NOTHING here —
+      // measured as 9 `remember_fact` attempts across 3 days, every one reaching the tool and failing on
+      // a schema she had never been shown.
+      // ⛔ `toolsUsed` IS NOT TOUCHED. It means *executed*, it has meant that for 81 rows, and widening
+      // it to "emitted" would silently rewrite the history it is compared against.
+      const refusal = authorizeToolCall({ offered: REFLECTION_TOOLS, name: call.name })
+      if (refusal) {
+        if (!toolsRefused.includes(call.name)) toolsRefused.push(call.name)
+        // ⭐ THE ATTEMPT IS RECORDED WHERE EVERY OTHER CALL IS RECORDED — one place for "she reached for
+        // a tool", with `arg_keys` (never the values) so the SHAPE she guessed stays legible.
+        // ⛔ Best-effort: observability must never be load-bearing.
+        recordToolCall(fastify, {
+          name: call.name, caller: ctx?.caller ?? {}, args: call.arguments,
+          ok: false, error: `not-offered: ${refusal.refused}`,
+        }).catch(() => {})
+        messages.push({ role: 'tool', name: call.name, content: JSON.stringify(refusal).slice(0, 8000) })
+        continue
+      }
       let result
       try { result = await runTool(call.name, call.arguments, ctx) } catch (e) { result = { error: e?.message || 'tool failed' } }
       if (!toolsUsed.includes(call.name)) toolsUsed.push(call.name)
@@ -608,7 +642,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     // -- that stays in `wrote_memory_id` (a fact) and in her own words (everything else).
     `UPDATE "${schema}"."log_conversation_revisits"
         SET text = $2, wrote_memory_id = $3, tools_used = $4::text[], blocked_by_disclosure = $5,
-            model = $6, messages_considered = $7,
+            model = $6, messages_considered = $7, tools_refused = $8::text[],
             outcome = CASE WHEN $5 THEN 'blocked' ELSE 'completed' END, completed_at = now()
       WHERE id = $1::uuid
      RETURNING id::text AS id, rolling_id`,
@@ -616,7 +650,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       // ⚠️ `bind`, NOT `replacements`. Sequelize expands an array in `replacements` into a comma-separated
       // list, which turns a text[] parameter into a syntax error — the `log_tool_calls` insert had to move
       // for exactly this.
-      bind: [claim.id, text, written[0] ?? null, toolsUsed, blocked, modelId, considered],
+      bind: [claim.id, text, written[0] ?? null, toolsUsed, blocked, modelId, considered, toolsRefused],
       type: seq.QueryTypes.SELECT,
     })
   if (!row) {

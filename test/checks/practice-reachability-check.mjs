@@ -120,17 +120,27 @@ try {
   check('E2 · ⛔ nor does their context block carry it',
     !String(otherBlock ?? '').includes(STANCE_LABELS[LABEL]))
 
-  // ── F · ⚠️⚠️ PROVENANCE — CHARACTERISED, NOT YET RULED ────────────────────────────────────────
-  // `own-memory-host.note()` hard-codes `origin: 'instructed'`, whose rendered meaning is *"this person
-  // told you about your practice directly"*. For a practice SHE concluded in a reflection that is false,
-  // and it also spends the audit that the frequency floor depends on: *"did anything bypass the floor?"*
-  // is answered by counting `instructed`, which would now include her own inferences.
-  // ⛔ THIS ASSERTION IS A TRIPWIRE, NOT AN ENDORSEMENT. It pins today's behaviour so the day it changes
-  // this check turns red and the change has to be deliberate. Ote's ruling is pending.
-  check('F1 · ⚠️ CHARACTERISATION: a reflection-derived practice is stored origin=instructed (pending ruling)',
-    row?.origin === 'instructed', `${row?.origin}`)
-  check('F2 · ⚠️ and she is TOLD the person said it — the sentence that is false for a reflection',
-    /told you about your practice directly/.test(String(found?.howLearned ?? '')), `${found?.howLearned ?? '—'}`)
+  // ── F · ⭐⭐ PROVENANCE — RULED, AND NOW ASSERTED ──────────────────────────────────────────────
+  // Ote, 2026-09-02: *"origin:'instructed' is semantically wrong for a practice Sotera derived herself
+  // during Reflection. Add: observed · instructed · reflection… Do not reinterpret it as observed or
+  // instructed just to fit the existing vocabulary."*
+  // ⚠️ This pair was a TRIPWIRE pinning the wrong behaviour, and it has now fired as designed.
+  check('F1 · ⭐⭐⭐ a reflection-derived practice is stored origin=REFLECTION — ⛔ never instructed',
+    row?.origin === 'reflection', `${row?.origin}`)
+  check('F2 · ⭐⭐ and she is told SHE reached it — ⛔ not that the person said it',
+    /reflecting on a conversation/.test(String(found?.howLearned ?? ''))
+    && !/told you/.test(String(found?.howLearned ?? '')), `${found?.howLearned ?? '—'}`)
+  // ⛔ AND THE TOOL'S OWN OCCASION IS UNCHANGED. `note_own_practice` exists because a person said something
+  // about her practice, so its default must still be `instructed` — the occasion decides, not a flag.
+  const { buildOwnMemory: bom } = await import('../../Backend/app/components/own-memory-host.js')
+  const svc = bom(fastify, { userId: agent.id, isRoot: false, user: { id: agent.id, isRoot: false } })
+  const spare = STANCE_LABEL_KEYS.find((k) => k !== LABEL && !held.has(k))
+  const noted = await svc.note({ label: spare })
+  check('F3 · ⭐ `note_own_practice` still defaults to INSTRUCTED — the occasion decides the provenance',
+    noted?.ok === true && noted?.origin === 'instructed', `${noted?.origin}`)
+  check('F4 · ⛔ and an unknown origin is REFUSED, ⛔ never coerced into a known one',
+    (await svc.note({ label: spare, origin: 'zz_invented' }))?.ok === false)
+  await pg.query(`delete from ${S}.txn_relational_records where subject_person_id=$1 and label=$2`, [agent.pid, spare])
 
   // ── THE RECEIPT AS IT STANDS TODAY ───────────────────────────────────────────────────────────
   const dec = await one(

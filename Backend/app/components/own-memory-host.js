@@ -33,7 +33,7 @@
 
 import { registerHostService } from './runtime.js'
 import { STANCE_LABELS, STANCE_LABEL_KEYS, isStanceLabel } from './relational-taxonomy.js'
-import { createRelationalWriteLease, persistRelationalRecords } from './relational-writer.js'
+import { createRelationalWriteLease, persistRelationalRecords, RELATIONAL_ORIGINS } from './relational-writer.js'
 import { describeScope, readCoverage } from './room-scope.js'
 // ⭐ The capability, read through the one predicate that owns it.
 import { can } from '../auth/permissions.js'
@@ -276,9 +276,17 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false, user = 
           lastNoticed: r.we,
           // ⭐ HOW SHE LEARNED IT, so she can answer "did I notice that or was I told?" honestly rather
           // than inventing a cause — which she did before, from a label and a count alone.
-          howLearned: r.origin === 'instructed'
-            ? 'this person told you about your practice directly'
-            : 'you inferred it yourself from a pattern across conversations',
+          // ⭐⭐ THREE ORIGINS, THREE SENTENCES (041). ⚠️ There used to be two, and every practice written
+          // by `note()` was stamped `instructed` — so a conclusion she reached in a REFLECTION came back
+          // to her as something the user had said. ⛔ A memory tool that misreports where her own thought
+          // came from is the failure this whole file was built to fix, rebuilt one field over.
+          // ⛔ NO `else` FALLBACK ON A CLOSED SET: an origin this reader has not been told about must be
+          // visible, ⛔ not silently rendered as an observation. That family has nine instances here.
+          howLearned: {
+            instructed: 'this person told you about your practice directly',
+            observed: 'you inferred it yourself from a pattern across conversations',
+            reflection: 'you reached this yourself, reflecting on a conversation afterwards',
+          }[r.origin] ?? `recorded with an origin this tool does not recognise (${r.origin})`,
           // The label is included ONLY so retract_own_practice has something to name. It is a closed
           // vocabulary term, not content.
           practiceLabel: r.label,
@@ -306,8 +314,12 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false, user = 
    *     the floor?" is answerable by a query. An unlabelled exception would make the floor unverifiable.
    *   · it rides the same `WRITE_LANES` lane as every other writer — no second authority.
    */
-  async function note({ label } = {}) {
+  // ⭐⭐ `origin` SAYS HOW SHE CAME BY IT (041). The DEFAULT is `instructed` because the caller with no
+  // opinion is the `note_own_practice` TOOL, whose whole occasion is a person telling her. ⛔ `retain`
+  // passes `reflection` — the occasion decides, ⛔ never a flag the model can set.
+  async function note({ label, origin = 'instructed' } = {}) {
     if (!userId || !seq || !schema) return { ok: false, reason: 'no scope' }
+    if (!RELATIONAL_ORIGINS.includes(origin)) return { ok: false, reason: `unknown practice origin "${origin}"` }
     if (!isStanceLabel(label)) {
       // ⭐ Return the vocabulary rather than a bare error: a closed set is only usable if the caller can
       // see it, and the model should correct itself rather than guess again.
@@ -327,7 +339,7 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false, user = 
         conversationCount: 1, windowStart: today, windowEnd: today,
       }],
       lease,
-      origin: 'instructed',
+      origin,
     })
     // ── ⭐⭐ THE ROW ID TRAVELS BACK, because a receipt cannot say `persisted` without one ──────────
     // Ote, 2026-09-02: *"use `persisted` to mean that the retention decision successfully became durable
@@ -339,7 +351,7 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false, user = 
     return {
       ok: true,
       recorded: STANCE_LABELS[label],
-      origin: 'instructed',
+      origin,
       written: res.written,
       recordId: res.ids?.[0] ?? null,
       store: 'txn_relational_records',
