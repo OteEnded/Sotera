@@ -4394,3 +4394,63 @@ distinguishable from this supersession because he ruled differently on purpose.
 
 ⏭ **Nothing else touched.** P1 still frozen, still zero gen-2 reflections. ⚠️ A `:8210` restart is pending
 and deferred — Ote was mid-conversation and no runtime reader is affected.
+
+---
+
+## 2026-09-02 22:14 (+07:00) · ⭐ P1 OBSERVING · ROME CLOSED · EMPTY TURNS FIXED · DREAMING IS NEXT
+
+### ✅ Shipped since the last entry
+
+**040 · the dispatch boundary.** `toolDefinitions(REFLECTION_TOOLS)` filtered the OFFER and `runTool`
+filtered nothing. ⭐ Correcting my own report: the audit showed `remember_fact` was attempted **9 times
+across 3 days and EVERY call FAILED** — five invented argument shapes — so she was **guessing the arguments
+of a tool she had never been shown**, not walking through an open door. ⛔ A missing offered set now
+**THROWS**; the four facts (offered · emitted · authorized · succeeded) are kept apart.
+
+**041 · practice provenance.** `observed · instructed · reflection`. `note()` hard-coded `instructed`, so a
+conclusion she reached in a reflection came back **from her own memory tool** as something the user had told
+her. **The OCCASION sets it.**
+
+**042 · `trigger_source`** + a dev-only manual reflection trigger that bypasses **the clock and nothing
+else**. ⛔ It passes no `turn` — an injected turn would measure me, not her.
+
+**Rome, reconciled and closed.** ⭐ The finding: `7d383ce3` was written **31 s** after Ote's first sentence;
+he corrected it at **+26 s** and again at **+2m22s** (*"building you. you are my rome, you know?"*).
+**Neither correction reached the store**, and every derived row names `7d383ce3` in its own evidence chain.
+⭐⭐ Three probes, all rolled back, established that the row **cannot carry its own true modality** while it
+occupies a fact slot — which is why contradict + supersede was the only honest path.
+
+**043/044 · empty turns say why.** 32 empty rows were **five classes**, four already stopped, and **one is
+not a defect** (a pure tool-call round). ⭐⭐ 044 exists because the red-proof caught a defect in **my own**
+043 constraint: **a CHECK passes when its expression is NULL**, so a classification with no cause was
+ACCEPTED — the old ambiguity wearing the new name.
+
+### ▶ P1 — background, N=5, and the class it was opened for has NOT occurred
+
+Four boundaries kept strictly apart. At the 2h checkpoint (N=4): `retain 0 · decline 0 · withheld 0 ·
+receipts 0 · anomalies none`; hand reading = 1 nothing-to-carry, 1 declined, **2 asked Ote**, **0
+stated-a-conclusion-and-did-nothing**. Ote: *"a clean negative path, not a failure."*
+
+⚠️ **An ASK has no emission channel** — nothing records *"I asked."* Reported as a property of the surface.
+
+⚠️ **The backlog is empty of genuine material**: 304 old unreflected conversations are ALL agent_dev; 287
+are below the 4-message floor and all 17 that clear it are `probe=true`. ⇒ no unreflected-history hole.
+⛔ But 16 reflections already leaked in on `probe`-absent rows — so **the current exclusion rests on
+accidental fixture shape**, parked as post-P1 hardening.
+
+### ⚠️ Five errors of mine, all caught and recorded
+
+A heredoc **ate backslash escapes** three times (one broke the reader for 45 min, and **its silence was the
+signal I missed**) · I asserted **dateless absences** twice in one check and the first accused correct data
+· I called a turn *"stalled"* **53 s before it landed** and a server *"still down"* **9 s into a startup** ·
+a persisted `cd` sent two commits to the wrong repo · I called `access_count` *decisive* when it is
+positive evidence only.
+
+### ▶ NEXT — DREAMING
+
+⭐ **Agreed with Ote as the next roadmap item.** Nine modules and a ledger exist; **⛔ nothing is wired** —
+no cron, no route, one row ever. **M1 is the instrument, not the reasoner** and needs none of the five open
+questions; **O-iii.a (view or materialization) is the root** — five of seven depend on it.
+⚠️⚠️ **M1 is safe for P1; M2 is not** — a commitment is a retrievable `txn_memories` row, and
+`recall({limit:6})` runs on every turn, so M2 can change what she says and therefore what later reflections
+reflect on. **M2 needs an explicit ruling before it runs alongside P1.**

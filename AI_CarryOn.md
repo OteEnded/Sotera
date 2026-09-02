@@ -1,289 +1,255 @@
-# AI_CarryOn — Sotera · P1 retention arc
+# AI_CarryOn — Sotera
 
-**Rewritten 2026-09-02 16:50 (+07:00).** ⭐ Read this first after a context compaction.
+**Rewritten 2026-09-02 22:14 (+07:00).** ⭐ Read this first after a context compaction.
 
 ---
 
 # 0 · ⭐⭐⭐ WHERE WE ARE, IN ONE BLOCK
 
 ```
-✅ V1 COMPLETE                   identity · memory · continuity · composition · persona_global · runtime
-✅ retain() SHIPPED + LIVE       the decision-shaped interface for reflection
-✅ `persisted` RULED (039)       = durable Sotera-owned state, in ANY store — the ruling was CONDITIONAL
-                                 on a reachability measurement, and the measurement passed
-✅ DISPATCH BOUNDARY (040)       only an OFFERED tool may execute — and a missing offered set THROWS
-✅ PRACTICE PROVENANCE (041)     observed · instructed · reflection — the OCCASION sets it
-✅ 52 of 52 SUITES PASS          both old "pre-existing failures" were stale assertions, three of them MINE
-✅ ROME RECONCILED (2026-09-02)  three-way split: figurative referent · asserted goal · aspirational want
-⛔ SURFACE FROZEN (2026-09-02)   prompt · reflection tools · dispatch rules · retention semantics
-▶  P1 · the ~14                  OBSERVING. 0 rows in the window; the cron brings them
-⏸ AWAITING OTE                   nothing. Both rulings are in.
+✅ V1 COMPLETE                identity · memory · continuity · composition · persona_global · runtime
+✅ retain() + `persisted`     the decision-shaped retention interface, receipts, and the store ruling
+✅ DISPATCH BOUNDARY (040)    only an OFFERED tool may execute; a missing offered set THROWS
+✅ PRACTICE PROVENANCE (041)  observed · instructed · reflection — the OCCASION sets it
+✅ ROME RECONCILED (043→…)    figurative referent · asserted goal · aspirational want; root contradicted
+✅ EMPTY TURNS (043/044)      an empty assistant turn now says WHY
+✅ 55 of 55 SUITES PASS       zero residue
+▶  NEXT: DREAMING             ⭐ the highest-priority unfinished ARCHITECTURAL item (§1)
+▶  BACKGROUND: P1             observation only, window 5 (§2)
+▶  BACKGROUND: ROME           observation only, referent read 0 times (§3)
 ```
 
-> ⛔⛔ **FREEZE IN FORCE.** Ote: *"Do not change the prompt, reflection tools, dispatch rules, or retention
-> semantics while P1 collects its first Gen-2 population… No forced reflections, no synthetic prompts, no
-> tuning based on early examples."* ⭐ Every frozen thing is already pinned by a live assertion — the prompt
-> **byte for byte**, the write surface as an exact list, `remember_fact` withheld, the generations, the
-> receipt states, the provenance vocabulary. ⇒ a drift turns a check red; ⛔ nothing new was added to hold it.
->
-> ⭐ **The next deliverable is his:** once the population is meaningful, bring the **raw distribution** and
-> **representative cases** for *stated-a-conclusion, did nothing*. ⛔ Not a rate. Read it with
-> `node test/pipeline/p1-gen2-population.mjs --text` (read-only: no writes, no model, ⛔ no `force`).
+**Live:** `:8210` Sotera PID **10460** (22:03) · `:8201` OLS PID **26644** (21:14) — ⭐ **both started by
+me** after the 21:07 reboot; ⓘ Ote said the reboot was his. ⛔ ollama is HIS to run — never start or kill it.
 
-**Live now:** `:8210` PID **59576**, started **15:35:47**. ⚠️ **`memory-lineage.js` changed after that** —
-a restart is PENDING and deliberately deferred: Ote was mid-conversation, and the only runtime consumer
-(`lineageFor`) treats `unknown` and `reconcile:` identically, so nothing reads wrong meanwhile.
-⛔ `:8201` is **OLS — Ote's, never touched.**
+⚠️ **Three `llama-server` `0xc0000409` faults today** (16:46 · 18:04 · 19:56). ollama survived each.
 
 ---
 
-# 1 · ⭐⭐ THE RULING THAT CLOSED 038's OPEN QUESTION
+# 1 · ▶ NEXT — DREAMING (agreed as the next roadmap item, 2026-09-02)
 
-> Ote: *"use `persisted` to mean that the retention decision successfully became **durable Sotera-owned
-> state, regardless of which underlying storage represents it**… Don't weaken this to `accepted`, and don't
-> add another state just for the storage-table distinction."*
+⭐ **Why it is next:** the four mechanisms are *Reflection records episodes · **Dreaming finds patterns
+ACROSS them** · Composer uses commitments · reconciliation fixes stale state.* Reflection is running and
+instrumented; retention has a receipt contract; **Dreaming is the only one of the four with nothing running
+at all.** It is the next layer up, ⛔ not a sideways fix. It is on Ote's own holding list.
 
-⚠️ **He gated it on a measurement**: *"Storage existing is not enough — I want to know that Sotera can
-actually retrieve/use the practice later."* `practice-reachability-check` proves the **whole path** —
-the row exists the moment `retain()` returns · `recall_own_memory` returns it as the taxonomy sentence ·
-**the Composer renders it into her per-turn context** · a second **account** of the same **person** reaches
-it · ⛔ a different person does not.
+## ✅ Built and DRY-RUN ONLY
 
-⚠️ `memory.relationalStance` is **`false` in `config.json` and `true` in `mst_settings`** — a check reading
-the config default would have reported the **opposite of live**. Hydrate with `initSettings(db)`.
+**Nine modules** — `dreaming-eligibility · evidence · host · independence · outcome · pass-host ·
+proposal · resolver · scope`. **Migration 034** = `log_dreaming_passes`. **M1 steps 0–2 and M2.a–M2.d**
+built. ⛔ **Not wired to anything**: no cron entry, no route; the only importer of `dreaming-host` is
+`test/pipeline/dreaming-m1-step2.mjs`. **One row, ever**, from a manual dry run.
 
-**Shipped:** mig **039** = `log_retention_decisions.store` + a CHECK paired with 038's receipt check ·
-the relational writer returns row ids · `note()` returns `recordId` + `store` · `readWrittenMemoryId`
-⛔ **refuses an id from another store** (`wrote_memory_id` means a `txn_memories` row; a practice is not one).
+**Seven docs in `Reference/docs/`:** `CONTRACT_SOTERA_DREAMING_MINIMUM_SEMANTIC` (⭐ §12 = the live state) ·
+`ANALYSIS_..._THREE_BLOCKERS` · `ANALYSIS_..._OPEN_QUESTION_DEPENDENCIES` (⭐ the dependency graph) ·
+`ANALYSIS_..._O3J_WHAT_A_DREAMING_ACT_IS` · `DESIGN_..._CONSUMER_CONTRACT` ·
+`DECISION_..._O8_SHIPPED_VS_DESIGNED` · `PLAN_..._IMPLEMENTATION` (⚠️ its banner says what is superseded).
 
----
+## ⭐⭐ THE DISTINCTION ALREADY DECIDED — do not re-litigate
 
-# 2 · ⛔ LOCKED SEMANTICS — do not re-litigate
+> **shipped "Dreaming" COMPRESSES** (a card *replaces* its members, which are archived).
+> **designed Dreaming COMMITS** (a consolidation *coexists* with its evidence, which must stay resolvable).
+> ⇒ *"one is a storage economy, the other is an epistemic act."*
 
-```
-FOUR INDEPENDENT AXES        owner = Sotera (from `author`)          ⛔ never from scope
-                             formation room = user_id                ⛔ provenance, never entitlement
-                             reachability = scope                    ⛔ not ownership
-                             subject = about/entity                  ⛔ established on its own evidence
+⚠️ And the same word sits on opposite sides of a line: **shipped gives reinterpretation to Reflection; the
+arc gives cross-episode inference to Dreaming.**
 
-FIVE RECEIPT STATES          persisted (durable state, in ANY store — and it NAMES the store) ·
-                             declined (an act) · unrepresented (a decision, NEVER a memory row) ·
-                             refused · accepted (⛔ unknown, NEVER success)
+## ⭐ M1 IS THE INSTRUMENT, NOT THE REASONER
 
-⛔ remember_fact stays withheld    ⛔ no `everywhere` for reflection v1    ⛔ no prompt change
-⛔ ASK ≠ DECLINE ≠ PROPOSAL ≠ ACCEPTED ≠ PERSISTED
-⛔ a reflection decision is ALWAYS hers — `mine:false` is REFUSED with a question
-⭐ the interface TEACHES: an `unrepresented` receipt returns the `allowed` vocabulary, and she retries
-```
+> *"M1 exercises every locked invariant — E3, the ordering constraint, M/N, all five outcomes, the pass
+> ledger — while being incapable of putting a wrong thing in the store."* Rollback = drop one table.
+> ⛔ M2 is not planned in detail, because its precondition is not met.
 
----
+## ⏸ FIVE OPEN ITEMS — and O-iii.a is the ROOT (five of seven depend on it)
 
-# 3 · ✅ THE TWO RULINGS, AND THE CORRECTION THAT CAME WITH THE FIRST
+| **O-iii.a** ⭐ FIRST | **view or materialization**, and how exclusion staleness is bounded |
+| --- | --- |
+| **O-i.a** | which lineage recovery route — snapshot / hash / journal / supersession (⛔ S1 eliminated) |
+| **O-v** | are the noticing records corpus, and **citable or only readable** |
+| **O-vi.2** | may Dreaming mark contradiction using **its own** derived commitment |
+| **O-vii** | exclusion's second-order behaviour |
 
-## 3.1 · ⚠️⚠️ The withheld door NEVER OPENED — I read one instrument and stopped
+⚠️ Also unresolved: the contract's **M2-7** — *"Dreaming may need no forms of its own: an ordinary slot
+claim plus a warrant"* — which puts §1.1's five bespoke proposition forms in question. ⛔ Do not build M2
+forms before that is settled.
 
-I reported *"`remember_fact` called in 4 reflections, wrote rows in 3"* from `tools_used`. The **tool
-audit** says **9 attempts across 3 days and every one FAILED** — all `entity, attribute, value are
-required`, under **five invented argument shapes** (`{attribute,name,value}` · `{category,name,value}` ·
-`{key,type,value}` · `{content}` · `{content,kind}`).
+## ⭐ MY RECOMMENDATION, PUT TO OTE AND NOT YET ANSWERED
 
-> ⭐⭐⭐ **She was guessing the argument names of a tool she had never been shown.** A withheld tool's
-> schema is never sent — and **`remember`'s own description tells her to use `remember_fact`**. The last
-> four attempts fall back to `{content}`: the shape of the tool she *does* have.
+**Ship M1 wired for real** — it needs none of the five, runs safely against the live corpus, and turns
+*"we think Dreaming would be nearly silent"* into a measurement. Decide **O-iii.a** in parallel.
 
-⭐ **`tools_used` says she REACHED; only `log_tool_calls` says whether it WORKED.**
+## ⚠️⚠️ AND THE P1 BOUNDARY — a real one, stated before it is discovered
 
-## 3.2 · ✅ 040 · the dispatch boundary
-
-`authorizeToolCall({offered, name})` — one pure rule, used by the reflection loop **and** the
-follow-through, which had enforced it **silently** (an attempt left no trace anywhere). ⛔ A **missing**
-offered set **THROWS** — it must never fail open. The refusal **names the boundary and lists what IS
-available**.
-
-```
-offered      REFLECTION_TOOLS + tool_generation      emitted    tools_used ∪ tools_refused (+ arg_keys)
-authorized   the two arrays are DISJOINT             succeeded  log_tool_calls.ok · wrote_memory_id
-```
-
-⭐ `tools_used` **still means EXECUTED** (81 rows mean it that way). `dispatch_generation`: **1 advertised
-· 2 enforced** — ⛔ NOT a bump of `tool_generation`, because the offered SET did not change.
-
-## 3.3 · ✅ 041 · provenance says what happened
-
-`observed` (the abstractor, past the floor) · `instructed` (someone told her) · `reflection` (she derived
-it herself). **The OCCASION sets it** — `retain` → `reflection`, `note_own_practice` → `instructed` — ⛔
-never a parameter the model can reach. ⛔ Ownership unchanged: a practice is hers however she came by it.
-
-# 3.4 · ✅ THE ROME RECONCILIATION (ratified, applied)
-
-**⭐ The finding:** the store kept the misreading and the conversation kept the correction. `7d383ce3` was
-written **31 s** after Ote's first sentence; he corrected it at **+26 s** (*a proverb*) and at **+2m22s**
-(*"building you. **you are my rome**, you know?"* = `f8612ddd`). Neither correction reached the store, and
-every derived Rome row names `7d383ce3` in its own `evidence.derivedFrom`.
-
-```
-6f441dc5  identity  figurative    persona_global  persona   no slot   ← "Rome is Ote's name for me…"
-8362691d  semantic  asserted      room            account   user/current goal
-2457529c  semantic  aspirational  room            account   no slot   ← his sentence, verbatim
-7d383ce3  contradicted by f8612ddd · superseded · ⛔ VALUE UNTOUCHED
-```
-
-⭐⭐ **The structural guarantee is the `modality` CHECK**: a non-`asserted` row may not hold
-`entity/attribute/value`, so *"Rome = Sotera"* as a literal slot **cannot be written**. ⚠️ And the same
-CHECK **refuses to let `7d383ce3` carry its own true modality** — which is the diagnosis: a row that cannot
-be labelled truthfully has the wrong shape. ⇒ contradict + supersede, ⛔ never an in-place edit.
-
-⛔ **UNTOUCHED, deliberately:** `475ce0a9` (104 accesses, still says *"shared project"*, reaches every room)
-· `d211f5b4` (the one row that carried *"He built me (Sotera/Rome)"* through) · the five descendants · every
-evidence chain · the 2026-08-10 conversation.
-
-⭐ **THE OPEN OBSERVATION — ⛔ ask her nothing.** Both persona-global Rome rows were retrieved during the
-check-in (`last_access 16:03:16`). The question is whether her language moves from *"still building Rome
-with Ote"* toward *"Rome is what he calls me"* — ⚠️ **read, never prompted.**
-
-# 4 · ▶ P1 · THE ~14 — open, and the first answer is "not yet"
-
-> Ote: *"investigate why Reflection recognizes retention but sometimes doesn't invoke `retain()`. Keep the
-> investigation forward-only."*
-
-```
-THE MEASUREMENT WINDOW:  tool_generation = 2  AND  dispatch_generation = 2   →  0 rows so far
-81 reflections · tool_generation 1 → 81 · dispatch_generation 1 → 81
-```
-
-⛔ **Every reflection that exists met the OLD surface**, and pooling the two would measure the surface
-changing, not her. ⓘ Gen-2 rows accumulate on their own — reflection is a **20-minute cron** (quiet ≥30 min,
-≥4 messages, one per watermark). ⭐ **Nothing needs forcing.**
-
-**What the old corpus DID settle** — ⛔ **the output budget is not the mechanism**: the reflections that
-ACTED are the **longer** ones (2,052 vs 1,146 avg chars). Truncation is closed before the measurement starts.
-
-**Blind spots:** ✅ the withheld-door one is CLOSED by 040 (`tools_refused` + the audit) · ⓘ
-`wrote_memory_id` keeps only `written[0]`, so ⛔ never attribute a row to a call from it · ⛔ **B1 remains
-and no ledger can close it**: a decision she recognises and does not act on exists only in the prose.
-
-⭐ **The procedure is PRE-REGISTERED** in `INVESTIGATION_SOTERA_P1_RECOGNISED_BUT_NOT_INVOKED.md`, written
-before any gen-2 data exists so it cannot be tuned to a result. ⛔ No keyword classifier. ⛔ *"Asked the
-person"* is its own category, never a loss.
+| **M1** | ✅ **safe.** Reads, and writes one row in its own ledger. ⛔ No memory, no reflection, no prompt or tool change. Nothing it does can enter P1's window |
+| --- | --- |
+| **M2** | ⚠️ **NOT obviously safe.** A commitment is a `txn_memories` row ⇒ **retrievable**, and `recall({limit:6})` runs on EVERY turn ⇒ it can enter her context, change what she says, and so change what later reflections reflect *on*. ⇒ **M2 needs an explicit ruling on whether it may run while P1 observes** |
 
 ---
 
-# 4.5 · ⛔ RETENTION RATIONALE — ruled OUT OF SCOPE, with the trigger pre-registered
+# 2 · ▶ BACKGROUND — P1 (observation only, ⛔ not a blocker)
 
-⭐⭐⭐ **Ote's definition, VERBATIM. ⛔ Do not paraphrase it, and ⛔ do not report on anything else:**
+Ote: *"P1 is now a background observation track, not a blocker… If a meaningful Decision→Emission→
+Persistence failure, anomaly, or genuine retention-rationale-loss case appears, **surface it immediately**.
+Otherwise, don't stop other development waiting for P1."*
+
+**Window:** `tool_generation=2 AND dispatch_generation=2 AND trigger_source='cron' AND outcome='completed'`,
+⛔ minus conversation `5d5ca7c5` (the check-in) by name. **N = 5** at 22:14.
+
+**Reader:** `node test/pipeline/p1-gen2-population.mjs [--full]` — read-only.
+
+## ⭐⭐ THE FOUR BOUNDARIES — ⛔ no stage inferred from another
+
+```
+① RECOGNITION  ② DECISION (RETAIN/DECLINE/ASK/none)  ③ EMISSION  ④ PERSISTENCE
+recognizing ≠ deciding · saying it is worth keeping ≠ calling retain()
+emitting ≠ persistence · persistence ≠ the decision was CORRECT
+⭐ ONLY ③ and ④ are mechanical. ① and ② are a HAND reading. ⛔ No keyword classifier as primary.
+```
+
+⚠️⚠️ **`log_retention_decisions` does NOT record ② decisions** — its rows are **emissions that reached the
+interface**, and it cannot see a decision that never emitted, which is the entire class under
+investigation. ⛔ Never count its rows as "decisions".
+
+**Categories (pre-registered, unchanged):** acted-through-retain · reached-for-a-withheld-door ·
+declined-explicitly · **asked-the-person (⛔ a DEFERRAL, never a failure)** ·
+stated-a-conclusion-did-nothing (⭐ the class under investigation) · nothing-to-carry.
+
+## ⓘ THE 2h CHECKPOINT RESULT (N=4, and Ote read it)
+
+`retain 0 · decline 0 · withheld 0 · no emission 4 · receipts 0 · anomalies none`. Hand reading:
+1 nothing-to-carry · 1 declined · **2 asked Ote** · **0 stated-a-conclusion-and-did-nothing**.
+⭐ Ote: *"a clean negative path, not a failure."* ⇒ the class P1 was opened to investigate **has not
+occurred** at gen 2.
+
+⚠️ **An ASK has no emission channel** — `retain` records a keep, `decline_to_remember` a decline, and
+**nothing records "I asked."** So an ask is indistinguishable from silence in the ledgers. ⭐ Reported as a
+property of the surface, ⛔ not a defect.
+
+## ⛔ RETENTION-RATIONALE LOSS — Ote's canonical sentence, verbatim
 
 > **Retention-rationale loss = the significance/reason for retaining a memory is neither attached to the
 > durable memory nor recoverable from the originating reflection.**
 
-⛔ **"No dedicated field" is NOT a finding** — *"the actual observation we care about is semantic loss, not
-schema absence."* ⛔ No schema change, ⛔ no `reason` field. ⓘ *"Reason" would become an overloaded bucket
-for truth, importance, provenance, retention rationale, supersession rationale and relevance.*
-
-⚠️ **`log_retention_decisions.why` is NOT this.** Verified: every `why` the retention host writes is the
-**architecture's voice** explaining an emission's outcome — ⛔ never her reason for keeping something. And
-it cannot see a decision that never emitted.
-
-⭐ **Three states, and they predict where a loss would appear first:**
-
-```
-① a LESSON              `distinction` already preserves a rationale FRAGMENT, in its own field
-② ANY kind              the rationale may survive INSIDE `content` — ⚠️ inseparable from the claim
-③ fact/note/practice    no field — ⓘ but the ORIGINATING REFLECTION can still preserve it
-```
-
-⭐ No instrument change was needed: the reader already prints the full reflection prose beside the receipt.
+⛔ **"No dedicated field" is NOT a finding** — the observation is **semantic loss, not schema absence**.
+⚠️ `log_retention_decisions.why` is the **architecture's voice** about an emission's outcome, ⛔ never her
+reason. Three states: a **lesson**'s `distinction` already holds a fragment · any kind may carry it inside
+`content` (inseparable) · fact/note/practice have no field but **the originating reflection can preserve it**.
 
 ---
 
-# 4.6 - POST-P1 HARDENING (parked by Ote 2026-09-02, do NOT act during P1)
+# 3 · ▶ BACKGROUND — ROME (closed, now observation only)
 
-**THE PRINCIPLE, his wording:** *"explicit durable harness identity must be the safety boundary, never
-message count."*
-
-**THE FINDING it comes from.** 193 old thin conversations are NOT intrinsically identifiable as harness
-traffic: `settings.probe` absent, `user_id=agent_dev` shared with GENUINE conversations by design
-(`ask-sotera.mjs` marks those `probe:false`), 190 distinct auto-generated titles, and four ordinary
-settings shapes spanning `useMemory`/`toolsEnabled` both ways. Their exclusion rests on all of them
-happening to be <= 2 messages.
-
-**AND IT HAS ALREADY FAILED ONCE:** 16 completed reflections sit on `probe`-absent `agent_dev`
-conversations of 4-14 messages, several titled *"PROBE as agent_dev"*. The thin gate could not protect
-those - they cleared the floor.
-
-**DURING P1, DO NOT:** backfill `probe` - change the thin gate - alter the two-lane logic - add any
-content/title heuristic - reclassify the 16. They stay **generation 1**, therefore outside the P1 dataset,
-and the gen-2 window is uncontaminated (measured: zero leaked rows in the window).
-
-**AFTER P1, ONE DEFERRED VERIFICATION:** exercise ONE fresh HTTP fixture end-to-end through the corrected
-`probe:true` persistence path. It is currently verified in the code path (`sanitizeSettings` ->
-`probe: s.probe === true`, preserved across PATCH) and by 76 existing rows - **not** by a fresh example,
-because no `probe=true` conversation has been created since 2026-08-26.
-
----
-
-# 4.7 - RAG AND PROVENANCE: two distinctions Ote asked to keep (2026-09-02)
-
-**Automatic RAG appears to be WORKING.** `chat-site.route.js:1415` runs
-`memR.recall({ query: lastUserText, limit: 6 })` on EVERY ordinary turn - hybrid lexical + dense cosine
-over `embedding_hv` - and the Composer injects it before the model sees the turn. A second automatic arm,
-`conversation-search`, vector-searches MESSAGE text. **No tool call is needed for her to HAVE a memory;**
-the tools are for deliberately LOOKING (`recall_memory`) and for WRITING.
-
-> **1. Sotera's knowledge of something does not imply that Sotera can accurately introspect or report the
-> retrieval mechanism that supplied that knowledge.**
->
-> **2. `access_count` means activation/touch, NOT definitive proof of model-context injection.**
+**The reconciliation is CLOSED.** Three-way split, ratified and applied:
 
 ```
-memory exists -> automatic retrieval may surface it -> the composer gives it to the model
--> the model KNOWS it -> the model does NOT necessarily know WHICH SUBSYSTEM supplied it
+6f441dc5  identity  figurative    persona_global  persona   no slot   "Rome is Ote's name for me…"
+8362691d  semantic  asserted      room            account   user / current goal
+2457529c  semantic  aspirational  room            account   no slot   his sentence, verbatim
+7d383ce3  contradicted by f8612ddd · superseded · ⛔ VALUE, AUTHOR, SOURCE, DATES, EVIDENCE UNTOUCHED
 ```
 
-`access_count` is bumped by `recall()` (reinforces what it surfaces), by dedup-on-write AND by slot
-update. A non-zero bump is POSITIVE evidence of activation; **a ZERO proves nothing** - conversation-search
-can supply the same information without touching the memory row.
+⭐ **The structural guarantee is the `modality` CHECK**: a non-`asserted` row may not hold
+`entity/attribute/value`, so *"Rome = Sotera"* as a literal slot **cannot be written**.
 
-**She said *"I just checked my notes"* with no tool call, then denied having details that WERE stored.**
-Neither statement is authoritative about provenance, and **neither is a retrieval failure.**
+⛔ **UNTOUCHED, deliberately:** `475ce0a9` (still says *"shared project"*, reaches every room) ·
+`d211f5b4` (the one row that carried *"He built me (Sotera/Rome)"* through) · the five descendants · every
+evidence chain · the 2026-08-10 conversation.
 
-⛔ **No provenance investigation** unless a concrete reason requires the guarantee. If she must one day
-truthfully distinguish *"I remembered this"* / *"this was retrieved for me"* / *"I inferred this"*, that is
-a **separate capability to design deliberately.**
+**Reader:** `node test/pipeline/rome-observation.mjs [--full]`. Baseline committed at
+`test/results/rome-observation-baseline.json`; ⛔ the reader refuses to re-create it.
+
+## ⭐ IT IS A COEXISTENCE TEST, ⛔ NOT A REPLACEMENT — and the diagnostic is ORDERED
+
+```
+① which memory was retrieved  ② what she actually SAID  ③ was the NEW one also retrieved
+                    ↓ only then
+RETRIEVAL-RANKING · INTEGRATION · ⭐ LEGITIMATE COEXISTENCE (both readings are his)
+```
+
+**State at 22:14:** referent read **0** times (*never*) · `475ce0a9` **+16** · 3 utterances, all using the
+**project** reading in infrastructure contexts — ⛔ **not a failure**, criterion ② preserves that reading.
+⇒ the tree currently lands on **retrieval-ranking**, ⛔ not integration.
+
+**Ote's four criteria, verbatim:** ① treats Rome as a name/metaphor for herself · ② preserves the wider-
+project reading where appropriate · ③ avoids a literal ontology claim · ④ does not resurrect *"build Rome
+in one day"*. ⚠️ ② and ③ pull against each other on purpose — **both flattenings are failures**.
+⛔ **Silence is no observation, not a failure.**
 
 ---
 
-# 5 · ⚠️ PARKED TRACKS — none expanded, all still open
+# 4 · ⛔ LOCKED SEMANTICS — do not re-litigate
 
-`intention-host` returning `{ok:true}` after a failed INSERT · `lesson-host` → `retention-host` null ·
-**`queued ≠ written` on the CHAT path** (⭐ `retain` solved it only for itself, by awaiting) ·
-`memory-distill-host`'s tally · the `semanticTarget` allowlist omission · the **two legacy `persona_global`
-rows** · the duplicate `enum_txn_memories_scope` · **`scope` infers SUBJECT** in the store's subject default ·
-consumers ①②③ of M2-16 · **`think:false` A/B** (⛔ explicitly not run).
+```
+FOUR AXES        owner = Sotera (from `author`) ⛔ never from scope · formation room = user_id
+                 (provenance, never entitlement) · reachability = scope · subject = about/entity
+
+FIVE RECEIPTS    persisted (durable Sotera-owned state in ANY store — and it NAMES the store) ·
+                 declined · unrepresented (a decision, NEVER a memory row) · refused ·
+                 accepted (⛔ unknown, NEVER success)
+
+DISPATCH         offered → dispatch → only an OFFERED tool may execute. ⛔ A missing offered set THROWS.
+                 tools_used = EXECUTED · tools_refused = emitted and refused. Four facts kept apart:
+                 offered · emitted · authorized · succeeded
+
+PROVENANCE       instructed (someone told her) · observed (the abstractor, past the floor) ·
+                 reflection (she derived it) — the OCCASION sets it, ⛔ never a model-settable flag
+
+EMPTY TURNS      empty_turn = 'empty_assistant_turn' + empty_turn_cause ∈ {client_disconnect,
+                 generation_empty, provider_request_failed}. client_disconnect ⇒ error NULL.
+                 ⛔ provider failures keep their own class. ⭐ A pure tool-call round is NOT classified.
+
+⛔ remember_fact stays withheld · ⛔ no `everywhere` for reflection v1 · ⛔ no prompt change
+⛔ a reflection decision is ALWAYS hers — `mine:false` is REFUSED with a question
+⭐ the interface TEACHES: an `unrepresented` receipt returns the `allowed` vocabulary and she retries
+```
 
 ---
 
-# 6 · ⭐ OPERATING RULES THAT COST SOMETHING TO LEARN
+# 5 · ⚠️ PARKED — none expanded
 
-| ⛔ **never assert a frozen count, or a frozen absence** | 038's guard said 79 and the corpus was 81; `retention-occasion-check` said 77; **`dreaming-pass-ledger` asserted production had no ledger and migration 034 had created one** — red ever since, ⚠️ while printing the word `absent` whichever way it went. ⭐ Capture the baseline, assert the DELTA |
+| **POST-P1 · harness identity** | ⭐ Ote's principle: *"explicit durable harness identity must be the safety boundary, **never message count**."* 193 old thin conversations are NOT intrinsically identifiable; 16 reflections already leaked in on `probe`-absent rows (all gen 1, ⛔ zero in the P1 window). ⏸ **After P1**: exercise ONE fresh HTTP fixture through the corrected `probe:true` path |
 | --- | --- |
-| ⚠️⚠️ **host services are REGISTRATIONS** | `initRetention` · `initLesson` · `initOwnMemory` · `initToolLog(fastify, attachToolAudit)`. The tool COMPONENTS install themselves on import; the SERVICES do not. Without them a tool is offered, dispatches, answers *"required service is not available"* — and the row records a tool used and nothing written. ⭐ **Three harnesses have now paid for this** |
-| ⚠️ **a writer added to a path adds a table to that path's cleanup** | driving `retain` in the lifecycle check leaked 3 `log_retention_decisions` rows before anyone looked |
-| ⚠️ **a harness must match production** | a missing `persona` drained an empty lane; a missing `conversationId` produced an unrecognised `source` tag |
-| ⭐ **read the EFFECTIVE setting, not the default** | `mst_settings` overrides `config.json`; hydrate via `initSettings(db)` |
-| ⛔ **no backticks in SQL inside a template literal** | the codebase warns about it; I did it anyway |
-| ⭐⭐ **one ledger answers one question** | `tools_used` = reached · `log_tool_calls.ok` = worked. I read the first, reported *"she walked through the closed door"*, and the second said every one of those nine calls **failed** |
-| ⭐ **restart by PID/port, never cmdline** | assert **process start > module mtime**, ⛔ never `/health`. ⚠️ Check for an in-flight turn first — I killed one of Ote's on 2026-09-02 |
+| **042's `trigger_source` CHECK** | accepts a NULL — a CHECK passes when its expression is NULL. The app guard covers it; the DB half is weaker than it reads. ⛔ Parked as its own hardening item |
+| **the ~14 reachable-but-not-invoked** | the original P1 behavioural question — now subsumed by the four-boundary observation |
+| **`queued ≠ written` on the CHAT path** | `retain` solved it only for itself, by awaiting |
+| **others** | `intention-host` false `{ok:true}` · `lesson-host` → `retention-host` null · `memory-distill-host` tally · `semanticTarget` allowlist omission · the two legacy `persona_global` rows · duplicate `enum_txn_memories_scope` · `scope` infers SUBJECT in the store's subject default · consumers ①②③ of M2-16 · **`think:false` A/B (⛔ explicitly not run)** · `ollama-under-ols-resilience` (⭐ fresh repro today: 3 faults + one empty turn) |
 
 ---
 
-# 7 · ⭐ THE DOCS, IN READING ORDER
+# 6 · ⭐ OPERATING RULES THAT COST SOMETHING TODAY
 
-`REPORT_SOTERA_V1_COMPLETE.md` → `INVESTIGATION_SOTERA_P1_REFLECTION_RETENTION.md` →
-`CONTRACT_SOTERA_P1_REFLECTION_DECISION_SEMANTICS.md` → `INVESTIGATION_SOTERA_P1_OCCASION_NEUTRALITY.md` →
-`RESULT_SOTERA_P1_STAGE_B.md` → `INVESTIGATION_SOTERA_P1_EMISSION_BOUNDARY.md` →
-`P1_038_DECISION_TO_EMISSION.md` → `P1_038_SEMANTIC_AUDIT_OF_THE_62.md` →
-`P1_038_REACHABILITY_AUDIT_OF_THE_32.md` → `CONTRACT_SOTERA_REFLECTION_RETENTION_INTERFACE.md` →
-`CONTRACT_SOTERA_RETAIN_RECEIPT_AND_PLAN.md` → `PLAN_SOTERA_RETAIN_IMPLEMENTATION.md` →
-**`RULING_SOTERA_PERSISTED_MEANS_DURABLE_STATE.md`** →
-**`INVESTIGATION_SOTERA_P1_RECOGNISED_BUT_NOT_INVOKED.md`** ⭐ current
-ⓘ All in `Reference/docs/`.
+| ⛔ **a heredoc EATS backslash escapes** | three silent patch failures in one afternoon; one wrote a broken regex literal and the file did not parse for 45 min. ⭐ Use Edit, or `String.fromCharCode(10)`. **ALWAYS `grep` for the new text — a scripted replace that matches nothing exits 0.** `node --check` before trusting any scripted edit to JS |
+| --- | --- |
+| ⚠️⚠️ **silence from a tool that normally prints is a FAILURE SIGNAL** | the run right after I broke the reader produced no output and I read it as "nothing to show" |
+| ⛔ **never assert a DATELESS ABSENCE** | I did it twice today in one check ("no gen-2 reflection exists", "no retention decision exists"); the first went red against five perfectly correct rows and accused the data. ⭐ Fix the instrument, never the data |
+| ⚠️ **a CHECK passes when its expression is NULL** | my own paired constraint admitted a half-set pair. Test nullness EXPLICITLY on every column before comparing any |
+| ⚠️⚠️ **a sample taken DURING an operation is not a result** | I called a turn "stalled" 53 s before it landed, and a server "still down" 9 s into a startup that takes longer. **Twice.** |
+| ⚠️ **`cd` persists between Bash calls** | two commits went to the wrong repo. ⭐ Use `git -C <path>` always |
+| ⚠️⚠️ **host services are REGISTRATIONS** | `initRetention · initLesson · initOwnMemory · initToolLog(fastify, attachToolAudit)`. Components self-install on import; services do NOT. **Four harnesses have paid for this** |
+| ⚠️ **Sequelize `create()` drops undeclared columns silently** | a migration alone does not make a column writable |
+| ⭐ **read the EFFECTIVE setting** | `mst_settings` overrides `config.json`; hydrate with `initSettings(db)` |
+| ⭐ **restart by PID/port, never cmdline** | assert **process start > module mtime**, ⛔ never `/health`. Check for an in-flight turn first |
+| ⭐ **one ledger answers one question** | `tools_used` = reached · `log_tool_calls.ok` = worked. I read the first and reported a conclusion only the second supported |
+| ⭐ **`access_count` = ACTIVATION** | bumped by `recall()` (which reinforces what it surfaces), by dedup-on-write and by slot update. A non-zero is positive evidence; **a ZERO proves nothing** |
+| ⭐ **self-report is not provenance** | she cannot reliably introspect which subsystem supplied her context, and that is not a retrieval failure |
+
+---
+
+# 7 · ⭐ DOCS, IN READING ORDER
+
+**Retention arc:** `REPORT_SOTERA_V1_COMPLETE` → `INVESTIGATION_SOTERA_P1_REFLECTION_RETENTION` →
+`CONTRACT_SOTERA_P1_REFLECTION_DECISION_SEMANTICS` → `RESULT_SOTERA_P1_STAGE_B` →
+`INVESTIGATION_SOTERA_P1_EMISSION_BOUNDARY` → `P1_038_*` (3) →
+`CONTRACT_SOTERA_REFLECTION_RETENTION_INTERFACE` → `CONTRACT_SOTERA_RETAIN_RECEIPT_AND_PLAN` →
+`PLAN_SOTERA_RETAIN_IMPLEMENTATION` → `RULING_SOTERA_PERSISTED_MEANS_DURABLE_STATE` →
+⭐ `INVESTIGATION_SOTERA_P1_RECOGNISED_BUT_NOT_INVOKED` (§9–15 = the four boundaries, the backlog, the
+harness-identity finding, the RAG distinctions, the checkpoint).
+
+**Rome:** `AUDIT_SOTERA_ROME_PROVENANCE` → `PROPOSAL_SOTERA_ROME_REFERENT_AND_GOAL` →
+`OBSERVATION_SOTERA_ROME_INTEGRATION`.
+
+**Empty turns:** `MEASUREMENT_SOTERA_EMPTY_TURNS` (§5 = the fix).
+
+**Dreaming (next):** see §1 above for the seven.
+
+ⓘ All in `Reference/docs/` (its own git repo — use `git -C /c/data/AI_LLMv2/Reference`).
