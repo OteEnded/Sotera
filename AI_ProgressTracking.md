@@ -4584,3 +4584,51 @@ loose figure is heavily caveated. Truncated counts are now flagged `rootsAreLowe
 and a red-proof asserts ⛔ no extrapolation or correction factor exists anywhere in the module.
 
 **57 of 57 suites green** — verified by grepping each for its pass line, ⛔ not by reading the last line.
+
+---
+
+## 2026-09-03 00:05 (+07:00) — ⚠️ M2 IS FURTHER ALONG *AND* FURTHER BEHIND THAN THE REQUEST ASSUMED
+
+### ⚠️⚠️ A NUMBERING COLLISION, SURFACED BEFORE ANY WORK
+
+Ote's message used **M2-7** for the COEXISTENCE question. In the contract **M2-7 is already LOCKED** and
+means something else — *ordinary claim + separate warrant, ⛔ no Dreaming-specific memory vocabulary*.
+⛔ **Nothing was renumbered.** The coexistence question is **M2-12**, the next free identifier.
+
+### ⭐⭐ THE TRUE STATE: `M2-1 … M2-11` ALREADY EXIST
+
+```
+✅ LOCKED   M2-5 · M2-7 · M2-8 (as direction) · M2-9 · M2-10 · M2-11
+⏸ OPEN     M2-1 · M2-2 · M2-3 · M2-4 · M2-6
+```
+
+⇒ there was **nothing to define**. ⭐⭐ **The gap is that SIX LOCKED RULINGS HAVE NO SCHEMA, NO MODULE AND
+NO TEST** — the plan's own rule says *"a clause with no test is not implemented."*
+
+### ⚠️⚠️ AND TWO SHIPPED DIVERGENCES FROM A LOCKED RULING
+
+`dreaming-proposal.js` still exports the **five bespoke FORMS**, and `dreaming-resolver.js` still mints
+**`dreaming:<form>`** slot addresses — both of which **M2-7 retired on 2026-09-01**. The code predates the
+ruling. ⭐ Characterized, ⛔ not silently fixed, so removing them is a deliberate visible change.
+ⓘ The store is clean: **0 rows** carry a Dreaming-specific attribute.
+
+### ⭐ BUILT: `dreaming-m2-semantics-check` — a CHARACTERIZATION register, ⛔ not a red wishlist
+
+⛔ A file that is red forever teaches everyone to ignore red. ⇒ it asserts the **absence** of each unbuilt
+piece **as the current state, with the reason**, and holds the substantive red-proofs behind that branch.
+It goes red when ① something is built without activating its proofs ② the semantics are wrong ③ a
+divergence is silently fixed or widened. **It prints the 7-item build list on every run.**
+
+### ⭐⭐⭐ M2-12 — THE COEXISTENCE EVIDENCE, MEASURED
+
+```
+recall's visibleWhere:  persona = P  AND  (user_id = U  OR  scope = 'persona_global')  AND LIVE
+⚠️⚠️ THERE IS NO AUTHOR FILTER  ⇒ a Dreaming commitment in a live room is reachable on EVERY turn
+⭐⭐⭐ BUT `persona` IS A FILTER  ⇒ a distinct persona is a STRUCTURAL isolation lever, not a promise
+P1 window at ruling time: 6 · synthesized persona-authored rows already live: 14
+```
+
+⇒ the contamination path is **through her context**, which is precisely what P1 measures — ⛔ not a
+counting problem a `WHERE` clause on the reader could fix.
+
+**58 of 58 suites green**, verified per-suite by its pass line.
