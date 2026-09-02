@@ -81,12 +81,30 @@ try {
       && msgs.find((m) => m.id === MSG_REFERENT)?.content.includes('you are my rome')
       && msgs.find((m) => m.id === MSG_WANT)?.content.includes('build rome in one day'))
 
-  // ── P · P1 ISOLATION, in both states ─────────────────────────────────────────────────────────
-  check('P1 · ⛔ the reconciliation wrote no reflection row — P1 is untouched',
-    Number((await one(`select count(*)::int n from ${S}.log_conversation_revisits
-                        where trigger_source <> 'legacy'`)).n) === 0)
-  check('P2 · ⛔ and no retention decision — this was not a retention act',
-    Number((await one(`select count(*)::int n from ${S}.log_retention_decisions`)).n) === 0)
+  // P1 ISOLATION.
+  // WARNING - THIS ASSERTION WAS WRONG AND WENT RED ON 2026-09-02. It read
+  //     count(*) where trigger_source <> 'legacy'  === 0
+  // which was true only because no gen-2 reflection existed YET. Five legitimate cron reflections later
+  // it failed - an ABSENCE ASSERTED WITH NO DATE ON IT, which is the defect my own notes warn about, and
+  // it accused correct data of being wrong. The instrument was fixed, NOT the data.
+  // => assert what this check actually means: the RECONCILIATION left no trace in the reflection ledger.
+  const sources = await q(`select distinct trigger_source from ${S}.log_conversation_revisits`)
+  check('P1a - the reconciliation invented no trigger_source - the vocabulary is still the closed four',
+    sources.every((r) => ['cron', 'manual', 'check', 'legacy'].includes(r.trigger_source)),
+    sources.map((r) => r.trigger_source).join(' '))
+  const attributed = await q(
+    `select left(id::text,8) id from ${S}.log_conversation_revisits
+      where wrote_memory_id in (select id from ${S}.txn_memories where source = $1)`, [SOURCE])
+  check('P1b - and NO reflection is credited with a row the reconciliation wrote',
+    attributed.length === 0, attributed.map((r) => r.id).join(' ') || 'none')
+  // SAME DEFECT CLASS, FIXED BEFORE IT BIT. This asserted 'log_retention_decisions is empty', which is a
+  // dateless absence: the first real retain() in production would have turned it red and accused correct
+  // data. => assert the MEANING - the reconciliation was not a retention act, so no receipt points at it.
+  const receiptsForReconciled = await q(
+    `select left(id::text,8) id from ${S}.log_retention_decisions
+      where memory_id in (select id from ${S}.txn_memories where source = $1)`, [SOURCE])
+  check('P2 - no retention receipt claims a reconciliation row - this was an operator act, not a retention one',
+    receiptsForReconciled.length === 0, receiptsForReconciled.map((r) => r.id).join(' ') || 'none')
 
   const root = await one(
     `select content, value, entity, attribute, author::text as author, source,

@@ -110,6 +110,22 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.JSONB,
                 allowNull: true,
             },
+            // ⭐⭐ 043 · AN EMPTY TURN SAYS WHY. `empty_turn` is the CLASSIFICATION
+            // ('empty_assistant_turn'); `empty_turn_cause` is the CAUSE — client_disconnect,
+            // generation_empty, or provider_request_failed. Both NULL on an ordinary turn.
+            //
+            // ⚠️⚠️ DECLARED HERE OR SILENTLY DROPPED. `create()` builds its insert from THIS list, so a
+            // column the model has never heard of is discarded without a word — the same defect that cost
+            // this project seven memories when `subject_person_id` was written by a caller the model did
+            // not know about. ⛔ A migration alone does not make a column writable.
+            empty_turn: {
+                type: DataTypes.TEXT,
+                allowNull: true,
+            },
+            empty_turn_cause: {
+                type: DataTypes.TEXT,
+                allowNull: true,
+            },
         },
         {
             tableName: "txn_messages",

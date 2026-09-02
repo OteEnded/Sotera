@@ -3406,12 +3406,42 @@ export default async function chatSiteRoutes(fastify) {
     // downstream finalisation depends on `saved`. Naming the state is the smaller, safer fix.
     const producedNothing = !String(answer || '').trim() && !String(reasoning || '').trim()
       && !toolActivity.length && !structuredSegments
+    // ── ⭐⭐⭐ 043 · THE EMPTY TURN NOW SAYS *WHY* ──────────────────────────────────────────────────
+    //
+    // Ote's ruling: *"Keep a single high-level `empty_assistant_turn` classification with a separate
+    // cause… A client disconnect is not automatically an error… `generation_empty` is a real generation
+    // failure condition, even when the provider returned no explicit error… Keep explicit
+    // `provider_request_failed` as its existing class; don't collapse it into `generation_empty`."*
+    //
+    // ⚠️ THE OLD STRING NAMED BOTH CAUSES AND COULD PICK NEITHER — *"the client disconnected before the
+    // first token, OR generation ended empty"*. 13 rows carried it, the newest on 2026-09-02 20:57:52
+    // after three `llama-server` 0xc0000409 faults, where the cause was certainly the empty generation.
+    //
+    // ⭐ AND THE DISTINCTION WAS ALREADY IN HAND: `clientGone` has been tracked since line ~1245, and this
+    // file already states the principle at the round-budget branch — *"a disconnect is the user leaving,
+    // exhaustion is us stopping her mid-job."* ⇒ nothing new is detected here; what is new is that the
+    // row RECORDS it.
+    const emptyTurn = producedNothing ? 'empty_assistant_turn' : null
+    const emptyTurnCause = !producedNothing ? null
+      // ⭐ The user left. Their browser closing is not a fault of hers or ours.
+      : (clientGone ? 'client_disconnect'
+        // ⭐ The provider NAMED a failure — it keeps its own class, verbatim. ⛔ Not relabelled.
+        : (genError ? 'provider_request_failed'
+          // ⭐ Nothing came back and nobody said why. THAT is a generation failure, not an unknown.
+          : 'generation_empty'))
+
     const turnError = genError
       || (roundsTruncated
         ? `the tool-round budget (${maxRounds}) ran out before an answer was written — raise chat.toolsMaxCalls or narrow the request`
         : null)
-      || (producedNothing
-        ? 'no output was produced — the client disconnected before the first token, or generation ended empty'
+      // ⛔ `client_disconnect` CONTRIBUTES NO ERROR — Ote: *"A client disconnect is not automatically an
+      // error. It is an empty/aborted turn with error=NULL unless there is an independent system failure."*
+      // ⓘ An independent failure is still reported, because `genError` is evaluated first above.
+      // ⭐ And `generation_empty` is an OBJECT, not a bare string: the message list reads
+      // `m.error.message || m.error.code`, so the old string rendered as a flat "error" and its text was
+      // lost to the UI. A named code makes the reason survive the round trip.
+      || (emptyTurnCause === 'generation_empty'
+        ? { code: 'generation_empty', message: 'the model produced no output and the provider reported no error' }
         : null)
 
     try {
@@ -3424,6 +3454,10 @@ export default async function chatSiteRoutes(fastify) {
         segments: structuredSegments, // interleaved weave (plain text-only replies don't need it)
         metrics,
         error: turnError, // why the turn failed (blank reply / no output at all) — survives reload
+        // ⭐ 043 · the SHAPE and the CAUSE, apart. ⛔ A `client_disconnect` has `error = NULL`, so these
+        // two are the only record that the turn happened and produced nothing.
+        empty_turn: emptyTurn,
+        empty_turn_cause: emptyTurnCause,
         // "ran as X" trace — bound OR model-triggered (use_skill) alike
         skill: (activeSkill || dynamicSkill) ? { id: (activeSkill || dynamicSkill).id, name: (activeSkill || dynamicSkill).name } : null,
       })
