@@ -4209,3 +4209,36 @@ one-of-declared-vocabulary (project-decision)       34       54       0
 - ⛔⛔ **Do NOT invent a heuristic now.** *“First establish whether the problem is **observable at all** with the current interface.”* ⏸ **Trigger: the first real Dreaming proposal — a DELIBERATE experimental milestone, ⛔ not something accidentally introduced while fixing M2-16.**
 
 - **Next action:** ⏸ **AWAITING OTE on M2-16.** ⏸ Open inside it: what **each** of the four consumers should do with a preserved `code` (⭐ four audiences, four decisions, ⛔ none urgent) · ⚠️ `memory-distill-host`'s unconditional `tally.distilled++` · ⛔ whether `captureFacts`' bare `catch {}` deserves anything at all. ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron · ZERO model calls this whole arc.**
+
+---
+
+## 2026-09-02 14:25 (+07:00) — P1: `retain()` shipped; V1 closed earlier the same day
+
+**V1 CLOSED.** All four remaining items were the same shape: *the mechanism already existed and could not
+SEE.* M2-16 kept only `e.message`; M2-17's lane returned `null`; 035 stamped scope from another axis; ④ was
+never handed the turn text. Not one was a missing rule.
+
+**P1 investigated, not assumed.** The writer was never the problem — 5 retention actions produced 5 rows,
+100%. The reflection instrument asks her to TELL, and her answer lands in a column nothing reads. A hand
+audit of 62 silent reflections found **32** where she recognised something durable, named it precisely
+(one specifies *"semantic memory, importance ~6"*), and acted on nothing — plus **10** that never answered
+the retention question at all, one denying she was Sotera.
+
+**The split that decided the design:** self-lessons were REACHABLE (two texts filled `save_lesson`'s three
+required fields in prose and never submitted them); facts about the person had **no door she is told she
+may use**. So the interface is decision-shaped, not tool-shaped.
+
+**Shipped:** 036 (the occasion records itself; silence became an outcome) · 037 (silence was three states)
+· 038 (the decision log + `tool_generation`; 81 reflections provably generation 1) · `retain()` ·
+reflection's surface swapped to `['retain','decline_to_remember']`.
+
+**The live pass found two defects.** ONE FIXED: she said `mine:false` and the row landed
+`author='account'` — the family-lineage shape through a new door; now refused with a question rather than
+silently corrected. ONE OPEN and awaiting Ote: a successful practice note returns `accepted` because it
+lands in `txn_relational_records` and has no memory id, and `accepted` must never mean success.
+
+**Also proved by the live run:** the interface TEACHES — she read the `allowed` list from an
+`unrepresented` receipt and retried with valid labels.
+
+**Not addressed, deliberately:** the ~14 reachable-but-not-invoked cases. That is the behavioural question,
+and it now has an instrument — with no back-catalogue.
