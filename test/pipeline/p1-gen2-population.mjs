@@ -164,7 +164,12 @@ try {
       console.log(`  ── ${r.id.slice(0, 8)}  ${r.at}  ${r.room}  chars=${r.chars}`)
       console.log(`     ③ used=[${(r.tools_used ?? []).join(' ')}] refused=[${(r.tools_refused ?? []).join(' ')}]`)
       console.log(`     ④ ${rec.length ? rec.map((d) => `${d.state}${d.kind ? `/${d.kind}` : ''}${d.store ? `@${d.store.replace('txn_', '')}` : ''}`).join(' ') : '(no receipt)'}`)
-      const body = FULL ? r.text : `${r.text.replace(/\n+/g, ' ').slice(0, 400)}…`
+      // THE ELLIPSIS IS CONDITIONAL. It was unconditional, so a reflection SHORTER than the cap was
+      // displayed as if it had been cut off - an instrument implying its own truncation is a false
+      // signal, and the very first sample (378 chars) hit it immediately.
+      const flat = r.text.replace(/
++/g, ' ')
+      const body = (FULL || flat.length <= 400) ? r.text : (flat.slice(0, 400) + '…')
       console.log(`\n${body.replace(/^/gm, '     ')}\n`)
     }
     console.log('  ⏸ PLACE EACH IN ONE CATEGORY, BY HAND — the pre-registered set, unchanged:')
