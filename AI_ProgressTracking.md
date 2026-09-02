@@ -4739,3 +4739,58 @@ Leaving the isolated row resident turned **two suites red, and both were RIGHT**
 the run is reproducible on demand.
 
 **59 of 59 checks · 689 of 689 unit tests · ⛔ live persona untouched (88 rows, 0 warrants, 0 questions).**
+
+---
+
+## 2026-09-03 01:55 (+07:00) — ⛔⛔ THE 12b FINDING WAS WITHDRAWN. IT WAS MY BUG.
+
+### ⛔⛔ THE CORRECTION, FIRST
+
+**What I reported:** *"0 of 4 verified · 8 of 8 cited spans discarded · not one span the model cited
+existed in the evidence."* ⇒ **WRONG.** The spans were fine. **Every cite was discarded, always,
+whatever the model produced.**
+
+⭐⭐⭐ **THE DEFECT:** `buildPrompt` labelled buckets ``b.label ?? `r${i+1}` `` while `verifyCitations`
+keyed on `b.root` — **two names for one thing**. 12b's caller passed `{root: b.label, turns}`, which
+STRIPPED `label`, so the prompt showed `[r1]` and the verifier looked up `g1`.
+
+⚠️⚠️ **AND IT FAILED IN THE SHAPE OF A PLAUSIBLE RESULT.** *"The model's citations do not verify"* is
+exactly what a WORKING gate would report. 🔑 **A defect that wears the costume of the finding it is
+corrupting is the most expensive kind there is** — I read a broken instrument as a discovery about the
+model, and wrote a confident paragraph about the model answering from its own knowledge.
+
+**Fixed:** one identity per bucket (`root`), used by the prompt AND the verifier; a bucket with no
+`root` now **THROWS** — ⛔ no invented fallback. Red-proof **R30** round-trips it: the identifier the
+prompt SHOWS must be the identifier the verifier ACCEPTS.
+
+### ✅ THE CORRECTED RESULTS
+
+```
+controlled fixture (3 clean roots)   A definition-framed ✅ 3/3 · B subject-framed ✅ 3/3 · 0 discarded
+natural corpus, re-run               4 of 4 VERIFIED · 0 of 8 cites discarded
+```
+
+⇒ the model **copies spans exactly** and **infers correctly**. ⛔ Nothing supports "the model is
+inadequate", and no model swap is warranted on this evidence.
+
+### ⭐⭐⭐ AND THE SURVIVING FINDING IS SHARPER THAN THE WRONG ONE
+
+The `preference` claim now VERIFIES — 2 roots, 0 discarded — and is still:
+
+> *"A durable fact or preference that is stored about the user rather than casual chitchat"*  `kind: definition`
+
+⇒ **a definition of its own slot label, sailing through the gate.** 🔑 **VERIFICATION IS NECESSARY AND
+DEMONSTRABLY INSUFFICIENT** — which is Ote's own M2-8 qualification arriving as a measurement:
+*"It does not prove the resulting value is true or meaningful."*
+
+**Two contract defects survive, both mine, neither the model's:**
+
+| **D1 · the QUESTION asked for a definition** | verbatim: *"what does \"user / preference\" appear to be?"* ⇒ a slot-definition answer was not merely legal, **it was the question**. The model answered accurately |
+| --- | --- |
+| **D2 · the EVIDENCE was selected by LABEL-TERM match** | `probeTermsFor('preference')` → `["preference"]` ⇒ 24 buckets of messages containing the WORD, ⛔ not material about the person. In agent_dev those are overwhelmingly Sotera discussing the memory system |
+
+⚠️ D1 and D2 are **not separable by the current fixture** — the fixture's evidence is clean, so both
+framings verified. Separating them needs a fixture where the evidence is *about the subject* but the
+question is definition-framed. ⛔ Not run; ⛔ nothing tuned.
+
+**59 of 59 checks · live persona untouched · M2 still disabled.**

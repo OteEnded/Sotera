@@ -269,6 +269,40 @@ try {
       !anyDreaming.includes(f))
   }
 
+  // ══ ⭐⭐⭐ THE PROMPT AND THE VERIFIER SHARE ONE BUCKET IDENTITY ═══════════════════════════════
+  // ⚠️⚠️ THIS GROUP EXISTS BECAUSE THE ABSENCE OF IT PRODUCED A FALSE FINDING. `buildPrompt` used
+  // ``b.label ?? `r${i+1}` `` while `verifyCitations` keyed on `b.root`; a caller passing
+  // `{root: b.label}` stripped `label`, so the prompt showed `[r1]` and the verifier looked up `g1`.
+  // ⇒ **every cite was discarded, always, whatever the model produced** — and it was reported as
+  // *"the model's citations do not verify"*, which is precisely what a WORKING gate would say.
+  // ⭐ A defect that fails in the shape of a plausible result is the most expensive kind there is.
+  const reasoner = await tryImport('dreaming-reason-host.js')
+  const verify = await tryImport('dreaming-verify.js')
+  check('R30 · ⭐ the reasoner and the verifier both load',
+    typeof reasoner?.buildPrompt === 'function' && typeof verify?.verifyCitations === 'function')
+  if (reasoner?.buildPrompt && verify?.verifyCitations) {
+    const fixture = [
+      { root: 'zz_alpha', turns: [{ excerpt: 'the first distinctive sentence' }] },
+      { root: 'zz_beta', turns: [{ excerpt: 'the second distinctive sentence' }] },
+    ]
+    const prompt = reasoner.buildPrompt({ buckets: fixture, entity: 'x', attribute: 'y' })
+    // ⭐⭐ ROUND TRIP: the identifier the PROMPT shows must be the identifier the VERIFIER accepts.
+    for (const b of fixture) {
+      check(`R30 · ⭐⭐ the prompt labels the bucket with its own \`root\` (${b.root})`,
+        prompt.includes(`[${b.root}]`))
+    }
+    const v = verify.verifyCitations({
+      cites: fixture.map((b) => ({ root: b.root, span: b.turns[0].excerpt })), buckets: fixture,
+    })
+    check('R30 · ⭐⭐⭐ a cite using the label the PROMPT SHOWED verifies — the two agree end to end',
+      v.ok === true && v.verifiedRoots === 2, v.why)
+    // ⛔ AND A BUCKET WITH NO IDENTITY IS LOUD, ⛔ never silently renumbered. A fallback that invents an
+    // identifier is what made the mismatch survivable in the first place.
+    let threw = false
+    try { reasoner.buildPrompt({ buckets: [{ turns: [{ excerpt: 'no root' }] }], entity: 'x', attribute: 'y' }) } catch { threw = true }
+    check('R30 · ⛔⛔ a bucket with NO `root` THROWS — ⛔ no invented fallback identifier', threw)
+  }
+
   // ══ M2-12 · COEXISTENCE — ⛔ EVIDENCE FOR A RULING OTE HAS NOT MADE, ⛔ NOT A PASS/FAIL ════════
   // ⚠️ These assertions describe the SYSTEM AS IT IS, so the ruling can be made against measurement.
   // ⛔ None of them asserts that M2 may or may not run: that decision is his.

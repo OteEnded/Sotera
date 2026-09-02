@@ -105,13 +105,16 @@ try {
     const admitted = admitEvidence({ rows, room: room.room })
     if (!admitted.ok) { results.push({ slot: slot.attribute, stage: 'evidence', why: admitted.why }); continue }
 
-    // ⭐ Opaque labels. The model cites by label and is never told how many there are.
-    const buckets = admitted.buckets.map((b, i) => ({ ...b, label: `g${i + 1}` }))
+    // ⭐ Opaque root ids. The model cites by root and is never told how many there are.
+    // ⚠️ ONE NAME. This used to add a separate `label`, and the mapping below then stripped it — the
+    // prompt and the verifier disagreed on every identifier and discarded 8 of 8 cites regardless of
+    // what the model produced.
+    const buckets = admitted.buckets.map((b, i) => ({ ...b, root: `g${i + 1}` }))
 
     // ── ③ + ④ PROPOSE, THEN VERIFY ──────────────────────────────────────────────────────────────
     // eslint-disable-next-line no-await-in-loop
     const r = await proposeFromBuckets({
-      llm, buckets: buckets.map((b) => ({ root: b.label, turns: b.turns })),
+      llm, buckets: buckets.map((b) => ({ root: b.root, turns: b.turns })),
       entity: 'user', attribute: slot.attribute,
     })
     results.push({ slot: slot.attribute, roots: buckets.length, ...r })

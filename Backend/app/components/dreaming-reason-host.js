@@ -70,9 +70,22 @@ export function makeDreamingLlm(fastify, { modelId = null, maxTokens = 400, user
  * contamination this project has already had to withdraw a finding over.
  */
 export function buildPrompt({ buckets, entity, attribute }) {
-  const shown = buckets.map((b, i) => {
+  const shown = buckets.map((b) => {
+    // ⭐⭐⭐ ONE IDENTITY PER BUCKET — `root`, the SAME STRING `verifyCitations` keys on.
+    //
+    // ⚠️⚠️ THIS LINE HELD A SILENT, TOTAL FAILURE. It used to read ``b.label ?? `r${i + 1}` `` — two
+    // names for one thing — and 12b's caller passed `{root: b.label, turns}`, which stripped `label`.
+    // ⇒ the prompt showed `[r1] [r2] [r3]`, the model cited `r1`, and the verifier looked up `g1`.
+    // **EVERY CITE WAS DISCARDED, ALWAYS, WHATEVER THE MODEL DID** — 8 of 8 on the natural corpus and
+    // 6 of 6 on a fixture whose spans were verbatim substrings.
+    //
+    // ⛔⛔ AND IT FAILED IN THE DIRECTION THAT LOOKS LIKE A FINDING: "the model's citations do not
+    // verify" is exactly what a working gate would report, so the bug wore the costume of the result it
+    // was corrupting. ⭐ A fallback that invents an identifier is never harmless — if the label is
+    // missing, the caller is wrong and it must be loud.
+    if (!b?.root) throw new TypeError('every bucket must carry a `root` — it is the identity the model cites and the verifier checks')
     const lines = b.turns.map((t) => `  - ${t.excerpt}`).join('\n')
-    return `[${b.label ?? `r${i + 1}`}]\n${lines}`
+    return `[${b.root}]\n${lines}`
   }).join('\n\n')
   return `Below are excerpts from separate conversations, grouped by conversation.
 
