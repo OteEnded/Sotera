@@ -4169,3 +4169,43 @@ one-of-declared-vocabulary (project-decision)       34       54       0
 - ⭐⭐ **The honest framing: the arc has built and verified the CONSTRAINTS AROUND cognition. It has ⛔ not tested cognition — and the reason is that its contract was only finished this week.**
 
 - **Next action:** ⏸ **AWAITING OTE on M2-15.** ⏸ Open inside it: whether the differentiation fix belongs to `ingest` or to the store's error shape; ⛔ whether `captureFacts`' bare `catch {}` should also distinguish (ⓘ a second, separate loss of information). ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
+
+## 2026-09-02 09:14 +0700 · ✅ M2-15 LOCKED (KEEP THE THROW) · ⭐⭐⭐ M2-16: FOUR LOSSES, ONE CAUSE, TWO CONTRACTS · ✅ MB-2 RECORDED
+
+- ⛔ **Investigation only.** ⛔ No implementation · no control-flow change · no production change · **no model calls** · no definition registration · no producer contract · no Dreaming generation. **706 unit tests, 0 failures.**
+
+### ✅ M2-15 LOCKED — KEEP THE THROW
+- ⭐⭐⭐ His framing, which is cleaner than my A/B one: **throw = safety · record = disclosure · pipeline catch = candidate isolation** — and **the measured ordering proves there is no partial memory write before the refusal.**
+- ✅ **The `model-tool` finding is locked with it:** `source_message_id` = **OCCASION, ⛔ never BASIS** ⇒ ⛔ **do not manufacture a `sourceText` for that path** from a message that merely happens to be associated with the resulting memory.
+
+### ⭐⭐⭐ M2-16 — THE ANSWER: ⛔ NOT two loss points, and ⛔ not the same problem
+- ⓘ **FOUR consumers lose information in four different ways, from ONE upstream cause, across TWO contracts.**
+
+#### ⓘ THE ONE CAUSE
+- `memory-pipeline.ingest`'s catch returns `{ok, stage, observation, error: e?.message}` and **drops `e.code`** — ⚠️ while the store sets a code on **THREE** deliberate refusals, ⛔ not one: **`SELF_STATE_CLAIM` (587) · `OWNERSHIP_BOUNDARY` (634) · `MODALITY_SLOT` (646)**.
+- ⭐⭐ **`e.code` is ALREADY this store's convention for *“this was a deliberate refusal, and here is which one”* — and all three die at one line** ⇒ ⛔ **no consumer downstream can distinguish a refusal even if it wanted to.**
+- ⭐ **And the same field separates his three categories for free:** a **refusal** (a named code) · a **DB failure** (ⓘ pg sets a 5-char **SQLSTATE** in `code`) · a **bug** (**`undefined`**).
+
+#### ⓘ THE FOUR LOSSES
+- ① **`captureFacts`** — `results.map(r => r.result?.action).filter(Boolean)`: a refused observation has **no `result`**, so **`.filter(Boolean)` removes it** while `facts` still counts it ⇒ ⭐ **`facts` and `actions.length` disagree, and that discrepancy is the ONLY surviving signal — and nobody reads it.**
+- ② **`memory-identity-host`** — `if (!r.ok) return { error: true }`: **the same flattening, but on the SUCCESS path**, ⛔ not in a catch.
+- ③ **`reflection-host.addNote`** — preserves `dropped`, ⚠️ but a refusal has neither `result` nor `dropped` ⇒ arrives as **`{ok:false, dropped:false}`**, a generic failure.
+- ④ ⚠️⚠️ **`memory-distill-host`** — **the return value is discarded entirely and `tally.distilled++` runs unconditionally** ⇒ **a refused episode is counted as distilled.** The worst of the four. ⛔ **Reported, not fixed** — a memory-layer bug, kept separate.
+- ⚠️ **A CORRECTION TO MY OWN M2-15 NOTE:** I named `captureFacts`' bare `catch {}` as the second loss point. ⓘ **It is the LEAST important** — because `ingest` catches per observation, it **rarely fires**. ⭐ **The real second loss is on the SUCCESS path, in `.filter(Boolean)`** — ⓘ this project's *“an explicit list silently drops what it was not told”* defect in its smallest possible form.
+
+#### ⭐⭐⭐ TWO CONTRACTS, DECIDED BY THE PACKAGE BOUNDARY
+- ⓘ **`ingest` lives in PortableComponents** and imports only two sibling portable modules; **the gate and all four consumers are HOST.** ⇒ ⛔⛔ **the portable pipeline CANNOT know about `OWNERSHIP_BOUNDARY`** — teaching it would invert the layering the whole PortableComponents pillar exists to hold.
+- **Contract A (portable):** may carry an **opaque** classification, ⛔ may not enumerate host reasons. **Contract B (host):** each consumer **may** name it — ⛔ but each has a **different audience**, so there is **no single fix for all four.**
+- ⭐⭐ **And the portable layer ALREADY carries a classification:** `{dropped:true, stage:'interpretation'}` vs `{stage:'commit'}` ⇒ **a finer one is the SAME idea, ⛔ not a new one.**
+
+#### ⏸ THE SMALLEST BOUNDARY — one field
+- ⏸ **PROPOSED (⛔ not implemented): `ingest`'s catch carries `code: e?.code ?? null`.** ⭐ **Portable-safe** — `code` is a generic `Error` property Node and pg already use, and the pipeline interprets nothing. ⭐ **Control-flow-neutral** — one property on an object already being returned, on a path already being taken. ⭐⭐ **And it is the ONLY place the information still exists.**
+- ⭐ **The dependency, stated: (a) is NECESSARY and NOT SUFFICIENT; (b) each consumer's decision is SUFFICIENT and IMPOSSIBLE without (a).** ⇒ all four consumer decisions become separate and ⛔ cannot even be discussed until (a) exists.
+- ⚠️ **It remains a PREREQUISITE for threading `asserted.text`, ⛔ not a follow-up.**
+
+### ✅ MB-2 RECORDED — the false-verification test target
+- ⭐⭐⭐ **`span ∈ evidence bucket` does NOT mean *the model actually used that evidence to produce value*** — his words: **a potentially serious false-verification path.**
+- ⇒ the first real Dreaming proposal test must ⛔ **not only** test *model → valid `{value,cites}` → containment → warrant*; it must **also construct ADVERSARIAL cases where the model produces a superficially valid citation without grounding the conclusion in the cited material.** ⓘ The concrete shape: **a model that copies the first N characters of each bucket passes every check and cites nothing meaningful**, and the system counts those roots as **verified**.
+- ⛔⛔ **Do NOT invent a heuristic now.** *“First establish whether the problem is **observable at all** with the current interface.”* ⏸ **Trigger: the first real Dreaming proposal — a DELIBERATE experimental milestone, ⛔ not something accidentally introduced while fixing M2-16.**
+
+- **Next action:** ⏸ **AWAITING OTE on M2-16.** ⏸ Open inside it: what **each** of the four consumers should do with a preserved `code` (⭐ four audiences, four decisions, ⛔ none urgent) · ⚠️ `memory-distill-host`'s unconditional `tally.distilled++` · ⛔ whether `captureFacts`' bare `catch {}` deserves anything at all. ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron · ZERO model calls this whole arc.**
