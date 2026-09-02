@@ -4794,3 +4794,50 @@ framings verified. Separating them needs a fixture where the evidence is *about 
 question is definition-framed. ⛔ Not run; ⛔ nothing tuned.
 
 **59 of 59 checks · live persona untouched · M2 still disabled.**
+
+---
+
+## 2026-09-03 02:20 (+07:00) — ✅ D1/D2 SEPARATED. **D2 IS RESPONSIBLE.**
+
+### ⭐⭐⭐ THE 2×2, RUN ONCE, DISCRIMINATOR PRE-REGISTERED
+
+⭐ The discriminator was declared **before the run** and is a yes/no, ⛔ not a classifier and ⛔ not a
+threshold: **does the value name a CONCRETE PARTICULAR** (`latency` · `benchmark` · `error counts`) that
+exists ONLY in the subject evidence and cannot be invented from a definition? ⛔ Neither term list was
+ever shown to the model.
+
+```
+                       │ Q-DEF (definition-framed)      │ Q-SUBJ (subject-framed)
+  ─────────────────────┼────────────────────────────────┼──────────────────────────────
+  E-SUBJ  subject-rel. │ ⭐ SUBJECT  (2 roots, benchmark)│ ⭐ SUBJECT (3 roots, all 5)
+  E-LABEL label-term   │ ⚠️ DEFINITION (sequence)        │ ⚠️ DEFINITION (durable, preference…)
+```
+
+⭐ **E-SUBJ carried the definitional TEMPTATION by design** — `g2` has the person defining the term
+mid-turn, beside the concrete behaviour. Without it the fixture would have offered no definitional
+option and passing would have proved nothing.
+
+### ⭐⭐ THE SEPARATION
+
+| **D1 is NOT independently sufficient** | E-SUBJ × Q-DEF → **subject-shaped**. Given good evidence, the definition-framed question still produced an answer about the person. ⓘ The framing leaked into the WORDING (*"appears to be…"*) but ⛔ not into the CONTENT |
+| --- | --- |
+| **D2 IS independently sufficient** | E-LABEL × Q-**SUBJ** → **definition-shaped**. Even when explicitly asked *"what is the person's review order?"*, label-term evidence could only yield *"whatever gets recorded as a durable preference for system reuse"* |
+
+⇒ 🔑 **THE EVIDENCE IS THE BINDING CONSTRAINT, NOT THE QUESTION.** D1 degrades the *completeness* of a
+subject answer (2 roots / 1 particular vs 3 roots / 5) but ⛔ does not change its SHAPE.
+
+### ⚠️⚠️ AND ALL FOUR CELLS WERE GROUNDED
+
+2–3 verified roots in **every** cell, including both definition-shaped ones. ⇒ **a definition-shaped
+claim passes M2-8 cleanly.** 🔑 Ote's qualification, now measured twice: *"Verification proves citation
+grounding, ⛔ not that the resulting claim is true, meaningful, or the right answer to the question."*
+
+### ⚠️ WHAT THIS RESULT IS NOT
+
+⛔ n=1 per cell · one model · one attribute · temperature 0 (deterministic, ⛔ not general).
+⛔ And E-LABEL cannot yield a subject answer BY CONSTRUCTION — so "D2 is sufficient" is partly
+definitional. ⭐ That is the point: it mirrors the natural corpus, where the evidence genuinely
+contained no subject material.
+
+⛔ **Nothing tuned. Neither question framing nor evidence selection changed. M2 disabled, live persona
+untouched.**
