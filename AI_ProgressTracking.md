@@ -4680,3 +4680,62 @@ anything and cannot write a commitment. 12b and 12c are AUTHORISED and ⏸ **not
 produced M2-5, M2-7 and M2-8, and deleting the instrument would leave the findings with no provenance.
 
 **59 of 59 checks · 688 of 688 unit tests.**
+
+---
+
+## 2026-09-03 01:30 (+07:00) — ✅ 12b AND 12c BOTH RUN · ⛔ NO LIVE-PERSONA WRITE
+
+### ⭐⭐⭐ 12b — THE VERIFICATION GATE CAUGHT **4 OF 4**, AND THAT IS THE FINDING
+
+Four slots, 7–24 independent roots each, aux model **CPU-side** (`numGpu: 0` forced, ⛔ not inherited
+from `memory.auxDevice`). Result: **0 of 4 reached a verified claim. 8 of 8 cited spans discarded.**
+
+⚠️⚠️ **The model produced fluent, confident, plausible prose — and not one span it cited existed in the
+evidence it was shown.** The values are DEFINITIONS OF THE SLOT LABEL (*"A durable fact about the user
+that is stored in memory to guide future interactions…"*) — it answered from what it knows the word
+"preference" means, ⛔ not from the excerpts.
+
+⇒ ⭐⭐⭐ **Without span verification, four ungrounded claims would have been proposed as commitments.**
+This is the M2-7 trade paying for itself on its first real run: prose is admitted because it is CHECKED,
+⛔ not because it is trusted. ⓘ And it is a measurement of the PIPELINE, ⛔ not of her — an aux extract
+model on a bare prompt.
+
+**State proof: 16 of 16 tracked values unchanged**, including `access_count`/`last_access` — the P1
+route no row count would catch.
+
+### ⚠️ AND 12b FOUND A DEFECT IN MY OWN VALIDATOR
+
+`ADDRESS_RE` began as an identifier pattern with the rationale *"a phrase is where prose hides"* — a rule
+carried over from the RETIRED closed grammar. ⓘ Measured: it **refused 34 of 104 live attributes (33%)**,
+including `communication preference` and `account identity`. ⇒ Dreaming could not have addressed a third
+of the slots that already exist. ⭐ **The real invariant is ORIGIN, not shape**: an address must not be a
+vocabulary Dreaming INVENTED. Fixed and pinned in both the check and the unit test.
+
+### ✅ 12c — 16 of 16, INCLUDING THE ISOLATION RED-PROOF
+
+`candidate → evidence (3 roots) → claim → span verification (2 verified, 0 discarded) → kind precondition
+→ persistence through the REAL write lane → warrant → isolated recall`.
+
+⭐⭐⭐ **The critical proof, asked of the LIVE reader rather than a test filter:** `buildMemoryV2` built
+for the live persona, same room, searched 4 ways ⇒ **0 leaks**. ⭐ Plus the POSITIVE CONTROL — the
+isolated reader DOES find it — so "zero" means isolation, ⛔ not a broken search.
+ⓘ `DEFAULT_PERSONA` is `null`, so `visibleWhere` emits `persona IS NULL` and a `zz_m2_isolated` row
+cannot satisfy it. **Structural.**
+
+⭐ The kind precondition **DEFERRED** on the undeclared slot, exactly as ruled — 047 landed empty, so no
+slot has a declared question. 12c proceeded past it deliberately; ⛔ in the live persona it would stop.
+
+### ⚠️⚠️ AND THE ISOLATION LEVER HAS A SECOND-ORDER COST — A REAL FINDING
+
+Leaving the isolated row resident turned **two suites red, and both were RIGHT**:
+- `memory-author-check` — *"every memory attributed to HER is traceable to an occasion; authorship is
+  earned, never assigned"* ⇒ my write attached no source occasion.
+- `self-history-check` — ⭐⭐ *"the schema holds exactly one persona — the premise of `role=assistant`
+  meaning Sotera."* ⓘ The store already carries **two** persona values (`null` × 88, `sotera` × 37); a
+  third broke the premise `self-history-host` relies on to retrieve across rooms.
+
+⇒ 🔑 **AN ISOLATED PERSONA CANNOT BE LEFT RESIDENT. 12c must be create → inspect → TEAR DOWN.**
+⭐ Lineage dumped to `test/results/m2-12c-lineage.json` first, so the evidence survives the teardown and
+the run is reproducible on demand.
+
+**59 of 59 checks · 689 of 689 unit tests · ⛔ live persona untouched (88 rows, 0 warrants, 0 questions).**

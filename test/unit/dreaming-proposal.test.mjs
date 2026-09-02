@@ -48,8 +48,17 @@ test('every required field is required', () => {
   ]) assert.equal(validateClaim(bad).ok, false)
 })
 
-test('an address must be an identifier, not a phrase — a phrase is where prose hides', () => {
-  assert.equal(validateClaim({ ...CLAIM, attribute: 'the way she reviews things' }).ok, false)
+// ⚠️ A slot address is a POINTER INTO THE EXISTING STORE, and 33% of live attributes contain a space.
+// An identifier-shaped rule refused a third of them — measured by the 12b run, fixed, and pinned here.
+test('a real live slot address validates, spaces and all', () => {
+  for (const real of ['communication preference', 'account identity', 'Thai name spelling']) {
+    assert.equal(validateClaim({ ...CLAIM, attribute: real }).ok, true, real)
+  }
+})
+
+test('but an address is still one line, and not blank', () => {
+  assert.equal(validateClaim({ ...CLAIM, attribute: ' leading' }).ok, false)
+  assert.equal(validateClaim({ ...CLAIM, attribute: 'two\nlines' }).ok, false)
 })
 
 // ⛔⛔ M2-7 MADE MECHANICAL: the retired vocabulary cannot return through a caller.

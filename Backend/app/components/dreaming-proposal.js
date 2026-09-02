@@ -40,8 +40,22 @@ export const T0_FIELDS = Object.freeze([
   'wrote_memory_id_present', 'tool_names', 'model',
 ])
 
-/** ⭐ A slot address is `entity/attribute`. ⛔ Kebab/snake identifiers only — a phrase is where prose hides. */
-const ADDRESS_RE = /^[a-z0-9][a-z0-9_.-]{0,63}$/i
+/**
+ * ⭐ A slot address is `entity/attribute` — a POINTER INTO THE EXISTING STORE.
+ *
+ * ⚠️⚠️ THIS WAS WRONG ON ITS FIRST RUN, AND THE 12b RUN CAUGHT IT. It began as
+ * `/^[a-z0-9][a-z0-9_.-]{0,63}$/i` with the rationale *"a phrase is where prose hides"* — a rule
+ * carried over from the RETIRED closed grammar, where a slot label was part of an enumerated
+ * vocabulary. ⓘ Measured against the live store: **34 of 104 live attributes (33%) were refused**,
+ * including `communication preference`, `account identity` and `Thai name spelling`. ⇒ Dreaming could
+ * not have addressed a third of the slots that already exist.
+ *
+ * ⭐⭐ THE REAL INVARIANT IS NOT SHAPE, IT IS ORIGIN: an address must not be a vocabulary Dreaming
+ * INVENTED (M2-7). Whether it contains a space is the store's business, and the store says spaces are
+ * ordinary. ⛔ Asking "is this a real slot?" is the memory layer's slot resolution, ⛔ not grammar's —
+ * a pure validator cannot answer it and should not pretend to.
+ */
+const ADDRESS_RE = /^[^\s][^\n\r]{0,127}$/
 
 /**
  * ⭐⭐⭐ validateClaim — the shape of an ORDINARY claim, plus its citations.

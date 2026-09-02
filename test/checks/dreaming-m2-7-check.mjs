@@ -55,6 +55,18 @@ try {
     check(`A2 · ⛔ the closed-grammar export \`${gone}\` is gone`,
       !new RegExp(`export (const|function) ${gone}\\b`).test(proposalCode))
   }
+  // ⚠️⚠️ THE REGRESSION THE 12b RUN BOUGHT. The address rule began as an identifier pattern and refused
+  // 34 of 104 live attributes (33%) — a rule carried over from the retired closed grammar, where a slot
+  // label was an enumerated token. ⭐ A slot address is a POINTER INTO THE EXISTING STORE, and the store
+  // says spaces are ordinary. Pinned here so nobody re-tightens it on aesthetics.
+  for (const real of ['communication preference', 'account identity', 'Thai name spelling', 'review-style']) {
+    check(`A0 · ⭐⭐ a REAL live slot address validates: \`${real}\``,
+      validateClaim({ ...CLAIM, attribute: real }).ok === true)
+  }
+  check('A0 · ⛔ …but a newline or a leading space is still refused — an address is one line',
+    validateClaim({ ...CLAIM, attribute: ' leading' }).ok === false
+    && validateClaim({ ...CLAIM, attribute: 'two\nlines' }).ok === false)
+
   check('A3 · ⛔⛔ `slotAddressFor` no longer MINTS a `dreaming:` address',
     !/dreaming[:\\/]/.test(codeOnly(resolverCode.slice(
       resolverCode.indexOf('export function slotAddressFor'),
@@ -81,7 +93,7 @@ try {
     valueOfClaim(CLAIM) === CLAIM.value && valueOf(CLAIM) === CLAIM.value)
   for (const [field, bad] of [
     ['entity', { ...CLAIM, entity: '' }],
-    ['attribute', { ...CLAIM, attribute: 'a phrase with spaces' }],
+    ['attribute', { ...CLAIM, attribute: '' }],
     ['value', { ...CLAIM, value: '   ' }],
     ['kind', { ...CLAIM, kind: null }],
     ['cites', { ...CLAIM, cites: [] }],
