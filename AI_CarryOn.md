@@ -195,6 +195,32 @@ it cannot see a decision that never emitted.
 
 ---
 
+# 4.6 - POST-P1 HARDENING (parked by Ote 2026-09-02, do NOT act during P1)
+
+**THE PRINCIPLE, his wording:** *"explicit durable harness identity must be the safety boundary, never
+message count."*
+
+**THE FINDING it comes from.** 193 old thin conversations are NOT intrinsically identifiable as harness
+traffic: `settings.probe` absent, `user_id=agent_dev` shared with GENUINE conversations by design
+(`ask-sotera.mjs` marks those `probe:false`), 190 distinct auto-generated titles, and four ordinary
+settings shapes spanning `useMemory`/`toolsEnabled` both ways. Their exclusion rests on all of them
+happening to be <= 2 messages.
+
+**AND IT HAS ALREADY FAILED ONCE:** 16 completed reflections sit on `probe`-absent `agent_dev`
+conversations of 4-14 messages, several titled *"PROBE as agent_dev"*. The thin gate could not protect
+those - they cleared the floor.
+
+**DURING P1, DO NOT:** backfill `probe` - change the thin gate - alter the two-lane logic - add any
+content/title heuristic - reclassify the 16. They stay **generation 1**, therefore outside the P1 dataset,
+and the gen-2 window is uncontaminated (measured: zero leaked rows in the window).
+
+**AFTER P1, ONE DEFERRED VERIFICATION:** exercise ONE fresh HTTP fixture end-to-end through the corrected
+`probe:true` persistence path. It is currently verified in the code path (`sanitizeSettings` ->
+`probe: s.probe === true`, preserved across PATCH) and by 76 existing rows - **not** by a fresh example,
+because no `probe=true` conversation has been created since 2026-08-26.
+
+---
+
 # 5 · ⚠️ PARKED TRACKS — none expanded, all still open
 
 `intention-host` returning `{ok:true}` after a failed INSERT · `lesson-host` → `retention-host` null ·
