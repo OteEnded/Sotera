@@ -4052,3 +4052,44 @@ tools_used            []            wrote_memory_id null      text 2,695 chars
 - ⭐ **The same seam the platform already draws:** `mst_roles` are **seeded**, and the standing bootstrap credential was **retired** because config could resurrect it. ⇒ ***things that define what is possible are REGISTERED; things that happen are WRITTEN.***
 
 - **Next action:** ⏸ **AWAITING OTE on M2-12.** ⛔ Two things I deliberately left open: **where the curated set physically lives** (maintenance script vs migration vs reviewed data file — different review properties), and **whether a first batch is worth writing before a check exists that would make it non-trivial** (ⓘ `def-called-by`'s four checks did not catch the utterance case). ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · the **`persona_global` route** · **asked-vs-unasked** · **R1–R3**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
+
+## 2026-09-02 07:00 +0700 · ✅✅ M2-12 LOCKED · ⭐⭐⭐ M2-13 — THE BLOCKER IS NOT A MISSING CHECK, IT IS A MISSING DECLARATION
+
+- ⛔ **Investigation only.** ⛔ No data file · no registration command · no lock · no registry · no migration · no definitions registered · no producer changed. **706 unit tests, 0 failures.**
+
+### ✅✅ M2-12 LOCKED (the ownership boundary + the validation contract)
+- The `project-decision` precedent transfers as a **registration pattern, ⛔ not an application writer** · registration is **reviewed, deliberate, ALL-OR-NOTHING** · **registry = implementation-owned via deploy · definitions = curated data · instances = room data** · **both gates required** · everything invalid **REFUSES rather than degrades** · identical content ⇒ **NOOP**, different content ⇒ **REFUSE** · **old definitions stay evaluable, slots repointed ⛔ not swept** · retiring a check ⇒ **required disclosure**, ⛔ not a blocker.
+- ⭐⭐⭐ And his ruling on the review boundary: *“the subject-free property cannot honestly be made into a deterministic classifier, especially with things like **Rome** demonstrating the ambiguity”* ⇒ ⛔ **definitions are never minted by Dreaming, the LLM, a tool or a memory write.**
+
+### A · ⓘ THE THREE HOMES, MEASURED IN THIS PROJECT
+- ① **seeder** — strongest **provenance** today (each entry resolved in git, quote verbatim, `--dry-run`, `--verify`, **all-or-nothing**), ⚠️ but mixes data with logic.
+- ② **migration** — **34 files applied BY HAND**; **23/34** wrap in `BEGIN;`, **29/34** carry a `RAISE EXCEPTION` proof block; ⚠️ **NO tracking table, NO dry-run**; ⚠️ and `001_core.sql` has **2 commits**, so append-only-by-convention has already bent.
+- ③ **reviewed data file + command** — ⭐ **already shipped as `persona.json` + `persona.lock.json`**: *“persona.json = **DESIRED** state; persona.lock.json…”*, lock carrying `integrity: sha256`, `resolvedAt`, `trust`. ⭐⭐⭐ **And the admin route is ALREADY FORBIDDEN from writing it** — *“Staging does NOT touch persona.json”* — **which is exactly the ownership rule M2-12 locked, already implemented for this kind of object.**
+- ⛔⛔ **MIGRATION IS DISQUALIFIED ON THE GUARANTEE, ⛔ not on convention:** **a migration is a ONE-TIME HISTORICAL ACT**, and definitions are **data whose validity is a function of code they do not control** ⇒ a definition written by migration 035 can be made unevaluable by a deploy in 2027, and **the migration can never look again.**
+
+### B · ⓘ THE CHECK INVENTORY, RUN AGAINST THE LIVE STORE (88 addressed rows)
+```
+check                                          can-run   cannot   fired
+ownership-boundary (as production supplies it)       0       88       1
+only-inside-quotes                                  54       34       1
+non-literal-in-fact-slot                             0       88       0
+value-in-cited-span                                  0       88       0
+one-of-declared-vocabulary (project-decision)       34       54       0
+```
+- ⓘ **And the cause, measured in the code:** **`semanticTarget` has ZERO producers** · `sourceText` has **one, conditionally** (`memory-extract-host.js:55`) · `subjectEstablished` has none · **0 of 88 rows carry a `modality`** (the producer is *“⛔ not wired into the live extraction pipeline”* by his own 2026-08-26 ruling) · **no cited spans stored.**
+- ⭐⭐⭐ **This fully explains `log_memory_refusals` = 0 rows: the shipped gate is not silent because it is wrong — it is silent because only ONE of its three axes is ever supplied, conditionally, by ONE producer.**
+
+### C · ⛔ WOULD A FIRST BATCH DO USEFUL WORK? — measured: no
+- `def-called-by` would run **1 of its 4** checks, catching **1** real row — ⚠️ **the same row the shipped gate would already catch if the producer passed `sourceText`.**
+- `def-decision-state` would be **correct and wholly redundant**: **34/34** project-decision values are already in-vocabulary because the seeder enforces it upstream, and ⓘ **`list_decisions` is READ-ONLY, so there is no runtime writer for it to guard against.**
+- ⇒ **exactly the *“DEFER on everything interesting”* outcome he said he does not want.**
+
+### ⭐⭐⭐ THE REAL FINDING — the order is wrong, and it is a different problem than the question assumed
+- > **A question-form declares what a SLOT asks. A check ALSO needs the PRODUCER to declare what it knows. Two declarations — and M2-11/M2-12 designed only one of them. ⓘ The other is measured as almost entirely absent.**
+
+### D · ⏸ RECOMMENDATION
+- **Home: ③**, built with ①'s discipline (verify-before-write · all-or-nothing · dry-run · verify · invoked by a person) **plus a LOCK** recording which check identifiers resolved at registration — ⭐ which is where *“retiring a check must report what it made unevaluable”* becomes **computable**. ⚠️ **Honest cost: ① exists and ③ must be built**; the reason to pay it is the staleness guarantee.
+- **Timing: WAIT** — ⛔ but *“until a non-trivial check exists”* is **the wrong precondition**: ⓘ two non-trivial checks already exist and are shipped; **their INPUTS are missing.** ⏸ **Proposed precondition, measurable and falsifiable: register the first definitions when at least ONE producer declares at least one axis UNCONDITIONALLY.** ⓘ Today: `semanticTarget` **0** · `modality` **0 of 88** · cited spans **0** · `sourceText` **1, conditional**. Re-run the §B inventory to tell when it changes.
+- ⚠️⚠️ **A PROVEN DEPENDENCY, reported ⛔ NOT proposed as work:** `sourceText` is **already** produced by the extract host, and the relayed-speech branch is the one `admissibleToSlot` branch needing **no declared axis** ⇒ making that supply unconditional would light up an **already-shipped** check across **54 of 88** rows with ⛔ **no definition layer, no notation and no registry** — and would generate the evidence for whether definitions are worth registering at all. ⛔ **It touches the extraction path and is entirely his call.**
+
+- **Next action:** ⏸ **AWAITING OTE on M2-13** (the home, and the timing precondition). ⛔ Still open inside it: **where a reviewed data file physically sits** · **whether the lock is a file or a table** (ⓘ `persona.lock.json` is a file because the SDK writes it at install; a definition lock is written by a run against a database — a different lifetime) · **whether the axis-supply dependency is work he wants at all.** ⛔ Still separate and untouched: **P1** · the **lesson-slot NULL/update hazard** · **M2-1** · **M2-6** · **persona-global** · **R1–R3** · **asked-vs-unasked**. ⓘ **Live state: memories 115 · slots 71 · pass rows 1 · refusal rows 0 · 0 rows superseded · 706 tests green · nothing in cron.**
