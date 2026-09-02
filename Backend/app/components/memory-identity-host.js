@@ -29,6 +29,10 @@
 
 import { IDENTITY_ATTR } from '@ote/memory/cognition/memory-identity.js'
 import { interpretIdentityLlm } from '@ote/memory/cognition/memory-identity-llm.js'
+// ⭐ THE SAME PURE GATE interpretIdentityLlm runs internally — so the text the boundary judges is exactly
+// the text the interpreter read. ⛔ Two different notions of "what was asserted" is how a check ends up
+// judging words nobody was shown.
+import { assertionGate } from '@ote/memory/cognition/memory-extract.js'
 import { buildMemoryPipeline } from './memory-pipeline-host.js'
 import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { makeAuxLlm, extractModel } from './memory-aux-llm-host.js'
@@ -245,7 +249,20 @@ export async function captureIdentity(fastify, { userId = null, persona, sourceM
   if (!identityEnabled(fastify.config) || !userId || !text || !String(text).trim()) return { skipped: true }
   try {
     const ask = makeIdentityAsk(fastify, { user: user ?? (userId ? { id: userId } : null), conversationId, interactive })
-    const { pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, ask })
+    // ── ⭐⭐⭐ ④ · HAND THE OWNERSHIP BOUNDARY THE WORDS THE CLAIM WAS READ FROM ──────────────────
+    //
+    // ⚠️⚠️ `here he come. "Hi, Sotera. I'm Cogito. I'm your uncle."` — typed by Ote, QUOTING somebody
+    // else — became `preferred_name = "Cogito"` on HIS account. The check that catches it shipped with
+    // 032 and its comment names this exact sentence; it never fired because `admissibleToSlot`
+    // *"RETURNS null WHEN IT CANNOT SEE"* and nothing passed it the text. ⛔ The boundary was blind, not
+    // wrong — so this supplies the eye, and changes no judgement.
+    //
+    // ⛔ THE ASSERTED TEXT, NEVER THE RAW TURN (Ote's instruction). `interpretIdentityLlm` runs this same
+    // pure gate and shows the model exactly this string, so the two agree by construction: the boundary
+    // judges the words the interpreter actually read, ⛔ not a wider turn it never saw. A pasted document
+    // is material the account holder was HANDLING, and its contents must not count as their own words.
+    const asserted = assertionGate(String(text)).text ?? null
+    const { pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, ask, sourceText: asserted })
     const { results } = await pipeline.observe(text, [identityInterpreter(fastify, { source, userId, requireCue })])
     const r = results[0]
     if (!r) return { identity: false } // nothing name-like in this turn

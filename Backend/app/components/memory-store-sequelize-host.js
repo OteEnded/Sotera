@@ -103,7 +103,7 @@ const OWNED_KIND_OR_UNCLASSIFIED = { [Op.or]: [{ [Op.in]: OWNED_KINDS }, { [Op.i
  * @param {object|null} [deps.log]
  * @param {()=>number}  [deps.now]
  */
-export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', scope = 'room', config = null, log = null, now = () => Date.now() } = {}) {
+export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', scope = 'room', sourceText = null, config = null, log = null, now = () => Date.now() } = {}) {
   const txn_memories = db?.txn_memories
   if (!txn_memories) throw new TypeError('createSequelizeMemoryStore: db.txn_memories is required')
   const P = persona ?? null
@@ -143,6 +143,27 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     throw new TypeError(`createSequelizeMemoryStore: scope must be 'room' or 'persona_global', got ${JSON.stringify(scope)}`)
   }
   const DECLARED_SCOPE = scope
+
+  // ── ⭐⭐⭐ THE OCCASION'S OWN WORDS — what a claim was read FROM (M2-14 / ④) ────────────────────
+  //
+  // ⚠️⚠️ THE MEASURED DEFECT: `here he come. "Hi, Sotera. I'm Cogito. I'm your uncle."` — typed by Ote,
+  // QUOTING somebody else — became `preferred_name = "Cogito"` on HIS account. ⭐ The check that catches
+  // it has been shipped since 032 and its comment names this exact sentence — but `admissibleToSlot`
+  // *"RETURNS null WHEN IT CANNOT SEE"*, and nothing ever handed it the text. ⇒ the boundary was not
+  // wrong; it was BLIND.
+  //
+  // ⭐ It rides construction beside `author` and `scope` for the same reason: a pipeline is built for ONE
+  // OCCASION and an occasion has one text, so there is no allowlist to survive and no field for four
+  // hops to drop. ⛔ A per-row value still wins where a producer sets one — this is the fallback, never
+  // an override.
+  //
+  // ⛔ AND IT IS THE ASSERTED TEXT, NEVER THE RAW TURN. Ote: *"Thread asserted.text, not the raw turn."*
+  // The assertion gate has already removed material the account holder was HANDLING rather than saying;
+  // using the raw turn would let a pasted document's contents count as the author's own words, which is
+  // the very confusion this is here to end.
+  // ⓘ For the model-tool path this stays NULL by design (M2-15, locked): the only text reachable there
+  // answers *when* a memory was written, never *what it rests on*.
+  const SOURCE_TEXT = sourceText == null ? null : String(sourceText)
 
   // ── ⭐⭐⭐ AND THE AUTHORITY IS DERIVED HERE, ⛔ NEVER ACCEPTED AS A CLAIM ──────────────────────
   //
@@ -683,7 +704,8 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // alike, which this project has paid for three times.
       const refusal = admissibleToSlot(row, {
         target: row.semanticTarget ?? null,
-        sourceText: row.sourceText ?? null,
+        // ⭐ the row's own value wins; the occasion's text is the FALLBACK (see SOURCE_TEXT above).
+        sourceText: row.sourceText ?? SOURCE_TEXT,
         subjectEstablished: row.subjectEstablished ?? null,
       })
       if (refusal) {
