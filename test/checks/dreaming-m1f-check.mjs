@@ -239,6 +239,20 @@ try {
   // understate roots and look like a finding.
   check('R29 · ⚠️ truncation is reported rather than silent',
     Number.isInteger(result?.summary?.truncatedSlots), `${result?.summary?.truncatedSlots} slot(s) truncated`)
+  // ⭐⭐⭐ AND A TRUNCATED COUNT SAYS SO IN THE DATA. Ote's ruling, 2026-09-02: truncated root counts are
+  // LOWER BOUNDS, ⛔ and must not be compensated with an inferred factor or threshold.
+  const truncatedSlots = (result?.slots ?? []).filter((x) => x.probed && x.all.truncated)
+  check('R29 · ⭐⭐ every truncated slot is FLAGGED as a lower bound in the data itself',
+    truncatedSlots.length > 0 && truncatedSlots.every((x) => x.all.rootsAreLowerBound === true),
+    `${truncatedSlots.length} truncated, all flagged`)
+  check('R29 · ⭐ …and an UNtruncated slot is NOT flagged — ⛔ else the flag means nothing',
+    (result?.slots ?? []).filter((x) => x.probed && !x.all.truncated)
+      .every((x) => x.all.rootsAreLowerBound === false))
+  // ⛔⛔ NO COMPENSATION FOR THE UNREAD REMAINDER. A scaled estimate would turn a measurement into a
+  // model, and the honest response to an incomplete look is to say it was incomplete — 6e, one tier down.
+  for (const f of ['extrapolat', 'estimate', 'scaleFactor', 'correction', 'projected']) {
+    check(`R29 · ⛔⛔ no compensation for the unread remainder: \`${f}\` is absent`, !hostCode.includes(f))
+  }
   // ⭐ BOTH SELECTORS REPORTED — one number would hide its own sensitivity to the selector.
   check('R29 · ⭐⭐ both selectors are reported, ⛔ never just the flattering one',
     Number.isInteger(result?.summary?.clearsFloorAll) && Number.isInteger(result?.summary?.clearsFloorAny),

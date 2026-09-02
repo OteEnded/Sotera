@@ -15,16 +15,18 @@
 ✅ EMPTY TURNS (043/044)      an empty assistant turn now says WHY
 ✅ M1 BUILT + WIRED, INERT    045 · the gate · the ledger guards · the bounded read · one cron entry (§1)
 ✅ M1-F MEASURED              §13.1's "the corpus is empty" does NOT survive contact with the data (§1.4)
-✅ 56 of 56 SUITES PASS       zero residue
-⏸  STOP: OTE INSPECTS         then O-iii.a → dense-arm hardening → M2 semantics. ⛔ Not before
+✅ O-iii.a RULED              admission is a STAGE, not a freshness window (§1.6)
+✅ DENSE-ARM DEFECT CLOSED    the leak was REPRODUCED live (7 of 8), then fixed (§1.7)
+✅ 57 of 57 SUITES PASS       zero residue
+⏸  NEXT: OTE INSPECTS         then M2 semantics. ⛔ Not before
 ▶  BACKGROUND: P1             observation only, window 6 (§2)
 ▶  BACKGROUND: ROME           observation only (§3)
 ```
 
-**Live:** `:8210` Sotera PID **10460** · `:8201` OLS PID **26644**. ⛔ ollama is HIS to run — never touch.
-⚠️ `:8210` has **NOT** been restarted since the cron change; the plugin's import graph was verified
-without booting instead, because Ote was mid-conversation. **The cron entry takes effect at his next
-restart, and it is inert either way.**
+**Live:** `:8210` Sotera PID **24156** · `:8201` OLS PID **26644**. ⛔ ollama is HIS to run — never touch.
+⏸ **RESTART BOUNDARY: PID 10460 → 24156 at 2026-09-02 23:38:51Z** — recorded because P1 and Rome are
+live observation tracks. Verified by **process start > newest module mtime**. ⭐ Dreaming registered
+**nothing** at boot: no job, no log line. The gate held.
 
 ---
 
@@ -85,7 +87,7 @@ emission guard is **provenance, not length**: every emitted label must be verbat
 
 ## 1.5 · ⏸ WHAT IS STILL OPEN, IN OTE'S ORDER
 
-| **1 · inspect** | ⏸ **HERE.** Ote reads the measurements. ⛔ Nothing proceeds without that |
+| **1 · inspect** | ⏸ **HERE.** Ote reads M1, O-iii.a and the hardening. ⛔ Nothing proceeds without that |
 | --- | --- |
 | **2 · O-iii.a** | ✅ the **staleness contract is RULED**: *index/corpus may rank → a CURRENT view decides admission → audit provides citation*, and ⛔ **no staleness window is derived from event frequency**. ⏸ What remains is applying it |
 | **3 · dense-arm hardening** | ⚠️ a REAL defect, separately classified. `VECTOR_SCOPE` carries `role`/`conversation_id`/`room_user_id` and ⛔ **not `excluded_from_evidence_at`**; the writer applies the predicate, the reader never does, and there is no re-derivation ⇒ **the stale window is UNBOUNDED**. 🔑 **a denormalised scope column may only carry an IRREVERSIBLE fact.** ⛔ `56425175` stays excluded and is NOT reclassified |
@@ -93,6 +95,40 @@ emission guard is **provenance, not length**: every emitted label must be verbat
 
 ⏸ Still open beneath O-iii.a: **O-i.a** (lineage recovery route) · **O-v** (noticing records citable?) ·
 **O-vi.2** (contradiction from its own commitment) · **O-vii** (exclusion's second-order behaviour).
+
+## 1.6 · ✅ O-iii.a — RULED. **Admission is a STAGE, not a freshness window**
+
+> **Material may be RANKED from a stale index and may NEVER be ADMITTED from one: admission must be
+> evaluated against the current authoritative conversation state within the same operation that treats
+> the material as evidence.** ⛔ No freshness window is defined, and none should be.
+
+⭐ **The fork dissolved** — *view or materialization* conflated two stages. **Both already exist** and were
+simply not composed. The corpus may be either; **admission may only ever be a view.**
+
+⭐⭐ **Why no time bound:** a stale producer errs in exactly two directions and **both are already-locked
+outcomes** — OMITS ⇒ N < M ⇒ **6e** (and 6b/6d refused at bounded, so no absence is claimable); INCLUDES ⇒
+refused, counted ⇒ **6a**. ⇒ **the completeness contract IS the staleness bound.**
+
+🔑 **A denormalised/materialized scope column may only carry an IRREVERSIBLE fact.** ⇒ 018 denormalised
+exactly the RIGHT columns; `incognito` is safe by ABSENCE for the same reason.
+
+⚠️ **Left open, named:** the pass ledger records the boundary STATE but ⛔ not the IDENTITY of the
+admission predicate. If `evidentialSql` changes, old pass rows become uninterpretable and nothing detects
+it. ⓘ `Reference/docs/DECISION_SOTERA_O3A_ADMISSION_IS_NOT_A_FRESHNESS_WINDOW.md`
+
+## 1.7 · ✅ DENSE-ARM HARDENING — closed, with the leak reproduced first
+
+⚠️⚠️ **The red-proof PERFORMED the defect rather than predicting it**: two live searches returned **7 of
+the 8** excluded rows. **Fix:** one clause — `AND ${evidentialSql('c')}` in the dense query, read-time,
+same query. After: **zero leaked.**
+
+⚠️ **It IS a post-filter on the index scan**, and 018's argument does not transfer: `onlyConversationId`
+selects ONE of 391 and would starve the pool; exclusion REMOVES material and is rare (ⓘ **0.4%**). ⛔ If
+that ever grows, the answer is a bigger pool — ⛔ **never skipping the boundary.**
+
+⛔ **`56425175` stays the regression fixture** and its 8 embedding rows were **NOT deleted** — that would
+make a release un-restorable. ⭐ `dense-admission-check` proves read-time evaluation by **releasing the
+exclusion inside a rolled-back transaction** and watching the rows become admissible instantly.
 
 ---
 

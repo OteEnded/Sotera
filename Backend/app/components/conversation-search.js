@@ -269,6 +269,36 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
   // read is decided later, by the projection and the grant, neither of which can see this table. Ote:
   // *"A vector score must never become an authorization signal. Don't let the optimization for 018
   // accidentally collapse those layers."*
+  // ── ⭐⭐⭐ ADMISSION IS RE-EVALUATED HERE, AT READ TIME (O-iii.a, ruled 2026-09-02) ───────────────
+  //
+  // ⚠️⚠️ THE DEFECT THIS CLOSES, MEASURED AND REPRODUCED 2026-09-02. `VECTOR_SCOPE` above filters
+  // through 018's denormalised columns — `role`, `conversation_id`, `room_user_id` — and ⛔ none of them
+  // carries `excluded_from_evidence_at`. So a message embedded while its conversation was admissible
+  // stayed dense-retrievable after the conversation was excluded: 8 rows from `56425175`, embedded ~21 h
+  // BEFORE the exclusion, and a live search returned **7 of them**. ⓘ The lexical arm was never affected
+  // — its `SCOPE` has always carried the predicate.
+  //
+  // ⭐⭐ 018 DENORMALISED EXACTLY THE RIGHT COLUMNS, and that is the point rather than an excuse:
+  // `role`, `conversation_id` and `room_user_id` are all IRREVERSIBLE once written, so a copy of them
+  // can never disagree with its source. `incognito` is handled by ABSENCE for the same reason — set at
+  // create, never patched, never embedded. ⛔ But `excluded_from_evidence_at` is REVERSIBLE by design,
+  // and a copy of a reversible fact is wrong the moment the original changes, with nothing to go back
+  // and correct it.
+  //
+  //     ⭐ A DENORMALISED OR MATERIALIZED SCOPE COLUMN MAY ONLY CARRY AN IRREVERSIBLE FACT.
+  //     ⭐ A REVERSIBLE BOUNDARY MUST BE EVALUATED AT READ TIME, EVERY TIME.
+  //
+  // ⇒ the predicate is applied here, against the CURRENT conversation row, in the same query that
+  // produces the candidates. ⛔ NOT copied beside the vector, ⛔ NOT refreshed on a schedule, ⛔ NOT
+  // bounded by a freshness window. Ote: *"index/corpus may rank → current admission decides whether
+  // something is actually admissible evidence → audit/provenance provides authority."*
+  //
+  // ⚠️ AND YES, THIS IS A POST-FILTER ON THE INDEX SCAN — the thing 018 worked to avoid. Stated plainly
+  // rather than hidden, because the two cases have OPPOSITE selectivity and 018's argument does not
+  // transfer: `onlyConversationId` selects ONE conversation out of 391 and would have starved the pool,
+  // whereas exclusion REMOVES material and is rare by nature — ⓘ measured 8 of 1,926 rows, 0.4%.
+  // ⛔ If exclusions ever became a large fraction, the answer is a bigger pool or a different index
+  // mechanism — ⛔ never skipping the boundary. Correctness is not the side of this trade that gives.
   async function dense(vector, pool, excludeConversationId) {
     const qvec = `[${vector.join(',')}]`
     return seq.query(
@@ -276,7 +306,7 @@ export function buildConversationSearch(fastify, { userId = null, currentConvers
          FROM ${ME} me
          JOIN ${MSG} m ON m.id = me.message_id
          JOIN ${CONV} c ON c.id = m.conversation_id
-        WHERE ${VECTOR_SCOPE} AND me.embedding_hv IS NOT NULL
+        WHERE ${VECTOR_SCOPE} AND ${evidentialSql('c')} AND me.embedding_hv IS NOT NULL
         ORDER BY me.embedding_hv <=> :qvec::halfvec(2048) LIMIT :pool`,
       { replacements: { qvec, userId, excludeConversationId, onlyConversationId, pool }, type: seq.QueryTypes.SELECT },
     )

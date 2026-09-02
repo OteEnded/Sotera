@@ -91,13 +91,21 @@ async function countForSlot({ query, schema, attribute, terms, mode, minRoots, m
     })
   }
   rooms.sort((a, b) => b.roots - a.roots)
+  const truncated = rows.length >= maxTurnsPerSlot
   return {
     mode,
     totalTurns: rows.length,
     // ⚠️ TRUNCATION IS REPORTED. A capped read that did not say so would understate roots silently —
     // the same shape as N < M going unreported, one tier down.
-    truncated: rows.length >= maxTurnsPerSlot,
+    truncated,
     maxRoots: rooms[0]?.roots ?? 0,
+    // ⭐⭐⭐ AND WHEN TRUNCATED, THE COUNT IS A LOWER BOUND — SAID IN THE DATA, not left to a footnote.
+    // Ote's ruling, 2026-09-02: *"The 17 truncated slots are important. Their root counts are lower
+    // bounds, not trustworthy recurrence counts. Don't compensate with an inferred factor or threshold."*
+    // ⛔ SO NOTHING HERE SCALES, EXTRAPOLATES, OR ESTIMATES THE UNREAD REMAINDER. A correction factor
+    // would turn a measurement into a model, and the honest move for an incomplete look is to say it was
+    // incomplete — which is 6e's whole logic, arriving one tier down.
+    rootsAreLowerBound: truncated,
     clearsFloor: rooms.some((r) => r.clearsFloor),
     rooms,
   }
@@ -154,6 +162,11 @@ export async function measureCandidates({
       clearsFloorAll: probed.filter((s) => s.all.clearsFloor).length,
       clearsFloorAny: probed.filter((s) => s.any.clearsFloor).length,
       truncatedSlots: probed.filter((s) => s.all.truncated || s.any.truncated).length,
+      // ⭐⭐ THE FLOOR-CLEARING COUNTS ARE THEMSELVES LOWER BOUNDS where a slot was truncated, and the
+      // summary says which. ⛔ It does NOT quote a corrected figure: a reader who wants one number must
+      // be told the number is a floor, not handed an estimate that hides its own incompleteness.
+      clearsFloorAllTruncated: probed.filter((s) => s.all.clearsFloor && s.all.rootsAreLowerBound).length,
+      clearsFloorAnyTruncated: probed.filter((s) => s.any.clearsFloor && s.any.rootsAreLowerBound).length,
     },
   }
 }

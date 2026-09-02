@@ -4516,3 +4516,71 @@ is that any of it constitutes recurrence, which needs a reasoner, which is M2.
 ⇒ the emission guard is **provenance, not length** — every emitted label must be verbatim a stored one.
 
 ⏸ **STOP HERE.** Ote: inspect the measurements before O-iii.a / dense-arm hardening / M2.
+
+---
+
+## 2026-09-02 23:45 (+07:00) — ✅ O-iii.a RULED · ✅ DENSE-ARM DEFECT FIXED · ⏸ RESTART BOUNDARY
+
+### ⭐⭐⭐ O-iii.a — ADMISSION IS A STAGE, NOT A FRESHNESS WINDOW
+
+> **Material may be RANKED from a stale index and may NEVER be ADMITTED from one: admission must be
+> evaluated against the current authoritative conversation state within the same operation that treats
+> the material as evidence.** ⛔ **No freshness window is defined, and none should be.**
+
+⭐ **The fork dissolved.** *View or materialization* conflated two stages: **both already exist** in the
+running system (a materialized index drained every 5 min, a read-time predicate) — they were simply not
+composed. The corpus may be either; **admission may only ever be a view.**
+
+⭐⭐ **Why no time bound is needed** — a stale candidate producer can be wrong in exactly two directions
+and **both land in already-locked outcomes**: it OMITS newly-eligible material ⇒ N < M ⇒ **6e** (and 6b/6d
+are refused at bounded completeness, so no absence can be claimed); it INCLUDES excluded material ⇒
+admission refuses it ⇒ counted ⇒ **6a**. ⇒ **the completeness contract IS the staleness bound.** A number
+of minutes would add nothing and would invite the one fatal move: treating stale material as admitted
+because the clock said it was recent enough.
+
+⭐ **The rule that generalises:** **a denormalised/materialized scope column may only carry an
+IRREVERSIBLE fact; a reversible boundary must be evaluated at read time, every time.** ⇒ 018 denormalised
+exactly the RIGHT columns (`role`, `conversation_id`, `room_user_id` — all irreversible) and `incognito`
+is safe by ABSENCE for the same reason. What was missing is the read-time stage for the one predicate
+that could never be denormalised.
+
+⚠️ **The one thing left open, named:** the pass ledger records the boundary **state** but ⛔ not the
+IDENTITY of the admission predicate. If `evidentialSql` ever changes, older pass rows become
+uninterpretable and nothing detects it. ⛔ Not built.
+
+ⓘ Full: `Reference/docs/DECISION_SOTERA_O3A_ADMISSION_IS_NOT_A_FRESHNESS_WINDOW.md`
+
+### ⭐⭐⭐ DENSE-ARM HARDENING — THE LEAK WAS REPRODUCED LIVE, THEN CLOSED
+
+⚠️⚠️ **Red-proof first, and it did not merely predict the defect — it PERFORMED it.** Two live searches
+through the real component returned **7 of the 8** excluded rows. ⛔ Not a source-reading inference: an
+actual search returning material Ote had excluded.
+
+**Fix:** one clause — `AND ${evidentialSql('c')}` in the dense query, against the CURRENT conversation
+row, in the same query that produces candidates. ⛔ Not copied beside the vector · ⛔ no schedule · ⛔ no
+freshness window. After: **zero leaked across both queries.**
+
+⚠️ **Stated plainly rather than hidden: this is a POST-FILTER on the index scan**, the thing 018 worked
+to avoid. The two cases have OPPOSITE selectivity and 018's argument does not transfer —
+`onlyConversationId` selects ONE of 391 and would starve the pool; exclusion REMOVES material and is rare
+(ⓘ 8 of 1,926 = **0.4%**). ⛔ If exclusions ever became a large fraction the answer is a bigger pool or a
+different index mechanism — ⛔ **never skipping the boundary.**
+
+⛔ **`56425175` remains the regression fixture**, excluded at its original timestamp, and its **8 embedding
+rows were NOT deleted** — deleting them would make a release un-restorable, converting a reversible
+boundary into an irreversible one. ⭐ `dense-admission-check` proves read-time evaluation by **releasing
+the exclusion inside a rolled-back transaction** and watching the same rows become admissible instantly.
+
+### ⏸ RESTART BOUNDARY — `:8210` PID 10460 → **24156** at **2026-09-02 23:38:51Z**
+
+⭐ Recorded because P1 and Rome are live observation tracks. Verified by **process start > newest module
+mtime**, ⛔ not by `/health`. Dreaming registered **nothing** (no log line, no job) — the gate held.
+
+### ⚠️ CORRECTION TO THE EARLIER M1-F REPORT
+
+The 17 truncated slots are almost entirely the **loose** selector: **1 of the 35 strict hits** is
+truncated, **17 of the 62** loose ones. ⇒ the strict figure is essentially unaffected by the cap; the
+loose figure is heavily caveated. Truncated counts are now flagged `rootsAreLowerBound` **in the data**,
+and a red-proof asserts ⛔ no extrapolation or correction factor exists anywhere in the module.
+
+**57 of 57 suites green** — verified by grepping each for its pass line, ⛔ not by reading the last line.
