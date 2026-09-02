@@ -168,6 +168,14 @@ export function buildLesson(fastify, { userId = null, conversationId = null } = 
     // satisfied rather than bypassed, which is the collision the Hermes survey said must be settled FIRST.
     const lease = await createRelationalWriteLease({ fastify, subjectUserId: userId })
     if (!lease) return { ok: false, reason: 'no write lease (this account has no person row)' }
+    // ⚠️ THE OCCASION-LESS FALLBACK IS LEGITIMATE BUT MUST BE VISIBLE. A caller with no conversation writes
+    // a lesson whose occasion cannot be walked back to — true for maintenance and imports, and true for a
+    // CHECK that forgot to thread one, which is how five rows landed under the bare tag. ⭐ `memory-lineage`
+    // recognises it (the MECHANISM is known; only the OCCASION is missing), so the warning is what tells an
+    // operator something was lost — ⛔ instead of a downstream check reporting it as an unknown writer.
+    if (!conversationId) {
+      try { fastify?.log?.warn?.({ userId }, '[lesson] no conversationId — this lesson will record no occasion') } catch { /* no logger */ }
+    }
     return lease.enqueue('lesson.commit', async () => {
       const [row] = await seq.query(
         `INSERT INTO "${schema}"."txn_memories"

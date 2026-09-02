@@ -54,6 +54,16 @@ const PREFIXED = Object.freeze([
 const EXACT = Object.freeze({
   'model-tool': MECHANISM.modelTool,
   consolidation: MECHANISM.consolidation,
+  // ── ⭐⭐ THE OCCASION-LESS FORM OF A PREFIXED TAG, AND WHY IT IS A VOCABULARY ENTRY ────────────────
+  // `lesson-host` writes `lesson:<conversationId>` and falls back to a bare `lesson` when it has no
+  // conversation — legitimate for any caller outside a chat turn (maintenance, an import, a harness).
+  // ⚠️ MEASURED 2026-09-02: five rows landed under the bare tag and `mechanismOf` returned `unknown`,
+  // which is defined here as a DEFECT. It was not one. The mechanism was perfectly well known; what was
+  // missing was the OCCASION, and those are different facts — the same split `occasionOf` already makes.
+  // ⇒ ⭐ recognising it keeps `unknown` meaning what it says: a tag no reader here has ever heard of.
+  // ⛔ It does NOT excuse the caller. `occasionOf('lesson')` is null, so a row with no occasion is still
+  // visibly a row with no occasion — the writer logs a warning, and the checks pass a conversationId.
+  lesson: MECHANISM.lesson,
 })
 
 /** ⭐ Which mechanism wrote a row, from its `source` tag. PURE. Never throws. */

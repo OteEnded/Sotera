@@ -386,7 +386,18 @@ export function buildRetention(fastify, {
     // this project has paid for "the tool accepted it" being read as "a row exists".
     if (!id) return record(decision, { state: 'accepted', why: 'the write reported no row id' })
 
-    return record(decision, { state: 'persisted', memoryId: id, kind: out.kind, author: out.author, via: out.via })
+    // ── ⭐⭐⭐ WHICH STORE HOLDS IT — RECORDED, ⛔ NEVER INFERRED ────────────────────────────────────
+    // Ote, 2026-09-02: *"use `persisted` to mean that the retention decision successfully became durable
+    // Sotera-owned state, regardless of which underlying storage represents it… Don't weaken this to
+    // `accepted`, and don't add another state just for the storage-table distinction."*
+    // ⇒ the outcome vocabulary is unchanged; what the receipt gained is WHERE. ⚠️ Without it `memory_id`
+    // would hold ids from two tables with nothing to tell them apart, which is this project's most-repeated
+    // defect — a reader deducing a value's meaning from its shape.
+    // ⭐ VERIFIED BEFORE THIS SHIPPED, because Ote made it the condition: `practice-reachability-check`
+    // proves a retained practice is reachable from `recall_own_memory` AND rendered into her per-turn
+    // context, at PERSON grain, and not reachable by anyone else. Storage existing was not enough.
+    const store = inner?.store ?? 'txn_memories'
+    return record(decision, { state: 'persisted', memoryId: id, store, kind: out.kind, author: out.author, via: out.via })
   }
 
   /**
@@ -410,9 +421,9 @@ export function buildRetention(fastify, {
       if (seq && schema) {
         await seq.query(
           `INSERT INTO "${schema}"."log_retention_decisions"
-             (content, kind, mine, about, attribute, distinction, state, why, memory_id,
+             (content, kind, mine, about, attribute, distinction, state, why, memory_id, store,
               user_id, conversation_id, source)
-           VALUES (:content, :kind, :mine, :about, :attribute, :distinction, :state, :why, :memoryId,
+           VALUES (:content, :kind, :mine, :about, :attribute, :distinction, :state, :why, :memoryId, :store,
                    :userId, :conversationId, :source)`,
           {
             replacements: {
@@ -428,6 +439,12 @@ export function buildRetention(fastify, {
               // ⛔ 038's CHECK enforces it in the database as well — two guards, because this is the third
               // time this project has paid for "accepted" being read as "a row exists".
               memoryId: receipt.state === 'persisted' ? (receipt.memoryId ?? null) : null,
+              // ⭐ 039's paired constraint: a persisted receipt names its store, and nothing else may.
+              // ⛔ DEFAULTED RATHER THAN DEMANDED, on purpose. `keep` writes fact/note/lesson to
+              // `txn_memories` and nowhere else, so that is the only value a missing one could mean — and
+              // Ote's rule stands above the tidiness: *"Observability must never be load-bearing."* A
+              // decision that actually happened must not be lost to a CHECK about where it was filed.
+              store: receipt.state === 'persisted' ? (receipt.store ?? 'txn_memories') : null,
               userId: userId ?? null,
               conversationId: conversationId ?? null,
               source: 'retain',
@@ -445,7 +462,10 @@ export function buildRetention(fastify, {
   const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   function idOf(r) {
     if (!r || typeof r !== 'object') return null
-    for (const k of ['id', 'memoryId', 'memory_id']) {
+    // ⭐ `recordId` is the practice store's answer. Ote's 039 ruling: `persisted` means the decision became
+    // durable Sotera-owned state, ⛔ not that it landed in one particular table — so the id is accepted
+    // from whichever store answered, and `store` (below) says which one it was.
+    for (const k of ['id', 'memoryId', 'memory_id', 'recordId']) {
       const v = r[k]
       if (typeof v === 'string' && UUID.test(v.trim())) return v.trim().toLowerCase()
     }

@@ -34,11 +34,28 @@ try {
   created = true
   await query(passLedgerDdl(TEST_SCHEMA))
 
-  // ⛔ AND PRODUCTION IS UNTOUCHED — asserted, not assumed.
-  const { rows: prodTables } = await query(
-    `SELECT tablename FROM pg_tables WHERE schemaname = $1 AND tablename = 'log_dreaming_passes'`, [PROD])
-  ok(prodTables.length === 0,
-    '0 · ⛔⛔ NO pass ledger exists in the production schema — M1 step 1 creates none', `${PROD}: absent`)
+  // ── ⛔ AND PRODUCTION IS UNTOUCHED — asserted, not assumed ───────────────────────────────────────
+  //
+  // ⚠️⚠️ THIS ASSERTION USED TO READ *"no pass ledger exists in the production schema"* and printed the
+  // literal word `absent` whichever way it went. **Migration 034 then created that ledger**, and there is
+  // a real pass in it — so the check went red on 2026-09-01 and STAYED red, while its own failure line
+  // still said "absent". ⇒ ⭐ it was asserting the ANSWER (there is no such table) instead of the STATE
+  // (this check must not be what puts one there), and reporting a constant instead of what it found.
+  //
+  // ⭐ THE INVARIANT IS THE SAME ONE, EXPRESSED AGAINST TODAY: production's ledger belongs to a MIGRATION,
+  // and this run must leave it exactly as it found it. Captured here, compared at the end — ⛔ never a
+  // frozen number written into the source.
+  const prodLedger = async () => {
+    const { rows: t } = await query(
+      `SELECT tablename FROM pg_tables WHERE schemaname = $1 AND tablename = 'log_dreaming_passes'`, [PROD])
+    if (!t.length) return { exists: false, rows: null }
+    const { rows: n } = await query(`SELECT count(*)::int AS n FROM "${PROD}".log_dreaming_passes`)
+    return { exists: true, rows: n[0].n }
+  }
+  const prodBefore = await prodLedger()
+  ok(prodBefore.exists === false || typeof prodBefore.rows === 'number',
+    '0 · ⓘ production\'s pass ledger, as this run found it',
+    prodBefore.exists ? `${PROD}: present, ${prodBefore.rows} pass(es) — migration 034` : `${PROD}: absent`)
 
   const ledger = buildPassLedger({ query, schema: TEST_SCHEMA })
 
@@ -161,6 +178,15 @@ try {
   // ── 8 · THE STATED INTENT ──────────────────────────────────────────────────────────────────────
   ok(/not a memory/.test(A_PASS_IS_NOT_A_COMMITMENT) && /never rewritten/.test(A_PASS_IS_NOT_A_COMMITMENT),
     '8 · ⭐ the ledger states in words that a pass is not a commitment and is never rewritten')
+
+  // ── ⛔⛔ 9 · AND PRODUCTION IS EXACTLY AS IT WAS ────────────────────────────────────────────────
+  // ⭐ The real guarantee, compared rather than assumed: everything above ran against the test schema, so
+  // production's ledger must not have gained a table, a row, or a pass. ⛔ Not a number in the source —
+  // the baseline this run captured before it started.
+  const prodAfter = await prodLedger()
+  ok(prodAfter.exists === prodBefore.exists && prodAfter.rows === prodBefore.rows,
+    '9 · ⛔⛔ PRODUCTION\'S LEDGER IS UNCHANGED BY THIS RUN — same table state, same pass count',
+    `${prodBefore.exists ? prodBefore.rows : 'absent'} → ${prodAfter.exists ? prodAfter.rows : 'absent'}`)
 } finally {
   // ── ⛔ CLEANUP, AND IT IS LOUD IF IT FAILS ──────────────────────────────────────────────────────
   if (created) {

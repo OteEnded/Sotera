@@ -276,7 +276,9 @@ export async function persistRelationalRecords({ db, records = [], lease, origin
     const v = validateRelationalRecord(r)
     if (!v.ok) throw new Error(`relational-writer: invalid record at commit — ${v.reason}`)
   }
-  if (!records.length) return { written: 0, skipped: 0 }
+  // ⭐ `ids` IS PRESENT ON BOTH BRANCHES. A key that appears only on the happy path is a key its reader
+  // learns to treat as optional — the same reason `recall()`'s degraded payload carries every slice.
+  if (!records.length) return { written: 0, skipped: 0, ids: [] }
 
   const seq = db.txn_memories.sequelize
   const { schema } = db.txn_memories.getTableName()
@@ -285,8 +287,14 @@ export async function persistRelationalRecords({ db, records = [], lease, origin
   // enqueue; atomic against itself by the transaction. There is no state in which half a batch landed.
   return lease.enqueue('relational.persist', async () => {
     return seq.transaction(async (tx) => {
+      // ⭐⭐ THE IDS COME BACK, and that is 039's whole point. Ote: *"use `persisted` to mean that the
+      // retention decision successfully became durable Sotera-owned state, regardless of which underlying
+      // storage represents it."* A receipt can only say that with an id to point at, so the writer that
+      // owns this store is the one that must hand it over — ⛔ never a reader guessing from a label.
+      // ⓘ `RETURNING` fires on the DO UPDATE branch too, so a repeat write answers with the SAME row.
+      const ids = []
       for (const r of records) {
-        await seq.query(
+        const returned = await seq.query(
           `INSERT INTO "${schema}"."txn_relational_records"
              (subject_person_id, tier, label, conversation_count, window_start, window_end, deriver_version, taxonomy_version, origin)
            VALUES (:subjectPersonId, :tier::persona_sotera.relational_tier, :label::persona_sotera.relational_label,
@@ -307,11 +315,20 @@ export async function persistRelationalRecords({ db, records = [], lease, origin
                          derived_at         = now(),
                          deriver_version    = EXCLUDED.deriver_version,
                          taxonomy_version   = EXCLUDED.taxonomy_version,
-                         updated_at         = now()`,
-          { replacements: { ...r, deriverVersion: DERIVER_VERSION, taxonomyVersion: TAXONOMY_VERSION, origin }, transaction: tx },
+                         updated_at         = now()
+           RETURNING id::text AS id`,
+          {
+            replacements: { ...r, deriverVersion: DERIVER_VERSION, taxonomyVersion: TAXONOMY_VERSION, origin },
+            transaction: tx,
+            // ⓘ SELECT, not INSERT: an INSERT type answers with a driver-shaped pair, and the id would
+            // have to be dug out of position 0 of position 0. This asks for the rows it actually returns.
+            type: seq.QueryTypes.SELECT,
+          },
         )
+        const id = Array.isArray(returned) ? returned[0]?.id : returned?.id
+        if (id) ids.push(String(id))
       }
-      return { written: records.length, skipped: 0 }
+      return { written: records.length, skipped: 0, ids }
     })
   })
 }

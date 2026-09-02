@@ -46,7 +46,7 @@ try {
   check('agent_dev resolves — ⛔ never root', Boolean(agent?.id && persona?.id))
 
   const decisions = async (state) => q(
-    `select content, kind, mine, about, attribute, distinction, state, why, memory_id::text
+    `select content, kind, mine, about, attribute, distinction, state, why, memory_id::text, store
        from ${S}.log_retention_decisions where content like $1 ${state ? 'and state=$2' : ''} order by created_at`,
     state ? [`${MARK}%`, state] : [`${MARK}%`])
   const memRow = async (id) => one(
@@ -105,6 +105,15 @@ try {
   check('A5 · ⭐⭐ and memory_id is set ONLY on persisted — the receipt contract',
     all.every((d) => (d.state === 'persisted') === Boolean(d.memory_id)),
     all.map((d) => `${d.state}:${d.memory_id ? 'id' : '-'}`).join(' '))
+  // ⭐⭐ 039 · AND THE ID SAYS WHICH STORE IT IS IN. Ote's ruling made `persisted` mean durable
+  // Sotera-owned state in ANY store, so `memory_id` can now hold an id from two tables — ⛔ a uuid that
+  // does not say which is exactly the "deduce the meaning from the value's shape" defect this project
+  // keeps paying for.
+  check('A7 · ⭐⭐ every persisted decision NAMES its store, and no other state does',
+    all.every((d) => (d.state === 'persisted') === Boolean(d.store)),
+    all.map((d) => `${d.state}:${d.store ?? '-'}`).join(' '))
+  check('A7 · ⭐ a lesson names txn_memories — the default store, stated rather than assumed',
+    all.filter((d) => d.state === 'persisted').every((d) => d.store === 'txn_memories'))
 
   // ── B · ⭐⭐⭐ THE FOUR AXES, EACH FROM ITS OWN COLUMN ──────────────────────────────────────────
   // A fact she keeps as HERS about someone ELSE — the shape that separates all four at once.
@@ -184,6 +193,13 @@ try {
   } catch { bit2 = true }
   check('D2 · ⭐⭐ and refuses `persisted` with NO id — ⛔ accepted can never become persisted',
     bit2)
+
+  // D3 · 039 · and refuses a persisted receipt that will not say WHERE it landed
+  let bit3 = false
+  try {
+    await pg.query(`insert into ${S}.log_retention_decisions (content, state, memory_id) values ($1,'persisted',gen_random_uuid())`, [`${MARK}redproof`])
+  } catch { bit3 = true }
+  check('D3 · ⭐⭐ the DATABASE refuses `persisted` with no store — an id from two tables must say which', bit3)
 } catch (e) {
   check('the check ran to completion', false, e?.stack ?? String(e))
 } finally {

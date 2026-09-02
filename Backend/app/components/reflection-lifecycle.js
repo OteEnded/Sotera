@@ -326,6 +326,15 @@ export function readWrittenMemoryId(toolName, result) {
   if (!result || typeof result !== 'object' || result.ok === false || result.error) return null
   // `dryRun` is propose_lesson: it deliberately writes nothing and says so, and it returns no id anyway.
   if (result.dryRun === true || result.nothingWasWritten === true) return null
+  // ── ⭐⭐ THE COLUMN IS `wrote_memory_id`, SO ONLY A MEMORY ID MAY GO IN IT ────────────────────────
+  // ⚠️ 039 made `retain` answer `persisted` for a practice note, whose id belongs to
+  // `txn_relational_records` — durable Sotera-owned state, and ⛔ not a row in `txn_memories`. Writing it
+  // here would put an id from one table into a column every reader takes to mean another, which is the
+  // defect 039 had just finished removing one layer down.
+  // ⭐ THE ACT IS NOT LOST BY THIS: `log_retention_decisions` records every retention decision WITH its
+  // store, so "did she retain something?" and "did a memory row result?" stay two answerable questions
+  // instead of one ambiguous id. ⛔ Never widen this to keep a tally looking complete.
+  if (typeof result.store === 'string' && result.store !== 'txn_memories') return null
   for (const key of ['id', 'memoryId', 'memory_id']) {
     const v = result[key]
     if (typeof v === 'string' && UUID_RE.test(v.trim())) return v.trim().toLowerCase()

@@ -37,6 +37,17 @@ const ok = (c, l, d = '') => check(l, c, d)
 const config = loadConfig()
 const db = await initDB(); setDB(db); await initSettings(db)
 const fastify = { db, config, log: null }
+// ⚠️⚠️ THE HOST SERVICES ARE REGISTRATIONS, and this check went without them until generation 2 made it
+// matter. ⓘ The tool COMPONENTS install themselves when `runtime.js` is imported; the HOST SERVICES they
+// bind to do NOT — so `retain` was offered, dispatched, answered *"Required service is not available"*,
+// and the reflection recorded a tool it had used and no memory. ⭐ That asymmetry has now cost three
+// separate harnesses; the fix is the same three lines the chat route runs at boot.
+const { initRetention } = await import('../../Backend/app/components/retention-host.js')
+const { initLesson } = await import('../../Backend/app/components/lesson-host.js')
+const { initOwnMemory } = await import('../../Backend/app/components/own-memory-host.js')
+const { initToolLog } = await import('../../Backend/app/audit/tool-log.js')
+const { attachToolAudit } = await import('../../Backend/app/components/runtime.js')
+initRetention(); initLesson(); initOwnMemory(); initToolLog(fastify, attachToolAudit)
 const pg = devPg(); await pg.connect()
 const S = devSchema()
 // ⚠️ `(?<!:)` IS LOAD-BEARING. A naive `:t` → `$2` replacement also rewrites the second colon of a
@@ -121,9 +132,17 @@ try {
   // something she merely looked at.
   ok(readWrittenMemoryId('recall_memory', { ok: true, id: '11111111-2222-3333-4444-555555555555' }) === null,
     'T · ⭐⭐ an id in a RECALL result is never read as a write — the gate is the tool name')
-  ok(readWrittenMemoryId('remember', { ok: true, id: '11111111-2222-3333-4444-555555555555' })
+  // ⚠️ `retain`, not `remember`. The write surface is generation 2 — the gate is `REFLECTION_WRITE_TOOLS`,
+  // so naming a tool reflection is no longer offered tests a surface that no longer exists.
+  ok(readWrittenMemoryId('retain', { state: 'persisted', memoryId: '11111111-2222-3333-4444-555555555555', store: 'txn_memories' })
      === '11111111-2222-3333-4444-555555555555',
     'T · …and a write tool\'s id is read')
+  // ⭐⭐ 039 · AND AN ID FROM ANOTHER STORE IS NOT A MEMORY ID. A persisted practice is durable
+  // Sotera-owned state whose row lives in `txn_relational_records`; putting it in `wrote_memory_id` would
+  // hand a reader an id from one table in a column that means another. ⓘ The act is still recorded — in
+  // `log_retention_decisions`, WITH its store.
+  ok(readWrittenMemoryId('retain', { state: 'persisted', memoryId: '11111111-2222-3333-4444-555555555555', store: 'txn_relational_records' }) === null,
+    'T · ⭐⭐ a persisted PRACTICE is not written into wrote_memory_id — it is not a memory row')
   ok(readWrittenMemoryId('propose_lesson', { ok: true, dryRun: true, id: '11111111-2222-3333-4444-555555555555' }) === null,
     'T · ⭐ a dry-run proposal wrote nothing and is not recorded as a write')
   ok(readWrittenMemoryId('save_lesson', { ok: false, reason: 'no lease' }) === null,
@@ -197,7 +216,10 @@ try {
   const REVISIT_COLUMNS = ['started_at', 'completed_at', 'outcome', 'reason', 'failure', 'from_rolling_id']
   const RATIFIED_COLUMNS = ['id', 'rolling_id', 'requested_at', 'conversation_id', 'user_id', 'up_to_rolling_id',
     'messages_considered', 'text', 'wrote_memory_id', 'tools_used', 'blocked_by_disclosure',
-    'prompt_generation', 'code_mtime', 'model', ...REVISIT_COLUMNS]
+    // ⭐ 038 · `tool_generation` sits BESIDE `prompt_generation` and is not a second name for it: the prompt
+    // text and the write-tool surface are two instruments that moved at different times, and pooling
+    // measurements across either boundary is how a surface change gets read as a behaviour change.
+    'prompt_generation', 'tool_generation', 'code_mtime', 'model', ...REVISIT_COLUMNS]
   // ⭐ …and each of them must actually BE there, or "the list matches" would also be true of a migration
   // that never ran. The guard has to bite in both directions.
   const missingRevisit = REVISIT_COLUMNS.filter((c) => !cols.has(c))
@@ -311,9 +333,13 @@ try {
     ok(dupes === 1, 'L1 · …and exactly one row exists for it', `${dupes} row(s)`)
 
     // ── 2 · A SAVING REFLECTION **POINTS AT** THE MEMORY ─────────────────────────────────────────
-    // ⚠️ `remember` on purpose, not `save_lesson`: it is FIRE-AND-FORGET (`{ok:true,queued:true}`, no id),
-    // which is the path where a naive implementation records "no memory" about a memory. If the id survives
-    // this, it survives the easy case too.
+    // ⚠️ A `note` on purpose, not a lesson: it rides the FIRE-AND-FORGET pipeline (`{ok:true,queued:true}`,
+    // no id) and `retain` has to wait for the write to settle before it can answer `persisted`. That is the
+    // path where a naive implementation records "no memory" about a memory. If the id survives this, it
+    // survives the easy case too.
+    // ⓘ GENERATION 2: the write surface is `retain` + `decline_to_remember`. This used to drive `remember`,
+    // and it kept passing after the swap because dispatch does not enforce the offered set — ⚠️ the
+    // withheld-tool dispatch defect, still parked. Driving the tool she is actually OFFERED is the point.
     const KEPT = 'zz_test The watermark is what makes one reflection per lull possible.'
     const SAID = 'zz_test Yes — one thing. I have kept it.'
     const saving = await mkConversation('zz_test reflection — something kept')
@@ -323,9 +349,10 @@ try {
       turn: async ({ tools }) => {
         round++
         if (round === 1) {
-          ok(Array.isArray(tools) && tools.some((t) => t.function?.name === 'remember'),
-            'L2 · ⭐ her ordinary tools are in the request — offered, and never mentioned in the prompt')
-          return { message: { content: '', tool_calls: [{ function: { name: 'remember', arguments: { content: KEPT, importance: 6 } } }] }, doneReason: 'tool_calls' }
+          ok(Array.isArray(tools) && tools.some((t) => t.function?.name === 'retain'),
+            'L2 · ⭐ her retention tool is in the request — offered, and never mentioned in the prompt',
+            (tools ?? []).map((t) => t.function?.name).filter(Boolean).join(', '))
+          return { message: { content: '', tool_calls: [{ function: { name: 'retain', arguments: { content: KEPT, kind: 'note', mine: true } } }] }, doneReason: 'tool_calls' }
         }
         return { message: { content: SAID }, doneReason: 'stop' }
       },
@@ -355,7 +382,7 @@ try {
       `author=${mem?.author}`)
     ok(mem?.user_id === me.id,
       'L2 · ⭐ …and user_id still records the ROOM it was formed in — context, not ownership (migration 015)')
-    ok(Array.isArray(row2?.tools_used) && row2.tools_used.includes('remember'),
+    ok(Array.isArray(row2?.tools_used) && row2.tools_used.includes('retain'),
       'L2 · the tool she reached for is recorded', (row2?.tools_used ?? []).join(', '))
 
     // ── ⭐⭐⭐ L4 · THE SOURCE ANCHOR. A MEMORY SHE FORMED FROM A CONVERSATION MUST POINT BACK AT IT ───
@@ -404,8 +431,14 @@ try {
         return { message: { content: '', tool_calls: [{ function: { name: 'remember', arguments: { content: 'zz_test SECOND WRITE THAT MUST NEVER HAPPEN', importance: 9 } } }] }, doneReason: 'tool_calls' }
       },
     })
-    ok(dup.skipped === true && dup.reason === 'already-reflected',
-      'L5 · ⭐ a second reflection at the same watermark is refused by the DATASTORE, not by the caller',
+    // ⚠️⚠️ THIS ASSERTION HAD GONE VACUOUS, AND THAT IS THE FINDING. It named the DATASTORE as the refuser
+    // and expected `already-reflected` (the UNIQUE index at line ~390). What actually answers first is the
+    // slice: a forced re-run has NOTHING NEW to review, so it returns `nothing-new` before the claim is
+    // ever attempted. ⇒ the caller refuses earlier than this test believed, and the index it meant to
+    // exercise was never reached — a guard that cannot arrive at its own mechanism proves nothing about it.
+    // ⭐ SO IT IS SPLIT IN TWO: what the caller path actually does, and a DIRECT red-proof of the index.
+    ok(dup.skipped === true && (dup.reason === 'nothing-new' || dup.reason === 'already-reflected'),
+      'L5 · ⭐ a second reflection at the same watermark is refused — and refused EARLY',
       `${dup.skipped ? dup.reason : 'IT RAN'}`)
     // ⭐⭐ THE TEETH: it was refused BEFORE the model was called, so it could not have written anything.
     // The old ordering would have called the model, executed `remember`, and only then discovered the
@@ -416,6 +449,23 @@ try {
     const memsAfter = (await Q(`SELECT count(*)::int AS n FROM ${S}.txn_memories WHERE content LIKE 'zz\\_test %'`))[0].n
     ok(memsAfter === memsBefore,
       'L5 · ⭐ and nothing durable appeared from the refused run', `${memsBefore} → ${memsAfter}`)
+
+    // ── ⭐⭐ L6 · THE DATASTORE GUARD ITSELF, PROVED DIRECTLY ─────────────────────────────────────
+    // Ote's invariant is about the STORE: *"a durable write must not be able to disappear from the
+    // reflection ledger."* Since the caller now refuses earlier, the only honest way to show the index
+    // still holds is to attack it head-on — one completed row per (conversation, watermark), no exceptions.
+    const [{ up_to_rolling_id: mark }] = await Q(
+      `SELECT up_to_rolling_id FROM ${S}.log_conversation_revisits WHERE conversation_id = :c LIMIT 1`, { c: saving })
+    let refusedByIndex = false
+    try {
+      await pg.query(
+        `INSERT INTO ${S}.log_conversation_revisits
+           (conversation_id, up_to_rolling_id, text, prompt_generation, outcome, completed_at)
+         VALUES ($1, $2, 'zz_test duplicate watermark', 3, 'completed', now())`, [saving, mark])
+    } catch { refusedByIndex = true }
+    ok(refusedByIndex,
+      'L6 · ⭐⭐⭐ the DATASTORE refuses a second COMPLETED reflection at the same watermark',
+      refusedByIndex ? 'the unique index held' : '⛔ a duplicate landed')
   }
 } finally {
   // ⛔ CLEAN UP EVERYTHING. Residue from my testing has appeared in Ote's own panels before.
@@ -424,6 +474,10 @@ try {
   // ⚠️ `zz_test %` is the fixture prefix every line here carries, so a memory that escaped the returned id
   // (a second write, a renamed field) is still cleaned up rather than left in her store.
   await wipe(`DELETE FROM ${S}.txn_memories WHERE content LIKE 'zz\_test %'`)
+  // ⚠️ NEW WITH GENERATION 2, AND IT LEAKED THREE ROWS BEFORE IT WAS NOTICED. `retain` records EVERY
+  // decision in `log_retention_decisions` — the memory it wrote was cleaned up and the decision about it
+  // was not. ⭐ A writer added to a path adds a table to that path's cleanup; the two move together.
+  await wipe(`DELETE FROM ${S}.log_retention_decisions WHERE content LIKE 'zz\_test %'`)
   await wipe(`DELETE FROM ${S}.txn_messages WHERE conversation_id = ANY($1::uuid[])`, [MADE.conversations])
   await wipe(`DELETE FROM ${S}.txn_conversations WHERE id = ANY($1::uuid[])`, [MADE.conversations])
   await pg.end()

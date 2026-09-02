@@ -44,7 +44,9 @@ test('an empty batch is a no-op that never reaches the lane', async () => {
   let touched = false
   const lease = { enqueue: () => { touched = true }, subjectUserId: 'u1', subjectPersonId: 'person-A' }
   const r = await persistRelationalRecords({ db: { txn_memories: {} }, records: [], lease })
-  assert.deepEqual(r, { written: 0, skipped: 0 })
+  // ⭐ `ids` is present here too. `retain` reads it to answer `persisted` with a real row id, and a key
+  // that exists only on the happy path is one its reader learns to treat as optional.
+  assert.deepEqual(r, { written: 0, skipped: 0, ids: [] })
   assert.equal(touched, false, 'no reason to occupy the shared lane with nothing to write')
 })
 

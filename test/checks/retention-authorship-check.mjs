@@ -31,7 +31,13 @@ const q = async (sql, p) => (await pg.query(sql, p)).rows
 
 const [me] = await q(`select id::text id, username from ${S}.mst_users where username = 'agent_dev' limit 1`)
 if (!me) { console.error('✖ agent_dev not found'); process.exit(1) }
-const R = buildRetention(fastify, { userId: me.id, self: { username: me.username } })
+// ⚠️ A CONVERSATION ID IS PART OF THE PRODUCTION SHAPE. Every live caller of this host has one, and a
+// harness that omits it exercises a configuration nobody runs: `lesson-host` then tags `source` as a bare
+// `lesson` instead of `lesson:<conversationId>`. ⭐ That lesson has cost twice now, so it is threaded here
+// even though every write below is expected to be REFUSED — the day one of them stops being refused, the
+// row it writes should look like production's.
+const [convo] = await q(`select id::text id from ${S}.txn_conversations where user_id = $1 order by created_at desc limit 1`, [me.id])
+const R = buildRetention(fastify, { userId: me.id, self: { username: me.username }, conversationId: convo?.id ?? null })
 
 // ── 1 · THE GATE · `mine` HAS NO DEFAULT ──────────────────────────────────────────────────────────
 //

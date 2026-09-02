@@ -329,7 +329,21 @@ export function buildOwnMemory(fastify, { userId = null, isRoot = false, user = 
       lease,
       origin: 'instructed',
     })
-    return { ok: true, recorded: STANCE_LABELS[label], origin: 'instructed', written: res.written }
+    // ── ⭐⭐ THE ROW ID TRAVELS BACK, because a receipt cannot say `persisted` without one ──────────
+    // Ote, 2026-09-02: *"use `persisted` to mean that the retention decision successfully became durable
+    // Sotera-owned state, regardless of which underlying storage represents it."*
+    // ⚠️ Until this returned no id, `retain` fell through to `accepted` — *"we stopped waiting and do not
+    // know"* — for a write that had already completed and was already reachable from her own memory tool.
+    // ⛔ AND THE STORE IS NAMED, never inferred. `memory_id` can now hold an id from either table and a
+    // uuid does not say which; a reader that assumed `txn_memories` would report a live row as missing.
+    return {
+      ok: true,
+      recorded: STANCE_LABELS[label],
+      origin: 'instructed',
+      written: res.written,
+      recordId: res.ids?.[0] ?? null,
+      store: 'txn_relational_records',
+    }
   }
 
   /**
