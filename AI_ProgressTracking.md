@@ -4841,3 +4841,60 @@ contained no subject material.
 
 ⛔ **Nothing tuned. Neither question framing nor evidence selection changed. M2 disabled, live persona
 untouched.**
+
+---
+
+## 2026-09-03 02:55 (+07:00) — §9.4 INVESTIGATED · ⛔ A CORRECTION TO MY OWN AUDIT
+
+### ⛔⛔ THE CORRECTION FIRST
+
+I justified `spoken-by-subject` as *"defensible on O-2 grounds."* ⇒ **WRONG.** O-2 is locked as **a
+COUNTING rule about root disjointness**, explicitly scoped to **Dreaming's own COMMITMENTS**. Her turns in
+two different conversations are **two different roots**, so **O-2 ADMITS them**. ⛔ It offers no support
+for that rule at all — and I offered it as the ground for the only rule that scored perfectly.
+
+### ⭐⭐⭐ §9.4 — THE POPULATION IS EMPTY, AND THE QUESTION LIVES ONE TIER DOWN
+
+```
+persona-authored memories                    18
+persona-authored memories ABOUT a person      0   ⇐ the class in question does not exist
+```
+
+⇒ for **commitments** the hazard is not live. ⚠️⚠️ **But the selector consumes TURNS, not memories** — and
+there her material is abundant (**86 of 97** for `preference`; **16 of 16** for `interaction_preference`).
+🔑 **The population that matters is her UTTERANCES; §9.4 and O-2 govern her COMMITMENTS.**
+
+**The three options answered:** ⛔ not (a) — the only shipped exclusion is the `source:'dreaming'` stamp,
+which covers Dreaming's own output (ⓘ and no `dreaming` source value exists yet). ⚠️ (b) is true and
+**hollow** — valid as roots, but O-2's protection runs through `derivedFrom`, measured **5 of 43**, so
+root-counting is still not computable. ⇒ ✅ **(c) a distinct class — and the store already owns the word:
+`provenance`.** M2-8 locked *"Dreaming may never claim `observed`"*; the same axis one tier down makes a
+turn **by** the subject primary and a turn **by Sotera about** the subject secondary.
+
+⭐⭐ **So `spoken-by-subject` is a PROVENANCE boundary, ⛔ not an O-2 one** — which is a real argument
+rather than a convenient proxy. ⚠️ It is still a semantic choice: it says a secondary source may not
+COUNT, which is stronger than saying it is a different kind of source.
+
+### ⭐ THE CHAIN — EXACT, TOTAL, AND NOT A SELECTOR
+
+```
+source_message_id present            60 of 60 (entity='user'), all resolving
+chain room = row's own user_id       60 of 60 — zero disagreements
+chain room owner = subject_person_id 45 of 45 — zero subjects who are not the room owner
+roots per slot via the chain         1 root → 40 slots · 2 → 2 · 10 → 1
+```
+
+⇒ ⭐ its value is **not new information** — it is that **the room becomes derivable FROM THE SLOT**
+instead of supplied by a caller, which closes the *caller-must-remember-to-filter* defect structurally.
+⛔ **93% of slots reach ONE root through it** ⇒ it answers *whose* exactly and *how much* not at all.
+
+### ⚠️⚠️ AND THE LIMIT THE DATA IMPOSES
+
+Subject **is** the room owner in **45 of 45** cases ⇒ *"the subject's room"* and *"the formation room"*
+have **never diverged**. 🔑 **The corpus cannot discriminate between two semantically different rules** —
+one about aboutness, one about provenance (ⓘ and the four-axis lock says `user_id` is provenance,
+**never entitlement**). A rule chosen now would look correct until the first memory about someone who is
+not the room's owner.
+
+⛔ **No selector proposed.** ⏸ Two rulings needed, neither decidable from data: may a secondary source
+COUNT toward recurrence · is the boundary the subject's room or the formation room.
