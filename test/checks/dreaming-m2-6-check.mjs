@@ -216,14 +216,36 @@ try {
     !/subjectPersonId[^\n]*\?\?[^\n]*roomOwner/i.test(hostSrc)
     && !/subject_person_id[^\n]*\?\?[^\n]*person_id/i.test(hostSrc))
   // ⭐ …proven behaviourally too: a live slot with no subject keeps NULL rather than borrowing one.
+  //
+  // ── ⚠️⚠️ THE FIXTURE MUST MATCH THE CLAIM, AND FOR A WHILE IT DID NOT (fixed 2026-09-03) ─────────
+  // This used to read `WHERE t.subject_person_id IS NULL … LIMIT 1` — which selects a **ROW** with no
+  // subject and then resolves by **ATTRIBUTE**, which is SLOT grain. ⛔ Two different things. Measured on
+  // the live corpus: 15 candidate rows across 13 attributes, and `preferred_name` alone has 11 rows of
+  // which **8 DO carry a subject** — so the slot correctly resolved to one while the picked row had none.
+  //
+  // ⭐⭐ AND THERE WAS NO `ORDER BY`, so which row Postgres returned was undefined: the assertion was a
+  // ~2-in-13 coin flip on physical row order, and it came up tails after a machine restart. ⛔ A check
+  // that passes or fails on storage order is not measuring the system.
+  // ⇒ the fixture now selects a slot where **NO row carries a subject**, deterministically — and the
+  // precondition is ASSERTED rather than assumed, so a future corpus makes the mismatch loud, not flaky.
   const noSubject = await query(
     `SELECT t.attribute FROM ${S}.txn_memories t JOIN ${S}.txn_messages m ON m.id = t.source_message_id
-      WHERE t.subject_person_id IS NULL AND t.entity = 'user' LIMIT 1`)
+      WHERE t.entity = 'user'
+        AND NOT EXISTS (SELECT 1 FROM ${S}.txn_memories x
+                         WHERE x.attribute = t.attribute AND x.subject_person_id IS NOT NULL)
+      GROUP BY t.attribute ORDER BY t.attribute LIMIT 1`)
   if (noSubject.rows.length) {
-    const r2 = await resolveFormationContext({ query, schema: devSchema(), attribute: noSubject.rows[0].attribute })
+    const attr = noSubject.rows[0].attribute
+    const guard = await query(
+      `SELECT count(*)::int AS total, count(subject_person_id)::int AS with_subject
+         FROM ${S}.txn_memories WHERE attribute = $1`, [attr])
+    check('RP11 · ⭐ PRECONDITION — the chosen fixture really is a subject-LESS slot, ⛔ not merely a '
+      + 'subject-less row in a slot that has one', guard.rows[0].with_subject === 0,
+    `attribute=${attr} rows=${guard.rows[0].total} carrying a subject=${guard.rows[0].with_subject}`)
+    const r2 = await resolveFormationContext({ query, schema: devSchema(), attribute: attr })
     check('RP11 · ⭐⭐ a live slot with NO subject resolves with `subjectPersonId` NULL — ⛔ never borrowed '
       + 'from the room', r2 !== null && r2.subjectPersonId === null && Boolean(r2.formationContext),
-      `subject=${r2?.subjectPersonId} context=${r2?.formationContext?.slice(0, 8)}`)
+    `attribute=${attr} subject=${r2?.subjectPersonId} context=${r2?.formationContext?.slice(0, 8)}`)
   } else {
     check('RP11 · ⓘ no subject-less live slot available to exercise the behavioural half', true,
       'every live entity=user slot carries a subject')

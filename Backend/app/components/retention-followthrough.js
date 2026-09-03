@@ -215,7 +215,10 @@ async function recordOccasion(fastify, { conversationId, messageId, user, why, f
  * serial lane. ⇒ `effected` here means **the tool accepted the act**, ⛔ not that a row exists. That is the
  * separately-tracked `queued ≠ written` gap and 037 does not close it.
  */
-function effected(result) {
+// ⭐ EXPORTED so the receipt proof can assert against THIS function rather than restating its rule.
+// ⚠️ A check that re-types `result.ok === false` tests its own copy: it would stay green if this changed
+// underneath it, which is a source-scan anchor going vacuous in test form.
+export function effected(result) {
   if (!result || typeof result !== 'object') return false
   if (result.ok === false || result.error || result.refused) return false
   return true

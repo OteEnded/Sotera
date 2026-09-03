@@ -97,6 +97,27 @@ const RETAIN_WAIT_MS = 20000
 /** ⭐ A private sentinel, so a timeout can never be confused with a value the write returned. */
 const RETAIN_TIMEOUT = Symbol('retain-timeout')
 
+/**
+ * ⭐⭐⭐ THE RECEIPT STATES — the EXISTING vocabulary, declared once instead of typed as literals.
+ *
+ * ⛔ Nothing new is named here. Ote, ratifying this change: *"Do not invent another receipt or state
+ * vocabulary."* These are exactly the strings `retain` already recorded; a check can now assert against
+ * the declaration rather than against a string it retypes — which is the difference between a proof and
+ * a spelling test.
+ *
+ * ⭐⭐ AND THE THREE THAT MATTER ARE THREE, ⛔ NEVER TWO:
+ *   persisted  the write happened and a row id proves it          ⇒ ok: true
+ *   refused    the write was rejected, with a reason and a code   ⇒ ok: false
+ *   accepted   ⚠️ WE STOPPED WAITING AND DO NOT KNOW              ⇒ ok: false, and ⛔ NEVER an act
+ */
+export const RETENTION_STATE = Object.freeze({
+  persisted: 'persisted',
+  refused: 'refused',
+  accepted: 'accepted',
+  unrepresented: 'unrepresented',
+  declined: 'declined',
+})
+
 export const OWNERSHIP_QUESTION = 'I need to know whose memory this is before I can keep it. Say mine:true '
   + 'if it belongs to me — something about myself, my own view, my own relationships — or mine:false if it '
   + 'is something about the person I am talking to. I will not guess: filing it under the wrong one is how '
@@ -116,6 +137,67 @@ export function buildRetention(fastify, {
   // author: honouring a per-call decision means building the store that already means what she said,
   // ⛔ never reaching in and reassigning a field afterwards.
   const memoryFor = (author, scope = 'room') => buildMemoryToolService(fastify, { userId, sourceMessageId, self, author, scope })
+
+  /**
+   * ⭐⭐⭐ THE ONE BOUNDED WAIT — turn a QUEUED receipt into an OBSERVED outcome.
+   *
+   * ── ⚠️⚠️ WHAT THIS EXISTS TO END, MEASURED ON THE CANARY 2026-09-03 ───────────────────────────────
+   * `keep()` returned `{ok:true, queued:true}` while the write was later REFUSED by the M2 replacement
+   * gate on a governed slot. Nothing was written, the previous belief stayed live, ⛔ and three consumers
+   * were told the retention happened: the model, `retention-followthrough`'s `effected()` — which then
+   * recorded `outcome:'keep'` durably — and every retention-rate figure built on that column.
+   *
+   * ⭐ The receipt was never missing. `buildMemoryToolService` has handed back `settled` all along and
+   * `retain()` has consumed it correctly all along; `keep()` DISCARDED it. ⇒ this is the smallest
+   * correction: ⛔ the shared `@ote/memory` seam is untouched, no new state is invented, and there is now
+   * exactly ONE place in this file that waits — `retain` reads what this resolved rather than racing again.
+   *
+   * ── ⛔ AND THE BOUND IS NOT OPTIONAL ───────────────────────────────────────────────────────────────
+   * The lane is shared and SERIAL per (persona, user), so this inherits whatever is queued ahead of it.
+   * ⚠️ On 2026-08-26 a write took **60 seconds** because 59 CPU-placed aux calls had starved the embedder.
+   * ⓘ Measured cost of the wait itself, over 329 real `retain` calls on this exact lane: p50 8 ms,
+   * p95 23 ms, worst 2 288 ms — ⭐ it has never reached this bound.
+   *
+   * @param {object} queued whatever the writer answered
+   * @returns {Promise<object>} the same shape with `state` decided and `settled` consumed
+   */
+  async function resolveReceipt(queued) {
+    if (!queued || typeof queued !== 'object') return queued
+    // ⭐ Already resolved — `lesson` and `practice` await their own write and carry an id. ⛔ Nothing to do.
+    if (queued.queued !== true) return queued
+    // ⛔⛔ QUEUED BUT NO RECEIPT — the honest answer is *we do not know*, ⛔ never `ok:true`.
+    // ⓘ This is reachable: the PACKAGE's `reconcileFactAsync` returns no `settled`, only the host's
+    // override does. A service built without that override must degrade to UNKNOWN and say so, ⛔ not
+    // fall back to the optimism this whole change removes.
+    const { settled: pending, ...rest } = queued
+    if (!pending) {
+      return { ...rest, ok: false, state: RETENTION_STATE.accepted,
+        why: 'this writer returned no receipt, so whether a row exists is unknown' }
+    }
+    try {
+      const settled = await Promise.race([
+        pending,
+        new Promise((r) => { setTimeout(() => r(RETAIN_TIMEOUT), RETAIN_WAIT_MS) }),
+      ])
+      // ⛔⛔ `accepted` IS NOT SUCCESS, and `ok:false` is what enforces that downstream: `effected()`
+      // reads `result.ok === false` and must never count a timeout as a retention act.
+      if (settled === RETAIN_TIMEOUT) {
+        return { ...rest, ok: false, state: RETENTION_STATE.accepted,
+          why: 'the write was still in flight when the wait elapsed' }
+      }
+      // ⭐ The refusal arrives as a VALUE, ⛔ not a throw: `pipeline.ingest` catches the store's error and
+      // carries `code` through deliberately — *"the host classifies; the pipeline only declines to erase."*
+      if (settled?.ok === false) {
+        return { ...rest, ok: false, state: RETENTION_STATE.refused, result: settled,
+          why: settled.error || 'the write failed', code: settled.code ?? null }
+      }
+      return { ...rest, ok: true, state: RETENTION_STATE.persisted, result: settled,
+        memoryId: idOf(settled?.result) ?? idOf(settled) }
+    } catch (e) {
+      return { ...rest, ok: false, state: RETENTION_STATE.refused,
+        why: e?.message || 'the write failed', code: e?.code ?? null }
+    }
+  }
 
   /**
    * keep({ what, kind, about, mine, attribute })
@@ -258,10 +340,14 @@ export function buildRetention(fastify, {
       // what `mine` already says. ⛔ It still does not override an explicit `about`, because ABOUT ≠ OWNER
       // is the whole point: `mine:true` + `about:'Ote'` stays about him and hers.
       const entity = about ? String(about) : (author === 'persona' ? 'sotera' : 'user')
-      const out = await mem.reconcileFactAsync({
+      // ⭐⭐⭐ AWAITED, ⛔ NOT FIRE-AND-FORGET. See `resolveReceipt` for what this ends and what it costs.
+      const out = await resolveReceipt(await mem.reconcileFactAsync({
         entity, attribute: String(attribute), value: content,
-      })
-      return { ok: out?.ok !== false, kind, author, via: 'remember_fact', result: out }
+      }))
+      return {
+        ok: out?.ok !== false, state: out?.state ?? null, kind, author, via: 'remember_fact',
+        why: out?.why ?? null, code: out?.code ?? null, memoryId: out?.memoryId ?? null, result: out,
+      }
     }
 
     // kind === note
@@ -272,8 +358,13 @@ export function buildRetention(fastify, {
     // ⛔ It would also mint exactly the row shape that currently has four checks red: `d211f5b4`,
     // `kind='identity'` with a NULL `user_id`, which overloads what NULL means. Authorship is expressed
     // through `author` and through nothing else.
-    const out = await mem.rememberAsync({ content, kind: 'semantic' })
-    return { ok: out?.ok !== false, kind, author, via: 'remember', result: out }
+    // ⭐ The note path carries the SAME receipt and gets the SAME treatment — ⛔ one door fixed and one
+    // left optimistic would be worse than neither, because the difference would be invisible.
+    const out = await resolveReceipt(await mem.rememberAsync({ content, kind: 'semantic' }))
+    return {
+      ok: out?.ok !== false, state: out?.state ?? null, kind, author, via: 'remember',
+      why: out?.why ?? null, code: out?.code ?? null, memoryId: out?.memoryId ?? null, result: out,
+    }
   }
 
   /**
@@ -363,33 +454,27 @@ export function buildRetention(fastify, {
         allowed: inner.allowed,
       })
     }
-    if (out?.ok === false) return record(decision, { state: 'refused', why: inner?.reason || 'the write did not succeed' })
+    // ── ⭐⭐⭐ THE RESOLVED STATE IS READ **BEFORE** `ok === false`, AND THE ORDER IS THE POINT ──────
+    //
+    // ⛔⛔ `accepted` NOW CARRIES `ok:false` (Ote, 2026-09-03: *"accepted means we stopped waiting and do
+    // not know whether the write exists. It is not success."*). ⚠️ So a plain `if (out.ok === false) →
+    // refused` below WOULD SILENTLY FOLD THE THIRD STATE INTO THE SECOND — the exact collapse this whole
+    // change exists to prevent, rebuilt one function away. ⇒ the named states are answered first.
+    if (out?.state === RETENTION_STATE.accepted) {
+      // ⛔ NO ID, and that is the honest record: ⓘ if this appears in a normal reflection it is an
+      // infrastructure finding about the write lane, ⛔ not an outcome.
+      return record(decision, { state: RETENTION_STATE.accepted, why: out.why || 'the write did not report an outcome in time' })
+    }
+    if (out?.state === RETENTION_STATE.refused) {
+      return record(decision, { state: RETENTION_STATE.refused, why: out.why || 'the write failed', code: out.code ?? null })
+    }
+    if (out?.ok === false) return record(decision, { state: RETENTION_STATE.refused, why: inner?.reason || 'the write did not succeed' })
 
     // ── ⭐ PERSISTED — but only with a real id ─────────────────────────────────────────────────────
-    // ⓘ lesson/practice already awaited and carry their id. fact/note answer with a QUEUED receipt and
-    // hand back `settled` — see memory-pipeline-host.
-    let id = idOf(inner)
-    if (!id && inner?.settled) {
-      try {
-        // ⚠️ BOUNDED. The lane is shared and serial; an unattended pass may wait, ⛔ but it may not hang.
-        const settled = await Promise.race([
-          inner.settled,
-          new Promise((r) => { setTimeout(() => r(RETAIN_TIMEOUT), RETAIN_WAIT_MS) }),
-        ])
-        if (settled === RETAIN_TIMEOUT) {
-          // ⛔⛔ `accepted` IS NOT SUCCESS. We stopped waiting and do not know whether a row exists, so we
-          // say exactly that and carry NO id. ⓘ If this ever appears in a normal reflection it is an
-          // infrastructure finding about the write lane, not an outcome.
-          return record(decision, { state: 'accepted', why: 'the write was still in flight when the wait elapsed' })
-        }
-        if (settled?.ok === false) {
-          return record(decision, { state: 'refused', why: settled.error || 'the write failed', code: settled.code ?? null })
-        }
-        id = idOf(settled?.result) ?? idOf(settled)
-      } catch (e) {
-        return record(decision, { state: 'refused', why: e?.message || 'the write failed', code: e?.code ?? null })
-      }
-    }
+    // ⓘ lesson/practice awaited their own write and carry their id; fact/note were resolved by `keep`'s
+    // ONE bounded wait and carry `memoryId`. ⛔ There is no second race here any more — two waits on one
+    // receipt is two bounds to get wrong, and the second one could only ever disagree with the first.
+    const id = out?.memoryId ?? idOf(inner)
     // ⭐⭐ NO ID, NO `persisted`. The database enforces this too (038's receipt CHECK) — ⓘ the third time
     // this project has paid for "the tool accepted it" being read as "a row exists".
     if (!id) return record(decision, { state: 'accepted', why: 'the write reported no row id' })
