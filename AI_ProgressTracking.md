@@ -5735,3 +5735,63 @@ nothing: 125 rows land on a permitted default, 0 carry `reported`, 0 carry a cha
 ② one jsonb hops column, or a child table with a lint-enforced tie instead of a CHECK-enforced one?
 ③ names/spellings (schema, not derivation). ④ Route B's own act — accepted as separate, ⛔ still undesigned;
 and the declaration **VERB** remains the only hard blocker on M2 committing anything.
+
+---
+
+## 2026-09-03 15:11 (+07:00) — state × hop cardinality, and the Route B act
+
+⛔ **Derivation only.** No implementation, migration, field, backfill or wiring. ⛔ No names or spellings
+(③ left open). M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_ORIGIN_STATES_AND_ROUTE_B.md`.
+
+**✅ OTE RULED FOUR MORE.** ① `not-examined` permissiveness accepted — ⭐ *"the schema does not eliminate
+producer-vacuity"* preserved explicitly, and **producer coverage remains a separate obligation**.
+② dedicated **same-row jsonb** hops, for the **state↔hops invariant**, ⛔ not convenience. ③ names and
+spellings stay open. ④ Route B stays a separate act.
+
+**PART A — ⭐⭐⭐ THREE STATES, ⛔ NOT FOUR. ⏸ This revises a vocabulary Ote had accepted, so it is a
+ruling request, ⛔ not an action.** The state answers three questions and only two are states:
+Q1 *was it examined?* · Q2 *is it re-presented?* · ⭐⭐ Q3 *what did we record of it?* — **which is hop
+CARDINALITY**. `unknown` and `known` occupy the **same epistemic position** and differ only in whether
+anything was recorded ⇒ keeping both is **two spellings of one fact** — the identical argument that killed
+`reported`-as-an-inner-modality and that barred a summary column.
+⇒ `not-examined` · `none` · `re-presented`; **unknown ⟺ re-presented + 0 hops** (⭐ the ORDINARY Route A
+outcome, ⛔ not an error), **known ⟺ re-presented + ≥1 hop**. Only ergonomics is lost.
+
+**⚠️ AND A CORRECTION TO MY OWN HOP SHAPE:** `depth` is **chain-level, ⛔ not per-hop** — *"is the innermost
+hop reached?"* is a property of the chain, and listing it per hop would be N spellings of one fact.
+⇒ a hop has **FOUR** fields (`who · what · span · how-meant`); the chain carries `state + depth`.
+⭐ Depth is **not** redundant with cardinality: cardinality = how many we recorded; depth = whether that is
+all there is.
+
+**THE LEGALITY TABLE + THREE SAME-ROW CHECKS.** ⛔ Illegal: `not-examined`/`none` with hops (the second is
+the dangerous one — slottable while carrying a chain, the Cogito failure re-enabled) and
+`re-presented + 0 hops + exhaustive` (a contradiction: *"completely known, and empty"* is `none` in
+disguise). ⇒ ① slot gate, 031's exact shape · ② only `re-presented` may carry hops (the state↔hops
+invariant) · ③ the contradiction. ⚠️ ⭐ **None removes producer-vacuity, and that is stated in the doc as
+ruled.**
+
+**PART B — ⭐⭐⭐ ROUTE B IS AN AMENDMENT, AND THAT IS WHERE THE PATTERN STOPS TRANSFERRING.** All three
+precedents **create** (a lock file, `doc:` rows, `reconcile:` rows); Route B **amends the provenance of a
+row that already exists**. ⇒ ⛔ not a new registry — an audit entry.
+⭐⭐ And the machinery is built and exercised: `log_memory_changes` — `action · actor(NOT NULL) · reason ·
+before · after · source`, ⓘ **137 rows** (`supersede` ×135, `forget` ×2), reason 137/137, before 137/137,
+after 135/137 — ⭐ `forget` correctly has **no after**, so the log already distinguishes absence from
+emptiness.
+⭐⭐⭐ **Route B would be the first caller ever to give `actor` a real value** (137/137 are `'system'`; its
+own comment invites better and no caller has). ⇒ an argument for reuse, ⛔ not for minting a fifth
+authorship field.
+⭐⭐ **Naming an inner speaker IS naming a person who is not present** ⇒ ⭐ exactly what `person-service`
+was built for after the rename incident (two-phase, confirm only in a LATER turn, ⛔ never merges or
+guesses). ⇒ Route B **references** identity, ⛔ never mints it; a hop's `who` is a `person_id`
+`person-service` already established, or `UNRESOLVED`.
+⭐⭐⭐ **DERIVED SAFETY PROPERTY:** `none → re-presented` on a **slotted** row is **REFUSED by CHECK ①**
+⇒ discovering that material was forwarded **cannot silently coexist with the fact slot built on it** — it
+forces retirement of the claim first. The reverse (`re-presented → none`) is safe by construction, does not
+retro-slot, and the erased chain survives in the audit `before`.
+⛔ Boundaries: Route B may not rewrite a **verified span** (A writes `span`; B writes `who`/`what`/pin),
+may not mint a person, may not touch reachability, may not be the question VERB, may not carry a score.
+
+⏸ **Four for Ote:** ① three states or four? ② is the contradiction CHECK worth having, or is it lint?
+③ does Route B reuse `log_memory_changes`, or does a provenance amendment deserve its own log?
+④ the declaration **VERB** — unchanged, still the only hard blocker on M2 committing anything.

@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -20,8 +20,8 @@ context compaction.
 ✅ M2-3                 RETIRED and re-derived under the room frame
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
-✅ ORIGIN FULLY DERIVED vocabulary · authorization · inner-hop modality · 3 blockers · REPRESENTATION
-⏸  NEXT                 ⭐ 4 rulings on the REPRESENTATION (§2), then Route B's act, then the VERB
+✅ ORIGIN FULLY DERIVED vocab · authz · inner-hop · 3 blockers · representation · STATES + ROUTE B
+⏸  NEXT                 ⭐ 4 rulings (3-vs-4 STATES · CHECK ③ · Route B's log home), then the VERB
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -133,6 +133,30 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
    ⛔ not `evidence` (43 rows, FOUR disjoint key-sets, no key on every row) · ⛔ not a composite type
      (0 exist, and element constraints need an immutable fn; this schema has 1 fn and it is volatile)
    ⭐ transition precedent is ON THIS TABLE: `txn_memories_quoted_needs_source` is NOT VALID
+✅ 4 MORE RULED (Ote): ① not-examined permissiveness ACCEPTED — ⭐ and the schema does NOT discharge
+   PRODUCER COVERAGE, which stays a separate obligation · ② dedicated SAME-ROW JSONB hops, for the
+   state↔hops invariant ⛔ not convenience · ③ names/spellings OPEN · ④ Route B stays a SEPARATE ACT
+⭐⭐ STATES × CARDINALITY + ROUTE B DERIVED → `DERIVATION_SOTERA_ORIGIN_STATES_AND_ROUTE_B`
+   ⭐⭐⭐ THREE STATES, ⛔ NOT FOUR — `unknown`/`known` are the SAME epistemic position and differ only
+     in hop CARDINALITY ⇒ keeping both is TWO SPELLINGS OF ONE FACT (the argument that already killed
+     `reported`-as-inner-modality). ⏸ THIS REVISES A VOCABULARY OTE ACCEPTED — his ruling needed
+   ⭐ `not-examined` · `none` · `re-presented`; unknown ⟺ re-presented+0 hops (⭐ the ORDINARY Route A
+     outcome), known ⟺ re-presented+≥1 hop
+   ⚠️ MY OWN CORRECTION: `depth` is CHAIN-LEVEL, ⛔ not per-hop ⇒ a hop has FOUR fields (who · what ·
+     span · how-meant). Depth is NOT redundant with cardinality: cardinality = how many recorded,
+     depth = whether that is all there is
+   ⭐ 3 same-row CHECKs: ① slot gate (031's shape) · ② only re-presented may carry hops · ③ ⛔ the
+     contradiction `re-presented + 0 hops + exhaustive`
+   ⭐⭐⭐ ROUTE B IS AN AMENDMENT — all 3 precedents CREATE; Route B AMENDS an existing row ⇒ its record
+     is a `log_memory_changes` entry (137 rows, before/after/actor/reason/source, and ⭐ `forget` has
+     NO after — the log already distinguishes absence from emptiness)
+   ⭐⭐ It would be the FIRST caller ever to give `actor` a real value (137/137 are 'system')
+   ⭐⭐ Naming an inner speaker IS naming a person not present ⇒ REFERENCE `person-service` (two-phase,
+     confirm only in a LATER turn), ⛔ Route B may NEVER mint a person
+   ⭐⭐⭐ DERIVED SAFETY: `none → re-presented` on a SLOTTED row is REFUSED by CHECK ① ⇒ discovering that
+     material was forwarded CANNOT silently coexist with the fact slot built on it
+   ⛔ Route B may not rewrite a VERIFIED span (A writes span; B writes who/what/pin)
+
 ⚠️ TWO OF MY CLAIMS CORRECTED: a trigger is NOT unprecedented here (`txn_intentions_touch_trg` exists —
    but ⭐ no trigger has ever enforced an INVARIANT); and the `evidence` CLOBBER risk is ⛔ NOT
    demonstrated — `lineageFor` MERGES via withDerivedFrom and preserves incoming evidence
