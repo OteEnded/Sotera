@@ -5865,3 +5865,68 @@ question ⇒ `checkKind` DEFERs on every slot, and DEFER is a hard stop. ⭐ Wha
 `who` always resolve to an existing person, forcing `person-service`'s two-phase flow first? ③ two `action`
 values or one? ④ is `source` accepted as the run occasion, or does the amendment deserve a **typed** run
 column like `pass_id`? ⑤ the lineage `MECHANISM` gap — separate item. ⑥ the **VERB**.
+
+---
+
+## 2026-09-03 15:28 (+07:00) — the ESTABLISH transition matrix; RETRACT is not a third act
+
+⛔ **Derivation only.** No implementation, migration, field, backfill or wiring. M2-6 unwired · M2 disabled
+· 12b frozen · P1 and Rome untouched. ⭐ → `Reference/docs/DERIVATION_SOTERA_ESTABLISH_TRANSITIONS.md`.
+
+**✅ OTE RULED:** ① ESTABLISH authority = the account owning the delivering turn's room (operational, ⛔
+never identity) · ② `who` **must resolve**; ⛔ Route B may never mint a person — `person-service` first ·
+③ **two** audit actions, ESTABLISH kept distinct · ④ `log_memory_changes.source` accepted as the occasion,
+⛔ no typed run column · ⑤ the lineage `MECHANISM` gap is a separate prerequisite · ⑥ VERB still blocking.
+
+**⭐⭐⭐ THE ANSWER: ESTABLISH IS FIRST-ESTABLISHMENT *PER FACT*, ⛔ NOT PER ROW** — and the discriminator
+was already built two derivations ago for a different reason:
+`UNRESOLVED · UNKNOWN · NONE-EXISTS · bounded(N of M) · not-examined` are all **explicit non-claims**
+⇒ **filling a non-claim = ESTABLISH · contradicting a claim = CORRECT.**
+⭐⭐ The three-valued epistemic vocabulary, locked for honesty, turns out to **be the act boundary** — and
+⭐ the design *requires* the per-fact rule: Route A yields `who: UNRESOLVED` and Route B fills it, so if
+that counted as contradiction the ordinary path would need the operator every single time.
+
+**THE MATRIX.** `not-examined → none` / `→ re-presented(0)` / `→ re-presented(≥1)` = **ESTABLISH**.
+⛔ `none → re-presented` is **always CORRECT** — `none` can only arise from an act, since the *default* is
+`not-examined` — and CHECK ① refuses it outright on a slotted row. ⛔ **Anything → `not-examined` is
+forbidden to both acts: you cannot un-examine** (one-way-on-exit).
+⭐⭐ **Adding a hop is ESTABLISH under `depth = bounded/unknown` and CORRECT under `depth = exhaustive`**
+⇒ the discriminator is **`depth`**, ⛔ not the state. The same edit is a different act depending on what
+the prior record *claimed about completeness*.
+Per field: `who UNRESOLVED → person` = ESTABLISH (the designed A→B sequence); `person A → person B` =
+CORRECT; `what UNKNOWN → pin` = ESTABLISH; `pin A → pin B` = CORRECT (⚠️ a changed pin silently re-points
+the declaration — the audit `before` is what makes it survivable). ⛔ `span` and `how-meant`: **forbidden to
+both acts**. ⛔ Piecemeal hop deletion forbidden — hops clear only wholesale via `state → none`; withdrawing
+an identity is a **value change to `UNRESOLVED`**, ⛔ never a deletion.
+⭐ An identical re-assert **converges and writes NO audit row** (a change and a non-change must not share a
+shape) ⇒ repeated ESTABLISH is safe with no special case. ⛔ A partial act is **refused whole**, naming the
+offending field.
+
+**⭐⭐⭐ A WARRANT NEITHER BLOCKS NOR PERMITS, AND IS NEVER CONSULTED.** ⛔ It must not block — the
+better-supported a wrong claim is, the *more* important the correction; blocking would make provenance
+discovery impossible on exactly the material that most needs it. ⛔ It must not permit — a warrant is
+evidence about **spans** and says nothing about origin. ⭐ CHECK ① forces remediation instead. And ⭐ a
+superseded warrant is **not a lie**: it is timestamped and carries `value_at_warrant`.
+
+**⭐⭐⭐ RETRACT IS NOT A THIRD ACT.** Tested on authority, precondition, permitted changes and what the act
+asserts — all four identical to CORRECT. The decisive one uses Ote's own lock: **`none` is a POSITIVE
+claim**, so "retracting" a chain *asserts first-hand-ness*. ⛔ Naming it separately would be two names for
+one act, and would falsely suggest withdrawing a chain is epistemically **cheaper** than replacing one when
+it is the **same strength of claim**. ⇒ **TWO ACTS: `ESTABLISH` · `CORRECT`** — landing exactly on ruling ③.
+⭐ All three withdrawal-shaped edits are CORRECT: `→ none` · `who → UNRESOLVED` · `exhaustive → bounded`.
+
+**⚠️⚠️ THE WARRANT RED-PROOF WOULD BE VACUOUS TODAY.** ⓘ `log_memory_warrants` has **0 rows**, so *"assert
+no warrant changed"* passes trivially on every memory in the corpus — the anchor-goes-vacuous family.
+⇒ ⭐⭐⭐ **RP-W0, a POSITIVE CONTROL, is mandatory:** issue a real warrant and assert the snapshot
+**changes**, before any assertion that it does not. Then RP-W1 (ESTABLISH, byte-identical snapshot of row
+count/selected/verified/discarded/verified_roots/value_at_warrant/pass_id) · RP-W2 (CORRECT, every shape) ·
+RP-W3 (ESTABLISH on a memory *with* a warrant: unchanged **and** the outcome identical to the no-warrant
+case) · RP-W4 (behavioural: no origin field reaches `visibleWhere`/`evidentialSql`/any disclosure
+predicate). ⭐ Plus one attempt per ⛔ cell of the matrix, **separately** — two routes to one guard are two
+tests.
+
+⏸ **Four for Ote:** ① is "first-establishment per FACT" accepted? ② is `depth` accepted as the add-a-hop
+discriminator? ③ is `not-examined` one-way-on-exit accepted? ④ is "two acts, RETRACT = CORRECT-to-`none`"
+accepted?
+⚠️ **And plainly: origin is now semantically complete, and M2 still cannot commit** — ⓘ 0 of 82 slots
+declared, `checkKind` DEFERs on every one. The **VERB** is the only hard blocker.

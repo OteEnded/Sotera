@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -21,7 +21,7 @@ context compaction.
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
 ✅ ORIGIN FULLY DERIVED vocab · authz · inner-hop · 3 blockers · representation · STATES + ROUTE B
-⏸  NEXT                 ⭐ 6 rulings (§2 Route B), then the VERB — ⛔ the ONLY M2-commit blocker
+⏸  NEXT                 ⭐ 4 rulings on TRANSITIONS, then the VERB — ⛔ the ONLY M2-commit blocker
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -133,6 +133,27 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
    ⛔ not `evidence` (43 rows, FOUR disjoint key-sets, no key on every row) · ⛔ not a composite type
      (0 exist, and element constraints need an immutable fn; this schema has 1 fn and it is volatile)
    ⭐ transition precedent is ON THIS TABLE: `txn_memories_quoted_needs_source` is NOT VALID
+⭐⭐ ESTABLISH TRANSITIONS DERIVED 15:28 → `DERIVATION_SOTERA_ESTABLISH_TRANSITIONS`
+   ⭐⭐⭐ ESTABLISH IS FIRST-ESTABLISHMENT **PER FACT**, ⛔ NOT PER ROW. The discriminator was already
+     built: `UNRESOLVED · UNKNOWN · NONE-EXISTS · bounded · not-examined` are EXPLICIT NON-CLAIMS ⇒
+     FILLING a non-claim = ESTABLISH · CONTRADICTING a claim = CORRECT
+   ⭐ The design REQUIRES it: Route A yields `who: UNRESOLVED` and Route B fills it — if that counted as
+     contradiction the ordinary path would need the operator every time
+   ⭐⭐ ADDING A HOP is ESTABLISH under depth=bounded/unknown and CORRECT under depth=EXHAUSTIVE ⇒ the
+     discriminator is `depth`, ⛔ NOT the state
+   ⛔ `none → re-presented` is ALWAYS CORRECT (`none` can only arise from an act; the DEFAULT is
+     not-examined) · ⛔ anything → `not-examined` is FORBIDDEN to both: you cannot UN-EXAMINE
+   ⛔ span and how-meant: FORBIDDEN TO BOTH ACTS · ⛔ piecemeal hop deletion forbidden (clear only
+     wholesale via state→none) · withdrawing an identity = a value change to UNRESOLVED, ⛔ not a delete
+   ⭐ identical re-assert ⇒ CONVERGES and writes NO audit row · a partial act is REFUSED WHOLE
+   ⭐⭐⭐ A WARRANT NEITHER BLOCKS NOR PERMITS and is never consulted — blocking would make provenance
+     discovery impossible on exactly the material that most needs it; CHECK ① forces remediation instead.
+     ⭐ A superseded warrant is not a lie: it is timestamped and carries `value_at_warrant`
+   ⭐⭐⭐ RETRACT IS NOT A THIRD ACT — `none` is a POSITIVE claim, so retracting = CORRECT-to-`none`.
+     ⇒ TWO ACTS: ESTABLISH · CORRECT
+   ⚠️⚠️ THE WARRANT RED-PROOF WOULD BE VACUOUS TODAY (0 warrant rows) ⇒ ⭐ A POSITIVE CONTROL IS
+     MANDATORY: issue a real warrant and assert the snapshot CHANGES before asserting it does not
+
 ⭐⭐ ROUTE B ACT + RUN PROVENANCE DERIVED 15:21 → `DERIVATION_SOTERA_ROUTE_B_ACT`
    ⭐⭐ TWO ACTS: ESTABLISH = the ACCOUNT owning the DELIVERING TURN'S ROOM (the only party that knows;
      ⛔ not root-because-admin, ⛔ an ACCOUNT never a person) · CORRECT/RETRACT = the operator via the
