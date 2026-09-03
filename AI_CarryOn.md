@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -21,7 +21,7 @@ context compaction.
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
 ✅ ORIGIN FULLY DERIVED vocab · authz · inner-hop · 3 blockers · representation · STATES + ROUTE B
-⏸  NEXT                 ⭐ 4 rulings (3-vs-4 STATES · CHECK ③ · Route B's log home), then the VERB
+⏸  NEXT                 ⭐ 6 rulings (§2 Route B), then the VERB — ⛔ the ONLY M2-commit blocker
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -133,6 +133,41 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
    ⛔ not `evidence` (43 rows, FOUR disjoint key-sets, no key on every row) · ⛔ not a composite type
      (0 exist, and element constraints need an immutable fn; this schema has 1 fn and it is volatile)
    ⭐ transition precedent is ON THIS TABLE: `txn_memories_quoted_needs_source` is NOT VALID
+⭐⭐ ROUTE B ACT + RUN PROVENANCE DERIVED 15:21 → `DERIVATION_SOTERA_ROUTE_B_ACT`
+   ⭐⭐ TWO ACTS: ESTABLISH = the ACCOUNT owning the DELIVERING TURN'S ROOM (the only party that knows;
+     ⛔ not root-because-admin, ⛔ an ACCOUNT never a person) · CORRECT/RETRACT = the operator via the
+     EXISTING `MECHANISM.reconciliation` (3 rows of precedent) ⇒ ⛔ no new mechanism for the correction
+   ⭐⭐⭐ B ESTABLISHES IDENTITY · A ESTABLISHES TEXT. B may change state·depth·who·what+pin;
+     ⛔⛔ NEVER `span` (not even to ADD one — a supplied span is NEW MATERIAL, not provenance) and
+     ⛔ never `how-meant`
+   ⭐⭐ ⇒ IF A SPAN EXISTS, ONLY MECHANICAL VERIFICATION PUT IT THERE ⇒ verified-ness is DERIVABLE FROM
+     EXISTENCE ⇒ ⛔ NO marker field, and "may not rewrite a verified span" becomes ENFORCEABLE
+   ⭐ Retraction is WHOLESALE via `state → none` (audit `before` preserves every hop); ⛔ never hop deletion
+   ⭐⭐ THE PIN IS THE SNAPSHOT — this schema already pins that way twice (`value_at_warrant`,
+     `before`/`after`) ⇒ ⛔ no new hash, no new pin field
+   ⭐ Route B verifies REFERENTIAL INTEGRITY + PRECONDITIONS ONLY, ⛔ never the claim ⇒ it is TESTIMONY:
+     trustworthy by ATTRIBUTION + AUDITABILITY, ⛔ not by verification
+   ⭐⭐⭐ THE ANTI-LAUNDERING INVARIANT: Route B changes PERMISSION (both directions) and can NEVER change
+     SUPPORT. ⛔ No declaration makes a span verify. Red-proof: an act must never move a warrant count
+   ⭐⭐ TWO RECEIPTS, ⛔ never interchangeable: `log_memory_warrants` = mechanical support ·
+     `log_memory_changes` = attributed testimony
+⭐⭐⭐ RUN PROVENANCE — THREE THINGS, THREE PLACES, ⛔ and the origin carries NO run id:
+   ① what the origin IS = txn_memories state+hops · ② how it CHANGED = log_memory_changes before/after ·
+   ③ WHICH RUN caused it = log_memory_changes.SOURCE (the occasion)
+   ⛔ `related_id` is OCCUPIED — *"the other row in the transition"*, a MEMORY id, 135/137 populated
+   ✅ `source` ALREADY carries the occasion OF THE CHANGE and is already used that way (model-tool ×42,
+     conversation:<id> ×7) — the same mechanism+occasion string `reconcile:<act>` uses ⇒ NO NEW COLUMN
+   ⭐⭐ RECEIPT→RUN scales, RUN→ARTEFACT does not: `log_conversation_revisits.wrote_memory_id` is a
+     SINGLE uuid ⇒ a run that touched two memories can record only one
+   ⭐⭐⭐ A RUN MAY BE THE OCCASION; ⛔ IT MAY NEVER BE THE AUTHORITY. Run discovers + MECHANICAL content
+     = fine; run supplies identity/pin = ⛔ Route C AND self-authorising
+   ⭐⭐ Run discovers, account declares ⇒ TWO AMENDMENTS, not one (mechanical@pass, then declared@act)
+     ⇒ ⛔ no field ever holds two occasions
+   ⚠️⚠️ PRE-EXISTING GAP FOUND: `MECHANISM` has NO `dreaming`/`reflection` entry ⇒ the first row either
+     writes lands in `unknown`, which its own check calls a DEFECT. ⏸ M2 NEEDS THIS REGARDLESS OF ORIGIN
+⚠️ ⛔ ORIGIN COMPLETE ≠ M2 MAY COMMIT. 0 of 82 slots declared ⇒ checkKind DEFERs on every slot.
+   ⭐ What origin DOES unblock: M2-6 may now be wired without baking delivery into formation — ⛔ still unwired
+
 ✅ 4 MORE RULED (Ote): ① not-examined permissiveness ACCEPTED — ⭐ and the schema does NOT discharge
    PRODUCER COVERAGE, which stays a separate obligation · ② dedicated SAME-ROW JSONB hops, for the
    state↔hops invariant ⛔ not convenience · ③ names/spellings OPEN · ④ Route B stays a SEPARATE ACT

@@ -5795,3 +5795,73 @@ may not mint a person, may not touch reachability, may not be the question VERB,
 ⏸ **Four for Ote:** ① three states or four? ② is the contradiction CHECK worth having, or is it lint?
 ③ does Route B reuse `log_memory_changes`, or does a provenance amendment deserve its own log?
 ④ the declaration **VERB** — unchanged, still the only hard blocker on M2 committing anything.
+
+---
+
+## 2026-09-03 15:21 (+07:00) — the Route B act, and run/occasion provenance
+
+⛔ **Derivation only.** No implementation, migration, field, backfill or wiring. ⛔ No names or spellings.
+M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_ROUTE_B_ACT.md`.
+
+**✅ OTE RULED:** ① **THREE STATES** — `not-examined | none | re-presented`; ⛔ the zero-hop case is no
+longer called *"unknown"* as a state. ② the **contradiction CHECK stays in the DB**. ③ Route B **reuses
+`log_memory_changes`** with the **real `actor`**, ⛔ no new authorship field — *current origin lives on the
+memory; the audit records how it changed*. ④ VERB still open.
+
+**WHO — ⭐⭐ TWO ACTS.** **ESTABLISH** = the **account owning the delivering turn's room**: Route A's
+authority was bounded to *"the speaker made the marking and the span exists"*; Route B is the same speaker
+stating explicitly what Route A could only detect. ⭐ Ote pasting a Cogito transcript is the only party who
+can say where it came from — ⛔ not root-because-admin, and ⚠️ it is an **account**, never a person.
+**CORRECT/RETRACT** = the operator, via the **existing** `MECHANISM.reconciliation` (*"its occasion is the
+RULING, not a turn"*, 3 rows) ⇒ ⭐ the correction half needs no new mechanism.
+
+**WHAT IT MAY CHANGE — ⭐⭐⭐ B ESTABLISHES IDENTITY; A ESTABLISHES TEXT.** `state · depth · who · what+pin`
+✅; `span` and `how-meant` ⛔⛔ **never — not even to ADD a span**: if the span is in the delivering text
+Route A finds it, and if it is not, the deliverer is supplying **new material, ⛔ not provenance**.
+⇒ ⭐⭐ **if a span exists, only mechanical verification put it there** ⇒ verified-ness is **derivable from
+existence**, needs ⛔ no marker field, and *"may not rewrite a verified span"* becomes **enforceable**.
+⭐ Retraction is wholesale via `state → none` (the audit `before` preserves every hop); ⛔ never hop
+deletion, which would erase mechanical evidence by declaration.
+
+**PIN + VERIFY.** ⚠️ A conversation id is a **reference, not a pin** (`evidenceState` already enumerates
+four ways one stops resolving). ⭐⭐ This schema already pins by **snapshot**, twice —
+`log_memory_warrants.value_at_warrant` and `log_memory_changes.before/after` ⇒ **Route B's pin IS the audit
+snapshot**; ⛔ no new hash, no new pin field. It verifies **referential integrity + preconditions only**,
+⛔ never the claim ⇒ ⭐⭐ **Route B is TESTIMONY: trustworthy by attribution and auditability, ⛔ not by
+verification.**
+
+**⭐⭐⭐ THE ANTI-LAUNDERING INVARIANT: Route B changes PERMISSION and can NEVER change SUPPORT.**
+Permission moves both ways (`→ re-presented` closes the slot; `→ none` permits a future write, and every
+other gate still applies). Support is untouched — **no declaration makes a span verify.** ⭐ Red-proof: an
+act must never move a warrant count or verified-root set.
+⭐⭐ **Two receipts now exist and are ⛔ never interchangeable:** `log_memory_warrants` answers *"is this
+SUPPORTED?"*; `log_memory_changes` answers *"how did the origin come to say this?"*
+
+**⭐⭐⭐ RUN PROVENANCE (Ote's mid-turn addition) — THREE THINGS, THREE PLACES, and the origin carries NO
+run id, which is what structurally prevents the conflation.**
+① what the origin **is** = `txn_memories` state+hops · ② how it **changed** = `log_memory_changes`
+before/after · ③ **which run caused it** = `log_memory_changes.source`, the occasion.
+⛔ `related_id` is **occupied** — *"the other row in the transition"*, a **memory** id, 135/137 populated.
+✅ `source` **already carries the occasion of the change** and is already used that way (`model-tool` ×42,
+`conversation:<id>` ×7) — the same `mechanism + occasion` string `reconcile:<act>` uses ⇒ **no new column
+required**.
+⭐⭐ **Receipt→run scales; run→artefact does not:** `log_conversation_revisits.wrote_memory_id` is a
+**single uuid**, so a run that touched two memories can record only one. ⓘ 88 revisit rows.
+⭐⭐⭐ **A run may be the OCCASION; ⛔ it may never be the AUTHORITY.** Run discovers + mechanical content =
+legitimate; run supplies identity or a pin = ⛔ Route C **and** self-authorising.
+⭐⭐ **Run discovers, account declares ⇒ TWO amendments, not one** (mechanical @ the pass, then declared @
+the act) ⇒ ⛔ no field ever has to hold two occasions — which follows from DETECTED→VERIFIED→ADMITTED not
+collapsing.
+⚠️⚠️ **PRE-EXISTING GAP FOUND, ⛔ not origin's:** `memory-lineage.js`'s `MECHANISM` has **no `dreaming` and
+no `reflection` entry**, so the first row either writes lands in `unknown` — which that module defines as a
+**defect** and a check fails on. ⏸ **M2 needs this regardless of origin.**
+
+⚠️ **AND SAY IT PLAINLY: origin being complete does NOT let M2 commit.** ⓘ 0 of 82 slots carry a declared
+question ⇒ `checkKind` DEFERs on every slot, and DEFER is a hard stop. ⭐ What origin **does** unblock:
+**M2-6 may now be wired without baking delivery into formation** — ⛔ and it stays unwired until Ote says.
+
+⏸ **Six for Ote:** ① is ESTABLISH authority right (the delivering room's account, ⛔ not root)? ② must a
+`who` always resolve to an existing person, forcing `person-service`'s two-phase flow first? ③ two `action`
+values or one? ④ is `source` accepted as the run occasion, or does the amendment deserve a **typed** run
+column like `pass_id`? ⑤ the lineage `MECHANISM` gap — separate item. ⑥ the **VERB**.
