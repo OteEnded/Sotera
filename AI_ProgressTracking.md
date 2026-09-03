@@ -5231,3 +5231,51 @@ migration for 6f + the product axis — ⓘ verified still absent: the CHECK is 
 decision · ③ M2-2 / M2-4 / gap ⑤ / quantifier vocabulary ⇒ parked or held.
 
 **60 of 60 checks · M2-6 unwired · M2 disabled · 12b baseline unmoved.**
+
+---
+
+## 2026-09-03 05:45 (+07:00) — ⏸ THE DECLARATION ACT, DERIVED. **047 built the NOUN; nothing built the VERB.**
+
+### ⭐⭐⭐ THE FINDING
+
+`mst_slot_questions` already holds **exactly** the object M2-10/M2-11 specify. ⇒ ⛔ the gap is **not the
+declaration OBJECT — it is the ACT that creates one**, and no such act exists. ⭐ Ote's own hypothesis is
+what the evidence supports: *"the system currently lacks a legitimate declaration act."*
+
+### ⭐⭐ STANDING — DERIVED, ⛔ NOT CHOSEN
+
+| **migration** | ⛔⛔ excluded **by its own proof block** — 047: *"declaring is an act by something that knows the question, and **a migration knows nothing**"* |
+| --- | --- |
+| **memory subsystem** | ⛔ excluded by WHAT IT IS: `createSlotStore` **ENSUREs** from a handed label, and *"slot bookkeeping must never be able to fail a write"* ⇒ **the definition of minting ≠ declaring** |
+| **reflection / dreaming** | ⛔⛔ excluded by the LOCKED rule — a reflection outcome IS inference from values. ⭐ And **circular**: Dreaming needs the declaration to commit, so it would be **self-authorising** |
+| ⭐ **the account** | ✅ **the only authority with a precedent — and there are THREE** |
+| ⚠️ **Sotera** | ⏸ **OPEN, and it SPLITS BY SUBJECT** — plausible for her OWN slots (*ownership follows authorship*), ⛔ inference for a `user/*` slot |
+
+### ⭐⭐⭐ THREE EXISTING PRECEDENTS, AND THEY AGREE ON ONE SHAPE
+
+| `persona.json → persona.lock.json` | RESOLUTION → a lock with **`integrity` sha256**, `resolvedAt`, `trust` | pinned to a **content hash** |
+| --- | --- | --- |
+| `doc:<path>@<sha>` — **34 rows, all `author='account'`** | REGISTRATION from an artefact | pinned to a **git sha** |
+| `reconcile:rome-2026-09-02` — 3 rows | a RECONCILIATION act | pinned to a **named, dated decision** |
+
+⭐⭐ **an AUTHORED ARTEFACT + an EXPLICIT ACT → a DURABLE RECORD PINNED TO SOMETHING IMMUTABLE.**
+⛔ In none of them is the record produced by inference, by use, or as a side effect.
+
+### ⭐⭐ Q4 + Q5 — BOTH ANSWERS CUT AGAINST URGENCY
+
+**An undeclared slot is FULLY USABLE.** ⓘ **82 slots · 773 writes · max 168 · 5 aliases · 0 declared** ⇒
+the machinery is heavily used for **resolution** while zero questions exist. **Identity and question are
+orthogonal in practice, not just in theory.** ⇒ ⭐ *"M2 cannot commit to it"* ≠ *"the slot is broken"*, and
+**deferring forever costs nothing today** — which removes the pressure to invent a verb in a hurry.
+
+**⛔ And 55/125 does NOT mean "55 need backfilling."** They depend on slot **IDENTITY**, which they have.
+⇒ **no existing memory is waiting on a declaration.** The only thing waiting is M2's ability to write, and
+M2 has never written.
+
+⚠️ **One asymmetry, ⛔ unresolved:** the 34 `doc:` registrations carry **slot_id = 0 of 34** — the one
+declared-from-an-artefact class **bypasses slot resolution entirely.**
+
+⏸ **Three things need a ruling, ⛔ not derivable:** does Sotera have standing for her own slots · what
+artefact does a declaration pin to · is the `doc:` class's slot-absence a principle or an accident.
+
+ⓘ `Reference/docs/DERIVATION_SOTERA_SLOT_QUESTION_DECLARATION.md`. ⛔ No vocabulary/API/migration/tool.
