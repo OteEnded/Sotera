@@ -5279,3 +5279,72 @@ declared-from-an-artefact class **bypasses slot resolution entirely.**
 artefact does a declaration pin to · is the `doc:` class's slot-absence a principle or an accident.
 
 ⓘ `Reference/docs/DERIVATION_SOTERA_SLOT_QUESTION_DECLARATION.md`. ⛔ No vocabulary/API/migration/tool.
+
+---
+
+## 2026-09-03 06:10 (+07:00) — ⛔ STANDING RE-DERIVED. My room-framing was wrong and is RETRACTED.
+
+**Ote's correction:** *"Sotera is one persistent persona/cognitive actor. **Her identity must not depend
+on the interface, room, or whether the other person even has a Sotera account.**"* ⇒ I had used room and
+subject as **proxies for standing** — the exact substitution the four-axis lock exists to prevent.
+
+### ⭐⭐⭐ THE MOVE THAT DISSOLVES THE `user/*` WORRY: **A QUESTION IS SUBJECT-FREE**
+
+The question behind `user/preferred_name` is *"what does a valid answer to **what is this person called**
+look like?"* — ⭐⭐ **that asserts nothing about Ote, Hermes or Person X.** ⇒ **declaring the question of
+a `user/*` slot is NOT authority over that person**; it is authority over **her own conceptual vocabulary**.
+
+⇒ ⭐⭐⭐ the two authorities separate by **WHAT THE ACT ASSERTS**, ⛔ not by whose slot it is:
+
+| **her own cognitive contract** | declare a **QUESTION** · subject-free · asserts nothing about anyone |
+| --- | --- |
+| **a fact about another person** | write a **VALUE** · subject-bearing · provenance/speaker/subject rules · ⏸ gap ⑤ |
+
+⭐ **Neither definition mentions a room, an interface or an account** — that is the test that the framing
+is now right.
+
+### ⚠️ AND THE BOUNDARY IS REAL: SUBJECT-FREE IN CONTENT, ⛔ NOT IN EFFECT
+
+A question **constrains what may later be asserted about the person** (declare `preferred_name` must be an
+ISO date and every real name becomes inadmissible). ⇒ **zero-assertion, NON-ZERO-AUTHORITY.**
+⭐ The containment already exists and is what makes this safe: M2-10 locked declarations **immutable** ·
+change = **new definition + repointing** · **existing memories NEVER re-validated** · warrants untouched.
+⇒ **a bad question cannot reach backwards.**
+
+### ⭐⭐⭐ AND THE FINDING: THE SCHEMA CANNOT SAY WHAT "SOTERA-OWNED" IS
+
+```
+mst_slots:  id · persona · user_id · entity · namespace · canonical_label · aliases · evidence ·
+            write_count · last_write · created_at · updated_at · subject_person_id · question_id
+            ⛔⛔ THERE IS NO `author` COLUMN.
+```
+
+Ownership follows **authorship** — and a slot has none. ⓘ Nearest field is `persona` (**78 null, 4
+'sotera'**), but that is *which namespace*, ⛔ not *who authored it*, and `DEFAULT_PERSONA` is itself
+`null` so the readings are indistinguishable. ⇒ ⭐ **the derivation rests on a predicate the schema cannot
+evaluate.** ⛔ Not a reason to substitute a proxy — 029 already cost this store exactly that.
+
+### THE SIX CASES — ⭐ A, B, C give the SAME answer (that is the test)
+
+**A/B/C** ⭐ yes on the derivation, identically — formation is provenance, ⛔ not identity.
+ⓘ `hermes` is a real account with **113 conversations**, so B is not hypothetical.
+**D** ⭐ yes to declare the *question*; the **value** is gap ⑤ — *"Ote told me Hermes has been working
+hard"* is valid knowledge that M2-6 refuses to **classify**, ⛔ not to admit.
+**E** ⭐ the primary case, live today. **F** ⚠️ see below.
+
+**⭐⭐ CASE C, MEASURED — an ACCOUNT is required, a PERSON is not:** `user_id` **NOT NULL** · 0 convos
+without a user · **2 convos whose user has NO `person_id`** · **9 accounts → 4 persons**. ⇒ the
+account≠person split is **already real and in use**. ⚠️ But an account-less interface would need a shell,
+which is then **indistinguishable from a person's room** downstream.
+
+**⚠️⚠️ CASE F — the capability exists and has NEVER been used:** `source:'conversation:<id>'` exists (34
+rows), ⛔ but **0 of 34 name a conversation in a different room.** ⇒ a forwarded conversation would take
+the deliverer's room as formation context and **nothing would detect the misattribution.** Ote's
+requirement is **not currently enforced by anything.**
+
+⏸ **Three rulings needed, ⛔ none derivable:** how ownership of a slot is determined at all (⛔ do not
+substitute `persona` or `user_id`) · whether formation context should be establishable separately from
+delivery (F) · whether an account shell is acceptable for an account-less interface (C).
+
+ⓘ `Reference/docs/DERIVATION_SOTERA_STANDING_AND_OWNED_COGNITION.md` — supersedes the standing section of
+the previous derivation.
