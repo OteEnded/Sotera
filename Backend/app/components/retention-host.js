@@ -36,6 +36,7 @@
 // nothing downstream of this file can observe an author different from the one she declared.
 
 import { buildMemoryToolService } from './memory-pipeline-host.js'
+import { idOf, RETENTION_STATE } from './memory-write-receipt.js'
 import { registerHostService } from './runtime.js'
 // ⚠️ BUILT DIRECTLY, NOT READ OUT OF THE SERVICE BAG — and that is not a style choice. The host-service
 // factory is called as `make({ fastify, user, extras })`: there is ⛔ no `services` argument, and even if
@@ -86,37 +87,11 @@ export function scopeFor(everywhere) {
   return everywhere === true ? 'persona_global' : 'room'
 }
 
-/**
- * ⭐ THE BOUNDED WAIT. A reflection is UNATTENDED — nobody is waiting on it — so it can afford to await a
- * write and report the truth instead of a queued receipt. ⛔ But "can afford to wait" is not "may hang":
- * the lane is shared and serial, and a stuck write must degrade to `accepted` rather than block the pass.
- * ⓘ Sized against the measured cost of the work it waits on: a CPU embed is ~1–2s and the reconcile adds
- * a little, so this is generous by an order of magnitude and still bounded.
- */
-const RETAIN_WAIT_MS = 20000
-/** ⭐ A private sentinel, so a timeout can never be confused with a value the write returned. */
-const RETAIN_TIMEOUT = Symbol('retain-timeout')
-
-/**
- * ⭐⭐⭐ THE RECEIPT STATES — the EXISTING vocabulary, declared once instead of typed as literals.
- *
- * ⛔ Nothing new is named here. Ote, ratifying this change: *"Do not invent another receipt or state
- * vocabulary."* These are exactly the strings `retain` already recorded; a check can now assert against
- * the declaration rather than against a string it retypes — which is the difference between a proof and
- * a spelling test.
- *
- * ⭐⭐ AND THE THREE THAT MATTER ARE THREE, ⛔ NEVER TWO:
- *   persisted  the write happened and a row id proves it          ⇒ ok: true
- *   refused    the write was rejected, with a reason and a code   ⇒ ok: false
- *   accepted   ⚠️ WE STOPPED WAITING AND DO NOT KNOW              ⇒ ok: false, and ⛔ NEVER an act
- */
-export const RETENTION_STATE = Object.freeze({
-  persisted: 'persisted',
-  refused: 'refused',
-  accepted: 'accepted',
-  unrepresented: 'unrepresented',
-  declined: 'declined',
-})
+// ⭐⭐⭐ THE BOUND, THE VOCABULARY AND THE WAIT NOW LIVE IN ONE PLACE — `memory-write-receipt.js`,
+// beside the lane they describe. ⛔ They were briefly declared here, and that was one door's view of a
+// three-door problem: `keep`, `retain` and the model's own `remember_fact` all needed the same answer.
+// ⭐ Re-exported so existing importers keep working and there is still exactly ONE definition.
+export { RETENTION_STATE, RETAIN_WAIT_MS } from './memory-write-receipt.js'
 
 export const OWNERSHIP_QUESTION = 'I need to know whose memory this is before I can keep it. Say mine:true '
   + 'if it belongs to me — something about myself, my own view, my own relationships — or mine:false if it '
@@ -165,38 +140,29 @@ export function buildRetention(fastify, {
     if (!queued || typeof queued !== 'object') return queued
     // ⭐ Already resolved — `lesson` and `practice` await their own write and carry an id. ⛔ Nothing to do.
     if (queued.queued !== true) return queued
-    // ⛔⛔ QUEUED BUT NO RECEIPT — the honest answer is *we do not know*, ⛔ never `ok:true`.
-    // ⓘ This is reachable: the PACKAGE's `reconcileFactAsync` returns no `settled`, only the host's
-    // override does. A service built without that override must degrade to UNKNOWN and say so, ⛔ not
-    // fall back to the optimism this whole change removes.
+    // ⭐⭐ THE WAIT IS NOT HERE ANY MORE. `settled` is always-settling and already bounded by the host
+    // that owns the lane, so this READS a decided outcome.
+    //
+    // ⚠️⚠️ AND IT MUST NOT RE-RESOLVE IT — MEASURED, 2026-09-04. This first called `settleWrite(pending)`
+    // again, which double-wrapped an already-decided receipt: the inner `accepted` (ok:false) was read by
+    // the outer pass as a FAILED WRITE and re-labelled `refused`, with the real `why` lost to a generic
+    // fallback. ⛔ Two resolutions of one receipt, and the second could only ever disagree with the first
+    // — the same hazard as two bounds, one layer up. `retention-receipt-check` caught it within a run.
     const { settled: pending, ...rest } = queued
-    if (!pending) {
-      return { ...rest, ok: false, state: RETENTION_STATE.accepted,
-        why: 'this writer returned no receipt, so whether a row exists is unknown' }
-    }
-    try {
-      const settled = await Promise.race([
-        pending,
-        new Promise((r) => { setTimeout(() => r(RETAIN_TIMEOUT), RETAIN_WAIT_MS) }),
-      ])
-      // ⛔⛔ `accepted` IS NOT SUCCESS, and `ok:false` is what enforces that downstream: `effected()`
-      // reads `result.ok === false` and must never count a timeout as a retention act.
-      if (settled === RETAIN_TIMEOUT) {
-        return { ...rest, ok: false, state: RETENTION_STATE.accepted,
-          why: 'the write was still in flight when the wait elapsed' }
+    const r = typeof pending?.then === 'function' ? await pending : null
+    // ⛔⛔ NO RECEIPT, OR ONE THAT DOES NOT ANSWER IN THE CONTRACT'S VOCABULARY ⇒ *we do not know*,
+    // ⛔ never `ok:true`. ⓘ Reachable: the PACKAGE's own `reconcileFactAsync` returns no `settled`; only
+    // the host's override does. A service built without it must degrade to UNKNOWN and SAY SO, ⛔ not
+    // fall back to the optimism this whole change removes.
+    if (!r || typeof r.state !== 'string') {
+      return {
+        ...rest, ok: false, state: RETENTION_STATE.accepted, code: null, memoryId: null, result: r ?? null,
+        why: 'this writer returned no receipt, so whether a row exists is unknown',
       }
-      // ⭐ The refusal arrives as a VALUE, ⛔ not a throw: `pipeline.ingest` catches the store's error and
-      // carries `code` through deliberately — *"the host classifies; the pipeline only declines to erase."*
-      if (settled?.ok === false) {
-        return { ...rest, ok: false, state: RETENTION_STATE.refused, result: settled,
-          why: settled.error || 'the write failed', code: settled.code ?? null }
-      }
-      return { ...rest, ok: true, state: RETENTION_STATE.persisted, result: settled,
-        memoryId: idOf(settled?.result) ?? idOf(settled) }
-    } catch (e) {
-      return { ...rest, ok: false, state: RETENTION_STATE.refused,
-        why: e?.message || 'the write failed', code: e?.code ?? null }
     }
+    // ⛔⛔ `accepted` IS NOT SUCCESS, and `ok:false` is what enforces it downstream: `effected()` reads
+    // `result.ok === false` and must never count a timeout as a retention act.
+    return { ...rest, ok: r.ok, state: r.state, why: r.why, code: r.code, memoryId: r.id, result: r.result ?? r }
   }
 
   /**
@@ -551,19 +517,11 @@ export function buildRetention(fastify, {
     return receipt
   }
 
-  /** ⭐ A row id, from whichever shape the layer beneath answered in. PURE. */
-  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  function idOf(r) {
-    if (!r || typeof r !== 'object') return null
-    // ⭐ `recordId` is the practice store's answer. Ote's 039 ruling: `persisted` means the decision became
-    // durable Sotera-owned state, ⛔ not that it landed in one particular table — so the id is accepted
-    // from whichever store answered, and `store` (below) says which one it was.
-    for (const k of ['id', 'memoryId', 'memory_id', 'recordId']) {
-      const v = r[k]
-      if (typeof v === 'string' && UUID.test(v.trim())) return v.trim().toLowerCase()
-    }
-    return null
-  }
+  // ⓘ `idOf` moved to `memory-write-receipt.js` with the rest of the receipt contract — the same function
+  // decides `persisted` for `keep`, `retain` AND the model's own tools, so one copy is the only honest
+  // number. ⭐ Ote's 039 ruling still governs it: `persisted` means the decision became durable
+  // Sotera-owned state, ⛔ not that it landed in one particular table — so the id is accepted from
+  // whichever store answered, and `store` (below) says which one it was.
 
   return { keep, retain, authorFor, KINDS }
 }

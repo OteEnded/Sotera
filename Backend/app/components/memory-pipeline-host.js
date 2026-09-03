@@ -19,6 +19,8 @@ import { OBSERVATION_TYPE } from '@ote/memory/cognition/memory-observation.js'
 import { buildMemoryV2, buildMemoryStoreFor } from './memory-v2-host.js'
 import { reachTrace } from './room-scope.js'
 import { noteRetrieved } from './memory-retrieval-trace.js'
+// ⭐ THE ONE BOUNDED WAIT. It lives beside the lane it bounds, ⛔ not in `@ote/memory` and ⛔ not once per door.
+import { settleWrite } from './memory-write-receipt.js'
 
 /**
  * commitToMemory — the fused Owner→Resolution→Conflict→Persistence tail (today: reconcileFact).
@@ -285,28 +287,35 @@ export function buildMemoryToolService(fastify, { userId = null, persona, source
       const out = withoutDecisions(await mem.listArchived(opts))
       return withReach(out, await reachTrace(fastify, { userId, matched: countOf(out), }))
     },
-    // ⭐⭐ `settled` — THE SAME QUEUED WRITE, ALSO HANDED BACK AS A PROMISE.
+    // ⭐⭐⭐ `settled` — THE SAME QUEUED WRITE, HANDED BACK AS AN **ALWAYS-SETTLING** RECEIPT.
     //
-    // ⛔ THE RETURN SHAPE IS OTHERWISE UNCHANGED and every existing caller keeps the queued receipt it
-    // already has: `keep()` ignores this field entirely, so the chat path behaves exactly as before.
-    // ⭐ It exists for ONE caller — `retain()`, the reflection interface — which is an UNATTENDED pass
-    // with nobody waiting and therefore able to await the truth. ⓘ Reflection already drains this same
-    // lane at the end of every pass *"so a queued remember has finished and reported its id BEFORE the
-    // reflection row claims there was no memory"*; this moves that wait earlier and makes it per-write.
+    // ── ⚠️⚠️ WHAT CHANGED ON 2026-09-04, AND WHY IT IS HERE RATHER THAN AT EACH DOOR ────────────────
+    // `settled` used to be the LANE'S OWN promise — unbounded, and resolving to the pipeline's internal
+    // shape. Two things followed, both measured:
+    //   · `keep()` DISCARDED it and reported `{ok:true, queued:true}` for a write the M2 gate refused;
+    //   · the model's `remember_fact` returned this object verbatim, and `JSON.stringify` flattened the
+    //     Promise to `{}` — so a KEPT fact and a REFUSED one serialised BYTE-IDENTICALLY.
     //
-    // ⚠️ Awaiting it is SAFE ONLY BECAUSE OF M2-17: before the lane rethrew, awaiting returned `null` and
-    // a failed write read as a success. ⛔ And leaving it unawaited is safe for the same reason — the
-    // lane's own chain guard absorbs the rejection, so no caller has to handle it.
+    // ⭐⭐ Three doors had the same defect, so the fix is at the seam all three already share: the wait
+    // happens ONCE, HERE, where the lane lives. ⇒ `settled` now always settles, within one bound, to
+    // `persisted / refused / accepted` — and a consumer can `await` it knowing no timeout number.
+    // ⛔ Ote, ratifying: *"Do not put the bound into @ote/memory."*
+    //
+    // ⓘ `queued: true` is kept for the one thing it still truthfully says — *this call returned before
+    // the write did* — and `resolveReceipt` uses it to tell "nothing to await" from "await this".
+    //
+    // ⚠️ Leaving the lane's promise unawaited on timeout is safe: `enqueueWrite` attaches its own
+    // absorbing continuation, so a later rejection can never escape as an unhandled one.
     rememberAsync(opts = {}) {
       if (!opts.content || !String(opts.content).trim()) throw new Error('content is required')
-      const settled = mem.enqueue('pipeline.remember', traced('remember', () => pipeline.ingest({ ...opts, type: OBSERVATION_TYPE.episodic, source: opts.source ?? 'model-tool' }), fastify?.log))
-      return { ok: true, queued: true, settled }
+      const run = mem.enqueue('pipeline.remember', traced('remember', () => pipeline.ingest({ ...opts, type: OBSERVATION_TYPE.episodic, source: opts.source ?? 'model-tool' }), fastify?.log))
+      return { ok: true, queued: true, settled: settleWrite(run) }
     },
     reconcileFactAsync(opts = {}) {
       const { entity, attribute, value } = opts
       if (!entity || !attribute || value == null || !String(value).trim()) throw new Error('entity, attribute, value are required')
-      const settled = mem.enqueue('pipeline.reconcileFact', traced('reconcileFact', () => pipeline.ingest({ ...opts, owner: entity, type: OBSERVATION_TYPE.fact, source: opts.source ?? 'model-tool' }), fastify?.log))
-      return { ok: true, queued: true, settled }
+      const run = mem.enqueue('pipeline.reconcileFact', traced('reconcileFact', () => pipeline.ingest({ ...opts, owner: entity, type: OBSERVATION_TYPE.fact, source: opts.source ?? 'model-tool' }), fastify?.log))
+      return { ok: true, queued: true, settled: settleWrite(run) }
     },
   }
 }
