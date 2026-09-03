@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path consolidated 17:51 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path 17:51; three shapes 17:55 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐⭐ M2 IMPLEMENTATION BOUNDARY — 3 shape decisions, then BUILD (§3)
+▶  NEXT                 ⭐⭐ 3 SHAPES DERIVED — ⏸ ratify, then BUILD. Proof order is MANDATORY
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -716,6 +716,48 @@ DECLARE → BIND → RESOLVE → ADMISSION → question_id_at_admission → red-
    ⇒ **M2 IS NOT DONE UNTIL THE SECOND IS TRUE**, and ⛔ the two must never be reported as one
 ⚠️ A GREEN SUITE PROVES NOTHING UNTIL RP-D0 AND RP-W0 HAVE PASSED — the warrant register passes
    VACUOUSLY on 0 rows, the kind register passes VACUOUSLY on 100% DEFER
+```
+
+## ⭐⭐⭐ THE THREE REMAINING SHAPES — DERIVED 17:55 → `CONTRACT_SOTERA_M2_THREE_SHAPES`
+## ⏸ RATIFY THESE THREE, THEN CROSS THE IMPLEMENTATION BOUNDARY AND BUILD.
+
+```
+① DECLARE OCCASION — the invariant is an EQUALITY TEST and nothing more ⇒ ⛔ no FK (occasions live in
+   DIFFERENT tables and the rule never RESOLVES one) · ⛔ no type discriminator · ⛔ no timestamp
+   (`declared_at` exists and is NOT what the rule needs — "same occasion" is IDENTITY, not ordering)
+   ⚠️⚠️ NULLABILITY IS THE WHOLE SAFETY QUESTION: a bypassing run that OMITS it yields NULL (or the
+   DEFAULT) and ⛔ THE CHECK PASSES EITHER WAY ⇒ ⭐⭐⭐ A DEFAULT DOES NOT HELP; OMISSION MUST BE
+   IMPOSSIBLE
+   ⭐ And there is NO "no occasion" case — an operator act's occasion is THE ACT (the reconcile:
+   precedent) ⇒ ⛔ no sentinel needed
+   ⇒ ⭐ SHAPE: `declared_in_occasion text NOT NULL` ⛔ NO DEFAULT · system-derived · a writer that
+   supplies nothing FAILS LOUDLY. ⚠️ Consumer with no occasion ⇒ DEFER (fail closed)
+
+② BIND NOT-PRESENT DISCIPLINE — ⭐ first SEPARATE two rules I had conflated: (a) self-authorisation is
+   just shape ① applied to the bind record · (b) the not-present discipline is the one needing a mechanism
+   ⛔ person-service's shape is NOT automatically right: its in-memory map + 30-min TTL + 500 cap +
+   "a re-proposal must not reset the clock" exist because its proposal is EPHEMERAL CONVERSATIONAL STATE
+   ⭐⭐⭐ BIND ALREADY HAS A DURABLE RECORD — the binding audit log ⇒ the pending state should be DURABLE
+   AND AUDITABLE, ⛔ not in-memory
+   ⭐⭐ AND TWO OF THE THREE MECHANISMS DISSOLVE: ⛔ the TTL (person-service needs one because it has NO
+   compare-and-set; BIND HAS `expected-current` ⇒ freshness comes from CAS, ⛔ not a clock) and ⛔ the
+   re-proposal rule (there IS no clock). ✅ Only the LATER-OCCASION requirement survives
+   ⇒ ⭐ SHAPE: PROPOSE = a binding-log row, ⛔ NO effect on mst_slots · CONFIRM = a row REFERENCING it,
+   REFUSED if it shares the proposal's occasion or if expected-current no longer matches. TWO ROWS FOR
+   ONE BIND — and that IS the evidence. ⛔ No in-memory state, no TTL, no cap, no clock rule
+
+③ `default` NAMESPACE DECLARATION — transcribing: owner OPEN · writers ALL · ⭐ SLOT-GOVERNED (all 82
+   slots + 55 slotted rows) · reads INCLUDE
+   ⚠️ THE SMALLEST SHAPE FOR `default` ALONE WOULD DROP THE OWNERSHIP COLUMNS — ⛔ but that builds a
+   table that cannot express the NEXT namespace, and Ote ruled ownership is required ⇒ keep them with a
+   CHECK making them present exactly when meaningful
+   ⇒ namespace_key PK (⛔ NO FK — undeclared must stay permissive) · means · owner_kind CHECK(open |
+   runtime-subsystem | registration-act) · owner NULL · permitted_writers text[] NULL · slot_governed
+   bool · read_default CHECK(include | exclude-unless-requested) · declared_by/at
+   + CHECK( (owner_kind='open') = (owner IS NULL AND permitted_writers IS NULL) )
+   ⭐⭐ permitted_writers is NULL for OPEN — ⛔ not an empty array (which would read "nobody may write",
+   the OPPOSITE of the truth) and ⛔ not a wildcard
+   ⛔ ONE TABLE, ONE ROW: `default`. No scope, no `project`, no `identity`, no read-behaviour change
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD

@@ -6724,3 +6724,58 @@ slot-governed one ALLOWs) — which is what makes **declaring `default` provable
 
 ⏸ **What this asks for: three shape decisions, then BUILD.** ⛔ No further semantic derivation is needed on
 the M2 path, and ⛔ the four post-M2 items must not become reasons to reopen it.
+
+---
+
+## 2026-09-03 17:55 (+07:00) — the three remaining M2 shapes; ready to cross the implementation boundary
+
+⛔ **NOT built.** ⏸ Origin PARKED · namespace LOCKED · **M2 semantic scope CLOSED** · M2-6 unwired ·
+M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/CONTRACT_SOTERA_M2_THREE_SHAPES.md`.
+
+**① THE DECLARE OCCASION.** The invariant is an **equality test and nothing more** ⇒ ⛔ no FK (occasions
+live in **different tables** — a pass, a revisit, a turn, an operator act — and the rule never needs to
+**resolve** one) · ⛔ no type discriminator · ⛔ no timestamp (ⓘ `declared_at` already exists and is **not**
+what the rule needs — *"same occasion"* is **identity**, ⛔ not ordering).
+⚠️⚠️ **Nullability is the whole safety question.** A bypassing run that **omits** it yields NULL — or the
+DEFAULT — and ⛔ **the check passes either way.** ⇒ ⭐⭐⭐ **a default does not help; omission must be
+IMPOSSIBLE.** ⭐ And there is **no *"no occasion"* case**: an operator act's occasion is **the act** (the
+`reconcile:` precedent) ⇒ ⛔ no sentinel is needed.
+⇒ ⭐ **`declared_in_occasion text NOT NULL`, ⛔ NO DEFAULT**, system-derived; a writer that supplies
+nothing **fails loudly**. ⚠️ A consumer with no occasion cannot prove non-collision ⇒ **DEFER**.
+
+**② THE BIND NOT-PRESENT DISCIPLINE.** ⭐ First, two rules I had **conflated** are separated: (a)
+self-authorisation is just **shape ① applied to the bind record**; (b) the not-present discipline is the
+one that needs a mechanism.
+⛔ **`person-service`'s shape is not automatically right.** Its in-memory map, 30-minute TTL, 500 cap and
+*"a re-proposal must not reset the clock"* all exist because **its proposal is ephemeral conversational
+state**. ⭐⭐⭐ **BIND already has a durable record — the binding audit log** ⇒ the pending state should be
+**durable and auditable, ⛔ not in-memory**, which is strictly better for an act whose whole justification
+is that it must not happen silently.
+⭐⭐ **And two of the three mechanisms dissolve:** ⛔ **the TTL** — person-service needs one because it has
+**no compare-and-set**; BIND **has `expected-current`**, so **freshness comes from CAS, ⛔ not a clock** ·
+⛔ **the re-proposal rule** — **there is no clock** to protect. ✅ Only the **later-occasion requirement**
+survives, and it is the whole point.
+⇒ ⭐ **PROPOSE** = a binding-log row with **no effect on `mst_slots`**; **CONFIRM** = a row **referencing**
+it, refused if it **shares the proposal's occasion** or if **`expected-current`** no longer matches.
+**Two rows for one bind — and that is the evidence.** ⛔ No in-memory state, no TTL, no cap, no clock rule.
+Enforcement at BIND's own write seam, one place.
+
+**③ THE `default` NAMESPACE DECLARATION.** Transcribing what already operates: owner **open** · writers
+**all** · ⭐ **slot-governed** (ⓘ all 82 slots and all 55 slotted rows) · reads **include**.
+⚠️ **The smallest shape for `default` alone would drop the ownership columns** — ⛔ but that builds a table
+that **cannot express the next namespace**, and Ote ruled a declaration must express **ownership**. ⇒ keep
+them with a CHECK making them present **exactly when meaningful**.
+⇒ `namespace_key` PK (⛔ **no FK** — undeclared must stay permissive) · `means` · `owner_kind`
+CHECK(open | runtime-subsystem | registration-act) · `owner` NULL · `permitted_writers text[]` NULL ·
+`slot_governed` bool · `read_default` CHECK(include | exclude-unless-requested) · `declared_by`/`at`
++ `CHECK( (owner_kind='open') = (owner IS NULL AND permitted_writers IS NULL) )`.
+⭐⭐ **`permitted_writers` is NULL for an open namespace** — ⛔ not an empty array (which would read
+*"nobody may write"*, the **opposite** of the truth) and ⛔ not a wildcard.
+⛔ **One table, one row: `default`.** No scope · no `project` · no `identity` · no read-behaviour change.
+
+⏸ **Ratify these three and the M2 path has no remaining semantic questions.** The build order is fixed:
+`implement → RP-D0 FIRST → RP-D1…D10 → RP-T1 → RP-NQ1/2/3 → RP-N8 → isolated E2E`.
+⚠️⚠️ **And the standing rule throughout:** *a "nothing changed" assertion is not evidence until the
+instrument has first demonstrated it can observe a change.* ⛔ **The current 100% DEFER state must not be
+allowed to make the suite green — RP-D0 must prove ALLOW is reachable before any refusal proof counts.**
