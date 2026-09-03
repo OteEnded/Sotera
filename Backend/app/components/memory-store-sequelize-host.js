@@ -45,6 +45,8 @@ import { BASIS, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFro
 // `memory-self-state-claim.js` and `memory-ownership.js`. This file holds the ENFORCEMENT and none of the
 // judgement about what a modality means.
 import { slotViolation } from './memory-modality.js'
+import { resolveSlotQuestion } from './memory-declaration-host.js'
+import { checkKind, KIND_OUTCOME } from './memory-kind-precondition.js'
 // ⭐⭐⭐ THE OWNERSHIP BOUNDARY — what ordinary semantic memory does NOT own. Ote, 2026-08-26: *"make it
 // know what it does not own instead of corrupting the meaning to fit the storage it happens to have."*
 // ⛔ The judgement is in the predicate; this file holds only the enforcement and the recording.
@@ -293,6 +295,45 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     const memoryIds = tracedMemoryIds(turnKey)
     if (!memoryIds.length) return row?.evidence ?? null
     return withDerivedFrom(row.evidence, derivedFrom({ basis: BASIS.inContext, memoryIds, via: 'turn-retrieval' }))
+  }
+
+  /**
+   * ⭐⭐ THE ADMITTING QUESTION — the third gate, beside `admissibleToSlot` and `slotViolation`.
+   *
+   * ⭐ This is the ONLY place an admission can be captured, because `reconcileFact` is the only path that
+   * resolves a slot: a row with no `slot_id` has no slot, and a slot is what carries a question.
+   * ⓘ Measured 2026-09-03: 49 of 104 slot-shaped rows have no slot at all.
+   *
+   * ⛔ RESOLVE makes no judgement and this makes no decision about the write — it answers one question
+   * (*was this row admitted under a declared question, and which?*) and returns null when it was not.
+   */
+  const admittingQuestionFor = async (row) => {
+    const slotId = row?.slot_id ?? null
+    const claimKind = row?.claimKind ?? null
+    if (!slotId || typeof claimKind !== 'string' || !claimKind.trim()) return null
+    try {
+      const { schema: sch } = txn_memories.getTableName()
+      if (!sch) return null
+      const q = async (sql, params = []) => ({
+        rows: await txn_memories.sequelize.query(sql, { bind: params, type: 'SELECT' }),
+      })
+      const resolved = await resolveSlotQuestion({ query: q, schema: sch, slotId })
+      // ⭐ An UNDECLARED namespace leaves `slotGoverned` null ⇒ the gate does not apply ⇒ no pin.
+      // Undeclared does not mean safe; it means not governed yet.
+      if (!resolved || resolved.slotGoverned !== true) return null
+      const verdict = checkKind({ slotKind: resolved.slotKind, claimKind })
+      return verdict.outcome === KIND_OUTCOME.allow ? resolved.questionId : null
+    } catch (e) {
+      // ⛔ A pin is a RECORD, never a permission — failing to compute one must not fail a write. And it
+      // fails to NULL, which already means "no kind gate was applied", so nothing is misreported.
+      // ⚠️ BUT IT MUST NOT BE SILENT. `log` is optional on this factory, so a store built without one
+      // would swallow this entirely — and a swallowed failure that writes NULL is indistinguishable from
+      // a gate that correctly declined. That ambiguity cost this project a 4-in-5 fact drop once already,
+      // so the console is the floor when no logger was wired.
+      const msg = `[memory] could not resolve the admitting question — writing NULL: ${e?.message}`
+      if (log?.warn) log.warn({ err: e?.message }, msg); else console.warn(msg)
+      return null
+    }
   }
 
   return {
@@ -807,9 +848,29 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // `subjectEstablished` are how a producer DECLARES what it knows; none of them is a field on this
       // table, and letting them through would either be silently dropped by the ORM (the
       // `subject_person_id` failure, which cost seven memories) or rejected. Stripped explicitly.
-      const { semanticTarget: _st, sourceText: _sx, subjectEstablished: _se, ...persistable } = row
+      // ⚠️⚠️ `claimKind` IS TRANSPORT TOO, AND ITS NAME IS A TRAP WORTH SPELLING OUT: `row.kind` on this
+      // table is `semantic`/`identity` — a NAMESPACE-ish axis — and has nothing to do with *what question
+      // a claim answers*. Two different facts, and one of them would silently answer for the other if the
+      // producer's kind arrived under that name.
+      const { semanticTarget: _st, sourceText: _sx, subjectEstablished: _se, claimKind: _ck, ...persistable } = row
+      // ⭐⭐⭐ THE ADMISSION PIN (048 · ruling ③). The question a row was admitted under is recorded ON THE
+      // ROW, in the same statement that writes it — ⛔ never looked up later, because a later lookup
+      // follows the slot to whatever it points at NOW, and that misreading is the whole reason the column
+      // exists. M2-10 stops a superseded question from RE-VALIDATING a row; it does not stop one from
+      // being MISREAD after a repoint.
+      //
+      // ⛔⛔ AND THIS DOES NOT REFUSE ANY WRITE. `checkKind` is a precondition on REPLACEMENT — whether an
+      // incoming claim may be treated as answering the slot's question — and M2-10 already ruled its DEFER
+      // "a consumer-side restriction, not a slot-level disablement". ⓘ No writer declares a claim kind
+      // today, so refusing here would refuse every existing writer, which is 031's exact rule: not a
+      // protection, an outage. ⇒ the gate's ALLOW is what earns the pin; anything else leaves it NULL.
+      //
+      // ⭐ NULL therefore means exactly one thing — *no kind gate was applied to this row* — and never
+      // "admitted under the slot's current question".
+      const admittedQuestionId = await admittingQuestionFor(row)
       const created = await txn_memories.create({
         ...persistable,
+        question_id_at_admission: admittedQuestionId,
         // ⭐⭐⭐ THE DERIVATION AXIS — what this row rests on, kept apart from the OCCASION it was written on.
         //
         // ⚠️⚠️ THE MEASURED FAILURE: `676e17b9` says *"we will build 'Rome' together as our shared project

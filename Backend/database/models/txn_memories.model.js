@@ -263,6 +263,24 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.UUID,
                 allowNull: true,
             },
+            // ⭐⭐⭐ THE QUESTION THIS ROW WAS ADMITTED UNDER (migration 048). Pinned at admission in the
+            // same statement that writes the row — never looked up later, because a later lookup follows
+            // the slot to whatever it points at NOW, and that misreading is the whole reason it exists:
+            // M2-10 stops a superseded question from RE-VALIDATING a row, not from being MISREAD.
+            //
+            // ⚠️ NULL MEANS EXACTLY ONE THING — *no kind gate was applied to this row* — true of three
+            // stated situations: the row predates the gate, it is outside the gate's domain, or it came
+            // through a writer that bypasses the seam. ⛔ Never "admitted under the slot's current question".
+            //
+            // ⚠️⚠️ AND IT IS DECLARED HERE BECAUSE THE COMMENT ABOVE IS NOT A STORY — IT IS A WARNING THAT
+            // CAME TRUE AGAIN. The gate resolved correctly and `checkKind` returned ALLOW, and the value
+            // still never reached the INSERT: Sequelize dropped the undeclared attribute in silence, with
+            // no error, exactly as it did to `subject_person_id`. ⓘ RP-T1's positive control is the only
+            // reason it was noticed — the two assertions that expected NULL were passing.
+            question_id_at_admission: {
+                type: DataTypes.UUID,
+                allowNull: true,
+            },
             // ⭐⭐ WHO AUTHORED this memory (migration 015). THE OWNERSHIP AXIS — Ote, 2026-08-20:
             // *"Ownership follows authorship."* `account` = the human said it (extraction);
             // `persona` = Sotera formed the understanding herself (episode / reflection / lesson /
