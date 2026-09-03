@@ -6978,3 +6978,48 @@ exactly like the memory subsystem breaking.
 
 ⏸ **Six for Ote**, then: build the consumer → red-proof governed + ungoverned → one real DECLARE + BIND via
 B-ii → a positive replacement control → enable and observe.
+
+---
+
+## 2026-09-03 19:05 (+07:00) — THE ENFORCEMENT CONSUMER IS BUILT AND BOTH PATHS ARE PROVED
+
+**OTE RATIFIED ALL SIX** and gave the build order. `✓ all 66 suites passed`.
+
+**BUILT: `memory-replacement-gate.js` (PURE) + wired at the store's `create`.**
+⭐⭐⭐ **The seam placement carries the invariant.** `supersedes_id` present IS the UPDATE signal at that
+seam — and `reconcileFact`'s NOOP/DUPLICATE branch **returns before `create` is ever called**. So
+*"COLLAPSE is never gated"* is guaranteed by **placement, not by a conditional anyone could later delete**.
+⭐⭐ And the ordering does the rest: the superseded row is invalidated only **after** `create` returns, so a
+refusal keeps the previous belief **live** and the exactly-one-live-row invariant intact.
+
+**THREE STATES, NEVER TWO.** The gate returns `NOT-IN-SCOPE` (outcome **null**) · `GOVERNED/ALLOW` ·
+`GOVERNED/REFUSE`. ⭐ Ote's warning — *"don't let the implementation accidentally turn 'not in scope' into
+DEFER"* — is proved on **every ungoverned route separately**: not-an-update · undeclared namespace ·
+namespace declared not-slot-governed · unbound slot. Four routes, four tests, because two routes to one
+guard are two tests.
+
+**THE FOUR REQUIRED DEMONSTRATIONS, all behavioural through the real store:**
+**B** ungoverned ⇒ a superseding write is **accepted**, its `supersedes_id` intact, and it carries **no
+pin** · **C2** governed + matching kind ⇒ the UPDATE is **allowed** · **C3/C4** governed + mismatched kind,
+and governed + **no** kind ⇒ **refused loudly** with `REPLACEMENT_REFUSED`, exposing the slot's question
+and the claim's kind as diagnostic context · **E** a **collapse on a governed slot succeeds regardless of
+M2**, leaving exactly one live row.
+⭐ With controls throughout: a NEW write on the governed slot is accepted and pinned first, so the refusals
+cannot be a broken write path; and `GOVERNED/ALLOW` is asserted so the NOT-IN-SCOPE results are not simply
+what the function always returns.
+
+**⭐⭐⭐ AND PART D IS THE ONE THAT MATTERS:** after **two** refusals the previous belief is **still live**
+and the refused rows were **never written at all** — a refusal leaves the world exactly as it found it.
+
+**⚠️ ONE HONEST NUANCE, STATED IN THE CODE RATHER THAN GLOSSED.** Inside an UPDATE the superseded row and
+any duplicate extras are invalidated **together, after** the create — so a refusal also forgoes *that
+write's* opportunistic heal of pre-existing duplicates. It creates **none**; the prior state is left
+exactly as it was. The alternative would be a refusal that **mutates**, which is the partial-act failure
+this project refuses everywhere else. That is the correct trade, and it is a trade.
+
+⏸ **Remaining before enable/observe:** a real DECLARE + BIND via B-ii, and a positive replacement control
+against the real corpus. ⚠️ And §7.1 still governs that choice: **no writer supplies a claim kind today**,
+so the first bind makes that slot's ordinary UPDATEs refuse. The candidate slot's writer path must be
+identified first — ⛔ not discovered after.
+
+Origin PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 and Rome UNTOUCHED · post-M2 OUT · no binding created.
