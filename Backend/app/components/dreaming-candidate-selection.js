@@ -134,12 +134,20 @@ export function provenanceOf(turn, { subjectPersonId = null, roomOwnerPersonId =
   // derived from the other; when they differ, the account holder speaking is a third party.
   // ⏸ ⛔ This refusal is NOT a ruling on gap ⑤ (claim subject vs slot subject, both known) — Ote is
   // holding that for a real divergent case, ⛔ not a constructed one.
+  // ⛔⛔⛔ AND THIS IS A REPRESENTATION GAP, ⛔ NOT A RULING THAT THIRD-PARTY INFORMATION IS INVALID.
+  // Ote, 2026-09-03, ratifying the fix: *"do not let this fix become a ruling that third-party
+  // information about another person is invalid. **Ote can tell Sotera about Hermes**; the unresolved
+  // question is **how that provenance should be represented.**"*
+  // ⇒ ⭐ what is refused here is CLASSIFYING such a turn as `primary` or `secondary` — because it is
+  // neither, and forcing it into either would misstate who said it. ⛔ It is NOT a judgement that the
+  // information is worthless, inadmissible, or unusable; ⏸ it is gap ⑤ waiting for a real case.
   if (subjectPersonId !== roomOwnerPersonId) {
     return {
       ok: false,
       refusal: REFUSAL.unclassifiable,
       why: 'the room\'s account holder is not the subject — a third party speaking about the subject is '
-        + 'neither primary nor secondary, and classing it either way would misrepresent who said it',
+        + 'neither primary nor secondary, so this vocabulary cannot represent it. ⛔ Not a judgement that '
+        + 'the information is invalid: how third-party provenance should be represented is undecided',
     }
   }
   return { ok: true, provenance: CANDIDATE_PROVENANCE.primary, speaker: 'subject' }

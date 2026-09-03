@@ -5184,3 +5184,50 @@ subject."*
 
 **60 of 60 checks · 689 of 689 unit tests · ⛔ zero importers of the module outside its own check ⇒ M2-6
 still unwired, M2 disabled, 12b baseline unmoved.**
+
+---
+
+## 2026-09-03 05:20 (+07:00) — INVARIANT RECORDED · THIRD-PARTY CLARIFIED · ⏸ NEXT DECISION IDENTIFIED
+
+### ⭐⭐⭐ THE STANDING RED-PROOF QUESTION, NOW A MEMORY
+
+> **"I could not establish X" must never silently become "X is established."**
+
+Ote ratified it as a **standard red-proof question for all future M2 work**, to be asked *"whenever
+nullable/unknown state crosses a safety boundary."* ⓘ Four measured mechanisms in this arc alone —
+**SQL NULL** (043's CHECK) · **missing coverage** (RP3/RP11 never attempted the null route) ·
+**discarded evidence** (the r1/g1 label mismatch) · **JS short-circuit** (`a && b && a!==b`).
+⭐ It fails in the SHAPE OF A PLAUSIBLE RESULT — *"could not verify"* is what a WORKING gate says — so it
+confirms an expectation and nobody looks again.
+
+### ⛔⛔ AND THE CLARIFICATION OTE ATTACHED — recorded in CODE, not just prose
+
+> *"do not let this fix become a ruling that third-party information about another person is invalid.
+> **Ote can tell Sotera about Hermes**; the unresolved question is **how that provenance should be
+> represented.**"*
+
+⇒ the third-party refusal now says the **VOCABULARY cannot represent it**, ⛔ explicitly *"not a judgement
+that the information is invalid"* — and a red-proof asserts that wording, because **a refusal message is
+what a later reader takes as the rule.**
+
+### ⏸ THE NEXT SEMANTIC DECISION — **WHAT ACT DECLARES A SLOT'S QUESTION?**
+
+```
+mst_slots                    82
+…with a declared question     0        ⇒ checkKind returns DEFER for EVERY slot
+memories addressing a slot   55 of 125
+```
+
+⭐⭐⭐ **M2 cannot commit to ANY existing slot — and not because of a bug.** M2-10's locked lifecycle
+says **declared, ⛔ never inferred · ⛔ no backfill · unknown ⇒ DEFER *permanently*** — and it locked the
+declarer's PROPERTIES (*"something that actually knows the question"*) while ⛔ **never naming the ACT or
+the OCCASION.** ⇒ the 82 existing slots defer **forever** unless something declares them.
+
+⚠️ This is a **harder blocker than M2-1**, which is now merely implementation of a locked ruling (a
+migration for 6f + the product axis — ⓘ verified still absent: the CHECK is still `6a…6e` and there are
+**0** product columns).
+
+**Ranked:** ① who declares a question ⇒ ⛔ blocks every commitment · ② M2-1 migration ⇒ locked, not a
+decision · ③ M2-2 / M2-4 / gap ⑤ / quantifier vocabulary ⇒ parked or held.
+
+**60 of 60 checks · M2-6 unwired · M2 disabled · 12b baseline unmoved.**

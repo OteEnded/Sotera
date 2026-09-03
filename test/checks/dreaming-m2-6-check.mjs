@@ -198,9 +198,17 @@ try {
     && unknownSel.refused.some((r) => r.refusal === REFUSAL.unclassifiable), JSON.stringify(unknownSel.refused))
   // ⏸ ⛔ AND THIS FIX IS NOT A RULING ON GAP ⑤. Ote: *"Keep gap ⑤ separate and open. Do not use this
   // defect fix to decide the semantics of known claim subject ≠ slot subject."*
+  const knownDiff = provenanceOf({ role: 'user' }, { subjectPersonId: PERSON_A, roomOwnerPersonId: PERSON_B })
   check('RP3b · ⏸ gap ⑤ stays open — the known-different case still refuses, ⛔ unchanged by this fix',
-    provenanceOf({ role: 'user' }, { subjectPersonId: PERSON_A, roomOwnerPersonId: PERSON_B }).refusal
-      === REFUSAL.unclassifiable)
+    knownDiff.refusal === REFUSAL.unclassifiable)
+  // ⛔⛔⛔ AND THE REFUSAL MUST NOT READ AS AN INVALIDITY RULING. Ote, 2026-09-03: *"do not let this fix
+  // become a ruling that third-party information about another person is invalid. Ote can tell Sotera
+  // about Hermes; the unresolved question is how that provenance should be represented."*
+  // ⭐ What is refused is CLASSIFYING it into a two-value vocabulary that cannot hold it — ⛔ not the
+  // information's worth. Asserted, because a refusal message is what a later reader will take as the rule.
+  check('RP3b · ⭐⭐⭐ the third-party refusal says the VOCABULARY cannot represent it, ⛔ NOT that the '
+    + 'information is invalid', /cannot represent it/.test(knownDiff.why ?? '')
+    && /[Nn]ot a judgement that the information is invalid/.test(knownDiff.why ?? ''), knownDiff.why)
 
   // ⛔ AND THE HOST MUST NOT DEFAULT ONE AXIS TO THE OTHER.
   const hostSrc = readFileSync(new URL('../../Backend/app/components/dreaming-candidate-host.js', import.meta.url), 'utf8')
