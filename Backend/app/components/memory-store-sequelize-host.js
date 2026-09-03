@@ -47,6 +47,7 @@ import { BASIS, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFro
 import { slotViolation } from './memory-modality.js'
 import { resolveSlotQuestion } from './memory-declaration-host.js'
 import { checkKind, KIND_OUTCOME } from './memory-kind-precondition.js'
+import { governsReplacement, REPLACEMENT } from './memory-replacement-gate.js'
 // ⭐⭐⭐ THE OWNERSHIP BOUNDARY — what ordinary semantic memory does NOT own. Ote, 2026-08-26: *"make it
 // know what it does not own instead of corrupting the meaning to fit the storage it happens to have."*
 // ⛔ The judgement is in the predicate; this file holds only the enforcement and the recording.
@@ -307,22 +308,25 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
    * ⛔ RESOLVE makes no judgement and this makes no decision about the write — it answers one question
    * (*was this row admitted under a declared question, and which?*) and returns null when it was not.
    */
-  const admittingQuestionFor = async (row) => {
+  const slotGovernanceFor = async (row) => {
     const slotId = row?.slot_id ?? null
     const claimKind = row?.claimKind ?? null
-    if (!slotId || typeof claimKind !== 'string' || !claimKind.trim()) return null
+    // ⭐ NOT IN SCOPE, and cheaply: a row with no slot has no question, so there is nothing to govern and
+    // nothing to pin. ⛔ This is not a DEFER — the gate does not apply.
+    if (!slotId) return { resolved: null, pin: null }
     try {
       const { schema: sch } = txn_memories.getTableName()
-      if (!sch) return null
+      if (!sch) return { resolved: null, pin: null }
       const q = async (sql, params = []) => ({
         rows: await txn_memories.sequelize.query(sql, { bind: params, type: 'SELECT' }),
       })
       const resolved = await resolveSlotQuestion({ query: q, schema: sch, slotId })
-      // ⭐ An UNDECLARED namespace leaves `slotGoverned` null ⇒ the gate does not apply ⇒ no pin.
-      // Undeclared does not mean safe; it means not governed yet.
-      if (!resolved || resolved.slotGoverned !== true) return null
-      const verdict = checkKind({ slotKind: resolved.slotKind, claimKind })
-      return verdict.outcome === KIND_OUTCOME.allow ? resolved.questionId : null
+      // ⭐ An UNDECLARED namespace leaves `slotGoverned` null ⇒ not governed YET ⇒ no pin, no gate.
+      if (!resolved || resolved.slotGoverned !== true) return { resolved, pin: null }
+      const verdict = (typeof claimKind === 'string' && claimKind.trim())
+        ? checkKind({ slotKind: resolved.slotKind, claimKind })
+        : null
+      return { resolved, pin: verdict?.outcome === KIND_OUTCOME.allow ? resolved.questionId : null }
     } catch (e) {
       // ⛔ A pin is a RECORD, never a permission — failing to compute one must not fail a write. And it
       // fails to NULL, which already means "no kind gate was applied", so nothing is misreported.
@@ -332,7 +336,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // so the console is the floor when no logger was wired.
       const msg = `[memory] could not resolve the admitting question — writing NULL: ${e?.message}`
       if (log?.warn) log.warn({ err: e?.message }, msg); else console.warn(msg)
-      return null
+      return { resolved: null, pin: null }
     }
   }
 
@@ -867,7 +871,37 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       //
       // ⭐ NULL therefore means exactly one thing — *no kind gate was applied to this row* — and never
       // "admitted under the slot's current question".
-      const admittedQuestionId = await admittingQuestionFor(row)
+      const governance = await slotGovernanceFor(row)
+      // ⭐⭐⭐ THE REPLACEMENT AUTHORITY (ratified 2026-09-03). `supersedes_id` present IS the UPDATE
+      // signal at this seam — and this is the ONLY place it can sit: `reconcileFact`'s NOOP/DUPLICATE
+      // branch returns BEFORE `create` is called, so a collapse can never reach this gate. *"COLLAPSE is
+      // never gated"* is therefore guaranteed by PLACEMENT, ⛔ not by a conditional anyone could delete.
+      //
+      // ⚠️ AND A REFUSAL LEAVES THE WORLD AS IT FOUND IT. The superseded row is invalidated only AFTER
+      // this create returns, so throwing here keeps the previous belief LIVE and the exactly-one-live-row
+      // invariant intact. ⓘ It also forgoes that write's opportunistic collapse of pre-existing
+      // duplicates — it creates none, and the alternative would be a refusal that mutates, which is the
+      // partial-act failure this project refuses everywhere else.
+      if (row?.supersedes_id) {
+        const gate = governsReplacement({
+          isUpdate: true,
+          slotGoverned: governance.resolved?.slotGoverned ?? null,
+          slotKind: governance.resolved?.slotKind ?? null,
+          claimKind: row?.claimKind ?? null,
+        })
+        if (gate.outcome === REPLACEMENT.refuse) {
+          log?.warn?.({ scope: gate.scope, why: gate.why, slot: row.slot_id, claimKind: row?.claimKind ?? null },
+            '[memory] refused a REPLACEMENT in a governed slot')
+          const e4 = new Error(`refused: ${gate.why}`)
+          e4.code = 'REPLACEMENT_REFUSED'
+          e4.reason = 'governed-slot-kind-mismatch'
+          e4.scope = gate.scope
+          e4.slotKind = governance.resolved?.slotKind ?? null
+          e4.claimKind = row?.claimKind ?? null
+          throw e4
+        }
+      }
+      const admittedQuestionId = governance.pin
       const created = await txn_memories.create({
         ...persistable,
         question_id_at_admission: admittedQuestionId,
