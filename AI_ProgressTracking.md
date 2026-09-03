@@ -7244,3 +7244,54 @@ now use `IS DISTINCT FROM` and a baseline.
 **67/67 suites, 0 FAIL lines in the run log.** Record: `Reference/docs/RECORD_SOTERA_FIRST_GOVERNED_BIND.md`.
 Fences hold: Origin PARKED, namespace LOCKED, M2-6 UNWIRED, 12b FROZEN, P1 and Rome UNTOUCHED, post-M2 OUT,
 no second slot bound, no writer taught.
+
+
+---
+
+## 2026-09-03 20:30 (+07:00) — TWO DERIVATIONS: the async retention receipt, and the consuming occasion
+
+Ote kept the three canary findings separate and ordered the first two derived before anything is built.
+Measured first, as he required. Nothing changed in the system.
+
+**① The async refusal.** First, a correction to my own canary finding: I reported that no receipt exists.
+It does. My step-5 script built the service with `createMemoryV2Service` directly — the *package* wrapper
+— while the live path uses `buildMemoryToolService`, which overrides both async wrappers and returns
+`{ok, queued, **settled**}`. Its own comment says `keep()` ignores that field and it exists for `retain()`.
+So the defect is a **discarded** receipt, not a missing one, and the fix is much smaller than I implied.
+
+Measured the ordering requirement rather than guessing it. `retain()` already awaits this exact shared
+serial lane, so its recorded duration IS the cost of the receipt: **329 real calls, p50 8 ms, p95 23 ms,
+max 2 288 ms**, never reaching its own 20 s bound. `keep` without the await is p50 0 ms. A turn already
+tolerates `recall_memory` at p95 4.9 s and 26.8 s worst. And 207 of 212 `keep` calls come from the
+follow-through pass — only **five** were ever live chat turns. There is no latency argument left.
+
+Found a third consumer nobody had named: `retention-followthrough`'s `effected()` returns true for
+`{ok:true, queued:true}`, so a governed refusal would be recorded durably as `outcome:'keep'`,
+`done:['keep']`. That is precisely the defect 036/037 exist to end, arriving through a door those fixes
+did not cover — so the optimistic receipt corrupts the retention-rate series, not just the model's belief.
+
+The whole reporting chain already exists and is correct: `ingest` catches the store's throw and returns
+`{ok:false, error, code}` with `REPLACEMENT_REFUSED` intact, and `retain` already reads exactly that.
+Derived correction: **`keep` adopts `retain`'s contract** — bounded await, three states, and `accepted`
+carrying `ok:false` so a timeout can never be counted as an act.
+
+**② The consuming occasion.** The occasion already has a name and the codebase states the identity in
+these words: *"the turn key IS the occasion id"*, and refuses to duplicate it — *"stamping the turn itself
+would restate the occasion under a second name."* And on this path it is already unmanufacturable:
+`remember` and `setIdentity` let a caller override `sourceMessageId`; **`reconcileFact` reads the
+construction-time constant and accepts no argument for it**, threaded from `extras.messageId` on the
+authenticated request. No new type, no new column, no new plumbing.
+
+But wiring it now would be **vacuous**, and that is the real finding. The two sides of the comparison are
+drawn from disjoint value spaces — operator labels like `canary-bind-2026-09-03-a-declare` on one side,
+message UUIDs on the other — so the equality can never be true and the rule would return ok every time
+for a structural reason unrelated to the question. A green that proves nothing.
+
+The honest statement of the gap is narrower than "the rule is not enforced": **no writer can perform a
+DECLARE or a BIND from inside a turn today, so the rule has nothing to catch** — and the moment one
+exists, its occasion must be the turn key or the rule silently stops working. So the correction belongs at
+the producing acts, not at the rule and not at the consumer. And any wiring needs a positive control that
+makes the comparison return false first, or the green is the instrument again.
+
+Docs: `DERIVATION_SOTERA_ASYNC_RETENTION_RECEIPT.md`, `DERIVATION_SOTERA_CONSUMING_OCCASION.md`.
+Fences unchanged. Canary still bound, no second slot, model tool untouched.
