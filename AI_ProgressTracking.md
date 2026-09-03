@@ -7069,3 +7069,47 @@ path on real traffic.
 any refusal"* — is **not reachable on real traffic at all** until a real writer can declare a kind.
 
 ⏸ **This is Ote's call: extend the portable package, or hold.** ⛔ No binding created.
+
+---
+
+## 2026-09-03 19:30 (+07:00) — THE CAPABILITY EXISTS, AND THE FULL REAL-WRITER POSITIVE PATH IS PROVEN
+
+**OTE GREEN-LIT the additive `claimKind` capability in `@ote/memory`.** ⭐ Done, and the complete path Ote
+specified now runs through the **real writer**:
+`explicit claimKind → reconcileFact → slot resolver → governed slot → real UPDATE → ALLOW → supersede`.
+
+**⚠️⚠️ A CORRECTION TO MY OWN CLAIM FIRST.** I said `@ote/memory` is *"shared with 12 projects"*.
+ⓘ **Measured: only Sotera consumes it** (`Backend/package.json` and `test/package.json`). The 12-project
+figure belongs to `@ote/components-sdk`, a **different** package. ⇒ the blast radius of this change is
+materially smaller than I stated, and the statement was wrong when I made it.
+
+**THE CHANGE, additive and minimal:** `claimKind = null` added to `reconcileFact`'s destructure and spread
+onto the store row **only when supplied** — `...(claimKind == null || '' ? {} : { claimKind })`. ⛔ No
+default · ⛔ no fallback · ⛔ no inference · ⛔ absent stays **absent**, so a host with no such policy
+receives exactly the row it received before the field existed. ⓘ Package tests: **84/84**. Sotera suite:
+**`✓ all 67 suites passed`**.
+
+**⭐⭐ THE TRANSPORT CONTROL ASSERTS AT EVERY BOUNDARY, NOT AT THE END** — because this project has lost a
+field to a closed list **eleven times, twice in the last day**, and an end-to-end pass does not establish
+that each boundary carried the value, only that the composition happened to work. A **delegating Proxy
+spy** wraps the real store, so what is asserted is the row that genuinely went on to be written.
+**Boundary A** — `claimKind` survived `reconcileFact`'s field list and reached `store.create` ·
+**Boundary B** — it survived the store's strip, the gate, the model declaration and the INSERT, evidenced
+by the **pin** · **3a** the row is pinned to the declared question, ⛔ **not a green built on an expected
+NULL** · **3b** it really was a replacement (`supersedes_id` set) · **3c** the previous belief was retired,
+leaving exactly one live row · **4** the same writer with **no** kind is refused, and **4a** confirms the
+package added no default · **4b** the refusal left exactly one live row.
+
+**⚠️ THE PACKAGE REPO IS DELIBERATELY LEFT UNCOMMITTED, and this needs Ote's call.**
+ⓘ `PortableComponents/Packages/Memory` is its own git repo and had **pre-existing uncommitted work**
+before I touched it — `cognition/memory-pipeline.js`, `index.js`, and two earlier hunks inside
+`memory-v2-service.js` itself (the *"a failed commit must never be represented as a successful
+observation"* rethrow fix). ⭐ My `claimKind` hunk is cleanly separate from all of them.
+⛔ I did not commit: doing so would either sweep somebody's in-flight work into a commit labelled
+`claimKind transport`, or require me to decide about changes that are not mine. ⏸ **Ote's call.**
+
+⏸ **What remains before enable/observe:** binding a **real** slot. ⭐ The capability blocker is gone, so
+the choice is now purely which slot — and ⓘ the coherent candidate cluster is in **Ote's own room**
+(7+ gaming slots, one live row each, one source conversation, untouched since 2026-08-26, never
+superseded), which makes it his decision and not a technical one.
+Origin PARKED · M2-6 UNWIRED · 12b FROZEN · P1 and Rome UNTOUCHED · post-M2 OUT · **no real slot bound.**
