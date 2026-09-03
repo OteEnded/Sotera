@@ -5999,3 +5999,44 @@ rather than two exposed verbs? ② `expected-current` on CORRECT? ③ is the **4
 accepted — material with no recorded delivery can never have its origin established by anyone?
 ⏸ ⛔ **And the DECLARATION verb is untouched: still 0 of 82 slots declared, still the only hard blocker on
 M2 committing anything.**
+
+---
+
+## 2026-09-03 15:46 (+07:00) — origin verb RATIFIED; the wording boundary made explicit
+
+⛔ **Still nothing built.** No implementation, migration, field, backfill or wiring. M2-6 unwired ·
+M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/CONTRACT_SOTERA_ORIGIN_VERB.md` (§9 rewritten).
+
+**✅ ALL THREE RULED YES.** ① **one operation** with a caller-declared, CAS-style **intent**; the act
+**derived** from `(current, requested)`; authority checked **only** against the derived act.
+② **`expected-current` on CORRECT** — ⭐⭐ and Ote refined it: **the WHOLE origin state being contradicted**,
+⛔ not just the field being changed, so a concurrent edit **anywhere** in the chain cannot pass unnoticed
+while the targeted field happens to match. ③ the **41-row ESTABLISH refusal** accepted.
+
+**⭐⭐ THE REFUSAL WORDING IS RULED, because the two readings are different facts:**
+✅ *"authority cannot be established, because delivery provenance is absent"* ·
+⛔ **never** *"unauthorized"* — which would say the caller was checked and failed, when in truth **there is
+nobody who could pass**. ⚠️ That is `could-not-establish-is-not-established` in its **refusal-message**
+form: *"could not establish"* must never be phrased as an established negative.
+
+**⚠️ THE WORDING CORRECTION OTE ASKED FOR, AND IT IS THE ARC'S OWN RULE TURNED ON THIS DOCUMENT:**
+
+> ✅ **The semantic / contract derivation is COMPLETE ENOUGH TO IMPLEMENT.**
+> ⛔⛔ **That is NOT a claim that the isolation behaviour holds.** Every §7 proof is **UNBUILT**, and until
+> each has **run with its positive control passing first**, the isolation properties are **SPECIFIED,
+> ⛔ NOT DEMONSTRATED.**
+
+⭐ *A contract that says what must be true is not evidence that it is true.* ⓘ And the warrant proof in
+particular would pass **vacuously today** on 0 rows — which is exactly why §7 requires the control first.
+⭐ Positive controls kept intact for implementation, one each: **warrant · span · person · reachability**,
+each proving the instrument can actually observe a change **before** anything asserts the origin verb
+cannot cause one.
+
+**⛔⛔ THE STANDING BOUNDARY, recorded as ruled — origin establishment/correction is NOT a general memory
+edit. It cannot: mutate a warrant · author a span · mint a person · alter reachability · silently modify
+any unrelated memory field.** ⭐ Each is a red-proof obligation with a positive control, ⛔ not an assurance.
+
+⏸ **Open:** names and spellings (deliberately, since the representation pass), and ⛔⛔ **the DECLARATION
+verb — completely separate, untouched, and still the only hard blocker on M2 committing anything.**
+ⓘ 0 of 82 slots declared; `checkKind` DEFERs on every one. ⭐ **Origin work does not unblock M2.**

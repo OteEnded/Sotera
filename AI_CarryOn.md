@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:43 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -20,8 +20,9 @@ context compaction.
 ✅ M2-3                 RETIRED and re-derived under the room frame
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
-✅ ORIGIN FULLY DERIVED vocab · authz · inner-hop · 3 blockers · representation · STATES + ROUTE B
-⏸  NEXT                 ⭐ 3 rulings on the ORIGIN VERB → IMPLEMENTATION BOUNDARY. ⛔ M2 still
+✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
+⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
+▶  NEXT                 ⭐ ORIGIN IS AT THE IMPLEMENTATION BOUNDARY (contract ratified). ⛔ M2 still
                         blocked by the DECLARATION verb (0 of 82 slots) — a DIFFERENT act
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
@@ -134,6 +135,19 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
    ⛔ not `evidence` (43 rows, FOUR disjoint key-sets, no key on every row) · ⛔ not a composite type
      (0 exist, and element constraints need an immutable fn; this schema has 1 fn and it is volatile)
    ⭐ transition precedent is ON THIS TABLE: `txn_memories_quoted_needs_source` is NOT VALID
+✅ ORIGIN VERB RATIFIED 15:46 — ⭐ THE SEMANTIC/CONTRACT DERIVATION IS **COMPLETE ENOUGH TO IMPLEMENT**
+   ⛔⛔ AND THAT IS **NOT** A CLAIM THAT THE ISOLATION BEHAVIOUR HOLDS. Every §7 proof is UNBUILT; until
+     each has RUN WITH ITS POSITIVE CONTROL PASSING FIRST, the isolation properties are SPECIFIED,
+     ⛔ NOT DEMONSTRATED. ⚠️ The warrant proof would pass VACUOUSLY today on 0 rows
+   ⛔⛔ STANDING BOUNDARY — origin establishment/correction is NOT a general memory edit. It cannot:
+     mutate a warrant · author a span · mint a person · alter reachability · silently modify ANY
+     unrelated memory field. ⭐ Each is a red-proof obligation WITH A POSITIVE CONTROL, ⛔ not an assurance
+   ✅ 3 FINAL RULINGS: ① one operation, caller-declared CAS intent, act DERIVED, authority checked ONLY
+     against the derived act · ② `expected-current` on CORRECT = **THE WHOLE ORIGIN STATE** (⛔ not one
+     field — a concurrent edit elsewhere in the chain must not pass unnoticed) · ③ the 41-row refusal
+   ⭐⭐ REFUSAL WORDING RULED: ✅ *"authority cannot be established, because delivery provenance is
+     absent"* · ⛔ NEVER *"unauthorized"* — that would say the caller was checked and failed, when in
+     truth THERE IS NOBODY WHO COULD PASS. (could-not-establish, in its refusal-message form)
 ⭐⭐ ORIGIN VERB CONTRACT 15:43 → `CONTRACT_SOTERA_ORIGIN_VERB`
    ⚠️⚠️ NAMING COLLISION FLAGGED: "the VERB" now names TWO acts. ⭐ THE DECLARATION VERB
      (mst_slot_questions, 047's noun) is STILL THE ONLY M2-COMMIT BLOCKER and is UNTOUCHED.
