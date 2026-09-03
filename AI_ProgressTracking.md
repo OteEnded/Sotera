@@ -6779,3 +6779,55 @@ CHECK(open | runtime-subsystem | registration-act) · `owner` NULL · `permitted
 ⚠️⚠️ **And the standing rule throughout:** *a "nothing changed" assertion is not evidence until the
 instrument has first demonstrated it can observe a change.* ⛔ **The current 100% DEFER state must not be
 allowed to make the suite green — RP-D0 must prove ALLOW is reachable before any refusal proof counts.**
+
+---
+
+## 2026-09-03 18:17 (+07:00) — CROSSED THE IMPLEMENTATION BOUNDARY. RP-D0 and RP-T1 are GREEN.
+
+**OTE RATIFIED ALL THREE SHAPES AND GAVE THE GREEN LIGHT.** M2 semantic scope closed; build order fixed.
+
+**MIGRATION 048 APPLIED**, 6 violations refused: `declared_in_occasion text NOT NULL` with **no default** ·
+`mst_namespace_declarations` with **one transcribed row** (`default`: open, slot-governed, include) ·
+`log_slot_bindings` (propose/confirm, with the first-bind/rebind CHECKs) · `question_id_at_admission`,
+landed **empty**.
+
+**BUILT:** `memory-bind-rules.js` (PURE — derive the act, the CAS intent guard, the occasion rules) ·
+`memory-declaration-host.js` (declare, propose, confirm, resolve, claim-kind validation) · the
+**admission pin** at the store seam.
+`confirmBind` is **one statement**: the UPDATE is a CTE and the audit INSERT SELECTs FROM it, so a failed
+compare-and-set writes **no audit row** — exactly one row for a real change, zero for a non-event, with no
+caller transaction required and a lost update structurally impossible.
+
+**RP-D0 GREEN, 24 assertions. DECLARE to BIND to RESOLVE to checkKind = ALLOW. ALLOW is reachable.**
+Riding along: RP-D4 (unregistered check refused at declaration) · RP-D6 (a prototype member refused) ·
+the occasion rule in both directions · DECLARE alone makes nothing operative · a proposal changes nothing ·
+a refused confirm writes no audit row · teardown asserted, not trusted.
+
+**RP-T1 GREEN.** Declare A, bind, admit M, declare B, rebind: M still reads A, new admissions read B.
+And **control 3 proves it is doing work**: a reader **following the slot** reports **B** while the pinned
+reader reports **A** — so "it used the pinned value" is not indistinguishable from "both paths agree".
+
+**AND THE POSITIVE CONTROL EARNED ITS KEEP IMMEDIATELY — A REAL DEFECT, CAUGHT.**
+The gate resolved correctly and `checkKind` returned ALLOW — and the value still never reached the INSERT.
+**Sequelize silently dropped `question_id_at_admission` because the MODEL did not declare it** — the
+identical failure that file already documents for `subject_person_id`, "which cost seven memories".
+No error. No warning.
+**RP-T1's control 2 was the only thing that caught it: the two assertions expecting NULL were PASSING.**
+A 100%-NULL suite is exactly as vacuous as a 100%-DEFER one — the whole reason the positive control was
+made mandatory. Fixed by declaring the field in `txn_memories.model.js`; and the swallow in
+`admittingQuestionFor` now falls back to console.warn when no logger is wired, because a swallowed failure
+that writes NULL is indistinguishable from a gate that correctly declined.
+
+**SUITE 63/63** — grepped for the pass line, not read off the last line. An earlier run showed
+`memory-lifecycle-check` failing; it passed 3/3 standalone and on the next full run. Reported as the
+transient it is, not silently re-run.
+
+**THE ADMISSION SEMANTIC, AS BUILT:** checkKind's ALLOW **earns the pin**; it does **not** refuse any
+write. M2-10 already ruled DEFER "a consumer-side restriction, not a slot-level disablement", and no
+writer declares a claim kind today — so refusing here would refuse every existing writer, which is 031's
+rule: not a protection, an outage. Enforcement of replacement is M2's, and M2 is disabled.
+`claimKind` is **transport**, stripped like semanticTarget/sourceText — not `row.kind`, which is the
+namespace-ish axis and a different fact entirely.
+
+**Next in the mandatory order:** RP-D1, D2, D3, D5, D8, D9, D10, RP-NQ1/2/3, RP-N8, isolated E2E.
+Origin stays PARKED, namespace LOCKED, M2 still disabled, M2-6 unwired, 12b frozen, P1 and Rome untouched.

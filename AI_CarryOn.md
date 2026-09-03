@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path 17:51; three shapes 17:55 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path 17:51; three shapes 17:55; BUILDING 18:17 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐⭐ 3 SHAPES DERIVED — ⏸ ratify, then BUILD. Proof order is MANDATORY
+▶  BUILDING M2          ✅ 048 applied · RP-D0 + RP-T1 GREEN · suite 63/63 · ⏸ 11 proofs left
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -758,6 +758,47 @@ DECLARE → BIND → RESOLVE → ADMISSION → question_id_at_admission → red-
    ⭐⭐ permitted_writers is NULL for OPEN — ⛔ not an empty array (which would read "nobody may write",
    the OPPOSITE of the truth) and ⛔ not a wildcard
    ⛔ ONE TABLE, ONE ROW: `default`. No scope, no `project`, no `identity`, no read-behaviour change
+```
+
+## ⭐⭐⭐ M2 IS BEING BUILT — CROSSED THE IMPLEMENTATION BOUNDARY 18:17
+
+```
+✅ MIGRATION 048 APPLIED — 6 violations refused
+   · mst_slot_questions.declared_in_occasion text NOT NULL, ⛔ NO DEFAULT
+   · mst_namespace_declarations + ONE transcribed row (`default`: open · slot-governed · include)
+   · log_slot_bindings (propose/confirm, with the first-bind/rebind CHECKs)
+   · txn_memories.question_id_at_admission (landed EMPTY)
+✅ BUILT: `memory-bind-rules.js` (PURE) · `memory-declaration-host.js` (declare · propose · confirm ·
+   resolve · claim-kind validation) · the admission pin at the store seam
+   ⭐ confirmBind is ONE STATEMENT: the UPDATE is a CTE and the audit INSERT SELECTs FROM it, so a failed
+   compare-and-set writes NO audit row => exactly one row for a real change, zero for a non-event,
+   with ⛔ no caller transaction needed
+✅ RP-D0 GREEN — 24 assertions. ⭐⭐⭐ DECLARE -> BIND -> RESOLVE -> checkKind = ALLOW. ALLOW IS REACHABLE
+   (+ rides along: RP-D4 unregistered check refused · RP-D6 prototype member refused · the occasion rule
+   both ways · DECLARE alone makes NOTHING operative · propose changes nothing · a refused confirm
+   writes no audit row · teardown ASSERTED)
+✅ RP-T1 GREEN — declare A -> bind -> admit M -> declare B -> rebind => M STILL reads A, new reads B
+   ⭐⭐⭐ CONTROL 3 PROVES IT IS DOING WORK: a reader FOLLOWING THE SLOT reports B while the pinned
+   reader reports A — so "it used the pinned value" is NOT indistinguishable from "both paths agree"
+✅ SUITE 63/63 (grepped for the pass line, ⛔ not the last line)
+
+⚠️⚠️ THE POSITIVE CONTROL EARNED ITS KEEP IMMEDIATELY — A REAL DEFECT, CAUGHT:
+   The gate RESOLVED correctly and checkKind returned ALLOW, and the value STILL never reached the
+   INSERT. Sequelize silently dropped `question_id_at_admission` because the MODEL did not declare it —
+   the identical failure that file already documents for `subject_person_id`, "which cost seven
+   memories". ⛔ NO error, NO warning.
+   ⭐⭐ RP-T1's control 2 was the ONLY thing that caught it: the two assertions expecting NULL were
+   PASSING. A 100%-NULL suite is exactly as vacuous as a 100%-DEFER one
+   => ⭐ FIXED by declaring the field in `txn_memories.model.js` · AND the swallow in
+   `admittingQuestionFor` now falls back to console.warn when no logger is wired
+
+⏸ NEXT IN THE MANDATORY ORDER: RP-D1/D2/D3/D5/D8/D9/D10 · RP-NQ1/2/3 · RP-N8 · isolated E2E
+⭐ THE ADMISSION SEMANTIC, as built: checkKind's ALLOW earns the PIN; it ⛔ does NOT refuse any write.
+   M2-10 already ruled DEFER "a consumer-side restriction, ⛔ not a slot-level disablement", and no
+   writer declares a claim kind today, so refusing here would refuse EVERY existing writer — 031's rule:
+   not a protection, an OUTAGE. Enforcement of replacement is M2's, and M2 is disabled
+⚠️ `claimKind` is TRANSPORT, stripped like semanticTarget/sourceText — ⛔ NOT `row.kind`, which is the
+   namespace-ish axis (semantic|identity) and a different fact entirely
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD
