@@ -23,7 +23,8 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  M2 PROOFS ALL GREEN  ✅ 048 · RP-D0 · RP-T1 · the full register · isolated E2E · suite 65/65
+✅ M2 BUILT + PROVEN     048 · RP-D0 · RP-T1 · register · E2E · enforcement · transport · 67/67
+⏸  AWAITING OTE         ⭐ the FIRST GOVERNED SLOT — 4 approvals (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -813,6 +814,32 @@ DECLARE → BIND → RESOLVE → ADMISSION → question_id_at_admission → red-
    not a protection, an OUTAGE. Enforcement of replacement is M2's, and M2 is disabled
 ⚠️ `claimKind` is TRANSPORT, stripped like semanticTarget/sourceText — ⛔ NOT `row.kind`, which is the
    namespace-ish axis (semantic|identity) and a different fact entirely
+```
+
+## ⏸⏸ AWAITING OTE — THE FIRST GOVERNED SLOT → `PROPOSAL_SOTERA_FIRST_GOVERNED_SLOT` (19:44)
+
+```
+⭐ RECOMMENDED: `user / build tag for this cycle` in **agent_dev's** room · 1 live row `CANARY-653912` ·
+  write_count 1 · quiet since 2026-08-26 · never superseded · writer = model-tool
+⭐⭐⭐ WHY: it is the ONLY candidate BOTH well-formed (entity=SUBJECT, attribute=PROPERTY) AND
+  SEMANTICALLY DISPOSABLE — a build tag is INSTRUMENTATION, so it asserts nothing about a person and a
+  wrong or refused update costs nothing. That is a property of the DATA, ⛔ not convenience
+⛔ REJECTED, with reasons: the gaming cluster is Ote's REAL personal data in HIS room · `physical state`
+  is sensitive · `Thai name spelling`/`alias`/`account identity`/`nature/origin` are identity-adjacent
+  real facts · `occupation`/`work schedule` are real person-facts
+⭐ QUESTION: `build-tag` · "which build tag is current for this cycle?" · checks nonempty · single-line ·
+  no-trailing-ellipsis — ⭐⭐ ALL THREE REGISTERED and all three TRUE of the answer shape (only 4 checks
+  exist, and there is NO enumeration check — which is why a status-shaped slot would be worse)
+⚠️⚠️ FINDING — **THE FIRST BIND IS A ONE-WAY DOOR.** The ratified acts are first-bind and rebind; there
+  is NO UNBIND (checkBindRequest requires a question id) ⇒ a bound slot is REPOINTABLE, ⛔ NOT REMOVABLE.
+  ⛔ Not a defect — unbinding would be *contradicting a claim with a non-claim* — ⭐ but it argues for
+  disposable data over real personal data
+⚠️ WRITER PATH: `commitToMemory` is a SECOND closed field list ({entity, attribute, value}+optionals),
+  Sotera-side, and an OBSERVATION carries no claim kind ⇒ ⛔ THE MODEL CANNOT SUPPLY ONE TODAY.
+  ⇒ the first governed UPDATE is an OPERATOR act through reconcileFact — the exact shape the transport
+  control already proved. ⭐ And after the bind the model-tool path REFUSES on that slot until taught,
+  which on a canary slot is THE DESIRED OBSERVABLE, not a defect
+⏸ 4 approvals needed — see the doc's §6
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD

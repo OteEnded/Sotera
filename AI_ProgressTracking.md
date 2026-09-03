@@ -7113,3 +7113,51 @@ the choice is now purely which slot — and ⓘ the coherent candidate cluster i
 (7+ gaming slots, one live row each, one source conversation, untouched since 2026-08-26, never
 superseded), which makes it his decision and not a technical one.
 Origin PARKED · M2-6 UNWIRED · 12b FROZEN · P1 and Rome UNTOUCHED · post-M2 OUT · **no real slot bound.**
+
+---
+
+## 2026-09-03 19:44 (+07:00) — THE FIRST-GOVERNED-SLOT PROPOSAL, selected from measured data
+
+⛔ **Nothing bound, nothing declared, no real row changed.** → `Reference/docs/PROPOSAL_SOTERA_FIRST_GOVERNED_SLOT.md`.
+
+**⚠️⚠️ A FINDING THAT BEARS ON THE CHOICE — THE FIRST BIND IS A ONE-WAY DOOR.** The ratified acts are
+**first-bind** and **rebind**; there is **no UNBIND** — `checkBindRequest` requires a question id, so a
+bound slot is **repointable, ⛔ not removable**. ⛔ Not a defect (unbinding would be *contradicting a claim
+with a non-claim*, which the vocabulary deliberately lacks a word for) — ⭐ but it makes the first choice
+more consequential than it looks, and argues for disposable data over real personal data.
+
+**⭐ RECOMMENDED: `user / build tag for this cycle` in agent_dev's room** — 1 live row `CANARY-653912`,
+write_count 1, quiet since 2026-08-26, never superseded, writer `model-tool`.
+**⭐⭐⭐ Why, and it is a property of the DATA rather than convenience:** it is the only candidate that is
+**both well-formed** (entity = SUBJECT, attribute = PROPERTY — unlike `project-decision`, which is
+inverted) **and semantically disposable**. A build tag is **instrumentation**: it asserts nothing about any
+person, so a wrong or refused update costs nothing.
+⛔ **Rejected with reasons:** the gaming cluster (`genre focus`, `playstyle priority`, `core enjoyment
+source`, `preferred activity mode`, `primary instrument lately`) is **Ote's real personal data in his own
+room** — a controlled UPDATE there would mean asserting a change to a true fact about him, as a test ·
+`physical state` is real and sensitive · `Thai name spelling` / `alias` / `account identity` /
+`nature/origin` are identity-adjacent real facts · `occupation` and `work schedule` are real person-facts.
+
+**THE QUESTION:** `build-tag` · *"which build tag is current for this cycle?"* · checks **nonempty ·
+single-line · no-trailing-ellipsis**. ⭐⭐ All three are **registered** and all three say something **true**
+about the answer shape. ⓘ Only four checks exist and **none is an enumeration**, which is exactly why a
+status-shaped slot would have been a worse first choice.
+
+**⚠️ THE WRITER PATH, honestly:** `commitToMemory` is a **second closed field list**
+(`{entity, attribute, value}` + optionals), Sotera-side, and an **observation carries no claim kind** ⇒
+**the model cannot supply one today**; that is a tool-contract change, not a threading change.
+⇒ **the first governed UPDATE is an OPERATOR act** through `reconcileFact` with an explicit `claimKind` —
+the exact shape the transport control already proved end to end.
+⭐ **And after the bind, the model-tool path will REFUSE on that slot until the tool is taught. On a canary
+slot that is the DESIRED OBSERVABLE** — a real governed refusal, on data that costs nothing, caused by a
+genuine missing declaration rather than a manufactured mismatch.
+
+**THE PROPOSED UPDATE:** `claimKind: build-tag`, same entity/attribute, `value: CANARY-<new>` ⇒ expected
+ALLOW → supersede → old row retired → one live row → new row pinned to `build-tag`.
+**REVERSIBILITY, stated honestly:** the data is disposable · history is **retired, never deleted** · the
+old value is **restorable** by a further governed UPDATE · ⚠️ but the **bind** is repointable, not
+removable · blast radius is one slot in one room (RP-D10, RP-D3) · and the refusal side is already proven
+to leave the world unchanged.
+
+⏸ **Four approvals needed:** the slot · the question and its checks · acknowledging the one-way door ·
+acknowledging that the model-tool writer will refuse there until taught.
