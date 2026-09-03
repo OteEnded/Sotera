@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03, §3 relocked 14:07, §6 added 14:25 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN locked 14:49 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -20,8 +20,8 @@ context compaction.
 ✅ M2-3                 RETIRED and re-derived under the room frame
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
-✅ ORIGIN VOCABULARY    derived + the AUTHORIZATION contract — ⭐ origin is a CHAIN, delivery = hop 0
-⏸  NEXT                 ⭐ 4 rulings before any schema (see §2 ORIGIN), then the declaration VERB
+✅ ORIGIN VOCABULARY    derived + AUTHORIZATION + inner-hop modality — ⭐ origin = chain[1:]
+⏸  NEXT                 ⭐ SCHEMA derivation — blocked on 4 rulings (§2 ORIGIN), then the VERB
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -84,16 +84,40 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
                  have NO modality ⇒ ⛔ do NOT loosen slotViolation; the fix is ARITY
               ⭐ quotation → potentially span-verifiable · paraphrase → no verbatim span exists ⇒
                  potentially UNVERIFIABLE, ⛔ NEVER automatically false
-              ⭐⭐ DETECTING a mark ≠ ASSERTING an origin. A · marked in speech (cue-verified, authority
-                 = the speaker's words) · B · declared as an ACT (authority = the account, pinned) ·
+              ⭐⭐ DETECTING a mark ≠ ASSERTING an origin. A · marked in speech (cue-verified) ·
+                 B · declared as an ACT (authority = the account, pinned) ·
                  ⛔⛔ C · inferred from shape/content = FORBIDDEN
+              ⭐⭐ ROUTE A'S AUTHORITY IS BOUNDED (Ote's tightening): the speaker's words are
+                 authoritative that THE SPEAKER MADE THE MARKING and THE SPAN EXISTS — ⛔ NOT of the
+                 IDENTITY or the TRUTH of the inner event. Route A ⇒ marked + span verified;
+                 ⛔ never inner speaker identity / origin identity / pin. Only Route B does those
+              ⛔ DETECTED → VERIFIED → ADMITTED must NOT collapse. Route A's ADMITTED = the write seam
+                 applying a DECLARED rule; that is what keeps M2-10 from retroactively re-admitting
               ⚠️ Route A can NEVER establish WHO — *"he said"* leaves `who: UNRESOLVED`, and that is
                  the POINT: a silent misattribution becomes an explicit unknown
+              ⭐ `who=none` = an ARTEFACT (no speaker) · `who=unresolved` = a speaker is INDICATED but
+                 identity not established. ⛔⛔ NEVER default either to the ROOM OWNER
               ⚠️ "needs no new PRIMITIVE" ≠ "SOLVED" — the acceptance path is unbuilt (0 of 34 doc:
                  rows carry a slot_id)
-              ⏸ 4 RULINGS BEFORE SCHEMA: ① is Route B a new act or the declaration VERB? ② how much
-                 modality does an inner hop get? ③ does an unverifiable origin block a warrant or
-                 record the absence? ④ where does it live (jsonb has precedent, ⛔ can't be constrained)
+              ⭐ chain = [delivery, represented-1, represented-2, …] · ORIGIN = chain[1:] — ⛔ NEVER
+                 includes the delivery; that is what stops it becoming another name for
+                 source_message_id
+              ⭐⭐ INNER-HOP MODALITY ANSWERED: an inner hop gets a SLOT and ⛔ NO VOCABULARY. None of
+                 the 3 reader decisions consults it — (a) slottability is already NO at hop 0 and
+                 ⛔ nothing deeper may reopen it · (b) is about `who` · (c) is about spans.
+                 ⭐ The slot must EXIST so silence is explicit (031: NULL ≠ asserted); the values wait
+                 for a consumer (⚠️ `actor` = 'system' on 137/137 is what choosing early looks like)
+              ⛔ `reported` may NEVER be an inner-hop value — it only means "there is a hop n+1",
+                 i.e. a SECOND spelling of arity
+              ⚠️⚠️ modality(hop0)='reported' ⟺ origin≠none ⟺ not slottable — ⭐ THREE SPELLINGS OF ONE
+                 FACT ⇒ ⛔ they may not both be WRITABLE. The chain is the truth; `reported` must be
+                 READ from it (the mechanismOf pattern)
+              ⭐ paraphrase: span=NONE EXISTS ⇒ never VERIFIED ⇒ supports a RECORD, ⛔ never a WARRANT.
+                 UNWARRANTABLE ≠ false. ⚠️ but `discarded` is a BARE INTEGER with no reason ⇒ "no span
+                 exists" and "span did not match" are indistinguishable today
+              ⏸ SCHEMA BLOCKED ON 4: ① is `reported` computed from the chain, or the chain from it?
+                 ② does the discard carry a REASON (⛔ not a score)? ③ is Route B a new act or the
+                 declaration VERB? ④ where does it live — ⛔ NOT json by default
 
 STANDING      ⭐⭐⭐ A QUESTION IS SUBJECT-FREE ⇒ declaring one asserts NOTHING about any person
               ⇒ two authorities, separated by WHAT THE ACT ASSERTS, ⛔ not by whose slot it is:
@@ -102,7 +126,7 @@ STANDING      ⭐⭐⭐ A QUESTION IS SUBJECT-FREE ⇒ declaring one asserts NOT
               ⭐ safe because M2-10 locked: immutable · repoint-not-edit · existing memories NEVER
                 re-validated ⇒ a bad question cannot reach backwards
               ⛔ Sotera's identity NEVER depends on room, interface, or whether the other party
-                has an account. OWNER ≠ FORMATION CONTEXT ≠ SUBJECT ≠ SPEAKER ≠ REACHABILITY
+                has an account. ⭐ The full 9-way distinction is in §3 — it is FOUNDATIONAL
 ```
 
 ---
@@ -116,10 +140,10 @@ STANDING      ⭐⭐⭐ A QUESTION IS SUBJECT-FREE ⇒ declaring one asserts NOT
 | **② FORWARDED ORIGIN** | ✅ **finding LOCKED · implementation DEFERRED.** ⛔ `source` must NOT be overloaded — it is **mechanism + writing occasion**, ⛔ not origin. ⭐ Origin **is** the one genuinely missing axis and must represent a **non-local** origin. ⛔ **Do not build the field.** ▶ Derive the contract across the six cases first → `DERIVATION_SOTERA_ORIGIN_CONTRACT` (done 14:07). ⭐ **Constraint: origin stays SEPARATE from `source`** |
 | **③ ACCOUNT SHELL** | ✅ **LOCKED — ⛔ REJECTED. Do not create account shells.** `person_id IS NULL` cannot be repurposed: it already means *"not established"* (`mina`), and later linking would destroy the distinction. ⭐ **An account is an operational ROOM/INTERFACE holder, ⛔ NOT the identity primitive.** ⏸ If a non-account counterparty ever needs representing, derive it on the **person/interface** side — ⛔ never by manufacturing accounts |
 
-## ⭐⭐⭐ THE HARD INVARIANT OTE LOCKED TO CARRY FORWARD
+## ⭐⭐⭐ THE HARD INVARIANT — ⭐ FOUNDATIONAL TO SOTERA'S IDENTITY MODEL (Ote, 2026-09-03)
 
 ```
-OWNER ≠ SUBJECT ≠ SPEAKER/SOURCE ≠ FORMATION CONTEXT ≠ REACHABILITY ≠ INTERFACE ≠ ACCOUNT ≠ PERSON
+OWNER ≠ SUBJECT ≠ SPEAKER ≠ ORIGIN ≠ FORMATION CONTEXT ≠ REACHABILITY ≠ INTERFACE ≠ ACCOUNT ≠ PERSON
 
 Sotera's identity is independent of interface, room, account, and formation context.
 ```

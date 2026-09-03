@@ -5541,3 +5541,67 @@ read**, ⛔ not an absent mark.
 block a warrant or record the absence? (M2-9: a receipt, ⛔ never a score) ④ where does it live?
 ⭐ 6 red-proof obligations recorded, ⛔ none built — including a **positive control on the producer**,
 since 0 rows and 0 refusals makes every current green vacuous.
+
+---
+
+## 2026-09-03 14:49 (+07:00) — four locks ratified; inner-hop modality DERIVED
+
+⛔ **Derivation only.** Nothing built. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_INNER_HOP_MODALITY.md`.
+
+**✅ FOUR LOCKS RATIFIED.**
+① **chain = [delivery, represented-1, represented-2, …] · ORIGIN = chain[1:]** — ⭐ the refinement is what
+stops origin becoming another name for `source_message_id`. Modality belongs to each hop individually;
+⛔ do not weaken `slotViolation()` — the missing capability is ARITY.
+② `none ≠ unknown ≠ value`, applied **independently** to `who`, `what`, `span`. `origin=none` = we
+established it is first-hand · `origin=unknown` = re-presentation established, content of it not ·
+`who=none` = an artefact · `who=unresolved` = a speaker is indicated, identity not established.
+⛔⛔ **Never default `unknown`/`unresolved` to the room owner.**
+③ ⚠️ **CORRECTS my §4.2**: the speaker's words are authoritative that the **speaker made the marking** and
+the **span exists** — ⛔ NOT of the **identity** or **truth** of the inner event. Route A ⇒ marked + span
+verified; only Route B (the deliberate account act) may establish provenance identities.
+③b ⚠️ **CORRECTS my §4.4**: ⛔ DETECTED → VERIFIED → ADMITTED must **not** collapse. Route A's ADMITTED is
+the **write seam applying a declared rule** — which is what stops a later rule change re-admitting
+retroactively.
+⭐⭐⭐ Foundational and permanently explicit:
+`OWNER ≠ SUBJECT ≠ SPEAKER ≠ ORIGIN ≠ FORMATION CONTEXT ≠ REACHABILITY ≠ INTERFACE ≠ ACCOUNT ≠ PERSON`.
+
+**④ ANSWERED — inner-hop modality.** Worked example, typed by Ote into Ote's room:
+*"Hermes told me Cogito said he's my uncle."* ⇒ hop 0 Ote (`reported`, span present) → hop 1 Hermes
+(`who` NAMED but **unresolved**) → hop 2 Cogito (**unresolved**, and ⛔ **span NONE EXISTS** — Ote
+paraphrased, there are no quote marks).
+⭐⭐⭐ **Not one of the three reader decisions consults an inner hop's modality.** (a) slottability is
+**already NO at hop 0** — `reported` ⇒ `isNonLiteral` ⇒ `mayOccupySlot` false, enforced twice — and
+⛔ nothing deeper may reopen it (an inner `asserted` would make the claim about *Cogito's assertion*, not
+about X). (b) primary/secondary is about `who`. (c) a warrant is about **spans**.
+⇒ ⭐⭐ **An inner hop gets a SLOT and ⛔ NO VOCABULARY.** The slot must exist so silence is EXPLICIT —
+031 already proves the alternative fails (*"readers must never read NULL as asserted"*) — and the values
+wait for a consumer, because ⓘ `log_memory_changes.actor` is NOT NULL, 137/137 populated, and every one is
+the single value `'system'`: that is what choosing a vocabulary before a reader looks like.
+⛔ **`reported` may never be an inner-hop value** — at hop n it only means *"there is a hop n+1"*, i.e. a
+SECOND spelling of arity.
+⭐ And the asymmetry that settles it: hop 0's modality comes from words **we have** (cue-verified); hop n≥1
+comes from words we **do not have**, so it can only ever be what Route A cue-verifies from the OUTER hop's
+marking — *"Hermes said he'd LIKE to…"* is markable and free; anything else is `UNRECORDED`, and any other
+answer is Route C.
+
+**⚠️⚠️ THE REDUNDANCY THIS EXPOSES — a constraint on the schema, before any schema.**
+`modality(hop 0)='reported'` ⟺ `origin ≠ none` ⟺ not slottable. **Three spellings of ONE fact**, two of
+them independently writable ⇒ they WILL diverge, at opposite ends of the record where nothing compares
+them. ⇒ ⭐⭐ **they may not both be writable; the CHAIN is the truth and `reported` must be READ from it**
+(the `mechanismOf(source)` pattern). ⚠️ Not free: `txn_memories_modality_slot_ck` depends on the column.
+
+**PARAPHRASE — `span = NONE EXISTS`, accepted and derived through.** A hop with no span can never be
+VERIFIED ⇒ never counts toward M2-8's ≥2 verified independent roots ⇒ ⭐ **supports a RECORD, ⛔ never a
+WARRANT. UNWARRANTABLE ≠ false.** No new mechanism — `log_memory_warrants` already enforces
+`verified + discarded = selected` and `verified <= selected`.
+⚠️ ⓘ **But `discarded` is a BARE INTEGER with no reason column** ⇒ *"no verbatim span exists"* (a property
+of the material) and *"the span did not match"* (a failure of the citation) are **indistinguishable
+today** — a dropped observation and one that was never made looking alike, in the warrant ledger.
+⏸ Needs a decision, ⛔ and the fix is a REASON on the discard, ⛔ never a score.
+
+⏸ **Schema derivation is blocked on 4:** ① is `reported` computed from the chain, or the chain from it?
+② does the discard carry a reason? ③ is Route B a new act or the still-open declaration VERB (same
+authority, same pin — ⚠️ inventing two may be the mistake)? ④ where does it live — ⛔ **not JSON by
+default**; Ote: *"the `doc:` precedent shows JSON CAN carry pinned provenance, ⛔ not that JSON is
+automatically the correct contract boundary."*
