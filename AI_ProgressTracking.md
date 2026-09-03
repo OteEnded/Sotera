@@ -5423,3 +5423,57 @@ aliases `m.user_id AS owner_id`, the conflation 015 retired.
 
 ⏸ **Back to Ote for the three rulings.** ⏸ Held unchanged: the declaration VERB · gap ⑤ · the M2-1 build ·
 the D2 residual · admission-predicate identity.
+
+---
+
+## 2026-09-03 14:07 (+07:00) — Ote LOCKED the three rulings; origin contract derived across six cases
+
+⛔ **Derivation only.** Nothing built. M2-6 unwired · M2 disabled · 12b frozen at 4/4 · P1 and Rome untouched.
+
+**✅ RULED BY OTE.**
+① **Slot ownership — LOCKED, ⛔ do not add `mst_slots.author`.** Slots are durable concept identities;
+ownership belongs to the authored memory act. `txn_memories.author` is the mechanism. Revisit only if a
+real consumer needs *"whose cognitive structure is this?"* — ⛔ no speculative column.
+② **Forwarded origin — finding LOCKED, implementation DEFERRED.** `source` must not be overloaded;
+origin is the one genuinely missing axis and must represent a non-local origin. ⛔ Field not to be built
+until the contract is derived. Origin stays SEPARATE from `source`.
+③ **Account shell — LOCKED, ⛔ REJECTED.** An account is an operational room/interface holder, ⛔ not the
+identity primitive. `person_id IS NULL` cannot be repurposed. Any non-account counterparty gets derived on
+the **person/interface** side.
+⭐⭐⭐ Hard invariant carried forward: `OWNER ≠ SUBJECT ≠ SPEAKER/SOURCE ≠ FORMATION CONTEXT ≠ REACHABILITY
+≠ INTERFACE ≠ ACCOUNT ≠ PERSON`, and Sotera's identity is independent of interface/room/account/formation.
+`how_I_see_him` stays the canonical live proof that these axes legitimately diverge.
+
+**▶ ORIGIN CONTRACT DERIVED** → `Reference/docs/DERIVATION_SOTERA_ORIGIN_CONTRACT.md`.
+
+⭐⭐⭐ **The finding: origin is not one missing mechanism — it is FOUR that already exist and have never
+been composed, plus ONE genuinely missing fact.**
+Already built: ① `modality='reported'` (*"the claim is not theirs"*) and it is **cue-verified** — a claim
+of it must quote a cue that is checked against the source text; ⓘ **0 rows use it**. ② the `doc:` evidence
+descriptor `{repo, path, commit, quote}` — ⭐ **a pinned NON-LOCAL origin working on 34 rows, 0 of which
+carry a `source_message_id`**; the external-document case is not a gap, it is the worked example.
+③ `evidenceState` — `source-readable | source-unreadable | source-destroyed | source-never-recorded`,
+authorised by **the source conversation's room** and **failing closed**; a cross-room origin would already
+report `source-unreadable` rather than pretend. ④ `REFUSAL.relayedSpeech`; ⓘ **0 fires**.
+⛔ Missing: **the IDENTITY of what is being re-presented** — and only that.
+
+⭐⭐ **The discrimination that organises the six cases: a third-party SUBJECT is not re-presented
+MATERIAL.** ⓘ The five smuggled-subject rows (hermes · hermes_alias · kavi · kavi_alt · ote) were **all
+formed in the speaker's own room, first-hand** ⇒ *"Ote tells Sotera about Hermes"* is **not a forwarding
+case** and needs **no origin axis** — it needs the SUBJECT axis. ⓘ 78 of 125 rows have
+`subject_person_id = NULL`; only **2** have subject ≠ room owner.
+⭐ Case 5 (external doc) is already solved. Cases 2 and 3 differ on ONE decisive property — **is there a
+verbatim span?** A paraphrase has none, so ⛔ it can never be span-verified, and the contract must be able
+to say *"unverifiable"* without that reading as *"false."* Case 6 (multi-hop) is the case that **breaks any
+single-valued field** — flattening a chain to its outermost hop is exactly how the Cogito row lost Ote's
+own authorship.
+
+⭐ **Dependency order ruled:** ORIGIN blocks M2-6 wiring and the D2 residual · the declaration **VERB** is
+the only hard blocker on M2 committing · M2-1 and admission-predicate identity are **independent** and may
+run any time · gap ⑤ is blocked on **data**, not design.
+⚠️ ⛔ **Do not wire M2-6 before origin** — `resolveFormationContext()` returns the DELIVERY room by
+construction.
+
+ⓘ **Corrections from 12:18 stand as corrections, ⛔ not rewritten:** the slot-usage figure (72 real slots ·
+220 writes · max 65, after removing 72% `zz_` probe traffic) · 5 persons not 4 · the stale `hermes_alias`
+comment in `memory-store-sequelize-host.js` · `memory-lint-host.js:172` aliasing `m.user_id AS owner_id`.

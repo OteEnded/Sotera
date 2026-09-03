@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03 (+07:00).** ⭐ Read this first after a context compaction.
+**Rewritten 2026-09-03 12:03, §3 relocked 14:07 (+07:00).** ⭐ Read this first after a context compaction.
 
 ---
 
@@ -83,15 +83,24 @@ STANDING      ⭐⭐⭐ A QUESTION IS SUBJECT-FREE ⇒ declaring one asserts NOT
 
 ---
 
-# 3 · ⏸⏸ THE THREE RULINGS — ⭐ ALL THREE NOW INVESTIGATED (2026-09-03 12:18)
+# 3 · ✅ THE THREE RULINGS — ⭐ ALL THREE LOCKED BY OTE 2026-09-03
 
-⭐ Full evidence: `DERIVATION_SOTERA_OWNERSHIP_FORWARDING_ACCOUNTSHELL`. Ote asked for the traces
-**before** ruling; these are the answers, ⛔ not the rulings.
+⭐ Evidence: `DERIVATION_SOTERA_OWNERSHIP_FORWARDING_ACCOUNTSHELL`. ⛔ Do not re-litigate.
 
-| **① SLOT OWNERSHIP** | ⭐ **A slot has no owner and needs none.** ⓘ 82/82 slots minted by ONE path (`reconcileFact`) that is never told who is writing; `checkKind` takes **kind only**; `mst_slot_questions` has **no scope column at all**. ⭐⭐ The live proof: `how_I_see_him` = **author `persona` · entity `ote` · room `agent_dev`** — three axes on one row, ⛔ none of them the slot's. ⇒ ⛔ **do not add `mst_slots.author`**; the reader that justified it was the retracted framing |
+| **① SLOT OWNERSHIP** | ✅ **LOCKED — ⛔ do NOT add `mst_slots.author`.** A slot is a durable CONCEPT IDENTITY; ownership belongs to the authored memory ACT. `txn_memories.author` **is** the ownership mechanism. ⭐⭐ Decisive live proof: `how_I_see_him` = **author/owner `Sotera` · subject `Ote` · formation `agent_dev`** — ⛔ and none of those is the slot's. ⏸ Revisit **only** if a real consumer needs *"whose cognitive structure is this?"* — ⛔ no speculative column |
 | --- | --- |
-| **② CASE F — forwarded** | ⭐⭐⭐ **`source:'conversation:<id>'` answers a DIFFERENT question.** `memory-lineage.js` reads it as **mechanism + occasion** ⇒ `conversation:` means *the extractor wrote this*, ⛔ not *this came from there*. ⚠️ **This supersedes my "unexercised capability" reading.** Of the four axes, **only the ORIGIN is missing**, and it must be nameable **without a local FK** (⛔ there is no `cogito` account) |
-| **③ CASE C — account shell** | ⛔ **Unsafe as posed.** A shell differs from a real account by **`person_id IS NULL` and nothing else** — ⚠️ and that already means *"person not yet linked"* (`mina`). ⇒ the standing red-proof question exactly. ⭐ And it is **not needed to be a SUBJECT**: `person-service.js` already creates account-less persons, and `Sotera` **is** one (0 accounts, 2 rows as subject) |
+| **② FORWARDED ORIGIN** | ✅ **finding LOCKED · implementation DEFERRED.** ⛔ `source` must NOT be overloaded — it is **mechanism + writing occasion**, ⛔ not origin. ⭐ Origin **is** the one genuinely missing axis and must represent a **non-local** origin. ⛔ **Do not build the field.** ▶ Derive the contract across the six cases first → `DERIVATION_SOTERA_ORIGIN_CONTRACT` (done 14:07). ⭐ **Constraint: origin stays SEPARATE from `source`** |
+| **③ ACCOUNT SHELL** | ✅ **LOCKED — ⛔ REJECTED. Do not create account shells.** `person_id IS NULL` cannot be repurposed: it already means *"not established"* (`mina`), and later linking would destroy the distinction. ⭐ **An account is an operational ROOM/INTERFACE holder, ⛔ NOT the identity primitive.** ⏸ If a non-account counterparty ever needs representing, derive it on the **person/interface** side — ⛔ never by manufacturing accounts |
+
+## ⭐⭐⭐ THE HARD INVARIANT OTE LOCKED TO CARRY FORWARD
+
+```
+OWNER ≠ SUBJECT ≠ SPEAKER/SOURCE ≠ FORMATION CONTEXT ≠ REACHABILITY ≠ INTERFACE ≠ ACCOUNT ≠ PERSON
+
+Sotera's identity is independent of interface, room, account, and formation context.
+```
+
+⭐ **`how_I_see_him` is the CANONICAL LIVE PROOF that these axes legitimately diverge.** ⛔ Keep it.
 
 ⭐⭐ **THE THREE FACTS THAT MADE THESE ANSWERABLE — all measured, all new:**
 - **five authorship axes exist; ONE works.** `author` 125/125 · `actor` 137/137 but **a single constant** ·
@@ -117,8 +126,21 @@ the whole of finding ③.
 | --- | --- |
 | **gap ⑤** | claim subject ≠ slot subject, BOTH KNOWN. ⏸ Held for a **real** divergent case, ⛔ not the constructed fixture. ⚠️ The refusal is a **representation gap, ⛔ NOT a ruling that third-party info is invalid** — *"Ote can tell Sotera about Hermes"* |
 | **M2-1 build** | locked, unbuilt: needs 6f + a product axis (migration) |
-| **the D2 residual** | ⚠️ **a definition-shaped claim still passes M2-8** — RP14 pins it GREEN on purpose. ⛔ M2-6 must never become an aboutness detector |
+| **the D2 residual** | ⚠️ **a definition-shaped claim still passes M2-8** — RP14 pins it GREEN on purpose. ⛔ M2-6 must never become an aboutness detector. ⭐ **Wait for ORIGIN**: a definition-shaped claim is one with no first-hand origin, so origin may dissolve it rather than needing a rule |
 | **admission-predicate identity** | ⏸ the pass row records the boundary STATE but not the PREDICATE's identity — separate hardening item |
+
+## ⭐ DEPENDENCY ORDER (ruled 2026-09-03, full reasoning in `DERIVATION_SOTERA_ORIGIN_CONTRACT` §7)
+
+```
+  ORIGIN vocabulary → schema        ── blocks M2-6 WIRING and the D2 residual
+  the declaration VERB              ── ⭐ THE ONLY HARD BLOCKER on M2 committing anything
+  M2-1 (6f + product axis)          ── independent, may run any time
+  admission-predicate identity      ── independent, may run any time
+  gap ⑤                             ── blocked on DATA (a real divergent case), ⛔ not on design
+```
+
+⚠️ ⛔ **Do NOT wire M2-6 before origin** — `resolveFormationContext()` returns the **DELIVERY** room by
+construction, and wiring it first bakes that in.
 
 ---
 
