@@ -17,7 +17,9 @@
 ✅ 12b / 12c            proposal-only 4/4 verified · isolated-persona E2E 16/16
 ✅ QUANTIFIER           semantics LOCKED (⛔ no vocabulary/API written)
 ✅ M2-3                 RETIRED and re-derived under the room frame
-⏸  BLOCKED ON OTE       ⭐ 3 rulings — see §3. Nothing proceeds without them
+✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
+✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
+⏸  NEXT                 origin VOCABULARY, then the declaration VERB (§3 dependency order)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
