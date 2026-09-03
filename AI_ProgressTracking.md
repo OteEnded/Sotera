@@ -5089,3 +5089,56 @@ enforced by RP11's third-party refusal · ⚠️ ⑤ **NEW GAP FOUND HERE: the c
 slot's subject.** Invisible today (45 of 45 agree); real on the first divergent case.
 
 ⓘ `Reference/docs/DERIVATION_SOTERA_QUANTIFIER_AND_M2_3_REFRAME.md`. ⛔ No vocabulary, no API, no code.
+
+---
+
+## 2026-09-03 04:45 (+07:00) — ✅ QUANTIFIER LOCKED · M2-3 RETIRED · ⏸ GAP ⑤ HELD OPEN
+## ⚠️⚠️ AND A LATENT SUBJECT-INHERITANCE DEFAULT FOUND IN MY OWN M2-6 CODE
+
+### ✅ LOCKED THIS PASS
+
+**Quantifier:** presence-asserting → bounded may suffice · absence-asserting → **exhaustive required** ·
+unknown → **DEFER** · **declared, never inferred** · a mechanically disqualified declaration is
+**REFUSED, ⛔ never reclassified** · marker detection is **explicitly sound-not-complete** · ⛔ no
+classifier may close that residual. **The absence rule belongs to the PROPOSITION at conclusion
+admissibility** — ⛔ not candidate selection, ⛔ not M2-8, ⛔ not persistence.
+
+**M2-3:** old formulation **RETIRED**. WRITER **dead as a test** (purpose now covered by M2-6 C1 +
+M2-8) · READER **vacuous at room scope**, rationale retained for the `persona_global` refusal.
+⇒ ⭐ **the surviving semantic rule is MIS-ATTRIBUTION, ⛔ not disclosure.**
+
+**Gap ⑤ — ⏸ HELD OPEN by Ote.** *"We know claim subject ≠ slot subject is mechanically possible, but we
+don't yet know the correct semantic treatment… I want the permanent rule derived from a real divergent
+case, not from the constructed fixture alone."*
+
+⛔⛔ **AND HIS STANDING WARNING:** *"formation context ≠ room owner ≠ subject ≠ ownership ≠ reachability.
+**'Room frame natural subject = room owner' must not become a universal subject-inheritance rule.**"*
+
+### ⚠️⚠️ WHICH IS EXACTLY WHAT MY CODE ALREADY DOES — MEASURED, ⛔ NOT READ
+
+`provenanceOf`, verified by running it:
+
+```
+subject KNOWN and DIFFERENT  → REFUSED  (unclassifiable)          ✅ correct
+subject KNOWN and SAME       → primary / speaker:'subject'        ✅ correct
+subject UNKNOWN (null)       → primary / speaker:'subject'        ⛔⛔ WRONG
+both unknown                 → primary / speaker:'subject'        ⛔⛔ WRONG
+```
+
+⇒ the divergence guard `if (subjectPersonId && roomOwnerPersonId && …)` **short-circuits on a null
+subject**, so **an UNKNOWN subject is silently treated as the room's account holder.**
+ⓘ **15 of 60 live `entity='user'` rows carry no `subject_person_id` — 25%.**
+
+🔑 **Same class as everything else this arc has caught: *"I could not check"* reading as *"I checked and
+it was fine."*** An unknown subject becomes an asserted one.
+
+⭐⭐ **And it contradicts my own contract's stated rationale.** C2 says *every candidate classified, or
+refused — ⛔ never defaulted*, and RP3's own comment reads *"unclassified would become `primary` by
+default, which is the misrepresentation ruling ① forbids."* ⇒ **the code does the thing the comment
+forbids.**
+
+⚠️ **A RED-PROOF GAP LET IT THROUGH:** RP3 and RP11 exercise *known-same* and *known-different*.
+⛔ **Neither exercises UNKNOWN.** The register passed because the case was never attempted.
+
+⇒ ⛔ **NOT FIXED — Ote ruled no code this pass.** ⭐ **No live exposure**: M2-6 is unwired and M2 is
+disabled. ⓘ Distinct from gap ⑤ (which is *both subjects known and different*); this is *subject unknown*.
