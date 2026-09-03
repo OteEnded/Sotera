@@ -4898,3 +4898,51 @@ not the room's owner.
 
 ⛔ **No selector proposed.** ⏸ Two rulings needed, neither decidable from data: may a secondary source
 COUNT toward recurrence · is the boundary the subject's room or the formation room.
+
+---
+
+## 2026-09-03 03:15 (+07:00) — ⏸ M2-6 EVIDENCE-SELECTION CONTRACT **PROPOSED**, awaiting Ote
+
+**Ote's rulings:** ① **secondary evidence YES** — her observations about a person MAY count, provenance
+explicit, ⛔ never rendered as if the subject said it. ② ⛔ **do not collapse formation room and subject
+room** — OWNER ≠ SUBJECT ≠ FORMATION CONTEXT ≠ PROVENANCE ≠ REACHABILITY. ③ ⛔ not
+`R-room ∧ spoken-by-subject`.
+
+### ⭐⭐⭐ THE CENTRAL CHANGE IS WHAT THE SELECTOR **PROMISES**
+
+> **C0 · the selector produces CANDIDATES, ⛔ not evidence.** Hard safety boundary + explicit provenance
+> class + inspectable key. ⛔ **It does NOT guarantee a candidate bears on the claim, and nothing
+> downstream may assume it does.**
+
+⭐ The pipeline's unstated premise was *"the selector returned it ⇒ it bears on the claim."* ⛔ **No exact
+key can repair that** — the label admits roots with none of the belief (`dry dock` 5→0) and misses roots
+that carry it (`genre focus` 0→2), while value- and source-matching both fall **below the O-2 floor**
+(93% of slots reach one root). ⇒ rename the promise rather than fake the guarantee. Same move as
+*corpus may RANK / view decides ADMISSION* and *root independence certifies the COUNT, not RELEVANCE*.
+
+### THE THREE CLAUSES
+
+| **C1 · formation context as the SAFETY boundary, SELF-DERIVED from the slot** | `slot → source_message_id → conversation → user_id`; ⓘ 60/60 resolve, 60/60 agree. ⭐ The win is that it stops being caller discipline. ⛔⛔ **Explicitly NOT a semantic claim** — it does not say the formation room defines the subject, ⚠️ *because the corpus cannot tell them apart* (subject = room owner **45 of 45**) |
+| --- | --- |
+| **C2 · every candidate carries `primary` / `secondary`** | primary = the subject's own words · secondary = Sotera's observation. ⭐ **Both admitted, both COUNT.** ⛔⛔ A secondary cite may never be rendered as the subject's words — the speaker travels into the warrant. `spoken-by-subject` **withdrawn** |
+| **C3 · key becomes `label ∪ value`** | ⭐ UNION, ⛔ not replacement — each finds what the other cannot. Exact, memory-layer-sourced, one-word answer. ⛔ No embedding/threshold/classifier |
+
+### ⚠️⚠️ WHAT IT DOES **NOT** FIX — NAMED RATHER THAN PAPERED OVER
+
+⛔ **A definition-shaped claim still verifies.** A union key retrieves MORE, so the meta-discussion that
+produced *"A durable fact or preference that is stored about the user…"* stays in the candidate set and
+M2-8 still passes it — M2-8 checks grounding, ⛔ not aboutness. ⇒ **that is M2-6's residual**, and closing
+it is a different lever (D1, or a decline path), ⛔ neither proposed.
+
+⚠️ **Trade-off stated:** C3 **increases** noise to buy recall — justified on O-2's own fail-direction
+logic (a missed root is unrecoverable; a noisy candidate still faces verification and the warrant).
+
+### ⏸ 14 RED-PROOF CASES SPECIFIED, ⛔ NOT YET BUILT
+
+⭐ **RP11 is the one that matters**: subject identity and formation context must be SEPARATE fields with
+neither derived from the other — proven on a **constructed** fixture where subject ≠ room owner, because
+⚠️ **the corpus has never produced that case.** It is what stops a structural convenience hardening into
+a semantic rule. ⭐ **RP14** pins the residual: a definition-shaped claim STILL passes M2-8, asserted so
+it cannot be mistaken for fixed.
+
+ⓘ `Reference/docs/CONTRACT_SOTERA_M2_6_EVIDENCE_SELECTION.md`. ⛔ Production selector unchanged.
