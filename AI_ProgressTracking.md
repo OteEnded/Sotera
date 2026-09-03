@@ -4946,3 +4946,42 @@ a semantic rule. ⭐ **RP14** pins the residual: a definition-shaped claim STILL
 it cannot be mistaken for fixed.
 
 ⓘ `Reference/docs/CONTRACT_SOTERA_M2_6_EVIDENCE_SELECTION.md`. ⛔ Production selector unchanged.
+
+---
+
+## 2026-09-03 03:45 (+07:00) — ✅ M2-6 CONTRACT BUILT · 14 RED-PROOFS GREEN · ⛔ NOT ENABLED
+
+**Built:** `dreaming-candidate-selection.js` (pure) + `resolveFormationContext()` on the candidate host +
+`dreaming-m2-6-check` (36 assertions covering RP1–RP14). **60 of 60 checks · 689 of 689 unit tests.**
+
+### ⭐⭐⭐ C0 IS THE CHANGE — the return is literally named `candidates`
+
+⛔ No `evidence` key exists on it, and the exported intent states outright that it **does not guarantee a
+candidate bears on the claim**. ⭐ The architectural move, not the code.
+
+### THE FOUR RESULTS OTE ASKED FOR BY NAME
+
+| **RP11** ⭐⭐⭐ | subject ≠ room owner, on a **constructed** fixture (⚠️ the corpus has never produced this case — 45 of 45 agree). ⭐⭐ **The third party is REFUSED, ⛔ not silently classed `primary`** — and the refusal NAMES the divergence. ⭐ Sotera's observation is still admitted as `secondary`, because **her authorship does not depend on whose room it is**. ⇒ formation context did NOT become the subject boundary |
+| --- | --- |
+| **RP12** | identical words in another room are refused **by the containment boundary**, ⛔ not by an aboutness judgement |
+| **RP13** | the return is `candidates`; ⛔ `evidence` is `undefined` |
+| **RP14** ⚠️⚠️ | **a definition-shaped claim STILL passes M2-8 — pinned GREEN on purpose.** ⭐ And a second assertion proves M2-6 did **not** quietly become an aboutness detector to make that look better: the meta turns are still admitted as candidates |
+
+### ⭐⭐ THE DESIGN DISCOVERY RP11 FORCED
+
+C2 names two classes. ⭐ **They are complete only while subject = room owner.** The moment they diverge, a
+turn by the room's account holder is a **third party** — neither the subject's own words nor Sotera's.
+⇒ ⛔ **refused as unclassifiable rather than defaulted**, because an unclassified candidate becomes
+`primary` downstream, and that is precisely the misrepresentation ruling ① forbids. 🔑 **The refusal IS
+the signal that a semantic ruling is owed** — which is how Ote asked for it: *"when we get a genuine
+cross-subject case, we can make the permanent semantic ruling from an actual case."*
+
+### ⚠️ AND A CHECK DEFECT, SAME CLASS AS THE EMPTY-TURN TRANSPOSITION
+
+My residue assertion read `persona IS NOT NULL` expecting 0 — but the store legitimately holds **two**
+persona values (`null` × 88, `sotera` × 37), so it accused **37 correct rows**. ⛔ I asserted THE ANSWER
+(*"no non-null persona exists"*) when the invariant is a STATE (*"no 12c fixture is resident"*).
+🔑 Third instance of [[assert-the-state-not-the-answer]] in this arc. Fixed and named in the file.
+
+⛔ **Production selector UNCHANGED — nothing calls the new module.** M2-8 unchanged · O-2 unchanged ·
+M2 disabled · live persona untouched · P1 untouched.

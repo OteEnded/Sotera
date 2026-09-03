@@ -40,6 +40,57 @@ import { evidentialSql } from './corpus-eligibility.js'
 export const MEASURE_CANDIDATES_DEPS = Object.freeze(['query', 'schema', 'minRoots', 'maxTurnsPerSlot'])
 
 /**
+ * ⭐⭐⭐ C1 · RESOLVE A SLOT'S FORMATION CONTEXT **FROM THE SLOT ITSELF**.
+ *
+ *     slot → source_message_id → txn_messages.conversation_id → txn_conversations.user_id
+ *
+ * ⭐ The point is NOT that this discovers something new — ⓘ measured, the chain agrees with the row's own
+ * `user_id` in **60 of 60** live `entity='user'` rows. The point is that the boundary stops being
+ * **caller discipline**: 12b bounded its own query by hand with `c.user_id = $1`, and nothing in the
+ * system would have noticed if it had not. ⇒ a boundary held by convention is the dense-arm defect's
+ * shape, and this makes it structural.
+ *
+ * ⛔⛔ AND IT IS NOT A SEMANTIC CLAIM. Ote, 2026-09-03: *"'formation context' is not 'the room this
+ * memory is for.' It is simply the structural context from which the candidate is allowed to be drawn.
+ * Sotera's memory remains Sotera-owned, independently of that context."*
+ * ⇒ this function returns the CONTEXT and, separately, the room owner's person — ⭐ two fields, ⛔ and it
+ * never returns one in place of the other.
+ *
+ * ⚠️ It returns `null` rather than guessing when the chain cannot be walked. A slot with no recorded
+ * source has no formation context, and `selectCandidates` fails closed on that.
+ */
+export async function resolveFormationContext({ query, schema, memoryId = null, attribute = null } = {}) {
+  if (typeof query !== 'function') throw new Error('resolveFormationContext requires a query(sql, params) function')
+  if (!schema) throw new Error('resolveFormationContext requires a schema')
+  if (!memoryId && !attribute) throw new TypeError('resolveFormationContext needs a memoryId or an attribute')
+  const S = `"${schema}"`
+  const { rows } = await query(
+    `SELECT c.user_id::text AS formation_context,
+            u.person_id::text AS room_owner_person_id,
+            t.subject_person_id::text AS subject_person_id,
+            t.attribute, t.value
+       FROM ${S}."txn_memories" t
+       JOIN ${S}."txn_messages" m ON m.id = t.source_message_id
+       JOIN ${S}."txn_conversations" c ON c.id = m.conversation_id
+       LEFT JOIN ${S}."mst_users" u ON u.id = c.user_id
+      WHERE ($1::uuid IS NULL OR t.id = $1::uuid)
+        AND ($2::text IS NULL OR t.attribute = $2::text)
+        AND t.invalid_at IS NULL AND t.expired_at IS NULL
+      ORDER BY t.created_at DESC LIMIT 1`,
+    [memoryId, attribute])
+  const r = rows[0]
+  if (!r?.formation_context) return null
+  return {
+    formationContext: r.formation_context,
+    // ⭐⭐ SEPARATE AXES, RETURNED SEPARATELY. ⛔ `subjectPersonId` is NOT defaulted to the room owner
+    // when it is absent — that substitution is exactly what ruling ② forbids, and it would be invisible.
+    roomOwnerPersonId: r.room_owner_person_id ?? null,
+    subjectPersonId: r.subject_person_id ?? null,
+    slot: { attribute: r.attribute, value: r.value },
+  }
+}
+
+/**
  * ⭐ One slot's candidate turns, room-grouped and counted. ⛔ Returns COUNTS ONLY.
  *
  * @param {'all'|'any'} mode  conjunctive or disjunctive over the probe terms
