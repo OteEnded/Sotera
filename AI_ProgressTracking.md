@@ -5348,3 +5348,25 @@ delivery (F) · whether an account shell is acceptable for an account-less inter
 
 ⓘ `Reference/docs/DERIVATION_SOTERA_STANDING_AND_OWNED_COGNITION.md` — supersedes the standing section of
 the previous derivation.
+
+---
+
+## 2026-09-03 12:03 (+07:00) — ⏸ PREPARED FOR CONTEXT COMPACTION
+
+`AI_CarryOn.md` **rewritten inline** — it now leads with the three rulings everything waits on, because
+that is what a fresh context needs first. §2 collects every semantic locked in this arc; §6 carries the
+one lesson that kept paying.
+
+**State at compaction:**
+
+```
+60/60 checks · 689/689 unit · migrations through 047
+:8210 PID 24156 · :8201 PID 26644 · restart boundary 2026-09-02 23:38:51Z recorded
+P1 window 7 · memories 125 · passes 5 · warrants 0 · slots 82 · declared questions 0
+zz_ residue 0 · dense_nonevidential 8 (the 56425175 regression fixture, EXPECTED)
+M2 disabled · M2-6 unwired (zero importers) · 12b baseline 4/4 frozen · live persona untouched
+```
+
+⏸ **Waiting on Ote:** ① how ownership of a slot is determined (⛔ `mst_slots` has no `author`) ·
+② case F, forwarded material · ③ case C, account-less interfaces.
+⏸ **Held:** the declaration VERB · gap ⑤ · the M2-1 build · the D2 residual · admission-predicate identity.
