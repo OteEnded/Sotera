@@ -4985,3 +4985,58 @@ persona values (`null` × 88, `sotera` × 37), so it accused **37 correct rows**
 
 ⛔ **Production selector UNCHANGED — nothing calls the new module.** M2-8 unchanged · O-2 unchanged ·
 M2 disabled · live persona untouched · P1 untouched.
+
+---
+
+## 2026-09-03 04:05 (+07:00) — ⏸ NEXT M2 DECISION IDENTIFIED: **M2-1**, plus a conflict found while ranking
+
+⛔ M2-6 stays **built and unwired**; production selector unchanged; 12b baseline not moved.
+
+### ⭐⭐⭐ M2-1 IS NEXT, AND IT IS A HARD BLOCKER — MEASURED, ⛔ NOT ARGUED
+
+```sql
+CHECK (outcome = ANY (ARRAY['6a','6b','6c','6d','6e']))   -- log_dreaming_passes
+```
+
+⇒ **a pass that successfully commits has NO outcome it may record.** ⛔ M2 cannot write and then say what
+it did. ⭐ The code flagged this before anyone asked — `dreaming-outcome.js`: *"a SUCCESSFUL COMMITMENT is
+not among them… M2 must settle it before it writes anything."*
+
+⭐ **Why the five are incomplete:** all answer ONE question negatively — *what did the material support?*
+⇒ there is no affirmative value, so **"it worked" would have to be INFERRED from an absent outcome**,
+which is the inference this arc bans everywhere else.
+
+### ⭐⭐ AND THE THREE-AXIS CASE IS IN THE DATA
+
+| act **#653** | `completed` · `failure=NULL` · `wrote_memory_id=NULL` · **10,923 chars of text** · 1 tool |
+| --- | --- |
+| acts that concluded and produced nothing, no failure | **80** |
+| values the reflection ledger can distinguish | **2** (completed 87 / failed 1) |
+
+⇒ **#653 reflected at length, reached for a tool, produced nothing, reported no failure — and is recorded
+identically to a pass that concluded nothing.** ⓘ **80 of 88 (91%)** sit in that collapse. A **product**
+axis (*a commitment identity, or none*) makes it representable.
+
+⚠️ **The sharp edge:** 6f is reachable at `bounded` because it asserts a PRESENCE — but **the quantifier
+lives in the CLAIM**, and a universal/negative claim asserts an absence *inside* an affirmative outcome.
+⭐ `mayConclude` cannot see a quantifier today; it takes an outcome and a completeness.
+
+### ⚠️⚠️ FOUND WHILE RANKING: **M2-3 CONTRADICTS THE LOCKED M2-7**
+
+**M2-3** (⏸ pending): *"⛔ May not… claim a **property of another person**."*
+**M2-7** (✅ LOCKED): *"the ROOM frame's natural subject is **THE ROOM'S OWNER**… a claim about the room's
+owner IN their own room discloses nothing (O-13's constraint was **persona-global**)."*
+
+⇒ ⛔ **M2-3 forbids exactly what M2-7 licenses.** M2-3 was written under the PERSONA frame; M2-7 changed
+the frame and explained the older prohibition was persona-global-scoped.
+⚠️⚠️ **And everything built since follows M2-7** — 12b proposed `user/…`, 12c persisted `agent_dev/…`,
+M2-6 is built around a subject who is the room's owner. ⇒ **M2-3 as written would forbid the working
+system.** ⭐ It needs RE-DERIVATION under the room frame, ⛔ not a yes/no.
+
+### ⓘ THE OTHER TWO, RANKED AND PARKED
+
+**M2-4** blocks nothing — `mayPublish` already refuses **every** `persona_global` prose claim, strictly
+stricter than M2-4 asks. **M2-2**'s open half is *memory-derived* claims, and M2-6 selects **turns** ⇒ off
+the critical path.
+
+ⓘ `Reference/docs/DECISION_REQUEST_SOTERA_M2_1_OUTCOME_AXES.md`. ⛔ Nothing implemented.
