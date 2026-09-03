@@ -6412,3 +6412,70 @@ namespace option right? ② freeze or migrate? ③ migration as a reconciliation
 ④ permitted values as a definition data field? ⑤ the B.1 line? ⑥ comparison policy as check identity?
 ⏸ **Still open:** claim-kind validation · the BIND audit storage home · the class-C tag representation ·
 the repair of `seed-decisions.mjs`. ⭐ RP-T1 and its three positive controls stand.
+
+---
+
+## 2026-09-03 17:19 (+07:00) — the `decisions` namespace contract; the precedent is weaker than it looked
+
+⛔ **Derivation only — NOT built. No row rewritten, no writer patched, no check registered, no namespace
+created.** ⏸ Origin PARKED. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_NAMESPACE_CONTRACT.md`.
+
+**✅ OTE LOCKED SIX:** canonical address + namespace containment · **MIGRATE** (⛔ not freeze) · migration =
+**reconciliation** with `supersedes_id`, per-room, reader changed first or atomically · permitted values =
+**data on the definition** · the **literal-value boundary** · comparison policy = **check identity**.
+
+**⚠️⚠️ FOUR MEASURED FACTS SAY *"DO IT LIKE `identity`"* IS NOT AVAILABLE AS AN ANSWER.**
+① `namespace` is an **opt-in filter** — every read spells `...(namespace ? { namespace } : {})` ⇒ ⭐ **a
+reader that does not ask gets every namespace.** The default is *include*.
+② The containment of `identity` is a **hand-written JS `.filter()`** after an unfiltered query, ⛔ not the
+namespace mechanism.
+③ A write into `identity` through the generic path is **warned, ⛔ not refused** — *"warn (don't throw) so
+a bypassing caller is visible in logs without breaking a write."*
+④ ⭐⭐⭐ **And `identity` names two different things, on two axes, with disjoint populations:**
+`kind='identity'` = **3 rows**, `namespace='default'`, `scope='persona_global'` — **who Sotera is**;
+`namespace='identity'` = **11 rows**, `kind='semantic'`, `scope='room'` — **what a person is called**.
+**Not one row overlaps.** ⇒ copying this precedent produces exactly the *"technical replacement"* Ote
+forbade.
+
+**⭐⭐⭐ AND OTE'S OWN ADOPTED DOMAIN STATEMENT ALREADY REQUIRES THE CONTRACT.** *"a **slot-governed**
+namespace"* presupposes a **declared classification** of which namespaces are slot-governed — ⛔ and no
+such list exists; there are two namespace values in the corpus and nothing anywhere says what either
+means. ⇒ **deriving `decisions` forces into existence the thing the domain statement already depends on.**
+The namespace contract is not a one-off.
+
+**⭐⭐ WHAT A NAMESPACE IS:** *a space of addresses under one semantic contract*, declaring **four** things —
+① an **owner** · ② **which writers may admit** · ③ **which gates apply** · ④ **the read default**.
+⛔ Not a prefix, ⛔ not a filter; containment is a **consequence**.
+
+**THE SEVEN ANSWERS.** ⭐⭐ **Three ownership shapes measured** — `default` **open** · `identity` owned by a
+**runtime subsystem** · `decisions` owned by an **operator registration act and therefore closed to every
+runtime writer** ⇒ **a declaration must express OWNERSHIP, ⛔ not membership.**
+Writers: only the registration writer, and **refused, ⛔ not warned** (③ and
+[[advertisement-is-not-authorization]] are the measured proof that warnings and withheld offers are not
+boundaries). Scope: **room-scoped as written**, and ⛔ **the namespace must not decide scope** — that
+rebuilds the 029 collapse; *"should decisions be persona-global?"* is a separate question.
+BIND/RESOLVE: ⓘ namespace **is** in the `mst_slots` unique key ⇒ part of **slot identity** ⇒ part of BIND;
+⛔ **not** part of the subject-free question ⇒ **RESOLVE is namespace-blind**. ⚠️ ⓘ And **all 82 slots are
+`namespace='default'` — the key column has never varied.**
+Address vs containment: ⭐ **part of the address** (it is in the slot key); containment follows.
+Readers: ⭐⭐⭐ **the read default must INVERT** — a governed namespace **excluded** from generic reads and
+included **on request** — ⛔ the opposite of today's spelling.
+
+**⛔ THE FAILURE TEST — how to tell if it became a rename:** a reader that does not ask still gets the rows ·
+a runtime writer is only warned · nothing declares an owner or which gates apply · the address still lacks
+its property name. ⭐ **The fourth is fixed by the canonical address; ⚠️ the first three are not fixed by
+ADDING a namespace — they are fixed by DECLARING one.**
+
+**RED-PROOFS, each with a control:** RP-N1 read default (control: `default` rows *are* returned) ·
+RP-N2 write closure — refused, not warned (control: the registration writer succeeds) · ⭐⭐ RP-N3 slot
+identity across namespaces — **a control is essential because the axis has never varied** · RP-N4 scope
+untouched (control: a deliberate scope change *is* detected) · RP-N5 RESOLVE is namespace-blind ·
+⭐ RP-N6 `kind` and `namespace` are never read as the same axis (§0.4).
+
+⏸ **Six for Ote:** ① the `identity` word collision — record, or rename one? ② is the namespace
+**declaration** part of this work? ③ ownership expressed, not membership? ④ inverting the read default
+(⚠️ which changes `identity`'s behaviour too) ⑤ refusal not warning at the write seam ⑥ `decisions` stays
+room-scoped?
+⏸ **Still open:** claim-kind validation · BIND audit home · class-C representation · the
+`seed-decisions.mjs` repair. ⭐ RP-T1 stands with all three positive controls.

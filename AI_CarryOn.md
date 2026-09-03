@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: legacy + enum derived, ⏸ 6 + 4 rulings open (§3)
+▶  NEXT                 ⭐ DECLARATION: namespace contract derived, ⏸ 6 + 4 rulings open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -527,6 +527,47 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
    but list_decisions filters `lower(value) = :want` ⇒ the reader is case-INSENSITIVE, an exact check
    would not be ⇒ ⛔ the policy must be part of the check's REGISTERED IDENTITY (two checks), ⛔ never a
    flag — a flag is a parameter that gets INTERPRETED, which B.1 forbids
+✅ ALL 6 LOCKED: canonical address + namespace containment · MIGRATE (⛔ not freeze) · migration =
+   RECONCILIATION with supersedes_id, per-room, reader changed first/atomically · permitted values =
+   DATA on the definition · the LITERAL-VALUE boundary · comparison policy = CHECK IDENTITY
+```
+
+## ⭐⭐ THE `decisions` NAMESPACE CONTRACT — DERIVED 17:19 → `DERIVATION_SOTERA_NAMESPACE_CONTRACT`
+
+```
+⚠️⚠️ THE PRECEDENT IS WEAKER THAN IT LOOKED — 4 MEASURED FACTS:
+   ① `namespace` is an OPT-IN FILTER — every read spells `...(namespace ? {namespace} : {})` ⇒ ⭐ a
+     reader that does not ask GETS EVERY NAMESPACE. The default is INCLUDE
+   ② the containment of `identity` is a HAND-WRITTEN JS `.filter()` after an unfiltered query, ⛔ not
+     the namespace mechanism
+   ③ a write into `identity` via the generic path is WARNED, ⛔ NOT REFUSED (*"warn (don't throw)"*)
+   ④ ⭐⭐⭐ AND `identity` NAMES TWO DIFFERENT THINGS ON TWO AXES, DISJOINT POPULATIONS:
+       kind='identity'      3 rows · namespace=default · persona_global · WHO SOTERA IS
+       namespace='identity' 11 rows · kind=semantic    · room           · WHAT A PERSON IS CALLED
+     ⇒ ⛔ *"do it like identity"* IS NOT AVAILABLE AS AN ANSWER — copying it produces exactly the
+     "technical replacement" Ote forbade
+⭐⭐⭐ AND OTE'S OWN ADOPTED DOMAIN STATEMENT ALREADY REQUIRES THIS: *"a SLOT-GOVERNED namespace"*
+   presupposes a DECLARED CLASSIFICATION of namespaces — ⛔ AND NO SUCH LIST EXISTS. ⇒ deriving
+   `decisions` forces into existence the thing the domain statement already depends on
+⭐⭐ A NAMESPACE IS A SPACE OF ADDRESSES UNDER ONE SEMANTIC CONTRACT, declaring FOUR things:
+   ① an OWNER · ② which writers may admit · ③ which gates apply · ④ THE READ DEFAULT.
+   ⛔ Not a prefix, ⛔ not a filter — containment is a CONSEQUENCE
+⭐⭐ THREE OWNERSHIP SHAPES MEASURED: default = OPEN · identity = a RUNTIME SUBSYSTEM · decisions = an
+   OPERATOR REGISTRATION ACT, ⛔ CLOSED TO EVERY RUNTIME WRITER ⇒ a declaration must express
+   OWNERSHIP, ⛔ not membership
+⭐ WRITERS: only the registration writer — and it must be REFUSED, ⛔ not warned (④ + ③ are the measured
+   proof that warnings and withheld offers are not boundaries)
+⭐ SCOPE: room-scoped as written; ⛔ THE NAMESPACE MUST NOT DECIDE SCOPE — that rebuilds the 029 collapse
+⭐ BIND/RESOLVE: namespace IS in the mst_slots unique key ⇒ part of SLOT IDENTITY ⇒ part of BIND;
+   ⛔ NOT part of the question (subject-free) ⇒ RESOLVE is namespace-BLIND.
+   ⚠️ ⓘ ALL 82 SLOTS ARE namespace='default' — the key column HAS NEVER VARIED
+⭐ ADDRESS, ⛔ not containment — it is in the slot key, so it ADDRESSES; containment follows
+⭐⭐⭐ THE READ DEFAULT MUST INVERT: a governed namespace must be EXCLUDED from generic reads and
+   included ON REQUEST — ⛔ the opposite of today's spelling
+⛔ THE FAILURE TEST — it is a RENAME if: a reader that doesn't ask still gets the rows · a runtime writer
+   is only warned · nothing declares an owner/gates · the address still lacks its property name.
+   ⭐ The FOURTH is fixed by the canonical address; ⚠️ THE FIRST THREE ARE NOT FIXED BY ADDING A
+   NAMESPACE — they are fixed by DECLARING one
 ⏸ 6 RULINGS from this doc
 ```
 
