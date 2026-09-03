@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: ns declaration + reader audit, ⏸ 6 + 5 open (§3)
+▶  NEXT                 ⭐ DECLARATION: name/pinning/authority derived, ⏸ 4 + 5 open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -607,7 +607,49 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
 ⚠️ IMMUTABLE, but supersession differs: a slot points at a question by FK; a row carries its namespace as
    a STRING ⇒ ⛔ nothing to repoint ⇒ ⏸ must an admitted row record the NAMESPACE CONTRACT it was
    admitted under (as ruling ③ did for the question)? RAISED, ⛔ not answered
-⏸ 6 RULINGS from this doc
+✅ 8 LOCKED: undeclared → INCLUDE/OPEN/DEFER · default+identity MUST be declared (a TRANSCRIPTION,
+   ⛔ not a backfill) · namespace authority = OPERATOR ⛔ not Sotera · governed ns EXCLUDED from
+   generic + internal reads · audit/lint stays NAMESPACE-BLIND · REFUSE at the write seam ·
+   namespace ∈ SLOT IDENTITY, ⛔ not the subject-free question
+⭐ *"Undeclared does not mean SAFE; it means NOT GOVERNED YET."*
+
+## ⭐⭐ NAME · PINNING · AUTHORITY — DERIVED 17:30 → `DERIVATION_SOTERA_NAMESPACE_NAME_PINNING_AUTHORITY`
+
+```
+⭐ THE NAME — 4 criteria: names the ADDRESS SPACE (⛔ not consumer/source/writer/mechanism) · ⛔ not a
+   word already on another axis · one word like default/identity · generalises to everything sharing
+   the four declared properties
+⭐⭐ THE THREE SPACES LINE UP: identity = what a PERSON IS CALLED · default = what is known GENERALLY ·
+   ??? = what is true of THE PROJECT ⇒ the missing name is at THAT level, ⛔ not at "decisions", which
+   is ONE ADDRESS FAMILY inside it
+⭐ CANDIDATES MEASURED in Backend/app: `project` 101 prose but as a quoted identifier ONLY
+   'project-decision' ×2 — which DISAPPEARS under canonical addressing ⇒ ⭐⭐ NOT TAKEN AS AN AXIS
+   ⛔ decisions (the collision) · ⛔⛔ commitment(s) 21 — M2'S OWN PRODUCT · ⛔ ledger 57 · ⛔ registry 77
+   · ⛔ record 258 · ⛔ governance 0 but names the MECHANISM · ⚠️ artefact/artifact — BOTH SPELLINGS live
+   ⇒ ⭐⭐ `project` is the ONLY candidate meeting all four — ⚠️ with the honest cost that it is BROAD
+⭐⭐⭐ PINNING: **THE ANALOGY WITH RULING ③ FAILS, AND FOR A PRECISE REASON.**
+   read_default ⇒ ⛔ MUST BE CURRENT, never pinned (a pinned read policy IS the 029 scope drift)
+   slot_governed ⇒ ⭐ ALREADY RECORDED by question_id_at_admission (present = gated · NULL = not) ⇒
+     pinning it would be A SECOND SPELLING OF A PINNED FACT
+   permitted_writers ⇒ what matters is WHO WROTE IT (author/source/audit), ⛔ not which policy allowed it
+   owner/owner_kind ⇒ descriptive, no retroactive force
+   ⇒ ⭐⭐⭐ **A QUESTION CHANGES WHAT A ROW MEANS; A NAMESPACE CHANGES WHO MAY ACT AND WHAT IS VISIBLE —
+   ⛔ NEITHER IS A PROPERTY OF THE ROW'S MEANING** ⇒ `memory.namespace = X` IS SUFFICIENT
+   ⚠️ TRIGGER TO REVISIT: if a namespace property is ever added that changes what a row MEANS
+⭐⭐ OWNER vs owner_kind vs permitted_writers = THREE JOBS, ⛔ NOT THREE AUTHORITIES: owner_kind selects
+   HOW the authority is CHECKED · owner NAMES the holder · permitted_writers LISTS THE CHANNELS
+⭐⭐⭐ AND OTE'S INTUITION IS DERIVED CORRECT: if permitted_writers conferred STANDING, adding a writer
+   would GRANT authority — ⭐ exactly the Origin failure (*"an authority handed in as a parameter is an
+   authority a caller can get wrong"*) ⇒ it is a MECHANISM list; adding a writer adds a ROUTE, ⛔ not a
+   right ⇒ ⭐⭐ NECESSARY BUT NOT SUFFICIENT: a permitted writer running WITHOUT a registration act has
+   NO authority. TWO preconditions at the write seam, neither substituting for the other
+   ⚠️ And for owner_kind=runtime-subsystem (identity) the two COINCIDE — which is exactly why the
+   distinction is INVISIBLE in the only precedent we have
+⭐ RP-N11 (behavioural, ⛔ never a grep): governed ns ⇒ generic reader ABSENT · audit reader PRESENT,
+   with BOTH positive controls — the generic read DOES return a default row (else "absent" only proves
+   the query is broken) and the audit read DOES miss a genuinely absent row (else "present" only proves
+   it returns everything unconditionally)
+⏸ 4 RULINGS from this doc
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD

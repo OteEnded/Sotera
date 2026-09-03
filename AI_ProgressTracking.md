@@ -6549,3 +6549,65 @@ per property? ③ declaring `default`/`identity` as a **transcription**? ④ aut
 exception?
 ⏸ **Still open:** claim-kind validation · BIND audit home · class-C representation · `seed-decisions`
 repair · legacy migration. ⭐ RP-T1 stands with all three controls.
+
+---
+
+## 2026-09-03 17:30 (+07:00) — the namespace name, contract pinning, and owner vs permitted-writers
+
+⛔ **Derivation only — NOT built. No namespace created, no read behaviour changed, no migration, no writer
+patch, no check registered.** ⏸ Origin PARKED. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome
+untouched. ⭐ → `Reference/docs/DERIVATION_SOTERA_NAMESPACE_NAME_PINNING_AUTHORITY.md`.
+
+**✅ OTE LOCKED EIGHT:** undeclared → INCLUDE / OPEN / **DEFER** · `default` + `identity` **must be
+declared**, and those declarations are a **transcription, ⛔ not a backfill** · namespace authority =
+**operator/account, ⛔ not Sotera** · governed namespaces **excluded from generic and internal reads** ·
+**audit/lint stays namespace-blind** · **refuse at the actual write seam** · namespace participates in
+**slot identity, ⛔ not the subject-free question**. ⭐ And his framing to keep:
+*"Undeclared does not mean safe; it means not governed yet."*
+
+**THE NAME — four criteria, then measurement.** It must name the **address space** (⛔ not the consumer,
+source, writer, or mechanism) · ⛔ not be a word already on another axis · sit at `default`/`identity`'s
+level · and generalise to everything sharing the four declared properties.
+⭐⭐ **The three spaces line up:** `identity` = what a **person is called** · `default` = what is known
+**generally** · **??? = what is true of THE PROJECT.** ⇒ the missing name is at *that* level — ⛔ not at
+*"decisions"*, which is **one address family inside it**.
+ⓘ Measured in `Backend/app`: **`project`** — 101 prose uses but as a quoted identifier **only
+`'project-decision'` ×2**, which **disappears under canonical addressing** ⇒ ⭐⭐ **not taken as an axis.**
+⛔ `decisions` (the measured collision) · ⛔⛔ `commitment(s)` **21 — M2's own product** · ⛔ `ledger` 57 ·
+⛔ `registry` 77 · ⛔ `record` 258 · ⛔ `governance` 0 but names the **mechanism** · ⚠️ `artefact`/`artifact`
+— **both spellings already live**. ⇒ ⭐⭐ **`project` is the only candidate meeting all four**, ⚠️ with the
+honest cost that it is **broad**.
+
+**⭐⭐⭐ PINNING — THE ANALOGY WITH RULING ③ FAILS, AND FOR A PRECISE REASON.**
+`read_default` ⇒ ⛔ **must be current, never pinned** — a pinned read policy **is** the 029 scope drift.
+`slot_governed` ⇒ ⭐ **already recorded by `question_id_at_admission`** (present = gated, NULL = not) ⇒
+pinning it would be **a second spelling of a fact already pinned**.
+`permitted_writers` ⇒ what matters is **who actually wrote it** (`author`, `source`, the audit), ⛔ not
+which policy allowed it. `owner`/`owner_kind` ⇒ descriptive, no retroactive force.
+⇒ ⭐⭐⭐ **A QUESTION CHANGES WHAT A ROW MEANS; A NAMESPACE CHANGES WHO MAY ACT AND WHAT IS VISIBLE —
+⛔ neither is a property of the row's meaning.** ⇒ **`memory.namespace = X` is sufficient.**
+⚠️ **Trigger to revisit, stated so it is not lost:** if a namespace property is ever added that changes
+what a row **means**, pinning becomes necessary immediately.
+
+**⭐⭐ OWNER vs `owner_kind` vs `permitted_writers` — THREE JOBS, ⛔ NOT THREE AUTHORITIES.**
+`owner_kind` selects **how the authority is checked** · `owner` **names the holder** · `permitted_writers`
+**lists the channels**.
+⭐⭐⭐ **And Ote's intuition is derived correct:** if `permitted_writers` conferred **standing**, then
+**adding a writer would grant authority** — ⭐ exactly the Origin failure (*"an authority handed in as a
+parameter is an authority a caller can get wrong"*). ⇒ it is a **mechanism list**; adding a writer adds a
+**route**, ⛔ never a right.
+⇒ ⭐⭐ **NECESSARY BUT NOT SUFFICIENT: a permitted writer running without a registration act has NO
+authority, even though it is on the list.** Two preconditions at the write seam, neither substituting for
+the other. ⚠️ And for `owner_kind = runtime-subsystem` (as `identity` is) the two **coincide** — ⭐ which is
+exactly why the distinction is **invisible in the only precedent we have**, and must be stated before a
+second namespace exists.
+
+**⭐ RP-N11, behavioural and never a grep:** a row in a declared exclude-by-default namespace is **absent**
+from the generic reader and **present** to the audit reader — with **both** positive controls, because the
+two failure modes are opposite: a **broken generic read** passes the exclusion assertion, and an
+**unconditional audit read** passes the visibility assertion. ⭐ RP-N10 stays behavioural too.
+
+⏸ **Four for Ote:** ① the name `project`, with its breadth? ② no contract pinning, with the stated trigger
+to revisit? ③ `permitted_writers` as necessary-but-not-sufficient? ④ RP-N11 with both controls.
+⏸ **Still open:** claim-kind validation · BIND audit home · class-C representation · `seed-decisions`
+repair · legacy migration. ⭐ RP-T1 stands with all three controls.
