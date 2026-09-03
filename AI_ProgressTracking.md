@@ -6336,3 +6336,79 @@ rows — wanted at all, or do existing rows stay and only future decisions use t
 ③ is a **parameterised** enumeration check acceptable? ④ canonical writer via `reconcileFact`, accepting
 the cost? ⑤ is the missing artefact-subject axis worth recording as a gap?
 ⏸ **Still open:** claim-kind validation · the BIND audit storage home · the class-C tag replacement.
+
+---
+
+## 2026-09-03 17:12 (+07:00) — legacy decision coexistence, and the enumeration-check contract
+
+⛔ **Derivation only — NOT built. No row rewritten, no writer patched, no check registered.**
+⏸ Origin PARKED. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_LEGACY_DECISIONS_AND_ENUM_CHECK.md`.
+
+**✅ OTE RULED FIVE:** the defect **is the address** · ⛔ do **not** rewrite the 34 rows now ·
+parameterised enumeration **yes in principle, contract first** · canonical writer = `reconcileFact` ·
+artefact subject = a **recorded gap**, ⛔ no schema. ⭐ And the general principle he locked:
+**physical column shape does not determine semantic shape.**
+
+**⚠️⚠️ A.0 — TRACING THE READER FOUND AN ARGUMENT *FOR* THE CURRENT ADDRESSING, WHICH I DID NOT EXPECT.**
+ⓘ `list_decisions` already reads the semantics correctly — `SELECT attribute AS key, value AS status` ⇒
+⭐ **the inversion was never a misunderstanding; the reader compensates for it by aliasing.**
+⛔ **But its stated safety boundary depends on the inversion:** *"ONE ENTITY — `entity =
+'project-decision'` and nothing else, **so it cannot become a general memory reader by accident**."*
+⇒ under canonical addressing every decision is its own entity and **that containment predicate vanishes.**
+⭐⭐ **A.0b — and the fix uses an existing axis:** `namespace` already governs `identity`, so
+`namespace=<decisions> · entity=<the decision> · attribute=status` is canonical **and** contained, with a
+boundary **stronger** than an entity string. ⏸ An option, ⛔ not a decision.
+
+**A.1–A.3.** The 34 rows **read safely** and are untouched — the kind gate is a **write** precondition.
+⭐ Dreaming may use them, and they are **better-attested than most of the corpus** (a pinned
+`doc:<path>@<sha>` with a verbatim quote). ⛔ But they can **never pass kind admission as they stand** (no
+slot) ⇒ permanently *"no kind gate applied"* — one of NULL's three stated situations, ⛔ not a defect.
+
+**⚠️⚠️ A.4 — THE DANGEROUS CASE.** A corrected seeder's idempotence key
+(`entity='project-decision' and attribute=$2`) **matches nothing** under canonical addressing ⇒ it
+**INSERTS** ⇒ **two live claims about one decision, with no key collision.** ⭐ **The keys do not collide;
+the MEANING does** — and it would be **silent**, because `list_decisions` filters on the old entity and
+would show only the old rows.
+⇒ ⭐⭐ **A.5: running both is not an option.** Either **freeze** the old population (canonical for new
+decisions only — ⚠️ and then `list_decisions` must read **both** or lose half the answer) or **migrate**.
+⭐ **A.6: migration is a RECONCILIATION** — the mechanism exists with 3 rows of precedent — occasioned by a
+named ruling, **superseding** each old row with a canonical one carrying the same pin, so the old row is
+preserved and the lineage walkable. ⛔ **Never an in-place UPDATE of the address.** ⚠️ Prerequisites stated
+up front: `list_decisions` changed first or atomically · the seeder's key changes meaning · per-room (the
+rows exist in two).
+**A.7:** `evidence.kind='project-decision'` stays **historical provenance only** — ⛔ never promoted into
+the declared vocabulary, or a private vocabulary gets legitimised after the fact.
+
+**⭐⭐⭐ B.0 — THE ENUMERATION DESIGN MOVE: don't parameterise the check; give the DEFINITION a data field.**
+ⓘ `checks` is `text[]` and every registered check is `run(value)` — nullary over anything but the value.
+⚠️ Encoding parameters inside an identifier would need **a parser inside the check id**, which is exactly
+how a predicate sneaks back into what 047 built as a pure name. ⇒ **`checks[]` stays pure identifiers, the
+permitted values are data on the definition, and the check stays code.** ⭐ Ote's own framing pointed here.
+⚠️ Honest cost: a second data-bearing check would want a second field — acceptable now (first such demand
+in the project's life), and a reason to revisit at the third.
+
+**⭐⭐⭐ B.1 — THE LINE THAT KEEPS DEFINITIONS FROM BECOMING CODE:**
+> *A parameter must be a **finite list of literal values** that a registered check compares by
+> **equality**. If a parameter would ever need to be **interpreted** — a pattern, a range, an expression —
+> that is a **new registered check**, ⛔ not a richer parameter.*
+
+**B.2.** Immutability falls out **free** (the definition is immutable) · changing the set = a new
+definition + a rebind · ⭐⭐ and because ruling ③ pins `question_id_at_admission`, **adding a value
+re-interprets nothing** · an **empty** permitted set is ⛔ refused (a question no answer can satisfy is not
+a question) · deregistration ⇒ DEFER, unchanged · malformed params refused at declaration **and** caught
+again at evaluation.
+
+**⚠️⚠️ B.3 — COMPARISON POLICY IS A SEMANTIC CHOICE, AND THE CORPUS ALREADY DISAGREES WITH ITSELF.**
+ⓘ Values are stored lowercase, and `list_decisions` filters with **`lower(value) = :want`** ⇒ **the reader
+is case-insensitive while an exact check would not be.** ⇒ *"is `Shipped` valid?"* has no default answer.
+⇒ ⛔ **the comparison policy must be part of the check's registered identity — two checks, ⛔ never one
+with a flag**, because a flag is a parameter that gets **interpreted**, which B.1 forbids.
+⛔ And what the check must never become: a source of truth · a classifier · a score · a **coercion** (a
+value not in the set is refused, ⛔ never mapped to the nearest one).
+
+⏸ **Six for Ote:** ① does A.0's lost containment change the answer to *"canonicalize at all"*, and is the
+namespace option right? ② freeze or migrate? ③ migration as a reconciliation with `supersedes_id`?
+④ permitted values as a definition data field? ⑤ the B.1 line? ⑥ comparison policy as check identity?
+⏸ **Still open:** claim-kind validation · the BIND audit storage home · the class-C tag representation ·
+the repair of `seed-decisions.mjs`. ⭐ RP-T1 and its three positive controls stand.

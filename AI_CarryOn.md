@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: project-decision derived, ⏸ 5 + 3 rulings open (§3)
+▶  NEXT                 ⭐ DECLARATION: legacy + enum derived, ⏸ 6 + 4 rulings open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -484,7 +484,50 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
    every existing check is NULLARY over the value
 ⭐ CANONICAL WRITER: registration and slot resolution are ORTHOGONAL — `reconcile:`'s slot-shaped row
    DOES carry a slot_id ⇒ ⛔ "it's a maintenance script" is not a reason to bypass reconcileFact
-⏸ 5 RULINGS from this doc
+✅ ALL 5 RULED: ① the defect IS the address · ② ⛔ do NOT rewrite the 34 rows now · ③ parameterised
+   enum YES in principle, contract to be derived · ④ canonical writer = reconcileFact · ⑤ artefact
+   subject = a RECORDED GAP, ⛔ no schema
+⭐ AND THE GENERAL PRINCIPLE OTE LOCKED: **physical column shape does not determine semantic shape**
+```
+
+## ⭐⭐ LEGACY DECISIONS · THE ENUM CHECK — DERIVED 17:12 → `DERIVATION_SOTERA_LEGACY_DECISIONS_AND_ENUM_CHECK`
+
+```
+⚠️⚠️ A.0 TRACING THE READER FOUND AN ARGUMENT **FOR** THE CURRENT ADDRESSING. `list_decisions` already
+   reads the semantics right (`attribute AS key, value AS status`) ⇒ ⭐ the inversion was never a
+   misunderstanding; the READER COMPENSATES BY ALIASING. ⛔ BUT its stated safety boundary — *"ONE
+   ENTITY … so it cannot become a general memory reader by accident"* — DEPENDS ON THE INVERSION.
+   Canonical addressing makes every decision its own entity ⇒ ⛔ THE CONTAINMENT PREDICATE VANISHES
+⭐⭐ A.0b THE FIX THAT USES AN EXISTING AXIS: `namespace` (already governs `identity`) ⇒ canonical +
+   contained = namespace=<decisions> · entity=<the decision> · attribute=status. ⏸ An option, ⛔ not a
+   decision
+⭐ A.1 the 34 rows READ SAFELY and are untouched — the kind gate is a WRITE precondition
+⭐ A.2 Dreaming may use them: they carry a PINNED doc:<path>@<sha> + verbatim quote ⇒ better-attested
+   than most of the corpus. ⛔ A.3 but they can NEVER pass kind admission as they stand (no slot) ⇒
+   permanently *no kind gate applied* — one of NULL's three stated situations, ⛔ not a defect
+⚠️⚠️ A.4 THE DANGEROUS CASE: a corrected seeder's key MATCHES NOTHING under canonical addressing ⇒ it
+   INSERTS ⇒ **TWO LIVE CLAIMS about one decision, NO key collision** — ⭐ the keys don't collide, the
+   MEANING does — and SILENTLY, because list_decisions would show only the old rows
+⭐⭐ A.5 ⇒ ⛔ RUNNING BOTH IS NOT AN OPTION. Either FREEZE the old (canonical for NEW decisions only, and
+   list_decisions must then read BOTH) or MIGRATE as a ruled act
+⭐ A.6 MIGRATION = a RECONCILIATION (the mechanism exists, 3 rows of precedent), occasioned by a named
+   ruling, SUPERSEDING each old row with a canonical one carrying the same pin ⇒ old row preserved,
+   lineage walkable. ⛔ NEVER an in-place UPDATE of the address
+⭐ A.7 `evidence.kind='project-decision'` stays HISTORICAL PROVENANCE ONLY — ⛔ never promoted into the
+   declared vocabulary, or a private vocabulary gets legitimised after the fact
+⭐⭐⭐ B.0 THE ENUM DESIGN MOVE: ⛔ DON'T PARAMETERISE THE CHECK — GIVE THE **DEFINITION** A DATA FIELD.
+   Encoding params in an identifier needs A PARSER INSIDE THE CHECK ID, which is how a predicate sneaks
+   back in ⇒ `checks[]` stays PURE IDENTIFIERS; the values are DATA on the definition; the check is CODE
+⭐⭐⭐ B.1 THE LINE THAT KEEPS DEFINITIONS FROM BECOMING CODE: *a parameter must be a FINITE LIST OF
+   LITERAL VALUES compared by EQUALITY. Anything needing INTERPRETATION (a pattern, a range, an
+   expression) is A NEW REGISTERED CHECK, ⛔ not a richer parameter*
+⭐ B.2 immutable falls out FREE (the definition is immutable) · changing the set = new definition +
+   rebind · ⭐⭐ and ruling ③ means adding a value RE-INTERPRETS NOTHING · empty set ⇒ ⛔ REFUSED
+⚠️⚠️ B.3 COMPARISON POLICY IS A SEMANTIC CHOICE AND THE CORPUS ALREADY DISAGREES: values are lowercase
+   but list_decisions filters `lower(value) = :want` ⇒ the reader is case-INSENSITIVE, an exact check
+   would not be ⇒ ⛔ the policy must be part of the check's REGISTERED IDENTITY (two checks), ⛔ never a
+   flag — a flag is a parameter that gets INTERPRETED, which B.1 forbids
+⏸ 6 RULINGS from this doc
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD
