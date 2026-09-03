@@ -5672,3 +5672,66 @@ neither subject-free nor per-instance.
 ⏸ **Three rulings, then the location decision:** ① does the DB keep enforcing the slot rule? ② does the
 discard carry the producer's three reasons? ③ is *"same pattern, different act"* accepted?
 ⭐ Already ruled out for the location: ⛔ not `source`/lineage (①.3) · ⛔ not `mst_slot_questions` (③).
+
+---
+
+## 2026-09-03 15:06 (+07:00) — the origin REPRESENTATION derived
+
+⛔ **Derivation only.** No migration, field, backfill or wiring. M2-6 unwired · M2 disabled · 12b frozen ·
+P1 and Rome untouched. ⭐ → `Reference/docs/DERIVATION_SOTERA_ORIGIN_REPRESENTATION.md`.
+
+**✅ OTE RULED THE THREE BLOCKERS.** ① DB keeps enforcing the slot rule ⇒ same-row, absent a new trigger.
+② Preserve `dreaming-verify.js`'s three reasons as **warrant-ledger provenance**, ⛔ not origin semantics;
+⛔ no *"no verbatim span exists"* until a producer emits it. ③ Route B is a **separate act** — same
+pattern, ⛔ never the `mst_slot_questions` verb.
+
+**⚠️ TWO OF MY OWN CLAIMS CORRECTED BEFORE ANYTHING RESTED ON THEM.**
+① *"a trigger is a mechanism this schema has never used"* — ⛔ **wrong**: `txn_intentions_touch_trg` exists
+(`NEW.updated_at := now()`). ⭐ The accurate, narrower statement: **no trigger has ever enforced an
+INVARIANT** — a safety trigger would be a first *in kind*, ⛔ not a first outright.
+② The `evidence` **clobber** risk I was about to assert — ⛔ **not demonstrated**. `lineageFor` returns
+`row.evidence` unchanged on every early return and otherwise merges via `withDerivedFrom` ⇒ it **preserves**
+incoming evidence and is in fact a precedent for safe co-tenancy.
+
+**⭐⭐⭐ THE STRUCTURAL RESULT: origin is STATE + HOPS.** `none` and `unknown` are **both hop-empty** ⇒ an
+array alone would have to mean both *"first-hand"* and *"we don't know"* — the exact 029 overload. So the
+state is a **primary fact**, ⛔ not derivable from the hops.
+
+**⚠️ AND IT NARROWS OTE'S OWN CONSTRAINT — reported plainly rather than built on.** I said *"origin must be
+same-row."* The sharper truth: **the fact the CHECK reads must be same-row, and that fact is the STATE.**
+His ruling stands and binds less than I stated.
+⭐⭐ But a **second** CHECK pulls the hops back on-row anyway: the dangerous divergence is `state='none'`
+(⇒ slottable) on a row that carries a chain — the Cogito failure re-enabled — and **atomicity does not
+prevent it; only a CHECK tying the two columns does**, which requires them on ONE ROW. A child table would
+need a trigger.
+
+**STATE = `not-examined | none | unknown | known`.** ⭐⭐ All 125 existing rows default to
+**`not-examined`** — ⛔ **not `none`**, which would assert a first-hand-ness nobody established: the
+standing invariant applied to a *default*.
+Gate: `CHECK (state IN ('not-examined','none') OR (entity IS NULL AND attribute IS NULL AND value IS
+NULL))` — ⭐ **031's exact shape**, permissive for the unrecorded case for 031's exact reason (refusing it
+would refuse all 55 slotted rows and every writer — *"not a protection, an outage"*).
+⚠️⚠️ **This RELOCATES blocker ①'s vacuity, ⛔ it does not remove it:** a producer that never runs leaves
+`not-examined`, which is slottable. ⭐ **No schema removes the need for a producer.** What it buys is four
+epistemic positions that are distinguishable and NOT NULL.
+⭐ `reported` falls out as `state IN ('unknown','known')` — derived, never written. ⛔ **031's constraint
+STAYS** as a second independent gate (its own argument applies to itself).
+
+**LOCATION — three same-row candidates, two rejected on measurement.**
+⛔ `evidence`: 43 rows, **four mutually disjoint key-sets, no key on every row** ⇒ a union of unrelated
+shapes; a safety-adjacent CHECK there would constrain a column whose contract is *"whatever the writer
+felt like."* ⛔ composite type: **0 exist** in this schema and element constraints need an immutable
+function — ⓘ this schema has **1** function and it is volatile. ✅ **Two dedicated columns**, which is also
+idiomatic here (**9** `text[]` columns already in use).
+⭐ Hop shape: `who` · `what` · `span` (**inline** — an inner hop is by definition not in this room, so a
+pointer resolves to `source-unreadable` by construction) · `how-meant` (**UNRECORDED** only) · `depth`
+(reusing the locked completeness contract). ⛔ No room/account/scope, no score, no kind enum.
+
+**⭐⭐ TRANSITION PRECEDENT IS ON THIS EXACT TABLE:** `txn_memories_quoted_needs_source` is **`NOT VALID`**
+— a constraint that binds forward without re-validating history. ⓘ And the immediate transition costs
+nothing: 125 rows land on a permitted default, 0 carry `reported`, 0 carry a chain.
+
+⏸ **Four for Ote:** ① is the `not-examined` permissiveness accepted, or tightened once a producer exists?
+② one jsonb hops column, or a child table with a lint-enforced tie instead of a CHECK-enforced one?
+③ names/spellings (schema, not derivation). ④ Route B's own act — accepted as separate, ⛔ still undesigned;
+and the declaration **VERB** remains the only hard blocker on M2 committing anything.

@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN locked 14:49; 3 blockers 14:59 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -20,8 +20,8 @@ context compaction.
 ✅ M2-3                 RETIRED and re-derived under the room frame
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
-✅ ORIGIN VOCAB + 3     vocabulary · authorization · inner-hop modality · the 3 schema blockers
-⏸  NEXT                 ⭐ 3 rulings (§2 blockers), THEN the location decision, then the VERB
+✅ ORIGIN FULLY DERIVED vocabulary · authorization · inner-hop modality · 3 blockers · REPRESENTATION
+⏸  NEXT                 ⭐ 4 rulings on the REPRESENTATION (§2), then Route B's act, then the VERB
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -119,6 +119,24 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
                  UNWARRANTABLE ≠ false
 
 ⭐⭐ THE THREE SCHEMA BLOCKERS — DERIVED 14:59 → `DERIVATION_SOTERA_THREE_SCHEMA_BLOCKERS`
+✅ 3 BLOCKERS RULED (Ote): ① DB keeps enforcing ⇒ same-row absent a trigger · ② preserve the THREE
+   producer reasons as LEDGER provenance (⛔ no 4th until a producer emits it) · ③ Route B = SEPARATE ACT
+⭐⭐ REPRESENTATION DERIVED → `DERIVATION_SOTERA_ORIGIN_REPRESENTATION`
+   ⭐⭐⭐ ORIGIN = STATE + HOPS, both SAME-ROW on txn_memories, in TWO dedicated columns tied by a CHECK.
+   ⭐ `none` and `unknown` are BOTH hop-empty ⇒ an array ALONE cannot represent origin (the 029 overload)
+   ⭐ STATE = not-examined | none | unknown | known. All 125 rows default `not-examined` — ⛔ NOT `none`,
+     which would assert first-hand-ness nobody established
+   ⭐ gate: `state IN ('not-examined','none') OR (entity IS NULL AND attribute IS NULL AND value IS NULL)`
+     — 031's SHAPE, and ⛔ 031's own constraint STAYS as a second independent gate
+   ⚠️⚠️ this RELOCATES ①'s vacuity, ⛔ does NOT remove it: no schema removes the need for a PRODUCER
+   ⭐ hops same-row because a CHECK can only tie columns ON ONE ROW — a child table would need a TRIGGER
+   ⛔ not `evidence` (43 rows, FOUR disjoint key-sets, no key on every row) · ⛔ not a composite type
+     (0 exist, and element constraints need an immutable fn; this schema has 1 fn and it is volatile)
+   ⭐ transition precedent is ON THIS TABLE: `txn_memories_quoted_needs_source` is NOT VALID
+⚠️ TWO OF MY CLAIMS CORRECTED: a trigger is NOT unprecedented here (`txn_intentions_touch_trg` exists —
+   but ⭐ no trigger has ever enforced an INVARIANT); and the `evidence` CLOBBER risk is ⛔ NOT
+   demonstrated — `lineageFor` MERGES via withDerivedFrom and preserves incoming evidence
+
 ① COMPAT      ⛔⛔ THE GATE GOES VACUOUS. `txn_memories_modality_slot_ck` keys on `modality`; stop
               writing `reported` and every re-presented row is NULL, which SATISFIES the CHECK.
               ⭐ 4 enforcement sites, not 1: the DB · slotViolation() · ownership-boundary:199 ·
