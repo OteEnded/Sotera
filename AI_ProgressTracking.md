@@ -6670,3 +6670,57 @@ cannot see Y at all.**
 **binding** log, accepting a third change log? ③ RP-NQ1/2/3? ④ is the four-item `project-decision` strand
 sequenced **after** M2, or worked in parallel?
 ⭐ RP-T1, RP-N10 and RP-N11 all stand with their controls.
+
+---
+
+## 2026-09-03 17:51 (+07:00) — M2 SCOPE CLOSED; the critical path consolidated at the implementation boundary
+
+⛔ **NOT built.** ⏸ Origin PARKED · namespace semantics LOCKED · M2-6 unwired · M2 disabled · 12b frozen ·
+P1 and Rome untouched. ⭐ → `Reference/docs/CONTRACT_SOTERA_M2_CRITICAL_PATH.md`.
+
+**✅ OTE LOCKED THE LAST FOUR:** claim-kind validation at **RESOLVE** (diagnosis, ⛔ not safety;
+`checkKind` stays **pure**, ⛔ no storage lookup) · a **dedicated BINDING log**, ⛔ never generalised into
+`slot_changes`, and a **third** memory-subsystem change log is explicitly fine because the **subjects
+differ** · RP-NQ1/2/3 with controls · ⭐ **the project-decision strand is sequenced AFTER M2.**
+⭐ And his instruction: **stop expanding the M2 semantic scope.**
+
+**THIS DOCUMENT CONSOLIDATES; ⛔ IT DOES NOT EXTEND.** Every stage points at a derivation already
+ratified — DECLARE · BIND · RESOLVE · ADMISSION · the historical pin — plus the self-authorisation rule
+across **both** acts, enforced at admission on the **consumer** side.
+
+**⭐⭐ AND THE SEQUENCING EXPOSED A FURTHER REDUCTION:** creating the **`project` namespace**, the
+**read-default inversion**, and RP-N1 / RP-N10 / RP-N11 are **all post-M2** — they matter once `project`
+exists. ⇒ **exactly ONE namespace declaration is on the M2 path: `default`**, because ⓘ all 82 slots and
+all 55 slotted rows live there and an undeclared namespace means `slot_governed = UNKNOWN ⇒ DEFER` ⇒ ⛔ the
+gate would govern **nothing**.
+
+**⏸⏸ AND SAID PLAINLY RATHER THAN IMPLIED — THE CONTRACTS ARE NOT ALL FINISHED. THREE SHAPE DECISIONS
+REMAIN ON THE PATH:**
+① **the OCCASION field** — the self-authorisation rule needs the DECLARE **and** BIND occasions recorded;
+ⓘ **047 has `declared_by` and `declared_at` and no occasion column.** The BIND audit carries one by design;
+DECLARE does not.
+② **the not-present discipline for BIND** — ruled in **principle**, ⛔ shape not derived. ⭐ `person-service`
+already has the pattern (a pending map · a TTL · *"a confirm is only honoured in a LATER turn than the
+proposal"* · ⚠️ and a re-proposal **must not reset the clock**). ⏸ Reuse it, or derive a variant?
+③ **declaring `default`** — ruled required and ruled a **transcription, ⛔ not a backfill**; the declaration
+object's shape is derived but ⛔ not ratified as schema.
+⇒ ⭐ **three shape decisions, ⛔ no new semantics.** Everything else on the path is ratified.
+
+**THE RED-PROOF REGISTER, M2 PATH ONLY**, under one governing rule: ⭐⭐⭐ *an assertion that **nothing
+changed** is exactly the assertion that passes when the instrument is broken* ⇒ **every such proof needs a
+positive control first.** ⭐⭐ **RP-D0 is mandatory and first** — DECLARE → BIND → RESOLVE → `checkKind` =
+**ALLOW** — because ⓘ 100% of slots DEFER today, so **until it passes every other proof is vacuous**, and
+the three-missing-pieces finding is exactly how this could ship green and do nothing. Then RP-D1–D10,
+RP-T1 with its three controls, RP-NQ1/2/3, and ⭐ RP-N8 (an undeclared namespace DEFERs; control: a declared
+slot-governed one ALLOWs) — which is what makes **declaring `default` provable rather than assumed**.
+⏸ Post-M2: RP-N1 · N7 · N9 · N10 · N11, and the origin register RP-W0–W4.
+
+**⭐⭐ THE DEFINITION OF DONE, KEPT SEPARATE AS OTE REQUIRED:**
+✅ *"semantic contract complete enough to implement"* ⇒ §2, with §3 honest about the gaps.
+⛔ *"behaviour demonstrated by positive-control red-proofs"* ⇒ §4, and **none of it has run.**
+⇒ **M2 is not done until the second is true, and ⛔ the two must never be reported as one.**
+⚠️ **A green suite proves nothing until RP-D0 and RP-W0 have passed** — the warrant register passes
+**vacuously** on 0 rows, the kind register **vacuously** on 100% DEFER.
+
+⏸ **What this asks for: three shape decisions, then BUILD.** ⛔ No further semantic derivation is needed on
+the M2 path, and ⛔ the four post-M2 items must not become reasons to reopen it.

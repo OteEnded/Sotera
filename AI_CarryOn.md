@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path consolidated 17:51 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: 2 on-path items derived · 4 off-path parked (§3)
+▶  NEXT                 ⭐⭐ M2 IMPLEMENTATION BOUNDARY — 3 shape decisions, then BUILD (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -684,7 +684,38 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
    (a memory · a warrant · a binding), ⛔ never by convenience
 ⭐ RP-NQ1/2/3 (namespace ≠ question), each with a control, because every one asserts *"X did not change
    Y"* — the assertion that passes when the probe cannot see Y at all
-⏸ 4 RULINGS from this doc
+✅ ALL 4 RULED: claim-kind validation at RESOLVE (diagnosis ⛔ not safety, checkKind stays PURE) ·
+   a DEDICATED BINDING log (⛔ not slot_changes; a 3rd change log is fine — the SUBJECTS differ) ·
+   RP-NQ1/2/3 · ⭐ THE PROJECT-DECISION STRAND IS SEQUENCED **AFTER M2**
+
+## ⭐⭐⭐ THE M2 CRITICAL PATH — CONSOLIDATED 17:51 → `CONTRACT_SOTERA_M2_CRITICAL_PATH`
+## ⛔ SCOPE IS CLOSED. Read that doc first; it consolidates and does NOT extend.
+
+```
+DECLARE → BIND → RESOLVE → ADMISSION → question_id_at_admission → red-proofs → isolated E2E → M2 commit
+⏸ AFTER M2: enumeration check · class-C representation · seed-decisions repair · legacy migration
+⭐⭐ AND A FURTHER REDUCTION: creating the `project` namespace, the READ-DEFAULT INVERSION and
+   RP-N1/N10/N11 are ALL POST-M2 ⇒ **exactly ONE namespace declaration is on the path: `default`**
+   (all 82 slots + all 55 slotted rows live there; undeclared ⇒ slot_governed UNKNOWN ⇒ DEFER ⇒ the
+   gate would govern NOTHING)
+
+⏸⏸ AND SAID PLAINLY — THE CONTRACTS ARE **NOT** ALL FINISHED. THREE SHAPE DECISIONS REMAIN ON THE PATH:
+   ① THE OCCASION FIELD — the self-authorisation rule needs the DECLARE and BIND occasions recorded;
+     ⓘ 047 has declared_by + declared_at and NO occasion column. The BIND audit carries one by design;
+     DECLARE does not
+   ② THE NOT-PRESENT DISCIPLINE FOR BIND — ruled in PRINCIPLE, shape NOT derived. ⭐ person-service has
+     the pattern (pending map · TTL · *"a confirm is only honoured in a LATER turn"* · ⚠️ a re-proposal
+     must NOT reset the clock). ⏸ Reuse or derive a variant?
+   ③ DECLARING `default` — ruled required and ruled a TRANSCRIPTION; the declaration object's SHAPE is
+     derived but ⛔ not ratified as schema
+   ⇒ ⭐ THREE SHAPE DECISIONS, ⛔ NO NEW SEMANTICS. Everything else on the path is ratified
+
+⭐⭐⭐ THE DEFINITION OF DONE, KEPT SEPARATE (Ote's requirement):
+   ✅ "semantic contract complete enough to IMPLEMENT"  ⇒ §2, with §3 honest about the gaps
+   ⛔ "behaviour DEMONSTRATED by positive-control red-proofs" ⇒ §4, and NONE of it has run
+   ⇒ **M2 IS NOT DONE UNTIL THE SECOND IS TRUE**, and ⛔ the two must never be reported as one
+⚠️ A GREEN SUITE PROVES NOTHING UNTIL RP-D0 AND RP-W0 HAVE PASSED — the warrant register passes
+   VACUOUSLY on 0 rows, the kind register passes VACUOUSLY on 100% DEFER
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD
