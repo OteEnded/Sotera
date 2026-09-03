@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ THE DECLARATION VERB — semantics derived, ⏸ 6 rulings open (§3)
+▶  NEXT                 ⭐ DECLARATION: 6 ruled · BIND/RESOLVE/ADMISSION derived, ⏸ 7 open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -359,7 +359,56 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
 ⭐⭐⭐ ⇒ RP-D0 IS MANDATORY AND FIRST: DECLARE → BIND → checkKind must ALLOW. ⛔ Until it passes every
    other proof is VACUOUS. ⓘ Only FOUR checks are registered (nonempty · single-line ·
    no-trailing-ellipsis · is-iso-date) — a definition can express very little today
-⏸ 6 RULINGS NEEDED — see the doc's §11
+✅ 6 RULED: ① DECLARE≠BIND YES · ② self-authorisation YES · ③ question_id_at_admission YES ·
+   ④ BIND audit DERIVE-FIRST · ⑤ RESOLVE is IN SCOPE · ⑥ BIND standing DERIVE (⛔ no analogy to Origin)
+```
+
+## ⭐⭐ BIND · RESOLVE · ADMISSION — DERIVED 16:30 → `DERIVATION_SOTERA_BIND_RESOLVE_ADMISSION`
+
+```
+⚠️⚠️ §0 A CORRECTION TO RULING ②, WHICH OTE ALREADY RATIFIED: a declaration only becomes consumable
+   when it is BOUND ⇒ a definition declared LAST WEEK could be BOUND MID-PASS by the pass that needs
+   it. ⇒ ⭐⭐⭐ THE RULE MUST COVER BOTH ACTS: neither the DECLARE nor the BIND may share the consuming
+   occasion. ⭐ BIND is the one that matters — BIND is what makes a definition OPERATIVE
+⭐⭐⭐ BIND STANDING — the obvious route is CLOSED by ruling ①: a slot HAS NO OWNER ⇒ standing cannot
+   be derived from slot ownership
+⭐ BIND asserts "this ADDRESS means that question" ⇒ SUBJECT-FREE IN CONTENT, ROOM-SCOPED IN EFFECT
+   ⇒ a THIRD shape: ⛔ neither DECLARE nor CORRECT. Ote was right that the analogy would not carry
+⭐⭐⭐ THE REAL DISCRIMINATOR IS JUDGEMENT vs TESTIMONY, ⛔ NOT WHO. ⓘ 82 of 82 slots minted by
+   `reconcileFact` from a LABEL NOBODY INTERPRETED ⇒ ⛔ NOT ONE SLOT IN THE CORPUS HAS A DELIBERATELY
+   AUTHORED ADDRESS ⇒ every BIND available today is inference-shaped, which M2-10 forbids REGARDLESS
+   OF WHO PERFORMS IT ⇒ ⭐⭐ STANDING IS NOT THE BINDING CONSTRAINT — EVIDENCE IS
+⭐ TWO ROUTES: B-i the address was AUTHORED (⛔ no writer does this today) · B-ii a deliberate later
+   act with the NOT-PRESENT discipline (person-service's propose/confirm), audited, ⛔ never inferred
+⭐⭐ STANDING for B-ii: Sotera (her structure) AND the account — and ⭐ for a label-minted slot THE
+   ACCOUNT'S IS THE NON-INFERENTIAL ONE: the label came from THEIR words
+⭐⭐ REBIND does NOT need the operator — ruling ③ REMOVED the retroactive damage (a rebind can no
+   longer rewrite history) ⇒ what it needs is STANDING + not-present discipline + AN AUDIT: it must
+   be unable to happen SILENTLY, ⛔ not escalated
+⭐ RESOLVE: authoritative = EXACTLY the row question_id points at; slotKind = its `question_key`
+   ⭐⭐ ⛔ RESOLVE DOES NOT FOLLOW `supersedes_id` ⇒ supersession alone changes NOTHING operative;
+   only a REBIND makes a new definition live. ⭐ Declaring cannot change behaviour; only binding can
+   ⭐ "missing definition" is IMPOSSIBLE — mst_slots_question_id_fkey has NO ON DELETE clause
+   ⭐⭐ RESOLVE returns TWO things: question_key → checkKind · checks[] → evaluate. ⛔ Never conflate
+   ⚠️ GAP: nothing validates that a CLAIM's kind is a declared question key ⇒ "no kind" and "a kind
+   nobody declared" collapse into one outcome
+⚠️⚠️ THE ADMISSION BOUNDARY — THERE ISN'T ONE. `kindPreconditionFor` has ZERO callers.
+   THREE write paths into txn_memories, and TWO BYPASS THE STORE (lesson-host ×2, direct INSERT, no
+   gates) — and one of them writes SLOT-SHAPED rows (entity='sotera', attribute='lesson', no slot_id)
+⭐⭐⭐ AND IT IS BIGGER: **49 of 104 slot-shaped rows have NO slot_id** (doc: 34/34 have none) because
+   the slot store DEGRADES SILENTLY ⇒ A ROW CAN BE SLOT-SHAPED WITHOUT HAVING A SLOT, and a row with
+   no slot can never carry a question
+⏸⏸ ⇒ THE TENSION, BEFORE ANY FIELD IS ADDED: the gate says *"this binds EVERY writer"* — but once
+   wired, either ⓐ those 49 DEFER (⛔ the doc: class can no longer write slot-shaped rows) or
+   ⓑ they are EXEMPT (⛔ the stated intent is false). ⭐ THIS is what the trace was for
+⭐ CAPTURE question_id_at_admission WHERE THE GATE SUCCEEDS, in the SAME statement as the row —
+   ⛔ never looked up later (a later read resolves to whatever the slot points at NOW)
+⭐ AND ITS NULL MUST MEAN EXACTLY ONE THING — *no kind gate was applied* — ⛔ never "admitted under the
+   slot's current question". This store has already paid for a NULL that meant two things (029)
+⛔ BIND AUDIT: no existing structure can take it honestly — log_memory_changes.memory_id is NOT NULL ·
+   log_user/config_changes are about other things · mst_slots.evidence would be an audit INSIDE the
+   mutable object it audits. ⏸ Storage home stays Ote's, as ruled
+⏸ 7 RULINGS NEEDED — see the doc's §5
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD

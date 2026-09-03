@@ -6119,3 +6119,88 @@ and the missing occasion column? ③ recording the admitting question id? ④ BI
 `log_memory_changes.memory_id` is NOT NULL, so a slot-only change has **nowhere to be recorded**, and the
 dangerous half is the unaudited one? ⑤ is the `question_id → slotKind` resolution part of this work?
 ⑥ standing for BIND?
+
+---
+
+## 2026-09-03 16:30 (+07:00) — BIND standing · the BIND audit event · RESOLVE · the admission boundary
+
+⛔ **Derivation only — NOT built.** ⛔ No storage home chosen. ⏸ Origin stays PARKED. M2-6 unwired ·
+M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_BIND_RESOLVE_ADMISSION.md`.
+
+**✅ OTE RULED SIX:** ① DECLARE ≠ BIND **yes** · ② self-authorisation + occasion **yes** ·
+③ `question_id_at_admission` **yes** · ④ BIND audit **derive before choosing** · ⑤ RESOLVE **is in scope**
+· ⑥ BIND standing **derive independently, ⛔ no analogy to Origin**.
+
+**⚠️⚠️ §0 — A CORRECTION TO RULING ②, WHICH HE HAD ALREADY RATIFIED.** A declaration only becomes
+consumable when it is **BOUND** ⇒ a definition declared last week could be **bound mid-pass by the very
+pass that needs it**, and the rule as written permits it. ⇒ ⭐⭐⭐ **the rule must cover both acts: neither
+the DECLARE nor the BIND may share the consuming occasion** — and BIND is the one that matters, because
+**BIND is what makes a definition operative**.
+
+**⭐⭐⭐ BIND STANDING — and the obvious route is closed by a ruling already made.** *"Who owns the slot?"*
+⇒ **nobody**: ruling ① locked that a slot has no owner. ⇒ standing cannot be derived from slot ownership.
+⭐ BIND asserts *"this ADDRESS means that question"* ⇒ **subject-free in content, room-scoped in effect** ⇒
+**a third shape**, ⛔ neither DECLARE nor CORRECT. Ote's suspicion that the analogy would not carry is
+correct.
+⭐⭐⭐ **The real discriminator is JUDGEMENT vs TESTIMONY, ⛔ not who.** ⓘ **82 of 82 slots** were minted by
+`reconcileFact` from a label nobody interpreted (and the labels show it — `"user's time zone and
+communication preference"`, `"my own existence timeline"`). ⇒ ⛔ **not one slot in the corpus has a
+deliberately authored address**, so **every BIND available today is inference-shaped — which M2-10 forbids
+regardless of who performs it.** ⇒ ⭐⭐ **standing is not the binding constraint; EVIDENCE is.**
+⭐ Two routes: **B-i** the address was authored in one deliberate act (⛔ no writer does this today) ·
+**B-ii** a deliberate later act with the **not-present discipline** (`person-service`'s propose/confirm),
+audited, ⛔ never inferred.
+⭐⭐ Standing for B-ii: **Sotera** (her own conceptual structure — Ote's own ground for DECLARE) **and the
+account** — and ⭐ **for a label-minted slot the account's is the NON-INFERENTIAL one, because the label
+came from their words.** Not disjoint, unlike origin.
+⭐⭐ **REBIND does not need the operator.** Ruling ③ **removed the retroactive damage** — a rebind can no
+longer rewrite history — so what it needs is standing + the not-present discipline + **an audit**: it must
+be unable to happen **silently**, ⛔ not escalated. *"Operator by symmetry"* does not survive the
+derivation.
+ⓘ And the rest: formation context ⛔ irrelevant · `user_id` ⭐ only as **scope of effect**, ⛔ never an
+ownership proxy · *"created by an account-owned process"* distinguishes nothing (**all 82** were).
+
+**THE RESOLVE CONTRACT.** Authoritative = **exactly** the row `question_id` points at; `slotKind` = its
+**`question_key`** (⛔ not the id — `checkKind` compares against a claim's kind **by name**).
+⭐⭐ ⛔ **RESOLVE does not follow `supersedes_id`** ⇒ **supersession alone changes nothing operative**; only
+a **rebind** makes a new definition live. ⭐ *Declaring cannot change behaviour; only binding can.*
+⭐ *"Missing definition"* is **impossible by construction** — ⓘ `mst_slots_question_id_fkey` has **no
+`ON DELETE` clause**. ⭐⭐ RESOLVE returns **two** things — `question_key` → `checkKind`, `checks[]` →
+`evaluate` — ⛔ never conflated. ⚠️ **Gap named:** nothing validates that a **claim's** kind is a declared
+question key, so *"no kind"* and *"a kind nobody ever declared"* collapse into one outcome.
+
+**⚠️⚠️ THE ADMISSION BOUNDARY — THE INVESTIGATION OTE ASKED FOR. THERE ISN'T ONE.**
+ⓘ `kindPreconditionFor` has **zero callers**. ⓘ **Three** write paths into `txn_memories`, and **two bypass
+the store entirely** (`lesson-host` ×2, direct INSERT, no gates) — ⚠️ and one of them writes **slot-shaped**
+rows (`entity='sotera'`, `attribute='lesson'`, no `slot_id`). ⭐ 015 already named this: *"`save_lesson`
+sidesteps this with its own INSERT."*
+⭐⭐⭐ **And it is bigger than the bypasses: 49 of 104 slot-shaped rows have NO `slot_id`** (`doc:` — 34 of
+34 have none), because the slot store **degrades silently**. ⇒ **a row can be slot-shaped without having a
+slot, and a row with no slot can never carry a question.**
+⏸⏸ ⇒ **The tension this forces open BEFORE any field is added:** the gate states *"this binds every
+writer"* — once wired, **either** those 49 **DEFER** (⛔ the `doc:` class can no longer write slot-shaped
+rows) **or** they are **exempt** (⛔ the stated intent is false). ⭐ **This is exactly what the requested
+trace was for.**
+⭐ Capture `question_id_at_admission` **where the gate succeeds**, in the **same statement** as the row —
+⛔ never looked up later, because a later read resolves to whatever the slot points at **now**, which is
+the failure ruling ③ exists to prevent.
+⭐ **And its NULL must mean exactly one thing** — *no kind gate was applied* — ⛔ never *"admitted under the
+slot's current question."* ⚠️ Two situations would otherwise both write NULL, and this store has already
+paid for a NULL that meant two things (029).
+
+**⛔ THE BIND AUDIT HAS NO HONEST HOME.** `log_memory_changes.memory_id` is **NOT NULL** ⇒ it cannot
+represent a slot-only mutation · `log_user_changes`/`log_config_changes` are about other things ·
+`mst_slots.evidence` would put an audit **inside the mutable object it audits**. ⏸ Storage home stays
+Ote's, as ruled — this derivation only establishes that nothing existing can take it without lying about
+what changed. ⭐ The event itself is derived: two derived actions (first-bind/rebind by the claim/non-claim
+rule) · actor = the session · **occasion required and load-bearing** (§0) · reason required · before/after
+carrying both id and key (⚠️ `before` NULL on a first bind — precedented by `forget` having no `after`) ·
+CAS intent + whole-state expected-current · an identical re-bind **converges with no audit row** · the
+**record** is append-only while the **binding** is mutable.
+
+⏸ **Seven for Ote:** ① the §0 extension of the self-authorisation rule to BIND · ② BIND standing as derived
+(evidence, not standing, as the constraint — so **no slot is bindable today** without B-ii) · ③ rebind needs
+audit, ⛔ not the operator · ④ the 49 slotless slot-shaped rows: DEFER or exempt · ⑤ the two bypass writers:
+brought to the seam or documented as *"no kind gate applied"* · ⑥ validating a claim's kind · ⑦ the BIND
+audit's storage home.
