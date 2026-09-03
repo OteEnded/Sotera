@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: namespace contract derived, ⏸ 6 + 4 rulings open (§3)
+▶  NEXT                 ⭐ DECLARATION: ns declaration + reader audit, ⏸ 6 + 5 open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -568,6 +568,45 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
    is only warned · nothing declares an owner/gates · the address still lacks its property name.
    ⭐ The FOURTH is fixed by the canonical address; ⚠️ THE FIRST THREE ARE NOT FIXED BY ADDING A
    NAMESPACE — they are fixed by DECLARING one
+✅ ALL 6 LOCKED: identity collision = RECORD ⛔ don't rename · namespace declaration IS part of this
+   work · ownership ⛔ not membership · governed namespaces EXCLUDED from generic reads (⚠️ audit the
+   readers first) · REFUSE ⛔ not warn · decisions stays ROOM-SCOPED (namespace ≠ scope)
+⭐ AND THE THREE DECLARATIONS STAY SEPARATE: NAMESPACE ("what address space?") · QUESTION ("what does
+   it ask?") · BIND ("which question applies to this slot?"). ⛔ Namespace is NOT part of the
+   subject-free question ⇒ RESOLVE stays NAMESPACE-BLIND and follows exactly the question_id
+
+## ⭐⭐ NAMESPACE DECLARATION + READER AUDIT — DERIVED 17:24 → `DERIVATION_SOTERA_NAMESPACE_DECLARATION_AND_READERS`
+
+```
+⚠️⚠️ A THIRD WORD COLLISION, AND I NEARLY ASSERTED THE OPPOSITE: `withoutDecisions()` (3 read sites)
+   filters `isDeclineRecord` = entity 'sotera' / attribute 'declined' ⇒ it excludes HER DECLINE RECORDS
+   (class C), ⛔ NOT project decisions. "Decisions" there = *her decisions NOT to remember*
+   ⇒ ⭐⭐⭐ NAMING THE NEW NAMESPACE `decisions` COLLIDES WITH A LIVE FILTER THAT MEANS SOMETHING ELSE
+   ⭐ What survives: class C IS already excluded from generic reads by hand at 3 sites — a FIFTH
+   containment-by-hand instance (retention-host says it aloud: *"had to be added at three read sites"*)
+⭐⭐ READER AUDIT — project-decision rows TODAY reach: generic recall (search/list/listArchived) ·
+   listContradicted/countContradicted · ⭐⭐⭐ AND `reconcileFact`'s findOwnLive({kind:'semantic'}) WITH NO
+   NAMESPACE, which JS-filters IDENTITY ONLY ⇒ **THEY ARE SLOT CANDIDATES FOR UNRELATED WRITES**
+   ⇒ ⭐ the read-default inversion CLOSES A REAL LATENT CROSS-CONTAMINATION, ⛔ not merely tidies a query
+⭐ PER-CLASS READ POLICY: generic recall + internal reconciliation ⇒ EXCLUDE by default · dedicated
+   readers ⇒ ASK explicitly · ⭐ AUDIT/LINT ⇒ DELIBERATELY NAMESPACE-BLIND (an audit that cannot see a
+   space cannot audit it) — ⚠️ the exception that keeps "excluded by default" honest
+⭐ DECLARATION SHAPE: namespace_key · means (human) · owner_kind (open | runtime-subsystem |
+   registration-act) · owner · permitted_writers · ⭐⭐ slot_governed (THE DOMAIN STATEMENT'S MISSING
+   LIST) · read_default · declared_by/at. ⛔ No scope, no questions, no values
+⚠️⚠️ UNDECLARED MUST NOT FAIL CLOSED GLOBALLY — namespace is a STRING, ⛔ not an FK ⇒ undeclared ⇒ reads
+   INCLUDE + writers OPEN (flipping either is an OUTAGE, 031's rule) but slot_governed UNKNOWN ⇒ DEFER
+⚠️ ⇒ WHICH FORCES: `default` MUST BE DECLARED, or the gate governs NOTHING (all 55 slotted rows and all
+   82 slots live there)
+⭐⭐⭐ AND THAT IS **NOT A BACKFILL**: a namespace's contract is ALREADY WRITTEN IN CODE (*"the reserved
+   identity namespace"*, *"identity is owned by the Identity Resolver"*) ⇒ declaring it TRANSCRIBES a
+   stated contract. A slot QUESTION was never stated anywhere — which is exactly why that one cannot be
+   backfilled and this one can
+⭐ AUTHORITY = THE OPERATOR/ACCOUNT, ⛔ NOT SOTERA — a namespace is an ARCHITECTURAL fact about the
+   system, ⛔ not her conceptual vocabulary. Derived from what the act asserts, ⛔ not by analogy
+⚠️ IMMUTABLE, but supersession differs: a slot points at a question by FK; a row carries its namespace as
+   a STRING ⇒ ⛔ nothing to repoint ⇒ ⏸ must an admitted row record the NAMESPACE CONTRACT it was
+   admitted under (as ruling ③ did for the question)? RAISED, ⛔ not answered
 ⏸ 6 RULINGS from this doc
 ```
 

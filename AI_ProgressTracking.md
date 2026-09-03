@@ -6479,3 +6479,73 @@ untouched (control: a deliberate scope change *is* detected) · RP-N5 RESOLVE is
 room-scoped?
 ⏸ **Still open:** claim-kind validation · BIND audit home · class-C representation · the
 `seed-decisions.mjs` repair. ⭐ RP-T1 stands with all three positive controls.
+
+---
+
+## 2026-09-03 17:24 (+07:00) — the namespace declaration shape, and the reader audit
+
+⛔ **Derivation only — NOT built. No row rewritten, no writer patched, no check registered, no namespace
+created, NO READ BEHAVIOUR CHANGED.** ⏸ Origin PARKED. M2-6 unwired · M2 disabled · 12b frozen ·
+P1 and Rome untouched. ⭐ → `Reference/docs/DERIVATION_SOTERA_NAMESPACE_DECLARATION_AND_READERS.md`.
+
+**✅ OTE LOCKED SIX:** the `identity` collision = **record, ⛔ don't rename** · the namespace **declaration
+is part of this work** · it expresses **ownership, ⛔ not membership** · governed namespaces **excluded
+from generic reads** (⚠️ audit the readers first) · **REFUSE, ⛔ not warn** · `decisions` stays
+**room-scoped** (namespace ≠ scope). ⭐ And the three declarations stay separate — NAMESPACE · QUESTION ·
+BIND — with **RESOLVE namespace-blind**, following exactly the `question_id`.
+
+**⚠️⚠️ A THIRD WORD COLLISION, AND I NEARLY ASSERTED THE OPPOSITE.** I found `withoutDecisions()` at three
+read sites and was about to report that project decisions are already filtered out of recall. ⛔ **False.**
+Measured: `isDeclineRecord(row) → entity === DECLINE_ENTITY && attribute === DECLINE_ATTRIBUTE` — it
+excludes **her decline records (class C)**, ⛔ not project decisions. *"Decisions"* there means *"her
+decisions **not to remember**."*
+⇒ ⭐⭐⭐ **naming the new namespace `decisions` collides with a live filter that means something else.**
+⭐ What survives the correction: class C **is** already excluded from generic reads by hand at three sites
+— a **fifth** containment-by-hand instance, and `retention-host.js` says it aloud: *"`withoutDecisions()`
+had to be added at three read sites."*
+
+**⭐⭐ THE READER AUDIT.** `project-decision` rows today reach: **generic recall** (`search`, `list`,
+`listArchived`) · `listContradicted`/`countContradicted` · and ⭐⭐⭐ **`reconcileFact`'s
+`findOwnLive({kind:'semantic'})` with NO namespace, which JS-filters IDENTITY ONLY ⇒ they are SLOT
+CANDIDATES for unrelated writes.** ⇒ ⭐ **the read-default inversion closes a real latent
+cross-contamination**, ⛔ not merely tidies a query.
+⭐ **Per-class policy:** generic recall + internal reconciliation ⇒ **exclude by default** · dedicated
+readers ⇒ **ask explicitly** (identity already does) · ⭐ **audit/lint ⇒ deliberately namespace-BLIND** —
+*an audit that cannot see a space cannot audit it*, ⚠️ the exception that keeps *"excluded by default"*
+honest · parameterised readers unchanged.
+
+**THE DECLARATION SHAPE:** `namespace_key` · `means` (a human sentence, ⛔ not machine-read) · `owner_kind`
+(**open | runtime-subsystem | registration-act** — the three measured shapes) · `owner` ·
+`permitted_writers` · ⭐⭐ **`slot_governed`** (the domain statement's missing list) · `read_default` ·
+`declared_by`/`declared_at`. ⛔ No scope, no questions, no values.
+
+**⚠️⚠️ UNDECLARED MUST NOT FAIL CLOSED GLOBALLY.** ⓘ `namespace` is a **string**, ⛔ not an FK, so a
+namespace can exist in data undeclared — as `default` and `identity` do. ⇒ **fail-closed per property:**
+undeclared ⇒ reads **INCLUDE**, writers **OPEN** (flipping either is an **outage**, 031's exact rule), but
+`slot_governed` **UNKNOWN ⇒ DEFER**.
+⚠️ ⇒ **which forces a consequence: `default` MUST be declared**, or the kind gate governs **nothing** —
+ⓘ all 55 slotted rows and all 82 slots live there.
+**⭐⭐⭐ AND THAT IS NOT A BACKFILL.** A namespace's contract is **already written in code** (*"the reserved
+identity namespace"*, *"identity is owned by the Identity Resolver, not the generic slot reconcile"*) ⇒
+declaring it **transcribes a stated contract**. A slot **question** was never stated anywhere — which is
+exactly why that one cannot be backfilled and this one can. ⭐ The asymmetry survives M2-10.
+
+**AUTHORITY = THE OPERATOR/ACCOUNT, ⛔ NOT SOTERA.** A **question** is her own conceptual vocabulary
+(Ote's ruling); a **namespace** is an **architectural fact about the system** — which spaces exist, who
+owns them, which gates apply — and ⚠️ she is not the author of the system's structure. ⭐ Derived from what
+the act asserts, ⛔ not by analogy.
+**Immutable**, ⚠️ but supersession differs: a slot points at a question by **FK**, while a row carries its
+namespace as a **string** ⇒ ⛔ nothing to repoint ⇒ ⏸ **must an admitted row record the namespace contract
+it was admitted under**, as ruling ③ did for the question? **Raised, ⛔ not answered.**
+
+**Red-proofs added:** RP-N7 undeclared stays readable (control: a declared exclude-by-default one does
+not) · RP-N8 undeclared ⇒ DEFER (control: a declared slot-governed one ⇒ ALLOW) · RP-N9 audit stays blind
+(control: generic recall does not) · ⭐⭐ RP-N10 reconcile isolation — a write never takes a slot candidate
+from another governed namespace (control: it *does* from its own).
+
+⏸ **Six for Ote:** ① the `decisions` name collides with `withoutDecisions` — rename which? ② fail-closed
+per property? ③ declaring `default`/`identity` as a **transcription**? ④ authority = operator, not Sotera?
+⑤ must a row record its admitting namespace contract? ⑥ the per-class read policy incl. the audit
+exception?
+⏸ **Still open:** claim-kind validation · BIND audit home · class-C representation · `seed-decisions`
+repair · legacy migration. ⭐ RP-T1 stands with all three controls.
