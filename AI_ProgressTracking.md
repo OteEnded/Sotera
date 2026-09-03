@@ -6831,3 +6831,48 @@ namespace-ish axis and a different fact entirely.
 
 **Next in the mandatory order:** RP-D1, D2, D3, D5, D8, D9, D10, RP-NQ1/2/3, RP-N8, isolated E2E.
 Origin stays PARKED, namespace LOCKED, M2 still disabled, M2-6 unwired, 12b frozen, P1 and Rome untouched.
+
+---
+
+## 2026-09-03 18:41 (+07:00) — THE WHOLE M2 RED-PROOF REGISTER IS GREEN, INCLUDING THE ISOLATED E2E
+
+**OTE RATIFIED** the Sequelize fix, the admission interpretation (ALLOW earns the pin; it does not
+globally refuse the write), and confirmBind's CTE/CAS shape. And he ratified the lesson into the standing
+proof discipline: **a positive control must demonstrate the intended state SURVIVES THE ACTUAL PERSISTENCE
+BOUNDARY, not merely that the application computed it.** Recorded as a memory.
+
+**BUILT AND RUN, in the mandatory order.** `declaration-rp-register-check.mjs` (24 assertions) and
+`declaration-e2e-isolation-check.mjs` (7). **Suite: `✓ all 65 suites passed`** — grepped for the pass line.
+
+**RP-D1** declare+bind leave an existing row byte-identical · CONTROL: a real update does change the
+snapshot.
+**RP-D2** with the kind gate ALLOWing, another gate still refuses the write.
+**RP-D5** an unrunnable declared check DEFERs and is reported as UNKNOWN · CONTROL: an all-registered set
+ALLOWs.
+**RP-W0 FIRST, then RP-D8** — a warrant is *issued* and the snapshot *changes*, and only then is "declare
+and rebind move no warrant" asserted. On an empty table that assertion is free.
+**RP-D9** a slot bound to a SUPERSEDED definition still resolves to THAT definition — RESOLVE does not
+follow supersedes_id, so supersession alone changes nothing operative; only a rebind makes a new
+definition live · CONTROL: the superseding row exists and is different.
+**RP-D10** binding one slot leaves a sibling untouched · CONTROL: the bind did take effect on its own.
+**RP-NQ1/2/3** the same question_id in a different namespace resolves to the same definition (RESOLVE is
+namespace-blind) · a namespace difference leaves the question unchanged · a question change leaves the
+namespace byte-identical · CONTROL: a different question_id resolves differently.
+**RP-N8** a slot in an UNDECLARED namespace admits with NO pin — undeclared does not mean safe, it means
+not governed yet · CONTROL: the same write in the declared, slot-governed `default` IS pinned.
+**RP-D3** BEHAVIOURAL — what every account can recall is identical before and after a declare+bind,
+asserted by exercising the read and never by reading the source · CONTROL: a real new memory does change
+what an account recalls.
+**ISOLATED E2E** — the whole chain runs (declare, bind, resolve, ALLOW, pin, supersede, rebind, pin holds)
+and the LIVE CORPUS IS BYTE-IDENTICAL to the pre-run fingerprint. The fingerprint was proved SENSITIVE
+first and proved to RETURN to baseline, so it is not merely monotonic. Not one pre-existing memory
+acquired a pin; not one pre-existing slot was bound.
+
+**ONE ASSERTION OF MINE WAS OVER-SPECIFIC AND WENT RED.** RP-D2 asserted WHICH gate refuses a figurative
+row and failed on `OWNERSHIP_BOUNDARY`. The write WAS refused — by `admissibleToSlot`'s
+figurative-as-literal-property rule, which runs BEFORE `slotViolation`. The proof's claim is that a
+non-kind gate still refuses; naming the door made the test fix an implementation ORDER it has no business
+fixing. Corrected to assert the state and report the actual code as detail.
+
+**SCOPE FENCES INTACT:** Origin PARKED · M2-6 UNWIRED · 12b FROZEN at 4/4 · P1 UNTOUCHED · Rome UNTOUCHED
+· M2 DISABLED. Every proof creates its own fixtures and asserts its own teardown; zz_ residue is zero.

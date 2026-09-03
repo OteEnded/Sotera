@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path 17:51; three shapes 17:55; BUILDING 18:17 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path 17:51; three shapes 17:55; BUILDING 18:17; PROOFS GREEN 18:41 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  BUILDING M2          ✅ 048 applied · RP-D0 + RP-T1 GREEN · suite 63/63 · ⏸ 11 proofs left
+▶  M2 PROOFS ALL GREEN  ✅ 048 · RP-D0 · RP-T1 · the full register · isolated E2E · suite 65/65
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -792,7 +792,21 @@ DECLARE → BIND → RESOLVE → ADMISSION → question_id_at_admission → red-
    => ⭐ FIXED by declaring the field in `txn_memories.model.js` · AND the swallow in
    `admittingQuestionFor` now falls back to console.warn when no logger is wired
 
-⏸ NEXT IN THE MANDATORY ORDER: RP-D1/D2/D3/D5/D8/D9/D10 · RP-NQ1/2/3 · RP-N8 · isolated E2E
+✅ THE WHOLE REGISTER IS GREEN — RP-D1/D2/D3/D5/D8/D9/D10 · RP-NQ1/2/3 · RP-N8 · isolated E2E
+   ⭐ RP-W0 ran FIRST inside it: a warrant is ISSUED and the snapshot CHANGES, before any "no warrant
+     moved" assertion — on an empty table that assertion is free
+   ⭐ RP-D9: a slot bound to a SUPERSEDED definition still resolves to THAT definition ⇒ supersession
+     alone changes NOTHING operative; only a rebind makes a new definition live
+   ⭐ RP-N8: a slot in an UNDECLARED namespace admits with NO pin · CONTROL: the same write in `default`
+     IS pinned ⇒ N8 is not passing because pinning is broken
+   ⭐ RP-D3 is BEHAVIOURAL — recall exercised per account, ⛔ never a source grep · CONTROL: a real new
+     memory DOES change what an account recalls
+   ⭐⭐ E2E: the whole chain runs and the LIVE CORPUS IS BYTE-IDENTICAL — and the fingerprint was proved
+     SENSITIVE FIRST, and proved to RETURN to baseline (⛔ not merely monotonic)
+⚠️ ONE ASSERTION OF MINE WAS OVER-SPECIFIC: RP-D2 asserted WHICH gate refuses a figurative row and went
+   red on OWNERSHIP_BOUNDARY. The write WAS refused — by admissibleToSlot, which runs BEFORE
+   slotViolation. ⇒ ⭐ assert the STATE (a non-kind gate refused), report the code as detail; naming the
+   door made the test fix an implementation ORDER it has no business fixing
 ⭐ THE ADMISSION SEMANTIC, as built: checkKind's ALLOW earns the PIN; it ⛔ does NOT refuse any write.
    M2-10 already ruled DEFER "a consumer-side restriction, ⛔ not a slot-level disablement", and no
    writer declares a claim kind today, so refusing here would refuse EVERY existing writer — 031's rule:
