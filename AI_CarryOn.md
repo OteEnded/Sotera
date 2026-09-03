@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN locked 14:49 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN locked 14:49; 3 blockers 14:59 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -20,8 +20,8 @@ context compaction.
 ✅ M2-3                 RETIRED and re-derived under the room frame
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
-✅ ORIGIN VOCABULARY    derived + AUTHORIZATION + inner-hop modality — ⭐ origin = chain[1:]
-⏸  NEXT                 ⭐ SCHEMA derivation — blocked on 4 rulings (§2 ORIGIN), then the VERB
+✅ ORIGIN VOCAB + 3     vocabulary · authorization · inner-hop modality · the 3 schema blockers
+⏸  NEXT                 ⭐ 3 rulings (§2 blockers), THEN the location decision, then the VERB
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -102,22 +102,41 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
               ⭐ chain = [delivery, represented-1, represented-2, …] · ORIGIN = chain[1:] — ⛔ NEVER
                  includes the delivery; that is what stops it becoming another name for
                  source_message_id
-              ⭐⭐ INNER-HOP MODALITY ANSWERED: an inner hop gets a SLOT and ⛔ NO VOCABULARY. None of
-                 the 3 reader decisions consults it — (a) slottability is already NO at hop 0 and
-                 ⛔ nothing deeper may reopen it · (b) is about `who` · (c) is about spans.
-                 ⭐ The slot must EXIST so silence is explicit (031: NULL ≠ asserted); the values wait
-                 for a consumer (⚠️ `actor` = 'system' on 137/137 is what choosing early looks like)
-              ⛔ `reported` may NEVER be an inner-hop value — it only means "there is a hop n+1",
-                 i.e. a SECOND spelling of arity
-              ⚠️⚠️ modality(hop0)='reported' ⟺ origin≠none ⟺ not slottable — ⭐ THREE SPELLINGS OF ONE
-                 FACT ⇒ ⛔ they may not both be WRITABLE. The chain is the truth; `reported` must be
-                 READ from it (the mechanismOf pattern)
+              ⭐⭐ ④ LOCKED, OTE'S WORDING: "Every hop has a modality FIELD; inner hops currently have
+                 only the justified epistemic state UNRECORDED, unless a future producer/consumer
+                 contract establishes another value."
+                 ⭐ None of the 3 reader decisions consults it — (a) slottability is already NO at hop 0
+                 and ⛔ nothing deeper may reopen it · (b) is about `who` · (c) is about spans.
+                 ⭐ The field must EXIST so silence is explicit (031: NULL ≠ asserted); values wait for
+                 a consumer (⚠️ `actor`='system' on 137/137 is what choosing early looks like)
+              ⛔ `reported` is NOT an inner-hop modality — "there is another represented hop" is
+                 STRUCTURAL ARITY, ⛔ not a semantic value
+              ⚠️⚠️ modality(hop0)='reported' ⟺ origin≠none ⟺ not slottable = THREE SPELLINGS OF ONE FACT
+                 ✅ LOCKED DIRECTION: `origin.length > 0 → hop0 is reported`
+                 ⛔ NEVER `reported → manufacture an origin chain`
+                 ⛔ but do NOT change the modality column yet — see the blockers below
               ⭐ paraphrase: span=NONE EXISTS ⇒ never VERIFIED ⇒ supports a RECORD, ⛔ never a WARRANT.
-                 UNWARRANTABLE ≠ false. ⚠️ but `discarded` is a BARE INTEGER with no reason ⇒ "no span
-                 exists" and "span did not match" are indistinguishable today
-              ⏸ SCHEMA BLOCKED ON 4: ① is `reported` computed from the chain, or the chain from it?
-                 ② does the discard carry a REASON (⛔ not a score)? ③ is Route B a new act or the
-                 declaration VERB? ④ where does it live — ⛔ NOT json by default
+                 UNWARRANTABLE ≠ false
+
+⭐⭐ THE THREE SCHEMA BLOCKERS — DERIVED 14:59 → `DERIVATION_SOTERA_THREE_SCHEMA_BLOCKERS`
+① COMPAT      ⛔⛔ THE GATE GOES VACUOUS. `txn_memories_modality_slot_ck` keys on `modality`; stop
+              writing `reported` and every re-presented row is NULL, which SATISFIES the CHECK.
+              ⭐ 4 enforcement sites, not 1: the DB · slotViolation() · ownership-boundary:199 ·
+              ⚠️ memory-lineage-check:73 (a source scan) ⇒ ⛔ origin may NOT ride on source/lineage
+              ⭐ Existing data costs NOTHING (0 rows carry `reported`, 0 carry a chain) — the whole
+              risk is FORWARD. ⭐⭐⭐ A CHECK CANNOT CROSS TABLES ⇒ if the DB is to keep enforcing,
+              ORIGIN MUST BE SAME-ROW; a normalized table forces a trigger or the seam alone
+② DISCARD     ⭐⭐⭐ THE REASON ALREADY EXISTS — `dreaming-verify.js` emits THREE (`malformed cite` ·
+              `root not in evidence` · `span mismatch`) and the LEDGER drops them into a bare integer.
+              ⇒ ⭐ minimum vocabulary = the producer's three, CARRIED THROUGH, ⛔ none invented.
+              ⛔ a 4th ("no span exists") only when a producer emits it. ⚠️ 0 rows, 0 readers, 0 real
+              discards ⇒ ⭐ inventing costs a dead column; DROPPING costs an unrecoverable fact
+③ ROUTE B     ⭐⭐⭐ NOT the declaration VERB — SAME PATTERN, DIFFERENT ACT. A question is SUBJECT-FREE
+              (which is WHY she has standing); an origin is entirely SUBJECT-BEARING ⇒ opposite sides
+              of the line the standing derivation drew. Also type-vs-instance · supersede-vs-correct ·
+              DEFER-vs-misattribute. ⭐ 047 SAYS SO: *"no subject, no room and no value — which is what
+              makes it safe as a persona-global object"* ⇒ ⛔ an origin cannot live there.
+              ⭐ We are instantiating an existing pattern for the 4th time, ⛔ not inventing a mechanism
 
 STANDING      ⭐⭐⭐ A QUESTION IS SUBJECT-FREE ⇒ declaring one asserts NOTHING about any person
               ⇒ two authorities, separated by WHAT THE ACT ASSERTS, ⛔ not by whose slot it is:

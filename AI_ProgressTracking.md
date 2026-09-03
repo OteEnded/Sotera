@@ -5605,3 +5605,70 @@ today** — a dropped observation and one that was never made looking alike, in 
 authority, same pin — ⚠️ inventing two may be the mistake)? ④ where does it live — ⛔ **not JSON by
 default**; Ote: *"the `doc:` precedent shows JSON CAN carry pinned provenance, ⛔ not that JSON is
 automatically the correct contract boundary."*
+
+---
+
+## 2026-09-03 14:59 (+07:00) — the three schema blockers derived, in order
+
+⛔ **Derivation only.** Nothing built. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_THREE_SCHEMA_BLOCKERS.md`.
+
+**✅ ④ RESTATED IN OTE'S WORDING:** *"Every hop has a modality FIELD; inner hops currently have only the
+justified epistemic state UNRECORDED, unless a future producer/consumer contract establishes another
+value."* ⛔ `reported` is not an inner-hop modality — *"there is another represented hop"* is **structural
+arity**. ✅ Locked direction: `origin.length > 0 → hop0 is reported`; ⛔ never
+`reported → manufacture an origin chain`. ⛔ The column is NOT to change yet.
+
+**① COMPATIBILITY — ⛔⛔ THE GATE GOES VACUOUS.**
+`CHECK (modality IS NULL OR modality = 'asserted' OR (entity IS NULL AND attribute IS NULL AND value IS
+NULL))`. ⇒ stop writing `reported` and every re-presented row is NULL, and **NULL SATISFIES THE CHECK** —
+the database gate goes silently vacuous for exactly the class it was built to catch. ⭐ The fifth mechanism
+in the *could-not-establish* family: a CHECK going vacuous because the value it tests stopped being
+produced.
+⭐ **FOUR enforcement sites, not one:** the DB constraint · `slotViolation()` at the store seam ·
+`memory-ownership-boundary.js:199` · ⚠️ `memory-lineage-check.mjs:73`, a **source scan** asserting the
+lineage module defines no modality vocabulary ⇒ ⛔ **origin may not ride on `source`/lineage** — a second,
+independent reason arriving from the test suite.
+⭐ **Existing data costs NOTHING:** 0 rows carry `reported`, 0 carry a chain, 122 are NULL ⇒ backward-
+compatible on data; **the whole risk is forward**.
+⭐⭐⭐ **A Postgres CHECK CANNOT CROSS TABLES** ⇒ if the database is to keep enforcing the slot rule against
+the chain, **origin must be SAME-ROW**; a normalized table forces a trigger (a mechanism this schema has
+never used) or the application seam alone — which is exactly what 031 refused to rely on.
+⏸ Needs Ote: **is the database expected to keep enforcing it?**
+
+**② DISCARD REASON — ⭐⭐⭐ IT ALREADY EXISTS AT THE PRODUCER.**
+`dreaming-verify.js` does not count discards, it **describes** them, with three values: *a cite must name a
+root and a span* · *cites a root that was not in the evidence* · *the span does not appear in that root's
+evidence*. They travel out whole through `dreaming-reason-host`. ⚠️ **And `log_memory_warrants.discarded`
+is a bare integer with no reason column** ⇒ three distinguishable facts collapse at the persistence
+boundary — 015's own diagnosis one layer down: *"the pipeline always knew… the store threw that away."*
+⇒ ⭐ **minimum vocabulary = the producer's three, carried through, ⛔ none invented.** A fourth (*"no
+verbatim span exists"*) is justified only when a producer emits it — a warrant-ledger concern, ⛔ not part
+of the origin object, ⛔ never a score.
+⚠️ Honest state: 0 rows · 0 readers · 0 production writers · **0 discards in any real run** (12b was 4/4
+verified). ⭐ Read strictly that justifies nothing — ⛔ but that is the `actor='system'` trap **inverted**:
+**inventing values costs a dead column; DROPPING values costs a fact that cannot be recovered.**
+⭐⭐ Structural rule: **the ledger must PERSIST the producer's vocabulary and ⛔ never define its own.**
+
+**③ ROUTE B vs THE DECLARATION VERB — ⭐⭐⭐ SAME PATTERN, DIFFERENT ACT.**
+Investigated, not assumed. The shapes do look identical (deliberate account act → authored/pinned
+declaration → durable record). ⭐ **Four differences, and the first is decisive:**
+① **subject-freedom** — a question is subject-free, which is *why Sotera has standing over it*; an origin
+is entirely subject-bearing ⇒ **opposite sides of the exact line the standing derivation drew**.
+② type vs instance (one persona-global definition reused by many slots · one record per material).
+③ lifecycle — supersede-by-repointing with existing memories never re-validated, vs **correct** a past
+event where the correction *should* propagate. ④ failure mode — DEFER (a brake) vs mis-attribution (a
+hazard).
+⭐⭐ **047 says it itself:** *"It contains no subject, no room and no value, which is what makes it safe as
+a persona-global object."* ⇒ ⛔ an origin declaration **cannot** live there without destroying the stated
+safety property.
+⇒ ⭐ **We are instantiating an existing pattern for the FOURTH time, ⛔ not inventing a mechanism** — the
+pattern already has three instances and no two are the same act (`persona.lock.json` sha256 ·
+`doc:<path>@<sha>` ×34 · `reconcile:rome-2026-09-02`). ⚠️ Merging would invent a NEW hybrid act that is
+neither subject-free nor per-instance.
+⭐ They may share the **authority** (the account), the **pin discipline**, and the **occasion**;
+⛔ never the object, the table, the lifecycle or the standing rule.
+
+⏸ **Three rulings, then the location decision:** ① does the DB keep enforcing the slot rule? ② does the
+discard carry the producer's three reasons? ③ is *"same pattern, different act"* accepted?
+⭐ Already ruled out for the location: ⛔ not `source`/lineage (①.3) · ⛔ not `mst_slot_questions` (③).
