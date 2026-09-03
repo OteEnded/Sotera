@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: 6 ruled · BIND/RESOLVE/ADMISSION derived, ⏸ 7 open (§3)
+▶  NEXT                 ⭐ DECLARATION: slotless/write-paths derived, ⏸ 4+2 rulings open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -408,7 +408,46 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
 ⛔ BIND AUDIT: no existing structure can take it honestly — log_memory_changes.memory_id is NOT NULL ·
    log_user/config_changes are about other things · mst_slots.evidence would be an audit INSIDE the
    mutable object it audits. ⏸ Storage home stays Ote's, as ruled
-⏸ 7 RULINGS NEEDED — see the doc's §5
+✅ 6 MORE RULED: self-authorisation covers DECLARE+BIND · occasion REQUIRED · BIND standing =
+   Sotera + account · ⭐ STANDING DOES NOT SUBSTITUTE FOR EVIDENCE · rebind ⛔ does NOT require the
+   operator · rebind needs standing + not-present discipline + AUDIT
+⏸ OPEN: claim-kind vocabulary validation · the BIND audit STORAGE HOME
+```
+
+## ⭐⭐ SLOTLESS ROWS · WRITE PATHS — DERIVED 16:46 → `DERIVATION_SOTERA_SLOTLESS_AND_WRITE_PATHS`
+
+```
+⚠️⚠️ THREE CORRECTIONS TO MY OWN CLAIMS:
+   ① "THREE write paths" was ⛔ INCOMPLETE — I scoped the grep to Backend/.
+     `test/maintenance/seed-decisions.mjs` raw-INSERTs and wrote **34 of 125 rows (27%)**
+   ② the slotless `preferred_name` rows are ⛔ NOT an accidental bypass — the code EXCLUDES them
+     deliberately: *"identity is owned by the Identity Resolver, not the generic slot reconcile"*,
+     and ⓘ namespace='identity' holds exactly those 11 rows
+   ③ doc:'s 2-rows-per-address is ⛔ NOT duplicate live claims — ⓘ 17 addresses × 2 ROOMS, one live
+     per room, 0 supersedes. Correct behaviour
+⭐⭐⭐ THE META-FINDING: "slot-shaped" is an ARTEFACT OF THE TEST. `slotted()` ORs three columns and
+   answers "is anything in them?", ⛔ not "does this row make a property CLAIM?" ⇒ of the 49, **45
+   carry a value and 4 do not** ⇒ the population was NEVER one thing, and classifying by the
+   implementation predicate would have produced exactly the false dichotomy Ote refused
+⭐⭐ THREE SEMANTIC CLASSES:
+   A · IDENTITY (11, namespace='identity') — ⛔ OUT OF THE DOMAIN BY DESIGN, declared in code
+   B · PROJECT-DECISION (34, doc:) — ⭐⭐⭐ IN THE DOMAIN AND BYPASSING IT. seed-decisions is
+     idempotent by (user_id, entity, attribute) IN RAW SQL — the mst_slots unique key re-expressed —
+     and carries `evidence->>'kind'` — a PRIVATE KIND VOCABULARY. ⇒ slot identity re-implemented
+     TWICE, and neither is the one the gate reads
+   C · LESSON/DECLINED (4) — ⭐ ADDRESSED BUT NOT VALUED (value NULL): entity/attribute used as a TAG.
+     A lesson ACCUMULATES ⇒ out by SHAPE, ⛔ not a gate bypass — ⚠️ but a representation smell
+⭐⭐⭐ ⇒ "BINDS EVERY WRITER" NEEDS A **DOMAIN**, ⛔ NOT AN EXEMPTION LIST:
+   *the kind gate governs a write that ASSERTS A VALUE AT AN ADDRESS IN A SLOT-GOVERNED NAMESPACE*
+   ⇒ ⭐ the original dichotomy DISSOLVES: 45 make claims, 11 of those are owned elsewhere, 34 are in
+   the domain and bypassing. ⛔ Neither "all 49 defer" nor "the 49 are exceptions" was right
+⭐ ADMISSION CAN ONLY BE CAPTURED IN `reconcileFact` — the ONLY method that resolves a slot
+⭐ NULL on question_id_at_admission keeps ONE meaning (*no kind gate applied*) — now true of THREE
+   stated situations: predates the gate · outside the domain · a bypass
+⭐⭐ RP-T1 TEMPORAL PROOF SPECIFIED (Ote's #8): A → bind → admit M → B → M still adheres to A, new
+   admissions use B. ⭐ It must exercise EVERY reader of a historical admission — a field written and
+   read by nobody is the `actor='system'` failure (137/137, one value, no reader)
+⏸ 4 RULINGS from this doc + 2 still open
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD

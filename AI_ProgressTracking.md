@@ -6204,3 +6204,67 @@ CAS intent + whole-state expected-current · an identical re-bind **converges wi
 audit, ⛔ not the operator · ④ the 49 slotless slot-shaped rows: DEFER or exempt · ⑤ the two bypass writers:
 brought to the seam or documented as *"no kind gate applied"* · ⑥ validating a claim's kind · ⑦ the BIND
 audit's storage home.
+
+---
+
+## 2026-09-03 16:46 (+07:00) — slotless slot-shaped rows classified; four write paths, not three
+
+⛔ **Derivation only — NOT built, and NO writer was patched.** ⏸ Origin PARKED. M2-6 unwired · M2 disabled
+· 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_SLOTLESS_AND_WRITE_PATHS.md`.
+
+**✅ OTE RULED SIX MORE:** self-authorisation covers **DECLARE + BIND** · occasion **required** · BIND
+standing = **Sotera + account** · ⭐ **standing does not substitute for evidence** · rebind ⛔ does **not**
+require operator authority · rebind needs **standing + not-present discipline + audit**.
+⏸ Open as ruled: **claim-kind vocabulary validation** · the **BIND audit storage home**.
+
+**⚠️⚠️ THREE CORRECTIONS TO MY OWN CLAIMS, MADE BEFORE ANYTHING RESTED ON THEM.**
+① *"There are three write paths into `txn_memories`"* — ⛔ **incomplete**: I scoped the grep to `Backend/`.
+`test/maintenance/seed-decisions.mjs` raw-INSERTs and wrote **34 of 125 rows (27%)** — the path I missed is
+the largest single contributor. ⚠️ A maintenance script is not a non-writer.
+② The slotless `preferred_name` rows are ⛔ **not** an accidental bypass — `memory-v2-service.js` excludes
+them **deliberately**: *"slot candidates only; **identity is owned by the Identity Resolver, not the generic
+slot reconcile**"*, and ⓘ `namespace='identity'` holds exactly those 11 rows, 0 with a slot.
+③ `doc:`'s two-rows-per-address is ⛔ **not** duplicate live claims — ⓘ **17 addresses × 2 rooms, one live
+per room, 0 supersedes.** Correct behaviour.
+
+**⭐⭐⭐ THE META-FINDING: *"slot-shaped"* is an ARTEFACT OF THE TEST.** `slotted()` ORs three columns and
+answers *"is anything in them?"* — ⛔ not *"does this row make a property CLAIM?"* ⇒ of the 49, **45 carry a
+value and 4 do not.** ⇒ **the population was never one thing**, and classifying it by the implementation
+predicate would have produced exactly the false dichotomy Ote refused.
+
+**THREE SEMANTIC CLASSES, THREE VERDICTS.**
+**A · IDENTITY** (11, `namespace='identity'`) — ⛔ **out of the domain by design**, and the code declares it.
+**B · PROJECT-DECISION** (34, `doc:`) — ⭐⭐⭐ **in the domain and bypassing it.** `seed-decisions.mjs` is
+idempotent by `(user_id, entity, attribute)` **in raw SQL** — the `mst_slots` unique key re-expressed in a
+WHERE clause — and its rows carry `evidence->>'kind' = 'project-decision'`, **a private kind vocabulary**.
+⇒ **slot identity re-implemented twice, and neither is the one the gate reads.** ⇒ Ote's third category, a
+**defect** — ⚠️ with the caveat that it is a maintenance script, so the remedy differs, ⛔ but *"it's a
+script"* is not a semantic exemption: its 34 rows are in the live corpus and read like any others.
+**C · LESSON / DECLINED** (4) — ⭐ **addressed but not valued** (`value` NULL): `entity/attribute` used as a
+**tag**. A lesson **accumulates**. ⇒ out **by shape**, ⛔ not a gate bypass — ⚠️ but a representation smell:
+the same three columns now mean *"a property address"* for one writer and *"a tag"* for another, and if
+anything ever wrote a **value** to `sotera/lesson` it would silently become a claim.
+
+**⭐⭐⭐ ⇒ *"BINDS EVERY WRITER"* NEEDS A DOMAIN, ⛔ NOT AN EXEMPTION LIST:**
+> *the kind gate governs a write that **asserts a value at an address in a slot-governed namespace**.*
+⇒ ⭐ **the original dichotomy dissolves.** Neither *"all 49 defer"* nor *"the 49 are exceptions"* was right:
+**45 make claims · 11 of those are owned by another subsystem · 34 are in the domain and bypassing.**
+⭐ That is a narrowing of the **claim**, ⛔ not of the enforcement.
+
+**THE ADMISSION BOUNDARY.** ⭐ `reconcileFact` is the **only** method that resolves a slot ⇒
+`question_id_at_admission` **can only ever be captured there**, beside `admissibleToSlot` and
+`slotViolation` as a third gate. ⛔ Placing it elsewhere, or assuming it covers *"every writer"*, would
+repeat the exact mistake Ote asked to prevent. ⭐ And its NULL keeps **one** meaning — *no kind gate was
+applied* — now true of **three stated situations**: predates the gate · outside the domain · a bypass.
+
+**⭐⭐ RP-T1, THE TEMPORAL PROOF (Ote's #8), SPECIFIED:** declare A → bind → admit M → declare B + rebind →
+**M still reports and adheres to A**, and a **new** admission uses B. ⭐ And the part that makes it
+behavioural: it must exercise **every reader that interprets a historical admission** and assert each uses
+the **pinned** value — ⛔ a field written and read by nobody is the `actor='system'` failure (137/137 rows,
+one value, no reader). ⚠️ Positive controls or it goes vacuous: the rebind **took effect** · RP-D0 gives a
+real admission to pin · and a reader that **would** report B if it followed the slot.
+
+⏸ **Four rulings from this doc:** ① class A out by design? ② class B a defect, and does script-ness change
+the remedy? ③ class C out by shape — should it stop using property columns for tags? ④ is the **domain**
+statement the right narrowing of *"binds every writer"*?
