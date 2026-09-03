@@ -99,9 +99,42 @@ export function provenanceOf(turn, { subjectPersonId = null, roomOwnerPersonId =
   if (turn?.role !== 'user') {
     return { ok: false, refusal: REFUSAL.unclassifiable, why: `role ${turn?.role ?? 'unknown'} is neither the subject nor Sotera` }
   }
+
+  // ── ⛔⛔ BOTH IDENTITIES MUST BE KNOWN BEFORE `primary` MAY BE CLAIMED ─────────────────────────
+  //
+  // ⚠️⚠️ THIS GUARD WAS MISSING, AND ITS ABSENCE WAS THE DEFECT. The divergence test below used to be
+  // `if (subjectPersonId && roomOwnerPersonId && …)`, which **short-circuits on a null subject** — so an
+  // UNKNOWN subject fell through and was classed `primary`, silently treating the room's account holder
+  // AS the subject. ⓘ Measured: **15 of 60 live `entity='user'` rows carry no `subject_person_id`** (25%).
+  //
+  // ⭐⭐⭐ That is the universal subject-inheritance rule Ote explicitly forbade —
+  // *"formation context ≠ room owner ≠ subject ≠ ownership ≠ reachability. 'Room frame natural subject =
+  // room owner' must not become a universal subject-inheritance rule."* — arriving as a `&&`.
+  //
+  // ⭐ AND IT CONTRADICTED THIS FILE'S OWN CONTRACT: C2 says every candidate is classified **or refused,
+  // ⛔ never defaulted**, because an unclassified candidate becomes `primary` downstream and that is the
+  // misrepresentation ruling ① forbids. The comment said it; the code did the opposite.
+  //
+  // 🔑 THE INVARIANT, WHICH IS THE ONE THIS WHOLE ARC PROTECTS:
+  //     **"I could not establish it" must never become "I established it."**
+  //
+  // ⛔ Ote's ruling is deliberately NARROW: this is *not* a decision about what an unknown subject MEANS.
+  // It is only that an unknown subject **cannot satisfy C2's requirement for provenance classification**,
+  // so it may not be promoted to `primary`.
+  if (!subjectPersonId || !roomOwnerPersonId) {
+    return {
+      ok: false,
+      refusal: REFUSAL.unclassifiable,
+      why: `cannot establish who spoke relative to the subject — `
+        + `${!subjectPersonId ? 'the subject is unknown' : 'the room owner is unknown'}`
+        + '; an unresolved identity may not be promoted to the subject\'s own words',
+    }
+  }
   // ⛔⛔ THE DIVERGENT CASE. `subjectPersonId` and `roomOwnerPersonId` are SEPARATE AXES and neither is
   // derived from the other; when they differ, the account holder speaking is a third party.
-  if (subjectPersonId && roomOwnerPersonId && subjectPersonId !== roomOwnerPersonId) {
+  // ⏸ ⛔ This refusal is NOT a ruling on gap ⑤ (claim subject vs slot subject, both known) — Ote is
+  // holding that for a real divergent case, ⛔ not a constructed one.
+  if (subjectPersonId !== roomOwnerPersonId) {
     return {
       ok: false,
       refusal: REFUSAL.unclassifiable,

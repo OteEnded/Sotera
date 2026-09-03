@@ -159,6 +159,49 @@ try {
   check('RP11 · ⭐⭐⭐ ⇒ formation context did NOT become the subject boundary: the divergent case is '
     + 'answered by REFUSING, and the refusal NAMES the divergence',
     /is not the subject/.test(m5why) && /neither primary nor secondary/.test(m5why), m5why)
+  // ══ RP3b · ⛔⛔ THE UNKNOWN CASES — THE HOLE THAT LET A SUBJECT-INHERITANCE DEFAULT THROUGH ════
+  //
+  // ⚠️⚠️ RP3 and RP11 exercised only *known-same* and *known-different*. **Neither attempted UNKNOWN**,
+  // and the register went green while `provenanceOf` silently classed an unknown subject as `primary` —
+  // treating the room's account holder AS the subject. ⓘ 15 of 60 live `entity='user'` rows (25%) carry
+  // no `subject_person_id`.
+  // 🔑 **"I could not establish it" must never become "I established it."**
+  // ⭐ Both unknown cases are attempted separately, because they reach the guard by different routes and
+  // 044 was accepted by exactly the route nobody attempted.
+  const unknownSubject = provenanceOf({ role: 'user' }, { subjectPersonId: null, roomOwnerPersonId: PERSON_B })
+  check('RP3b · ⛔⛔⛔ UNKNOWN subject + known room owner ⇒ REFUSED — ⛔ never promoted to `primary`',
+    unknownSubject.ok === false && unknownSubject.refusal === REFUSAL.unclassifiable, JSON.stringify(unknownSubject))
+  check('RP3b · ⭐ …and the refusal NAMES which identity was missing',
+    /the subject is unknown/.test(unknownSubject.why ?? ''), unknownSubject.why)
+  const unknownBoth = provenanceOf({ role: 'user' }, {})
+  check('RP3b · ⛔⛔ BOTH unknown ⇒ REFUSED — a different route to the same guard, attempted separately',
+    unknownBoth.ok === false && unknownBoth.refusal === REFUSAL.unclassifiable, JSON.stringify(unknownBoth))
+  const unknownRoom = provenanceOf({ role: 'user' }, { subjectPersonId: PERSON_A, roomOwnerPersonId: null })
+  check('RP3b · ⛔ known subject + UNKNOWN room owner ⇒ REFUSED too',
+    unknownRoom.ok === false && /room owner is unknown/.test(unknownRoom.why ?? ''), unknownRoom.why)
+  // ⭐⭐ AND THE INVARIANT THAT MUST SURVIVE THE FIX: Sotera's own turn is classed WITHOUT reference to
+  // the subject at all — WHO SPOKE is known regardless of whether the subject was resolved. ⛔ Making her
+  // classification depend on subject resolution would silently discard her observations, which is exactly
+  // what ruling ① forbids.
+  for (const ctx of [{}, { subjectPersonId: null, roomOwnerPersonId: PERSON_B }, { subjectPersonId: PERSON_A, roomOwnerPersonId: PERSON_B }]) {
+    const her = provenanceOf({ role: 'assistant' }, ctx)
+    check('RP3b · ⭐⭐ SOTERA is `secondary` whatever the subject resolution — who SPOKE is known regardless',
+      her.ok === true && her.provenance === CANDIDATE_PROVENANCE.secondary, JSON.stringify(ctx))
+  }
+  // ⛔ END TO END: an unknown-subject selection yields NO primary candidates, only refusals.
+  const unknownSel = selectCandidates({
+    rows: [row({ id: 'm9', root: 'r9', text: 'raw error counts before the recommendation', role: 'user', room: ROOM_A })],
+    slot: SLOT, formationContext: ROOM_A, subjectPersonId: null, roomOwnerPersonId: PERSON_B,
+  })
+  check('RP3b · ⭐⭐⭐ end to end — an unknown subject produces ZERO candidates and a NAMED refusal',
+    unknownSel.candidates.length === 0
+    && unknownSel.refused.some((r) => r.refusal === REFUSAL.unclassifiable), JSON.stringify(unknownSel.refused))
+  // ⏸ ⛔ AND THIS FIX IS NOT A RULING ON GAP ⑤. Ote: *"Keep gap ⑤ separate and open. Do not use this
+  // defect fix to decide the semantics of known claim subject ≠ slot subject."*
+  check('RP3b · ⏸ gap ⑤ stays open — the known-different case still refuses, ⛔ unchanged by this fix',
+    provenanceOf({ role: 'user' }, { subjectPersonId: PERSON_A, roomOwnerPersonId: PERSON_B }).refusal
+      === REFUSAL.unclassifiable)
+
   // ⛔ AND THE HOST MUST NOT DEFAULT ONE AXIS TO THE OTHER.
   const hostSrc = readFileSync(new URL('../../Backend/app/components/dreaming-candidate-host.js', import.meta.url), 'utf8')
   check('RP11 · ⛔⛔ the resolver never defaults `subjectPersonId` to the room owner',

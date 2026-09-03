@@ -5142,3 +5142,45 @@ forbids.**
 
 ⇒ ⛔ **NOT FIXED — Ote ruled no code this pass.** ⭐ **No live exposure**: M2-6 is unwired and M2 is
 disabled. ⓘ Distinct from gap ⑤ (which is *both subjects known and different*); this is *subject unknown*.
+
+---
+
+## 2026-09-03 05:00 (+07:00) — ✅ THE UNKNOWN-SUBJECT DEFECT FIXED, WITH THE MISSING RED-PROOFS
+
+**Ote's ruling, deliberately narrow:** *"The ruling is not 'we have decided what an unknown subject
+means.' The ruling is narrower: **unknown subject cannot satisfy C2's requirement for provenance
+classification. Therefore it must not be silently promoted to room-owner/primary.**"*
+
+### ✅ THE FOUR CASES, NOW EXACTLY AS RULED
+
+```
+known subject = room owner        →  primary / speaker=subject      ✅ unchanged
+known subject ≠ room owner        →  unclassifiable                 ✅ unchanged (⏸ gap ⑤ untouched)
+unknown subject + known room      →  unclassifiable                 ⭐ FIXED
+unknown subject + unknown room    →  unclassifiable                 ⭐ FIXED
+```
+
+⭐ The defect was a `&&`: `if (subjectPersonId && roomOwnerPersonId && …)` **short-circuits on a null
+subject**, so the divergence test never ran and the turn fell through to `primary`.
+⇒ ⛔ **`subjectPersonId` is never derived from `roomOwnerPersonId`, and no unclassified candidate falls
+through to `primary`.** The refusal NAMES which identity was missing.
+
+### ⭐⭐ AND ONE INVARIANT THE FIX HAD TO NOT BREAK
+
+**Sotera is `secondary` whatever the subject resolution** — ⭐ *who spoke* is known regardless of whether
+the subject was resolved. ⛔ Making her classification depend on subject resolution would silently discard
+her observations, which is exactly what ruling ① forbids. Red-proofed across all three contexts.
+
+### ⚠️ THE RED-PROOF GAP, CLOSED AND NAMED
+
+RP3/RP11 exercised only **known-same** and **known-different**. ⛔ **Neither attempted UNKNOWN**, so the
+register went green over a live defect. ⇒ **RP3b** now attempts *unknown-subject*, *unknown-room* and
+*both-unknown* **separately**, because they reach the guard by different routes — ⓘ 044 was accepted by
+exactly the route nobody attempted.
+
+⏸ **Gap ⑤ untouched**, and red-proofed as untouched: the known-different case still refuses, unchanged by
+this fix. ⛔ Ote: *"Do not use this defect fix to decide the semantics of known claim subject ≠ slot
+subject."*
+
+**60 of 60 checks · 689 of 689 unit tests · ⛔ zero importers of the module outside its own check ⇒ M2-6
+still unwired, M2 disabled, 12b baseline unmoved.**
