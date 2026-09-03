@@ -6268,3 +6268,71 @@ real admission to pin · and a reader that **would** report B if it followed the
 ⏸ **Four rulings from this doc:** ① class A out by design? ② class B a defect, and does script-ness change
 the remedy? ③ class C out by shape — should it stop using property columns for tags? ④ is the **domain**
 statement the right narrowing of *"binds every writer"*?
+
+---
+
+## 2026-09-03 17:06 (+07:00) — `project-decision` as a semantic class: a correct fact with a malformed address
+
+⛔ **Derivation only — NOT built, NO writer patched, NO row rewritten.** ⏸ Origin PARKED. M2-6 unwired ·
+M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_PROJECT_DECISION_CLASS.md`.
+
+**✅ OTE RULED ALL FOUR:** class A out by design · class B a **genuine defect** · class C out by shape ·
+⭐ **domain statement adopted**: *the kind gate governs a write that asserts a value at an address in a
+slot-governed namespace.*
+
+**⭐⭐ MEASURED FIRST: THE VALUE *IS* THE STATUS.** `value = evidence->>'status'` on **every** row, from a
+**closed four-value vocabulary** — ⓘ `shipped` ×18 · `frozen` ×8 · `deferred` ×6 · `open` ×2.
+⇒ **the question is: *"what is the current STATUS of decision X?"*** — ⛔ not *"what was decided"*, which
+lives in `content` and the pinned `doc:<path>@<sha>`. ⭐ It is the cleanest slot question in the corpus.
+
+**⭐⭐⭐ AND THE ADDRESS IS INVERTED — THAT IS THE DEFECT.**
+`user / preferred_name / "Hermes"` → entity = **SUBJECT**, attribute = **PROPERTY**.
+`project-decision / okf-export / "deferred"` → entity = **TYPE**, attribute = **SUBJECT**.
+⇒ ⭐⭐ **the property name — `status` — appears NOWHERE in the address**, which is exactly **why** the
+writer needed a private `evidence->>'kind'`: the address does not say what is being asked.
+ⓘ The distribution proves it: `user` = **43 attributes / 60 rows** (one subject, many properties);
+`project-decision` = **17 attributes / 34 rows** (**one property, many subjects**).
+⇒ **two incompatible addressing conventions live in one column pair, and the gate reads only one.**
+
+**REPLACE, ⛔ not accumulate** — a decision has one current status. ⚠️ Honest caveat: ⓘ **0 addresses carry
+two distinct values**, so replacement is **unexercised**; the semantic argument stands alone and the data
+neither supports nor contradicts it.
+**SUBJECT IS A THIRD CLASS — an ARTEFACT** (not a person, not her own practice) ⇒ correctly **no**
+`subject_person_id`; ⚠️ and there is **no artefact-subject axis at all** — the decision's identity survives
+only in the slug.
+
+**⚠️ AND THE FOUR "KINDS" ARE NOT A COLUMN.** ⓘ `kind` = `semantic`|`identity` (a **namespace** axis) ·
+`tier` = hot/warm/cold (**retention**) · *stance* lives in `txn_relational_records` · *practice/lesson*
+lives in the lesson rows. ⇒ *"does an existing kind cover it?"* **cannot be answered by lookup** — only
+semantically.
+
+**⭐⭐⭐ ⇒ IT NEEDS NO NEW SEMANTIC CATEGORY. It is a correctly-shaped FACT with a MALFORMED ADDRESS.**
+Canonical form: `entity = <the decision>` · `attribute = status` · `value = deferred` ⇒ ⭐ the private
+evidence kind becomes **unnecessary**, because the address then says what it asks.
+⚠️⚠️ **But the repair is a RE-ADDRESSING of 34 live rows** — the *"rewriting history"* class ⇒ ⏸ **a
+separate ruled act, ⛔ never a side effect of canonicalizing a writer.** (`doc:` provenance is unaffected;
+⚠️ the seeder's idempotence key **changes meaning** and a re-run would create a second population.)
+
+**⭐⭐⭐ AND IT PRODUCES THE FIRST REAL DEMAND FOR A CHECK THE REGISTRY LACKS: an ENUMERATION check** —
+arriving from live material rather than imagination, which is exactly what Ote asked to surface *before*
+the Declaration vocabulary is finalized. ⓘ Registered today: `nonempty` · `single-line` ·
+`no-trailing-ellipsis` · `is-iso-date`. ⛔ It must **not** be met by loosening the registry — *"a definition
+cannot invent a check by naming one"* — ⚠️ and a **parameterised** check is a **new shape**: every existing
+check is nullary over the value.
+
+**CANONICAL WRITER:** registration and slot resolution are **orthogonal** — ⓘ `reconcile:`'s slot-shaped
+row **does** carry a `slot_id` ⇒ ⛔ *"it's a maintenance script"* is not a reason to bypass `reconcileFact`.
+⚠️ Weighed honestly: the canonical path adds resolution + embedding for 17 stable slugs — ⛔ but *"heavier"*
+is not a semantic argument, and this arc already paid for one writer that took a shortcut.
+
+**⭐ RP-T1 KEPT AND RESTATED**, behavioural across **every reader that interprets a historical admission**,
+with three positive controls or it is green-but-uninstrumented: the rebind **actually changed** the
+binding · RP-D0 **actually produced** an admission · and **a reader that would visibly differ** if it
+wrongly followed the current binding.
+
+⏸ **Five for Ote:** ① the defect is the ADDRESS, not the writer or the category? ② re-addressing 34 live
+rows — wanted at all, or do existing rows stay and only future decisions use the canonical address?
+③ is a **parameterised** enumeration check acceptable? ④ canonical writer via `reconcileFact`, accepting
+the cost? ⑤ is the missing artefact-subject axis worth recording as a gap?
+⏸ **Still open:** claim-kind validation · the BIND audit storage home · the class-C tag replacement.

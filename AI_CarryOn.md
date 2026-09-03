@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: slotless/write-paths derived, ⏸ 4+2 rulings open (§3)
+▶  NEXT                 ⭐ DECLARATION: project-decision derived, ⏸ 5 + 3 rulings open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -447,7 +447,44 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
 ⭐⭐ RP-T1 TEMPORAL PROOF SPECIFIED (Ote's #8): A → bind → admit M → B → M still adheres to A, new
    admissions use B. ⭐ It must exercise EVERY reader of a historical admission — a field written and
    read by nobody is the `actor='system'` failure (137/137, one value, no reader)
-⏸ 4 RULINGS from this doc + 2 still open
+✅ ALL 4 RULED: A out by design · B a GENUINE DEFECT · C out by shape · ⭐ DOMAIN STATEMENT ADOPTED:
+   *the kind gate governs a write that ASSERTS A VALUE AT AN ADDRESS IN A SLOT-GOVERNED NAMESPACE*
+```
+
+## ⭐⭐ `project-decision` AS A SEMANTIC CLASS — DERIVED 17:06 → `DERIVATION_SOTERA_PROJECT_DECISION_CLASS`
+
+```
+⭐⭐ MEASURED: THE VALUE **IS** THE STATUS — value = evidence->>'status' on EVERY row, from a CLOSED
+   4-value vocabulary (shipped ×18 · frozen ×8 · deferred ×6 · open ×2)
+⭐ THE QUESTION: "what is the current STATUS of decision X?" ⛔ NOT "what was decided" (that lives in
+   `content` + the pinned doc:<path>@<sha>). ⇒ the cleanest slot question in the corpus
+⭐⭐⭐ BUT THE ADDRESS IS **INVERTED** — and that IS the defect:
+     user / preferred_name / "Hermes"       entity = SUBJECT · attribute = PROPERTY
+     project-decision / okf-export / "…"    entity = TYPE    · attribute = SUBJECT
+   ⇒ ⭐⭐ THE PROPERTY NAME (`status`) APPEARS NOWHERE IN THE ADDRESS — which is exactly WHY the writer
+   needed a private `evidence->>'kind'`: the address does not say what is being asked
+   ⓘ Distribution proves it: `user` = 43 attributes / 60 rows (one subject, many properties) ·
+   `project-decision` = 17 attributes / 34 rows (ONE property, many subjects)
+⭐ REPLACE, ⛔ not accumulate (a decision has ONE current status) — ⚠️ but 0 addresses have 2 values, so
+   replacement is UNEXERCISED; the semantic argument stands alone, the data neither supports nor denies
+⭐ SUBJECT IS A THIRD CLASS: an ARTEFACT (not a person, not her own practice) ⇒ correctly NO
+   subject_person_id — ⚠️ and there is NO artefact-subject axis at all; identity survives only in the slug
+⚠️ AND THE FOUR "KINDS" (fact/note/stance/practice) ARE **NOT A COLUMN** — kind = semantic|identity (a
+   NAMESPACE axis) · tier = hot|warm|cold (RETENTION) · stance lives in txn_relational_records ·
+   practice lives in the lesson rows. ⇒ "does an existing kind cover it?" cannot be answered by lookup
+⭐⭐⭐ ⇒ IT NEEDS NO NEW SEMANTIC CATEGORY. **It is a correctly-shaped FACT with a MALFORMED ADDRESS.**
+   canonical: entity = <the decision> · attribute = `status` · value = deferred ⇒ ⭐ the private
+   evidence kind becomes UNNECESSARY, because the address then says what it asks
+⚠️⚠️ ⇒ BUT THE REPAIR IS A RE-ADDRESSING OF 34 LIVE ROWS — the "rewriting history" class ⇒ ⏸ A SEPARATE
+   RULED ACT, ⛔ never a side effect of canonicalizing a writer. (doc: provenance is unaffected; the
+   seeder's idempotence key CHANGES MEANING and would create a second population)
+⭐⭐⭐ FIRST REAL DEMAND FOR A CHECK THE REGISTRY LACKS: an ENUMERATION check. ⓘ Registered = nonempty ·
+   single-line · no-trailing-ellipsis · is-iso-date. ⛔ Must NOT be met by loosening the registry
+   (*"a definition cannot invent a check by naming one"*) ⚠️ and a PARAMETERISED check is a new shape —
+   every existing check is NULLARY over the value
+⭐ CANONICAL WRITER: registration and slot resolution are ORTHOGONAL — `reconcile:`'s slot-shaped row
+   DOES carry a slot_id ⇒ ⛔ "it's a maintenance script" is not a reason to bypass reconcileFact
+⏸ 5 RULINGS from this doc
 ```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD
