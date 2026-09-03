@@ -5370,3 +5370,56 @@ M2 disabled · M2-6 unwired (zero importers) · 12b baseline 4/4 frozen · live 
 ⏸ **Waiting on Ote:** ① how ownership of a slot is determined (⛔ `mst_slots` has no `author`) ·
 ② case F, forwarded material · ③ case C, account-less interfaces.
 ⏸ **Held:** the declaration VERB · gap ⑤ · the M2-1 build · the D2 residual · admission-predicate identity.
+
+---
+
+## 2026-09-03 12:18 (+07:00) — the three investigations Ote ordered: ownership · forwarding · account shell
+
+⛔ **Investigation only.** Nothing built. M2-6 unwired · M2 disabled · 12b untouched · no vocabulary, API,
+migration, declaration tool, account shell or backfill.
+⭐ Full evidence: `Reference/docs/DERIVATION_SOTERA_OWNERSHIP_FORWARDING_ACCOUNTSHELL.md`.
+
+**① SLOT OWNERSHIP — traced through all six candidates Ote named.**
+Minting: 82/82 slots carry `evidence.mintedBy='reconcileFact'` — ONE path, and it is never told who writes.
+Caller identity: `buildMemoryV2(..., author='account')` passes `author` to the memory store and
+NOT to `createSlotStore` on the very next line — the axis stops one seam short.
+Persona config: all 48 slots holding memories have `persona=NULL`; the only 4 with `'sotera'` are `zz_`
+probes with 0 rows. History: slot room == member-row room 55/55; 0 slots span rooms.
+⭐⭐ Five authorship axes measured: `txn_memories.author` 125/125 ✅ · `log_memory_changes.actor` 137/137 but
+a SINGLE constant · `mst_persons.created_by_user_id` 0 of 5 · `mst_slot_questions.declared_by` 0 rows ·
+`mst_slots` no column. The one that works is declared at a seam every writer passes, by the caller that
+knows the occasion, with a safe default.
+⭐⭐⭐ The live proof a slot must NOT carry an owner: `how_I_see_him` = author `persona` · entity `ote` ·
+room `agent_dev` — owner/subject/formation, three answers on one row, none of them the slot's.
+⇒ nothing consumes a slot owner (`checkKind` takes kind only; `mst_slot_questions` has no scope column).
+
+**② CASE F — the decisive finding is a re-reading, not a new measurement.**
+`memory-lineage.js` reads `source` as MECHANISM + OCCASION ⇒ `conversation:<id>` means *the extractor wrote
+this*, ⛔ NOT *this came from there*. ⚠️ Supersedes my earlier "the capability exists and has never been
+used" reading — the 0-of-34 number was right, my interpretation of the capability was not.
+⭐⭐⭐ And Case F already happened: `here he come. "Hi, Sotera. I'm Cogito. I'm your uncle."` — typed by Ote
+QUOTING somebody else — became `preferred_name="Cogito"` on HIS account.
+⚠️ The refusal built for it has never fired: `log_memory_refusals` = 0 rows.
+⚠️ `resolveFormationContext()` returns the DELIVERY room by construction (84/84 ordinary today).
+Of the four axes: current conversation ✅ exists · delivery ⛔ derivable, not its own field · source
+conversation ⚠️ only when local · ORIGIN ⛔ the one genuinely missing fact — and there is no `cogito`
+account, so it must be nameable without a local FK (the `doc:<path>@<sha>` shape).
+
+**③ CASE C — unsafe as posed, and the need is smaller than it looked.**
+accounts 9 → 8 linked, 1 not (`mina`); persons 5 → 4 with accounts, 1 without (`Sotera`, kind='persona',
+2 rows as subject). ⭐ `person-service.js` already creates account-less persons explicitly, two-phase.
+⇒ an account is required to hold a ROOM, ⛔ not to be a SUBJECT.
+⛔ A shell would differ from a real account by `person_id IS NULL` and nothing else — and that already
+means "person not yet linked". The standing red-proof question, exactly.
+⭐ At the one built consumer the M2-6 fix already refuses a null room owner as `unclassifiable` — the
+danger is not the shell, it is LINKING a person to it.
+
+⚠️ **TWO OF MY OWN FIGURES CORRECTED.** "82 slots · 773 writes · max 168" was 72% `zz_` probe traffic —
+honest figure **72 real slots · 220 writes · max 65** (conclusion survives, the number did not).
+"9 accounts → 4 persons" undercounted: there are **5** persons, and the fifth is the whole of finding ③.
+ⓘ Also stale, ⛔ not fixed: `memory-store-sequelize-host.js` names `hermes_alias` as the account with no
+person — it is linked to `Hermes`; the unlinked account is `mina`. And `memory-lint-host.js:172` still
+aliases `m.user_id AS owner_id`, the conflation 015 retired.
+
+⏸ **Back to Ote for the three rulings.** ⏸ Held unchanged: the declaration VERB · gap ⑤ · the M2-1 build ·
+the D2 residual · admission-predicate identity.

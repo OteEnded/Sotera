@@ -83,12 +83,33 @@ STANDING      ⭐⭐⭐ A QUESTION IS SUBJECT-FREE ⇒ declaring one asserts NOT
 
 ---
 
-# 3 · ⏸⏸ THE THREE RULINGS EVERYTHING IS WAITING ON
+# 3 · ⏸⏸ THE THREE RULINGS — ⭐ ALL THREE NOW INVESTIGATED (2026-09-03 12:18)
 
-| **① how is OWNERSHIP OF A SLOT determined?** | ⛔⛔ **`mst_slots` has NO `author` column.** Ownership follows authorship, so *"is this Sotera-owned?"* **has no answer in the schema**. ⛔ Do NOT substitute `persona` (78 null / 4 'sotera') or `user_id` — 029 already cost this store exactly that substitution |
+⭐ Full evidence: `DERIVATION_SOTERA_OWNERSHIP_FORWARDING_ACCOUNTSHELL`. Ote asked for the traces
+**before** ruling; these are the answers, ⛔ not the rulings.
+
+| **① SLOT OWNERSHIP** | ⭐ **A slot has no owner and needs none.** ⓘ 82/82 slots minted by ONE path (`reconcileFact`) that is never told who is writing; `checkKind` takes **kind only**; `mst_slot_questions` has **no scope column at all**. ⭐⭐ The live proof: `how_I_see_him` = **author `persona` · entity `ote` · room `agent_dev`** — three axes on one row, ⛔ none of them the slot's. ⇒ ⛔ **do not add `mst_slots.author`**; the reader that justified it was the retracted framing |
 | --- | --- |
-| **② CASE F — forwarded material** | `source:'conversation:<id>'` exists (34 rows) but **0 of 34 name a conversation in another room** ⇒ a forwarded conversation takes the DELIVERER's room as formation context and **nothing detects it** |
-| **③ CASE C — account-less interfaces** | `user_id` is **NOT NULL** ⇒ an account shell is required; ⭐ but a PERSON is not (2 convos have a user with no `person_id`; **9 accounts → 4 persons**). Is a shell acceptable when it becomes indistinguishable from a person's room downstream? |
+| **② CASE F — forwarded** | ⭐⭐⭐ **`source:'conversation:<id>'` answers a DIFFERENT question.** `memory-lineage.js` reads it as **mechanism + occasion** ⇒ `conversation:` means *the extractor wrote this*, ⛔ not *this came from there*. ⚠️ **This supersedes my "unexercised capability" reading.** Of the four axes, **only the ORIGIN is missing**, and it must be nameable **without a local FK** (⛔ there is no `cogito` account) |
+| **③ CASE C — account shell** | ⛔ **Unsafe as posed.** A shell differs from a real account by **`person_id IS NULL` and nothing else** — ⚠️ and that already means *"person not yet linked"* (`mina`). ⇒ the standing red-proof question exactly. ⭐ And it is **not needed to be a SUBJECT**: `person-service.js` already creates account-less persons, and `Sotera` **is** one (0 accounts, 2 rows as subject) |
+
+⭐⭐ **THE THREE FACTS THAT MADE THESE ANSWERABLE — all measured, all new:**
+- **five authorship axes exist; ONE works.** `author` 125/125 · `actor` 137/137 but **a single constant** ·
+  `created_by_user_id` **0 of 5** · `declared_by` 0 rows · `mst_slots` no column.
+  ⭐ The one that works is declared **at a seam every writer passes**, by the caller that knows the occasion,
+  with a safe default. ⇒ **⛔ don't add a fifth on speculation.**
+- ⭐⭐⭐ **CASE F ALREADY HAPPENED.** `here he come. "Hi, Sotera. I'm Cogito. I'm your uncle."` — typed by Ote,
+  **quoting somebody else** — became `preferred_name = "Cogito"` **on HIS account**. Delivery was taken as
+  formation AND as speaker. ⚠️ The refusal built for it (`relayedSpeech`) has **never fired: 0 rows in
+  `log_memory_refusals`** — ⛔ the clean corpus is not evidence the boundary works.
+- ⚠️ **`resolveFormationContext()` returns the DELIVERY room by construction** (it walks
+  `source_message_id → conversation → user_id`). ⓘ 84/84 rows are ordinary today, so it is not a live bug —
+  ⛔ but it is the exact line that would absorb forwarded material into the deliverer's room.
+
+⚠️ **TWO OF MY OWN FIGURES CORRECTED THERE:** *"82 slots · 773 writes · max 168"* was **72% `zz_` probe
+traffic** — the honest figure is **72 real slots · 220 writes · max 65** (the conclusion survives, the
+number did not). And *"9 accounts → 4 persons"* undercounted: there are **5 persons**, and the fifth is
+the whole of finding ③.
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD
 
@@ -169,8 +190,9 @@ one.** ⭐ The repairs that work: make the fact **explicit**, **fail closed**, *
 `DECISION_SOTERA_O3A_ADMISSION_IS_NOT_A_FRESHNESS_WINDOW` → `AUDIT_SOTERA_D2_EVIDENCE_SELECTOR` →
 `INVESTIGATION_SOTERA_S94_SELF_CONSUMPTION` → `CONTRACT_SOTERA_M2_6_EVIDENCE_SELECTION` →
 `DECISION_REQUEST_SOTERA_M2_1_OUTCOME_AXES` → `DERIVATION_SOTERA_QUANTIFIER_AND_M2_3_REFRAME` →
-`DERIVATION_SOTERA_SLOT_QUESTION_DECLARATION` → ⭐ `DERIVATION_SOTERA_STANDING_AND_OWNED_COGNITION`
-(**supersedes** the standing section of the one before it).
+`DERIVATION_SOTERA_SLOT_QUESTION_DECLARATION` → `DERIVATION_SOTERA_STANDING_AND_OWNED_COGNITION`
+(**supersedes** the standing section of the one before it) → ⭐⭐ **`DERIVATION_SOTERA_OWNERSHIP_FORWARDING_ACCOUNTSHELL`**
+(answers its three open rulings; **supersedes** its §3.2 reading of `source:'conversation:<id>'`).
 
 **Earlier arcs:** retention/P1 chain · Rome (3) · `MEASUREMENT_SOTERA_EMPTY_TURNS`.
 ⓘ All in `Reference/docs/` — its own git repo, use `git -C /c/data/AI_LLMv2/Reference`.
