@@ -5477,3 +5477,67 @@ construction.
 ⓘ **Corrections from 12:18 stand as corrections, ⛔ not rewritten:** the slot-usage figure (72 real slots ·
 220 writes · max 65, after removing 72% `zz_` probe traffic) · 5 persons not 4 · the stale `hermes_alias`
 comment in `memory-store-sequelize-host.js` · `memory-lint-host.js:172` aliasing `m.user_id AS owner_id`.
+
+---
+
+## 2026-09-03 14:25 (+07:00) — origin VOCABULARY + the assertion/authorization contract
+
+⛔ **Derivation only.** Nothing built. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_ORIGIN_VOCABULARY_AND_AUTHORIZATION.md`.
+
+**⚠️ TWO CORRECTIONS FROM OTE, applied to `DERIVATION_SOTERA_ORIGIN_CONTRACT` as §2.2 and §2.3 — ⛔ marked
+as corrections, not silently rewritten.**
+① `origin = none` is **not** `speaker = none`. Case 4 keeps speaker/source = X and subject = Y:
+`owner=Sotera · subject=Hermes · speaker=Ote · formation=Ote/Sotera · origin=NONE`. `none` is a POSITIVE
+claim (first-hand); ⛔ it must stay distinct from `unknown`.
+② *"needs no new PRIMITIVE"* ≠ *"already solved."* ⓘ Measurable, and it bites case 5 too: **0 of the 34
+`doc:` rows carry a `slot_id`** ⇒ even the case whose write path works has never had its material accepted
+as a slot claim. The acceptance path is unbuilt in both.
+
+**⭐⭐ SHAPE: origin is a CHAIN of HOPS, and DELIVERY IS HOP 0 — already stored** (`source_message_id` +
+`user_id`). ⇒ origin is *"the rest of the chain"*, which is exactly why a single-valued field cannot hold
+it. Case 4 = hop 0 only · cases 1/2/3/5 = hop 0→1 · case 6 = hop 0→1→2.
+
+**⭐⭐⭐ THE STRUCTURAL FINDING — what the modality axis reveals.** `reported` is defined as *"the speaker
+is relaying someone else's claim"* and `isNonLiteral` makes it **unslottable**, enforced twice
+(`slotViolation()` + `txn_memories_modality_slot_ck`). That looks too coarse — forwarded material could
+never support a claim. ⭐ It is not: **`modality` describes ONE statement and a re-presentation has N.**
+`reported` is **hop 0's** modality and is correctly placed; hops 1…N have **no modality of their own**.
+⇒ ⛔ **do NOT loosen `slotViolation`** — the missing thing is ARITY, not a weaker gate.
+
+**VOCABULARY — five slots per hop, each three-valued** (Ote's `none ≠ unknown` correction generalised):
+`who` (person · UNRESOLVED · NONE) · `what` (local id · non-local PIN · UNKNOWN) · `span` (present INLINE ·
+NONE EXISTS · UNKNOWN) · `how meant` (the 5-value vocabulary · UNRECORDED) · `depth` — ⭐ **reuse the
+locked completeness contract**: `exhaustive` | `bounded(N of M)` | `unknown`.
+⭐ The span must be stored **inline**: an inner hop is by definition not in this room, so a pointer to it
+resolves to `source-unreadable` **by construction** — the 34 `doc:` rows already carry `quote` inline.
+⛔ No kind enum (readers branch on span, not kind) · ⛔ no room/account/scope · ⛔ no score.
+
+**⭐⭐⭐ AUTHORIZATION — detecting a mark is not asserting an origin.**
+A · **marked in speech** — authority = the speaker's own words; the model LOCATES and the mark is
+CUE-VERIFIED (`if (!hay.includes(cue)) → verified:false`). Cases 2/3/6.
+B · **declared as an act** — authority = the account; the precedent shape (authored artefact + explicit act
++ an immutable pin). Cases 1/5.
+⛔⛔ C · **inferred from shape/content — FORBIDDEN** (M2-10; the surface test gave 3 false positives and
+5+ false negatives).
+⚠️ **Route A can NEVER establish WHO.** *He said "I'm Cogito"* verifies the cue and the span but not who
+"he" is ⇒ `who: UNRESOLVED` — ⭐ and that is the point: a silent misattribution becomes an explicit
+unknown, which M2-6 already refuses as `unclassifiable` rather than defaulting to the room owner.
+Only Route B can name an inner speaker.
+
+**⚠️ MEASURED STATE OF THE INGREDIENTS.** The modality **vocabulary + gate are WIRED and enforced twice**;
+the **producer is not** — ⓘ `interpretModality`'s only importer in the entire repo is
+`test/pipeline/modality-matrix.mjs`, a lab pipeline. 0 rows carry `reported`; 0 refusals recorded.
+⇒ ⭐⭐ **the acceptance decision already exists; the producer does not — so the authorization question has
+never actually been faced.** It was deferred by not wiring a producer.
+
+**⛔ THE RESIDUAL NO CONTRACT REMOVES:** an **unmarked** re-presentation is indistinguishable from
+first-hand material, and every route to catching it anyway is Route C. ⓘ Reassuringly, the Cogito material
+**was** marked — `onlyInsideQuotes()` detects exactly that shape — so the defect was **a mark nothing
+read**, ⛔ not an absent mark.
+
+⏸ **4 rulings before any schema:** ① is Route B a new act, or the still-open declaration VERB? (same shape
+— two acts may be a mistake) ② how much modality does an inner hop get? ③ does an unverifiable origin
+block a warrant or record the absence? (M2-9: a receipt, ⛔ never a score) ④ where does it live?
+⭐ 6 red-proof obligations recorded, ⛔ none built — including a **positive control on the producer**,
+since 0 rows and 0 refusals makes every current green vacuous.
