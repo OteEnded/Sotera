@@ -7345,3 +7345,52 @@ tool across 3 days. Recommended: the model-facing refusal says what happened, no
 
 Doc: `DERIVATION_SOTERA_MODEL_FACING_WRITE_RESULT.md`. Fences unchanged; canary still the sole governed
 slot; model tool untouched.
+
+
+---
+
+## 2026-09-04 — MODEL-FACING WRITE RESULT SHIPPED; BOTH WRITERS, ALL THREE STATES
+
+**Built ③ as ratified.** The wait now happens ONCE, in the host, beside the lane it bounds:
+`memory-write-receipt.js` owns the bound, the vocabulary and the resolver, and `settled` is
+always-settling. The package awaits it and knows no timeout number — Ote: *"Do not put the bound into
+@ote/memory."* `retention-host` reads the decided outcome; its own copy of `idOf` and the state constants
+are gone, so there is exactly one definition of each.
+
+`remember` is included, as ruled. Both doors now report persisted / refused / accepted, and the serialised
+result carries no `settled` and no Promise artifact in any state.
+
+**Two audiences, one truth.** The model is told what happened and never how to repair a capability it does
+not possess; the developer receipt keeps the real code and the full diagnosis, and the proof asserts both
+halves of that on the SAME write.
+
+⚠️ **One refinement I made inside his ruling, worth flagging.** The approved sentence *"This memory is
+governed and this write could not be admitted"* is used only when the code really is
+`REPLACEMENT_REFUSED`. The same path also carries ownership-boundary and slot-admissibility refusals, and
+saying "this memory is governed" about one of those would be a plainly false statement about the world —
+the opposite of what the change is for. Every other refusal gets *"That was not saved. The write could not
+be admitted."*
+
+⚠️⚠️ **A real regression, caught inside the run by the check written the day before.** Moving the wait down
+left `resolveReceipt` still calling `settleWrite`, so an already-decided receipt was resolved a SECOND
+time: the inner `accepted` (ok:false) was read by the outer pass as a failed write and re-labelled
+`refused`, with the real reason lost to a generic fallback. Two resolutions of one receipt — the same
+hazard as two bounds, one layer up, and I had written the comment warning about it. `resolveReceipt` now
+reads the receipt and treats anything that does not answer in the contract's vocabulary as UNKNOWN, never
+as optimism.
+
+**And one red that was mine, not the system's.** The persistence-boundary assertion read `value` for both
+doors and went red on the note. A fact is subject-attribute-VALUE; a note has no attribute and its text is
+`content`, with `value` NULL. Probed it rather than assuming — "the receipt named a row that does not
+exist" and "I looked in the wrong column" are the same red until you check. The system was right.
+
+**69/69 suites, 0 FAIL lines. @ote/memory 84/84.** Committed 38806ca (Sotera side). The package change is
+confined to `modelResult` plus the two handler lines and remains cleanly separable from the pre-existing
+uncommitted work in that repo, which is still untouched.
+
+⏸ Next, in his order: wire the consuming-occasion rule + its positive control — and per his standing
+instruction, the same-occasion attack must eventually be CONSTRUCTIBLE before the rule gets credit; a
+green that only reflects operator labels never equalling message UUIDs proves nothing.
+
+Fences unchanged: canary is the only governed slot, no model-tool claimKind, Origin/P1/Rome/12b/M2-6/
+post-M2 all held.
