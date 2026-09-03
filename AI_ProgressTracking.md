@@ -6876,3 +6876,50 @@ fixing. Corrected to assert the state and report the actual code as detail.
 
 **SCOPE FENCES INTACT:** Origin PARKED · M2-6 UNWIRED · 12b FROZEN at 4/4 · P1 UNTOUCHED · Rome UNTOUCHED
 · M2 DISABLED. Every proof creates its own fixtures and asserts its own teardown; zz_ residue is zero.
+
+---
+
+## 2026-09-03 18:52 (+07:00) — ENFORCEMENT READINESS: measured, and the answer is NOT YET
+
+Ote asked whether to enable the M2 consumer/enforcement side against the real corpus, or whether a final
+readiness check is wanted first. **Measured rather than judged:**
+
+**① THE ENFORCEMENT SEAM DOES NOT EXIST.** `kindPreconditionFor` still has **ZERO callers** — the only hit
+in the repo is a comment inside my own RP-D0 check. The store *captures the pin*; nothing *consumes* ALLOW
+to gate a replacement. So "enable the enforcement side" is not a config flip: the consumer is unbuilt.
+
+**② AND IF IT WERE BUILT, IT WOULD ENFORCE NOTHING.** Right now: **0 declared questions · 0 bound slots ·
+0 pins · 0 binding rows** — every proof tore its fixtures down. `checkKind` DEFERs on all 82 slots.
+
+**③ BUT REPLACEMENT IS A REAL, LIVE BEHAVIOUR — this is not hypothetical traffic.** ⓘ `log_memory_changes`
+holds **147 `supersede` events**, and 8 superseding rows are live today, 6 of them carrying a slot across
+5 distinct slots.
+
+**⇒ THE READINESS FINDING, AND IT IS A REAL ONE:** enforcement's DEFER means *"do not treat this as a
+replacement"* — and with 100% of slots deferring, wiring it today would stop **every** slot replacement.
+That is an outage, not a protection — 031's exact rule, and the same one that kept the admission pin from
+refusing every writer.
+
+**⇒ AND DEFER HAS TWO POSSIBLE MEANINGS AT THE ENFORCEMENT SEAM, BOTH WITH COSTS. This is not settled by
+anything ratified, and it is an operational edge the proof register did not cover:**
+  · **refuse the write** ⇒ an outage on a live path with 147 historical events;
+  · **write without superseding** ⇒ two live rows for one slot — the `duplicate-live-slot` shape
+    `memory-lint-host` already has a rule for, and which root's room already exhibits (2 live
+    `preferred_name` rows).
+
+⚠️ And the failure mode is quiet: enabling on a corpus with nothing declared does not fail loudly, it
+*silently stops replacements* — and "no replacements happened" looks identical to "no replacements were
+needed". That is precisely the empty-expected-value family Ote just ratified.
+
+**RECOMMENDED SEQUENCE, and each step is falsifiable:**
+1. **Decide what DEFER means at the enforcement seam** (the two options above). This is the one open
+   operational question; ⛔ it is not a reopening of M2 semantics.
+2. **Build the seam** with that meaning, plus the domain rule already adopted.
+3. **Perform ONE real DECLARE + BIND** — a deliberate act by an authority on a real slot. ⚠️ Note that
+   ⓘ 82 of 82 slots are label-minted, so this must go through route B-ii's propose/confirm; it is the
+   first act in this system that will have consequences, and it is Ote's call which slot.
+4. **Then enable, and MEASURE** — with a positive control that a replacement can be observed at all,
+   because "nothing was refused" is unproven until the instrument has shown it can see a refusal.
+
+⛔ Post-M2 strand stays out: enumeration check · class-C representation · seed-decisions repair · legacy
+migration. Origin PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 and Rome UNTOUCHED · M2 DISABLED.
