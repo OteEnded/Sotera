@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -22,8 +22,8 @@ context compaction.
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
-▶  NEXT                 ⭐ ORIGIN IS AT THE IMPLEMENTATION BOUNDARY (contract ratified). ⛔ M2 still
-                        blocked by the DECLARATION verb (0 of 82 slots) — a DIFFERENT act
+⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
+▶  NEXT                 ⭐ THE DECLARATION VERB — semantics derived, ⏸ 6 rulings open (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -324,6 +324,43 @@ Sotera's identity is independent of interface, room, account, and formation cont
 traffic** — the honest figure is **72 real slots · 220 writes · max 65** (the conclusion survives, the
 number did not). And *"9 accounts → 4 persons"* undercounted: there are **5 persons**, and the fifth is
 the whole of finding ③.
+
+## ⭐⭐ THE DECLARATION VERB — DERIVED 16:19 → `DERIVATION_SOTERA_DECLARATION_VERB`
+
+```
+⏸ STATUS       semantics DERIVED, ⛔ NOT ratified · ⛔ NOT built · ⛔ STILL THE M2 BLOCKER
+⭐⭐⭐ THE SPLIT  DECLARE (a subject-free DEFINITION) ≠ BIND (point a room-scoped SLOT at one).
+               047 already built BOTH objects ⇒ TWO ACTS.
+⭐⭐ AND THE RISK IS IN **BIND**, ⛔ NOT DECLARE — a slot was minted get-or-create from a LABEL by a
+   component that "must never fail a write" and "degrades silently" ⇒ nothing ever interpreted it.
+   M2-10's "never infer a question from a slot/memory/label/evidence/historical use" is a
+   constraint on BIND. ⚠️ And §9.2: the SAFE half is fully audited, the DANGEROUS half is NOT
+STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority over the subject-free
+   cognitive contract). ⚠️ OPPOSITE of the origin verb, whose authorities are DISJOINT
+   BIND = first-bind (fills a NON-CLAIM ⇒ ESTABLISH-shaped) vs rebind (contradicts ⇒ CORRECT-shaped)
+⭐⭐⭐ SELF-AUTHORISATION IS THE CENTRAL HAZARD: if Sotera may declare and Dreaming is Sotera, what
+   stops Dreaming declaring the question it needs to commit? ⛔ Withholding the OFFER is worthless —
+   measured: a withheld tool was called 4× across 3 days ⇒ ⭐ ENFORCE AT ADMISSION.
+   ⭐ THE RULE: *the act that declares must not be the act that needs it* ⇒ a question declared in
+   occasion X may not be consumed by occasion X ⇒ ⚠️ the declaration must record its OCCASION
+   (047 has NO such column), and enforcement goes on the CONSUMER side (ONE gate, not N callers)
+⛔ NO COMBINED DECLARE+BIND OPERATION — one call that authors a permission AND applies it IS the
+   self-authorisation shape. ⭐ The separation is the gate, ⛔ not ergonomics
+⭐ IMMUTABLE ⇒ no UPDATE path; "changing a question" = new definition + rebind
+⭐⭐⭐ ⚠️ REPOINTING SILENTLY REWRITES HISTORY: M2-10 stops RE-VALIDATION but not MISREADING — after a
+   repoint, "what question does this row answer?" resolves to the CURRENT definition
+   ⇒ AN ADMITTED MEMORY MUST RECORD THE QUESTION ID IT WAS ADMITTED UNDER (pin by snapshot, like
+   value_at_warrant). ⛔ And `supersedes_id` is a LINEAGE link, ⛔ NEVER a redirect
+⭐ AUTHORIZES EXACTLY ONE THING: checkKind may return ALLOW. ⛔ NOT the write — every other gate stands
+⚠️⚠️ THREE PIECES MISSING, NOT ONE: ① DECLARE ② BIND ③ **RESOLVE question_id → slotKind — UNBUILT AND
+   UNSPECIFIED.** `kindPreconditionFor` reads `slot?.kind`; ⛔ mst_slots has NO kind column and
+   NOTHING in the repo reads question_id ⇒ a perfect DECLARE+BIND would STILL DEFER on every write,
+   and EVERY TEST WOULD STAY GREEN because 100% DEFER is the current expected state
+⭐⭐⭐ ⇒ RP-D0 IS MANDATORY AND FIRST: DECLARE → BIND → checkKind must ALLOW. ⛔ Until it passes every
+   other proof is VACUOUS. ⓘ Only FOUR checks are registered (nonempty · single-line ·
+   no-trailing-ellipsis · is-iso-date) — a definition can express very little today
+⏸ 6 RULINGS NEEDED — see the doc's §11
+```
 
 ## ⏸ ALSO OPEN, EXPLICITLY HELD
 

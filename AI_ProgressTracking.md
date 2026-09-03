@@ -6040,3 +6040,82 @@ any unrelated memory field.** ⭐ Each is a red-proof obligation with a positive
 ⏸ **Open:** names and spellings (deliberately, since the representation pass), and ⛔⛔ **the DECLARATION
 verb — completely separate, untouched, and still the only hard blocker on M2 committing anything.**
 ⓘ 0 of 82 slots declared; `checkKind` DEFERs on every one. ⭐ **Origin work does not unblock M2.**
+
+---
+
+## 2026-09-03 16:19 (+07:00) — the DECLARATION verb derived; three missing pieces, not one
+
+⛔ **Derivation only — NOT built, NOT ratified.** ⏸ **Origin is PARKED at its implementation boundary** and
+is not to be built either. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_DECLARATION_VERB.md`.
+
+**⭐⭐⭐ THE SPLIT: DECLARE ≠ BIND.** 047 already built **two objects** — a subject-free persona-global
+DEFINITION and a room-scoped `mst_slots.question_id` POINTER ⇒ **two acts**.
+⭐⭐ **And the risk is in BIND, ⛔ not DECLARE.** A slot is minted get-or-create **from a label** by a
+component whose contract is *"slot bookkeeping must never be able to fail a write"* and *"degrades
+silently"* ⇒ **nothing ever interpreted that label**. Deciding the slot `favourite colour` asks the
+preferred-name question is a judgement about material nobody examined — and M2-10's *"never infer a
+question from a slot, a memory, a label, evidence, or successful historical use"* reads exactly as a
+constraint on **BIND**. ⚠️ The earlier derivation treated declaration as one act; splitting it relocates
+the hazard.
+
+**STANDING.** DECLARE = ⭐ **Sotera and the account** — Ote already ruled it: *"authority over the
+subject-free cognitive contract, not the room, interface, account, or subject"*, and the reason is
+structural: the act asserts nothing about anyone. ⚠️ **The opposite of the origin verb, whose authorities
+are DISJOINT** — ⛔ do not carry that model across. BIND = first-bind fills an explicit **non-claim**
+(ESTABLISH-shaped); a rebind **contradicts** (CORRECT-shaped) — the origin discriminator transfers exactly.
+
+**⭐⭐⭐ SELF-AUTHORISATION IS THE CENTRAL HAZARD OF THIS VERB.** If Sotera may declare and Dreaming is
+Sotera, what stops Dreaming declaring the question it needs in order to commit? ⛔⛔ Withholding the
+capability is an **offer-layer** restriction and this project has measured what that is worth —
+[[advertisement-is-not-authorization]]: reflection filtered the offer and **nothing at dispatch**, and a
+withheld tool was called **4× across 3 days**. ⇒ ⭐ **enforce at ADMISSION.**
+⭐ **THE RULE: the act that declares must not be the act that needs it** — the same shape as
+`person-service`'s *"a confirm is only honoured in a LATER turn than the proposal it answers"*.
+⇒ a question declared in occasion X may not be consumed by occasion X ⇒ ⚠️ **the declaration must record
+its OCCASION** (⛔ 047 has no such column), and ⭐ enforcement belongs on the **consumer** side — one commit
+gate, not N callers.
+⛔ **And therefore NO combined declare-and-bind operation:** one call that authors a permission *and*
+applies it **is** the self-authorisation shape. ⭐ The separation is the gate, ⛔ not ergonomics.
+
+**SUPERSESSION — ⭐⭐⭐ and a real finding.** A definition is immutable, so "changing a question" is a new
+definition **plus** a rebind. M2-10 protects rows from **re-validation** ✅ — ⚠️ **but not from
+MISREADING**: after a repoint, *"what question does this row answer?"* follows `memory → slot →
+question_id` and lands on the **CURRENT** definition, not the one the row was admitted under.
+⇒ **an admitted memory must record the question id it was admitted under** — pin by snapshot, exactly like
+`value_at_warrant` and `before`/`after`. ⛔ Without it supersession silently rewrites history.
+⛔ And `supersedes_id` is a **lineage link, never a redirect**.
+
+**AUTHORIZES EXACTLY ONE THING:** `checkKind` may return ALLOW. ⛔ **Not the write** — the modality slot
+rule, `admissibleToSlot`'s five refusals, the origin CHECKs, M2-8's floor, the quantifier gate and the
+scope predicate all still apply. ⛔ Must not authorize: a value assertion · reachability · re-validation ·
+a backfill · inference for other slots · a warrant.
+
+**⚠️⚠️ THREE PIECES ARE MISSING, NOT ONE.** ① DECLARE ② BIND ③ ⭐ **RESOLVE `question_id` → the `slotKind`
+string — UNBUILT AND UNSPECIFIED.** ⓘ `kindPreconditionFor` reads `slot?.kind`; **`mst_slots` has no
+`kind` column** and **nothing in the repo reads `question_id` at all**. ⇒ a perfect DECLARE and a perfect
+BIND would both succeed and `checkKind` would **still DEFER on every write** — and ⭐⭐ **every existing
+test would stay green**, because 100% DEFER is the current expected state. ⚠️ ③ is an **unbuilt seam**, ⛔
+not a defect (`kindPreconditionFor`'s own comment: *"the gate as a caller would use it"*, and no caller
+exists).
+
+**⭐⭐⭐ THE CENTRAL VACUITY, AND RP-D0.** Today 0 declarations, 0 bound slots, `checkKind` DEFERs on all
+82 ⇒ **every assertion of the form *"an undeclared slot defers"* passes on a system where the verb does
+nothing at all.** ⇒ **RP-D0 is mandatory and first: DECLARE → BIND → `checkKind` must return ALLOW.**
+Until it passes, every other proof is vacuous. Then RP-D1…D10: no re-validation (control: a real update
+does change a row) · authorizes only the comparison · no reachability (behavioural, with a scope-change
+control) · unregistered check refused at declaration · **deregistration ⇒ DEFER** (the two validation
+layers cover *different times* and the gap between them is real) · prototype pollution refused · ⭐ the
+**self-authorisation** proof with its control (the same question declared in a *prior* occasion IS
+consumable) · no warrant movement (⚠️ vacuous on 0 rows — needs RP-W0) · supersession reports the **old**
+question · one bind binds one slot (ⓘ `communication preference` really does exist in two rooms).
+
+ⓘ **An honest limit:** exactly **four** checks are registered — `nonempty` · `single-line` ·
+`no-trailing-ellipsis` · `is-iso-date` ⇒ a definition can express very little today. ⛔ Not a reason to
+admit prose or a predicate.
+
+⏸ **Six rulings before any contract is locked:** ① the DECLARE/BIND split? ② the self-authorisation rule
+and the missing occasion column? ③ recording the admitting question id? ④ BIND's missing audit home —
+`log_memory_changes.memory_id` is NOT NULL, so a slot-only change has **nowhere to be recorded**, and the
+dangerous half is the unaudited one? ⑤ is the `question_id → slotKind` resolution part of this work?
+⑥ standing for BIND?
