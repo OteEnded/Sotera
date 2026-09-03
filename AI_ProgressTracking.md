@@ -5930,3 +5930,72 @@ discriminator? ③ is `not-examined` one-way-on-exit accepted? ④ is "two acts,
 accepted?
 ⚠️ **And plainly: origin is now semantically complete, and M2 still cannot commit** — ⓘ 0 of 82 slots
 declared, `checkKind` DEFERs on every one. The **VERB** is the only hard blocker.
+
+---
+
+## 2026-09-03 15:43 (+07:00) — the ORIGIN VERB contract; origin reaches the implementation boundary
+
+⛔ **Contract only — NOT BUILT.** No implementation, migration, field, backfill or wiring. ⛔ No names or
+spellings. M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/CONTRACT_SOTERA_ORIGIN_VERB.md`.
+
+**✅ OTE RULED ALL FOUR TRANSITION QUESTIONS: YES.** First-establishment **per FACT** (⭐ with the whole act
+kept **atomic** — per-fact semantics must not become partial/best-effort mutation) · `depth` as the add-hop
+discriminator · `not-examined` **one-way-on-exit** · **two acts**, RETRACT is not a third.
+
+**⚠️⚠️ A NAMING COLLISION FLAGGED FIRST — and it is the family this arc keeps paying for.**
+*"The VERB"* now names two acts: ⏸ **the DECLARATION verb** (`mst_slot_questions`; 047 built the noun,
+nothing built the verb; ⓘ 0 of 82 slots declared) is **still the only hard blocker on M2 committing**, and
+is **untouched**; ⭐ the **ORIGIN verb** is a different act (ruling ③ separated them). ⇒ ⛔ **deriving the
+origin verb does NOT unblock M2**, and calling both "the VERB" would have re-merged by vocabulary two acts
+ruled apart by semantics.
+
+**⭐⭐⭐ ONE OPERATION · THE ACT IS DERIVED · THE INTENT IS DECLARED AND CHECKED.**
+⛔ The act is not supplied: given `(current, requested)` it is fully determined, and this arc has ruled the
+shape three times — **a derivable fact must not also be writable** (`reported` from the chain · the summary
+column barred · `mechanismOf(source)` parsed, never duplicated).
+⚠️ But derived-alone allows **silent act-drift**, and ⭐⭐ **the authorities are DISJOINT** — the operator
+may **not** ESTABLISH, the deliverer may **not** CORRECT — so drift is a wrong act under an authority that
+does not cover it, **in either direction**.
+⇒ ⭐ **intent is a compare-and-set guard**, exactly like `supersedes_id`: it grants nothing and makes drift
+**loud**. Mismatch ⇒ REFUSE, naming both. **Authority is checked against the DERIVED act**, ⛔ never the
+declared intent. ⭐ One operation (entry point) + two audit actions (record) were never the same question.
+
+**FIELDS.** Caller: target · intent · `state`/`depth`/`who`/`what`+pin · **reason (required)** ·
+**expected-current on CORRECT only** — ⭐ intent already covers ESTABLISH drift, but a CORRECT whose target
+claim changed would silently contradict a **different** claim.
+⛔ System-derived, never caller-supplied: **the act** · **`actor`** (the session — ⚠️ `logMemoryChange`
+accepts a label, and for this verb it must not) · **`source`** (the invoking context — else a caller could
+claim a run caused their act) · `before`/`after` (⭐ which **is** the pin) · `reported`.
+⛔⛔ A payload containing `span` or `how-meant` is **REFUSED, ⛔ not silently stripped** — the
+allowlist-drops family, ⓘ ten instances in this project.
+
+**⭐⭐ AUTHORITY REUSES WHAT EXISTS.** ESTABLISH walks the chain `resolveFormationContext` already walks
+(`source_message_id → conversation → user_id`); CORRECT reuses the store's **derived** root-ness —
+*"an authority handed in as a parameter is an authority a caller can get wrong."* ⇒ ⛔ no new admin check,
+and ⛔ never infer identity from a value's shape.
+⚠️⚠️ **MEASURED AND MUST BE STATED NOW, NOT DISCOVERED LATER: 41 of 125 memories have no
+`source_message_id`** ⇒ no delivering turn ⇒ **no ESTABLISH authority exists for them and the verb must
+REFUSE.** ⭐ Correct, not a defect — nobody can attest to the origin of material whose delivery was never
+recorded — and the refusal must say exactly that, ⛔ never *"unauthorized"*.
+
+**ATOMICITY.** One transaction, row locked `FOR UPDATE` (⭐ without it two concurrent ESTABLISH acts both
+see the non-claim and both fill it), and **the no-op decision happens INSIDE the lock** — outside it a
+concurrent change could make *"nothing changed"* a lie. ⭐ Exactly **one** audit row for a real change,
+exactly **zero** for a no-op.
+
+**⭐⭐⭐ THE ISOLATION THROUGH-LINE: every isolation proof asserts that NOTHING changed — which is exactly
+the assertion that passes when the instrument is broken.** ⇒ ⛔ **every one needs a positive control.**
+⚠️ ⓘ `log_memory_warrants` has **0 rows**, so the warrant proof is **vacuous today**: RP-W0 must issue a
+real warrant and assert the snapshot **changes** first. Then warrant byte-identity across every act shape,
+plus ⭐ an act on a memory that HAS a warrant producing an outcome **identical to the no-warrant case**
+(neither block nor permit). Span: no path but mechanical verification writes one, with a positive control
+that verification does. Person: `mst_persons` unchanged, with a positive control that `person-service`
+does create one. Reachability: ⭐ **behavioural, ⛔ never a source regex** — identical recall before and
+after, with a positive control that a scope change IS detected by the same harness.
+
+⏸ **Three for Ote, then the implementation boundary:** ① one operation with a declared, checked intent,
+rather than two exposed verbs? ② `expected-current` on CORRECT? ③ is the **41-row ESTABLISH refusal**
+accepted — material with no recorded delivery can never have its origin established by anyone?
+⏸ ⛔ **And the DECLARATION verb is untouched: still 0 of 82 slots declared, still the only hard blocker on
+M2 committing anything.**

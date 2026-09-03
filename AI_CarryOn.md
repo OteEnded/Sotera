@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:43 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -21,7 +21,8 @@ context compaction.
 ✅ 3 RULINGS LOCKED     ownership ⛔no column · origin DEFERRED · account shell ⛔REJECTED (§3)
 ✅ ORIGIN CONTRACT      derived across 6 cases — ⭐ 4 mechanisms exist, 1 fact missing
 ✅ ORIGIN FULLY DERIVED vocab · authz · inner-hop · 3 blockers · representation · STATES + ROUTE B
-⏸  NEXT                 ⭐ 4 rulings on TRANSITIONS, then the VERB — ⛔ the ONLY M2-commit blocker
+⏸  NEXT                 ⭐ 3 rulings on the ORIGIN VERB → IMPLEMENTATION BOUNDARY. ⛔ M2 still
+                        blocked by the DECLARATION verb (0 of 82 slots) — a DIFFERENT act
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -133,6 +134,31 @@ ORIGIN        ⭐⭐⭐ ORIGIN = what event/artefact this material RE-PRESENTS. 
    ⛔ not `evidence` (43 rows, FOUR disjoint key-sets, no key on every row) · ⛔ not a composite type
      (0 exist, and element constraints need an immutable fn; this schema has 1 fn and it is volatile)
    ⭐ transition precedent is ON THIS TABLE: `txn_memories_quoted_needs_source` is NOT VALID
+⭐⭐ ORIGIN VERB CONTRACT 15:43 → `CONTRACT_SOTERA_ORIGIN_VERB`
+   ⚠️⚠️ NAMING COLLISION FLAGGED: "the VERB" now names TWO acts. ⭐ THE DECLARATION VERB
+     (mst_slot_questions, 047's noun) is STILL THE ONLY M2-COMMIT BLOCKER and is UNTOUCHED.
+     ⛔ The ORIGIN verb is a different act (ruling ③) — deriving it does NOT unblock M2
+   ⭐⭐⭐ ONE OPERATION · THE ACT IS DERIVED · THE INTENT IS DECLARED AND CHECKED
+     ⛔ act not supplied (a derivable fact must not also be writable — `reported`/mechanismOf precedent)
+     ⚠️ but derived-alone allows SILENT ACT-DRIFT, and ⭐⭐ the authorities are DISJOINT (the operator may
+     NOT establish; the deliverer may NOT correct) ⇒ intent is a COMPARE-AND-SET GUARD; mismatch REFUSES,
+     naming both; ⭐ AUTHORITY is checked against the DERIVED act, ⛔ never the declared intent
+   ⭐ CALLER: target · intent · state/depth/who/what+pin · reason (REQUIRED) · expected-current (CORRECT
+     only — intent already covers ESTABLISH drift, but a CORRECT could silently contradict a DIFFERENT claim)
+   ⛔ SYSTEM-DERIVED, caller may not supply: the act · `actor` (the SESSION, ⛔ not a label) · `source`
+     (the invoking context — else a caller could claim a run caused it) · before/after · `reported`
+   ⛔⛔ A payload containing `span`/`how-meant` is REFUSED, ⛔ not silently stripped (allowlist family, 10×)
+   ⭐⭐ AUTHORITY REUSES WHAT EXISTS: ESTABLISH walks the chain `resolveFormationContext` already walks;
+     CORRECT reuses the store's DERIVED root-ness (*"an authority handed in as a parameter is an authority
+     a caller can get wrong"*) ⇒ ⛔ no new admin check
+   ⚠️⚠️ MEASURED: 41 of 125 memories have NO `source_message_id` ⇒ no delivering turn ⇒ ⛔ NO ESTABLISH
+     AUTHORITY EXISTS for them, and the verb must REFUSE — ⭐ correct, not a defect, and the refusal must
+     say exactly that, ⛔ never "unauthorized"
+   ⭐ ATOMIC: one txn, FOR UPDATE, and the NO-OP decision happens INSIDE the lock. Exactly ONE audit row
+     for a real change, exactly ZERO for a no-op
+   ⭐⭐⭐ EVERY ISOLATION PROOF ASSERTS *NOTHING CHANGED* — which is exactly what passes when the instrument
+     is broken ⇒ ⛔ EVERY ONE NEEDS A POSITIVE CONTROL (warrant · span · person · reachability)
+
 ⭐⭐ ESTABLISH TRANSITIONS DERIVED 15:28 → `DERIVATION_SOTERA_ESTABLISH_TRANSITIONS`
    ⭐⭐⭐ ESTABLISH IS FIRST-ESTABLISHMENT **PER FACT**, ⛔ NOT PER ROW. The discriminator was already
      built: `UNRESOLVED · UNKNOWN · NONE-EXISTS · bounded · not-examined` are EXPLICIT NON-CLAIMS ⇒
