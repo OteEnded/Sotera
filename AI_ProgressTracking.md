@@ -7295,3 +7295,53 @@ makes the comparison return false first, or the green is the instrument again.
 
 Docs: `DERIVATION_SOTERA_ASYNC_RETENTION_RECEIPT.md`, `DERIVATION_SOTERA_CONSUMING_OCCASION.md`.
 Fences unchanged. Canary still bound, no second slot, model tool untouched.
+
+
+---
+
+## 2026-09-03 21:05 (+07:00) — keep() NOW REPORTS WHAT HAPPENED; remember_fact DERIVED, NOT TOUCHED
+
+Machine restarted mid-session; Postgres survived, both app servers did not. Brought OLS back on :8201
+(PID 27160) and Sotera on :8210 (PID 15548), skipping the launcher's frontend rebuild since no frontend
+was edited.
+
+**① SHIPPED — `keep()` adopts `retain()`'s receipt contract.** It now performs the ONE bounded wait
+(RETAIN_WAIT_MS, unchanged) and reports persisted / refused / accepted. `accepted` carries `ok:false`, so
+`effected()` can never count a timeout as a retention act. The shared package seam is untouched and no new
+state name was invented — `RETENTION_STATE` just declares the strings `retain` already recorded.
+
+The composition risk was real and is where the care went: `accepted` carrying `ok:false` meant `retain`'s
+existing `if (out.ok === false) → refused` would have folded the third state into the second — the exact
+collapse the change exists to prevent, one function away. The named states are now answered first, and
+`retain`'s duplicate inline race is gone. One receipt, one wait, one bound.
+
+**② PROVEN — all three states, against the real seam.** `retention-receipt-check`, 20 assertions. The
+positive control runs first and crosses the persistence boundary (the receipt's id is looked up, never
+trusted). The refusal is produced at the REAL canary slot and asserts the world is unchanged afterwards.
+And `accepted` is produced by genuinely blocking the shared write lane for 25 s — the way production
+produced it on 2026-08-26 — with the assertion that matters most: **once the lane cleared, the row
+LANDED**. That is what makes `accepted` mean UNKNOWN rather than FAILED, in both directions.
+
+**A latent flake surfaced and was fixed, and it was not mine.** `dreaming-m2-6`'s RP11 selected a
+subject-less ROW and then resolved by ATTRIBUTE — slot grain. Measured: 15 candidate rows across 13
+attributes, and `preferred_name` alone has 11 rows of which 8 DO carry a subject. With no ORDER BY it was
+a ~2-in-13 coin flip on physical row order, and the machine restart turned it up tails. The fixture now
+selects a genuinely subject-less slot, deterministically, and asserts that precondition. 3/3 runs identical.
+
+**68/68 suites, 0 FAIL lines.** Committed 4f32360.
+
+**③ DERIVED, NOT BUILT — the model-facing write result.** Measured first: a kept fact and a refused one
+serialise BYTE-IDENTICALLY to `{"ok":true,"queued":true,"settled":{}}`. A Promise flattens to an empty
+object, so the payload carries a field that looks like data and holds none. `remember` has the same defect.
+
+The layering fact decides the shape: the package owns the handler, the host owns the lane and the bound.
+So the derived contract is to make `settled` ALWAYS-SETTLING within the one bound host-side, after which
+the package handler is `await r.settled` — bounded by construction, knowing no number — and
+`resolveReceipt` stops racing. One wait, one bound, three honest doors.
+
+One question needs his ruling: the store's refusal text names `claimKind`, and handing that to the model
+describes a remedy she does not have. That is precisely the shape that produced 9 attempts at a withheld
+tool across 3 days. Recommended: the model-facing refusal says what happened, not what to do.
+
+Doc: `DERIVATION_SOTERA_MODEL_FACING_WRITE_RESULT.md`. Fences unchanged; canary still the sole governed
+slot; model tool untouched.
