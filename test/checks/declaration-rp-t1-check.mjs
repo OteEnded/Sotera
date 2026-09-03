@@ -58,6 +58,11 @@ async function bind(questionId, intent, expected, tag) {
   })
 }
 
+// ⭐⭐ THE BASELINE, ⛔ NOT ZERO. Ote bound the first real slot on 2026-09-03 and there is no UNBIND, so
+// `log_slot_bindings` is legitimately non-empty forever. A teardown asserting the TABLE IS EMPTY asserts
+// an absence with no date. ⇒ residue is a DELTA against the state this run found.
+const [{ b: BASE_BINDINGS }] = await Q(`SELECT count(*)::int AS b FROM "${schema}"."log_slot_bindings"`, {})
+
 try {
   const [u] = await Q(`SELECT id::text FROM "${schema}"."mst_users" WHERE username = 'agent_dev'`, {})
   if (!u) throw new Error('agent_dev not found — RP-T1 must never run as root')
@@ -173,8 +178,9 @@ try {
             (SELECT count(*)::int FROM "${schema}"."mst_slots" WHERE canonical_label LIKE 'zz_rpt1_%') AS s,
             (SELECT count(*)::int FROM "${schema}"."txn_memories" WHERE source = 'zz_rpt1') AS m,
             (SELECT count(*)::int FROM "${schema}"."log_slot_bindings") AS b`, {})
-  check('10 · ⭐ teardown ASSERTED, not trusted', residue.q === 0 && residue.s === 0 && residue.m === 0 && residue.b === 0,
-    `questions=${residue.q} slots=${residue.s} memories=${residue.m} bindings=${residue.b}`)
+  check('10 · ⭐ teardown ASSERTED, not trusted — and against the BASELINE, ⛔ not against zero',
+    residue.q === 0 && residue.s === 0 && residue.m === 0 && residue.b === BASE_BINDINGS,
+    `questions=${residue.q} slots=${residue.s} memories=${residue.m} bindings=${residue.b} (baseline ${BASE_BINDINGS})`)
   await seq.close()
   done()
 }

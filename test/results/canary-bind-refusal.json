@@ -1,0 +1,76 @@
+{
+  "captured_at": "2026-09-03T12:57:18.560Z",
+  "attempted": {
+    "A": "CANARY-000111-tool",
+    "B": "CANARY-000222-extractor"
+  },
+  "immediate_return_to_model_tool": {
+    "ok": true,
+    "queued": true
+  },
+  "thrown": {
+    "code": "REPLACEMENT_REFUSED",
+    "reason": "governed-slot-kind-mismatch",
+    "scope": "GOVERNED",
+    "slotKind": "build-tag",
+    "claimKind": null,
+    "message": "refused: the slot asks `build-tag` and the incoming claim declares no kind — ⛔ a claim may not be assumed to answer the question it is replacing the answer to"
+  },
+  "before": {
+    "rows": [
+      {
+        "id": "ac171c98-8c15-4d44-a0c5-074edd5ac19a",
+        "value": "CANARY-653912",
+        "live": false
+      },
+      {
+        "id": "e64da54b-fa97-4433-92a3-fe0c3027bb0d",
+        "value": "CANARY-771403",
+        "live": false
+      },
+      {
+        "id": "403fa19e-d2ee-452d-9158-50654f711108",
+        "value": "CANARY-884127",
+        "live": true
+      }
+    ],
+    "live": [
+      {
+        "id": "403fa19e-d2ee-452d-9158-50654f711108",
+        "value": "CANARY-884127",
+        "live": true
+      }
+    ],
+    "audit": 1,
+    "bound": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8"
+  },
+  "after": {
+    "rows": [
+      {
+        "id": "ac171c98-8c15-4d44-a0c5-074edd5ac19a",
+        "value": "CANARY-653912",
+        "live": false
+      },
+      {
+        "id": "e64da54b-fa97-4433-92a3-fe0c3027bb0d",
+        "value": "CANARY-771403",
+        "live": false
+      },
+      {
+        "id": "403fa19e-d2ee-452d-9158-50654f711108",
+        "value": "CANARY-884127",
+        "live": true
+      }
+    ],
+    "live": [
+      {
+        "id": "403fa19e-d2ee-452d-9158-50654f711108",
+        "value": "CANARY-884127",
+        "live": true
+      }
+    ],
+    "audit": 1,
+    "bound": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8"
+  },
+  "log_entries": 3
+}

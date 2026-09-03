@@ -4,40 +4,46 @@
 
 ---
 
-# 0-A · ⏸⏸ THE ONE THING PENDING — NOTHING ELSE MOVES
+# 0-A · ✅ THE CANARY IS BOUND — and TWO decisions now sit with Ote
 
-> ⭐⭐⭐ **M2 IS BUILT AND PROVEN. It is NOT enabled, because no real slot is governed yet.**
-> ⏸ **Ote must approve the FIRST GOVERNED SLOT** → `Reference/docs/PROPOSAL_SOTERA_FIRST_GOVERNED_SLOT`.
-
-```
-RECOMMENDED   `user / build tag for this cycle` in agent_dev's room · 1 live row `CANARY-653912`
-              write_count 1 · quiet since 2026-08-26 · never superseded · writer model-tool
-WHY           the ONLY candidate both WELL-FORMED (entity=SUBJECT, attribute=PROPERTY) and
-              SEMANTICALLY DISPOSABLE — a build tag is INSTRUMENTATION, asserts nothing about a person
-REJECTED      the gaming cluster / physical state / Thai name spelling / alias / occupation are all
-              REAL PERSONAL DATA, mostly in Ote's own room
-QUESTION      `build-tag` · "which build tag is current for this cycle?"
-              checks nonempty · single-line · no-trailing-ellipsis  (all REGISTERED, all TRUE)
-UPDATE        claimKind `build-tag`, value CANARY-<new>  => ALLOW, supersede, one live row, pinned
-```
-
-⚠️ **TWO ACKNOWLEDGEMENTS NEEDED, NOT JUST THE SLOT:**
-1. ⛔ **THE FIRST BIND IS A ONE-WAY DOOR** — there is no UNBIND; a bound slot is REPOINTABLE, ⛔ not
-   removable. (Unbinding would be contradicting a claim with a non-claim; the vocabulary has no word.)
-2. ⚠️ **The model-tool writer will REFUSE on that slot until taught** — `commitToMemory` is a second
-   closed field list and an observation carries no claim kind. ⭐ On a canary slot that is THE DESIRED
-   OBSERVABLE, ⛔ not a defect.
-
-⇒ **On approval:** DECLARE → B-ii PROPOSE → later-occasion CONFIRM → the controlled UPDATE → observe the
-real supersede → then enable/observe M2.
-
-# 0-B · LIVE STATE AT COMPACTION
+> ⭐⭐⭐ **THE FIRST GOVERNED SLOT IS LIVE.** Approved and bound 2026-09-03.
+> Full record → `Reference/docs/RECORD_SOTERA_FIRST_GOVERNED_BIND.md`.
 
 ```
-67/67 suites · @ote/memory 84/84 · migrations through 048 · :8210 PID 24156 · :8201 PID 26644
-memories 125 · slots 82 · declared questions 0 · BOUND SLOTS 0 · pinned 0 · bindings 0
-namespace declarations 1 (`default`) · warrants 0 · passes 5 · zz_ memories 0 (10 legacy probe slots)
+QUESTION   build-tag  803924c3-…   "which build tag is current for this cycle?"
+SLOT       user / build tag for this cycle  41421c16-…   default · agent_dev   ⛔ NOT Ote's room
+HISTORY    CANARY-653912 (retired) → CANARY-771403 (retired) → CANARY-884127 (LIVE, pinned)
+ALL SIX OF OTE'S CONFIRMATIONS HOLD · 67/67 suites · corpus: bound 1 of 82 · pinned 2 · bindings 2
 ```
+
+⏸⏸ **THE TWO OPEN DECISIONS, and the first is the bigger one:**
+
+**① ⚠️⚠️ A GOVERNED REFUSAL IS INVISIBLE TO THE MODEL TOOL.** `keep()` calls
+`mem.reconcileFactAsync({entity, attribute, value})` — a **third** closed field list — which validates
+three fields, enqueues, and **returns `{ok:true, queued:true}` BEFORE the gate ever runs**. The refusal is
+sound (⛔ no row written, previous belief live, ⛔ no mutation) and it is **logged only**. She would be told
+the fact was kept. ⛔ Deliberately NOT fixed — Ote's call.
+
+**② ⏸ Enable / observe M2 more broadly?** Today M2 is the replacement authority for **one** slot; every
+other slot returns NOT-IN-SCOPE and legacy reconciliation is untouched.
+
+⇒ Also open, smaller: wiring `checkConsumingOccasion` (§0-B) · teaching a writer to declare a claim kind ·
+the `@ote/memory` change becoming independently attributable in git.
+
+# 0-B · LIVE STATE — 2026-09-03 20:06 (+07:00)
+
+```
+67/67 suites (0 FAIL lines in the run log) · migrations through 048
+memories 127 · slots 82 · declared questions 1 · BOUND SLOTS 1 · pinned 2 · bindings 2
+namespace declarations 1 (`default`) · warrants 0
+```
+
+⚠️⚠️ **AN UNWIRED RULE, FOUND WHILE BINDING.** `resolveSlotQuestion` computes and returns
+`declaredInOccasion` **and** `boundInOccasion` — exactly the two inputs the self-authorisation rule needs —
+and `slotGovernanceFor` **discards both**. `checkConsumingOccasion` is referenced by **RP-D0 alone**, never
+by a consumer. ⇒ the rule Ote ratified is proven and ⛔ **not enforced at admission**. ⓘ It is currently
+unenforceable anyway: no occasion is plumbed to the store's write seam, so there is nothing to compare
+against. Needs a derivation about where the consuming occasion comes from, ⛔ not a patch.
 
 **BUILT:** migration 048 · `memory-bind-rules.js` (PURE) · `memory-declaration-host.js` ·
 `memory-replacement-gate.js` (PURE) · the pin + gate in `memory-store-sequelize-host.js` ·
@@ -53,8 +59,9 @@ attributable before M2 closeout, ⛔ without disturbing the existing work.
 # 0-C · ⛔⛔ FENCES
 
 ```
-ORIGIN PARKED (complete, ⛔ nothing built) · NAMESPACE LOCKED · M2 DISABLED · M2-6 UNWIRED
-12b FROZEN 4/4 · P1 and ROME UNTOUCHED · POST-M2 STRAND OUT · NO REAL SLOT BOUND
+ORIGIN PARKED (complete, ⛔ nothing built) · NAMESPACE LOCKED · M2-6 UNWIRED
+12b FROZEN 4/4 · P1 and ROME UNTOUCHED · POST-M2 STRAND OUT
+⭐ ONE SLOT GOVERNED (the approved canary) · ⛔ NO SECOND SLOT · ⛔ NO WRITER TAUGHT
 ```
 
 # 0-D · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
@@ -71,6 +78,15 @@ ORIGIN PARKED (complete, ⛔ nothing built) · NAMESPACE LOCKED · M2 DISABLED �
 ⭐    ASSERT THE STATE, ⛔ NOT THE IMPLEMENTATION ORDER (RP-D2 named the wrong gate and went red)
 ⭐    Two routes to one guard are TWO TESTS · "not in scope" ≠ "deferred" · "could not establish X"
       must never become "X is established"
+⭐⭐  A HARNESS THAT OMITS AN *OPTIONAL* ADAPTER DOES NOT OBSERVE THE SYSTEM — it observes a system
+      missing a part. `auditLog` is optional and its absence means "beliefs change, the trail is
+      missing", so an assertion ABOUT the trail could only ever fail. Wire what you assert on.
+⭐⭐  ⛔ NEVER ASSERT A GLOBAL ABSENCE — read a BASELINE and assert the DELTA. Five teardowns asserted
+      `log_slot_bindings = 0`; there is no UNBIND, so they went red the moment the system did the
+      thing it was built for. Residue means WHAT THIS RUN LEFT, never what the table holds.
+⭐⭐⭐ `col <> 'x'` IS NULL-UNSAFE AND SILENTLY GREEN. `NULL <> 'x'` is NULL, not TRUE, so an isolation
+      assertion counted 0 where the honest count was 2 — blind to the exact rows it guarded. Its
+      sibling going RED is the only reason it was ever looked at. => `IS DISTINCT FROM`.
 ```
 
 ---

@@ -1,0 +1,76 @@
+{
+  "captured_at": "2026-09-03T12:55:18.878Z",
+  "new_value": "CANARY-884127",
+  "write": {
+    "ok": true,
+    "action": "update",
+    "id": "403fa19e-d2ee-452d-9158-50654f711108"
+  },
+  "slot": {
+    "qid": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8",
+    "question_key": "build-tag",
+    "bindings": 2
+  },
+  "rows": [
+    {
+      "id": "ac171c98-8c15-4d44-a0c5-074edd5ac19a",
+      "value": "CANARY-653912",
+      "supersedes_id": null,
+      "pin": null,
+      "invalid_at": "2026-09-03T12:53:27.242Z",
+      "created_at": "2026-08-26T03:58:43.281Z"
+    },
+    {
+      "id": "e64da54b-fa97-4433-92a3-fe0c3027bb0d",
+      "value": "CANARY-771403",
+      "supersedes_id": "ac171c98-8c15-4d44-a0c5-074edd5ac19a",
+      "pin": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8",
+      "invalid_at": "2026-09-03T12:55:18.618Z",
+      "created_at": "2026-09-03T12:53:27.239Z"
+    },
+    {
+      "id": "403fa19e-d2ee-452d-9158-50654f711108",
+      "value": "CANARY-884127",
+      "supersedes_id": "e64da54b-fa97-4433-92a3-fe0c3027bb0d",
+      "pin": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8",
+      "invalid_at": null,
+      "created_at": "2026-09-03T12:55:18.616Z"
+    }
+  ],
+  "audit": [
+    {
+      "action": "supersede",
+      "actor": "ote-operator",
+      "reason": "lexical 1.000 · \"build tag for this cycle\" → slot \"build tag for this cycle\"",
+      "memory_id": "e64da54b-fa97-4433-92a3-fe0c3027bb0d",
+      "related_id": "403fa19e-d2ee-452d-9158-50654f711108",
+      "before": {
+        "kind": "semantic",
+        "tier": "warm",
+        "value": "CANARY-771403",
+        "entity": "user",
+        "pinned": false,
+        "source": null,
+        "content": "user's build tag for this cycle: CANARY-771403",
+        "attribute": "build tag for this cycle",
+        "confidence": 0.6,
+        "created_at": "2026-09-03T12:53:27.239Z",
+        "expired_at": null,
+        "importance": null,
+        "invalid_at": null,
+        "access_count": 0,
+        "supersedes_id": "ac171c98-8c15-4d44-a0c5-074edd5ac19a",
+        "source_message_id": null
+      },
+      "after": {
+        "value": "CANARY-884127",
+        "replacedBy": "403fa19e-d2ee-452d-9158-50654f711108"
+      }
+    }
+  ],
+  "totals": {
+    "bound_slots": 1,
+    "pinned": 2,
+    "memories": 127
+  }
+}

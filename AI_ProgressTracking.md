@@ -7189,3 +7189,58 @@ without disturbing the existing work. That is Ote's call.
 ⭐ **Two corrections made this session that outlived their moment:** `@ote/memory` is consumed by **Sotera
 alone** (the 12-project figure was `@ote/components-sdk`), and RP-D2 was rewritten to assert the STATE
 rather than which gate refuses first.
+
+
+---
+
+## 2026-09-03 20:06 (+07:00) — ✅ THE FIRST GOVERNED SLOT IS BOUND, UPDATED AND REFUSED-AGAINST
+
+Ote approved all four points and gave the green light: *"bind the canary."* Done, in four **separate script
+invocations** rather than one process, because four occasions inside one act would be nominally distinct
+and actually one.
+
+**DECLARE** `build-tag` (`803924c3`) — asserted `bound_slots` stayed 0, so declaring really did make
+nothing operative. **PROPOSE** first-bind (act DERIVED, not taken from the caller) — asserted
+`question_id` stayed NULL. **CONFIRM** in a later occasion — and the same-occasion attempt was run FIRST,
+against the real proposal: refused `same-occasion`, and it wrote nothing. Then the real confirm. The slot
+`user / build tag for this cycle` in **agent_dev's** room is now governed. One of 82.
+
+**ALL SIX OF OTE'S CONFIRMATIONS HOLD.** `CANARY-653912` is historical and still present; exactly one live
+row; the new row is PINNED; the supersede is audited; the bind survived the write; and all 34 sibling
+fingerprints are byte-identical to the BEFORE snapshot.
+
+⚠️ **There are two governed updates and not one, because of a defect in MY INSTRUMENT.** The first run
+confirmed five of six and failed the audit one: `supersedes_id` was correct and `log_memory_changes` held
+nothing. The cause was the harness — it built the service without `auditLog`, and the host's contract says
+plainly that adapter is OPTIONAL and *"absent means beliefs still change, the trail is missing"*. The
+service's own line is `if (!auditLog) return`. **A harness that omits an optional adapter does not observe
+the system; it observes a system missing a part** — the persistence-boundary lesson, one seam over. Rewired
+all three adapters as `memory-v2-host.js` does and re-ran on the same disposable slot. Nothing was lost.
+
+**THE REFUSAL CONTROL EXPOSED MORE THAN THE REFUSAL.** The real model-tool executor is
+`retention-host.js:261` — `keep()` calls `reconcileFactAsync({entity, attribute, value})`, a **THIRD**
+closed field list. It refused correctly: no row written, the canary value still live, nothing retired, no
+audit row. **But `reconcileFactAsync` returns `{ok:true, queued:true}` BEFORE the gate ever runs.** The
+refusal happens on the serial write lane, which logs and rethrows — long after the caller was handed a
+success. ⚠️ **A governed refusal is invisible to the model tool.** She would be told the fact was kept.
+That is exactly the "complete real-world consequence" Ote asked this canary to expose. Left unfixed; his
+call. The extractor seam was proved BEHAVIOURALLY instead of by a source scan: `claimKind` was supplied at
+the caller and a delegating spy showed it absent at the store.
+
+⚠️ **An unwired rule found while doing this.** `resolveSlotQuestion` computes `declaredInOccasion` AND
+`boundInOccasion` — the two inputs the self-authorisation rule needs — and the store's `slotGovernanceFor`
+discards both. `checkConsumingOccasion` is referenced by RP-D0 alone. The rule Ote ratified is proven and
+not enforced at admission. It is unenforceable as things stand (no occasion reaches the write seam), so it
+needs a derivation, not a patch. Recorded, not touched.
+
+⚠️ **Six suites went red immediately after the bind — all six mine, none a regression.** Five teardowns
+asserted `log_slot_bindings = 0`; there is no UNBIND, so that table is legitimately non-empty forever and
+they went red for the system doing the thing it was built for. Each now reads a BASELINE and asserts the
+delta. **And the sixth exposed a check that had been silently green:** the E2E isolation assertion used
+`source <> 'zz_e2e'`, and `NULL <> 'x'` is NULL — so it counted 0 where the honest count was 2, blind to
+the exact rows it existed to guard. Its sibling going red is the only reason it was ever looked at. Both
+now use `IS DISTINCT FROM` and a baseline.
+
+**67/67 suites, 0 FAIL lines in the run log.** Record: `Reference/docs/RECORD_SOTERA_FIRST_GOVERNED_BIND.md`.
+Fences hold: Origin PARKED, namespace LOCKED, M2-6 UNWIRED, 12b FROZEN, P1 and Rome UNTOUCHED, post-M2 OUT,
+no second slot bound, no writer taught.

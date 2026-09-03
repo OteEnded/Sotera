@@ -68,6 +68,11 @@ for (const [label, claimKind] of [['no claim kind', null], ['a MISMATCHED claim 
     g.scope === REPLACEMENT_SCOPE.governed && g.outcome === REPLACEMENT.refuse, g.why)
 }
 
+// ⭐⭐ THE BASELINE, ⛔ NOT ZERO. Ote bound the first real slot on 2026-09-03 and there is no UNBIND, so
+// `log_slot_bindings` is legitimately non-empty forever. A teardown asserting the TABLE IS EMPTY asserts
+// an absence with no date. ⇒ residue is a DELTA against the state this run found.
+const [{ b: BASE_BINDINGS }] = await Q(`SELECT count(*)::int AS b FROM "${schema}"."log_slot_bindings"`)
+
 try {
   const [u] = await Q(`SELECT id::text FROM "${schema}"."mst_users" WHERE username = 'agent_dev'`)
   if (!u) throw new Error('agent_dev not found — this check must never run as root')
@@ -187,8 +192,9 @@ try {
     `SELECT (SELECT count(*)::int FROM "${schema}"."mst_slot_questions" WHERE question_key LIKE 'zz_%') AS q,
             (SELECT count(*)::int FROM "${schema}"."txn_memories" WHERE source = 'zz_enf') AS m,
             (SELECT count(*)::int FROM "${schema}"."log_slot_bindings") AS b`)
-  check('⭐ teardown ASSERTED, not trusted', res.q === 0 && res.m === 0 && res.b === 0,
-    `questions=${res.q} memories=${res.m} bindings=${res.b}`)
+  check('⭐ teardown ASSERTED, not trusted — and against the BASELINE, ⛔ not against zero',
+    res.q === 0 && res.m === 0 && res.b === BASE_BINDINGS,
+    `questions=${res.q} memories=${res.m} bindings=${res.b} (baseline ${BASE_BINDINGS})`)
   await seq.close()
   done()
 }

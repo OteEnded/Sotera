@@ -38,6 +38,11 @@ let slotId = null
 let questionId = null
 let proposalId = null
 
+// ⭐⭐ THE BASELINE, ⛔ NOT ZERO. Ote bound the first real slot on 2026-09-03 and there is no UNBIND, so
+// `log_slot_bindings` is legitimately non-empty forever. A teardown asserting the TABLE IS EMPTY asserts
+// an absence with no date. ⇒ residue is a DELTA against the state this run found.
+const BASE_BINDINGS = (await query(`SELECT count(*)::int AS b FROM "${schema}"."log_slot_bindings"`)).rows[0].b
+
 try {
   // ── 0 · a throwaway slot in the test account's room, in the `default` namespace ──────────────────
   const { rows: u } = await query(`SELECT id::text FROM "${schema}"."mst_users" WHERE username = 'agent_dev'`)
@@ -180,9 +185,10 @@ try {
     `SELECT (SELECT count(*)::int FROM "${schema}"."mst_slot_questions" WHERE question_key LIKE 'zz_%') AS q,
             (SELECT count(*)::int FROM "${schema}"."mst_slots" WHERE canonical_label LIKE 'zz_rpd0_%') AS s,
             (SELECT count(*)::int FROM "${schema}"."log_slot_bindings") AS b`)
-  check('11 · ⭐ teardown ASSERTED, not trusted — no zz_ declaration or slot residue, binding log empty',
-    residue[0].q === 0 && residue[0].s === 0 && residue[0].b === 0,
-    `questions=${residue[0].q} slots=${residue[0].s} bindings=${residue[0].b}`)
+  check('11 · ⭐ teardown ASSERTED, not trusted — no zz_ declaration or slot residue, and the binding log '
+    + 'is back at its BASELINE (⛔ not at zero — the first real bind is permanent)',
+  residue[0].q === 0 && residue[0].s === 0 && residue[0].b === BASE_BINDINGS,
+  `questions=${residue[0].q} slots=${residue[0].s} bindings=${residue[0].b} (baseline ${BASE_BINDINGS})`)
 
   await c.end()
   done()

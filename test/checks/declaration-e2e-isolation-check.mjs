@@ -42,6 +42,14 @@ let slotId = null
 let BEFORE = null   // ⭐ module scope: the `finally` block must be able to compare against it
 let userId = null
 
+// ⭐⭐ THE TWO BASELINES the mid-run isolation assertions compare against. Read BEFORE anything is written,
+// ⛔ never hardcoded: the corpus legitimately contains governed slots and pinned rows since 2026-09-03.
+const [{ p: BASE_PINNED, s: BASE_BOUND }] = await Q(
+  `SELECT (SELECT count(*)::int FROM "${schema}"."txn_memories"
+            WHERE question_id_at_admission IS NOT NULL AND source IS DISTINCT FROM 'zz_e2e') AS p,
+          (SELECT count(*)::int FROM "${schema}"."mst_slots"
+            WHERE question_id IS NOT NULL AND canonical_label NOT LIKE 'zz_%') AS s`)
+
 /**
  * ⭐ THE FINGERPRINT — a whole-corpus digest computed IN THE DATABASE, so it reads what was PERSISTED
  * rather than what the application believes it wrote. That distinction is the one RP-T1 cost us.
@@ -131,15 +139,26 @@ try {
     + 'admitted under', pin2?.pin === d1.question.id, `pin=${pin2?.pin} v1=${d1.question.id}`)
 
   // ── 3 · ⭐⭐ THE LIVE CORPUS IS UNCHANGED **DURING** THE RUN, except by this check's own fixtures ──
+  //
+  // ⚠️⚠️ THESE TWO WERE WRITTEN AS ABSOLUTE ZEROES AND BOTH WERE WRONG, IN OPPOSITE DIRECTIONS:
+  //  ① `source <> 'zz_e2e'` is NULL-UNSAFE. Every ordinary memory has a NULL `source`, and `NULL <> 'x'`
+  //    is NULL, not TRUE — so this counted 0 where the honest count was 2, and the check went GREEN
+  //    because it could not see the rows it existed to guard. ⇒ `IS DISTINCT FROM`.
+  //  ② The zeroes were an ABSENCE ASSERTED WITH NO DATE. Ote bound the first real slot on 2026-09-03 and
+  //    the corpus now correctly holds a governed slot and pinned rows; the assertion went RED for the
+  //    system doing exactly what it was built to do.
+  // ⇒ both now compare against the BASELINE this run found. What isolation means is *this check changed
+  //   nothing outside its own fixtures*, which is a DELTA — never a global zero.
   const [live] = await Q(
     `SELECT count(*)::int AS n FROM "${schema}"."txn_memories"
-      WHERE question_id_at_admission IS NOT NULL AND source <> 'zz_e2e'`)
+      WHERE question_id_at_admission IS NOT NULL AND source IS DISTINCT FROM 'zz_e2e'`)
   check('3 · ⭐⭐ NOT ONE pre-existing memory acquired a pin — the whole path touched only its own rows',
-    live.n === 0, `pinned non-fixture rows=${live.n}`)
+    live.n === BASE_PINNED, `pinned non-fixture rows=${live.n} (baseline ${BASE_PINNED})`)
   const [liveBound] = await Q(
     `SELECT count(*)::int AS n FROM "${schema}"."mst_slots"
       WHERE question_id IS NOT NULL AND canonical_label NOT LIKE 'zz_%'`)
-  check('3b · ⭐⭐ and NOT ONE pre-existing slot was bound', liveBound.n === 0, `bound non-fixture slots=${liveBound.n}`)
+  check('3b · ⭐⭐ and NOT ONE pre-existing slot was bound BY THIS RUN',
+    liveBound.n === BASE_BOUND, `bound non-fixture slots=${liveBound.n} (baseline ${BASE_BOUND})`)
 } catch (e) {
   check('the E2E ran to completion', false, e?.message ?? String(e))
 } finally {

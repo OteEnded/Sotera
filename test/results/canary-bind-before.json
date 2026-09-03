@@ -1,0 +1,365 @@
+{
+  "captured_at": "2026-09-03T12:50:18.568Z",
+  "room": {
+    "id": "6a75d412-3be0-4c94-9c76-35f63d19d509",
+    "username": "agent_dev"
+  },
+  "slot": {
+    "id": "41421c16-c94c-4cbb-89d4-d5957373470f",
+    "namespace": "default",
+    "entity": "user",
+    "canonical_label": "build tag for this cycle",
+    "question_id": null,
+    "user_id": "6a75d412-3be0-4c94-9c76-35f63d19d509",
+    "persona": null,
+    "write_count": 1,
+    "last_write": "2026-08-26T03:58:43.044Z",
+    "created_at": "2026-08-26T03:58:43.042Z",
+    "updated_at": "2026-08-26T03:58:43.044Z"
+  },
+  "namespace_declaration": {
+    "namespace_key": "default",
+    "owner_kind": "open",
+    "owner": null,
+    "permitted_writers": null,
+    "slot_governed": true,
+    "read_default": "include"
+  },
+  "rows": [
+    {
+      "id": "ac171c98-8c15-4d44-a0c5-074edd5ac19a",
+      "value": "CANARY-653912",
+      "kind": "semantic",
+      "namespace": "default",
+      "entity": "user",
+      "attribute": "build tag for this cycle",
+      "provenance": "synthesized",
+      "author": "account",
+      "scope": "room",
+      "supersedes_id": null,
+      "question_id_at_admission": null,
+      "invalid_at": null,
+      "expired_at": null,
+      "created_at": "2026-08-26T03:58:43.281Z",
+      "updated_at": "2026-08-26T03:58:43.281Z",
+      "source_message_id": "12fa5237-8c09-4b4d-9d2b-bb7c6a278096"
+    }
+  ],
+  "totals": {
+    "slots": 82,
+    "bound_slots": 0,
+    "questions": 0,
+    "bindings": 0,
+    "memories": 125,
+    "pinned": 0,
+    "live_memories": 113
+  },
+  "siblings": [
+    {
+      "id": "31d721aa-0663-48bd-8e8f-a665645c4538",
+      "entity": "user",
+      "canonical_label": "identity relative to others",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-21T06:57:50.988Z"
+    },
+    {
+      "id": "32e7ea24-dc3d-4027-9a01-0ada359ef5fe",
+      "entity": "time zone relationship with user",
+      "canonical_label": "morning_time_mapping",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-26T03:58:04.224Z"
+    },
+    {
+      "id": "32fcf002-e832-4a7a-8f18-4fed8ae9fbff",
+      "entity": "user",
+      "canonical_label": "favorite color",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 2,
+      "updated_at": "2026-08-12T10:11:34.590Z"
+    },
+    {
+      "id": "34aed533-0f29-4f73-9dfe-11fc77721b53",
+      "entity": "zz subject",
+      "canonical_label": "zz_retain_pref",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 45,
+      "updated_at": "2026-09-03T12:29:35.153Z"
+    },
+    {
+      "id": "3db9a3df-8cbb-455b-a105-6b9b371eea64",
+      "entity": "user",
+      "canonical_label": "location",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 4,
+      "updated_at": "2026-08-26T03:58:19.078Z"
+    },
+    {
+      "id": "506ab42d-0575-4251-ac91-578f36866bbd",
+      "entity": "user",
+      "canonical_label": "deployment day",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-20T04:57:46.456Z"
+    },
+    {
+      "id": "63f50c58-f7ec-419c-9dcb-9fe7f22f275a",
+      "entity": "sotera",
+      "canonical_label": "zz_occasion_attr",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 51,
+      "updated_at": "2026-09-03T12:29:43.169Z"
+    },
+    {
+      "id": "675137b8-a5f0-4a0c-b53d-317fad596d14",
+      "entity": "user",
+      "canonical_label": "response to appreciation",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 6,
+      "updated_at": "2026-08-25T20:27:20.595Z"
+    },
+    {
+      "id": "6b7eb849-3fba-4caa-aea2-c814064a2f17",
+      "entity": "user",
+      "canonical_label": "working hours",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 2,
+      "updated_at": "2026-08-26T03:57:19.205Z"
+    },
+    {
+      "id": "78dbb66e-1a3e-4c0d-803c-ee27565f97d7",
+      "entity": "ote",
+      "canonical_label": "how_I_see_him",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 71,
+      "updated_at": "2026-09-03T12:29:41.583Z"
+    },
+    {
+      "id": "88bc70c0-8a7d-47d5-8f60-59339d333669",
+      "entity": "sotera",
+      "canonical_label": "reaction_to_praise",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 68,
+      "updated_at": "2026-09-03T12:29:41.919Z"
+    },
+    {
+      "id": "956f5add-0665-4242-a85d-adf8615c0b7a",
+      "entity": "user",
+      "canonical_label": "zz_global_probe",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 14,
+      "updated_at": "2026-09-02T03:48:41.458Z"
+    },
+    {
+      "id": "9ab13fa9-1bf5-470f-a297-c00e24eb16ef",
+      "entity": "user",
+      "canonical_label": "project collaborators",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-12T14:22:19.404Z"
+    },
+    {
+      "id": "9cfc9206-f7f9-4887-a1bc-51356261eeed",
+      "entity": "user",
+      "canonical_label": "communication_preference",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-09-02T07:20:25.507Z"
+    },
+    {
+      "id": "9ef3ca0a-e9d2-42f9-9676-bb5084c6a0f3",
+      "entity": "user",
+      "canonical_label": "zz_global_probe",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 88,
+      "updated_at": "2026-09-03T12:29:32.634Z"
+    },
+    {
+      "id": "9f3cf4f7-388d-4cd1-9e37-855d0e3ee4bd",
+      "entity": "user",
+      "canonical_label": "favourite colour",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 2,
+      "updated_at": "2026-08-12T10:12:05.743Z"
+    },
+    {
+      "id": "a0b20feb-f7f3-47de-a19b-e188b5255a73",
+      "entity": "user",
+      "canonical_label": "timezone",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 2,
+      "updated_at": "2026-08-25T18:27:19.011Z"
+    },
+    {
+      "id": "a6b08149-2ba6-4df1-89b7-4011841b50b1",
+      "entity": "user",
+      "canonical_label": "build box name",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 2,
+      "updated_at": "2026-08-20T04:57:52.591Z"
+    },
+    {
+      "id": "a7186f33-4afe-4619-a6f7-df46787a3481",
+      "entity": "user",
+      "canonical_label": "communication style when unsure",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-25T19:28:41.222Z"
+    },
+    {
+      "id": "b3c21e43-4f9e-47a1-8bb2-69ac82e6d27c",
+      "entity": "user",
+      "canonical_label": "favorite thing about the project",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-12T14:22:19.860Z"
+    },
+    {
+      "id": "c6460b45-5f18-4867-aa51-ba8a63678e57",
+      "entity": "user",
+      "canonical_label": "preferred response length",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-25T19:05:49.418Z"
+    },
+    {
+      "id": "c7a13438-06eb-4bde-9dba-dbe168a69127",
+      "entity": "user",
+      "canonical_label": "work hours",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-18T16:04:05.501Z"
+    },
+    {
+      "id": "ca0a9943-ede0-4965-8073-9adb2b2ca874",
+      "entity": "user",
+      "canonical_label": "preferred communication style",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-25T19:09:28.708Z"
+    },
+    {
+      "id": "cbf9abe4-e312-4bee-9e0d-b6d4b199e885",
+      "entity": "user",
+      "canonical_label": "favorite programming language",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 3,
+      "updated_at": "2026-08-12T10:34:19.525Z"
+    },
+    {
+      "id": "d62e7f9d-f96d-43d9-9251-9fb28782b0f0",
+      "entity": "user",
+      "canonical_label": "preferred units",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 2,
+      "updated_at": "2026-08-25T19:26:54.086Z"
+    },
+    {
+      "id": "dc31fc66-4566-4515-9c88-067806757ca5",
+      "entity": "user",
+      "canonical_label": "demotion principle for memory",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-12T14:22:18.784Z"
+    },
+    {
+      "id": "e4129774-0f2d-4b61-8462-a9fb9a073aa7",
+      "entity": "user",
+      "canonical_label": "deploy schedule",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-20T04:57:52.375Z"
+    },
+    {
+      "id": "e6e170ec-2dbe-4b14-a67d-31dfb69b1b76",
+      "entity": "user",
+      "canonical_label": "color vision",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-25T19:05:55.442Z"
+    },
+    {
+      "id": "e7db3052-1e38-444d-88d9-82738ec59828",
+      "entity": "user's time zone and communication preference",
+      "canonical_label": "timezone_preference",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-26T03:55:08.002Z"
+    },
+    {
+      "id": "ef904ef2-a151-437e-8078-494e59e07870",
+      "entity": "user",
+      "canonical_label": "reaction_to_praise",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-25T20:27:20.108Z"
+    },
+    {
+      "id": "f792b628-a53e-4200-a411-03c2f5b627bf",
+      "entity": "user",
+      "canonical_label": "work schedule",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-26T03:58:42.631Z"
+    },
+    {
+      "id": "fa8a3097-8176-4bc8-9af3-fa5c6d8f3c23",
+      "entity": "user's communication preference",
+      "canonical_label": "preferred answer length",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-25T19:05:03.460Z"
+    },
+    {
+      "id": "fa91fdd7-3a1d-4528-b421-05d273b7b5aa",
+      "entity": "user",
+      "canonical_label": "favorite colour",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 1,
+      "updated_at": "2026-08-12T10:12:43.657Z"
+    },
+    {
+      "id": "ffd2beb4-83a0-4094-8fcd-513e5d5a4ce4",
+      "entity": "user",
+      "canonical_label": "zz_lane_probe",
+      "namespace": "default",
+      "question_id": null,
+      "write_count": 192,
+      "updated_at": "2026-09-03T12:30:39.837Z"
+    }
+  ]
+}

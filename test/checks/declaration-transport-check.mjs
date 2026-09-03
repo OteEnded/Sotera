@@ -43,6 +43,12 @@ const MADE = []
 let userId = null
 let slotId = null
 
+// ⭐⭐ THE BASELINE, ⛔ NOT ZERO. Ote bound the first real slot on 2026-09-03, so `log_slot_bindings` is
+// now legitimately non-empty forever — there is no UNBIND. A teardown that asserts the TABLE IS EMPTY is
+// asserting an absence with no date, and it went red the moment the system did the thing it was built for.
+// ⇒ residue means *what THIS check left behind*, which is a DELTA against the state it found.
+const [{ b: BASE_BINDINGS }] = await Q(`SELECT count(*)::int AS b FROM "${schema}"."log_slot_bindings"`)
+
 try {
   const [u] = await Q(`SELECT id::text FROM "${schema}"."mst_users" WHERE username = 'agent_dev'`)
   if (!u) throw new Error('agent_dev not found — this check must never run as root')
@@ -141,8 +147,9 @@ try {
             (SELECT count(*)::int FROM "${schema}"."txn_memories" WHERE attribute = :a) AS m,
             (SELECT count(*)::int FROM "${schema}"."mst_slots" WHERE canonical_label = :a) AS s,
             (SELECT count(*)::int FROM "${schema}"."log_slot_bindings") AS b`, { a: ATTR })
-  check('⭐ teardown ASSERTED, not trusted', res.q === 0 && res.m === 0 && res.s === 0 && res.b === 0,
-    `questions=${res.q} memories=${res.m} slots=${res.s} bindings=${res.b}`)
+  check('⭐ teardown ASSERTED, not trusted — and against the BASELINE, ⛔ not against zero',
+    res.q === 0 && res.m === 0 && res.s === 0 && res.b === BASE_BINDINGS,
+    `questions=${res.q} memories=${res.m} slots=${res.s} bindings=${res.b} (baseline ${BASE_BINDINGS})`)
   await seq.close()
   done()
 }
