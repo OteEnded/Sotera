@@ -6923,3 +6923,58 @@ needed". That is precisely the empty-expected-value family Ote just ratified.
 
 ⛔ Post-M2 strand stays out: enumeration check · class-C representation · seed-decisions repair · legacy
 migration. Origin PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 and Rome UNTOUCHED · M2 DISABLED.
+
+---
+
+## 2026-09-03 19:03 (+07:00) — THE ENFORCEMENT-SEAM CONTRACT (narrow, as instructed)
+
+⛔ **Derivation only. No consumer built, no binding created.** Origin PARKED · M2-6 UNWIRED · 12b FROZEN ·
+P1 and Rome UNTOUCHED · post-M2 strand OUT. → `Reference/docs/CONTRACT_SOTERA_ENFORCEMENT_SEAM.md`.
+
+**① WHAT A REPLACEMENT ACTUALLY IS.** `resolveConflict` is pure and has **FOUR** outcomes, not two:
+**NEW** (write, nothing invalidated) · **NOOP** (no row written at all) · **DUPLICATE** (reinforce **and
+collapse extras — this invalidates rows**) · **UPDATE** (new row supersedes, old invalidated, extras
+collapsed). ⇒ **two of the four invalidate rows and only one is a value replacement.** A gate reasoning
+about "replacement" as one thing would either govern convergence by accident or miss it.
+
+**② THE LEGACY GUARANTEE:** exactly **one live row per slot** after a reconcile · **convergent and
+self-healing** — every write collapses duplicates any other writer left · history kept via
+`supersedes_id` + `invalid_at`, never deletion · one audit row per displacement.
+
+**③ ⭐⭐⭐ WHICH ELIMINATES ONE CANDIDATE OUTRIGHT.** *"Write without superseding"* does not merely risk a
+duplicate-live-slot — it **breaks the one invariant the reconcile path exists to maintain**, and
+simultaneously **disables the self-healing** that repairs other writers' duplicates. Ote had already ruled
+it unacceptable; this is the mechanical reason it is **incoherent**, not merely undesirable.
+
+**④ ⭐⭐⭐ THE FRAMING QUESTION: M2 IS THE REPLACEMENT AUTHORITY FOR GOVERNED SLOTS**, ⛔ not an additional
+gate. Two arguments, the second decisive: M2-10's wording is an **authority** statement (*"an update is
+only legitimate when…"*); and an "additional gate" would be **vacuous by construction** — if DEFER fell
+through to legacy it would fire only where a slot is governed AND mismatched, and never protect an
+ungoverned slot, which is **100% of them**. ⭐ The adopted domain rule is what makes authority safe rather
+than sweeping: governance is **opted into one slot at a time**, by a deliberate act.
+
+**⑤ UNGOVERNED SLOTS: all four outcomes byte-for-byte, and the gate is NOT IN SCOPE** — ⛔ it does not
+DEFER there, it does not apply. ⭐ The distinction is not pedantry: *"the gate deferred"* and *"the gate was
+never in scope"* have different remedies, and this arc has paid repeatedly for two facts sharing one value.
+
+**⑥ ⭐⭐⭐ THE INVARIANT THAT PREVENTS DEFER FROM PRODUCING DUPLICATES, as one rule:**
+> *The gate may only ever turn an UPDATE into a REFUSAL. It may never turn an UPDATE into a write that
+> does not supersede, and it may never suppress a COLLAPSE.*
+⇒ **UPDATE is governed · COLLAPSE is NEVER governed** (gating convergence would *leave* the duplicate
+state this contract exists to prevent) · NOOP and NEW are out of scope, with the admission pin already
+recording that a NEW row was ungated.
+
+**⑦ DEFER, PRECISELY:** ungoverned ⇒ not in scope, legacy unchanged. Governed ⇒ **the claim may not
+replace**, and since a non-superseding write is incoherent, **the write is REFUSED — loudly**, naming the
+slot's question and the claim's kind, because those have different remedies. ⭐ The outage fear dissolves:
+DEFER can only occur on a slot somebody deliberately bound, and today that is **zero**.
+
+**⚠️⚠️ ⑦.1 — AND THE REAL CONSEQUENCE, NAMED BEFORE THE FIRST BIND RATHER THAN AFTER.** ⓘ **No writer
+supplies a claim kind today.** ⇒ **the first real BIND makes every ordinary write to that slot start
+refusing**, because an absent claim kind is a DEFER on a governed slot. That is what *"the first
+consequential binding"* means concretely: either the slot's writers are taught to declare a kind first, or
+the first bind is chosen as a slot with no live writers. ⚠️ Discovering this after enabling would look
+exactly like the memory subsystem breaking.
+
+⏸ **Six for Ote**, then: build the consumer → red-proof governed + ungoverned → one real DECLARE + BIND via
+B-ii → a positive replacement control → enable and observe.
