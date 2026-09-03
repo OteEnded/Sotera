@@ -5040,3 +5040,52 @@ stricter than M2-4 asks. **M2-2**'s open half is *memory-derived* claims, and M2
 the critical path.
 
 ⓘ `Reference/docs/DECISION_REQUEST_SOTERA_M2_1_OUTCOME_AXES.md`. ⛔ Nothing implemented.
+
+---
+
+## 2026-09-03 04:30 (+07:00) — ⏸ QUANTIFIER DERIVED · M2-3 RE-DERIVED · ⛔ nothing implemented
+
+**Locked by Ote this pass:** ✅ **6f = sufficient** · ✅ **three independent axes** (execution →
+conclusion → product), **`ran + 6f + no product` representable**, ⛔ product never inferred from 6f ·
+✅ the quantifier gate lives at **conclusion admissibility**, unknown ⇒ **DEFER**.
+
+### ⭐⭐⭐ A · THE QUANTIFIER IS NOT A NEW RULE — IT IS THE EXISTING RULE, MOVED
+
+`mayConclude` already refuses 6b/6d at non-exhaustive completeness *"because they **assert an absence**,
+and an incomplete look cannot establish one."* ⭐ **6f is affirmative as an OUTCOME, but its CLAIM may
+still assert an absence** — *"she always asks for numbers first"* IS *"there is no occasion where she
+did not."* ⇒ **the absence rule moves from the OUTCOME to the PROPOSITION.** Nothing invented.
+
+⚠️ **Universal and negative are ONE class, not two** — a three-form list would be an allowlist that drops
+what it was not told. ⇒ **presence-asserting** (bounded suffices) · **absence-asserting** (exhaustive
+required) · **unknown ⇒ DEFER**.
+
+**Where it comes from:** ⭐ **declared by the claim**, same shape as M2-10's `kind` — ⛔ never inferred
+from value, outcome or counts. ⛔ **And a declaration alone is not enough**: a claim declaring `presence`
+whose value carries an absence marker is **REFUSED, ⛔ never reclassified** — reclassifying would quietly
+correct a misdeclaration and lose the fact one happened.
+⚠️⚠️ **SOUND IN ONE DIRECTION ONLY, stated:** a marker list catches *stated* universals, ⛔ never an
+implied one (*"that is simply how she reviews"*). ⓘ Same shape as E3's Q1. ⛔ Not closable by a word list
+and ⛔ not to be closed by a classifier.
+
+⭐ **Only 6f needs the gate** — 6a is about the boundary, 6b/6d are already gated, 6c persists nothing,
+6e asserts nothing. ⛔ Not in candidate selection · ⛔ not in persistence · ⛔ not in M2-8 (a perfectly
+grounded universal is exactly the case this exists for).
+
+### ⭐⭐ B · M2-3 RE-DERIVED — THE ROOM FRAME DISSOLVES THE PROBLEM BOTH OLD TESTS SOLVED
+
+Both were **disclosure** tests. Under M2-7 the reader IS the subject, in their own room ⇒ what remains is
+⛔ not *may this be said to this reader* but **is this claim TRUE OF THIS SUBJECT.**
+
+| **WRITER test** | ⛔ **DEAD AS WRITTEN** — the value is model-produced prose from bounded evidence, so by construction it uses material outside T0 and the test fails every valid claim. ⭐ Its PURPOSE has two better owners that did not exist when it was written: **M2-8 span verification** and **M2-6 C1** |
+| --- | --- |
+| **READER test** | ⚠️ **VACUOUS at room scope** (every citation is openable by construction), ⭐ live again if scope widens — currently redundant with `mayPublish`'s blanket `persona_global` refusal. Retire as a test, **keep as the stated reason** |
+
+**Five constraints derived; three already enforced, ⚠️ two not:**
+① about the SUBJECT — ⛔ **the known D2 residual** (RP14) · ② no absence without exhaustive ⇒ Part A ·
+✅ ③ secondary never presented as the subject's words (C2) · ⭐⭐⭐ ✅ ④ **what survives of *"may not
+claim a property of another person"* is a MIS-ATTRIBUTION rule, not a disclosure one** — already
+enforced by RP11's third-party refusal · ⚠️ ⑤ **NEW GAP FOUND HERE: the claim's subject must be the
+slot's subject.** Invisible today (45 of 45 agree); real on the first divergent case.
+
+ⓘ `Reference/docs/DERIVATION_SOTERA_QUANTIFIER_AND_M2_3_REFRAME.md`. ⛔ No vocabulary, no API, no code.
