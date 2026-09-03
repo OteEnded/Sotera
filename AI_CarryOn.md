@@ -1,9 +1,80 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45; M2 path 17:51; three shapes 17:55; BUILDING 18:17; PROOFS GREEN 18:41 (+07:00).** ⭐ Read this first after a
-context compaction.
+**Compaction checkpoint 2026-09-03 19:42 (+07:00).** ⭐ Read §0-A first; the rest is history.
 
 ---
+
+# 0-A · ⏸⏸ THE ONE THING PENDING — NOTHING ELSE MOVES
+
+> ⭐⭐⭐ **M2 IS BUILT AND PROVEN. It is NOT enabled, because no real slot is governed yet.**
+> ⏸ **Ote must approve the FIRST GOVERNED SLOT** → `Reference/docs/PROPOSAL_SOTERA_FIRST_GOVERNED_SLOT`.
+
+```
+RECOMMENDED   `user / build tag for this cycle` in agent_dev's room · 1 live row `CANARY-653912`
+              write_count 1 · quiet since 2026-08-26 · never superseded · writer model-tool
+WHY           the ONLY candidate both WELL-FORMED (entity=SUBJECT, attribute=PROPERTY) and
+              SEMANTICALLY DISPOSABLE — a build tag is INSTRUMENTATION, asserts nothing about a person
+REJECTED      the gaming cluster / physical state / Thai name spelling / alias / occupation are all
+              REAL PERSONAL DATA, mostly in Ote's own room
+QUESTION      `build-tag` · "which build tag is current for this cycle?"
+              checks nonempty · single-line · no-trailing-ellipsis  (all REGISTERED, all TRUE)
+UPDATE        claimKind `build-tag`, value CANARY-<new>  => ALLOW, supersede, one live row, pinned
+```
+
+⚠️ **TWO ACKNOWLEDGEMENTS NEEDED, NOT JUST THE SLOT:**
+1. ⛔ **THE FIRST BIND IS A ONE-WAY DOOR** — there is no UNBIND; a bound slot is REPOINTABLE, ⛔ not
+   removable. (Unbinding would be contradicting a claim with a non-claim; the vocabulary has no word.)
+2. ⚠️ **The model-tool writer will REFUSE on that slot until taught** — `commitToMemory` is a second
+   closed field list and an observation carries no claim kind. ⭐ On a canary slot that is THE DESIRED
+   OBSERVABLE, ⛔ not a defect.
+
+⇒ **On approval:** DECLARE → B-ii PROPOSE → later-occasion CONFIRM → the controlled UPDATE → observe the
+real supersede → then enable/observe M2.
+
+# 0-B · LIVE STATE AT COMPACTION
+
+```
+67/67 suites · @ote/memory 84/84 · migrations through 048 · :8210 PID 24156 · :8201 PID 26644
+memories 125 · slots 82 · declared questions 0 · BOUND SLOTS 0 · pinned 0 · bindings 0
+namespace declarations 1 (`default`) · warrants 0 · passes 5 · zz_ memories 0 (10 legacy probe slots)
+```
+
+**BUILT:** migration 048 · `memory-bind-rules.js` (PURE) · `memory-declaration-host.js` ·
+`memory-replacement-gate.js` (PURE) · the pin + gate in `memory-store-sequelize-host.js` ·
+`question_id_at_admission` DECLARED in `txn_memories.model.js` · `claimKind` transport in `@ote/memory`.
+**PROOFS:** `declaration-rp-d0-check` (⭐ RUN FIRST — proves ALLOW is REACHABLE) · `-rp-register-` ·
+`-rp-t1-` · `-enforcement-` · `-transport-` · `-e2e-isolation-`.
+
+⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED ON PURPOSE** — its own git repo, holding
+**pre-existing work that is not mine** (`memory-pipeline.js`, `index.js`, and two earlier hunks in
+`memory-v2-service.js`). ⭐ My `claimKind` hunk is cleanly separate. ⏸ Ote: it must become independently
+attributable before M2 closeout, ⛔ without disturbing the existing work.
+
+# 0-C · ⛔⛔ FENCES
+
+```
+ORIGIN PARKED (complete, ⛔ nothing built) · NAMESPACE LOCKED · M2 DISABLED · M2-6 UNWIRED
+12b FROZEN 4/4 · P1 and ROME UNTOUCHED · POST-M2 STRAND OUT · NO REAL SLOT BOUND
+```
+
+# 0-D · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
+
+```
+⭐⭐⭐ A "nothing changed" assertion is exactly the one that PASSES WHEN THE INSTRUMENT IS BROKEN
+      => every one needs a POSITIVE CONTROL first
+⭐⭐⭐ And the control must show the value SURVIVES THE PERSISTENCE BOUNDARY, ⛔ not merely that the
+      application computed it — Sequelize dropped an undeclared column in silence while the gate
+      returned ALLOW, and the assertions expecting NULL were PASSING
+⭐⭐  Any assertion whose expected value is EMPTY (NULL · 0 rows · DEFER · unchanged) is UNPROVEN until
+      a control has demonstrated the non-empty state
+⭐⭐  An explicit field list DROPS what it was not told about — ELEVEN times here, TWICE in one day
+⭐    ASSERT THE STATE, ⛔ NOT THE IMPLEMENTATION ORDER (RP-D2 named the wrong gate and went red)
+⭐    Two routes to one guard are TWO TESTS · "not in scope" ≠ "deferred" · "could not establish X"
+      must never become "X is established"
+```
+
+---
+
 
 # 0 · ⭐⭐⭐ WHERE WE ARE, IN ONE BLOCK
 

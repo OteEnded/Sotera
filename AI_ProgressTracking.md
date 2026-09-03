@@ -7161,3 +7161,31 @@ to leave the world unchanged.
 
 ⏸ **Four approvals needed:** the slot · the question and its checks · acknowledging the one-way door ·
 acknowledging that the model-tool writer will refuse there until taught.
+
+
+---
+
+## 2026-09-03 19:42 (+07:00) — PREPARED FOR CONTEXT COMPACTION
+
+⛔ Nothing bound, nothing declared, no real row changed. The carry-on now leads with §0-A/B/C/D: the one
+pending decision, live state, the fences, and the lessons.
+
+**WHERE THIS SESSION GOT TO.** M2's semantics were derived, ratified clause by clause, BUILT and PROVEN;
+Origin's semantics were completed and PARKED; the namespace semantics were LOCKED. The single remaining
+act is Ote approving the FIRST GOVERNED SLOT.
+
+**PENDING — four approvals** (`PROPOSAL_SOTERA_FIRST_GOVERNED_SLOT`): the slot
+(`user / build tag for this cycle`, agent_dev, `CANARY-653912`) · the question (`build-tag`, three
+registered checks) · ⛔ that the first bind is a ONE-WAY DOOR (repointable, not removable) · ⚠️ that the
+model-tool writer will REFUSE there until taught, which on a canary slot is the desired observable.
+
+**STATE:** 67/67 suites · @ote/memory 84/84 · migrations through 048 · 0 questions · 0 bound slots ·
+0 pins · 0 bindings · 1 namespace declaration (`default`) · warrants 0 · passes 5 · P1 7 · zz_ memories 0.
+
+⚠️ **`PortableComponents/Packages/Memory` remains UNCOMMITTED on purpose** — pre-existing work that is not
+mine sits beside my `claimKind` hunk. It must become independently attributable before M2 closeout,
+without disturbing the existing work. That is Ote's call.
+
+⭐ **Two corrections made this session that outlived their moment:** `@ote/memory` is consumed by **Sotera
+alone** (the 12-project figure was `@ote/components-sdk`), and RP-D2 was rewritten to assert the STATE
+rather than which gate refuses first.
