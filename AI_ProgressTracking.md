@@ -7023,3 +7023,49 @@ so the first bind makes that slot's ordinary UPDATEs refuse. The candidate slot'
 identified first — ⛔ not discovered after.
 
 Origin PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 and Rome UNTOUCHED · post-M2 OUT · no binding created.
+
+---
+
+## 2026-09-03 19:14 (+07:00) — THE WRITER-PATH MEASUREMENT: the blocker is a CAPABILITY, not a slot choice
+
+⛔ **Measurement only. No binding created, nothing built.** Origin PARKED · M2-6 UNWIRED · 12b FROZEN ·
+P1 and Rome UNTOUCHED · post-M2 OUT.
+
+**⭐⭐⭐ THE ANSWER: no writer can be GIVEN a claim kind without changing the PORTABLE package.**
+ⓘ `claimKind` appears **only in my own new code** — no production caller passes it. And the reason is
+structural, not an oversight: **`reconcileFact` is the only path that resolves a slot**, it lives in
+`@ote/memory` (the portable package shared with 12 projects), and its signature is a **closed field list**:
+`{ entity, attribute, value, importance, confidence, source, namespace, provenance, subject }`.
+⇒ ⚠️ **an extra `claimKind` would be silently dropped** — the allowlist-drops family, for the eleventh time
+in this project, and the same shape that just ate `question_id_at_admission` at the ORM boundary.
+⛔ There is no Sotera-only seam: every other writer bypasses slots entirely, so it cannot be injected at
+the store without INFERRING a kind, which M2-10 forbids.
+
+**⇒ SO THE CHOICE IS NOT "WHICH SLOT" — IT IS ONE OF THREE, AND EACH HAS A COST:**
+① **Extend the portable package** so a caller may declare a claim kind and `reconcileFact` threads it
+through. ⚠️ Touches `@ote/memory`, which 12 projects depend on — though the change is additive and optional.
+② **Bind a slot with no live writer**, accepting that its next UPDATE (whenever it comes) refuses.
+③ **Wait** — bind nothing until ① is wanted.
+
+**THE SLOT LANDSCAPE, measured:**
+ⓘ **72 real slots · 0 dormant** (every slot has been written at least once) · **all 72 written within 30
+days**, but only **3 within 7 days** · ⭐⭐ and **only 5 slots have EVER seen a supersede** — the single act
+the gate governs.
+⭐ The three most recent are `agent_dev`'s (`how_I_see_him` 70 writes, `reaction_to_praise` 67,
+`communication_preference` 1) — ⚠️ and their counts are **inflated by the test suite itself**, which writes
+as `agent_dev` through `reconcileFact`; all three now show **0 live rows** because those fixtures were torn
+down. ⇒ **`agent_dev` slots are test-traffic slots, not a clean candidate.**
+⭐ The coherent dormant cluster is in **`ote`'s** room: 7+ slots (`core enjoyment source`, `gear
+preference`, `preferred activity mode`, `playstyle priority`, `activity type`, `primary game`, `genre
+focus`), each **1 live row**, all from **one conversation**, untouched since **2026-08-26**, and **never
+superseded**. ⚠️ But that is his real data in his own room, which makes it his call and not a technical one.
+
+**⇒ RECOMMENDATION, stated as a recommendation:** ⭐ **option ① first.** Binding before the capability
+exists means deliberately creating a slot whose next legitimate update fails — and the gate would then be
+demonstrating a refusal caused by a **missing capability**, not by a real kind mismatch. That is a
+misleading positive-control: it would prove the refusal path works while proving nothing about the ALLOW
+path on real traffic.
+⚠️ And the ALLOW control Ote requires — *"an actual governed UPDATE → ALLOW → supersede before we interpret
+any refusal"* — is **not reachable on real traffic at all** until a real writer can declare a kind.
+
+⏸ **This is Ote's call: extend the portable package, or hold.** ⛔ No binding created.
