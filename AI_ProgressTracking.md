@@ -6611,3 +6611,62 @@ two failure modes are opposite: a **broken generic read** passes the exclusion a
 to revisit? ③ `permitted_writers` as necessary-but-not-sufficient? ④ RP-N11 with both controls.
 ⏸ **Still open:** claim-kind validation · BIND audit home · class-C representation · `seed-decisions`
 repair · legacy migration. ⭐ RP-T1 stands with all three controls.
+
+---
+
+## 2026-09-03 17:45 (+07:00) — claim-kind validation, the BIND audit home, and what is actually blocking
+
+⛔ **Derivation only — NOT built.** ⏸ Origin PARKED · **namespace semantics LOCKED and not reopened**.
+M2-6 unwired · M2 disabled · 12b frozen · P1 and Rome untouched.
+⭐ → `Reference/docs/DERIVATION_SOTERA_CLAIM_KIND_AND_BIND_AUDIT.md`.
+
+**✅ OTE LOCKED THE NAMESPACE, ALL FOUR:** name = **`project`** (⇒ *"decisions"* is an **address family
+inside it**, ⛔ not the namespace) · ⛔ **no contract pinning** · `permitted_writers` = **mechanism, ⛔ not
+authority** · **RP-N11** with both controls. ⛔ Not to be reopened absent an actual contradiction.
+
+**⭐⭐⭐ AN OBSERVATION WORTH MORE THAN A DERIVATION: only TWO of the six open items are on the M2 path** —
+**claim-kind validation** (`checkKind`'s other input) and the **BIND audit home** (BIND is the dangerous
+half and cannot be built without it). The other four — enumeration check · class-C representation ·
+`seed-decisions` repair · legacy migration — are **one strand**, the `project-decision` cleanup, opened by
+the slotless investigation and now fully specified by the locked namespace. ⛔ **They gate nothing.**
+⭐ The open list is **converging, not branching.**
+
+**⚠️ A CORRECTION TO MY OWN CLAIM.** I wrote that *"no kind"* and *"a kind nobody declared"* collapse into
+one outcome **with one message**. ⛔ Half wrong: `checkKind` already returns **different messages**. ⭐ They
+share the **outcome** (DEFER), which is correct — both remedies stop the write.
+**⭐⭐ But a real distinction is still lost:** claim `person-name` vs slot `preferred-name` (**two real
+questions that disagree** ⇒ rebind, or the claim is about something else) and claim `blorp` (**the model
+invented a kind** ⇒ the proposal is nonsense) produce **the same message**, and the remedies are unrelated.
+**⭐⭐⭐ And the system is already safe:** `slotKind = question_key`, so **a claim kind that matches is
+necessarily a declared key, by construction of the match** — an invented kind can only ever DEFER.
+⇒ ⛔ **validation adds no safety; it adds DIAGNOSIS** — and Ote's *"don't add it merely because it seems
+cleaner"* is answered by a measured fact: ⓘ **100% of slots DEFER today**, so **the entire near-term value
+of this gate is its refusal messages.**
+⭐⭐ **And it belongs OUTSIDE `checkKind`** — the gate is **pure**, and a vocabulary check needs a lookup ⇒
+put it at the **RESOLVE layer**, which already reads `mst_slot_questions`. ⛔ Do not make the pure gate
+impure. Three outcomes, one gate unchanged.
+
+**THE BIND AUDIT HOME.** ⛔ `log_memory_changes` — `memory_id` is **NOT NULL**, and relaxing it would let a
+*memory*-change row exist **with no memory** · ⛔ `mst_slots.evidence` — an audit **inside the mutable
+object it audits**, destroyed by the next write to it · ⛔ wrong-subject logs. ⇒ ⭐ **a dedicated log is the
+only honest option.**
+**⭐⭐⭐ But NOT a general slot-change log.** ⓘ `mst_slots` mutates three ways and the **guarantee differs**:
+**BIND** changes *what may be admitted* ⇒ must be audited and cannot be silent · **`recordAlias`** changes
+only *resolution* and is **already self-audited inline** (`{phrase, by, confidence, at}`; ⓘ 5 slots carry
+learned aliases) · **`touch`** is a usage counter. ⇒ ⭐ **audit the BINDING, leave aliases as they are** —
+*a seam goes where the guarantee differs*.
+⚠️ **Honest note:** that makes a **third** change log in the memory subsystem (`log_memory_changes` ·
+`log_memory_warrants` · this) — ⭐ justified **only** because the **subject differs** each time (a memory ·
+a warrant · a binding), ⛔ never by convenience.
+
+**⭐ RP-NQ1/2/3 — the namespace ≠ question invariant Ote asked for**, each with a control: the same
+`question_id` in two namespaces resolves to the **same** definition (control: two different ids resolve
+differently) · a namespace difference leaves the question **unchanged** (control: a **rebind** does change
+it) · a question change leaves the namespace **byte-identical** (control: a deliberate namespace change
+**is** detected). ⭐⭐ Every one asserts *"X did not change Y"* — **the assertion that passes when the probe
+cannot see Y at all.**
+
+⏸ **Four for Ote:** ① claim-kind validation justified by diagnosis, at the RESOLVE layer? ② a dedicated
+**binding** log, accepting a third change log? ③ RP-NQ1/2/3? ④ is the four-item `project-decision` strand
+sequenced **after** M2, or worked in parallel?
+⭐ RP-T1, RP-N10 and RP-N11 all stand with their controls.

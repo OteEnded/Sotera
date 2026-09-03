@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30 (+07:00).** ⭐ Read this first after a
+**Rewritten 2026-09-03 12:03; §3 relocked 14:07; §6 added 14:25; §2 ORIGIN 14:49; blockers 14:59; representation 15:06; states+RouteB 15:11; RouteB-act 15:21; transitions 15:28; origin-verb 15:46; declaration-verb 16:19; bind/resolve 16:30; slotless 16:46; project-decision 17:06; legacy+enum 17:12; namespace 17:19; ns-declaration 17:24; name+pinning 17:30; claim-kind+bind-audit 17:45 (+07:00).** ⭐ Read this first after a
 context compaction.
 
 ---
@@ -23,7 +23,7 @@ context compaction.
 ✅ ORIGIN CONTRACT DONE  semantics RATIFIED end-to-end — ⭐ complete enough to IMPLEMENT
 ⛔ ORIGIN PROOFS UNBUILT  isolation is SPECIFIED, ⛔ NOT demonstrated (§2 ORIGIN, positive controls)
 ⏸  ORIGIN PARKED        at its implementation boundary — ⛔ do NOT build unless Ote says
-▶  NEXT                 ⭐ DECLARATION: name/pinning/authority derived, ⏸ 4 + 5 open (§3)
+▶  NEXT                 ⭐ DECLARATION: 2 on-path items derived · 4 off-path parked (§3)
 ▶  BACKGROUND           P1 window 7 · Rome observation (§5)
 ```
 
@@ -649,6 +649,41 @@ STANDING     DECLARE = ⭐ Sotera AND the account (Ote already ruled: authority 
    with BOTH positive controls — the generic read DOES return a default row (else "absent" only proves
    the query is broken) and the audit read DOES miss a genuinely absent row (else "present" only proves
    it returns everything unconditionally)
+✅ NAMESPACE SEMANTICS **LOCKED** — ⛔ DO NOT REOPEN unless a later derivation exposes an actual
+   contradiction: `project` is the namespace · ⛔ no contract pinning · authority = operator/account ·
+   owner ≠ permitted_writers · undeclared = INCLUDE/OPEN/DEFER · governed ns need explicit declaration ·
+   excluded from generic+internal reads · audit stays BLIND · governed writes need BOTH channel
+   permission AND actual authority · namespace ∈ slot identity, ⛔ not question semantics
+   ⭐ CANONICAL: namespace=project · entity=okf-export · attribute=status · value=deferred
+   ⇒ "decisions" is an ADDRESS FAMILY inside `project`, ⛔ not the namespace
+
+## ⭐⭐ CLAIM-KIND · BIND AUDIT · WHAT IS BLOCKING — DERIVED 17:45 → `DERIVATION_SOTERA_CLAIM_KIND_AND_BIND_AUDIT`
+
+```
+⭐⭐⭐ ONLY **TWO** OF THE SIX OPEN ITEMS ARE ON THE M2 PATH: claim-kind validation · the BIND audit home.
+   The other FOUR (enum check · class-C · seed repair · legacy migration) are ONE STRAND — the
+   `project-decision` cleanup — ⛔ and gate nothing. ⭐ The open list is CONVERGING, not branching
+⚠️ A CORRECTION TO MY OWN CLAIM: "no kind" and "an undeclared kind" do NOT collapse into one message —
+   checkKind already returns DIFFERENT messages. ⭐ They share the OUTCOME (DEFER), which is correct
+⭐⭐ BUT A REAL DISTINCTION IS LOST: claim `person-name` vs slot `preferred-name` (TWO REAL QUESTIONS
+   THAT DISAGREE ⇒ rebind) and claim `blorp` (THE MODEL INVENTED A KIND ⇒ the proposal is nonsense)
+   produce the SAME message — and the remedies are unrelated
+⭐⭐⭐ AND THE SYSTEM IS ALREADY SAFE: slotKind = question_key, so a claim kind that MATCHES is
+   necessarily a DECLARED key BY CONSTRUCTION ⇒ ⛔ validation adds NO SAFETY. ⭐ It adds DIAGNOSIS —
+   justified because ⓘ 100% of slots DEFER today ⇒ **the entire near-term value of the gate is its
+   REFUSAL MESSAGES**
+⭐⭐ AND IT BELONGS OUTSIDE checkKind — the gate is PURE; the vocabulary check needs a lookup ⇒ put it at
+   the RESOLVE layer, which already reads mst_slot_questions. ⛔ Do not make the pure gate impure
+⭐⭐ BIND AUDIT — ⛔ log_memory_changes (memory_id NOT NULL; relaxing it lets a memory-change row exist
+   with NO memory) · ⛔ mst_slots.evidence (an audit INSIDE the mutable object it audits) · ⛔ wrong-
+   subject logs ⇒ ⭐ a dedicated log is the only honest option
+⭐⭐⭐ BUT NOT A GENERAL SLOT-CHANGE LOG — the guarantee differs: BIND changes WHAT MAY BE ADMITTED ⇒ must
+   be audited; recordAlias changes only RESOLUTION and is ALREADY self-audited inline
+   ({phrase,by,confidence,at}, ⓘ 5 slots); touch is a counter ⇒ ⭐ AUDIT THE BINDING, leave aliases
+   ⚠️ Honest note: that makes a THIRD change log — justified ONLY because the SUBJECT differs each time
+   (a memory · a warrant · a binding), ⛔ never by convenience
+⭐ RP-NQ1/2/3 (namespace ≠ question), each with a control, because every one asserts *"X did not change
+   Y"* — the assertion that passes when the probe cannot see Y at all
 ⏸ 4 RULINGS from this doc
 ```
 
