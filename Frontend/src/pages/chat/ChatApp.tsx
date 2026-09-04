@@ -2825,13 +2825,14 @@ export default function ChatApp() {
 
   // ---- export the open conversation (client-side; includes the persisted tool trace) ----
   const [showDownload, setShowDownload] = useState(false)
-  // default filename: ols_chat_<YYYYMMDD-HHmmss> - <chat title>
+  // default filename: sotera_chat_<YYYYMMDD-HHmmss> - <chat title>
+  // (was `ols_chat_` — carried over from OteLLMServices, which is a different product.)
   const exportName = (() => {
     const d = new Date()
     const p = (n: number) => String(n).padStart(2, '0')
     const ts = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
     const name = (activeTitle || 'chat').replace(/[^\w -]+/g, '_').replace(/^[\s_]+|[\s_]+$/g, '').slice(0, 60) || 'chat'
-    return `ols_chat_${ts} - ${name}`
+    return `sotera_chat_${ts} - ${name}`
   })()
 
   // Build the export payload for a given format — used by the download modal.
