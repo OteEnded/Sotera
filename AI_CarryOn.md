@@ -1,92 +1,80 @@
 # AI_CarryOn — Sotera
 
-**Compaction checkpoint 2026-09-03 19:42 (+07:00).** ⭐ Read §0-A first; the rest is history.
+**Checkpoint 2026-09-04.** ⭐ Read §0-A first; everything below §0-D is history.
 
 ---
 
-# 0-A · ✅ THE CANARY IS BOUND — and TWO decisions now sit with Ote
+# 0-A · ⏸ WHERE THIS STANDS — M2 IS BUILT, PROVEN AND DELIBERATELY NARROW
 
-> ⭐⭐⭐ **THE FIRST GOVERNED SLOT IS LIVE.** Approved and bound 2026-09-03.
-> Full record → `Reference/docs/RECORD_SOTERA_FIRST_GOVERNED_BIND.md`.
-
-```
-QUESTION   build-tag  803924c3-…   "which build tag is current for this cycle?"
-SLOT       user / build tag for this cycle  41421c16-…   default · agent_dev   ⛔ NOT Ote's room
-HISTORY    CANARY-653912 (retired) → CANARY-771403 (retired) → CANARY-884127 (LIVE, pinned)
-ALL SIX OF OTE'S CONFIRMATIONS HOLD · 67/67 suites · corpus: bound 1 of 82 · pinned 2 · bindings 2
-```
-
-⏸⏸ **THE TWO OPEN DECISIONS, and the first is the bigger one:**
-
-**① ⚠️⚠️ A GOVERNED REFUSAL IS INVISIBLE TO THE MODEL TOOL.** `keep()` calls
-`mem.reconcileFactAsync({entity, attribute, value})` — a **third** closed field list — which validates
-three fields, enqueues, and **returns `{ok:true, queued:true}` BEFORE the gate ever runs**. The refusal is
-sound (⛔ no row written, previous belief live, ⛔ no mutation) and it is **logged only**. She would be told
-the fact was kept. ⛔ Deliberately NOT fixed — Ote's call.
-
-**② ⏸ Enable / observe M2 more broadly?** Today M2 is the replacement authority for **one** slot; every
-other slot returns NOT-IN-SCOPE and legacy reconciliation is untouched.
-
-⇒ Also open, smaller: wiring `checkConsumingOccasion` (§0-B) · teaching a writer to declare a claim kind ·
-the `@ote/memory` change becoming independently attributable in git.
-
-# 0-B · LIVE STATE — 2026-09-03 20:06 (+07:00)
+> ⭐⭐⭐ **M2 IS ALREADY RUNNING.** There is ⛔ no enable switch. The gate evaluates every write and returns
+> NOT-IN-SCOPE for 81 of 82 slots because they are unbound. ⇒ **BIND is the rollout unit.**
 
 ```
-67/67 suites (0 FAIL lines in the run log) · migrations through 048
-memories 127 · slots 82 · declared questions 1 · BOUND SLOTS 1 · pinned 2 · bindings 2
-namespace declarations 1 (`default`) · warrants 0
+GOVERNED SLOTS   1 of 82   `user / build tag for this cycle` · agent_dev · question `build-tag`
+KILL SWITCH      mst_namespace_declarations.slot_governed = false   ⭐ REHEARSED, both directions
+CANDIDATES       ⛔ ZERO eligible-and-safe. agent_dev has none; the 2 corpus-wide are real personal
+                 data in ote's and hermes's rooms, and I proposed neither.
 ```
 
-⚠️⚠️ **AN UNWIRED RULE, FOUND WHILE BINDING.** `resolveSlotQuestion` computes and returns
-`declaredInOccasion` **and** `boundInOccasion` — exactly the two inputs the self-authorisation rule needs —
-and `slotGovernanceFor` **discards both**. `checkConsumingOccasion` is referenced by **RP-D0 alone**, never
-by a consumer. ⇒ the rule Ote ratified is proven and ⛔ **not enforced at admission**. ⓘ It is currently
-unenforceable anyway: no occasion is plumbed to the store's write seam, so there is nothing to compare
-against. Needs a derivation about where the consuming occasion comes from, ⛔ not a patch.
+⏸ **THE OPEN DECISION IS OTE'S AND IT IS NOT A TECHNICAL ONE**: the corpus contains no second slot that
+is both eligible under the containment rule and safe to experiment on. ⇒ broadening M2 needs either a
+slot he nominates, or accepting that the observation window (§5 of the rollout contract) may take months
+at 6 replacements per 3 weeks.
 
-**BUILT:** migration 048 · `memory-bind-rules.js` (PURE) · `memory-declaration-host.js` ·
-`memory-replacement-gate.js` (PURE) · the pin + gate in `memory-store-sequelize-host.js` ·
-`question_id_at_admission` DECLARED in `txn_memories.model.js` · `claimKind` transport in `@ote/memory`.
-**PROOFS:** `declaration-rp-d0-check` (⭐ RUN FIRST — proves ALLOW is REACHABLE) · `-rp-register-` ·
-`-rp-t1-` · `-enforcement-` · `-transport-` · `-e2e-isolation-`.
-
-⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED ON PURPOSE** — its own git repo, holding
-**pre-existing work that is not mine** (`memory-pipeline.js`, `index.js`, and two earlier hunks in
-`memory-v2-service.js`). ⭐ My `claimKind` hunk is cleanly separate. ⏸ Ote: it must become independently
-attributable before M2 closeout, ⛔ without disturbing the existing work.
-
-# 0-C · ⛔⛔ FENCES
+# 0-B · ⭐⭐ THE FOUR RULES THAT GOVERN ANY FURTHER WORK HERE
 
 ```
-ORIGIN PARKED (complete, ⛔ nothing built) · NAMESPACE LOCKED · M2-6 UNWIRED
-12b FROZEN 4/4 · P1 and ROME UNTOUCHED · POST-M2 STRAND OUT
-⭐ ONE SLOT GOVERNED (the approved canary) · ⛔ NO SECOND SLOT · ⛔ NO WRITER TAUGHT
+① CONTAINMENT · a slot may be bound only if EVERY writer that has ever superseded a row in it can
+   declare a claim kind AND name an occasion.  ⛔ "it probably won't be touched" is not evidence.
+   ⇒ the auto-extractor CANNOT declare a kind and must NOT be modified to fit M2 (Ote, 2026-09-04).
+② NEW IS OUT OF SCOPE, permanently. A NEW row may still carry a pin; that pin says WHICH QUESTION IT
+   WAS ADMITTED UNDER and that the write was UNGATED — ⛔ never that a replacement was authorised.
+③ GOVERNANCE KNOWLEDGE IS A **READ** CONCERN; GOVERNANCE COMPLIANCE IS A **WRITE** CONCERN.
+   ⛔ The refusal stays opaque. Returning a question key from it would make the gate a permission
+   oracle and the refusal a read channel.
+④ THE WINDOW IS COUNT-BASED, ⛔ never time-based. Elapsed time without traffic proves nothing.
 ```
 
-# 0-D · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
+# 0-C · LIVE STATE — 2026-09-04
+
+```
+72/72 suites · @ote/memory 84/84 · migrations through 048
+slots 82 · bound 1 · questions 1 · bindings 2 · pinned rows 4 · namespaces 1 (`default`, governed)
+⚠️ `tool-call-log-check` is MODEL-DEPENDENT and flaked once (the turn called no tool); green on re-run.
+```
+
+**BUILT THIS ARC:** the canary bind · `memory-write-receipt.js` (one bound, one vocabulary, one wait) ·
+the always-settling receipt · the model-facing projection (two audiences, one truth) · the
+self-authorisation rule wired at admission · `claimKind` end-to-end from both model tools ·
+the rehearsed kill switch.
+
+⚠️ **`PortableComponents/Packages/Memory` AND `Tools/Retention` HOLD UNCOMMITTED WORK.** The package repo
+also contains pre-existing changes that are ⛔ NOT mine — my `claimKind` / `modelResult` / `makeObservation`
+hunks are cleanly separable. ⏸ Ote: independently attributable before M2 closeout.
+
+# 0-D · ⛔⛔ FENCES
+
+```
+ORIGIN PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 UNTOUCHED · ROME UNTOUCHED · POST-M2 OUT
+⭐ ONE GOVERNED SLOT · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ EXTRACTOR NOT MODIFIED
+```
+
+# 0-E · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
 
 ```
 ⭐⭐⭐ A "nothing changed" assertion is exactly the one that PASSES WHEN THE INSTRUMENT IS BROKEN
-      => every one needs a POSITIVE CONTROL first
-⭐⭐⭐ And the control must show the value SURVIVES THE PERSISTENCE BOUNDARY, ⛔ not merely that the
-      application computed it — Sequelize dropped an undeclared column in silence while the gate
-      returned ALLOW, and the assertions expecting NULL were PASSING
-⭐⭐  Any assertion whose expected value is EMPTY (NULL · 0 rows · DEFER · unchanged) is UNPROVEN until
-      a control has demonstrated the non-empty state
-⭐⭐  An explicit field list DROPS what it was not told about — ELEVEN times here, TWICE in one day
-⭐    ASSERT THE STATE, ⛔ NOT THE IMPLEMENTATION ORDER (RP-D2 named the wrong gate and went red)
-⭐    Two routes to one guard are TWO TESTS · "not in scope" ≠ "deferred" · "could not establish X"
-      must never become "X is established"
-⭐⭐  A HARNESS THAT OMITS AN *OPTIONAL* ADAPTER DOES NOT OBSERVE THE SYSTEM — it observes a system
-      missing a part. `auditLog` is optional and its absence means "beliefs change, the trail is
-      missing", so an assertion ABOUT the trail could only ever fail. Wire what you assert on.
-⭐⭐  ⛔ NEVER ASSERT A GLOBAL ABSENCE — read a BASELINE and assert the DELTA. Five teardowns asserted
-      `log_slot_bindings = 0`; there is no UNBIND, so they went red the moment the system did the
-      thing it was built for. Residue means WHAT THIS RUN LEFT, never what the table holds.
-⭐⭐⭐ `col <> 'x'` IS NULL-UNSAFE AND SILENTLY GREEN. `NULL <> 'x'` is NULL, not TRUE, so an isolation
-      assertion counted 0 where the honest count was 2 — blind to the exact rows it guarded. Its
-      sibling going RED is the only reason it was ever looked at. => `IS DISTINCT FROM`.
+      => every one needs a POSITIVE CONTROL first, and it must cross the PERSISTENCE boundary
+⭐⭐⭐ A GREEN CAN BE STRUCTURAL: operator labels can never equal message UUIDs, so the occasion rule
+      would have passed 100% of the time and proved nothing. Construct the ATTACK before taking credit.
+⭐⭐  A harness that omits an OPTIONAL adapter observes a system missing a part, not the system
+⭐⭐  ⛔ NEVER assert a GLOBAL ABSENCE — read a BASELINE inside the run and assert the DELTA
+⭐⭐  `col <> 'x'` IS NULL-UNSAFE AND SILENTLY GREEN => `IS DISTINCT FROM`
+⭐⭐  TWO fixtures under ONE entity COLLAPSE INTO ONE SLOT — separate the ENTITY, not just the label
+      (this cost two checks; the second time I had already written the warning)
+⭐   A property of the NAMESPACE is not a property of the SLOT — `slot_governed` is true for all 82
+⭐   An explicit field list DROPS what it was not told about — 13 times here now
+⭐   ASSERT THE STATE, ⛔ not the implementation order · "not in scope" ≠ "deferred"
+⭐   A rollback nobody has run is a hope
 ```
 
 ---
