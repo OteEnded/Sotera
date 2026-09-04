@@ -176,7 +176,16 @@ export function buildRetention(fastify, {
   // ⚠️ `practiceOrigin` IS AN OCCASION FACT, NOT A PARAMETER SHE CAN SET. The `keep` tool's handler passes
   // an explicit field list and this is not on it, so nothing the model emits can reach it; `retain` sets
   // it to `reflection` because that is what its occasion IS. ⭐ 041: provenance describes what happened.
-  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false, practiceOrigin = 'instructed' } = {}) {
+  /**
+   * ⭐⭐⭐ `claimKind` — WHICH DECLARED QUESTION THIS CLAIM ANSWERS. Optional, and its absence is an
+   * ANSWER rather than a gap: *"the writer did not say"*.
+   *
+   * ⛔⛔ NEVER INFERRED AND NEVER DEFAULTED. Ote, 2026-09-04: *"no inferred kind; no default kind; absent
+   * kind remains absent."* Deriving one from `attribute` would be this file guessing which question she
+   * meant — the same class of act as guessing `mine`, which it refuses on the line above for the same
+   * reason. ⓘ A wrong kind is refused by the gate; an invented one cannot become an admission.
+   */
+  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false, practiceOrigin = 'instructed', claimKind = null } = {}) {
     const content = String(what ?? '').trim()
     if (!content) return { ok: false, refused: 'nothing_to_keep', why: 'There is no content to keep — say what you want kept.' }
 
@@ -313,6 +322,10 @@ export function buildRetention(fastify, {
       // ⭐⭐⭐ AWAITED, ⛔ NOT FIRE-AND-FORGET. See `resolveReceipt` for what this ends and what it costs.
       const out = await resolveReceipt(await mem.reconcileFactAsync({
         entity, attribute: String(attribute), value: content,
+        // ⛔ THE KEY EXISTS ONLY WHEN ONE WAS GIVEN. This was a THREE-FIELD list and it is the third
+        // closed list the claim kind had to cross; spreading a `null` here would hand the gate a claim
+        // that says it answers nothing, which is ⛔ not what "unstated" means.
+        ...(claimKind != null && String(claimKind).trim() !== '' ? { claimKind: String(claimKind).trim() } : {}),
       }))
       return {
         ok: out?.ok !== false, state: out?.state ?? null, kind, author, via: 'remember_fact',

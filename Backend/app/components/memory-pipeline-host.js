@@ -40,6 +40,15 @@ export function commitToMemory(mem, obs) {
   // every row landing `synthesized` (the safe default), so nothing would break, nothing would log, and
   // "she can tell your words from her inferences" would simply be untrue.
   if (obs.provenance != null) args.provenance = obs.provenance
+  // ⭐⭐⭐ THE CLAIM KIND — the THIRD field this list would have dropped, and the one the canary caught it
+  // dropping. 2026-09-03: a `claimKind` was supplied AT THE CALLER and a delegating spy showed it absent
+  // at the store, so a governed slot could only ever refuse. ⛔ Demonstrated, not grepped for.
+  //
+  // ⛔⛔ ABSENT STAYS ABSENT — the omit-when-null rule this function already documents, and here it is
+  // load-bearing rather than tidy: passing `claimKind: null` would say *"this claim answers no question"*
+  // where the truth is *"the producer did not say"*, and a governed slot's whole decision turns on that
+  // difference. ⭐ A missing key must never be a kind.
+  if (obs.claimKind != null && String(obs.claimKind).trim() !== '') args.claimKind = obs.claimKind
   return mem.reconcileFact(args)
 }
 
