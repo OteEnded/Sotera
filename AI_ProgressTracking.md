@@ -7684,3 +7684,44 @@ no tool; green standalone and on a full re-run. Test flakiness, not a product fa
 
 Doc: `DERIVATION_SOTERA_M2_CLOSURE_STATE.md` (Reference repo, 0753fa2). Canary still the only governed
 slot; all fences held.
+
+
+---
+
+## 2026-09-04 — M2 RATIFIED CLOSED (MECHANISM) · eligibility now OBSERVED on the maintenance pass
+
+**73/73 suites, 0 FAIL lines.** The one approved action is built.
+
+**State, ratified:** `M2 · MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`. ⛔ Not blocked, not
+disabled, not waiting on more tests. **The mechanism being LIVE and M2 being OPERATIONALLY CLOSED are two
+different claims — the first is true, the second is deliberately false** until the production evidence
+exists. Also ratified: the ALLOW half is coupled to the deferred governance-READ decision, recorded as a
+dependency and ⛔ not reopened.
+
+**Eligibility is now observed, not remembered.** It rides the boot + daily cron beside the memory-integrity
+lint — the same reason that lint exists: *"we shouldn't have to discover this accidentally while
+investigating something else."* A slot becomes eligible when its WRITERS change, which happens without
+anyone deciding it should.
+
+⭐ **One definition, two renderers.** The containment rule lives in `memory-bind-eligibility-host.js`; the
+cron and the human-facing audit both call it. A second copy would be a second rule, and the one nobody
+reruns is the one that goes stale. It grants nothing and binds nothing. Slots already ruled on are held
+apart **with the date and the reason**, so a settled question is not re-asked nightly, and a writer nobody
+has classified fails CLOSED.
+
+⭐⭐⭐ **The check's centre is the positive control**, because the detector's healthy output is an EMPTY
+LIST — exactly what a blind detector returns. So it builds a genuinely eligible slot and requires the
+detector to find it, in the object AND in the summary line the cron actually logs. It also proves one
+extractor supersede excludes a slot whose other writer is capable (the rule is *every* writer, not *some*),
+and that a never-superseded slot appears in no bucket at all.
+
+⚠️ **An existing architectural guard caught the new file and was right to.** The population-read guard
+requires every `txn_memories` SELECT to carry the liveness predicate. ⛔ I did not add it — that would leave
+only the newest row and hide every earlier writer; on the canary it would report ONE writer where there are
+FOUR, making the rule blind to the evidence it exists to read. Declared as an exemption instead, with the
+reason — and the guard reports stale exemptions, so it maintains itself.
+
+Live picture today: bound=1 · newly-eligible=0 · excluded=3 (`communication preference`, `timezone`,
+`current goal`) · already-ruled-on=2 (`soteras_family_lineage…`, `core_commitments`).
+
+Canary remains the sole governed slot. No binds, no generated traffic, no read surface. All fences held.

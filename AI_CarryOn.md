@@ -16,7 +16,9 @@ CANDIDATES       ⛔ ZERO eligible-and-safe. agent_dev has none; the 2 corpus-wi
                  data in ote's and hermes's rooms, and I proposed neither.
 ```
 
-**STATE: `M2 · MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`.**
+**STATE (RATIFIED 2026-09-04): `M2 · MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`.**
+⭐⭐ **THE MECHANISM BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE TWO DIFFERENT CLAIMS.** The first is
+TRUE; the second is ⛔ DELIBERATELY FALSE until the production evidence exists. ⛔ Do not merge them.
 ⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled"
 (it is ENABLED; 81 slots are NOT-IN-SCOPE, which is different) · ⛔ NOT "waiting on more tests".
 
@@ -26,6 +28,10 @@ learn one — no read exposes it, the refusal deliberately withholds it, and the
 rather than guess. ⇒ ⭐⭐⭐ **M2's operational closure is COUPLED to the deferred governance-READ decision**,
 whichever way that goes. ⓘ Measured: the model's natural replacement rate is 2 updates in 24 days.
 ⇒ `Reference/docs/DERIVATION_SOTERA_M2_CLOSURE_STATE.md`.
+
+⭐ **ELIGIBILITY IS OBSERVED, ⛔ NOT REMEMBERED** — `memory-bind-eligibility-host.js` rides the boot+daily
+cron beside the memory lint, and `test/maintenance/audit-bind-candidates.mjs` renders the same function.
+ⓘ Today: bound=1 · newly-eligible=0 · excluded=3 · already-ruled-on=2 (each with its date and reason).
 
 # 0-B · ⭐⭐ THE FOUR RULES THAT GOVERN ANY FURTHER WORK HERE
 
