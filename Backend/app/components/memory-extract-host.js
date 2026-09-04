@@ -73,7 +73,30 @@ export async function captureFacts(fastify, { userId = null, persona, sourceMess
     // serializeCommits: this is the AUTOMATIC writer. It shares the store's single serial write lane with the
     // model's own tool writes, so the one-writer invariant holds structurally rather than by luck. (The
     // extraction LLM call stays off the lane — only the commit is serialized.)
-    const { pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, serializeCommits: true })
+    // ⭐⭐⭐ THE ASSERTED TEXT MUST REACH THE STORE, OR THE RELAYED-SPEECH RULE IS BLIND.
+    //
+    // ⚠️⚠️ THE MEASURED INCIDENT, 2026-08-26. Ote pasted a letter written by somebody else — his own prose
+    // was `here he come.` — and `preferred_name = "Cogito"` was written onto HIS account. Twice; the
+    // second row was read **143 times** before anyone noticed.
+    //
+    // ⛔⛔ THE RULE THAT CATCHES THIS ALREADY EXISTED AND ALREADY NAMED THAT SENTENCE.
+    // `admissibleToSlot`'s relayed-speech check refuses a value that appears ONLY inside quoted speech —
+    // and it is guarded by `sourceText &&`, so with no text it does not fire. ⇒ **the boundary was not
+    // wrong; it was never handed the evidence.**
+    //
+    // ⭐ `memory-identity-host` has threaded this all along (`sourceText: asserted`). THIS path did not —
+    // and this is the path that produced the incident, because `makeObservation` UPGRADES a fact whose
+    // attribute is an identity attribute into an identity observation. ⇒ an identity row could reach the
+    // store by the one route that carried no text.
+    //
+    // ⓘ `assertionGate` is computed here as well as inside the interpreter. Same expression, same
+    // semantics — ⛔ deliberately not hoisted, because the interpreter runs later inside `observe()` and
+    // the store is built before it. A second call is cheaper than a shared mutable.
+    const gated = assertionGate(text)
+    const { pipeline } = buildMemoryPipeline(fastify, {
+      userId, persona, sourceMessageId, serializeCommits: true,
+      sourceText: gated.extract ? gated.text : '',
+    })
     const { observations, results } = await pipeline.observe(text, [factInterpreter(fastify, { userId, source })])
     if (!observations) return { facts: 0 }
     return { facts: observations, actions: results.map((r) => r.result?.action).filter(Boolean) }

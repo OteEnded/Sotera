@@ -150,9 +150,18 @@ if (dev) {
 // left live. `7d383ce3` (2026-09-02, the Rome root) was marked AND superseded, because a fact slot cannot
 // hold two live rows. ⛔ Merging them would make "value intact, invalid_at null" false and hide the fact
 // that Ote ruled differently on purpose.
-const QUARANTINED = ['49111883', 'b8a4660b'] // marked, still live
+//
+// ⭐⭐ AND A THIRD TREATMENT WAS ADDED 2026-09-04, deliberately and by name — which is what this list is
+// FOR. `49111883` was RETIRED: Ote traced the relayed-speech incident to its two source turns (letters
+// written by Cogito that he pasted, his own prose being `here he come.` and `from your unc`) and approved
+// invalidating it. ⛔ It was NOT tidied: the row keeps its value, provenance, importance, source turn and
+// subject, and carries a `log_memory_changes` row with the full `before` snapshot.
+// ⚠️ THE GUARD BELOW STILL BITES. `b8a4660b` remains quarantined-and-live, and any row that acquires
+// `invalid_at` WITHOUT being named here still goes red — which is exactly what caught this change.
+const QUARANTINED = ['b8a4660b']             // marked, still live
+const RETIRED = ['49111883']                 // marked AND invalidated — relayed speech, Ote 2026-09-04
 const RECONCILED = ['7d383ce3']              // marked AND superseded — Rome, 2026-09-02
-const APPROVED_CONTRADICTIONS = [...QUARANTINED, ...RECONCILED]
+const APPROVED_CONTRADICTIONS = [...QUARANTINED, ...RETIRED, ...RECONCILED]
 const markedRows = await q(
   `select left(id::text,8) id, attribute from ${S}.txn_memories
     where contradicted_at is not null and content <> $1`, [FIXTURE])
@@ -166,8 +175,17 @@ const intact = await q(
   `select left(id::text,8) id, value, invalid_at from ${S}.txn_memories
     where left(id::text,8) = any($1::text[])`, [QUARANTINED])
 ok(intact.length === QUARANTINED.length && intact.every((r) => r.value != null && r.invalid_at === null),
-  '5 · ⭐ …and they are QUARANTINED, not corrected — value intact, invalid_at still null',
+  '5 · ⭐ …and the QUARANTINED ones are not corrected — value intact, invalid_at still null',
   intact.map((r) => `${r.id}=${JSON.stringify(r.value)}${r.invalid_at ? ' ⛔INVALIDATED' : ''}`).join(' '))
+// ⭐⭐ AND THE RETIRED ONE IS RETIRED, ⛔ NOT ERASED — the distinction Ote required when he approved it.
+const retired = await q(
+  `select left(id::text,8) id, value, provenance::text prov, importance, source_message_id, invalid_at
+     from ${S}.txn_memories where left(id::text,8) = any($1::text[])`, [RETIRED])
+ok(retired.length === RETIRED.length
+  && retired.every((r) => r.invalid_at !== null && r.value != null && r.prov != null && r.source_message_id != null),
+'5b · ⭐⭐ …while the RETIRED one is invalidated AND still carries its whole evidence — value, provenance '
++ 'and the source turn survive, so the incident stays reconstructable',
+retired.map((r) => `${r.id}=${JSON.stringify(r.value)}/${r.prov}/${r.invalid_at ? 'retired' : '⛔STILL LIVE'}`).join(' '))
 
 // ⚠️ AND THE ASSERTION HERE IS **CONTRADICTED**, NOT "UNTOUCHED", BECAUSE UNTOUCHED WOULD BE FALSE.
 // My first version of this check tested `contradicted_at IS NOT NULL OR invalid_at IS NOT NULL` and went
