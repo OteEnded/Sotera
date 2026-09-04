@@ -7489,3 +7489,56 @@ possess."* It now possesses it. Whether that text should change is his call; I h
 
 Fences unchanged: canary still the only governed slot, Origin PARKED, M2-6 UNWIRED, 12b FROZEN, P1 and
 Rome UNTOUCHED, post-M2 OUT.
+
+
+---
+
+## 2026-09-04 — DERIVED: what a governed refusal may tell the model, now that it CAN answer
+
+⛔ Nothing changed. The model-facing text is untouched, as instructed.
+
+**The measurement that decides most of it:** `question_key` is reachable by NO model-facing read — every
+occurrence in components, routes, packages and tools is an internal gate parameter. ⇒ a refusal saying
+*"your claim kind was missing or wrong"* names a field the model cannot fill from anything it can see.
+That disqualifies option ② before any risk argument.
+
+**The behavioural evidence, stated honestly.** 353 refused `remember_fact` calls, all from reflection where
+the tool is withheld — but 346 are my own test runs; the real-user figure is **7**. What survives the
+caveat is the SHAPE: 87 of 90 conversations show exactly 4 attempts, i.e. she reaches for the unavailable
+door on essentially every retention decision a pass makes. An unsatisfiable capability is attempted at the
+rate the underlying INTENT occurs, not at a rate that decays with refusals.
+
+**And the house has already ruled, in the opposite direction from opacity.** `tool-authorization.js`
+records it: she was guessing argument names of a tool she had never been shown — five invented shapes,
+nine failures — and the conclusion was that *a refusal which names the boundary and lists what she does
+have is strictly more useful than an error she cannot act on*. `retain`'s `unrepresented` receipt does the
+same, returning `allowed[]`. ⇒ the house pattern is **return the admissible set, not a description of the
+error**.
+
+**The core finding, and it cuts against exposing the key at the refusal.** A question definition is
+subject-free by construction, so a key discloses nothing personal — the axis one would expect to worry
+about is clean. But if the refusal hands over the key, the sequence becomes write → refused, here is the
+key → retry → allowed. **Echoing back a key you were just handed is not a claim about the world.** It turns
+M2 from *the writer must know* into *the writer will be told* — the self-authorisation shape one layer up,
+with the credential issued at the moment of refusal. Two consequences nobody had named: the refusal becomes
+a READ CHANNEL for governance structure, and the gate degrades into a permission oracle. Separately: any
+retry rule must exclude `accepted`, since that write may still land.
+
+**So the analysis produces a fourth option:** disclose through a READ, never through the refusal.
+Disclosure and refusal are two axes. A key learned from a read is knowledge she brought to the write; a key
+learned from a refusal is a credential issued during it. The gate keeps its meaning and the capability
+becomes usable — and *what she may know about a memory's governance* lands in the disclosure layer, where
+it belongs.
+
+**Recommendation:** keep ① unchanged for now (one disposable governed slot; the text is true), ⛔ never ②,
+and treat ④ as the real answer when volume justifies it.
+
+⚠️ **The one thing I could not measure**, stated so §2.1 is not read as stronger than it is: whether a
+LEGIBLE refusal actually changes her next call. `keep`'s ownership refusal is legible by design, but
+`log_retention_occasions` holds 2 rows and `log_retention_decisions` is empty (swept by check teardowns).
+Every legibility claim rests on the `remember_fact` audit and the prior rulings, not on a measurement of
+the legible case. If Ote wants it measured first, the instrument is a retention-decision sample that
+survives teardown — small, separate work.
+
+Doc: `DERIVATION_SOTERA_GOVERNED_REFUSAL_DISCLOSURE.md`. Fences unchanged; canary still the only governed
+slot.
