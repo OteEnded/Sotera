@@ -390,10 +390,90 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     }
   }
 
+  /**
+   * ⭐⭐⭐ ATTACH THE TWO LOCAL DATES a model-facing memory may honestly carry. ⛔ Adds nothing else.
+   *
+   * ── ⚠️⚠️ THREE TIMES, THREE DIFFERENT FACTS ──────────────────────────────────────────────────
+   *   `txn_messages.created_at`  ⭐ WHEN IT WAS SAID     — the account holder spoke on that date
+   *   `txn_memories.created_at`  ⭐ WHEN IT WAS RECORDED — Sotera wrote it down then
+   *   the EVENT's own time       ⛔ **NOT REPRESENTED**, and ⛔ never inferred from either
+   *
+   * ⚠️ THEY GENUINELY DIVERGE, MEASURED: of 72 live rows with a source turn, three were recorded more
+   * than a day after it and one by **23.6 DAYS** — the Rome reconciliation read an August turn and wrote
+   * a September row. ⇒ returning the row's date as *"when you told me"* would be a NEW falsehood.
+   *
+   * ⛔ `valid_at` IS DELIBERATELY NOT USED: it equals `created_at` on 72 rows and holds a genuine
+   * "true since" on 34 (`doc:` ingest, the file's commit date). One field cannot be both.
+   *
+   * ── ⭐⭐⭐ AND THE TIMEZONE IS **EXPLICIT**, because "local" turned out not to be a stable idea ─────
+   * ⚠️⚠️ MEASURED, and it cost two red runs to find: `::date` renders in the CONNECTION'S session
+   * timezone, and the two clients disagree — `psql` reports `Asia/Bangkok`, **Sequelize reports UTC**.
+   * The Rome turn is `2026-08-10 03:19+07`: the **10th** to the person who typed it, the **9th** in UTC.
+   * ⇒ a bare `::date` would have told her *"you said this on the 9th"* about 3am on the 10th, HIS time —
+   * ⛔ exactly the off-by-one this field exists to remove, arriving through the fix for it.
+   *
+   * ⇒ ⭐⭐ SO THE ZONE IS NAMED IN THE QUERY rather than inherited. A date is a fact about the person's
+   * day, and inheriting it from whichever driver happens to connect is not a decision anyone made.
+   *
+   * ⚠️ THE ZONE USED IS THE DEPLOYMENT'S, ⛔ NOT THE INDIVIDUAL USER'S. There is no per-account timezone
+   * column; this server runs in the account holder's own zone, so today the two coincide. ⓘ For a user in
+   * a different zone the date could be a day out — a REAL residual, recorded rather than hidden.
+   *
+   * ⓘ AND THE PRECEDENT HAS THIS BUG: `recall_own_memory.decidedOn` is a bare `created_at::date` through
+   * Sequelize, so it renders in UTC and is a day early for anything before 07:00 local. ⛔ Not fixed here
+   * — it is a different field, ratified as unchanged, and correcting it is its own decision.
+   *
+   * ⓘ ONE extra query per read, so the main read's shape is untouched. ⛔ On failure it attaches nothing
+   * and the projection carries no date — "we could not establish when" must be visible, ⛔ never guessed.
+   */
+  /**
+   * ⭐ THE ZONE A DATE IS RENDERED IN — the deployment's own, read once and named in the query.
+   * ⛔ NOT the database session's: `psql` and Sequelize disagree (Bangkok vs UTC), so inheriting it makes
+   * the answer depend on which driver connected. ⚠️ `UTC` only if the host cannot say, which is honest
+   * rather than silently wrong.
+   */
+  const DISPLAY_TZ = (() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' }
+  })()
+
+  const withLocalDates = async (rows) => {
+    if (!Array.isArray(rows) || !rows.length) return rows
+    const ids = rows.map((r) => r?.id).filter(Boolean)
+    if (!ids.length) return rows
+    try {
+      const { schema: sch } = txn_memories.getTableName()
+      const got = await txn_memories.sequelize.query(
+        `SELECT m.id::text AS id,
+                (m.created_at AT TIME ZONE :tz)::date::text AS recorded_on,
+                (msg.created_at AT TIME ZONE :tz)::date::text AS said_on
+           FROM "${sch}"."txn_memories" m
+           LEFT JOIN "${sch}"."txn_messages" msg ON msg.id = m.source_message_id
+          WHERE m.id = ANY(ARRAY[:ids]::uuid[])`,
+        { replacements: { ids, tz: DISPLAY_TZ }, type: txn_memories.sequelize.QueryTypes.SELECT, logging: false },
+      )
+      const by = new Map(got.map((d) => [String(d.id), d]))
+      for (const r of rows) {
+        const d = by.get(String(r.id))
+        if (!d) continue
+        r.recorded_on = d.recorded_on
+        if (d.said_on) r.said_on = d.said_on
+      }
+    } catch (e) {
+      const msg = `[memory] could not resolve local dates — memories will carry no date: ${e?.message}`
+      if (log?.warn) log.warn({ err: e?.message }, msg); else console.warn(msg)
+    }
+    return rows
+  }
+
   return {
     // ── READS ────────────────────────────────────────────────────────────────────────────────
     async findVisible({ kind = null, namespace = null } = {}) {
-      return txn_memories.findAll({ where: visibleWhere(kind, namespace), order: [['created_at', 'DESC']], raw: true })
+      // ⭐ THE ONE READ EVERY MODEL-FACING PROJECTION DRAWS FROM — `list`, `recall` and `search` all reach
+      // the model through `candidates()`/`retrieve()`, and both call this. ⇒ attaching the dates HERE is
+      // why `recall_memory` and `list_memories` agree BY CONSTRUCTION, ⛔ not by two edits staying in step.
+      return withLocalDates(await txn_memories.findAll({
+        where: visibleWhere(kind, namespace), order: [['created_at', 'DESC']], raw: true,
+      }))
     },
 
     async findOwnLive({ kind = null, namespace = null } = {}) {

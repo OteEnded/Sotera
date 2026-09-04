@@ -213,6 +213,17 @@ ok(liveSqlFor('m') === 'm.invalid_at IS NULL AND m.expired_at IS NULL',
     // which is the opposite of what this guard is protecting.
     // ⛔ It reads no content — labels, sources and counts only.
     { file: 'memory-bind-eligibility-host.js', why: 'a HISTORY read of superseding writers — liveness would hide every earlier writer, which is exactly the evidence the containment rule needs' },
+    // ⭐⭐ AN ID LOOKUP, AND THE `match` IS WHY IT IS SAFE TO EXEMPT AT ALL.
+    // `memory-store-sequelize-host.js` contains MANY reads, and a file-wide entry would excuse every one
+    // of them — including a real population read added tomorrow. ⇒ this entry names the SHAPE, so only
+    // this literal is excused and the file stays guarded.
+    // ⓘ Liveness is meaningless here: the ids come from a read that already applied it, and `listArchived`
+    // deliberately returns rows that are NOT live — a liveness filter would blind the dates for those.
+    {
+      file: 'memory-store-sequelize-host.js',
+      match: 'AT TIME ZONE :tz',
+      why: 'an ID LOOKUP that renders two dates for rows the caller already holds — liveness was decided by the read that selected them, and archived rows must keep their dates',
+    },
   ]
   const seen = new Set()
   const offenders = []
@@ -224,7 +235,11 @@ ok(liveSqlFor('m') === 'm.invalid_at IS NULL AND m.expired_at IS NULL',
       scanned += 1
       const live = (/invalid_at IS NULL/i.test(lit) && /expired_at IS NULL/i.test(lit)) || /LIVE_SQL|liveSqlFor/.test(lit)
       if (live) continue
-      if (EXEMPT.some((e) => e.file === f)) { seen.add(f); continue }
+      // ⭐ AN ENTRY MAY NAME A SHAPE. Without `match` it excuses the whole file, which is right for a
+      // module whose ONLY raw read is the exempt one — and wrong for a module with many. ⇒ `match`
+      // narrows the excuse to one literal, so the rest of that file stays guarded.
+      const ex = EXEMPT.find((e) => e.file === f && (!e.match || lit.includes(e.match)))
+      if (ex) { seen.add(`${ex.file}${ex.match ? `::${ex.match}` : ''}`); continue }
       offenders.push(`${f} :: ${lit.replace(/\s+/g, ' ').slice(0, 80)}`)
     }
   }
@@ -233,7 +248,10 @@ ok(liveSqlFor('m') === 'm.invalid_at IS NULL AND m.expired_at IS NULL',
     `${scanned} raw SELECT(s) over txn_memories`)
   ok(offenders.length === 0, '9 · ⭐⭐ every POPULATION read of txn_memories carries the liveness predicate',
     offenders.length ? offenders.join(' | ') : `${scanned} read(s), ${EXEMPT.length} declared exemption(s)`)
-  const stale = EXEMPT.filter((e) => !seen.has(e.file)).map((e) => e.file)
+  // ⭐ The key must match what `seen` records, or a shape-scoped entry would always look stale — and a
+  // guard that cries stale about a live exemption teaches people to ignore it.
+  const stale = EXEMPT.filter((e) => !seen.has(`${e.file}${e.match ? `::${e.match}` : ''}`))
+    .map((e) => `${e.file}${e.match ? `::${e.match}` : ''}`)
   ok(stale.length === 0, '9 · ⭐ …and no exemption has outlived the read it excuses',
     stale.length ? `stale: ${stale.join(', ')}` : 'all exemptions still describe a real read')
 
