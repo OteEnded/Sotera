@@ -205,6 +205,14 @@ ok(liveSqlFor('m') === 'm.invalid_at IS NULL AND m.expired_at IS NULL',
   const EXEMPT = [
     { file: 'lesson-host.js', why: 'an ID LOOKUP of a prior lesson being related to — liveness is the caller\'s question, not the read\'s' },
     { file: 'person-service.js', why: 'an EXISTS visibility predicate — narrowing it would remove person visibility, an authorization change wearing a bug fix\'s clothes' },
+    // ⭐⭐ A HISTORY READ, ⛔ NOT A POPULATION READ — and the distinction is load-bearing here.
+    // The M2 containment rule asks *which writers have ever SUPERSEDED a row in this slot*, and a
+    // superseded row is by definition `invalid_at IS NOT NULL`. ⚠️ Adding the liveness predicate would
+    // leave only the newest row and hide every earlier writer: on the canary it would report ONE writer
+    // where there are four. ⇒ the filter would make the rule BLIND TO THE EVIDENCE IT EXISTS TO READ,
+    // which is the opposite of what this guard is protecting.
+    // ⛔ It reads no content — labels, sources and counts only.
+    { file: 'memory-bind-eligibility-host.js', why: 'a HISTORY read of superseding writers — liveness would hide every earlier writer, which is exactly the evidence the containment rule needs' },
   ]
   const seen = new Set()
   const offenders = []

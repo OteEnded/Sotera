@@ -12,6 +12,7 @@ import { REFLECTION_GENERATION, REFLECTION_TOOLS } from '../components/reflectio
 import { runHealthSuite } from '../maintenance/health-suite.js'
 import { decayWorkingMemory } from '../components/working-memory-host.js'
 import { lintMemory, lintSummaryLine } from '../components/memory-lint-host.js'
+import { bindEligibility, eligibilitySummaryLine } from '../components/memory-bind-eligibility-host.js'
 import { runOnePass, makeSequelizeQuery } from '../components/dreaming-host.js'
 import { dreamingCronEnabled } from '../components/dreaming-gate.js'
 
@@ -72,6 +73,22 @@ export default fp(async function (fastify, opts) {
             }
         } catch (e) {
             await log(`[memory-lint] (${trigger}) error: ${e.message}`, import.meta.url)
+        }
+        // ⭐⭐ M2 BIND ELIGIBILITY — read-only, deterministic, and here for the SAME reason the lint above
+        // is: Ote, 2026-09-04, *"eligibility should be observed continuously rather than remembered."*
+        // ⚠️ A slot becomes eligible when its WRITERS change, which happens without anyone deciding it
+        // should — so a slot that becomes bindable announces itself instead of waiting to be looked for.
+        // ⛔ It grants nothing and binds nothing: eligibility only means the containment rule would not
+        // refuse a bind, and a bind stays a deliberate, separately approved act.
+        // ⓘ Quiet unless something is NEWLY eligible — slots already ruled on are held apart with their
+        // date and reason, so a settled question is not re-asked nightly.
+        try {
+            const elig = await bindEligibility(fastify.db)
+            if (!elig.ok || elig.eligible.length) {
+                await log(`[m2-eligibility] (${trigger}) ${eligibilitySummaryLine(elig)}`, import.meta.url)
+            }
+        } catch (e) {
+            await log(`[m2-eligibility] (${trigger}) error: ${e.message}`, import.meta.url)
         }
         // persona memory v2 Phase-3 consolidation → Knowledge Cards (gated by memory.consolidateEnabled,
         // default OFF). Makes LLM calls, so it rides ONLY the scheduled daily tick, never the boot pass.
