@@ -137,7 +137,14 @@ try {
     + 'this, every refusal below could be a broken write path', !!g1?.id)
   const [g1row] = await Q(
     `SELECT question_id_at_admission::text AS pin FROM "${schema}"."txn_memories" WHERE id = :i`, { i: g1.id })
-  check('C1 · …and it is pinned to the declared question', g1row?.pin === d.question.id, `pin=${g1row?.pin}`)
+  // ⭐⭐⭐ AND WHAT THAT PIN MEANS ON A **NEW** ROW, stated exactly — Ote, 2026-09-04: *"NEW is not
+  // governed; its admission pin, where applicable, records that the write was UNGATED."*
+  // ⇒ the pin says WHICH QUESTION THE ROW WAS ADMITTED UNDER. ⛔ It does NOT say a replacement decision
+  // was made in its favour, because on a NEW write the replacement authority never ran at all. ⚠️ Reading
+  // a pin as "M2 approved this" would be exactly wrong for every NEW row that carries one.
+  check('C1 · …and it is pinned to the declared question — ⛔ recording WHICH QUESTION IT WAS ADMITTED '
+    + 'UNDER on an UNGATED write, ⛔ never that a replacement was authorised',
+  g1row?.pin === d.question.id, `pin=${g1row?.pin}`)
 
   // ── governed + MATCHING kind ⇒ UPDATE ALLOWED ──────────────────────────────────────────────────
   const g2 = await write(slotG, { value: 'second', claimKind: KEY, supersedes_id: g1.id })

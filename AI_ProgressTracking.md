@@ -7594,3 +7594,46 @@ sufficient evidence.
 
 Doc: `DERIVATION_SOTERA_M2_ROLLOUT_CONTRACT.md`. Five rulings requested. Canary still the sole governed
 slot; all fences unchanged.
+
+
+---
+
+## 2026-09-04 — (A) ROLLBACK EXERCISED · (B) CANDIDATE AUDIT · ⛔ NOTHING BOUND
+
+**72/72 suites, 0 FAIL lines.** ⓘ One transient on the way: `tool-call-log-check` failed once in a suite
+run ("the turn produced at least one audit row — 0 rows"). It is model-dependent — the turn simply did not
+call a tool — and it passed standalone and on a full re-run. Reported as a transient, not silently re-run.
+
+**Ote's correction preserved exactly.** NEW is not governed; the replacement authority never runs on it.
+An earlier draft said *"no pin unless the kind matches"*, which described mechanics and lost the rule. A
+NEW write on a governed slot MAY still carry an admission pin — that is measured, `declaration-enforcement-
+check` C and C1 — and on such a row the pin records WHICH QUESTION IT WAS ADMITTED UNDER and that the write
+was UNGATED. ⛔ It does not record that a replacement was authorised. I sharpened C1's own label to carry
+the distinction, so the check states it rather than merely exercising it.
+
+**(A) THE ROLLBACK IS NO LONGER A HOPE.** `m2-rollback-check`, 14/14, on the real canary: governed → an
+unkinded UPDATE refused → `slot_governed=false` → the IDENTICAL write succeeds and legacy reconciliation
+supersedes normally with no pin → the bind, the binding audit and all four existing pins survive untouched,
+no prior row changed → restore → the unkinded UPDATE is refused again AND a properly kinded one is allowed
+and pinned. Both halves, because *"refuses everything"* is not the same as *"governance returned"*. The
+restore is in `finally` and asserted: a kill switch a crashing test can leave off is not a safety mechanism.
+
+**(B) THE AUDIT CORRECTS THE PREMISE OF THE QUESTION.** There are not two agent_dev candidates. agent_dev
+has exactly two superseded slots and the first is the canary itself; the other is `timezone`, and it is
+EXCLUDED — its only supersede is the auto-extractor. ⇒ **after the ruling, agent_dev has ZERO non-canary
+eligible candidates.**
+
+⭐ And `timezone` is the argument FOR the ruling, visible in two rows: the extractor's supersede replaced
+*"User's timezone is Bangkok (Asia/Bangkok)."* with *"Bangkok"* — it IMPROVED the slot. Governing it would
+have refused that correction.
+
+Corpus-wide the eligible set is **2**, and I propose neither: `soteras_family_lineage_and_key_relationships`
+(Ote's room — and it is the family-lineage incident's own slot, whose ADDRESS is wrong, so governing it
+would pin a question onto a defect) and `core_commitments` (hermes's room, a real user who cannot be asked).
+⇒ the corpus does not currently contain a second slot that is both eligible AND safe to experiment on.
+That is a finding about the rollout, not a blocker to route around.
+
+New: `test/checks/m2-rollback-check.mjs`, `test/maintenance/audit-bind-candidates.mjs` (reproducible
+per-slot verdicts with their evidence). Docs: the rollout contract now carries §1.1, §9-A and §9-B.
+
+Fences unchanged. Canary still the only governed slot; nothing bound.
