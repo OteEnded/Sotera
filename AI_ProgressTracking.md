@@ -7637,3 +7637,50 @@ New: `test/checks/m2-rollback-check.mjs`, `test/maintenance/audit-bind-candidate
 per-slot verdicts with their evidence). Docs: the rollout contract now carries §1.1, §9-A and §9-B.
 
 Fences unchanged. Canary still the only governed slot; nothing bound.
+
+
+---
+
+## 2026-09-04 — DERIVED: the M2 closure state. ⛔ Nothing bound, no traffic generated.
+
+**The headline is that the blocker is not corpus scarcity, which changes the answer.** Even with a perfect
+slot, **no non-operator writer can produce an ALLOWED governed UPDATE today.** Compliance requires naming
+the slot's question key; the extractor cannot declare a kind at all; and the model tool CAN declare one but
+has no way to LEARN a key — no model-facing read exposes `question_key`, the refusal deliberately does not
+say one, and the tool description tells her to omit rather than guess.
+
+⇒ **The two rulings are coupled and neither was made with the other in view.** *"Governance knowledge is a
+READ concern"* — correct, and ratified today — is exactly what makes the ALLOW half of the operational
+window unreachable. That is not an argument to reopen it. It is why the honest state is READY rather than
+CLOSED, and the coupling belongs on the record rather than being rediscovered in three months.
+
+**Measured:** the model's natural replacement rate is **2 updates in 24 days** — one per twelve days, and
+only a fraction would land on a governed slot. Five allowed model updates is a multi-month horizon even if
+the knowledge gap did not exist. Scored honestly, **two of the five criteria are unreachable from this
+corpus**, and the first is unreachable from ANY corpus under the current rulings.
+
+**On the constructed-slot question: NO — but not because "constructed" disqualifies it.** The canary is
+constructed and produced three real findings. The test that separates evidence from fixture is narrower:
+*did the write happen because someone wanted the memory, or because we wanted the observation?* A
+constructed SLOT is fine; constructed TRAFFIC is the fixture. And it could not produce the ALLOW half
+anyway without handing her the key — which is the permission oracle relocated from the refusal into the
+conversation. ⭐ Recorded, so it is not lost: such a slot COULD legitimately observe the REFUSE half in the
+wild, because whether she supplies a kind unprompted is an outcome we do not control.
+
+**The closure state:** `M2 · MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`, with four forbidden
+drifts written down — ⛔ not "operationally closed" (two criteria never observed), ⛔ not "blocked"
+(nothing is), ⛔ not "disabled" (it is enabled; 81 slots are NOT-IN-SCOPE, which is different), ⛔ not
+"waiting on more tests" (the tests are done; what is missing is traffic, and no test can supply it).
+**The count-based requirement is not weakened anywhere — it is UNMET, and the state name says so.**
+
+**Future eligibility:** the BIND needs no architectural work — the contract, the audit script, route B-ii,
+the window, the regression classes and the rehearsed kill switch all exist. But the WINDOW needs one thing,
+and it is the deferred governance-read decision. ⇒ M2 cannot reach operational closure until that question
+is decided, whichever way it goes. One concrete action proposed: run `audit-bind-candidates.mjs` in the
+periodic maintenance pass so eligibility is OBSERVED rather than remembered.
+
+⚠️ **Kept on the record, not erased:** `tool-call-log-check` flaked once — model-dependent, the turn called
+no tool; green standalone and on a full re-run. Test flakiness, not a product failure.
+
+Doc: `DERIVATION_SOTERA_M2_CLOSURE_STATE.md` (Reference repo, 0753fa2). Canary still the only governed
+slot; all fences held.

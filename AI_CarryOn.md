@@ -16,10 +16,16 @@ CANDIDATES       ⛔ ZERO eligible-and-safe. agent_dev has none; the 2 corpus-wi
                  data in ote's and hermes's rooms, and I proposed neither.
 ```
 
-⏸ **THE OPEN DECISION IS OTE'S AND IT IS NOT A TECHNICAL ONE**: the corpus contains no second slot that
-is both eligible under the containment rule and safe to experiment on. ⇒ broadening M2 needs either a
-slot he nominates, or accepting that the observation window (§5 of the rollout contract) may take months
-at 6 replacements per 3 weeks.
+**STATE: `M2 · MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`.**
+⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled"
+(it is ENABLED; 81 slots are NOT-IN-SCOPE, which is different) · ⛔ NOT "waiting on more tests".
+
+⚠️⚠️ **AND THE BLOCKER IS NOT CORPUS SCARCITY.** Even with a perfect slot, **no non-operator writer can
+produce an ALLOWED governed UPDATE**: compliance needs the slot's question KEY, and the model has no way to
+learn one — no read exposes it, the refusal deliberately withholds it, and the tool tells her to omit
+rather than guess. ⇒ ⭐⭐⭐ **M2's operational closure is COUPLED to the deferred governance-READ decision**,
+whichever way that goes. ⓘ Measured: the model's natural replacement rate is 2 updates in 24 days.
+⇒ `Reference/docs/DERIVATION_SOTERA_M2_CLOSURE_STATE.md`.
 
 # 0-B · ⭐⭐ THE FOUR RULES THAT GOVERN ANY FURTHER WORK HERE
 
