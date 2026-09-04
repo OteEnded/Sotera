@@ -100,6 +100,10 @@ export const OWNERSHIP_QUESTION = 'I need to know whose memory this is before I 
 
 export function buildRetention(fastify, {
   userId = null, sourceMessageId = null, self = null, conversationId = null, isRoot = false, user = null,
+  // ⭐ THE CONSUMING OCCASION for an act with no turn. Ote, 2026-09-04: *"For ordinary operator acts,
+  // keep the named operator occasion exactly as currently established."* ⚠️ In a real request this stays
+  // null and the TURN KEY is the occasion; ⛔ an operator name never overrides one.
+  occasion = null,
 } = {}) {
   // ⭐ The specialised hosts stay exactly as they are and are reached THROUGH here — a front door, ⛔ not
   // a demolition. `lesson` and `ownMemory` already write persona-authored rows by construction, so they
@@ -111,7 +115,7 @@ export function buildRetention(fastify, {
   // ⭐ 035 · scope joins author on the CONSTRUCTION path, for the reason the header above gives about
   // author: honouring a per-call decision means building the store that already means what she said,
   // ⛔ never reaching in and reassigning a field afterwards.
-  const memoryFor = (author, scope = 'room') => buildMemoryToolService(fastify, { userId, sourceMessageId, self, author, scope })
+  const memoryFor = (author, scope = 'room') => buildMemoryToolService(fastify, { userId, sourceMessageId, self, author, scope, occasion })
 
   /**
    * ⭐⭐⭐ THE ONE BOUNDED WAIT — turn a QUEUED receipt into an OBSERVED outcome.

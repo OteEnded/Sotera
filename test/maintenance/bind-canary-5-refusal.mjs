@@ -22,7 +22,7 @@ import { logMemoryChange, snapshot } from '../../Backend/app/audit/memory-log.js
 import { commitToMemory } from '../../Backend/app/components/memory-pipeline-host.js'
 import { createMemoryV2Service } from '@ote/memory/cognition/memory-v2-service.js'
 import { devSchema } from '../harness.mjs'
-import { SLOT, QUESTION, ACTOR } from './bind-canary-common.mjs'
+import { SLOT, QUESTION, ACTOR, OCCASION } from './bind-canary-common.mjs'
 
 const ATTEMPT_A = 'CANARY-000111-tool'
 const ATTEMPT_B = 'CANARY-000222-extractor'
@@ -49,7 +49,11 @@ const userId = before.room.id
 const logged = []
 const log = { error: (...a) => logged.push(a), warn: (...a) => logged.push(a), info: () => {}, debug: () => {} }
 
-const realStore = createSequelizeMemoryStore({ db, persona: null, userId, log })
+// ⭐ THE CONSUMING OCCASION. Since 2026-09-04 a write to the (bound) canary slot must be able to name
+// the occasion it happens in — otherwise it cannot establish that it is not the very act that
+// declared or bound `build-tag`. ⛔ Distinct from OCCASION.declare / .propose / .confirm, which is
+// exactly the separation the rule asks for.
+const realStore = createSequelizeMemoryStore({ db, persona: null, userId, log, occasion: OCCASION.refusal })
 // ⭐ THE BOUNDARY SPY — delegating, so what it records is the row that genuinely went on to be written.
 const seen = []
 const store = new Proxy(realStore, {

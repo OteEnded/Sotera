@@ -50,7 +50,11 @@ const SLOW_NOTE = `zz_mfw_slow_note_${t}`
 
 const [me] = await q(`SELECT id::text AS id FROM ${S}."mst_users" WHERE username = 'agent_dev'`)
 if (!me) { console.error('✖ agent_dev not found — ⛔ never run this as root'); process.exit(1) }
-const mem = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room' })
+// ⭐ AN OPERATOR OCCASION. Since 2026-09-04 a write to a BOUND slot must be able to name the occasion
+// it happens in, or it cannot establish that it is not the very act that declared or bound the
+// question. ⓘ In a real request this is the TURN KEY; an operator act names its own.
+const OCC = `zz_mfw_consuming_${t}`
+const mem = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room', occasion: OCC })
 
 /** ⭐ EXACTLY what the package handlers do — ⛔ the check must not model it differently. */
 const asModel = async (queued) => (await queued.settled)?.forModel ?? null
@@ -122,7 +126,7 @@ try {
   check('B10 · ⛔ …and NO replacement row was written', leak.n === 0, `rows=${leak.n}`)
 
   // ══ PART C · ⭐⭐⭐ ACCEPTED — a REAL blocked lane, both doors ═════════════════════════════════════
-  const blocker = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room' })
+  const blocker = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room', occasion: OCC })
   const BLOCK_MS = 25_000
   const held = blocker.enqueue('zz_mfw_block', () => new Promise((r) => { setTimeout(r, BLOCK_MS) }))
   const startedAt = Date.now()

@@ -47,6 +47,7 @@ import { BASIS, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFro
 import { slotViolation } from './memory-modality.js'
 import { resolveSlotQuestion } from './memory-declaration-host.js'
 import { checkKind, KIND_OUTCOME } from './memory-kind-precondition.js'
+import { checkConsumingOccasion } from './memory-bind-rules.js'
 import { governsReplacement, REPLACEMENT } from './memory-replacement-gate.js'
 // ⭐⭐⭐ THE OWNERSHIP BOUNDARY — what ordinary semantic memory does NOT own. Ote, 2026-08-26: *"make it
 // know what it does not own instead of corrupting the meaning to fit the storage it happens to have."*
@@ -106,7 +107,7 @@ const OWNED_KIND_OR_UNCLASSIFIED = { [Op.or]: [{ [Op.in]: OWNED_KINDS }, { [Op.i
  * @param {object|null} [deps.log]
  * @param {()=>number}  [deps.now]
  */
-export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', scope = 'room', sourceText = null, config = null, log = null, now = () => Date.now() } = {}) {
+export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', scope = 'room', sourceText = null, occasion = null, config = null, log = null, now = () => Date.now() } = {}) {
   const txn_memories = db?.txn_memories
   if (!txn_memories) throw new TypeError('createSequelizeMemoryStore: db.txn_memories is required')
   const P = persona ?? null
@@ -167,6 +168,25 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
   // ⓘ For the model-tool path this stays NULL by design (M2-15, locked): the only text reachable there
   // answers *when* a memory was written, never *what it rests on*.
   const SOURCE_TEXT = sourceText == null ? null : String(sourceText)
+
+  // ── ⭐⭐⭐ THE CONSUMING OCCASION — one identifier space, two legitimate origins ────────────────
+  //
+  // Ote, ratifying 2026-09-04: *"consuming occasion = turn key = source_message_id, construction-scoped
+  // and therefore not caller-manufacturable on the reconcileFact path… For an in-turn act the occasion
+  // must be the authenticated turn key; the writer must not be able to manufacture another identifier."*
+  //
+  // ⭐ It rides CONSTRUCTION beside `author`, `scope` and `sourceText`, for the reason this file already
+  // argues twice above: a pipeline is built for ONE OCCASION, so there is no allowlist to survive and no
+  // hop to drop it. ⛔ And a caller that could name its own occasion per write could declare a question
+  // inside the very pass that consumes it, which is the whole thing the rule exists to prevent.
+  //
+  // ── ⭐⭐ TWO ORIGINS, ⛔ NOT TWO TYPES ────────────────────────────────────────────────────────────
+  //   IN A TURN         the turn key — `row.source_message_id`, set by the service from ITS construction
+  //   AN OPERATOR ACT   a named occasion, exactly as the canary's DECLARE and BIND already carry
+  //
+  // ⚠️ The row's own turn key WINS where there is one: an operator-named occasion is the fallback for an
+  // act that genuinely has no turn, ⛔ never an override for one that does.
+  const OCCASION = occasion == null ? null : String(occasion)
 
   // ── ⭐⭐⭐ AND THE AUTHORITY IS DERIVED HERE, ⛔ NEVER ACCEPTED AS A CLAIM ──────────────────────
   //
@@ -313,20 +333,50 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     const claimKind = row?.claimKind ?? null
     // ⭐ NOT IN SCOPE, and cheaply: a row with no slot has no question, so there is nothing to govern and
     // nothing to pin. ⛔ This is not a DEFER — the gate does not apply.
-    if (!slotId) return { resolved: null, pin: null }
+    if (!slotId) return { resolved: null, pin: null, selfAuth: null }
     try {
       const { schema: sch } = txn_memories.getTableName()
-      if (!sch) return { resolved: null, pin: null }
+      if (!sch) return { resolved: null, pin: null, selfAuth: null }
       const q = async (sql, params = []) => ({
         rows: await txn_memories.sequelize.query(sql, { bind: params, type: 'SELECT' }),
       })
       const resolved = await resolveSlotQuestion({ query: q, schema: sch, slotId })
       // ⭐ An UNDECLARED namespace leaves `slotGoverned` null ⇒ not governed YET ⇒ no pin, no gate.
-      if (!resolved || resolved.slotGoverned !== true) return { resolved, pin: null }
+      if (!resolved || resolved.slotGoverned !== true) return { resolved, pin: null, selfAuth: null }
+      // ⛔⛔ AND `slotGoverned` IS A NAMESPACE PROPERTY, ⛔ NOT A SLOT ONE — it is TRUE for every slot in
+      // `default`, bound or not. ⚠️ Wiring the self-authorisation rule on it alone made every ordinary
+      // write in the whole namespace answerable to a question nobody had declared, and an occasion-less
+      // ordinary `keep` started failing `SELF_AUTHORISED_QUESTION`. ⭐ That is the outage 031 named,
+      // rebuilt through a new door, and two unrelated suites caught it inside one run.
+      // ⇒ A SLOT WITH NO DECLARED QUESTION IS NOT GOVERNED YET, so no self-authorisation question can
+      // arise about it. Same distinction the replacement gate already draws between NOT-IN-SCOPE and
+      // GOVERNED — ⛔ it just was not applied here.
+      if (!resolved.slotKind) return { resolved, pin: null, selfAuth: null }
+
+      // ── ⭐⭐⭐ THE SELF-AUTHORISATION RULE, AT THE CONSUMER (wired 2026-09-04) ──────────────────
+      //
+      // *Neither the DECLARE nor the BIND that makes a question operative may share the occasion that
+      // consumes it.* ⭐ `resolveSlotQuestion` has always RETURNED both occasions; ⛔ this function used
+      // to discard them, so the ratified rule was proven in RP-D0 and enforced NOWHERE. That is the
+      // discarded-evidence mechanism, in the one place it most mattered.
+      //
+      // ⚠️ AND THE INPUT IS NOT MANUFACTURABLE HERE. `reconcileFact` — the ONLY path that resolves a slot
+      // — writes `source_message_id` from ITS construction-time constant and accepts no argument for it.
+      // ⇒ what a model asks for cannot change which occasion it is judged in.
+      const consumingOccasion = row?.source_message_id ?? OCCASION
+      const selfAuth = checkConsumingOccasion({
+        consumingOccasion,
+        declaredInOccasion: resolved.declaredInOccasion,
+        boundInOccasion: resolved.boundInOccasion,
+      })
+      // ⛔⛔ NO PIN FOR A SELF-AUTHORISED ADMISSION. The pin says *"admitted under this question"*; if the
+      // question was declared or bound by this very act, that admission is not one this row may cite.
+      if (!selfAuth.ok) return { resolved, pin: null, selfAuth }
+
       const verdict = (typeof claimKind === 'string' && claimKind.trim())
         ? checkKind({ slotKind: resolved.slotKind, claimKind })
         : null
-      return { resolved, pin: verdict?.outcome === KIND_OUTCOME.allow ? resolved.questionId : null }
+      return { resolved, selfAuth, pin: verdict?.outcome === KIND_OUTCOME.allow ? resolved.questionId : null }
     } catch (e) {
       // ⛔ A pin is a RECORD, never a permission — failing to compute one must not fail a write. And it
       // fails to NULL, which already means "no kind gate was applied", so nothing is misreported.
@@ -336,7 +386,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // so the console is the floor when no logger was wired.
       const msg = `[memory] could not resolve the admitting question — writing NULL: ${e?.message}`
       if (log?.warn) log.warn({ err: e?.message }, msg); else console.warn(msg)
-      return { resolved: null, pin: null }
+      return { resolved: null, pin: null, selfAuth: null }
     }
   }
 
@@ -882,6 +932,31 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // invariant intact. ⓘ It also forgoes that write's opportunistic collapse of pre-existing
       // duplicates — it creates none, and the alternative would be a refusal that mutates, which is the
       // partial-act failure this project refuses everywhere else.
+      // ── ⭐⭐⭐ SELF-AUTHORISATION IS ITS OWN REFUSAL, ⛔ NOT A KIND MISMATCH ────────────────────
+      //
+      // ⭐ It is kept OUT of `governsReplacement` on purpose. That gate answers one question — *does this
+      // claim answer the slot's question?* — and this answers a different one: *may this act use a
+      // permission it created?* ⛔ Two questions with two remedies must not share a refusal:
+      //     kind mismatch      ⇒ fix the claim, or rebind the slot
+      //     self-authorisation ⇒ declare or bind in a DIFFERENT occasion than the one that consumes it
+      // ⚠️ A refusal that cannot be acted on is noise, and one that names the wrong remedy is worse.
+      //
+      // ⛔⛔ AND IT REFUSES ONLY A REPLACEMENT. A governed slot's NEW write is not in the replacement
+      // authority's scope (ratified), so a self-authorised NEW write is left to legacy — it simply never
+      // earns a pin. ⭐ Widening this to every write would be the outage 031 already named.
+      if (row?.supersedes_id && governance.resolved?.slotGoverned === true && governance.selfAuth?.ok === false) {
+        log?.warn?.({ refusal: governance.selfAuth.refusal, why: governance.selfAuth.why, slot: row.slot_id },
+          '[memory] refused a REPLACEMENT whose question was declared or bound by this same occasion')
+        const e5 = new Error(`refused: ${governance.selfAuth.why}`)
+        e5.code = 'SELF_AUTHORISED_QUESTION'
+        e5.reason = governance.selfAuth.refusal
+        e5.slotKind = governance.resolved?.slotKind ?? null
+        // ⭐ WHICH slot and WHICH row it would have replaced. A refusal a reader cannot locate is noise,
+        // and this is the pair a caller needs to act on it.
+        e5.slotId = row.slot_id ?? null
+        e5.supersedes = row.supersedes_id ?? null
+        throw e5
+      }
       if (row?.supersedes_id) {
         const gate = governsReplacement({
           isUpdate: true,

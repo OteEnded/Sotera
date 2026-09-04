@@ -37,6 +37,12 @@ const Q = (s, r = {}) => seq.query(s, { replacements: r, type: seq.QueryTypes.SE
 const X = (s, r = {}) => seq.query(s, { replacements: r })
 
 const t = Date.now()
+// ⭐ AN OPERATOR OCCASION. Since 2026-09-04 the store enforces the self-authorisation rule at
+// admission, and a write to a BOUND slot that cannot name its occasion is refused — it cannot prove
+// it is not the very act that declared or bound the question. ⛔ Distinct from every DECLARE/BIND
+// occasion below, which is exactly what the rule asks a caller to be able to say.
+const OCC = `zz_tx_consuming_${t}`
+
 const KEY = `zz_tx_${t}`
 const ATTR = `zz_tx_attr_${t}`
 const MADE = []
@@ -54,7 +60,7 @@ try {
   if (!u) throw new Error('agent_dev not found — this check must never run as root')
   userId = u.id
 
-  const realStore = createSequelizeMemoryStore({ db, persona: null, userId })
+  const realStore = createSequelizeMemoryStore({ db, persona: null, userId, occasion: OCC })
   // ⭐ BOUNDARY SPY — wraps the real store and records the row `reconcileFact` handed it. It DELEGATES,
   // so what is asserted below is the row that genuinely went on to be written, ⛔ not a stub's echo.
   const seen = []

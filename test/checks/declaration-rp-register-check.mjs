@@ -40,6 +40,12 @@ const Q = (s, r = {}) => seq.query(s, { replacements: r, type: seq.QueryTypes.SE
 const X = (s, r = {}) => seq.query(s, { replacements: r })
 
 const t = Date.now()
+// ⭐ AN OPERATOR OCCASION. Since 2026-09-04 the store enforces the self-authorisation rule at
+// admission, and a write to a BOUND slot that cannot name its occasion is refused — it cannot prove
+// it is not the very act that declared or bound the question. ⛔ Distinct from every DECLARE/BIND
+// occasion below, which is exactly what the rule asks a caller to be able to say.
+const OCC = `zz_rpreg_consuming_${t}`
+
 const KEY_A = `zz_rpreg_a_${t}`
 const KEY_B = `zz_rpreg_b_${t}`
 const NS_UNDECLARED = `zz_ns_${t}`
@@ -79,7 +85,7 @@ try {
   const [u] = await Q(`SELECT id::text FROM "${schema}"."mst_users" WHERE username = 'agent_dev'`)
   if (!u) throw new Error('agent_dev not found — this check must never run as root')
   userId = u.id
-  const store = createSequelizeMemoryStore({ db, persona: null, userId })
+  const store = createSequelizeMemoryStore({ db, persona: null, userId, occasion: OCC })
   const write = async (slotId, claimKind, extra = {}) => {
     const r = await store.create({
       kind: 'semantic', namespace: 'default', content: `zz_rpreg ${claimKind ?? 'none'}`,

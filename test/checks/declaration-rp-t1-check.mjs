@@ -40,6 +40,11 @@ const stamp = Date.now()
 const A_KEY = `zz_rpt1_question_a_${stamp}`
 const B_KEY = `zz_rpt1_question_b_${stamp}`
 const LABEL = `zz_rpt1_label_${stamp}`
+// ⭐ AN OPERATOR OCCASION. Since 2026-09-04 the store enforces the self-authorisation rule at
+// admission, and a write to a BOUND slot that cannot name its occasion is refused — it cannot prove it
+// is not the very act that declared or bound the question. ⛔ Distinct from every DECLARE/BIND occasion
+// below, which is exactly what the rule asks a caller to be able to say.
+const OCC = `zz_rpt1_consuming_${stamp}`
 let slotId = null
 let qA = null
 let qB = null
@@ -72,7 +77,7 @@ try {
     { uid: u.id, label: LABEL })
   slotId = s.id
 
-  const store = createSequelizeMemoryStore({ db, persona: null, userId: u.id })
+  const store = createSequelizeMemoryStore({ db, persona: null, userId: u.id, occasion: OCC })
   const admit = async (claimKind, marker) => {
     const r = await store.create({
       kind: 'semantic', namespace: 'default', content: `zz_rpt1 ${marker}`,

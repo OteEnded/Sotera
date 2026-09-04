@@ -39,6 +39,12 @@ const Q = (s, r = {}) => seq.query(s, { replacements: r, type: seq.QueryTypes.SE
 const X = (s, r = {}) => seq.query(s, { replacements: r })
 
 const t = Date.now()
+// ⭐ AN OPERATOR OCCASION. Since 2026-09-04 the store enforces the self-authorisation rule at
+// admission, and a write to a BOUND slot that cannot name its occasion is refused — it cannot prove
+// it is not the very act that declared or bound the question. ⛔ Distinct from every DECLARE/BIND
+// occasion below, which is exactly what the rule asks a caller to be able to say.
+const OCC = `zz_enf_consuming_${t}`
+
 const KEY = `zz_enf_${t}`
 const MADE = []
 const SLOTS = []
@@ -77,7 +83,7 @@ try {
   const [u] = await Q(`SELECT id::text FROM "${schema}"."mst_users" WHERE username = 'agent_dev'`)
   if (!u) throw new Error('agent_dev not found — this check must never run as root')
   userId = u.id
-  const store = createSequelizeMemoryStore({ db, persona: null, userId })
+  const store = createSequelizeMemoryStore({ db, persona: null, userId, occasion: OCC })
   const mkSlot = async (label) => {
     const [r] = await Q(
       `INSERT INTO "${schema}"."mst_slots" (id, persona, user_id, entity, namespace, canonical_label, write_count, created_at, updated_at)

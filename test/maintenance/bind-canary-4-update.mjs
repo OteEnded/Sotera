@@ -33,7 +33,7 @@ import { createSlotStore } from '../../Backend/app/components/memory-slot-store-
 import { logMemoryChange, snapshot } from '../../Backend/app/audit/memory-log.js'
 import { createMemoryV2Service } from '@ote/memory/cognition/memory-v2-service.js'
 import { devSchema } from '../harness.mjs'
-import { SLOT, QUESTION, ACTOR } from './bind-canary-common.mjs'
+import { SLOT, QUESTION, ACTOR, OCCASION } from './bind-canary-common.mjs'
 
 /** ⭐ The same SHAPE, a new tag — exactly what a build-tag slot is FOR. */
 const NEW_VALUE = process.argv[2] || 'CANARY-884127'
@@ -61,7 +61,11 @@ const S = `"${schema}"`
 const userId = before.room.id
 // ⭐ ALL THREE ADAPTERS, wired as `memory-v2-host.js` wires them. ⛔ The audit one is not optional HERE:
 // confirmation ④ is an assertion ABOUT the trail, so a harness without it could only ever fail.
-const store = createSequelizeMemoryStore({ db, persona: null, userId })
+// ⭐ THE CONSUMING OCCASION. Since 2026-09-04 a write to the (bound) canary slot must be able to name
+// the occasion it happens in — otherwise it cannot establish that it is not the very act that
+// declared or bound `build-tag`. ⛔ Distinct from OCCASION.declare / .propose / .confirm, which is
+// exactly the separation the rule asks for.
+const store = createSequelizeMemoryStore({ db, persona: null, userId, occasion: OCCASION.update })
 const slotStore = createSlotStore({ db, persona: null, userId })
 const auditLog = (entry) => logMemoryChange(db, {
   ...entry, ...(entry?.before ? { before: snapshot(entry.before) } : {}),
@@ -78,6 +82,11 @@ console.log(`slot       ${SLOT_ID}  (${SLOT.entity} / ${SLOT.label} · ${SLOT.ro
 console.log(`old value  ${JSON.stringify(liveBefore.value)}   row ${liveBefore.id}`)
 console.log(`new value  ${JSON.stringify(NEW_VALUE)}`)
 console.log(`claimKind  ${QUESTION.key}`)
+
+const SIBS_BEFORE = await Q(
+  `SELECT id::text, entity, canonical_label, namespace, question_id::text, write_count, updated_at
+     FROM ${S}."mst_slots" WHERE user_id = :u::uuid AND id <> :s::uuid ORDER BY id`,
+  { u: userId, s: SLOT_ID })
 
 const w = await mem.reconcileFact({
   entity: SLOT.entity, attribute: SLOT.label, value: NEW_VALUE, claimKind: QUESTION.key,
@@ -136,15 +145,21 @@ ok('⑤ the BIND is still in place — a write does not disturb the binding',
   slotNow?.question_key === QUESTION.key && slotNow.bindings === 2,
   `asks=${slotNow?.question_key} binding_rows=${slotNow?.bindings}`)
 
-// ⭐ ⑥ THE BLAST-RADIUS CONTROL — fingerprints compared against the recorded prior state, ⛔ not a count.
+// ⭐ ⑥ THE BLAST-RADIUS CONTROL — fingerprints compared against a recorded prior state, ⛔ not a count.
+//
+// ⚠️⚠️ AND THE BASELINE IS THIS RUN'S, ⛔ NOT THE DAY-ONE FILE. It first compared against
+// `canary-bind-before.json`, which is a snapshot from the moment Ote approved the act — so re-running the
+// script a day later reported "a sibling changed" for every slot the suite had legitimately touched since.
+// ⭐ That is an absence asserted with no date, wearing a third shape: the question is *did THIS act touch a
+// sibling*, and only a baseline taken inside this run can answer it.
 const sibsNow = await Q(
   `SELECT id::text, entity, canonical_label, namespace, question_id::text, write_count, updated_at
      FROM ${S}."mst_slots" WHERE user_id = :u::uuid AND id <> :s::uuid ORDER BY id`,
   { u: userId, s: SLOT_ID })
 const fp = (r) => `${r.id}|${r.entity}|${r.canonical_label}|${r.namespace}|${r.question_id ?? ''}|${r.write_count}|${new Date(r.updated_at).toISOString()}`
-const drifted = sibsNow.filter((r, i) => fp(r) !== fp(before.siblings[i] ?? {}))
-ok(`⑥ ⛔ NO sibling slot changed — all ${before.siblings.length} fingerprints identical to the BEFORE snapshot`,
-  sibsNow.length === before.siblings.length && drifted.length === 0,
+const drifted = sibsNow.filter((r, i) => fp(r) !== fp(SIBS_BEFORE[i] ?? {}))
+ok(`⑥ ⛔ NO sibling slot changed — all ${SIBS_BEFORE.length} fingerprints identical across THIS act`,
+  sibsNow.length === SIBS_BEFORE.length && drifted.length === 0,
   drifted.length ? `drifted: ${drifted.map((d) => d.canonical_label).join(', ')}` : 'byte-identical')
 
 const [totals] = await Q(

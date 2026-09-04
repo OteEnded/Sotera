@@ -55,8 +55,12 @@ const [me] = await q(`SELECT id::text AS id, username FROM ${S}."mst_users" WHER
 if (!me) { console.error('✖ agent_dev not found — ⛔ this check must never run as root'); process.exit(1) }
 const [convo] = await q(
   `SELECT id::text AS id FROM ${S}."txn_conversations" WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`, [me.id])
+// ⭐ AN OPERATOR OCCASION. Since 2026-09-04 a write to a BOUND slot must be able to name the occasion
+// it happens in, or it cannot establish that it is not the very act that declared or bound the
+// question. ⓘ In a real request this is the TURN KEY; an operator act names its own.
+const OCC = `zz_rcpt_consuming_${t}`
 const R = buildRetention(fastify, {
-  userId: me.id, self: { username: me.username }, conversationId: convo?.id ?? null,
+  userId: me.id, self: { username: me.username }, conversationId: convo?.id ?? null, occasion: OCC,
 })
 
 const liveCanary = async () => q(
