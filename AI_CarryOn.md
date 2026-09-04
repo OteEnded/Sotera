@@ -1,92 +1,136 @@
 # AI_CarryOn — Sotera
 
-**Checkpoint 2026-09-04.** ⭐ Read §0-A first; everything below §0-D is history.
+**Compaction checkpoint 2026-09-05 00:32 (+07:00).** ⭐ Read §0-A first; everything below §0-F is history.
 
 ---
 
-# 0-A · ⏸ WHERE THIS STANDS — M2 IS BUILT, PROVEN AND DELIBERATELY NARROW
+# 0-A · ⏸ TWO ARCS ARE OPEN. NEITHER IS BLOCKED.
 
-> ⭐⭐⭐ **M2 IS ALREADY RUNNING.** There is ⛔ no enable switch. The gate evaluates every write and returns
-> NOT-IN-SCOPE for 81 of 82 slots because they are unbound. ⇒ **BIND is the rollout unit.**
+## ⓐ M2 GOVERNANCE — `MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`
 
-```
-GOVERNED SLOTS   1 of 82   `user / build tag for this cycle` · agent_dev · question `build-tag`
-KILL SWITCH      mst_namespace_declarations.slot_governed = false   ⭐ REHEARSED, both directions
-CANDIDATES       ⛔ ZERO eligible-and-safe. agent_dev has none; the 2 corpus-wide are real personal
-                 data in ote's and hermes's rooms, and I proposed neither.
-```
-
-**STATE (RATIFIED 2026-09-04): `M2 · MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`.**
-⭐⭐ **THE MECHANISM BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE TWO DIFFERENT CLAIMS.** The first is
-TRUE; the second is ⛔ DELIBERATELY FALSE until the production evidence exists. ⛔ Do not merge them.
 ⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled"
-(it is ENABLED; 81 slots are NOT-IN-SCOPE, which is different) · ⛔ NOT "waiting on more tests".
+(it is **enabled**; 83 of 84 slots are NOT-IN-SCOPE, which is different) · ⛔ NOT "waiting on more tests".
+
+> ⭐⭐ **THE MECHANISM BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE TWO DIFFERENT CLAIMS.**
+> The first is TRUE; the second is ⛔ DELIBERATELY FALSE until production evidence exists. ⛔ Never merge them.
 
 ⚠️⚠️ **AND THE BLOCKER IS NOT CORPUS SCARCITY.** Even with a perfect slot, **no non-operator writer can
 produce an ALLOWED governed UPDATE**: compliance needs the slot's question KEY, and the model has no way to
-learn one — no read exposes it, the refusal deliberately withholds it, and the tool tells her to omit
-rather than guess. ⇒ ⭐⭐⭐ **M2's operational closure is COUPLED to the deferred governance-READ decision**,
-whichever way that goes. ⓘ Measured: the model's natural replacement rate is 2 updates in 24 days.
-⇒ `Reference/docs/DERIVATION_SOTERA_M2_CLOSURE_STATE.md`.
+learn one — no read exposes it, the refusal deliberately withholds it, the tool says omit rather than guess.
+⇒ ⭐⭐⭐ **M2's operational closure is COUPLED to the deferred governance-READ decision.** ⛔ Not reopened.
 
-⭐ **ELIGIBILITY IS OBSERVED, ⛔ NOT REMEMBERED** — `memory-bind-eligibility-host.js` rides the boot+daily
-cron beside the memory lint, and `test/maintenance/audit-bind-candidates.mjs` renders the same function.
-ⓘ Today: bound=1 · newly-eligible=0 · excluded=3 · already-ruled-on=2 (each with its date and reason).
+⭐ Eligibility is now OBSERVED, not remembered: `memory-bind-eligibility-host.js` rides the boot+daily cron
+beside the memory lint, and `test/maintenance/audit-bind-candidates.mjs` renders the same function.
+Today: bound=1 · newly-eligible=0 · excluded=3 · already-ruled-on=2 (each with its date and reason).
 
-# 0-B · ⭐⭐ THE FOUR RULES THAT GOVERN ANY FURTHER WORK HERE
+## ⓑ THE 2026-09-04 RECALL INCIDENT — four defects, worked INDEPENDENTLY
+
+She answered *"here's what we talked about today"* with a list that was mostly ten days old.
+
+```
+④ relayed speech became Ote's identity                 ✅ CLOSED — proved 14/14 · two rows retired 13/13
+① no dates on memories about him                       ✅ CLOSED — when:{date,basis} shipped, 21/21
+② a TIME question answered as a TOPIC search           ⏸ NEXT — ⛔ untouched
+③ the working-memory summary outranked the transcript  ⏸ AFTER ② — ⛔ untouched
+```
+
+⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
+
+> **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently
+> perform semantic search?**
+
+ⓘ Ote's invariant: *a read must not silently answer a different question from the one the model asked.*
+Options sketched: **A** add explicit time scope · **B** refuse/defer · **C** another architecture.
+⛔ He said: **do not pick B just because it is safer — get the actual contract first.**
+
+ⓘ For ③, the measured facts: her prompt was **24,037 tokens** (the whole conversation was present), and the
+composer's highest-utility item was the **89-token** working-memory block. ⚠️ Its rendered text is NOT
+recoverable — only its token count and utility are logged. Fixing that observability gap is part of ③.
+
+# 0-B · ⭐⭐⭐ THE RULES THAT GOVERN ANY FURTHER WORK HERE
 
 ```
 ① CONTAINMENT · a slot may be bound only if EVERY writer that has ever superseded a row in it can
-   declare a claim kind AND name an occasion.  ⛔ "it probably won't be touched" is not evidence.
-   ⇒ the auto-extractor CANNOT declare a kind and must NOT be modified to fit M2 (Ote, 2026-09-04).
-② NEW IS OUT OF SCOPE, permanently. A NEW row may still carry a pin; that pin says WHICH QUESTION IT
-   WAS ADMITTED UNDER and that the write was UNGATED — ⛔ never that a replacement was authorised.
+   declare a claim kind AND name an occasion. ⛔ "it probably won't be touched" is not evidence.
+   ⇒ the auto-extractor CANNOT declare a kind and must NOT be modified to fit M2.
+② NEW IS OUT OF M2 SCOPE, permanently. A NEW row may still carry a pin; that pin says WHICH QUESTION
+   IT WAS ADMITTED UNDER and that the write was UNGATED — ⛔ never that a replacement was authorised.
 ③ GOVERNANCE KNOWLEDGE IS A **READ** CONCERN; GOVERNANCE COMPLIANCE IS A **WRITE** CONCERN.
-   ⛔ The refusal stays opaque. Returning a question key from it would make the gate a permission
-   oracle and the refusal a read channel.
-④ THE WINDOW IS COUNT-BASED, ⛔ never time-based. Elapsed time without traffic proves nothing.
+   ⛔ The refusal stays opaque — returning a question key would make the gate a permission oracle
+   and the refusal a read channel.
+④ THE M2 WINDOW IS COUNT-BASED, ⛔ never time-based. Elapsed time without traffic proves nothing.
+⑤ `quoted` = VERBATIM, ⛔ NOT speaker attribution. It is a CREDENTIAL — the strongest class we have.
+   ⇒ ⛔ never teach it to carry who spoke; fix the EVIDENCE BOUNDARY instead.
+⑥ A DATE MUST SAY WHAT IT IS A DATE **OF**: `said` · `recorded` · ⛔ there is no `happened`.
 ```
 
-# 0-C · LIVE STATE — 2026-09-04
+# 0-C · LIVE STATE — 2026-09-05 00:32
 
 ```
-72/72 suites · @ote/memory 84/84 · migrations through 048
-slots 82 · bound 1 · questions 1 · bindings 2 · pinned rows 4 · namespaces 1 (`default`, governed)
-⚠️ `tool-call-log-check` is MODEL-DEPENDENT and flaked once (the turn called no tool); green on re-run.
+76/76 suites · @ote/memory 84/84 · migrations through 048
+:8210 PID 15548 (Sotera) · :8201 PID 27160 (OLS) · :54322 PID 7132 (pg)
+memories 151 · live 113 · slots 84 · BOUND 1 · questions 1 · bindings 2 · pinned 14 (all canary, 1 live)
+Ote's live `preferred_name` rows: 0  ⭐ correct — the two false "Cogito" rows are RETIRED, ⛔ not replaced
+ⓘ 10 legacy `zz_` slots hold 0 memories — empty shells, ⛔ not new residue
+ⓘ `tool-call-log-check` is MODEL-DEPENDENT and has flaked twice; green standalone and on re-run
 ```
 
-**BUILT THIS ARC:** the canary bind · `memory-write-receipt.js` (one bound, one vocabulary, one wait) ·
-the always-settling receipt · the model-facing projection (two audiences, one truth) · the
-self-authorisation rule wired at admission · `claimKind` end-to-end from both model tools ·
-the rehearsed kill switch.
+**BUILT SINCE THE LAST CHECKPOINT:** the model-tool `claimKind` capability · the always-settling receipt
+(`persisted / refused / accepted`) · the model-facing write result · the self-authorisation rule wired at
+admission · the rehearsed namespace kill switch · continuous bind-eligibility on the cron · the
+relayed-speech threading fix · `when:{date,basis}` on every memory · the `sotera_chat_` export rename.
 
-⚠️ **`PortableComponents/Packages/Memory` AND `Tools/Retention` HOLD UNCOMMITTED WORK.** The package repo
-also contains pre-existing changes that are ⛔ NOT mine — my `claimKind` / `modelResult` / `makeObservation`
-hunks are cleanly separable. ⏸ Ote: independently attributable before M2 closeout.
+⚠️⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED, AND SO IS `Tools/Retention`.**
+The package repo ALSO holds **pre-existing work that is NOT mine** — `cognition/memory-pipeline.js`, two
+`.bak` files, two test files, and earlier hunks in `memory-v2-service.js` and `index.js`.
+
+⭐ **MINE, cleanly separable:** `claimKind` in `reconcileFact` · `claimKind` in `makeObservation`'s `common`
+· `modelResult` + the two tool handlers in `index.js` · `temporalProvenance` / `TEMPORAL_BASIS` / `when` in
+`view()`. ⏸ Ote: this must become **independently attributable in git before M2 closeout**, ⛔ without
+disturbing the pre-existing work.
 
 # 0-D · ⛔⛔ FENCES
 
 ```
 ORIGIN PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 UNTOUCHED · ROME UNTOUCHED · POST-M2 OUT
-⭐ ONE GOVERNED SLOT · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ EXTRACTOR NOT MODIFIED
+⭐ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE
+⛔ THE EXTRACTOR IS NOT MODIFIED TO FIT M2 · ⛔ ② AND ③ UNTOUCHED · ⛔ NO GENERATED M2 TRAFFIC
 ```
 
-# 0-E · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
+# 0-E · ⏸ RESIDUALS — recorded, ⛔ none of them fixed
 
 ```
-⭐⭐⭐ A "nothing changed" assertion is exactly the one that PASSES WHEN THE INSTRUMENT IS BROKEN
-      => every one needs a POSITIVE CONTROL first, and it must cross the PERSISTENCE boundary
+⚠️ `recall_own_memory.decidedOn` is a bare `created_at::date` through Sequelize ⇒ renders in UTC and is a
+   DAY EARLY before 07:00 local. ⛔ Ote ratified `decidedOn` unchanged; correcting it is its own decision.
+⚠️ the `when` date uses the DEPLOYMENT's timezone, ⛔ not the individual user's — no per-account column.
+⚠️ INLINE ATTRIBUTED SPEECH is caught today only by the shipped rule's 8-character floor. ATTRIBUTION
+   itself — who the surrounding clause assigns a span to — is computed NOWHERE. Open residual.
+ⓘ Ote's room holds live rows under TWO persona scopes (`null` 31 · `'sotera'` 20). A read scoped to one
+   cannot see the other. ⛔ Not investigated.
+ⓘ Closed field lists remain the standing hazard — 13 recorded instances.
+```
+
+# 0-F · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
+
+```
+⭐⭐⭐ MEASURE THE THING THAT EXISTS BEFORE DERIVING ITS REPLACEMENT. I wrote a detector and a second
+      gate for ④; the shipped rule already solved it AND was better. Both were deleted.
+⭐⭐⭐ A "nothing changed" assertion is the one that PASSES WHEN THE INSTRUMENT IS BROKEN ⇒ positive
+      control FIRST, and it must cross the PERSISTENCE boundary.
 ⭐⭐⭐ A GREEN CAN BE STRUCTURAL: operator labels can never equal message UUIDs, so the occasion rule
-      would have passed 100% of the time and proved nothing. Construct the ATTACK before taking credit.
-⭐⭐  A harness that omits an OPTIONAL adapter observes a system missing a part, not the system
-⭐⭐  ⛔ NEVER assert a GLOBAL ABSENCE — read a BASELINE inside the run and assert the DELTA
-⭐⭐  `col <> 'x'` IS NULL-UNSAFE AND SILENTLY GREEN => `IS DISTINCT FROM`
-⭐⭐  TWO fixtures under ONE entity COLLAPSE INTO ONE SLOT — separate the ENTITY, not just the label
-      (this cost two checks; the second time I had already written the warning)
-⭐   A property of the NAMESPACE is not a property of the SLOT — `slot_governed` is true for all 82
-⭐   An explicit field list DROPS what it was not told about — 13 times here now
-⭐   ASSERT THE STATE, ⛔ not the implementation order · "not in scope" ≠ "deferred"
-⭐   A rollback nobody has run is a hope
+      would have passed 100% and proved nothing. CONSTRUCT THE ATTACK before taking credit.
+⭐⭐  A DATE IS A LOCAL FACT. `toISOString()` is UTC; `::date` is the SESSION's zone — and psql and
+      Sequelize DISAGREE. Name the zone explicitly or ship an off-by-one day.
+⭐⭐  ⛔ NEVER assert a GLOBAL ABSENCE — read a BASELINE inside the run and assert the DELTA.
+⭐⭐  `col <> 'x'` IS NULL-UNSAFE AND SILENTLY GREEN ⇒ `IS DISTINCT FROM`.
+⭐⭐  TWO fixtures under ONE entity COLLAPSE INTO ONE SLOT — separate the ENTITY, not just the label.
+⭐   A property of the NAMESPACE is not a property of the SLOT (`slot_governed` is true for all 84).
+⭐   A harness that omits an OPTIONAL adapter observes a system MISSING A PART.
+⭐   An explicit field list DROPS what it was not told about.
+⛔   `node --check` PASSES ON AN EMPTY FILE. A syntax check is not an existence check — I truncated a
+      1090-line file with a failed script and restored it from git.
+⛔   ASSERT THE STATE, ⛔ not the implementation order · "not in scope" ≠ "deferred" ·
+      "could not establish X" must never become "X".
 ```
 
 ---

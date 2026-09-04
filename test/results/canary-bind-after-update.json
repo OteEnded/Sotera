@@ -1,10 +1,10 @@
 {
-  "captured_at": "2026-09-03T12:55:18.878Z",
-  "new_value": "CANARY-884127",
+  "captured_at": "2026-09-04T00:08:30.866Z",
+  "new_value": "CANARY-509733",
   "write": {
     "ok": true,
     "action": "update",
-    "id": "403fa19e-d2ee-452d-9158-50654f711108"
+    "id": "fce5876f-3224-4623-9e18-d0ad635482f2"
   },
   "slot": {
     "qid": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8",
@@ -33,8 +33,24 @@
       "value": "CANARY-884127",
       "supersedes_id": "e64da54b-fa97-4433-92a3-fe0c3027bb0d",
       "pin": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8",
-      "invalid_at": null,
+      "invalid_at": "2026-09-04T00:08:01.513Z",
       "created_at": "2026-09-03T12:55:18.616Z"
+    },
+    {
+      "id": "4701001e-5264-423a-a7df-5769b00f69e6",
+      "value": "CANARY-661208",
+      "supersedes_id": "403fa19e-d2ee-452d-9158-50654f711108",
+      "pin": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8",
+      "invalid_at": "2026-09-04T00:08:30.592Z",
+      "created_at": "2026-09-04T00:08:01.511Z"
+    },
+    {
+      "id": "fce5876f-3224-4623-9e18-d0ad635482f2",
+      "value": "CANARY-509733",
+      "supersedes_id": "4701001e-5264-423a-a7df-5769b00f69e6",
+      "pin": "803924c3-d4bb-4fa7-aeff-d9e29706b4a8",
+      "invalid_at": null,
+      "created_at": "2026-09-04T00:08:30.585Z"
     }
   ],
   "audit": [
@@ -42,35 +58,35 @@
       "action": "supersede",
       "actor": "ote-operator",
       "reason": "lexical 1.000 · \"build tag for this cycle\" → slot \"build tag for this cycle\"",
-      "memory_id": "e64da54b-fa97-4433-92a3-fe0c3027bb0d",
-      "related_id": "403fa19e-d2ee-452d-9158-50654f711108",
+      "memory_id": "4701001e-5264-423a-a7df-5769b00f69e6",
+      "related_id": "fce5876f-3224-4623-9e18-d0ad635482f2",
       "before": {
         "kind": "semantic",
         "tier": "warm",
-        "value": "CANARY-771403",
+        "value": "CANARY-661208",
         "entity": "user",
         "pinned": false,
         "source": null,
-        "content": "user's build tag for this cycle: CANARY-771403",
+        "content": "user's build tag for this cycle: CANARY-661208",
         "attribute": "build tag for this cycle",
         "confidence": 0.6,
-        "created_at": "2026-09-03T12:53:27.239Z",
+        "created_at": "2026-09-04T00:08:01.511Z",
         "expired_at": null,
         "importance": null,
         "invalid_at": null,
         "access_count": 0,
-        "supersedes_id": "ac171c98-8c15-4d44-a0c5-074edd5ac19a",
+        "supersedes_id": "403fa19e-d2ee-452d-9158-50654f711108",
         "source_message_id": null
       },
       "after": {
-        "value": "CANARY-884127",
-        "replacedBy": "403fa19e-d2ee-452d-9158-50654f711108"
+        "value": "CANARY-509733",
+        "replacedBy": "fce5876f-3224-4623-9e18-d0ad635482f2"
       }
     }
   ],
   "totals": {
     "bound_slots": 1,
-    "pinned": 2,
-    "memories": 127
+    "pinned": 4,
+    "memories": 129
   }
 }

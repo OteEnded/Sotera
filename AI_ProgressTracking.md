@@ -7725,3 +7725,138 @@ Live picture today: bound=1 · newly-eligible=0 · excluded=3 (`communication pr
 `current goal`) · already-ruled-on=2 (`soteras_family_lineage…`, `core_commitments`).
 
 Canary remains the sole governed slot. No binds, no generated traffic, no read surface. All fences held.
+
+## 2026-08-05 — THE VOICE PIPELINE: drift much improved, two engine defects fenced, and the GGUF route closed ✅
+
+- Summary: three threads finished. **(1) The GGUF/VoxCPM2 route is measured and closed** — usable, but only when
+  the chat model is small. **(2) Ote's longest-running complaint, the "diff between sentence", is much improved
+  in POST-PROCESSING on the engine that already ships** — his words, kept exactly: *"it not completely fix tho,
+  but it improve so much i dont feel annoy anymore."* **(3) Two real OmniVoice defects found and fenced**, both
+  landing on the FIRST piece of a reply. Plus his C: drive went from 21 GB free to 99 GB.
+
+- **GGUF/VoxCPM2, on CUDA, with no system change.** Portable CUDA 13.3 assembled from NVIDIA's per-component
+  zips (750 MB vs a 3.4 GB installer unpacking to 9.3 GB): no admin, no UAC, and **the 610.74 driver never
+  touched** — an installer replaces the display driver by default and that rollback is all that holds back the
+  2026-08-01 GPU faults. Dead ends recorded: pip `cuda-nvcc` wheels ship **ptxas but no nvcc**; `-extract`
+  requires elevation; **CUDA 12.9's `cudafe++` dies 0xC0000005 on VS 18's headers** (reproduced on a 4-line
+  kernel; 12.9's gate is `_MSC_VER >= 1950`, VS 18 is 1951, 13.3's is `>= 1960`). ⚠ `sm_120` is mandatory on
+  these Blackwell cards. Results: **RTF 0.296 short / 0.229 long** (vs bf16 GPU 0.89, ggml CPU 3.47), VRAM
+  5,314/6,490 MiB — a few hundred MiB *under* bf16 on the same basis.
+  ⇒ **A 26B brain OR the 8/10 voice, not both on 2x16 GB.** `gemma4:26b` leaves 1.2–1.9 GB; a ~9B leaves ~15 GB.
+  Plan written, NOT built per his instruction: `Reference/docs/PLAN_VOICE_ENGINE_SWITCHABLE.md`.
+
+- **The drift fix, and why the first attempt failed.** Matching each piece's LEVEL (gain) and PITCH to a
+  per-voice target works; the FILTER was what sounded wrong. `torchaudio.functional.pitch_shift` is a phase
+  vocoder — it randomises phase between STFT bins and smears transients — and he named it instantly: *"the tone
+  is normallize better, but the filter is kinda add noise/ai feel."* **TD-PSOLA** (Praat/parselmouth) does no
+  spectral transform at all, and is **35x cheaper than WORLD** (12 ms vs 546 ms per 4 s piece). ⇒ **His ear
+  separated "the idea is right" from "the implementation is wrong" — ask which half failed before abandoning an
+  approach.** Live proof: this voice's own spread is **30.5 Hz** (99.6–130.1 across ten renders); matched output
+  through the running sidecar holds **6.4 Hz**.
+  ⚠ **The target is per-voice and FIXED, never the first piece** — the ramp makes piece 0 the shortest text the
+  engine ever sees and the least reliable thing measured all day; targeting it once pushed every other piece
+  +3 semitones toward garbage. A fixed target also makes the voice consistent across the WHOLE conversation.
+
+- **Two OmniVoice defects, both on the first piece.** MEASURED: the engine returns **zero samples** for very
+  short input and then dies inside its own post-processing — 2 of 8 renders for a 10-char Thai greeting, 3 of 8
+  for "Hello", 0 of 8 at 12+ chars. Fixes: **MIN_SPEAKABLE = 15 in both cutters** (mid-stream a runt waits; at
+  flush it is carried FORWARD into the next piece, or merged BACKWARD when it lands last — never dropped), and
+  **an empty render is now a 204 SKIP, not a 502** (the sidecar retries, then answers 204; the service turns it
+  into `{empty:true}` and the route into 204, reusing the path a table-only piece already takes).
+  ⚠ 204 passes `res.ok`, so without an explicit check it fell through to "returned no audio" and raised a 502.
+
+- **Numbers CLOSED, and the fix was ours all along.** *"after resove number, omni doing ok"* —
+  `speakable.js expandNumbers()` means no engine ever sees a Thai digit in production, so its measured inability
+  to read them (78 % of its own spelled control; Q8 82 %) never reaches a user. ⇒ **Never weigh number handling
+  in an engine choice, and never reach for F16 to fix it.**
+
+- **VoxCPM2 is clone-only.** *"for no ref/clone, the sound is pretty random in style"* — no-reference is an
+  unsupported mode, not a light option. On that engine a persona's voice IS a reference clip.
+
+- **His disk.** 40.4 GB of model weights moved C: to `D:\ProgramHolder\HuggingFaceModels`, 21 repos consolidated
+  (43.3 GB), verified with `snapshot_download(local_files_only=True)` BEFORE deleting anything. Cause was OURS:
+  he already had `HF_HOME` set machine-wide to D:, and every lab command overrode it — a line this very doc
+  called *"NOT OPTIONAL"*. Eight docs de-hardcoded. Also reclaimed the fish-speech venv (18.4 GB, an engine that
+  OOM'd at 15.16 GiB on an IDLE 16 GB card and never rendered a single clip), `.venv-fa`, and a duplicate HF
+  cache; Fish's 10.25 GB of weights were **moved, not deleted**, after I found my own note claiming they were
+  already on D: was false. **C: 21 GB to 99 GB free.**
+
+- Files touched: `Backend/app/voice/service.js` (204 to `{empty:true}`) · `Backend/app/voice/stream-speech.js` +
+  `Frontend/src/lib/speechStream.ts` (MIN_SPEAKABLE, carry-forward, merge-backward — MIRRORED) ·
+  `test/unit/speech-mirror.test.mjs` (+3 cases) · `test/checks/voice-check.mjs` (+204 case) · `.gitignore` ·
+  `AI_CarryOn.md` · `Reference/docs/PLAN_VOICE_ENGINE_SWITCHABLE.md` (new) · VoiceModels (unversioned):
+  `sidecar/serve.py`, `sidecar/serve_shared.py` (new, shared estimator), `sidecar/calibrate_voice.py` (new),
+  `sidecar/voice_targets.json` (new), `round2/` probes (`gguf_render`, `gguf_verdicts`, `piece_match`,
+  `piece_pieces.mjs`, `opener_probe`, `match_filters`, `repeat_probe`, page builders), README traps 27–28,
+  EAR_NOTES, engine NOTES.
+
+- Verification: **32 mirror + 54 voice unit tests, full `voice-check.mjs`, and the headed `shot-autospeak-ui.mjs`
+  drive all green.** ⚠ Both new test groups were confirmed to FAIL without their fix (two mirror cases fail with
+  MIN_SPEAKABLE disabled; the voice-check 204 case returned 502 before the service change) — *an assertion that
+  passes pre-fix proves nothing*. UI drive re-run because the cutter change moves the highlight spans: highlight
+  tracks and stays lit (4/4 samples, area 4292 to 6793), 0 ms seams, cleared on Stop, both themes eyeballed, six
+  shots archived. ⚠ The **frontend bundle was stale** (built 2026-08-04 18:10) — answer-with-speak cuts in the
+  browser, so the floor would not have applied at all until `npm run build` (run from `Frontend/`, outDir is
+  `Backend/public/dist`). My first check for it was a false negative (a pure marker a minifier deletes); a
+  `globalThis` side-effect marker proved it, and then needed one more clean rebuild to strip the marker out.
+
+- ⚠ **Four wrong verdicts in one day, all the same root cause** — comparing to a single number instead of the
+  measured spread: a flat 4 Hz pitch threshold against 7.6 Hz of noise; a duration check with only a lower
+  bound; a repetition probe compared to one control while another known-good clip scored higher; and a VRAM
+  claim that paired a device delta against an allocator-level figure. Ote caught two with four-word questions
+  (*"how is it bigger?"*). Now README trap 28: **a threshold that is not the measured spread is a coin toss with
+  a sentence attached.** Also: I took the app server down and restarted it from the wrong cwd — `server.js`
+  lives in `Backend/`, not the repo root.
+
+- Next action: **his ear on the LIVE pipeline** (not the lab clips) — pieces should hold ~115 Hz and a short
+  greeting opener should no longer break. Then, if he gives a separate go-ahead, build
+  `PLAN_VOICE_ENGINE_SWITCHABLE.md`. Sotera's voice calibration waits until he decides personas.
+
+---
+
+## 2026-09-05 00:32 (+07:00) — COMPACTION CHECKPOINT · ④ and ① closed, ② and ③ open
+
+**76/76 suites, 0 FAIL lines. @ote/memory 84/84.** Carry-on rewritten with a fresh checkpoint (§0-A the two
+open arcs · §0-B the six standing rules · §0-C live state · §0-D fences · §0-E residuals · §0-F lessons).
+
+**④ RELAYED SPEECH — closed.** The rule already existed: `admissibleToSlot`'s relayed-speech check has been
+in the tree since 032 and its comment names the exact sentence. Run against Ote's full probe set it is
+correct on every line, including the inline case I had declared unreachable. ⇒ the defect was ONE MISSING
+ARGUMENT — `captureFacts` never handed the store the asserted text, and that is the path that produced the
+incident, because `makeObservation` upgrades an identity-attributed fact into an identity observation. I had
+written a new detector and a second gate first; both deleted, and the superseded derivation kept with a
+notice rather than erased. Two false `preferred_name = "Cogito"` rows retired with one audit row each,
+`before` snapshots intact, both source turns preserved, and the exact recall that produced the incident now
+returns neither — while a TRUE memory mentioning Cogito is untouched.
+
+**① TEMPORAL PROVENANCE — closed.** Every memory now carries `when: {date, basis}` through the shared
+`view()`, so `recall_memory` and `list_memories` agree by construction. Two basis values, `said` and
+`recorded`, and deliberately no `happened` — the event's own time is not represented anywhere and cannot be
+derived, so an unfillable slot would only invite something to fill it.
+
+⚠️ **Two defects the red-proof caught, both mine, both the same off-by-one.** A JS `toISOString()` renders
+UTC: the Rome turn `2026-08-10 03:19+07` is the 10th to the person who typed it and the 9th in UTC. And
+`::date` alone does not fix it either — psql's session is Asia/Bangkok while **Sequelize's is UTC**, so the
+answer depended on which driver connected. The zone is now named in the query.
+
+⚠️ **A destructive slip worth recording**: a failed script truncated `memory-store-sequelize-host.js` to
+zero bytes; restored from git within the minute, losing only my own uncommitted edit. `node --check` PASSED
+on the empty file — a syntax check is not an existence check.
+
+**M2 unchanged and ratified as** `MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`, with the
+coupling recorded: the ALLOW half of the window is unreachable while governance knowledge stays a deferred
+read decision. Bind eligibility now rides the boot+daily cron so a newly eligible slot announces itself;
+today it reports bound=1, newly-eligible=0, excluded=3, already-ruled-on=2.
+
+**⏸ NEXT, in order:** ② — *can `recall_memory` answer a temporal question, or must it refuse rather than
+silently perform semantic search?* Ote's invariant: a read must not silently answer a different question
+from the one asked, and ⛔ do not pick "refuse" merely because it is safer. Then ③, whose observability gap
+— the rendered working-memory block is not recoverable, only its token count and utility — is part of the
+work. Then back to M2.
+
+⛔ Fences all hold: canary is the only governed slot, no second bind, no governance read surface, the
+extractor is not modified, ② and ③ untouched, no generated M2 traffic.
+
+⚠️ Standing item: `PortableComponents/Packages/Memory` and `Tools/Retention` remain uncommitted. The package
+repo also holds pre-existing work that is not mine; my hunks are cleanly separable and must become
+independently attributable before M2 closeout without disturbing the rest.
