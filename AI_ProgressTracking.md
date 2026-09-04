@@ -7394,3 +7394,51 @@ green that only reflects operator labels never equalling message UUIDs proves no
 
 Fences unchanged: canary is the only governed slot, no model-tool claimKind, Origin/P1/Rome/12b/M2-6/
 post-M2 all held.
+
+
+---
+
+## 2026-09-04 — THE CONSUMING-OCCASION RULE IS WIRED, AND PROVED BY A CONSTRUCTED ATTACK
+
+**70/70 suites, 0 FAIL lines. @ote/memory 84/84.** Committed 3a0acf0.
+
+`resolveSlotQuestion` has always returned `declared_in_occasion` AND `bound_in_occasion`; the store
+computed both and threw them away, so a ratified rule was proven in RP-D0 and enforced nowhere. It now
+runs at the write seam as its OWN refusal — `SELF_AUTHORISED_QUESTION`, ⛔ not a kind mismatch, because
+the remedies differ.
+
+The consuming occasion is the turn key, construction-scoped: `reconcileFact` stamps `source_message_id`
+from its own constant and accepts no argument for it, so a caller cannot name the occasion it is judged
+in. An operator act with no turn names its own instead, threaded through
+`buildRetention → buildMemoryToolService → buildMemoryV2 → the store`.
+
+**The attack is constructed, exactly as required.** A real message row is created; its id becomes the
+DECLARE occasion AND the BIND occasion (the propose/confirm separation still holds, so the TURN goes on
+the confirm); the consuming UPDATE is then issued from a service built for that same turn, with a correct
+claim kind so nothing else can be the reason. It is REFUSED. The identical write from a DIFFERENT turn is
+ALLOWED and pinned. Without that construction the rule would have passed 100% of the time because every
+declare/bind in the corpus is operator-origin and a consuming write carries a message UUID — disjoint
+value spaces, a green that proves nothing.
+
+⚠️⚠️ **Two defects the suite caught during the wiring, both mine, and the first was serious.**
+`slotGoverned` is a NAMESPACE property — TRUE for every slot in `default`, bound or not. Keying the rule
+on it alone made every ordinary occasion-less write in the whole namespace answerable to a question nobody
+had declared, and two unrelated suites (`persona-global-write`, `write-lane-composition`) went red on an
+ordinary `keep`. That is the 031 outage rebuilt through a new door. The rule now requires a slot that is
+actually BOUND — the same NOT-IN-SCOPE vs GOVERNED distinction the replacement gate already draws, which I
+simply failed to apply. ⭐ Control 7b now covers precisely that case: an unbound slot written with NO
+occasion at all must be allowed. My original 7 passed an occasion, so it only ever exercised the value
+comparison and would not have caught it.
+
+The second: the canary script's blast-radius control compared against the day-one snapshot, so re-running
+it reported drift for every slot the suite had legitimately touched since. It baselines inside its own run
+now — the absence-with-no-date lesson in a third shape.
+
+**The honest consequence of fail-closed, stated rather than discovered:** a write to a BOUND slot that
+cannot name its occasion is refused, with `no-occasion` as its named reason. Seven existing checks and the
+canary operator scripts now name theirs. That is a real tightening and it is the ratified rule.
+
+Canary verified end to end afterwards: 653912 → 771403 → 884127 → 661208 → 509733, all preserved, one live
+row, pinned, audited, bind intact, no sibling touched. Still the ONLY governed slot.
+
+⏸ Next in his order: revisit model-tool claimKind, then broader M2 enablement. Fences unchanged.
