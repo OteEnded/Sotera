@@ -7442,3 +7442,50 @@ Canary verified end to end afterwards: 653912 → 771403 → 884127 → 661208 �
 row, pinned, audited, bind intact, no sibling touched. Still the ONLY governed slot.
 
 ⏸ Next in his order: revisit model-tool claimKind, then broader M2 enablement. Fences unchanged.
+
+
+---
+
+## 2026-09-04 — THE MODEL TOOL CAN NOW DECLARE WHICH QUESTION ITS CLAIM ANSWERS
+
+**71/71 suites, 0 FAIL lines. @ote/memory 84/84.** Committed f78550c (Sotera side).
+
+`claimKind` reaches the gate from the model's own tools. Eight boundaries stood between the tool schema
+and the store, and **two of them ate it silently**: `makeObservation` did not carry it in `common`, and
+`commitToMemory`'s explicit arg list dropped it — the canary proved that second one behaviourally on
+2026-09-03. Both now carry it. The tool schemas gained the parameter (`additionalProperties:false` would
+otherwise reject the argument outright), and `keep()`'s three-field call to `reconcileFactAsync` was the
+third closed list.
+
+**No inference, no default, absent stays absent.** `keep()` refuses to derive a kind from the attribute
+for the same reason it refuses to guess `mine`. `commitToMemory` OMITS the key entirely rather than
+passing null — *"the writer did not say"* and *"this answers no question"* are different facts and a
+governed slot's decision turns on the difference.
+
+⭐ The anti-inference control is the sharpest assertion in the check: the slot is bound, the writer stays
+silent, and the write is REFUSED. A system that derived the kind from the attribute or from the slot's own
+binding would have allowed it.
+
+**The tool descriptions are written to make omitting comfortable, on purpose.** A withheld tool whose
+existence was merely implied drew nine attempts across three days with the argument names guessed, so a
+parameter that invited a plausible value would produce invented keys at volume — and an invented key can
+only ever be refused. So the description says *only if you actually know it*, says omitting is a complete
+answer, and does not hint that supplying one would help.
+
+**The proof drives `runTool`, not the host functions** — the real writer path, tool schema through gate.
+ALLOW with the right kind is pinned and supersedes; missing AND mismatched are both refused (the mismatch
+uses a real, declared, different question, so the gate is shown comparing identities rather than merely
+rejecting the unknown); the previous belief stays live and nothing is written; an unbound slot is
+unaffected with or without a kind and earns no pin; both doors — `keep` and `remember_fact` — are proved on
+both sides. The model-facing refusal still exposes no `claimKind`.
+
+⚠️ I repeated a mistake I had already documented: three fixtures under one entity collapsed into one slot,
+so the "ungoverned" and `remember_fact` cases were silently exercising the GOVERNED slot. Separating the
+ENTITY separates the slot key itself. The warning in the new check is oversized deliberately.
+
+⏸ **One question for Ote before broader M2**: the model-facing refusal text was ratified when the model
+COULD NOT supply a claim kind — *"tell the model what happened, not how to repair a capability it does not
+possess."* It now possesses it. Whether that text should change is his call; I have not touched it.
+
+Fences unchanged: canary still the only governed slot, Origin PARKED, M2-6 UNWIRED, 12b FROZEN, P1 and
+Rome UNTOUCHED, post-M2 OUT.
