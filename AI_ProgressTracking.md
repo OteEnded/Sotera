@@ -7542,3 +7542,55 @@ survives teardown — small, separate work.
 
 Doc: `DERIVATION_SOTERA_GOVERNED_REFUSAL_DISCLOSURE.md`. Fences unchanged; canary still the only governed
 slot.
+
+
+---
+
+## 2026-09-04 — DERIVED: the M2 enablement / rollout contract
+
+⛔ Nothing enabled, nothing bound, no read surface. Measurement and derivation only.
+
+**The framing correction comes first, because it changes the question.** There is no M2 config flag — I
+grepped settings and config. The gate already runs on EVERY write in the corpus and returns NOT-IN-SCOPE
+for 81 of 82 slots because they are unbound. ⇒ **the rollout IS the bind sequence**; there is nothing to
+turn on. That is a better question than "enable or not", because it is per-slot and reversible by
+namespace rather than all-or-nothing.
+
+**The measurement that dominates everything:** only **6 of 82 slots have ever been superseded**, 10
+supersedes total, **4 of them my own canary**. Only an UPDATE is governed, so binding a slot that never
+updates changes nothing observable — 76 of 82 would be governed vacuously. The entire real rollout surface
+is **five slots**. And 0 slots hold more than one live row, so the legacy invariant holds corpus-wide.
+
+⭐⭐⭐ **The hard constraint, and it is the finding that matters most:** the **auto-extractor** produced 5 of
+the 6 non-canary replacements, and it **cannot declare a claim kind by construction** — it infers facts
+from prose and has no basis for naming a declared question; inventing one would break the *no inferred
+kind* rule ratified this morning. ⇒ **binding a slot the extractor updates means the extractor may no
+longer update it.** That is a behavioural narrowing, not a safety gate, and it needs Ote's ruling rather
+than an implementation decision.
+
+**Containment is measurable, not assumed.** Only `kind='semantic'` has ever superseded — cards and
+episodic prose have produced ZERO, so Dreaming's card path cannot meet the gate at all. Rome's
+reconciliation DID supersede once and cannot declare a kind. ⇒ the containment rule is one sentence: *a
+slot may be bound only if every writer that has ever superseded a row in it can declare a claim kind and
+name an occasion.* That covers Dreaming, 12b, Rome, P1 and any subsystem nobody has thought of yet,
+without naming any of them — which is why it is the rule rather than a checklist.
+
+**The boundary is per SLOT; the namespace is a kill switch.** `slot_governed = false` on `default` makes
+every bound slot NOT-IN-SCOPE in one statement, no code change, no unbind — so **the one-way door of BIND
+is made safe by a namespace-level off switch**. Binds and history survive; they simply stop being
+operative. I propose exercising it on the canary before any second bind: a rollback nobody has run is a
+hope.
+
+**The observation window must be count-based, not time-based**, and the measurement says why: 6 non-canary
+replacements in ~3 weeks. A two-week soak would very likely observe ZERO governed UPDATEs and then be
+reported as success — a green from a blind instrument. ⚠️ The honest consequence is that a meaningful
+window may take months at the measured rate. That is a fact about the rollout, not an argument for
+shortening it.
+
+Nine regression classes and the operationally-closed evidence set are in the doc. Notably what does NOT
+count: a green suite, elapsed time without traffic, and the canary alone — it is instrumentation Ote chose
+*because* nothing depends on it, which is what made it a good first bind and exactly what stops it being
+sufficient evidence.
+
+Doc: `DERIVATION_SOTERA_M2_ROLLOUT_CONTRACT.md`. Five rulings requested. Canary still the sole governed
+slot; all fences unchanged.
