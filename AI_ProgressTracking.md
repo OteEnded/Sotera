@@ -8397,3 +8397,14 @@ targetless failure has no state. ⭐ `REFLECTION_GENERATION` stays 3 (P0 asserts
 **A/B ready.** `test/pipeline/reflection-gen4-ab.mjs` (clone each of the 20 largest agent_dev conversations twice, `updated_at` −4 d so
 the live cron never claims them, alternate order, trigger manual, real model, incremental JSON) · `reflection-gen4-ab-report.mjs`
 (blind PAIRS doc with X/Y by hash · METRICS doc with every pre-registered falsifier · key file). ⛔ Gen 3 live, unchanged.
+
+## 2026-09-05 14:05 (+07:00) — ⏸ GEN-4 A/B RUN · G4 STOP — awaiting Ote's blind pairing and ADOPT / REJECT / ITERATE
+
+Suite after the build: 80/81 (the one = pre-existing D5 drift). A/B: 20 pairs × 2 arms through the real lane and model
+(`ollama/qwen3.6:35b`), clones `updated_at` −4 d, alternating order, trigger manual; every pass completed (40/40 ok, 2–25 s).
+**Result:** Gen 4's citation affordance was used **0 times in 14 retains** (no `from`, no `quote` in any tool call) ⇒ resolution /
+verification rates UNDEFINED, establishment 0/6, adoption precondition **NOT MET**. F1 no (retains/pass 0.40 → 0.70, an INCREASE),
+F2 no (kinds identical), F3 no, F5 UNDEFINED, F4 ⏸ Ote. ⚠️ The numbered transcript alone changed her behaviour: more retains, shorter
+content (252 → 103 chars mean) — a prompt change is a prompt change. 12 of 20 pairs retained nothing on both sides (fixture material).
+Docs: `MEASUREMENT_SOTERA_REFLECTION_GENERATION_4_PAIRS.md` (blind, X/Y by hash) · `…_METRICS.md` · key
+`test/results/reflection-gen4-ab-key.json`. ⛔ Production stays Gen 3. ⛔ Not adopted on mechanics. Clones kept until the decision.
