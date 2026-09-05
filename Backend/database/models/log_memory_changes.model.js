@@ -98,6 +98,11 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.STRING(200),
                 allowNull: true,
             },
+            // ⭐ THE ACT this change belongs to (migration 049) — so the audit trail is never the one place acts are
+            // still anonymous (M7). An operator repair carries an `operator` label; a store-made change carries the
+            // writing act. NULL on rows that predate 049.
+            act_kind: { type: DataTypes.ENUM("turn", "revisit", "dreaming", "job", "operator", "ingest", "record", "request"), allowNull: true },
+            act_id: { type: DataTypes.TEXT, allowNull: true },
         },
         {
             tableName: "log_memory_changes",

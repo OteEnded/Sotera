@@ -365,6 +365,29 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 type: DataTypes.JSONB,
                 allowNull: true,
             },
+            // ══ ⭐⭐⭐ THE FOUR AXES (migration 049) — occasion · reachability · provenance(child table) · temporal(derived) ══
+            //
+            // `FINAL_SEMANTIC_REMEDIATION_ARCHITECTURE_V1.md`: no axis is derived from another. `source_message_id`
+            // above is UNTOUCHED — it kept three different meanings by writer (the turn read · the occasion turn · the
+            // conversation's newest message) and is now a legacy pointer read only by compat surfaces.
+            //
+            // WRITER — the contract key (memory-writer-contracts.js). ⛔ Never derived from `source`'s prefix:
+            // `model-tool` is written by BOTH chat tools and reflection's `retain`, so the prefix cannot tell a
+            // turn-driven write from a pass-driven one. Set by the host that knows which occasion it serves.
+            writer: { type: DataTypes.STRING(32), allowNull: true },
+            // OCCASION — the identity of the ACT: (kind, id) into the ledger that already records it (a turn · a
+            // revisit · a dreaming pass · a job run · a label). NULL = no act recorded. ⛔ No FK (048's reasoning).
+            act_kind: { type: DataTypes.ENUM("turn", "revisit", "dreaming", "job", "operator", "ingest", "record", "request"), allowNull: true },
+            act_id: { type: DataTypes.TEXT, allowNull: true },
+            // REACHABILITY — what material the act worked from. A pass-driven writer's material is a RANGE,
+            // ⛔ never a point. States (readable · unreadable · destroyed · never-recorded · unreviewed) are computed
+            // at read. NULL kind = not recorded (legacy); 'none' = the writer's material is not a conversation.
+            reach_kind: { type: DataTypes.ENUM("turn", "range", "document", "none"), allowNull: true },
+            reach_conversation_id: { type: DataTypes.UUID, allowNull: true },
+            reach_message_id: { type: DataTypes.UUID, allowNull: true },
+            reach_from_rolling_id: { type: DataTypes.INTEGER, allowNull: true },
+            reach_to_rolling_id: { type: DataTypes.INTEGER, allowNull: true },
+            reach_document: { type: DataTypes.TEXT, allowNull: true },
         },
         {
             tableName: "txn_memories",

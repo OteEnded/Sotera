@@ -36,6 +36,7 @@ import define_mst_trigger_jobs from "./mst_trigger_jobs.model.js";
 import define_txn_conversations from "./txn_conversations.model.js";
 import define_txn_messages from "./txn_messages.model.js";
 import define_txn_memories from "./txn_memories.model.js";
+import define_txn_memory_evidence from "./txn_memory_evidence.model.js";
 import define_txn_user_memories from "./txn_user_memories.model.js";
 import define_txn_feedback from "./txn_feedback.model.js";
 import define_txn_token_grants from "./txn_token_grants.model.js";
@@ -203,6 +204,8 @@ export default function initModels(sequelize, schema) {
     const txn_conversations = def(define_txn_conversations);
     const txn_messages = def(define_txn_messages);
     const txn_memories = def(define_txn_memories);
+    // ⭐ 049 · provenance references — 0..n typed pointers to what a memory rests on (child of txn_memories)
+    const txn_memory_evidence = def(define_txn_memory_evidence);
     const txn_user_memories = def(define_txn_user_memories);
     // User-submitted feedback (via /v1/me/feedback) — admins triage in the Feedback console tab.
     const txn_feedback = def(define_txn_feedback);
@@ -320,6 +323,7 @@ export default function initModels(sequelize, schema) {
             txn_conversations,
             txn_messages,
             txn_memories,
+            txn_memory_evidence,
             txn_user_memories,
             txn_feedback,
             txn_token_grants,
