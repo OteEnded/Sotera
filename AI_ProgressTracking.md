@@ -8127,3 +8127,60 @@ The divergence stays possible by construction.
 assumes the source turn is the account holder's — on all 13 reflection rows it is HERS; the episode distiller's
 `last.id` anchor is unexamined; quoted spans as a provenance signal; `getSource`'s ±2 window is tuned for the extractor
 path.
+
+---
+
+## 2026-09-05 16:00 (+07:00) — semantics DERIVED · provenance · occasion · reachability · ⛔ nothing changed
+
+`DERIVATION_SOTERA_PROVENANCE_OCCASION_REACHABILITY.md`. Registers kept apart; the Candidate semantic contract
+(§7) is the only new material and chooses no field, column, parameter or API.
+
+**§1 · The three meanings, defined from consumers, not from the column.** PROVENANCE answers *which evidence did
+this come from* — 0..n turns/memories/documents; speaker and said-date derive from an evidence TURN; absence is
+first-class ("not established"). OCCASION answers *which act was this* — exactly one, equality-only, unique per
+act (a pass is an act); absence is fail-closed for governed writes (M2). REACHABILITY answers *where can I walk*
+— exactly one conversation; any message of it suffices; absence is `never-recorded`. Three shapes, three
+cardinalities — one scalar cannot carry all three without a coincidence.
+
+**§2 · Consumers by the question they need.** Provenance readers: `when.said`, `getSource`'s ±2 window and
+`learnedOn`, `corrections.learnedFrom`, relayed-speech (honest — extractor path only). Occasion readers: M2
+`checkConsumingOccasion`, refusal record, `noteRetrieved`/`lineageFor`, lint, `memory-lineage`. Reachability:
+dreaming formation-context, `getSource`'s scope/evidenceState, the reflection anchor's stated purpose. ⭐ **The
+store already defines the column as the OCCASION** — `lineageFor`: *"the turn key IS the occasion id … the
+derivation is found THROUGH the occasion while staying a separate answer"* — and keeps `evidence.derivedFrom`
+for derivation: 5 rows carry it, all `memoryIds` via turn-retrieval, **0 name a message**. Every provenance
+consumer that is coherent today is coherent because of the extractor's coincidence (evidence turn = occasion
+turn). `getSource` asks two questions with one pointer — provenance wording ("the message it was saved from")
+over a reachability mechanism — and is where the overload becomes visible.
+
+**§3 · Minimum information for reflection provenance — requirements R1–R6**: per-item reference · resolvable
+without trusting the model · inside the reviewed slice · absence representable and never defaulted to the anchor
+· speaker/date from the resolved turn · support ≠ location. Ote's five shapes scored against them, none chosen;
+R4 holds regardless — until a per-item reference exists, a reflection row's provenance is *unknown*. The
+reflection question (Generation 3) does not ask for evidence; changing it is a new instrument.
+
+**§4 · Temporal vocabulary.** `said` is provenance-glossed and occasion-computed: the gloss holds for the
+extractor (33), chat rows about the user, reconcile (3); it FAILS on all 13 reflection rows and 2 persona rows
+anchored to user turns. `decidedOn` (own-memory) and `recorded` are one fact under two names for persona rows;
+retain decides at write time (3/3 within 5 s). ⭐ `294f8f26`: decided/recorded 09-05, `when.said` 09-04 — two
+dates, both hers, neither the account holder's saying. ⇒ `said` has already become an overloaded temporal
+label: wrong gloss on 15 rows, wrong date on 0.
+
+**§5 · Distiller classified**: `source` = coverage watermark (`episode:<cid>:<lastRid>`, may span an elided
+middle), `source_message_id` = end-of-window anchor — reachability + end-of-stretch, ⛔ not provenance; the same
+writer class as reflection; **0 rows in the corpus**.
+
+**§6 · Beyond-range rows as a composition defect**: old promise (08-21) = reachability + end of the reviewed
+stretch; current guarantee = reachability always, end-of-stretch only when unbounded (1 of 89 passes, 3 rows);
+no reader checks (ii) but `getSource` and `when.said` behave as if it held; ⚠️ **the 13:40 and 14:00 passes share
+occasion id 6539** — two acts, one key — a latent M2 self-authorisation collision (no governed write has run
+through reflection).
+
+**§7 · Candidate contract** — occasion unique per act; reachability a range for pass writes; provenance never
+inferred from occasion except under a writer-declared guarantee; `said` only from an established evidence turn
+whose speaker is the account holder, else recorded/decided and no `said`; absence first-class in all three.
+Existing shapes that already fit are NAMED (pass ledger id and range; `derivedFrom.messageIds`; getSource's four
+states), not proposed.
+
+**Additional questions recorded**: two `BASIS` vocabularies (`memory-lineage` vs `memory-cognition-axes`);
+`memory-modality` promises "the words" through an occasion key; the distiller's watermark over an elided middle.

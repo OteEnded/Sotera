@@ -87,6 +87,17 @@ pointer 89 turns beyond it; 1 of 89 passes. D: proposition-day ≠ anchor-day **
 ⓘ New question: ①'s `said` gloss assumes the source turn is the ACCOUNT HOLDER's — on all 13 reflection rows it is HERS.
 ⛔ Undecided by ruling: one field vs two · `top` vs `up_to_rolling_id` · retain naming a turn · speaker validation.
 
+⭐⭐ **SEMANTICS DERIVED 09-05 — `DERIVATION_SOTERA_PROVENANCE_OCCASION_REACHABILITY.md`.** Three concepts, three
+cardinalities: PROVENANCE 0..n evidence refs (speaker+said-date derive from it; absence = 'not established') · OCCASION
+exactly one act (equality only; unique per ACT — a pass, ⛔ not the conversation's newest message) · REACHABILITY one
+conversation (a RANGE for pass writes). ⭐ The store ALREADY defines `source_message_id` as the OCCASION (`lineageFor`,
+`memory-lineage`) and keeps `evidence.derivedFrom.messageIds` for derivation — written on 0 rows. Provenance readers
+(`when.said`, `getSource` ±2, `corrections.learnedFrom`) rely on the EXTRACTOR's coincidence (occasion == evidence turn).
+`said` = provenance-glossed, occasion-computed ⇒ already an overloaded temporal label (wrong gloss on 15 rows; wrong DATE
+on 0). Distiller = same writer class (watermark `source` + end-of-window anchor; 0 rows). Beyond-range rows: promise (i)
+reachability kept, (ii) end-of-stretch broken; ⚠️ passes 13:40/14:00 SHARE occasion id 6539 (latent M2 collision).
+⛔ Undecided by ruling: fields · anchor · question generation · retain reference · `said` restriction · `decided` basis.
+
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
 > **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently
