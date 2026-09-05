@@ -7955,3 +7955,42 @@ named: tool results must be captured from the SSE stream; `log_tool_calls` holds
 
 Instruments (read-only): `measure-temporal-read.mjs` §9–§10, `measure-temporal-routing.mjs`. Docs
 `Reference` `DERIVATION_SOTERA_TEMPORAL_ROUTING.md`. **③ untouched. M2 unchanged. Ranking unchanged.**
+
+---
+
+## 2026-09-05 09:20 (+07:00) — R-C RATIFIED · red-proof DESIGNED around the volunteered recap · ⚠️ one correction
+
+**Ote ratified R-C**: the merge rule as the primary protection; the denominator with three populations,
+attached to the enumeration that performs the temporal operation, ⛔ never `recall_memory`;
+`retrieve_conversations` as the history instrument **recorded as a passage, not a full-day history** until
+R-D is separately designed; R-B rejected outright; `when` is provenance, not routing; routing behaviour
+measured, not asserted — the hard invariant is the merge rule.
+
+**⚠️ CORRECTION TO THE INCIDENT RECORD.** Checking the real rows for the must-fire control: the recap's
+*"Rome is a metaphor, like a north star"* item was **said that evening, in that conversation — Ote's 22:38
+turn** (reflection later stored it as `294f8f26`, `said_on 2026-09-04`). I had attributed it to the
+10-August Rome memory. ⇒ the merge was **two** items — *"many instruments… ระนาด, ซอ"* (`b9c9a133`) and
+*"piano has been your primary instrument lately"* (`6864d087`), both said 2026-08-26 — under a heading
+asserting 4 September. Diagnosis unchanged; record now exact; corrected in the derivation, the carry-on and
+memory. ⓘ Found en route: `294f8f26`'s `source_message_id` points at **her** 23:30 turn, not his 22:38 —
+reflection's provenance names the wrong speaker's message. Recorded, not acted on.
+
+**THE RED-PROOF DESIGN** (`REDPROOF_DESIGN_SOTERA_MERGE_RULE.md`, ⛔ design only). The invariant stated so a
+machine can check it: a heading asserting one time; the list items under it; each item's evidence and its
+date. ⭐ **Must-fire = the actual 23:03:19 reply replayed offline** with hand-verified anchors — it must flag
+exactly the two 26-Aug items and ⛔ not Rome, ⛔ not the work items; anchors are asserted as a precondition
+so the control cannot pass vacuously. Must-pass (same heading, only today's items), must-not-fire (old
+memory under a non-temporal heading — the rule is about the heading's claim, not about mentioning old
+things), must-separate (two headings, the honest composition — proving the right answer is reachable).
+**L-MODEL reproduces the VOLUNTEERED recap**: agent_dev, `zz_` fixture with a backdated source turn so
+`when.said` is 26 days old *by the real ① mechanism*, five unique markers (three old, two said today), a
+natural five-turn conversation with a **closing cue and no question**; rates recorded (recap · temporal
+heading · tools chosen · routing), the merge rule asserted per volunteered heading, UNMAPPED items counted
+and never folded into PASS. ⚠️ Constraint discovered: **tool results are clipped at 4,000 chars** in the
+stream and in `segments`, and a 34-row `list_memories` result exceeds it — hence marker→fixture mapping,
+never result mapping. L-BACKEND D1–D7 pin the denominator, the undated population, `when`, the ranking and
+the `recall_memory` schema. L-TOOL pins the 49-count invariant and the passage description.
+
+**IMPLEMENTATION BOUNDARY reported** — IN: a pure `partitionByWhen` and an optional window on
+`list_memories`/`list()`, plus three new checks. OUT: `recall_memory`, `memoryHint`, ranking,
+`retrieve_conversations`, the reply path (no runtime detector), ③, M2, the extractor. ⏸ **Awaiting GO.**

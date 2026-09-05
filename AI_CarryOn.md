@@ -40,7 +40,8 @@ She answered *"here's what we talked about today"* with a list that was mostly t
 PROVED   removing "today" from the query returns the IDENTICAL 8 memories ⇒ it is a topic word
 PROVED   no temporal parameter exists on ANY of the 9 memory tools (additionalProperties:false)
 ⭐⭐⭐    the 09-04 incident was a JOIN, ⛔ not a silent search: she MERGED the live transcript
-         (genuinely today) with 08-10/08-26 memories under one heading "what we talked about today"
+         (genuinely today) with TWO 26-Aug instrument memories under one heading "what we talked about today"
+         (⚠️ corrected 09-05: the Rome-as-metaphor item WAS said that day, at 22:38 — not the 10-Aug memory)
 ⭐⭐⭐    the temporal instrument ALREADY EXISTS — `retrieve_conversations` with `between:` /
          `in:"here"`, 5 successful `between` calls in production. She did not reach for it.
 ⭐⭐      `list_memories` + `when` ALREADY answers all five of his probes exactly (34 rows, all dated)
@@ -58,7 +59,13 @@ corpus routing measured (she reaches for conversations only when the SOURCE IS N
 followed a relative-day word); boundary derived by EVIDENCE KIND; contract = **the MERGE RULE + the DENOMINATOR**
 (R-C), ⛔ no classifier in `memoryHint`, ⛔ `when` is not a router, ⛔ no date on `recall_memory`; R-D (a SPAN-capable
 conversation read — `{in:"here"}` is a 9-turn PASSAGE, radius fixed) recorded as a separate capability gap.
-⏸ Awaiting Ote's ruling on §7.1 (5 items) and the 3-layer red-proof design (§8).
+✅ **R-C RATIFIED 09-05** (merge rule · denominator on the ENUMERATION · retrieve_conversations = history instrument,
+recorded as a PASSAGE · R-B rejected · `when` ≠ routing · routing MEASURED not asserted). ⭐ Red-proof DESIGNED around the
+VOLUNTEERED recap — `REDPROOF_DESIGN_SOTERA_MERGE_RULE.md`: must-fire = the real 23:03:19 reply (exactly the two 26-Aug
+instrument items, ⛔ not Rome — corrected: Rome was said that day at 22:38); fixture MARKERS (streamed tool results are
+CLIPPED at 4,000 chars, so mapping is marker→fixture); L-MODEL elicits a recap with a CLOSING CUE, ⛔ no question.
+⏸ Implementation boundary reported (§6): IN = `partitionByWhen` + window on `list_memories` + 3 checks; OUT = recall_memory,
+memoryHint, ranking, retrieve_conversations, the reply path, ③, M2. ⏸ AWAITING GO before any code.
 
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
