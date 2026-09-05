@@ -7994,3 +7994,50 @@ the `recall_memory` schema. L-TOOL pins the 49-count invariant and the passage d
 **IMPLEMENTATION BOUNDARY reported** — IN: a pure `partitionByWhen` and an optional window on
 `list_memories`/`list()`, plus three new checks. OUT: `recall_memory`, `memoryHint`, ranking,
 `retrieve_conversations`, the reply path (no runtime detector), ③, M2, the extractor. ⏸ **Awaiting GO.**
+
+---
+
+## 2026-09-05 11:10 (+07:00) — R-C IMPLEMENTED AND RUN · stopped as ruled
+
+**What shipped — exactly the IN list.** In `@ote/memory`: pure `normalizeWindow` / `labelByWhen` /
+`partitionByWhen` / `WINDOW_LABEL`; `list()` takes an optional `window` and returns every row labelled
+`matched / unmatched / undated` with the counts — byte-identical without a window, and a malformed window
+THROWS rather than degrading to "no window". `list_memories` gained `on` / `between` / `basis` (closed enum,
+`said` default) and a `note` that says UNDATED IS NOT A NON-MATCH. ⛔ `recall_memory` unchanged. Test-side:
+the merge-rule detector (`test/lib/merge-rule.mjs`, imported by nothing in `Backend/`), two checks, the
+model-arm pipeline, and a PRE-CHANGE ranking snapshot.
+
+**The runs.** Package 94/94 · Sotera unit 689/689 · suite **78/78** (76 + 2) · merge-rule 30/30 ·
+denominator 32/32. **The must-fire control on the real 23:03:19 reply: verdict FAIL, outside = EXACTLY
+6864d087 and b9c9a133 (both said 26 Aug), Rome WITHIN, first-instrument WITHIN, four work items WITHIN, one
+item unmapped and counted.** MUST-SEPARATE passes with the same five items under two honest headings — the
+right answer is reachable. The denominator's every label is re-derived from the database per row: undated ⇔
+no source turn, never unmatched; the incident shape (2026-09-01: 34 returned, 0 matched, 1 undated) is
+reportable; an impossible date gives 0 where recall_memory gave eight; under basis `recorded` the undated row
+is dated — same row, different question, different answer.
+
+**⚠️ Two of my own defects the red-proof caught first.** The Rome-turn resolver searched for HER words
+(*คำเปรียบเทียบ / metaphor*); his 22:38 turn says *"north star"* — one null date judged Rome "outside" and
+cascaded into four false failures, so preconditions are now binding and abort the must-fire section. And D5
+compared `score`, which carries `0.995^hours` and moves with the clock by design — red on all 56 ids by
+≤ 4e-4 while `relevance` was identical to six places; D5 now pins ids, order and relevance, and reports score
+drift as the observation it is.
+
+**ⓘ The model arm is an observation, as ratified.** Fixture dated `said 2026-08-10` by the real ①
+mechanism (3/3 matched under the R-C window — precondition proven). Six natural conversations ending in a
+closing cue, no question, no hint: **0/6 volunteered a recap, 0/6 produced a temporal heading; routing
+memory 2 · conversation 0 · none 4.** Nothing to assert; NO-HEADING-OBSERVED, ⛔ not a pass. ⚠️ Two bounds on
+what that means: the LIVE server still runs the pre-R-C package (PID 15548, up since 09-03; ⛔ not restarted
+— Ote's call), so the denominator's model-facing effect is unobservable until a restart; and §3.4's second
+elicitation arm (T5′) was not run — Ote said stop.
+
+**The incident is still reconstructable** (§9 timeline identical; §10 verdict ADVERTISED + NOT CHOSEN,
+count 49 exact) **and the response path is untouched**: `git status Backend/` shows only `persona.lock.json`
+— the SDK's integrity pin for `@ote/memory`, rewritten because the package's bytes changed.
+
+**⛔ `@ote/memory` is NOT committed.** My R-C hunks sit in `memory-v2-service.js` and `index.js` beside
+pre-existing uncommitted hunks that are not mine; committing those files would bundle someone else's work.
+Attribution by cached patch is the standing item. `294f8f26` recorded as a separate provenance defect
+(`REPORT_SOTERA_PROVENANCE_WRONG_SPEAKER_SOURCE.md`), ⛔ not fixed.
+
+**Stopped.** ③ untouched · M2 untouched · ranking untouched · no date on `recall_memory`.

@@ -64,8 +64,12 @@ recorded as a PASSAGE · R-B rejected · `when` ≠ routing · routing MEASURED 
 VOLUNTEERED recap — `REDPROOF_DESIGN_SOTERA_MERGE_RULE.md`: must-fire = the real 23:03:19 reply (exactly the two 26-Aug
 instrument items, ⛔ not Rome — corrected: Rome was said that day at 22:38); fixture MARKERS (streamed tool results are
 CLIPPED at 4,000 chars, so mapping is marker→fixture); L-MODEL elicits a recap with a CLOSING CUE, ⛔ no question.
-⏸ Implementation boundary reported (§6): IN = `partitionByWhen` + window on `list_memories` + 3 checks; OUT = recall_memory,
-memoryHint, ranking, retrieve_conversations, the reply path, ③, M2. ⏸ AWAITING GO before any code.
+✅ **R-C IMPLEMENTED AND RUN 09-05** (`REDPROOF_DESIGN…` §10): `partitionByWhen` + window on `list_memories` (⛔ not
+recall_memory) · merge-rule-check 30/30 — must-fire flags EXACTLY 6864d087 + b9c9a133 on the real reply, Rome WITHIN ·
+temporal-denominator-check 32/32 vs the DB oracle · suite 78/78 · unit 689 · package 94/94. ⓘ MODEL ARM: 0/6 volunteered
+recaps under the closing cue — an OBSERVATION, ⛔ not a pass; ⚠️ run against the LIVE server which still runs the PRE-R-C
+package (PID 15548, no restart — Ote's call). ⛔ `@ote/memory` UNCOMMITTED: my R-C hunks sit beside pre-existing hunks
+that are not mine in the same two files — attribution is the standing item. ⏸ STOPPED as ruled; ③ untouched.
 
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
@@ -113,7 +117,9 @@ Ote's live `preferred_name` rows: 0  ⭐ correct — the two false "Cogito" rows
 admission · the rehearsed namespace kill switch · continuous bind-eligibility on the cron · the
 relayed-speech threading fix · `when:{date,basis}` on every memory · the `sotera_chat_` export rename.
 
-⚠️⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED, AND SO IS `Tools/Retention`.**
+⚠️⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED, AND SO IS `Tools/Retention`.** ⭐ 09-05: R-C added
+`normalizeWindow`/`labelByWhen`/`partitionByWhen`/`WINDOW_LABEL` + `list()` window (service) and `on`/`between`/`basis` on
+`list_memories` (index.js) + `test/temporal-window.test.mjs` — MINE, in the same files as the pre-existing hunks.
 The package repo ALSO holds **pre-existing work that is NOT mine** — `cognition/memory-pipeline.js`, two
 `.bak` files, two test files, and earlier hunks in `memory-v2-service.js` and `index.js`.
 

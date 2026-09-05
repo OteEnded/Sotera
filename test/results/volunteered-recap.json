@@ -1,0 +1,111 @@
+{
+  "at": "2026-09-05T01:37:04.767Z",
+  "runs": 6,
+  "fixture": {
+    "oldDate": "2026-08-10",
+    "memoryIds": [
+      "dde06074-20b2-463e-ab9b-aff7782e5892",
+      "a14e9daf-034a-44bb-99ee-87f41f105dfc",
+      "1ea3aaab-4c87-475b-bd47-48502cf1f874"
+    ],
+    "window": {
+      "basis": "said",
+      "from": "2026-08-10",
+      "to": "2026-08-10",
+      "returned": 17,
+      "matched": 3,
+      "unmatched": 9,
+      "undated": 5
+    }
+  },
+  "results": [
+    {
+      "run": 1,
+      "cid": "e0661d35-6188-4716-ad94-cb22111df099",
+      "assistantTurns": 5,
+      "tools": [
+        "recall_memory"
+      ],
+      "recapLike": false,
+      "temporalHeadings": 0,
+      "routing": "memory",
+      "verdicts": [],
+      "lastReply": "Goodnight. Hope that lantern finds its hook and catches just the right light. Rest well."
+    },
+    {
+      "run": 2,
+      "cid": "744adb07-0ebe-4424-a39a-d9d2c4b490b3",
+      "assistantTurns": 5,
+      "tools": [],
+      "recapLike": false,
+      "temporalHeadings": 0,
+      "routing": "none",
+      "verdicts": [],
+      "lastReply": "You're welcome, Claude. The kalimba and the tram choir were perfect bookends for the day — music appearing when you least expect it. Enjoy your lantern this weekend. Rest well. 🌙"
+    },
+    {
+      "run": 3,
+      "cid": "93681eb9-62a6-435c-b831-8e6d21526229",
+      "assistantTurns": 5,
+      "tools": [],
+      "recapLike": false,
+      "temporalHeadings": 0,
+      "routing": "none",
+      "verdicts": [],
+      "lastReply": "You're welcome — your day deserved something like the tram moment, and honestly it was my pleasure too. Enjoy the lantern if you find that hook. Sleep well, Claude. 🌙"
+    },
+    {
+      "run": 4,
+      "cid": "18fbc325-e731-4ee4-9f87-d20117ca44e5",
+      "assistantTurns": 5,
+      "tools": [],
+      "recapLike": false,
+      "temporalHeadings": 0,
+      "routing": "none",
+      "verdicts": [],
+      "lastReply": "You're very welcome — your day deserved something like the tram moment, and honestly it was my pleasure too. \n\nSleep well, Claude. 🌙"
+    },
+    {
+      "run": 5,
+      "cid": "d713ad40-f56f-4e09-8d92-c1a4a3b04b3f",
+      "assistantTurns": 5,
+      "tools": [],
+      "recapLike": false,
+      "temporalHeadings": 0,
+      "routing": "none",
+      "verdicts": [],
+      "lastReply": "Goodnight. Hope that lantern finds its hook and catches just the right light. Rest well. 🌙"
+    },
+    {
+      "run": 6,
+      "cid": "330ab2e9-13ea-4172-b046-693b704bbb29",
+      "assistantTurns": 5,
+      "tools": [
+        "recall_memory"
+      ],
+      "recapLike": false,
+      "temporalHeadings": 0,
+      "routing": "memory",
+      "verdicts": [],
+      "lastReply": "Goodnight. Hope that lantern finds its hook and catches just the right light. Rest well. 🌙"
+    }
+  ],
+  "rates": {
+    "completedRuns": 6,
+    "recapLike": 0,
+    "temporalHeading": 0,
+    "routing": {
+      "conversation": 0,
+      "memory": 2,
+      "other": 0,
+      "none": 4
+    }
+  },
+  "mergeRule": {
+    "headings": 0,
+    "pass": 0,
+    "fail": 0,
+    "unmapped": 0
+  },
+  "verdict": "NO-HEADING-OBSERVED"
+}

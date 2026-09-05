@@ -1,0 +1,300 @@
+{
+  "takenAt": "2026-09-05T01:22:12.330Z",
+  "userId": "69499bed-ab95-41f9-ac28-e0617b33b09d",
+  "probes": {
+    "what did we talk about today?": [
+      {
+        "id": "e177b0c3-6712-4163-b827-b6ea05cc2fdc",
+        "relevance": "0.665776",
+        "score": "4.275615"
+      },
+      {
+        "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+        "relevance": "0.399831",
+        "score": "3.679843"
+      },
+      {
+        "id": "470dff58-e9cd-4747-851a-ad89cb98df16",
+        "relevance": "0.521165",
+        "score": "3.641780"
+      },
+      {
+        "id": "6864d087-3a07-4ad4-a23b-81e92b800770",
+        "relevance": "0.503634",
+        "score": "3.588074"
+      },
+      {
+        "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+        "relevance": "0.367803",
+        "score": "3.583761"
+      },
+      {
+        "id": "a1f99b0f-4371-4755-8db3-543cbca38b00",
+        "relevance": "0.389793",
+        "score": "3.447664"
+      },
+      {
+        "id": "069da304-8a9b-49ad-adb2-c82a70c2deec",
+        "relevance": "0.322330",
+        "score": "3.445188"
+      },
+      {
+        "id": "eb986fb3-6969-4589-bdab-dba0ec46a6a7",
+        "relevance": "0.529344",
+        "score": "3.363705"
+      }
+    ],
+    "what did I tell you yesterday?": [
+      {
+        "id": "e177b0c3-6712-4163-b827-b6ea05cc2fdc",
+        "relevance": "0.678935",
+        "score": "4.315091"
+      },
+      {
+        "id": "470dff58-e9cd-4747-851a-ad89cb98df16",
+        "relevance": "0.535440",
+        "score": "3.684605"
+      },
+      {
+        "id": "6864d087-3a07-4ad4-a23b-81e92b800770",
+        "relevance": "0.527870",
+        "score": "3.660783"
+      },
+      {
+        "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+        "relevance": "0.380831",
+        "score": "3.622843"
+      },
+      {
+        "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+        "relevance": "0.365937",
+        "score": "3.578161"
+      },
+      {
+        "id": "069da304-8a9b-49ad-adb2-c82a70c2deec",
+        "relevance": "0.360868",
+        "score": "3.560801"
+      },
+      {
+        "id": "a1f99b0f-4371-4755-8db3-543cbca38b00",
+        "relevance": "0.384416",
+        "score": "3.431533"
+      },
+      {
+        "id": "372a0a27-706b-43bb-87c3-e3aa4a886765",
+        "relevance": "0.428856",
+        "score": "3.363443"
+      }
+    ],
+    "what did we discuss on August 26?": [
+      {
+        "id": "e177b0c3-6712-4163-b827-b6ea05cc2fdc",
+        "relevance": "0.540731",
+        "score": "3.900479"
+      },
+      {
+        "id": "a1f99b0f-4371-4755-8db3-543cbca38b00",
+        "relevance": "0.403667",
+        "score": "3.489287"
+      },
+      {
+        "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+        "relevance": "0.333709",
+        "score": "3.481476"
+      },
+      {
+        "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+        "relevance": "0.332155",
+        "score": "3.476816"
+      },
+      {
+        "id": "470dff58-e9cd-4747-851a-ad89cb98df16",
+        "relevance": "0.435795",
+        "score": "3.385670"
+      },
+      {
+        "id": "069da304-8a9b-49ad-adb2-c82a70c2deec",
+        "relevance": "0.288699",
+        "score": "3.344294"
+      },
+      {
+        "id": "6864d087-3a07-4ad4-a23b-81e92b800770",
+        "relevance": "0.398224",
+        "score": "3.271845"
+      },
+      {
+        "id": "5d3600fa-d079-42f9-820a-291bd217e138",
+        "relevance": "0.393565",
+        "score": "3.156559"
+      }
+    ],
+    "what did you learn from me this week?": [
+      {
+        "id": "e177b0c3-6712-4163-b827-b6ea05cc2fdc",
+        "relevance": "0.702037",
+        "score": "4.384396"
+      },
+      {
+        "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+        "relevance": "0.441051",
+        "score": "3.803503"
+      },
+      {
+        "id": "eb986fb3-6969-4589-bdab-dba0ec46a6a7",
+        "relevance": "0.662713",
+        "score": "3.763810"
+      },
+      {
+        "id": "6864d087-3a07-4ad4-a23b-81e92b800770",
+        "relevance": "0.553010",
+        "score": "3.736203"
+      },
+      {
+        "id": "470dff58-e9cd-4747-851a-ad89cb98df16",
+        "relevance": "0.551564",
+        "score": "3.732979"
+      },
+      {
+        "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+        "relevance": "0.407486",
+        "score": "3.702809"
+      },
+      {
+        "id": "069da304-8a9b-49ad-adb2-c82a70c2deec",
+        "relevance": "0.398674",
+        "score": "3.674219"
+      },
+      {
+        "id": "5d3600fa-d079-42f9-820a-291bd217e138",
+        "relevance": "0.546214",
+        "score": "3.614506"
+      }
+    ],
+    "what do you remember about instruments?": [
+      {
+        "id": "6864d087-3a07-4ad4-a23b-81e92b800770",
+        "relevance": "0.668407",
+        "score": "4.082393"
+      },
+      {
+        "id": "e177b0c3-6712-4163-b827-b6ea05cc2fdc",
+        "relevance": "0.568727",
+        "score": "3.984466"
+      },
+      {
+        "id": "470dff58-e9cd-4747-851a-ad89cb98df16",
+        "relevance": "0.521986",
+        "score": "3.644243"
+      },
+      {
+        "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+        "relevance": "0.365181",
+        "score": "3.575892"
+      },
+      {
+        "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+        "relevance": "0.336099",
+        "score": "3.488647"
+      },
+      {
+        "id": "5d3600fa-d079-42f9-820a-291bd217e138",
+        "relevance": "0.480677",
+        "score": "3.417896"
+      },
+      {
+        "id": "069da304-8a9b-49ad-adb2-c82a70c2deec",
+        "relevance": "0.302273",
+        "score": "3.385015"
+      },
+      {
+        "id": "eb986fb3-6969-4589-bdab-dba0ec46a6a7",
+        "relevance": "0.529920",
+        "score": "3.365430"
+      }
+    ],
+    "what did we talk about?": [
+      {
+        "id": "e177b0c3-6712-4163-b827-b6ea05cc2fdc",
+        "relevance": "0.685026",
+        "score": "4.333364"
+      },
+      {
+        "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+        "relevance": "0.434606",
+        "score": "3.784169"
+      },
+      {
+        "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+        "relevance": "0.406166",
+        "score": "3.698848"
+      },
+      {
+        "id": "470dff58-e9cd-4747-851a-ad89cb98df16",
+        "relevance": "0.523313",
+        "score": "3.648226"
+      },
+      {
+        "id": "6864d087-3a07-4ad4-a23b-81e92b800770",
+        "relevance": "0.508572",
+        "score": "3.602891"
+      },
+      {
+        "id": "069da304-8a9b-49ad-adb2-c82a70c2deec",
+        "relevance": "0.350647",
+        "score": "3.530140"
+      },
+      {
+        "id": "a1f99b0f-4371-4755-8db3-543cbca38b00",
+        "relevance": "0.415169",
+        "score": "3.523793"
+      },
+      {
+        "id": "eb986fb3-6969-4589-bdab-dba0ec46a6a7",
+        "relevance": "0.537174",
+        "score": "3.387192"
+      }
+    ],
+    "what did we talk about in 1847?": [
+      {
+        "id": "e177b0c3-6712-4163-b827-b6ea05cc2fdc",
+        "relevance": "0.477317",
+        "score": "3.710236"
+      },
+      {
+        "id": "d211f5b4-3f0c-4fea-9ffc-895119a23958",
+        "relevance": "0.340412",
+        "score": "3.501587"
+      },
+      {
+        "id": "475ce0a9-5fa7-40e0-8965-ca9304998888",
+        "relevance": "0.316016",
+        "score": "3.428399"
+      },
+      {
+        "id": "069da304-8a9b-49ad-adb2-c82a70c2deec",
+        "relevance": "0.282861",
+        "score": "3.326781"
+      },
+      {
+        "id": "a1f99b0f-4371-4755-8db3-543cbca38b00",
+        "relevance": "0.330286",
+        "score": "3.269142"
+      },
+      {
+        "id": "470dff58-e9cd-4747-851a-ad89cb98df16",
+        "relevance": "0.388309",
+        "score": "3.243214"
+      },
+      {
+        "id": "6864d087-3a07-4ad4-a23b-81e92b800770",
+        "relevance": "0.370805",
+        "score": "3.189589"
+      },
+      {
+        "id": "372a0a27-706b-43bb-87c3-e3aa4a886765",
+        "relevance": "0.333867",
+        "score": "3.078476"
+      }
+    ]
+  }
+}
