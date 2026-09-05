@@ -44,6 +44,7 @@ import {
   // measuring today's code against yesterday's ledger.
   shapeReflectionTranscript, readWrittenMemoryId, isDisclosureRefusal, REFLECTION_TOOL_GENERATION,
   selectReviewableRange, TRIGGER_SOURCES,
+  generationSpec, citationResolver, withCitationFields,
 } from './reflection-lifecycle.js'
 // ⭐⭐ THE DISPATCH BOUNDARY, imported rather than written here — the same rule the follow-through uses,
 // stated once with its evidence beside it.
@@ -265,7 +266,10 @@ async function sweepStalled(fastify, { quietMinutes }) {
  *        deliberate manual run); it does NOT skip incognito, probe fixtures or the memory master switch,
  *        because those are not timing conditions.
  */
-export async function reflectOnConversation(fastify, { conversationId, force = false, turn = null, triggerSource } = {}) {
+export async function reflectOnConversation(fastify, { conversationId, force = false, turn = null, triggerSource, generation = REFLECTION_GENERATION } = {}) {
+  // ⭐ THE GENERATION IS A PARAMETER WITH ONE DEFAULT — production never passes it and runs REFLECTION_GENERATION; an
+  //    experiment passes another declared generation explicitly. Unknown ⇒ throws (a generation is declared before it runs).
+  const spec = generationSpec(generation)
   // ── ⭐⭐ WHO ASKED (042) · REQUIRED, ⛔ NEVER DEFAULTED ─────────────────────────────────────────
   // Ote: *"mark the run with a clear trigger_source=manual so manual runs can be separated from normal
   // cron-generated reflections. Do not mix them into the primary P1 population automatically."*
@@ -329,7 +333,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const { slice, contextCount, newCount, reviewedTo, remaining, truncated } =
     selectReviewableRange(msgs, { already })
   if (!slice.length || reviewedTo == null) return { skipped: true, reason: 'nothing-new' }
-  const { transcript, considered, elided } = shapeReflectionTranscript(slice)
+  const { transcript, considered, elided } = shapeReflectionTranscript(slice, { numbered: spec.numbered })
 
   // ── ⭐⭐ THE COVERAGE GUARD (Ote's option C) — kept even though the normal path cannot reach it ────
   // Ote: *"Keep an explicit coverage/elision diagnostic as a guard, even though the normal path should
@@ -396,7 +400,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       // Review 121-145." `already` is the completed cursor, so the range starts just past it; 0 means
       // she has never reviewed this conversation and the range starts at its beginning (null).
       bind: [conversationId, conv.user_id ?? null, reviewedTo, considered,
-        REFLECTION_GENERATION, CODE_MTIME, reflectionModel(fastify.config),
+        generation, CODE_MTIME, reflectionModel(fastify.config),
         // ⛔ CLAMPED, AND THE CONSTRAINT CAUGHT THIS BEFORE A HUMAN DID. `already + 1` can exceed the
         // top when the quiet+changed gate is bypassed (`force: true`, which every fixture uses) or when a
         // completed cursor already sits at the newest message. ⇒ 025's `range_sane` CHECK rejected the
@@ -440,6 +444,8 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     writer: 'reflection',
     act: { kind: 'revisit', id: claim.id },
     reach: { kind: 'range', conversationId, from: slice[0]?.rolling_id ?? reviewedTo, to: reviewedTo },
+    // Generation 4: the resolver for her [n] citations — bound to THIS slice and nothing else; null under Generation 3
+    citations: spec.citations ? citationResolver(slice) : null,
   })
 
   // ⭐⭐ CAPTURING THE MEMORY ID WITHOUT BECOMING A SECOND WRITER.
@@ -472,7 +478,8 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
 
   const modelId = reflectionModel(fastify.config)
   const { provider, model } = splitModelId(modelId)
-  const tools = toolDefinitions(REFLECTION_TOOLS)
+  // Generation 4 offers retain WITH `from`/`quote`; every other generation offers today's definitions byte for byte
+  const tools = spec.citations ? withCitationFields(toolDefinitions(REFLECTION_TOOLS)) : toolDefinitions(REFLECTION_TOOLS)
   const maxRounds = intCfg(fastify.config, 'reflectionMaxRounds', 4)
   const maxTokens = intCfg(fastify.config, 'reflectionMaxTokens', 1600)
   const numCtx = intCfg(fastify.config, 'reflectionNumCtx', 16384)
@@ -709,7 +716,7 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     // ⓘ RETURNED, NOT STORED. The caller and a check can see that this reflection was cut off; the row
     // cannot, by decision. ⛔ Do not re-add it to the INSERT without asking.
     clipped,
-    promptGeneration: REFLECTION_GENERATION,
+    promptGeneration: generation,
   }
 }
 

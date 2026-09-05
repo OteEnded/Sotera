@@ -325,7 +325,7 @@ test('⭐⭐ the host builds the transcript from the SLICE, not from every messa
   // moment option B renamed the selector — while the PROPERTY it names in its own title was still true.
   // ⭐ It asserted the LINE, not the PROPERTY: the same defect that let the steerReg test pass for 28
   // hours over a decoration on a scope nobody could read. ⇒ rewritten to assert what it claims.
-  assert.match(hostCode, /shapeReflectionTranscript\(slice\)/,
+  assert.match(hostCode, /shapeReflectionTranscript\(slice(\)|, \{)/,
     '⛔ shapeReflectionTranscript(msgs) would re-read the whole conversation every tick')
   // the slice is chosen from the unreviewed range, whatever the selector is called
   assert.match(hostCode, /selectReviewableRange\(msgs, \{ already \}\)/,

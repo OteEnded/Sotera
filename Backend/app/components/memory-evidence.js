@@ -63,8 +63,10 @@ const Q = async (db, sql, replacements) => db.txn_memories.sequelize.query(sql, 
 /**
  * Load the message a turn reference points at — id, role, content, conversation, rolling_id. ⛔ Resolution only.
  */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 async function loadTurn(db, messageId) {
-  if (!messageId || !db?.txn_messages) return null
+  // a target that is not even uuid-shaped cannot be a message — "does not exist", ⛔ not a query error that drops every reference
+  if (!messageId || !UUID_RE.test(String(messageId)) || !db?.txn_messages) return null
   return db.txn_messages.findOne({ where: { id: messageId }, attributes: ['id', 'role', 'content', 'conversation_id', 'rolling_id', 'created_at'], raw: true })
 }
 
@@ -86,9 +88,21 @@ export async function createReferences(db, { memoryId, refs = [], act = null, re
   if (!db?.txn_memory_evidence || !memoryId || !Array.isArray(refs) || !refs.length) return []
   const a = normalizeAct(act)
   const out = []
-  for (const ref of refs) {
+  for (let ref of refs) {
     const kind = ref?.kind
-    if (!Object.values(REFERENCE_KIND).includes(kind) || !ref?.target) continue
+    if (!Object.values(REFERENCE_KIND).includes(kind)) continue
+    // ⭐ a WRITER-DECLARED failure (e.g. a citation ordinal that resolved to nothing) is recorded as failed, target and all —
+    //    the row's provenance shows the fabricated citation instead of hiding it (I10)
+    if (ref.how === VERIFICATION.failed) {
+      const row = await db.txn_memory_evidence.create({
+        memory_id: memoryId, ref_kind: kind, target: ref.target == null ? '' : String(ref.target), span: ref.span ?? null,
+        credential: null, established: false, verification: { how: VERIFICATION.failed, reason: String(ref.reason ?? 'the writer declared this citation failed') },
+        act_kind: a?.kind ?? null, act_id: a?.id ?? null,
+      })
+      out.push(row.get({ plain: true }))
+      continue
+    }
+    if (!ref?.target) continue
     let established = true
     let verification = { how: ref.how ?? VERIFICATION.writerCited }
     if (kind === REFERENCE_KIND.turn) {
@@ -102,7 +116,8 @@ export async function createReferences(db, { memoryId, refs = [], act = null, re
         verification = { how: VERIFICATION.declaredCoincidence }
       } else if (ref.span != null) {
         // ⭐ a SPAN is a checkable claim and is checked FIRST — attestation vouches for a turn, ⛔ never for words that are not in it
-        if (spanAppears(turn.content, ref.span)) verification = { how: VERIFICATION.spanVerified }
+        // a VERIFIED verbatim span is the definition of `quoted` — the credential rides the reference unless the writer set one
+        if (spanAppears(turn.content, ref.span)) { verification = { how: VERIFICATION.spanVerified }; if (ref.credential == null) ref = { ...ref, credential: 'quoted' } }
         else { established = false; verification = { how: VERIFICATION.failed, reason: 'the cited span is not in the cited turn' } }
       } else if (attests || ref.how === VERIFICATION.operatorAttested) {
         verification = { how: VERIFICATION.operatorAttested }
@@ -132,7 +147,7 @@ export async function provenanceFor(db, memoryIds = [], { tz = 'UTC' } = {}) {
   const rows = await Q(db, `
     SELECT e.memory_id::text AS memory_id, e.ref_kind, e.target, e.span, e.credential::text AS credential, e.established, e.verification,
            msg.role AS turn_role, (msg.created_at AT TIME ZONE :tz)::date::text AS turn_day,
-           CASE WHEN e.ref_kind = 'turn' THEN (CASE WHEN msg.id IS NULL THEN 'source-destroyed' ELSE 'source-readable' END) ELSE NULL END AS state
+           CASE WHEN e.ref_kind = 'turn' AND e.target <> '' THEN (CASE WHEN msg.id IS NULL THEN 'source-destroyed' ELSE 'source-readable' END) ELSE NULL END AS state
       FROM ${tableOf(db, 'txn_memory_evidence')} e
       LEFT JOIN ${tableOf(db, 'txn_messages')} msg ON e.ref_kind = 'turn' AND msg.id::text = e.target
      WHERE e.memory_id = ANY(ARRAY[:ids]::uuid[])

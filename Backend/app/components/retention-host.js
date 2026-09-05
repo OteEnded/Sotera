@@ -38,6 +38,7 @@
 import { buildMemoryToolService } from './memory-pipeline-host.js'
 import { idOf, RETENTION_STATE } from './memory-write-receipt.js'
 import { registerHostService } from './runtime.js'
+import { citationRefs } from './reflection-lifecycle.js'
 // ⚠️ BUILT DIRECTLY, NOT READ OUT OF THE SERVICE BAG — and that is not a style choice. The host-service
 // factory is called as `make({ fastify, user, extras })`: there is ⛔ no `services` argument, and even if
 // there were, factories run in REGISTRATION ORDER, so a service reaching sideways would silently see
@@ -106,6 +107,8 @@ export function buildRetention(fastify, {
   occasion = null,
   // ⭐ 049 · the four axes, threaded from the occasion that built this service (a turn · a reflection pass)
   writer = null, act = null, reach = null,
+  // Generation 4 (reflection): the resolver for [n] citations, bound to the slice she was shown; null everywhere else
+  citations = null,
 } = {}) {
   // ⭐ The specialised hosts stay exactly as they are and are reached THROUGH here — a front door, ⛔ not
   // a demolition. `lesson` and `ownMemory` already write persona-authored rows by construction, so they
@@ -187,7 +190,7 @@ export function buildRetention(fastify, {
    * meant — the same class of act as guessing `mine`, which it refuses on the line above for the same
    * reason. ⓘ A wrong kind is refused by the gate; an invented one cannot become an admission.
    */
-  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false, practiceOrigin = 'instructed', claimKind = null } = {}) {
+  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false, practiceOrigin = 'instructed', claimKind = null, evidenceRefs = [] } = {}) {
     const content = String(what ?? '').trim()
     if (!content) return { ok: false, refused: 'nothing_to_keep', why: 'There is no content to keep — say what you want kept.' }
 
@@ -328,6 +331,8 @@ export function buildRetention(fastify, {
         // closed list the claim kind had to cross; spreading a `null` here would hand the gate a claim
         // that says it answers nothing, which is ⛔ not what "unstated" means.
         ...(claimKind != null && String(claimKind).trim() !== '' ? { claimKind: String(claimKind).trim() } : {}),
+        // 049 · her citations (Generation 4) ride to the store, which verifies them; absent ⇒ nothing is written
+        ...(Array.isArray(evidenceRefs) && evidenceRefs.length ? { evidenceRefs } : {}),
       }))
       return {
         ok: out?.ok !== false, state: out?.state ?? null, kind, author, via: 'remember_fact',
@@ -345,7 +350,7 @@ export function buildRetention(fastify, {
     // through `author` and through nothing else.
     // ⭐ The note path carries the SAME receipt and gets the SAME treatment — ⛔ one door fixed and one
     // left optimistic would be worse than neither, because the difference would be invisible.
-    const out = await resolveReceipt(await mem.rememberAsync({ content, kind: 'semantic' }))
+    const out = await resolveReceipt(await mem.rememberAsync({ content, kind: 'semantic', ...(Array.isArray(evidenceRefs) && evidenceRefs.length ? { evidenceRefs } : {}) }))
     return {
       ok: out?.ok !== false, state: out?.state ?? null, kind, author, via: 'remember',
       why: out?.why ?? null, code: out?.code ?? null, memoryId: out?.memoryId ?? null, result: out,
@@ -379,12 +384,15 @@ export function buildRetention(fastify, {
    *
    * @returns {Promise<{state:'persisted'|'declined'|'unrepresented'|'refused'|'accepted', …}>}
    */
-  async function retain({ content, kind, mine, about = null, attribute = null, distinction = null } = {}) {
+  async function retain({ content, kind, mine, about = null, attribute = null, distinction = null, from = null, quote = null } = {}) {
     // ⭐ The decision as she stated it, kept verbatim for the record regardless of outcome.
     const decision = { content, kind, mine, about, attribute, distinction }
     // ⭐ `distinction` is the honest name for what `keep` calls `attribute` on a lesson. The interface
     // speaks the decision's vocabulary; the mapping is this file's job, ⛔ not hers.
     const slot = kind === KINDS.lesson ? (distinction ?? attribute) : attribute
+    // ⭐ Generation 4: her [n] citations → evidence references, resolved against the slice this pass showed her. ⛔ Never
+    //    a search; an ordinal that resolves to nothing is a DECLARED failure the store records. No resolver ⇒ nothing.
+    const evidenceRefs = citationRefs({ from, quote }, citations)
 
     // ── ⭐⭐⭐ A REFLECTION DECISION IS ALWAYS HERS — and the live run proved this needed enforcing ──
     //
@@ -415,7 +423,7 @@ export function buildRetention(fastify, {
       // answered *"this person told you about your practice directly"* about her own conclusion.
       // ⛔ It changes no ownership: a practice is hers however she came by it. Ote: *"Keep this as a
       // vocabulary/provenance change, not a change to retention ownership."*
-      out = await keep({ what: content, kind, about, mine, attribute: slot, practiceOrigin: 'reflection' })
+      out = await keep({ what: content, kind, about, mine, attribute: slot, practiceOrigin: 'reflection', evidenceRefs })
     } catch (e) {
       // ⭐ A store gate threw — a REFUSAL with a class, not a bug. It is already recorded in
       // `log_memory_refusals` by the store; here it becomes a receipt.
@@ -561,6 +569,7 @@ export function initRetention() {
       writer: extras?.writer ?? null,
       act: extras?.act ?? null,
       reach: extras?.reach ?? null,
+      citations: extras?.citations ?? null,
       conversationId: extras?.conversationId ?? null,
       isRoot: user?.isRoot === true,
       user,

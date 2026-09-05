@@ -62,6 +62,22 @@ export const THE_REFLECTION_QUESTION = 'Was there anything in this conversation 
  *       prompt is ever added — that would be a different instrument, not a configuration change.
  */
 export const REFLECTION_GENERATION = 3
+/**
+ * ⭐ WHAT EACH GENERATION CHANGES — as DATA, so an experiment can run one generation while production runs another.
+ *   3 — the transcript is `role: text`; retain has no reference field.
+ *   4 — the transcript lines are NUMBERED `[n] role: text`, and retain gains two OPTIONAL fields (`from` ordinals,
+ *       `quote` a verbatim span) that the host resolves against THIS pass's slice — `PLAN_SOTERA_REFLECTION_GENERATION_4_CITATION.md`.
+ * ⛔ The question text is the same in both. ⛔ Nothing reads this table with a default other than REFLECTION_GENERATION.
+ */
+export const REFLECTION_GENERATIONS = Object.freeze({
+  3: Object.freeze({ numbered: false, citations: false }),
+  4: Object.freeze({ numbered: true, citations: true }),
+})
+export function generationSpec(generation) {
+  const spec = Number.isInteger(generation) ? REFLECTION_GENERATIONS[generation] : null
+  if (!spec) throw new TypeError(`reflection: unknown prompt generation ${String(generation)} — declare it in REFLECTION_GENERATIONS first`)
+  return spec
+}
 
 /** The tool names offered during a reflection. Exported so a check can assert the list, not guess it. */
 export const REFLECTION_READ_TOOLS = [
@@ -221,8 +237,8 @@ export function unreviewedSlice(msgs = [], { already = 0, contextBefore = 6 } = 
 }
 
 /** ⭐ ONE definition of a transcript line, so the BUDGET and the PROMPT can never disagree about cost. */
-export const transcriptLine = (m, lineClip = 1500) =>
-  `${m.role}: ${String(m.content || '').replace(/\s+/g, ' ').slice(0, lineClip)}`
+export const transcriptLine = (m, lineClip = 1500, ordinal = null) =>
+  `${ordinal == null ? '' : `[${ordinal}] `}${m.role}: ${String(m.content || '').replace(/\s+/g, ' ').slice(0, lineClip)}`
 
 /**
  * ⚠️⚠️ THE ELISION BRANCH IS NOW A SAFETY NET, NOT THE NORMAL PATH. `selectReviewableRange` bounds the
@@ -239,8 +255,9 @@ export const transcriptLine = (m, lineClip = 1500) =>
  * ⭐ `tailStart` can never precede the head now, `considered` can never exceed `msgs.length`, and
  * `elided` is true only when something was genuinely dropped.
  */
-export function shapeReflectionTranscript(msgs = [], { maxChars = 24000, lineClip = 1500, edge = 20 } = {}) {
-  const lines = msgs.map((m) => transcriptLine(m, lineClip))
+export function shapeReflectionTranscript(msgs = [], { maxChars = 24000, lineClip = 1500, edge = 20, numbered = false } = {}) {
+  // ⭐ Generation 4: `[n] role: text` — the ordinal is the ONLY thing she can cite; ⛔ no id, no rolling id, no date is shown
+  const lines = msgs.map((m, i) => transcriptLine(m, lineClip, numbered ? i + 1 : null))
   const whole = lines.join('\n')
   if (whole.length <= maxChars) return { transcript: whole, considered: msgs.length, elided: false }
   const head = lines.slice(0, edge)
@@ -320,6 +337,63 @@ export function selectReviewableRange(msgs = [], { already = 0, contextBefore = 
  * purity check as whole-string equality rather than by scanning for banned words, because a word list
  * catches what I thought to ban and an equality assertion catches what I did not.
  */
+/**
+ * ⭐⭐ THE CITATION RESOLVER — bound to ONE pass's slice. `turnFor(n)` is the id of the n-th line she was shown (1-based), or
+ * null. ⛔ It knows nothing outside the slice, so a citation can never reach a turn she did not see (R3 by construction).
+ */
+export function citationResolver(slice = []) {
+  const rows = Array.isArray(slice) ? slice : []
+  return Object.freeze({
+    size: rows.length,
+    turnFor(n) {
+      if (!Number.isInteger(n) || n < 1 || n > rows.length) return null
+      return rows[n - 1]?.id ?? null
+    },
+  })
+}
+
+/**
+ * ⭐ ordinals + optional quote → evidence references for the store. An ordinal that does not resolve becomes a DECLARED
+ * FAILURE (`how: 'failed'`, target null, the reason naming the ordinal) — recorded by the store, ⛔ never silently dropped,
+ * so a fabricated line number is visible in the row's provenance. No resolver ⇒ no references.
+ */
+export function citationRefs({ from = null, quote = null } = {}, resolver = null) {
+  if (!resolver || !Array.isArray(from)) return []
+  const span = typeof quote === 'string' && quote.trim() ? quote : null
+  const out = []
+  for (const n of from) {
+    const target = resolver.turnFor(n)
+    if (target) out.push({ kind: 'turn', target, span })
+    else out.push({ kind: 'turn', target: null, span, how: 'failed', reason: `ordinal ${String(n)} is not a line of the reviewed slice (1..${resolver.size})` })
+  }
+  return out
+}
+
+/** The one sentence Generation 4 adds to `retain`, and the two optional fields. ⛔ No instruction to cite — an affordance. */
+export const CITATION_AFFORDANCE = ' If this rests on particular lines of the conversation, you may name them by their [n] number in `from`, and quote the exact words in `quote`.'
+export function withCitationFields(defs = []) {
+  return (Array.isArray(defs) ? defs : []).map((d) => {
+    if (d?.function?.name !== 'retain') return d
+    const fn = d.function
+    const params = fn.parameters ?? { type: 'object', properties: {} }
+    return {
+      ...d,
+      function: {
+        ...fn,
+        description: `${fn.description ?? ''}${CITATION_AFFORDANCE}`,
+        parameters: {
+          ...params,
+          properties: {
+            ...(params.properties ?? {}),
+            from: { type: 'array', items: { type: 'integer' }, description: 'The [n] line numbers this rests on, if any.' },
+            quote: { type: 'string', description: 'The exact words from one of those lines, if you are quoting.' },
+          },
+        },
+      },
+    }
+  })
+}
+
 export function buildReflectionTurnPrompt({ who, transcript }) {
   return `A conversation you had with ${who}:
 

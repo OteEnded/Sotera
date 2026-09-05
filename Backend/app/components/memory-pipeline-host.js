@@ -50,6 +50,7 @@ export function commitToMemory(mem, obs) {
   // where the truth is *"the producer did not say"*, and a governed slot's whole decision turns on that
   // difference. ⭐ A missing key must never be a kind.
   if (obs.claimKind != null && String(obs.claimKind).trim() !== '') args.claimKind = obs.claimKind
+  if (Array.isArray(obs.evidenceRefs) && obs.evidenceRefs.length) args.evidenceRefs = obs.evidenceRefs // 049 · the writer's citations ride the observation
   return mem.reconcileFact(args)
 }
 
