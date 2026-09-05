@@ -53,9 +53,13 @@ const rows = await q(`
    ORDER BY m.created_at`)
 say(`rows: ${rows.length} · already classified (writer set): ${rows.filter((r) => r.writer).length}`)
 
+// idempotent on BOTH outcomes: a classified row carries a writer; an UNKNOWN row carries no writer but already carries this
+// act's audit row — re-running must not audit it twice
+const audited = new Set((await q(`SELECT memory_id::text AS id FROM ${S}."log_memory_changes" WHERE action = 'axes-backfill' AND act_id = $1`, [ACT.id])).map((x) => x.id))
 const plans = []
 for (const r of rows) {
-  if (r.writer) { bump('skipped-already-classified'); continue } // idempotent
+  if (r.writer) { bump('skipped-already-classified'); continue }
+  if (audited.has(r.id)) { bump('skipped-already-audited-unknown'); continue }
   const src = r.source ?? ''
   const plan = { id: r.id, writer: null, act: null, reach: null, refs: [], population: null, reason: '' }
   const turnReach = () => ({ kind: 'turn', messageId: r.smid, conversationId: r.src_conv })

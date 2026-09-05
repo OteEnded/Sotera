@@ -8363,3 +8363,14 @@ clock. ⛔ R-C not modified.
 reflection Generation-4 citation instrument (store side built, prompt not changed) · distiller enablement · historical
 severity · BASIS rename · `@ote/memory` foreign hunks still uncommitted (not mine) · two persona scopes now have a shape
 (production reads NULL; ingest 17 + operator 3 sit under `'sotera'`).
+
+## 2026-09-05 12:45 (+07:00) — ✅ LIVE STABILIZATION · :8210 restarted on the axes build (Ote's instruction)
+
+PID 15548 (up since 09-03 22:50, pre-axes) stopped; `node server.js` restarted detached → PID 22896, health 200 in 1 s; boot
+resolved the `txn_memory_evidence` / `log_memory_changes.act_*` models (the axes build). Backfill re-run (dry then apply): 160
+rows · 127 already classified · 31 unknown already audited (⭐ script made idempotent for UNKNOWN rows too — keyed on this
+act's audit row, not only on `writer`) · **2 stragglers → unknown** (agent_dev, no pointer, no label). **Ote's rows without
+axes: 0.** Live probe (agent_dev, zz_ conversation, one turn through the real route, removed after): 2 `remember_fact` rows →
+`writer chat-tool · act turn · reach turn · 1 span-verified turn reference each` ✓. Re-run: provenance-axes 49/49 ·
+incident-replay 21/21 · memory-lint ALL · evidence-authorization ALL. ⛔ 8 reflection rows left unknown · distiller off ·
+R-C/D5 and BASIS untouched.
