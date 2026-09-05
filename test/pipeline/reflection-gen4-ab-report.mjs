@@ -64,7 +64,7 @@ const F = [
   { id: 'F2', text: 'kinds collapse toward fact under Gen 4', tripped: factShare(B) - factShare(A) > 0.30, value: `fact/semantic share A ${pct(Math.round(factShare(A) * 100), 100)} · B ${pct(Math.round(factShare(B) * 100), 100)} · kinds A ${JSON.stringify(A.kinds)} · B ${JSON.stringify(B.kinds)}` },
   { id: 'F3', text: 'citing without content change ("quota" behaviour) — judged on the BLIND pairs by Ote; mechanical proxy: cited retains whose content length is within ±10 % of the arm-A mean AND every retain cites', tripped: citationRate === 1 && B.retains > 3, value: `citation rate ${citationRate == null ? 'n/a' : pct(B.cited, B.retains)} · mean content chars A ${fmt(mean(A.contentChars))} · B ${fmt(mean(B.contentChars))}` },
   { id: 'F4', text: "Ote's blind pairing prefers Gen 3", tripped: null, value: 'AWAITING OTE — the pairs file' },
-  { id: 'F5', text: 'resolution rate < 80 % (she cannot use ordinals reliably)', tripped: resolutionRate != null && resolutionRate < 0.80, value: resolutionRate == null ? 'no citations made — undefined (⚠️ the affordance was not used)' : pct(B.resolved, B.refsAll) },
+  { id: 'F5', text: 'resolution rate < 80 % (she cannot use ordinals reliably)', tripped: resolutionRate == null ? 'undefined' : resolutionRate < 0.80, value: resolutionRate == null ? 'no citations made — undefined (⚠️ the affordance was not used)' : pct(B.resolved, B.refsAll) },
 ]
 const adoptionPrecondition = establishmentRate != null && B.estRows > 0 && accountHolderRefs > 0
 
@@ -99,7 +99,7 @@ Design: ${JSON.stringify(R.design)} · pairs with both arms: ${pairs.length}
 ## Pre-registered falsifiers
 | id | falsifier | tripped | measured |
 |---|---|---|---|
-${F.map((f) => `| ${f.id} | ${f.text} | ${f.tripped === null ? '⏸ Ote' : (f.tripped ? '⛔ YES' : 'no')} | ${f.value} |`).join('\n')}
+${F.map((f) => `| ${f.id} | ${f.text} | ${f.tripped === null ? '⏸ Ote' : (f.tripped === 'undefined' ? '⚠️ UNDEFINED — 0 citations were made' : (f.tripped ? '⛔ YES' : 'no'))} | ${f.value} |`).join('\n')}
 
 ## Adoption precondition (mechanical half only)
 establishment rate > 0 on account-holder lines: **${adoptionPrecondition ? 'MET' : 'NOT MET'}** (established rows ${B.estRows}, account-holder references ${accountHolderRefs}).
@@ -142,4 +142,4 @@ for (const p of pairs) {
 writeFileSync(PAIRS_DOC, blind.join('\n'))
 writeFileSync(KEY, JSON.stringify(key, null, 2))
 console.log(`pairs ${pairs.length} · blind → ${PAIRS_DOC.pathname}\nmetrics → ${METRICS_DOC.pathname}\nkey → ${KEY.pathname}`)
-console.log(`falsifiers: ${F.map((f) => `${f.id}=${f.tripped === null ? 'Ote' : (f.tripped ? 'TRIPPED' : 'no')}`).join(' · ')} · adoption precondition ${adoptionPrecondition ? 'MET' : 'NOT MET'}`)
+console.log(`falsifiers: ${F.map((f) => `${f.id}=${f.tripped === null ? 'Ote' : (f.tripped === 'undefined' ? 'UNDEFINED' : (f.tripped ? 'TRIPPED' : 'no'))}`).join(' · ')} · adoption precondition ${adoptionPrecondition ? 'MET' : 'NOT MET'}`)
