@@ -42,13 +42,20 @@ try {
 
   // ── the oracle: each returned id → its source turn's date (or NULL when there is none) ──────────────
   const ids = plain.memories.map((m) => m.id)
+  // 049 · THE ORACLE IS PROVENANCE: said_on = the ONE day of established account-holder turn references; no_source now
+  // means "no such reference" — exactly what the undated population must be. The occasion pointer is not consulted.
   const oracle = new Map((await q(`
-    SELECT m.id::text AS id, (msg.created_at AT TIME ZONE '${TZ}')::date::text AS said_on, m.source_message_id IS NULL AS no_source
-      FROM ${S}."txn_memories" m LEFT JOIN ${S}."txn_messages" msg ON msg.id = m.source_message_id
-     WHERE m.id = ANY($1::uuid[])`, [ids])).map((r) => [r.id, r]))
+    SELECT m.id::text AS id,
+           (SELECT CASE WHEN count(DISTINCT (msg.created_at AT TIME ZONE '${TZ}')::date) = 1
+                        THEN min((msg.created_at AT TIME ZONE '${TZ}')::date)::text ELSE NULL END
+              FROM ${S}."txn_memory_evidence" e JOIN ${S}."txn_messages" msg ON msg.id::text = e.target AND msg.role = 'user'
+             WHERE e.memory_id = m.id AND e.ref_kind = 'turn' AND e.established) AS said_on,
+           NOT EXISTS (SELECT 1 FROM ${S}."txn_memory_evidence" e JOIN ${S}."txn_messages" msg ON msg.id::text = e.target AND msg.role = 'user'
+                        WHERE e.memory_id = m.id AND e.ref_kind = 'turn' AND e.established) AS no_source
+      FROM ${S}."txn_memories" m WHERE m.id = ANY($1::uuid[])`, [ids])).map((r) => [r.id, r]))
   check('D0b · the oracle covers every returned row', ids.every((id) => oracle.has(id)))
   const undatedTruth = ids.filter((id) => oracle.get(id).no_source).length
-  check('D0c · ⭐ some returned rows have NO source turn — the undated population is REAL on this corpus, not hypothetical', undatedTruth > 0, `no_source=${undatedTruth} of ${ids.length}`)
+  check('D0c · ⭐ some returned rows have NO established account-holder turn reference — the undated population is REAL on this corpus, not hypothetical', undatedTruth > 0, `no_source=${undatedTruth} of ${ids.length}`)
 
   // ══ D1 · exhaustive and exclusive, for several windows ═══════════════════════════════════════════════
   const windows = [{ on: '2026-09-04' }, { on: '2026-09-01' }, { on: '1847-01-01' }, { between: ['2026-08-01', '2026-09-30'] }, { on: '2026-09-04', basis: 'recorded' }]
@@ -70,16 +77,16 @@ try {
   const on1847 = await mem.list({ window: { on: '1847-01-01' } })
   check('D2c · an impossible date → matched = 0 (⛔ recall_memory returned eight for this)', on1847.window.matched === 0 && on1847.window.returned === ids.length, JSON.stringify(on1847.window))
 
-  // ══ D3 · ⭐⭐⭐ PER ROW: undated ⇔ no source turn; never unmatched ═════════════════════════════════════
+  // ══ D3 · ⭐⭐⭐ PER ROW: undated ⇔ no established account-holder turn reference on one day; never unmatched ═════════════════════════════════════
   let perRowOk = true
   const bad = []
   for (const m of on0904.memories) {
     const o = oracle.get(m.id)
-    const expect = o.no_source ? 'undated' : (o.said_on === '2026-09-04' ? 'matched' : 'unmatched')
+    const expect = (o.no_source || o.said_on == null) ? 'undated' : (o.said_on === '2026-09-04' ? 'matched' : 'unmatched')
     if (m.window !== expect) { perRowOk = false; bad.push([m.id.slice(0, 8), m.window, expect]) }
   }
-  check('D3a · ⭐⭐⭐ EVERY row\'s label is re-derived from the database and agrees — undated ⇔ no source turn, ⛔ never unmatched', perRowOk, bad.length ? JSON.stringify(bad.slice(0, 5)) : `rows=${on0904.memories.length}`)
-  check('D3b · the undated count equals the number of returned rows with source_message_id IS NULL, exactly', on0904.window.undated === undatedTruth, `undated=${on0904.window.undated} truth=${undatedTruth}`)
+  check('D3a · ⭐⭐⭐ EVERY row\'s label is re-derived from the database and agrees — undated ⇔ no established account-holder turn reference on one day, ⛔ never unmatched', perRowOk, bad.length ? JSON.stringify(bad.slice(0, 5)) : `rows=${on0904.memories.length}`)
+  check('D3b · the undated count equals the number of returned rows with no established single-day account-holder turn reference, exactly', on0904.window.undated === undatedTruth, `undated=${on0904.window.undated} truth=${undatedTruth}`)
   check('D3c · ⛔ no undated row has its `when.basis` = said (the label and ① agree: nothing established a said date)', on0904.memories.filter((m) => m.window === 'undated').every((m) => m.when?.basis !== 'said'))
 
   // ══ D4 · `when` is untouched by the window ═══════════════════════════════════════════════════════════

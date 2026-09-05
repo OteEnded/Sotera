@@ -224,6 +224,11 @@ ok(liveSqlFor('m') === 'm.invalid_at IS NULL AND m.expired_at IS NULL',
       match: 'AT TIME ZONE :tz',
       why: 'an ID LOOKUP that renders two dates for rows the caller already holds — liveness was decided by the read that selected them, and archived rows must keep their dates',
     },
+    {
+      file: 'memory-evidence.js',
+      match: "'txn_memories')} WHERE id = :id::uuid",
+      why: 'decidedFor: an ID LOOKUP of one row\'s own creation day (decided ≡ recorded for turn-driven and act-less rows) — the caller holds the row; liveness was decided by the read that selected it',
+    },
   ]
   const seen = new Set()
   const offenders = []

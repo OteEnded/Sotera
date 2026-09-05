@@ -73,10 +73,13 @@ try {
     conv.length > 0, `said=${conv.length} · recorded=${rows.filter((m) => m.when?.basis === 'recorded').length}`)
   // …and cross-check one against the database, ⛔ not against the projection's own claim.
   const sample = conv.find((m) => m.sourceMessageId)
+  // ⭐ 049 · the oracle is the ESTABLISHED account-holder TURN REFERENCE's day, ⛔ no longer the occasion pointer's
   const [truth] = await q(
-    `SELECT msg.created_at::date::text AS said, m.created_at::date::text AS recorded
-       FROM ${S}."txn_memories" m JOIN ${S}."txn_messages" msg ON msg.id = m.source_message_id
-      WHERE m.id = $1::uuid`, [sample.id])
+    `SELECT (msg.created_at AT TIME ZONE 'Asia/Bangkok')::date::text AS said, m.created_at::date::text AS recorded
+       FROM ${S}."txn_memories" m
+       JOIN ${S}."txn_memory_evidence" e ON e.memory_id = m.id AND e.ref_kind = 'turn' AND e.established
+       JOIN ${S}."txn_messages" msg ON msg.id::text = e.target AND msg.role = 'user'
+      WHERE m.id = $1::uuid LIMIT 1`, [sample.id])
   check('1b · ⭐⭐ …and the date matches the SOURCE TURN in the database, ⛔ not the row\'s own created_at',
     sample.when.date === truth.said, `projected=${sample.when.date} turn=${truth.said} row=${truth.recorded}`)
 
