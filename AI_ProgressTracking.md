@@ -8283,3 +8283,39 @@ act from a timestamp window. `294f8f26` resolves to decided/recorded 09-05, no `
 **§10 · Undecided**: representation carriers; reflection's per-item reference shape; the chat-tool coincidence; exposing
 `decided`; multi-day `said`; the two `BASIS` vocabularies; the distiller's ledger and coverage invariant; admin act
 names; speaker validation. ⛔ Nothing changed.
+
+---
+
+## 2026-09-05 21:00 (+07:00) — FINAL_SEMANTIC_REMEDIATION_ARCHITECTURE_V1 · the §10 items closed · ⛔ nothing implemented
+
+`FINAL_SEMANTIC_REMEDIATION_ARCHITECTURE_V1.md` — the pre-implementation gate. Two measurements grounded the two
+empirical questions: **the chat-tool "same turn" coincidence is false in general** (37 rows anchored to a user turn:
+4 verbatim — three short identity tokens and a canary — 16 with ≥50% of content words in the turn, 17 with fewer;
+`memory-lineage.js` already documents `676e17b9` as the counter-example, anchored sixteen days after the metaphor was
+coined), and **the credential is earned only on the extractor path** (`classifyCapture` is called from
+`memory-extract-host` alone, verifying the span against `sourceText`; all 16 `quoted` rows are extractor rows; every
+chat-tool row is `synthesized`).
+
+**Decisions, each as FACT → RULE → RECOMMENDATION → UNDECIDED.** Reflection may cite ordinals of the reviewed slice (+
+optional verbatim span) and memory ids it was handed; ⛔ no uuids, ⛔ no dates shown; the host resolves deterministically
+and verifies spans, never mints; a failed citation is recorded as failed and the item is still retained as `not
+established` — never refused for lacking provenance. Chat tools: ⛔ no declared coincidence; ✅ write-time verification
+against the occasion turn only (tests P/N/X/F); honest cost 33/37 `said`s withdrawn. `decided` stays internal on account
+reads; `decidedOn` is preserved as the existing own-memory exposure with its grounding declared. Multi-day `said`:
+withhold the scalar; the references carry their dates; no span basis. Two `BASIS`: two concepts — reference kind vs
+belief grounds — one-way mapping (`in-context` never lifts above `inferred`), no merge, rename later. Credential attaches
+to the reference; `quoted` without a reference is meaningless; `elicited`/`observed` are act facts. Distiller: one act
+per (conversation, run) minted before writing; reflection's coverage invariant adopted verbatim (watermark = reviewed
+end; elision refuses); reachability = the range; no `last.id` evidence; ⏸ whether it stays enabled is Ote's. Admin acts:
+named label or request identity, actor + reason mandatory, audit rows carry the act id; triggered passes are separate
+acts. Speaker: ⛔ no write-time refusal; ✅ consumer rule + integrity report; `speaker: not established` defined as a
+first-class state.
+
+**§11** invariants I1–I10 and forbidden inferences F1–F10. **§12** the representation boundary — what must be
+expressible per row, per act, per refusal, per audit row, and the constraints (three distinct absences; a writer-contract
+registry; in-context ids stay presence). **§13** seven genuinely Ote-level decisions (reflection instrument generation;
+accepting the `said` withdrawals; the distiller's future; `remember_fact` wording; speaker-claim detection; the `BASIS`
+names; representation). **§14** migration principles M1–M7 — deterministic facts established, withdrawal ≠ repair,
+unknown stays unknown, no inference as repair, every repair an audited act.
+
+⛔ No implementation, schema, migration, validator, repair, rename or code. Awaiting the gate review.

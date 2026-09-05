@@ -120,6 +120,20 @@ decided ← act. Migration meaning: extractor said STANDS (declared coincidence)
 withdrawn unless a turn ref exists (37 rows — the visible cost; a chat coincidence is a §10 writer-contract decision).
 ⛔ No schema/migration/code/rename/validator/repair. Representation is §10 — not decided.
 
+⭐⭐⭐ **FINAL GATE DOC 09-05 — `FINAL_SEMANTIC_REMEDIATION_ARCHITECTURE_V1.md`** (§10 items closed; FACT→RULE→RECOMMENDATION→
+UNDECIDED each). Reflection provenance: she may cite slice ORDINALS (+ optional verbatim span) and memory ids she was given;
+⛔ no uuids, ⛔ no dates shown; host RESOLVES and VERIFIES (classifyCapture-style), never mints; failed citation recorded, item
+still retained (`not established`). Chat-tool same-turn coincidence: ⛔ NOT declarable (measured: 4 verbatim / 16 partial /
+17 <50% of 37; lineage header's own Rome counter-example) — YES as write-time VERIFICATION against the occasion turn only;
+cost: 33/37 rows lose coincidental `said`. `decided`: internal for account reads; `decidedOn` preserved as its own-memory
+exposure, grounding declared. Multi-day `said`: WITHHOLD scalar, refs carry dates, no span basis. Two BASIS: two concepts
+(reference kind vs belief grounds), one-way mapping, no merge/rename now. Credential = property of a REFERENCE; `quoted` w/o
+ref is meaningless; elicited/observed are act facts. Distiller: act per (conversation, run) before write; adopt reflection's
+coverage invariant (watermark = reviewed end, elision refuses); no `last.id` evidence; ⏸ enable-or-not is Ote's. Admin acts:
+label or request identity + actor + reason; audit rows must carry the act id. Speaker: NO write refusal; consumer rule +
+integrity report; `speaker: not established` defined. §12 representation boundary listed; §13 seven Ote-level decisions;
+§11 invariants I1–I10 + forbidden inferences F1–F10; §14 migration principles. ⛔ Nothing implemented. AWAITING GATE REVIEW.
+
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
 > **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently
