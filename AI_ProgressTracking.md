@@ -7860,3 +7860,49 @@ extractor is not modified, ② and ③ untouched, no generated M2 traffic.
 ⚠️ Standing item: `PortableComponents/Packages/Memory` and `Tools/Retention` remain uncommitted. The package
 repo also holds pre-existing work that is not mine; my hunks are cleanly separable and must become
 independently attributable before M2 closeout without disturbing the rest.
+
+---
+
+## 2026-09-05 07:30 (+07:00) — ② DERIVED · the premise did not survive the incident log
+
+**⛔ Nothing implemented.** Measurement + semantics only, as ratified. ③ untouched, M2 unchanged.
+`Reference/docs/DERIVATION_SOTERA_TEMPORAL_READ.md` (`7152156`), instrument
+`test/maintenance/measure-temporal-read.mjs` — read-only, and it uses `search()` rather than `recall()`
+**because `recall()` reinforces what it returns** and would rewrite the signal being measured.
+
+**THE EQUIVALENCE IS PROVED, AND STRONGER THAN EXPECTED.** Deleting the word *today* from
+*"what did we talk about today?"* returns the **identical eight memories**, differing only in order. An
+impossible date (*"in 1847"*) still returns eight confident results. The lexical arm shows why:
+`websearch_to_tsquery` renders the question as `'talk' & 'today'` — **`today` is a topic word.** No
+temporal parameter exists on any of the nine memory tools, and `query` is used in exactly two places:
+embedded, and handed to tsquery.
+
+**⚠️⚠️ BUT THE INCIDENT WAS NOT THAT.** Reconstructed from `log_tool_calls`: 28 turns, three chat tool
+calls. The turn that triggered the recall had **no temporal question in it** — she volunteered the recap
+(*"Let me check what we actually discussed today"*), then rendered a list that **fused the live transcript
+(genuinely today) with memories said on 10 and 26 August** under one heading. ⇒ **the defect was a JOIN,
+not a read.** Neither source lied; the composition did. ⛔ Fixing `recall_memory` would not have prevented
+it.
+
+**⭐⭐⭐ AND THE TEMPORAL INSTRUMENT ALREADY EXISTS.** `retrieve_conversations` carries `between:[d,d]` and
+`in:"here"`, filters in SQL, and has **five successful `between` calls in production** plus 24 successful
+`in:` calls. She had it and reached for memory instead. The ④ shape again. ⓘ Whether it was *advertised*
+that turn I **could not establish** — `tools_offered` logs only the retention occasion's own two tools —
+and ⛔ that has not been converted into "it was not offered".
+
+**⭐⭐ `list_memories` + `when` already answers all five probes exactly** — 34 rows, every one dated,
+reproducing the ground truth (yesterday → 5, August 26 → 17). It works because 34 < the 200 limit.
+
+**⚠️⚠️ THREE CLOCKS.** The ranker's `recency` decays from `last_access ?? created_at` — usage recency,
+drifted up to **25.8 days** off both `said` and `recorded` on 16 live rows. The only time-like quantity
+that influences *which* memories return means neither of the two ① named.
+
+**⚠️ AND MEMORY IS A ~4% SAMPLE** of the conversation — 0% on five of eleven days. So a *correct* temporal
+filter on memory would still answer *"what did we talk about today"* wrongly, with more authority.
+
+**RECOMMENDED: option C** — route the three questions apart, add the missing **denominator** to the memory
+read, ⛔ give `recall_memory` no date parameter. ⏸ Awaiting Ote's ruling; nothing built.
+
+ⓘ Two residuals found en route, ⛔ neither acted on, both in a different contract:
+`retrieve_conversations.between` filters `c.updated_at` (*conversations active then*, ⛔ not *what was said
+then*), and `new Date('2026-08-26')` parses as UTC midnight — the same off-by-one family ① paid for.

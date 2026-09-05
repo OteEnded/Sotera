@@ -30,9 +30,29 @@ She answered *"here's what we talked about today"* with a list that was mostly t
 ```
 ④ relayed speech became Ote's identity                 ✅ CLOSED — proved 14/14 · two rows retired 13/13
 ① no dates on memories about him                       ✅ CLOSED — when:{date,basis} shipped, 21/21
-② a TIME question answered as a TOPIC search           ⏸ NEXT — ⛔ untouched
+② a TIME question answered as a TOPIC search           ⭐ DERIVED 09-05 — ⏸ awaiting ratification
 ③ the working-memory summary outranked the transcript  ⏸ AFTER ② — ⛔ untouched
 ```
+
+⇒ ⭐⭐⭐ **② IS DERIVED AND THE PREMISE DID NOT SURVIVE — `DERIVATION_SOTERA_TEMPORAL_READ.md`.**
+
+```
+PROVED   removing "today" from the query returns the IDENTICAL 8 memories ⇒ it is a topic word
+PROVED   no temporal parameter exists on ANY of the 9 memory tools (additionalProperties:false)
+⭐⭐⭐    the 09-04 incident was a JOIN, ⛔ not a silent search: she MERGED the live transcript
+         (genuinely today) with 08-10/08-26 memories under one heading "what we talked about today"
+⭐⭐⭐    the temporal instrument ALREADY EXISTS — `retrieve_conversations` with `between:` /
+         `in:"here"`, 5 successful `between` calls in production. She did not reach for it.
+⭐⭐      `list_memories` + `when` ALREADY answers all five of his probes exactly (34 rows, all dated)
+⚠️⚠️     THREE CLOCKS: the ranker's `recency` is `last_access` — drifted up to 25.8 days off both
+⚠️       memory is a ~4% sample of the conversation, 0% on 5 of 11 days ⇒ a perfect date filter on
+         MEMORY still answers "what did we talk about today" wrongly
+```
+
+⇒ ⭐ **RECOMMENDED: option C** — route the three questions apart, add the missing DENOMINATOR to the
+memory read (*"8 returned, 0 from the day you named, N undateable"*), ⛔ give `recall_memory` no date
+parameter. ⏸ **BLOCKING SUB-QUESTION §7.3**: was `retrieve_conversations` ADVERTISED that turn? ⛔ Not
+established — `tools_offered` logs only the retention occasion's own two tools.
 
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
