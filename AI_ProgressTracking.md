@@ -8184,3 +8184,47 @@ states), not proposed.
 
 **Additional questions recorded**: two `BASIS` vocabularies (`memory-lineage` vs `memory-cognition-axes`);
 `memory-modality` promises "the words" through an occasion key; the distiller's watermark over an elided middle.
+
+---
+
+## 2026-09-05 17:30 (+07:00) — semantic COMPATIBILITY REVIEW · 13 consumers · absences · the 6539 collision · ⛔ nothing changed
+
+`REVIEW_SOTERA_PROVENANCE_CONTRACT_COMPATIBILITY.md`. Each consumer of `source_message_id`/provenance reviewed
+against the §7 contract with GREEN/YELLOW/RED and evidence.
+
+**GREEN (contract-shaped already)**: lineage/supersession — `memory-lineage` defines the column as OCCASION and keeps
+`derivedFrom` for derivation; supersession never reads the pointer. Relayed-speech — runs only where the writer's turn
+IS the evidence turn and `sourceText &&` disables it on absence rather than inferring. Lint — occasion presence and
+reachability integrity, correctly scoped. Manual reconcile — occasion as a named ruling in `source`, provenance as the
+hand-chosen turn in the pointer: the one writer shaped like the contract.
+
+**YELLOW (right concept, wrong key granularity for pass-driven acts)**: M2 admission (equality + fail-closed correct;
+`consumingOccasion = row.source_message_id ?? OCCASION` makes a reflection write's occasion the conversation's newest
+message). Refusal records (same). Retrieval traces (keyed by occasion, in-process, **TTL 15 min** — a shared key within
+the TTL would hand pass 2 pass 1's retrieved memories as `derivedFrom` and pollute contradiction checks). Corrections
+`learnedFrom` (provenance wording on the occasion key). Dreaming as a writer (`sourceMessages` label; 0 cards).
+
+**RED**: `when.said` — infers provenance from occasion with no declared guarantee; wrong gloss on 15 rows; **cannot say
+"not established" when an anchor exists**. `getSource` provenance half — "the message it was saved from" over a
+reachability mechanism; 2/13 on reflection (its reachability half is GREEN: three honest absence flavours). Reflection
+retention and the distiller as writers — declare no provenance and cannot; anchor not unique per act; range not
+represented. Speaker attribution — **no speaker field exists on memories**; `author` is ownership; the only implied
+speaker is the anchor's role, which is hers on `294f8f26`/`0966ab33`.
+
+**The absence cases, proved**: no-provenance is **unrepresentable for a reachable, occasioned row** — the anchor
+manufactures `said`, "the message it was saved from" and `learnedFrom`; it is representable only when occasion and
+reachability are ALSO absent, and then all three collapse onto one NULL (29 rows; `source`'s prefix disambiguates the
+other 38). No-occasion fails closed where governed (GREEN) and is silent elsewhere; for pass-driven writes the failure
+mode is not absence but a **shared key that passes as identity**. No-reachability is well-formed at `getSource`
+(never-recorded / destroyed / unreadable), silently excluding at Dreaming's JOIN, and **"reachable but unreviewed" has no
+representation** (3 rows).
+
+**The 6539 collision — a REAL violation of the contract, latent in the corpus.** `top.id` is a function of conversation
+state, invariant across acts until a message arrives; two acts at 13:40 and 14:00 took one key by design of the key,
+not by a bug. No consumer misbehaved because of circumstance: 20-min gap > 15-min TTL, six `remember` calls and no
+recall in either pass (all six rows `evidence = NULL`), operator-only declaration so a uuid never equals a stored label.
+The leak is reachable within a 15-minute window after a pass that recalls. ⛔ How the pass identity is carried: not
+decided (the pass ledger row already has one).
+
+**Tally**: 4 consumers contract-shaped · 5 right in concept, wrong in key granularity · 4 read occasion as provenance.
+⛔ No schema, implementation, migration, rename, validator or repair.

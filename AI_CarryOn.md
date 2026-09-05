@@ -98,6 +98,16 @@ on 0). Distiller = same writer class (watermark `source` + end-of-window anchor;
 reachability kept, (ii) end-of-stretch broken; ⚠️ passes 13:40/14:00 SHARE occasion id 6539 (latent M2 collision).
 ⛔ Undecided by ruling: fields · anchor · question generation · retain reference · `said` restriction · `decided` basis.
 
+⭐ **COMPATIBILITY REVIEW 09-05 — `REVIEW_SOTERA_PROVENANCE_CONTRACT_COMPATIBILITY.md`** (13 consumers, GREEN/YELLOW/RED).
+GREEN: lineage/supersession · relayed-speech · lint · manual reconcile (the contract's exemplar: occasion in `source`,
+provenance in the pointer). YELLOW (right concept, pass-key = conversation state): M2 admission · refusal records · retrieval
+traces (TTL 15 min — a shared key within it leaks derivation across passes) · corrections.learnedFrom · Dreaming writes.
+RED: `when.said` · `getSource` (provenance half) · reflection retention · distiller (0 rows) · speaker attribution (no field
+on memories; implied speaker = anchor's role). ABSENCES: no-provenance **RED** (unrepresentable when an anchor exists — the
+anchor MANUFACTURES `said`); no-occasion GREEN where governed; no-reachability GREEN at getSource (3 flavours), RED for
+'reachable but unreviewed'; 29 rows carry all three absences on one NULL. COLLISION 6539: **REAL violation** (key = conversation
+state, not act), LATENT by circumstance (20-min gap > 15-min TTL; no recall calls; operator-only declaration). ⛔ Nothing decided.
+
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
 > **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently
