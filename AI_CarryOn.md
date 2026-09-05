@@ -71,6 +71,12 @@ recaps under the closing cue — an OBSERVATION, ⛔ not a pass; ⚠️ run agai
 package (PID 15548, no restart — Ote's call). ⛔ `@ote/memory` UNCOMMITTED: my R-C hunks sit beside pre-existing hunks
 that are not mine in the same two files — attribution is the standing item. ⏸ STOPPED as ruled; ③ untouched.
 
+⭐ **294f8f26 INVESTIGATED 09-05 (read-only) — `REPORT_SOTERA_PROVENANCE_WRONG_SPEAKER_SOURCE.md` §INVESTIGATION.**
+`source_message_id` has THREE meanings by writer: extractor/reconcile = the turn that SAID it · chat tools =
+`lastUserMsg.id`, the OCCASION turn · reflection = `top.id`, the conversation's NEWEST message (assistant 13/13), by
+DESIGN as a reachability anchor. Genuine speaker contradictions **2/156** (`294f8f26`, `0966ab33`), one reflection pass.
+⚠️ `top` ≠ `up_to_rolling_id`: 3 rows anchored 89 turns BEYOND what the pass reviewed. ⛔ Nothing changed, nothing decided.
+
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
 > **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently

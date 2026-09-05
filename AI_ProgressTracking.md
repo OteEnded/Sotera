@@ -8041,3 +8041,43 @@ Attribution by cached patch is the standing item. `294f8f26` recorded as a separ
 (`REPORT_SOTERA_PROVENANCE_WRONG_SPEAKER_SOURCE.md`), ⛔ not fixed.
 
 **Stopped.** ③ untouched · M2 untouched · ranking untouched · no date on `recall_memory`.
+
+---
+
+## 2026-09-05 12:40 (+07:00) — 294f8f26 · speaker provenance INVESTIGATED · ⛔ nothing changed, nothing decided
+
+**R-C accepted as complete for review; not reopened.** Instrument `test/maintenance/measure-speaker-provenance.mjs`
+(read-only, 7 sections); report appended to `REPORT_SOTERA_PROVENANCE_WRONG_SPEAKER_SOURCE.md`.
+
+**Q1 · the mechanism.** Reflection loads ALL messages of the conversation, takes `top = msgs[last]` — the
+conversation's newest message — and passes `messageId: top.id` into the tool context; the retention service
+threads it as `sourceMessageId`, and every `retain`/`remember` write inherits it. `retain` has no per-item
+message parameter. The intent is written at the site (2026-08-21): *"the anchor that makes the whole
+conversation reachable from the memory"* — a REACHABILITY anchor by design, ⛔ not the proposition turn.
+
+**⇒ `source_message_id` means THREE things, by writer** (measured, all 156 rows): extractor and the manual
+reconcile point at **the turn that said it** (user 36/36); chat tools point at **`lastUserMsg.id`, the occasion
+turn** (user 37/37, 10 of them earlier than the write); reflection points at **the conversation's newest turn**
+(assistant **13/13**). `294f8f26` is exactly what the mechanism produces: anchor = her 23:30:57 reply
+(rolling_id 8956, the last message), proposition = his 22:38:17 turn (8935). Its siblings from the same pass
+(`67ed5588`, `0966ab33`) share the anchor; the extractor's rows from the same conversation point at the user
+turn they read.
+
+**⚠️ A sharper finding.** `top` is the newest message; `up_to_rolling_id` is the last message the pass
+actually SHOWED her (the range is budget-bounded). On the 176-turn conversation they diverged: `c5567db5`,
+`c35fbb5a`, `9d71b989` (09-02 13:40) are anchored at 6539 while their pass reviewed only to 6450 — **a source
+she had not read in the pass that wrote them**. Corpus: 89 completed passes, 1 reviewed short of newest.
+
+**Q2 · the census.** 105 about-the-user rows; **11 anchored to an assistant turn — all 11 reflection**. Speech
+attribution hand-classified over 15 regex hits: **genuine contradictions 2/156** — `294f8f26` (*"the user
+clarified…"*) and `0966ab33` (*"the user … has expressed a desire…"*), both one reflection pass; consistent
+attributions `6f441dc5`, `2457529c`, `a1f99b0f`; non-assertions (verb present, no speaker claimed) `9a563c62`,
+`0c6477c8`, `e85586ae`, `7fbb46fa`, `f052f007`, `d93e5295`, `02b095e5`, `676e17b9`, `67ed5588`; one subject
+mismatch of the known `sotera-is-the-subject` class, `922c7edd`. Reverse direction (*"I said"* on a user turn):
+0. `when.said` for reflection rows is the anchor's date — divergence from the proposition's day is possible
+by construction and not yet observed (checked on both two-day conversations).
+
+**Undecided, recorded, ⛔ not solved:** one meaning vs a second pointer · whether `retain` should name the
+turn (and whether she can) · `top` vs `up_to_rolling_id` as the anchor. **Additional questions recorded:**
+writer labelling (reflection `remember` → `source NULL`, `retain` → `'model-tool'`); `recall_memory_source`
+on a reflection row opens on her words; the three beyond-range rows.
