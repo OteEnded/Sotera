@@ -8374,3 +8374,26 @@ axes: 0.** Live probe (agent_dev, zz_ conversation, one turn through the real ro
 `writer chat-tool · act turn · reach turn · 1 span-verified turn reference each` ✓. Re-run: provenance-axes 49/49 ·
 incident-replay 21/21 · memory-lint ALL · evidence-authorization ALL. ⛔ 8 reflection rows left unknown · distiller off ·
 R-C/D5 and BASIS untouched.
+
+## 2026-09-05 13:55 (+07:00) — ⭐⭐ GEN-4 CITATION INSTRUMENT · G1 red-proof → G2 built behind the generation switch (Ote: GO on G0)
+
+**G1 first.** `test/unit/reflection-generation-4.test.mjs` (5: generation table · U1 ordinal resolver · U2 numbered lines byte-
+identical otherwise · citationRefs declared failures · withCitationFields touches only retain) and
+`test/checks/reflection-generation-4-check.mjs` (18: C1 cite + verify · C2 fabricated ordinal ⇒ FAILED ref, row written · C3 misquote
+· C5 quote in an UNcited line ⇒ failed (⛔ no search) · C4 Gen 3 control byte-identical · C6 ledger generations 3/4 · C7 Gen 4
+without `from` = Gen 3 row · C8 a cited FACT through the pipeline · L lint). Run red: 11 fails, the instrument's assertions exactly.
+
+**G2.** `REFLECTION_GENERATIONS` as data ({3:{numbered:false,citations:false}, 4:{numbered:true,citations:true}}), `generationSpec`,
+`transcriptLine(m, clip, ordinal)`, `shapeReflectionTranscript(…, {numbered})`, `citationResolver(slice)`, `citationRefs`,
+`withCitationFields` (pure) · lane: `reflectOnConversation({…, generation = REFLECTION_GENERATION})` — production never passes it; the
+ledger binds `generation`; tools overlay + `extras.citations` only under spec.citations · retention: `citations` option threaded from
+extras; `retain({…, from, quote})` → `citationRefs` → `keep({…, evidenceRefs})` → rememberAsync/reconcileFactAsync · pipeline-host
+`commitToMemory` and the package's episodic resolver / `makeObservation.common` / `reconcileFact` carry `evidenceRefs` (package commit
+`8091139`, two files as HEAD+mine blobs; Tools/Retention handler passthrough with `.pre-gen4.bak` — not a git repo) · evidence: a
+writer-DECLARED failure is recorded (target '', reason names the ordinal); a verified span earns `quoted` on the reference; a
+targetless failure has no state. ⭐ `REFLECTION_GENERATION` stays 3 (P0 asserts it). Green: unit 704/704 · gen-4 18/18 · axes 49/49
+· reflection-lifecycle/manual-trigger/dispatch-boundary ALL. Sotera `76bdb9b`. Full suite running.
+
+**A/B ready.** `test/pipeline/reflection-gen4-ab.mjs` (clone each of the 20 largest agent_dev conversations twice, `updated_at` −4 d so
+the live cron never claims them, alternate order, trigger manual, real model, incremental JSON) · `reflection-gen4-ab-report.mjs`
+(blind PAIRS doc with X/Y by hash · METRICS doc with every pre-registered falsifier · key file). ⛔ Gen 3 live, unchanged.
