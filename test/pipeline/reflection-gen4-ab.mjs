@@ -3,6 +3,7 @@
 //   node test/pipeline/reflection-gen4-ab.mjs --dry            print the design and the pairs, run nothing
 //   node test/pipeline/reflection-gen4-ab.mjs                  run (resume-safe: pairs already run are skipped)
 //   node test/pipeline/reflection-gen4-ab.mjs --pairs 20       N per arm (default 20)
+//   node test/pipeline/reflection-gen4-ab.mjs --reharvest      re-read the DB for every recorded clone; run nothing
 //
 // ── DESIGN ────────────────────────────────────────────────────────────────────────────────────────────
 // A/B by GENERATION on FROZEN material: each source conversation (agent_dev, ⛔ never his account) is CLONED twice; clone A
@@ -94,11 +95,19 @@ async function harvest(cid) {
                                (SELECT json_agg(json_build_object('kind', e.ref_kind, 'target', e.target, 'span', e.span, 'established', e.established, 'how', e.verification->>'how', 'reason', e.verification->>'reason',
                                                                    'role', x.role, 'day', (x.created_at AT TIME ZONE 'Asia/Bangkok')::date::text) ORDER BY e.rolling_id)
                                   FROM ${S}."txn_memory_evidence" e LEFT JOIN ${S}."txn_messages" x ON x.id::text = e.target WHERE e.memory_id = m.id) AS refs
-                          FROM ${S}."txn_memories" m WHERE m.user_id = $2::uuid AND m.reach_conversation_id = $1::uuid ORDER BY m.created_at`, [cid, agent.id])
+                          FROM ${S}."txn_memories" m
+                         WHERE m.user_id = $2::uuid AND (m.reach_conversation_id = $1::uuid
+                            -- lessons/practices carry a record act and no conversation reach: reach them through the decision that persisted them
+                            OR m.id IN (SELECT d.memory_id FROM ${S}."log_retention_decisions" d WHERE d.conversation_id = $1::uuid AND d.memory_id IS NOT NULL))
+                         ORDER BY m.created_at`, [cid, agent.id])
   const decisions = await q(`SELECT kind, mine, state, why, length(content)::int AS chars FROM ${S}."log_retention_decisions" WHERE conversation_id = $1::uuid ORDER BY created_at`, [cid])
   return { ledger, calls, rows, decisions }
 }
 
+if (argv.includes('--reharvest')) {
+  for (const p of results.pairs) for (const k of ['A', 'B']) if (p[k]?.conversationId) p[k].harvest = await harvest(p[k].conversationId)
+  save(); say(`re-harvested ${results.pairs.length} pairs — nothing run`); await pg.end(); process.exit(0)
+}
 for (let i = 0; i < sources.length; i++) {
   const src = sources[i]
   if (results.pairs.some((p) => p.source === src.id && p.A?.harvest && p.B?.harvest)) { say(`  pair ${i + 1} · ${src.id.slice(0, 8)} already run — skipped`); continue }

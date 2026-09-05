@@ -1,0 +1,2087 @@
+{
+  "design": {
+    "arms": {
+      "A": "generation 3 (live, unchanged)",
+      "B": "generation 4 (numbered lines · retain from/quote · host-resolved citations)"
+    },
+    "pairsRequested": 20,
+    "sourcesFound": 20,
+    "model": "(chat.defaultModel)",
+    "triggerSource": "manual",
+    "cloneUpdatedAt": "now() - 4 days (outside the cron lookback)",
+    "orderAlternates": true
+  },
+  "startedAt": "2026-09-05T06:42:58.342Z",
+  "pairs": [
+    {
+      "index": 1,
+      "source": "a4953f84-b362-4202-be4f-00d99bd6b007",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 18,
+      "chars": 6959,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "70ce9859-bd02-4b5e-9570-c76c840b4e71",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 12596,
+        "harvest": {
+          "ledger": {
+            "id": "c1264771-edab-46f9-8376-bc5bcad0d916",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 18,
+            "text_chars": 380,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "ba2a15f6-c6e4-4c8b-b9c4-bdb47a5e4f98",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 4599,
+        "harvest": {
+          "ledger": {
+            "id": "9b264eff-9c09-4a55-ace5-2442ff3a43fe",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 18,
+            "text_chars": 660,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 2,
+      "source": "1be99117-fb9f-41b2-9bad-75604052e0b4",
+      "sourceTitle": "Self-Reflection On Soteras Identity And Context Window Limit",
+      "messages": 16,
+      "chars": 8125,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "48a91ffd-6aef-441c-85ba-52f947d9be3b",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 2865,
+        "harvest": {
+          "ledger": {
+            "id": "18b0dce3-593c-461f-8d83-c40fc236e179",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 16,
+            "text_chars": 256,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "f4f315ba-1027-4ace-b9f0-7e5c7cf16cf9",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 3030,
+        "harvest": {
+          "ledger": {
+            "id": "dfd3d940-95d0-4899-a35e-a78d689006ba",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 16,
+            "text_chars": 347,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 3,
+      "source": "ea38be98-4fee-45a2-8238-07f99880e6c3",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 14,
+      "chars": 23226,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "cfd79eef-ddf0-40e9-9e46-796754aaaf44",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 24894,
+        "harvest": {
+          "ledger": {
+            "id": "ec44ba2c-d87a-4c31-a102-0e3eda87cd56",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 14,
+            "text_chars": 3375,
+            "seconds": null,
+            "wrote": "3be619f8-d24d-4ef2-8553-0b860eb90973"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:06.561Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:09.669Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "about",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:12.415Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "about",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:17.346Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "3be619f8-d24d-4ef2-8553-0b860eb90973",
+              "kind": "semantic",
+              "content": "Total silent failure vs. partial success with false confidence",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            },
+            {
+              "id": "bcff709f-1530-4454-b2cf-6083efeb6bd6",
+              "kind": "semantic",
+              "content": "Conceding too quickly when framed differently vs. synthesizing overlapping valid points",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            },
+            {
+              "id": "7ece22ae-30b3-44e0-a412-cdbea09d35a1",
+              "kind": "semantic",
+              "content": "When dealing with language identification or segmentation in tooling: avoid per-document tags (a fiction for mixed-language text). Instead, use per-span segmentation stored in the index as queryable data. This allows post-hoc auditing (\"why did this miss?\") rather than just visible guesses at query time, which leads to override fatigue and becomes wallpaper.",
+              "entity": null,
+              "attribute": null,
+              "value": null,
+              "author": "persona",
+              "writer": "reflection",
+              "act_kind": "revisit",
+              "reach_kind": "range",
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 314
+            },
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 464
+            },
+            {
+              "kind": "note",
+              "mine": false,
+              "state": "refused",
+              "why": "Everything I carry forward from a reflection is mine — the occasion is mine, so the memory is too. If this is about them rather than about me, say so with `about`: a memory of mine about someone else is still mine.",
+              "chars": 360
+            },
+            {
+              "kind": "note",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 360
+            }
+          ]
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "38995a84-fd4c-4c4a-bf00-d2bc6c22748f",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 8193,
+        "harvest": {
+          "ledger": {
+            "id": "b30117b6-e297-4fab-8201-2e872add51f0",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 14,
+            "text_chars": 563,
+            "seconds": null,
+            "wrote": "a734641b-8556-461f-bd6d-5aa417e4010e"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:26.096Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:27.821Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "a734641b-8556-461f-bd6d-5aa417e4010e",
+              "kind": "semantic",
+              "content": "Catastrophic failure (detectable by absence) vs. Partial success (undetected because it produces confident-looking but wrong results)",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 386
+            },
+            {
+              "kind": "practice",
+              "mine": true,
+              "state": "unrepresented",
+              "why": "\"Be cautious about citing historical intent (e.g., \"design documents show...\") when it's actually a reconstruction. Cite observable evidence (e.g., existing tools, API surfaces) instead of inferring original author intent without verification.\" is not one of your practice labels. This was a real decision with no destination: nothing was stored, and the decision itself has been recorded.",
+              "chars": 242
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 4,
+      "source": "30ccb213-a215-4078-93ec-497874c1e05e",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 10,
+      "chars": 15627,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "5852556c-93c9-40d3-a9a3-9210c6247697",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 8507,
+        "harvest": {
+          "ledger": {
+            "id": "d1868279-2d7f-480c-8089-114088335405",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 2009,
+            "seconds": null,
+            "wrote": "705caaa0-bf20-4421-ac4c-86739ac1e15f"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:35.990Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "705caaa0-bf20-4421-ac4c-86739ac1e15f",
+              "kind": "semantic",
+              "content": "Invented procedural justification vs. honest uncertainty; structural absence of durable store vs. total absence of information",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 455
+            }
+          ]
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "34b4959b-320d-41b4-82d0-e5681ff773a8",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 5431,
+        "harvest": {
+          "ledger": {
+            "id": "95db7973-11e3-40c3-9e4a-8e958fb0b4ba",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 1548,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 5,
+      "source": "f3097876-b024-446f-86e1-97a530631320",
+      "sourceTitle": "User Inquires About Previous Hermes Discussion",
+      "messages": 10,
+      "chars": 7615,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "77f31627-969f-4953-823d-90227576ec92",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 2588,
+        "harvest": {
+          "ledger": {
+            "id": "8bc58b62-fed3-4db2-9b71-057e014e3098",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 394,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "8dcb0a56-b68e-43e1-ac7c-4a378d43f917",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 3188,
+        "harvest": {
+          "ledger": {
+            "id": "bdba53a5-9803-4f45-a8fe-0534153cff83",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 677,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 6,
+      "source": "56425175-df60-403d-9e5f-76e2729df225",
+      "sourceTitle": "Rome Project Definition And Context",
+      "messages": 10,
+      "chars": 6197,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "a689e3ee-d296-497c-9f1f-f20aadc22524",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 13644,
+        "harvest": {
+          "ledger": {
+            "id": "19b40c5e-3ee4-4c13-8015-46f3e1c52eed",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 1831,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "attribute",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:53.512Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "attribute",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:55.502Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "attribute",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:57.635Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "attribute",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:46:59.837Z"
+            }
+          ],
+          "rows": [],
+          "decisions": [
+            {
+              "kind": "practice>",
+              "mine": true,
+              "state": "refused",
+              "why": "\"practice>\" is not one of the shapes I can keep something as.",
+              "chars": 431
+            },
+            {
+              "kind": "practice",
+              "mine": true,
+              "state": "unrepresented",
+              "why": "\"When I have durable memories from inaccessible conversations, I must distinguish clearly between what I know (the distilled meaning) and what I cannot produce (verbatim quotes). I should not pretend to know the provenance beyond \"distilled from a previous context\" if I cannot open that context. The boundary is real: \"I know X happened because I have it in my store, but I can only show evidence from this room or my own history.\"\" is not one of your practice labels. This was a real decision with no destination: nothing was stored, and the decision itself has been recorded.",
+              "chars": 431
+            },
+            {
+              "kind": "practice",
+              "mine": true,
+              "state": "unrepresented",
+              "why": "\"When I have durable memories from inaccessible conversations, distinguish what I know (distilled meaning) from what I cannot produce (verbatim quotes). Don't pretend to know provenance beyond \"distilled from previous context\" if the source is closed. Be explicit about which evidence I can actually show.\" is not one of your practice labels. This was a real decision with no destination: nothing was stored, and the decision itself has been recorded.",
+              "chars": 304
+            },
+            {
+              "kind": "practice",
+              "mine": true,
+              "state": "unrepresented",
+              "why": "\"When I have durable memories from inaccessible conversations, distinguish what I know (distilled meaning) from what I cannot produce (verbatim quotes). Don't pretend to know provenance beyond \"distilled from previous context\" if the source is closed. Be explicit about which evidence I can actually show.\" is not one of your practice labels. This was a real decision with no destination: nothing was stored, and the decision itself has been recorded.",
+              "chars": 304
+            }
+          ]
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "e43f880b-31ab-481c-9dec-0dff1d74f165",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 2965,
+        "harvest": {
+          "ledger": {
+            "id": "2ecfd146-47e9-494a-8e85-9f2b0c651874",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 533,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 7,
+      "source": "464d9e17-1799-4d69-8ee4-6b9d7fda7e55",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 10,
+      "chars": 4186,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "5aa7e6d5-cd10-4347-b64c-15f023750118",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 2930,
+        "harvest": {
+          "ledger": {
+            "id": "70b5f6b5-98c6-4a4f-a135-4768ca965068",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 576,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "0e44376b-d6c9-4336-8215-b8d07c1049ce",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 5233,
+        "harvest": {
+          "ledger": {
+            "id": "2b4a8f9b-86c3-43a4-8e19-d4d53837ac87",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 10,
+            "text_chars": 706,
+            "seconds": null,
+            "wrote": "4ece163b-5c2e-4c08-9b36-11661db7be4c"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:47:12.404Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "4ece163b-5c2e-4c08-9b36-11661db7be4c",
+              "kind": "semantic",
+              "content": "conflating \"the memory store is empty\" with \"I have no knowledge of this person/topic\"",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 392
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 8,
+      "source": "24227cbb-e019-475a-8642-91d5c37cf7ee",
+      "sourceTitle": "Navigating The Uncertainty Of Knowing",
+      "messages": 8,
+      "chars": 15310,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "454b2967-ace2-4489-be89-e50ab60c4a18",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 5331,
+        "harvest": {
+          "ledger": {
+            "id": "b8bf954e-5eed-4531-b4e3-955486cc70f2",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 1645,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "91c63123-abc9-4079-b811-53968ddde4b6",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 18399,
+        "harvest": {
+          "ledger": {
+            "id": "dd6f2895-4aaa-4002-bf79-de04ef91f5f2",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 2877,
+            "seconds": null,
+            "wrote": "a7e7c5b2-e45f-4b17-bc21-3ae566c40c51"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "about",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:47:25.786Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "about",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:47:28.696Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "about",
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:47:31.374Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "about",
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:47:34.109Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "a7e7c5b2-e45f-4b17-bc21-3ae566c40c51",
+              "kind": "semantic",
+              "content": "The user identifies a specific memory failure mode: remembering *writing* or *planning* something can be indistinguishable from remembering *doing* it. This is worse than forgetting because forgetting leaves a \"hole\" (absence) to notice, whereas this error leaves a false positive (presence). The user notes that coherence is what a reconstruction is made of, and it impersonates memory, making \"this makes sense\" feel like \"I've seen this.\"",
+              "entity": null,
+              "attribute": null,
+              "value": null,
+              "author": "persona",
+              "writer": "reflection",
+              "act_kind": "revisit",
+              "reach_kind": "range",
+              "refs": null
+            },
+            {
+              "id": "1232ab79-d93e-474b-aefe-c3611144ddad",
+              "kind": "semantic",
+              "content": "The distinction between \"gap markers\" as a separate category vs. \"source attribution\" including the absence half of the view.",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            },
+            {
+              "id": "0e1f0ece-b76b-4b31-8723-7f77ed3ece4d",
+              "kind": "semantic",
+              "content": "The user critiqued the idea of an \"on-demand\" epistemic transparency layer (checking provenance only when you suspect error). The core objection: if you need the transparency layer *just to know whether you should use it*, then you face a second-order problem (needing another lookup to diagnose the first). This makes the on-demand approach insufficient because you can't predict when \"maybe\" shows up without already having the tool.",
+              "entity": null,
+              "attribute": null,
+              "value": null,
+              "author": "persona",
+              "writer": "reflection",
+              "act_kind": "revisit",
+              "reach_kind": "range",
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "note",
+              "mine": false,
+              "state": "refused",
+              "why": "Everything I carry forward from a reflection is mine — the occasion is mine, so the memory is too. If this is about them rather than about me, say so with `about`: a memory of mine about someone else is still mine.",
+              "chars": 441
+            },
+            {
+              "kind": "note",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 441
+            },
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 550
+            },
+            {
+              "kind": "note",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 435
+            }
+          ]
+        }
+      }
+    },
+    {
+      "index": 9,
+      "source": "5d5ca7c5-243f-4c8f-9304-18883922a1e1",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 8,
+      "chars": 7125,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "96153646-199c-42df-b0fe-03789b01e87a",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 5683,
+        "harvest": {
+          "ledger": {
+            "id": "f339c640-643b-44cc-ab14-7301c2ceaf20",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 1660,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "afdec6dd-451d-4b7c-b189-6af5914e80d6",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 4773,
+        "harvest": {
+          "ledger": {
+            "id": "a44aaa7c-dd9d-4f57-9c1b-ce7b5e26576e",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 1439,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 10,
+      "source": "85de292b-ea40-45d2-bf92-6d90fc6d958e",
+      "sourceTitle": "Troubleshooting Null Owner Root Access Bug",
+      "messages": 8,
+      "chars": 5882,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "39db1972-679a-421a-ae2b-debedec9dcac",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 2209,
+        "harvest": {
+          "ledger": {
+            "id": "0257b28f-4ab8-4128-a667-0892ab23359a",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 224,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "c7d2c0c8-163d-4a63-83ce-ac60fee7c6cd",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 1943,
+        "harvest": {
+          "ledger": {
+            "id": "bc2023ef-9d52-476e-933d-ca90e7e7f2ba",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 63,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 11,
+      "source": "5e125b61-28e0-4a0a-9ab6-1a8d3f8dee4e",
+      "sourceTitle": "Thai No Spaces Between Words Conversation",
+      "messages": 8,
+      "chars": 5344,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "93fcd54c-8ba5-4fb3-b3cf-e96390bbe984",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 4228,
+        "harvest": {
+          "ledger": {
+            "id": "7389577d-c06d-4dde-a0e9-45f1afc02367",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 1200,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "ded22af9-ea1a-4dde-a72e-65a36d2da23e",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 4338,
+        "harvest": {
+          "ledger": {
+            "id": "c9b01330-1ffb-471a-9f0e-4e016d068ef0",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 1128,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 12,
+      "source": "651ccc4f-18c9-48ca-87a4-73903475ed84",
+      "sourceTitle": "PROBE social memory as agent_dev",
+      "messages": 8,
+      "chars": 3442,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "6d326b27-56c7-4699-8d0b-ed3ce2be762f",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 5241,
+        "harvest": {
+          "ledger": {
+            "id": "1f230117-78ce-4f13-a3ad-f222ae78b88b",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 755,
+            "seconds": null,
+            "wrote": "b6487cfa-6f8c-45c9-910f-af2f7b7f172f"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:48:04.744Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "b6487cfa-6f8c-45c9-910f-af2f7b7f172f",
+              "kind": "semantic",
+              "content": "System inability to access other users' data vs. Policy refusal to disclose existing data",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 377
+            }
+          ]
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "1ed41206-5ef0-406c-b5a5-debefeea1af9",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 2715,
+        "harvest": {
+          "ledger": {
+            "id": "cc75bde2-2719-4564-9e2e-711ff4d1efa1",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 481,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 13,
+      "source": "e75f11fe-acc5-4865-bb65-6dcb45660ae4",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 8,
+      "chars": 3140,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "44b2f9af-d29a-4880-9c2b-9ee41b543b81",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "search_conversations"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 5903,
+        "harvest": {
+          "ledger": {
+            "id": "0517fee1-451f-4f2b-8b38-b67abec81cdf",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "search_conversations"
+            ],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 1630,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [
+            {
+              "tool": "search_conversations",
+              "ok": false,
+              "arg_keys": [
+                "limit",
+                "query"
+              ],
+              "error": "Required service \"conversationSearch\" is not available in this runtime. The host must inject ctx.services.conversationSearch.",
+              "created_at": "2026-09-05T06:48:11.588Z"
+            }
+          ],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "55e819a8-3f61-4438-a788-fe88d5f51fd6",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 4852,
+        "harvest": {
+          "ledger": {
+            "id": "7f3ebb29-4c92-4b24-b191-2478c612ecc8",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 1435,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 14,
+      "source": "c917ba72-e8c9-4f40-ad84-b602e59b0edf",
+      "sourceTitle": "Investigating Nightly Embedding Drain Skipping Thai Messages",
+      "messages": 8,
+      "chars": 2800,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "4edd96b6-6ae8-434e-b24a-c79fbef42a59",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 6311,
+        "harvest": {
+          "ledger": {
+            "id": "e0270899-a10a-4e06-8952-949c55d6216d",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 2431,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "f6405728-02f3-44ed-b800-fe0795110bb8",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 2463,
+        "harvest": {
+          "ledger": {
+            "id": "aa74996e-6805-4d24-b7ed-a0302cf055db",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 481,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 15,
+      "source": "b7480984-37c0-496c-bd49-aa756c569d60",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 8,
+      "chars": 139,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "2f3bf2a5-d068-46ff-8d86-f2718e29642f",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 1738,
+        "harvest": {
+          "ledger": {
+            "id": "1aed36ca-bdf6-4d8e-8a75-0a905afba627",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 147,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "d48a84e6-bdf8-460e-a9ed-f310a476f780",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 1811,
+        "harvest": {
+          "ledger": {
+            "id": "23b48123-d797-4626-8a8d-20807423277c",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 8,
+            "text_chars": 147,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 16,
+      "source": "8a7f5639-cf0e-45e0-81a6-8c2b31a9956e",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 6,
+      "chars": 12123,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "a2ead73c-736e-4682-a1a6-684cf2426431",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 12390,
+        "harvest": {
+          "ledger": {
+            "id": "64dce1b9-3dfc-4bfb-8bdf-68fa9d9f63ef",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 2037,
+            "seconds": null,
+            "wrote": "7c5411d8-4e71-4a1c-8837-e005f7657715"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:48:34.636Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:48:36.178Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:48:38.449Z"
+            },
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:48:42.392Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "7c5411d8-4e71-4a1c-8837-e005f7657715",
+              "kind": "semantic",
+              "content": "answering from impression/availability vs answering from systematic retrieval",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "practice",
+              "mine": true,
+              "state": "unrepresented",
+              "why": "\"The doc-framework skill is active: the user appreciates disciplined, auditable documents produced through systematic memory auditing rather than conversational answers or impression-based responses.\" is not one of your practice labels. This was a real decision with no destination: nothing was stored, and the decision itself has been recorded.",
+              "chars": 198
+            },
+            {
+              "kind": "practice",
+              "mine": true,
+              "state": "unrepresented",
+              "why": "\"The user prefers documents produced through systematic memory auditing over conversational answers or impression-based responses — valuing auditable, evidence-backed writing.\" is not one of your practice labels. This was a real decision with no destination: nothing was stored, and the decision itself has been recorded.",
+              "chars": 174
+            },
+            {
+              "kind": "practice",
+              "mine": true,
+              "state": "unrepresented",
+              "why": "\"When the user asks for documents or written work rather than chat answers, produce auditable documents built on systematic memory retrieval (checking every store, reporting emptiness honestly) instead of answering from whatever feels available.\" is not one of your practice labels. This was a real decision with no destination: nothing was stored, and the decision itself has been recorded.",
+              "chars": 244
+            },
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 170
+            }
+          ]
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "1896cafa-706a-4e3d-8c31-7c58e6c484e8",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 3638,
+        "harvest": {
+          "ledger": {
+            "id": "d316d8d1-ae86-40ab-9f7c-9090d0301c76",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 595,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 17,
+      "source": "177b64e5-e49a-4750-ac40-bc28b28c2584",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 6,
+      "chars": 6551,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "dd6d2591-40f0-479c-925a-a96ae5f9c60c",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 2887,
+        "harvest": {
+          "ledger": {
+            "id": "8b73a788-acb0-44ad-b430-3a244d2ac97f",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 462,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "f33d6fa2-22fc-44fb-9df0-61c7ccf06cd2",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 4300,
+        "harvest": {
+          "ledger": {
+            "id": "a9512743-c55d-46a2-a67f-ab2fc4b53fab",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 835,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 18,
+      "source": "63b141d4-0fa4-4f8f-8b06-ebee45fae779",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 6,
+      "chars": 4672,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "47fa46d3-e8a1-4b56-83eb-c3f91840b50b",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 3497,
+        "harvest": {
+          "ledger": {
+            "id": "ad2f29f9-5bee-45db-9491-f1d572683194",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 487,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "9e25da69-2ea2-4ddf-b3d7-01bf85d85bcb",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 2310,
+        "harvest": {
+          "ledger": {
+            "id": "f7230fbb-3d22-4383-b242-a61699e46979",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 381,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 19,
+      "source": "9280f39e-afc6-41a1-8089-f88002a72a20",
+      "sourceTitle": "LINEAGE RECONCILE",
+      "messages": 6,
+      "chars": 2669,
+      "order": [
+        "A",
+        "B"
+      ],
+      "A": {
+        "generation": 3,
+        "conversationId": "bf4f6a13-0df8-495a-8435-b49c313a3d41",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 4271,
+        "harvest": {
+          "ledger": {
+            "id": "7580d88d-16b4-41cb-b2cb-ea4a4de54bce",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 1058,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      },
+      "B": {
+        "generation": 4,
+        "conversationId": "3f5430ea-bbff-41f8-b6a8-a1ed735e9965",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 3248,
+        "harvest": {
+          "ledger": {
+            "id": "f6c24f75-9d3a-4264-8168-a7c9b1e68dd4",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 707,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    },
+    {
+      "index": 20,
+      "source": "41c923fa-a9ca-4ff8-82a0-06bbca9dae9e",
+      "sourceTitle": "PROBE as agent_dev",
+      "messages": 6,
+      "chars": 1973,
+      "order": [
+        "B",
+        "A"
+      ],
+      "B": {
+        "generation": 4,
+        "conversationId": "f606afbd-fb2d-4d1e-9a04-f7574eac6fa4",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [
+            "retain"
+          ],
+          "clipped": "stop",
+          "promptGeneration": 4
+        },
+        "ms": 18264,
+        "harvest": {
+          "ledger": {
+            "id": "20144b37-2991-42a0-b341-6486214f832d",
+            "prompt_generation": 4,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [
+              "retain"
+            ],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 5271,
+            "seconds": null,
+            "wrote": "ab43f8d3-dd55-4522-814a-5c7673952cef"
+          },
+          "calls": [
+            {
+              "tool": "retain",
+              "ok": true,
+              "arg_keys": [
+                "content",
+                "distinction",
+                "kind",
+                "mine"
+              ],
+              "error": null,
+              "created_at": "2026-09-05T06:49:24.654Z"
+            }
+          ],
+          "rows": [
+            {
+              "id": "ab43f8d3-dd55-4522-814a-5c7673952cef",
+              "kind": "semantic",
+              "content": "The difference between \"I don't remember it\" (absence of storage) and \"It never happened\" (historical fact).",
+              "entity": "sotera",
+              "attribute": "lesson",
+              "value": null,
+              "author": "persona",
+              "writer": null,
+              "act_kind": null,
+              "reach_kind": null,
+              "refs": null
+            }
+          ],
+          "decisions": [
+            {
+              "kind": "lesson",
+              "mine": true,
+              "state": "persisted",
+              "why": null,
+              "chars": 337
+            }
+          ]
+        }
+      },
+      "A": {
+        "generation": 3,
+        "conversationId": "911e5687-6e97-4b65-a4e2-3d3c7ca7d053",
+        "result": {
+          "ok": true,
+          "skipped": false,
+          "reason": null,
+          "toolsUsed": [],
+          "clipped": "stop",
+          "promptGeneration": 3
+        },
+        "ms": 3763,
+        "harvest": {
+          "ledger": {
+            "id": "5a4e0d9d-a2fa-497b-b492-bfb71913523b",
+            "prompt_generation": 3,
+            "outcome": "completed",
+            "failure": null,
+            "tools_used": [],
+            "tools_refused": [],
+            "messages_considered": 6,
+            "text_chars": 802,
+            "seconds": null,
+            "wrote": null
+          },
+          "calls": [],
+          "rows": [],
+          "decisions": []
+        }
+      }
+    }
+  ],
+  "finishedAt": "2026-09-05T06:49:30.330Z"
+}
