@@ -108,6 +108,18 @@ anchor MANUFACTURES `said`); no-occasion GREEN where governed; no-reachability G
 'reachable but unreviewed'; 29 rows carry all three absences on one NULL. COLLISION 6539: **REAL violation** (key = conversation
 state, not act), LATENT by circumstance (20-min gap > 15-min TTL; no recall calls; operator-only declaration). ⛔ Nothing decided.
 
+⭐⭐ **REMEDIATION ARCHITECTURE DESIGNED 09-05 — `DESIGN_SOTERA_PROVENANCE_REMEDIATION_ARCHITECTURE.md`** (semantic only).
+§0 THE RULE: no axis is derived from another; the only bridge is a WRITER-DECLARED coincidence (relayed-speech's `sourceText &&`
+is the model). OCCASION = the ACT, minted before it writes — turn key (turn-driven) · PASS identity (reflection/Dreaming; the
+distiller has NO act record and needs one) · label (operator) · refusals inherit the act; 6539 dissolves by moving the key to
+the act (`top` demoted to reachability). PROVENANCE = 0..n typed refs {turn|memory|document|record}, each establishing
+support (+speaker/date for TURN refs only); written by the writer or not at all; reflection = NOT established; ⛔ no reader
+completes it; ⛔ phrase locations are investigation, not repair. REACHABILITY = turn | RANGE (pass) | document | none, four
+states kept + the DISTINCTION 'reachable but unreviewed'. TEMPORAL: said ← account-holder turn refs ONLY; recorded ← row;
+decided ← act. Migration meaning: extractor said STANDS (declared coincidence); reflection said WITHDRAWN; chat-tool said
+withdrawn unless a turn ref exists (37 rows — the visible cost; a chat coincidence is a §10 writer-contract decision).
+⛔ No schema/migration/code/rename/validator/repair. Representation is §10 — not decided.
+
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
 > **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently

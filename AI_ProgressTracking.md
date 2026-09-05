@@ -8228,3 +8228,58 @@ decided (the pass ledger row already has one).
 
 **Tally**: 4 consumers contract-shaped · 5 right in concept, wrong in key granularity · 4 read occasion as provenance.
 ⛔ No schema, implementation, migration, rename, validator or repair.
+
+---
+
+## 2026-09-05 19:10 (+07:00) — REMEDIATION ARCHITECTURE designed · semantic model → representation requirements · ⛔ no code
+
+`DESIGN_SOTERA_PROVENANCE_REMEDIATION_ARCHITECTURE.md`, built on the locked §7 contract and the compatibility review.
+
+**§0 · The one rule.** No axis is ever derived from another axis. The only permitted bridge is a WRITER-DECLARED
+coincidence recorded on the act — the extractor's *"the turn I read is the turn that occasioned me"* — and relayed
+speech's `sourceText &&` is that declaration already expressed in code. Every RED in the review is a violation of this
+rule; the remedy is to give each axis its own carrier and its own absence, so cross-derivation has nothing to grab.
+
+**§2 · Occasion.** The unit is the ACT, minted before it writes, compared by equality. Carriers derived from what each
+writer already records: turn key for extractor/identity/chat tools/follow-through; **the pass identity** for reflection
+(`log_conversation_revisits` is claimed before the tools run and carries the range) and Dreaming (`log_dreaming_passes`;
+`log_memory_warrants.pass_id` already treats a pass as an act key); labels for reconcile and M2 acts; refusals inherit
+the attempted act's identity; ⛔ the episode distiller has **no act record** and needs one before it may write; admin
+edits have `actor`/`reason` but no act identity. **6539 dissolves** by moving the key to the act — `top.id` is demoted to
+a reachability fact, and not the right one (the pass's material is its reviewed range). Passes 13:40 and 14:00 become
+two acts by construction; traces and `lineageFor` cannot share state; M2 sees two occasions, correctly.
+
+**§3 · Provenance.** An independent evidence set: `{established, references[]}`, each ref typed turn | memory |
+document | record with `establishes {support, speaker?, date?}` — speaker and date from **turn refs only**, never
+transitive through a memory; document refs carry a document date, not a `said`. 0 refs ⇒ not established — sayable
+while occasion and reachability are present. Per-writer establishment: extractor 1 turn ref by declared coincidence
+(`quoted`/`elicited` strengthen it); chat tools only by citation or `derivedFrom`; reflection/distiller nothing today;
+reconcile by operator attestation; docs from `evidence.{quote,path,commit}`. **Written by the writer or not at all; no
+reader completes it.** Speaker becomes a property of turn refs — `294f8f26`'s *"the user clarified"* is a content claim
+with speaker **not established**, the truthful state. The `provenance` CREDENTIAL column and the cognition `BASIS` are
+kept distinct from this axis.
+
+**§4 · Reachability.** Target turn | range | document | none; the four `getSource` states kept; one added DISTINCTION —
+**reachable but unreviewed**: a readable pointer outside the act's reviewed range, never presented as "the source". It
+describes the three existing rows exactly. `never-recorded` is a complete state a doc row holds alongside full
+provenance; Dreaming must report unreachable rows, not drop them.
+
+**§5 · Temporal.** `said` ← account-holder turn refs only (one date, or all one day; several days ⇒ no single `said`);
+`recorded` ← the row; `decided` ← the act. An anchor never creates `said` — the 15 manufactured `said`s vanish by losing
+their input, not by special-casing persona rows; the R-C `undated` population becomes exactly "no established `said`".
+
+**§6 · Consumer map** (current → intended → change) for all 13; preserved explicitly: lineage's separation, reconcile's
+shape, relayed-speech fail-closed, lint's scope, M2's `no-occasion`, `getSource`'s states, ①/R-C shapes.
+
+**§7 · Absences proved independent on real rows**: occasion+reachability+no provenance (13 reflection rows);
+occasion+provenance+no reachability (34 doc rows); occasion only (4 lessons/declines); none of the three (29 rows —
+stay unknown). The only fallback in the model is within Temporal (`recorded`).
+
+**§8 · Migration meaning, ⛔ no script**: deterministic = pass ids and ranges from the ledger, doc refs from evidence;
+declarable = extractor turn refs; withdrawal = `said` on 13 reflection rows and, ⚠️ visibly, on 37 chat-tool rows unless a
+chat coincidence is declared as a writer contract (§10); ⛔ inference = phrase-located turns, speaker from anchor role,
+act from a timestamp window. `294f8f26` resolves to decided/recorded 09-05, no `said`, speaker not established.
+
+**§10 · Undecided**: representation carriers; reflection's per-item reference shape; the chat-tool coincidence; exposing
+`decided`; multi-day `said`; the two `BASIS` vocabularies; the distiller's ledger and coverage invariant; admin act
+names; speaker validation. ⛔ Nothing changed.
