@@ -74,11 +74,14 @@ try {
   const audit = await q(
     `SELECT memory_id::text, action, actor, reason, (before IS NOT NULL) AS has_before
        FROM ${S}."log_memory_changes" WHERE memory_id = ANY($1::uuid[]) ORDER BY created_at`, [IDS])
-  check('3 · ⭐⭐ EXACTLY ONE audit row per memory — ⛔ not zero, ⛔ not two', audit.length === 2,
-    `rows=${audit.length}`)
+  // ⓘ 049: LATER audited acts may add rows of OTHER actions to the same memories (the provenance-axes backfill did —
+  //    `axes-backfill`, M7). The retirement's invariant is about the `forget` rows: exactly one each, never zero, never two.
+  const forgets = audit.filter((a) => a.action === 'forget')
+  check('3 · ⭐⭐ EXACTLY ONE `forget` audit row per memory — ⛔ not zero, ⛔ not two', forgets.length === 2,
+    `forget rows=${forgets.length} · all rows=${audit.length} (${[...new Set(audit.map((a) => a.action))].join(', ')})`)
   check('3a · ⭐ action `forget`, a real operator, and a precise reason',
-    audit.every((a) => a.action === 'forget' && a.actor === 'ote-operator' && /relayed speech/i.test(a.reason ?? '')),
-    audit.map((a) => `${a.action}/${a.actor}`).join(' · '))
+    forgets.every((a) => a.actor === 'ote-operator' && /relayed speech/i.test(a.reason ?? '')),
+    forgets.map((a) => `${a.action}/${a.actor}`).join(' · '))
   check('3b · ⭐⭐⭐ …and each carries the COMPLETE `before` snapshot, so the retired belief is readable '
     + 'from the audit alone', audit.every((a) => a.has_before), audit.map((a) => a.has_before).join(' · '))
 

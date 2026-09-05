@@ -1,6 +1,6 @@
 # AI_CarryOn — Sotera
 
-**Compaction checkpoint 2026-09-05 00:32 (+07:00).** ⭐ Read §0-A first; everything below §0-F is history.
+**Checkpoint 2026-09-05 11:45 (+07:00).** ⭐ Read §0-A first; everything below §0-F is history.
 
 ---
 
@@ -30,7 +30,7 @@ She answered *"here's what we talked about today"* with a list that was mostly t
 ```
 ④ relayed speech became Ote's identity                 ✅ CLOSED — proved 14/14 · two rows retired 13/13
 ① no dates on memories about him                       ✅ CLOSED — when:{date,basis} shipped, 21/21
-② the 09-04 recap was a JOIN of transcript + memory      ⭐ PREMISE SUPERSEDED · routing contract DERIVED — ⏸ awaiting ratification
+② the 09-04 recap was a JOIN of transcript + memory      ✅ R-C RATIFIED + IMPLEMENTED 09-05 · ⭐⭐⭐ PROVENANCE AXES SHIPPED 09-05 (PASS)
 ③ the working-memory summary outranked the transcript  ⏸ AFTER ② — ⛔ untouched
 ```
 
@@ -132,16 +132,32 @@ ref is meaningless; elicited/observed are act facts. Distiller: act per (convers
 coverage invariant (watermark = reviewed end, elision refuses); no `last.id` evidence; ⏸ enable-or-not is Ote's. Admin acts:
 label or request identity + actor + reason; audit rows must carry the act id. Speaker: NO write refusal; consumer rule +
 integrity report; `speaker: not established` defined. §12 representation boundary listed; §13 seven Ote-level decisions;
-§11 invariants I1–I10 + forbidden inferences F1–F10; §14 migration principles. ⛔ Nothing implemented. AWAITING GATE REVIEW.
+§11 invariants I1–I10 + forbidden inferences F1–F10; §14 migration principles. ✅ GATE PASSED — implemented below.
 
-⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
+⭐⭐⭐ **PROVENANCE AXES SHIPPED 09-05 11:40 — Phases 1–7, `REPORT_SOTERA_PROVENANCE_AXES_LIFECYCLE.md` · VERDICT PASS.**
+Phases 1–3 (Reference `7eb4807`): `PHASE1_…DECISIONS` (seven §13 decisions closed) · `SPEC_…IMPLEMENTATION` · `REDPROOF_PLAN_…`
+(tests before code). Phase 4 (Sotera `08f4742` `398aa28` `381f6eb` `ad852b8` · package `d489b6a`): **mig 049** — `writer`,
+`(act_kind, act_id)`, `reach_*` + CHECKs on `txn_memories`; `txn_memory_evidence`; act on refusals/changes/retention decisions.
+`memory-writer-contracts.js` (13 writers; pass writers REFUSED without an act — `NO_ACT`; declared coincidence ONLY extractor/
+identity; chat tools VERIFY value-in-occasion-turn; operator attests) · `memory-evidence.js` (refs verified: exists · in range ·
+in conversation · span; failures RECORDED, item stands; speaker/date resolved from the TURN, never stored; `saidFor` = one day of
+account-holder turn refs). Store stamps axes from construction only; `said` from evidence only; `getSource` = MATERIAL ≠
+EVIDENCE + `speaker: not established`. Every writer wired (reflection `revisit:<ledger id>` + range; Dreaming `dreaming:<pass>`;
+chat route turn act; M2 admission act-first with the ratified precedence kept; traces/lineage keyed by act; lint +9 rules;
+`@ote/memory remember()` passes `evidenceRefs`). Phase 5 (`test/maintenance/migrate-provenance-axes.mjs --apply`, act
+`provenance-axes-backfill-2026-09-05`): 158 rows · 77 refs (36 coincidence · 4 span · 3 attested · 34 document) · 158 audit
+rows; reflection 5 ledger-linked → act+range, **8 unlinked → act NOT recorded** (strict reading; window link is Ote's);
+`c5567db5` pointer OUTSIDE its range ⇒ `reviewed:false`; 0 refs for any reflection row; **`said` 89 → 43 = 46 withdrawn
+(13 reflection + 33 chat-tool), exactly FINAL §14's projection**; 31 unknown rows = ALL agent_dev fixtures. Phase 6:
+provenance-axes 49/49 · incident-replay 21/21 · temporal-provenance ALL · lint/evidence-auth/cogito ALL · unit 699 · package
+94 · suite 79/80 (the one = D5 order drift, EXTERNAL — 0-E) · `measure-temporal-read` §9/§10 unchanged. ⭐ Clarified inside
+the contract: a SPAN is verified before attestation; chat-tool = `model-tool` whatever the author; ledger `from NULL` accepted
+only where `messages_considered` = messages ≤ `up_to` (8/8). ⛔ R-C · M2 · ③ · privacy · relayed speech · reflection prompt ·
+`source_message_id` all untouched. ⏸ **OTE'S (report §F):** window link for the 8 rows · restart :8210 then re-run the
+backfill · Generation-4 reflection citations (store side built) · distiller enablement · historical severity · BASIS rename.
 
-> **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently
-> perform semantic search?**
-
-ⓘ Ote's invariant: *a read must not silently answer a different question from the one the model asked.*
-Options sketched: **A** add explicit time scope · **B** refuse/defer · **C** another architecture.
-⛔ He said: **do not pick B just because it is safer — get the actual contract first.**
+⇒ ✅ **② IS SETTLED** (R-C: the merge rule + the denominator; `recall_memory` gets no date parameter) and the provenance
+defect beneath it is closed. ⏸ **③ IS NEXT — ⛔ untouched.**
 
 ⓘ For ③, the measured facts: her prompt was **24,037 tokens** (the whole conversation was present), and the
 composer's highest-utility item was the **89-token** working-memory block. ⚠️ Its rendered text is NOT
@@ -164,23 +180,27 @@ recoverable — only its token count and utility are logged. Fixing that observa
 ⑥ A DATE MUST SAY WHAT IT IS A DATE **OF**: `said` · `recorded` · ⛔ there is no `happened`.
 ```
 
-# 0-C · LIVE STATE — 2026-09-05 00:32
+# 0-C · LIVE STATE — 2026-09-05 11:45
 
 ```
-76/76 suites · @ote/memory 84/84 · migrations through 048
+79/80 suites (D5 order drift — EXTERNAL, see 0-E) · @ote/memory 94/94 · migrations through 049
 :8210 PID 15548 (Sotera) · :8201 PID 27160 (OLS) · :54322 PID 7132 (pg)
 memories 151 · live 113 · slots 84 · BOUND 1 · questions 1 · bindings 2 · pinned 14 (all canary, 1 live)
 Ote's live `preferred_name` rows: 0  ⭐ correct — the two false "Cogito" rows are RETIRED, ⛔ not replaced
+⭐ AXES: 158 rows classified · 77 evidence refs · said 89→43 · 8 reflection acts NOT recorded · lint defects 8 (those rows)
+⚠️ :8210 PID 15548 still runs PRE-AXES code — rows written since the backfill (2 so far) carry no axes
 ⓘ 10 legacy `zz_` slots hold 0 memories — empty shells, ⛔ not new residue
 ⓘ `tool-call-log-check` is MODEL-DEPENDENT and has flaked twice; green standalone and on re-run
 ```
 
-**BUILT SINCE THE LAST CHECKPOINT:** the model-tool `claimKind` capability · the always-settling receipt
+**BUILT SINCE THE LAST CHECKPOINT:** ⭐⭐⭐ the four provenance axes (mig 049 · writer contracts · evidence table · audited
+backfill — see ⓑ) · the model-tool `claimKind` capability · the always-settling receipt
 (`persisted / refused / accepted`) · the model-facing write result · the self-authorisation rule wired at
 admission · the rehearsed namespace kill switch · continuous bind-eligibility on the cron · the
 relayed-speech threading fix · `when:{date,basis}` on every memory · the `sotera_chat_` export rename.
 
-⚠️⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED, AND SO IS `Tools/Retention`.** ⭐ 09-05: R-C added
+⚠️⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED, AND SO IS `Tools/Retention`.** ⭐ 09-05 11:40: the two AXES hunks
+are committed ALONE (`d489b6a`, staged as blobs — the working tree was not touched); everything below is still uncommitted. ⭐ 09-05: R-C added
 `normalizeWindow`/`labelByWhen`/`partitionByWhen`/`WINDOW_LABEL` + `list()` window (service) and `on`/`between`/`basis` on
 `list_memories` (index.js) + `test/temporal-window.test.mjs` — MINE, in the same files as the pre-existing hunks.
 The package repo ALSO holds **pre-existing work that is NOT mine** — `cognition/memory-pipeline.js`, two
@@ -207,9 +227,16 @@ ORIGIN PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 UNTOUCHED · ROME UNTOUCHE
 ⚠️ the `when` date uses the DEPLOYMENT's timezone, ⛔ not the individual user's — no per-account column.
 ⚠️ INLINE ATTRIBUTED SPEECH is caught today only by the shipped rule's 8-character floor. ATTRIBUTION
    itself — who the surrounding clause assigns a span to — is computed NOWHERE. Open residual.
-ⓘ Ote's room holds live rows under TWO persona scopes (`null` 31 · `'sotera'` 20). A read scoped to one
-   cannot see the other. ⛔ Not investigated.
-ⓘ Closed field lists remain the standing hazard — 13 recorded instances.
+ⓘ Ote's room holds live rows under TWO persona scopes (`null` 34 · `'sotera'` 20). A read scoped to one
+   cannot see the other. ⛔ Not investigated. ⭐ 09-05 shape: null = extractor 14 · chat-tool 8 · reflection 11 ·
+   decline 1; 'sotera' = ingest 17 · operator 3 (the Rome reconcile rows); production reads the null scope.
+ⓘ Closed field lists remain the standing hazard — 14 recorded instances (the 14th: `@ote/memory remember()` dropped `evidenceRefs`).
+⚠️ 8 reflection rows have act NOT recorded (strict reading) ⇒ 8 standing `pass-writer-without-act` lint DEFECTS until Ote
+   permits the unambiguous 20-min window link (PHASE1 §8) as a separate audited act.
+⚠️ :8210 still runs pre-axes code — live rows since the backfill carry no axes; re-run the idempotent backfill after restart.
+ⓘ D5a/D5b (R-C's frozen-order search snapshot): same id set, same per-id relevance, ORDER moved because two of his rows were
+   accessed at 04:30:49Z (after the 01:22Z snapshot) — `last_access` is the third clock. ⛔ R-C untouched.
+ⓘ Three ledger rows link `wrote_memory_id` to lesson/decline records; those rows keep the `record` act (the contract).
 ```
 
 # 0-F · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof

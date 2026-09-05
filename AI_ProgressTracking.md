@@ -8319,3 +8319,47 @@ names; representation). **§14** migration principles M1–M7 — deterministic 
 unknown stays unknown, no inference as repair, every repair an audited act.
 
 ⛔ No implementation, schema, migration, validator, repair, rename or code. Awaiting the gate review.
+
+## 2026-09-05 11:40 (+07:00) — ⭐⭐⭐ PROVENANCE AXES SHIPPED · Phases 1–7 · `REPORT_SOTERA_PROVENANCE_AXES_LIFECYCLE.md` · **PASS**
+
+Ote: *"let's take this full circle — investigation → semantic contract → architecture → implementation → migration →
+verification."* Autonomous between phases; ⛔ no `BLOCKED — semantic decision required` arose.
+
+**Phases 1–3 (docs, Reference `7eb4807`).** The seven §13 decisions closed as FACT → RULE → DECISION → CONSEQUENCE
+(`PHASE1_…`); the implementation spec (`SPEC_…`, 15 sections, every consumer old→new→change→test); the red-proof plan
+(`REDPROOF_PLAN_…`) — tests written BEFORE code, constructed so the OLD behaviour fails them.
+
+**Phase 4 (Sotera `08f4742` · `398aa28` · `381f6eb` · `ad852b8`; package `d489b6a`).** Migration 049: `writer`,
+`(act_kind, act_id)`, `reach_*` on `txn_memories` with `act_whole`/`reach_shape` CHECKs; `txn_memory_evidence`; act columns on
+refusals/changes/retention decisions. `memory-writer-contracts.js` (13 writers; pass writers fail closed without an act;
+declared coincidence ONLY for extractor/identity; chat tools VERIFY against the occasion turn; operator attests).
+`memory-evidence.js` (`createReferences` verifies exists/range/conversation/span, records failures; `provenanceFor` resolves
+speaker/date from the TURN, never stored; `saidFor` one day of account-holder turn refs). Store stamps axes from
+construction, refuses `NO_ACT`, `said` from evidence only, `getSource` = material ≠ evidence + `speaker: not established`.
+Every writer wired (reflection `revisit:<ledger id>` + range; Dreaming `dreaming:<pass>`; chat route turn act). Consumers:
+M2 admission act-first (ratified precedence kept), refusal/audit/retention carry the act, traces + lineage keyed by act,
+corrections from established refs, lint +9 rules. ⭐ Two allowlists found by the red-proof: `@ote/memory remember()`
+dropped `evidenceRefs` (instance 14 of the family) and the check read the lint report in the wrong shape.
+⭐ P-8 clarified inside the contract: a SPAN is verified before attestation is consulted. Red-proof 49/49 · unit 699/699 ·
+incident replay red as designed.
+
+**Phase 5 (`test/maintenance/migrate-provenance-axes.mjs --apply`, act `provenance-axes-backfill-2026-09-05`).** 158 rows ·
+77 references (36 declared coincidence · 4 span-verified · 3 operator-attested · 34 document) · 158 audit rows. Reflection:
+5 ledger-linked (`wrote_memory_id`) get `revisit` act + range — NULL `from` accepted only where `messages_considered` = messages
+≤ `up_to` (8/8 did); 8 unlinked get writer only, act/reach NOT recorded (strict reading; the window join is Ote's to permit).
+`c5567db5`'s pointer 6539 lies OUTSIDE its pass's range 6346–6450 ⇒ `reviewed:false` (M4). 0 references for any reflection
+row (F7). `said`: 89 → 43; **46 withdrawn = 13 reflection + 33 chat-tool**, exactly FINAL §14's projection. 31 unknown rows are
+ALL agent_dev fixtures. ⚠️ 2 rows written since by the still-running old server carry no axes — re-run after restart.
+
+**Phase 6.** provenance-axes 49/49 · incident-replay 21/21 (no manufactured today · anchor ≠ provenance · 294f8f26 not
+attributed · two act keys on one pointer · traces separate · R-C merge rule still fires on exactly the two 26-Aug items) ·
+temporal-provenance ALL · lint/evidence-authorization/cogito ALL (cogito now counts `forget` rows — the backfill legitimately
+added an `axes-backfill` row per memory) · suite 78/80 → 79/80 after the cogito fix · package 94/94 · `measure-temporal-read`
+§9/§10 unchanged, EXACT MATCH. ⚠️ D5a/D5b (R-C snapshot) drift is PRE-EXISTING and external: same id set, same per-id
+relevance, order moved because two rows were accessed at 04:30:49Z (after the 01:22Z snapshot) — `last_access` is the third
+clock. ⛔ R-C not modified.
+
+**Ote-level (report §F):** window link for the 8 rows (clears 8 lint defects) · restart :8210 then re-run the backfill ·
+reflection Generation-4 citation instrument (store side built, prompt not changed) · distiller enablement · historical
+severity · BASIS rename · `@ote/memory` foreign hunks still uncommitted (not mine) · two persona scopes now have a shape
+(production reads NULL; ingest 17 + operator 3 sit under `'sotera'`).
