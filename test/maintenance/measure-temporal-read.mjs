@@ -186,6 +186,38 @@ console.table(await q(`
    WHERE tool = 'retrieve_conversations' AND ('between' = ANY(arg_keys) OR 'in' = ANY(arg_keys))
    GROUP BY 1, 2 ORDER BY 3 DESC`))
 
+// ══ 10 · ⭐⭐⭐ WAS retrieve_conversations ADVERTISED IN THE INCIDENT TURN? ═════════════════════════
+// Ote: *"distinguish advertised + not chosen / advertised + withheld by authorization / not advertised."*
+// ⛔ The persisted trace is a COUNT and two labels, never names (S1 chose that deliberately). So the set
+// is RECONSTRUCTED: the same assembly function, the incident's own inputs, on the same registry — the
+// Sotera process serving :8210 started 2026-09-03 22:50, before the incident, and no reload has happened.
+line('10 · THE ADVERTISED TOOLSET — persisted trace vs. reconstruction from the same registry')
+const [inc] = await q(`
+  SELECT settings->>'toolsEnabled' AS tools_on, settings->>'useMemory' AS use_memory, settings->>'skill' AS skill,
+         (SELECT array_agg(DISTINCT m.metrics->'toolset') FROM ${S}."txn_messages" m
+           WHERE m.conversation_id = c.id AND m.role = 'assistant' AND m.metrics ? 'toolset') AS traces
+    FROM ${S}."txn_conversations" c WHERE c.id = $1::uuid`, [CONV])
+console.log(`  conversation settings: toolsEnabled=${inc.tools_on} useMemory=${inc.use_memory} skill=${inc.skill}`)
+console.log(`  persisted toolset traces (distinct, all assistant turns): ${JSON.stringify(inc.traces)}`)
+const { assembleToolDefs } = await import('../../Backend/app/chat/tool-defs.js')
+const { toolDefinitions, memoryToolNames } = await import('../../Backend/app/components/runtime.js')
+const skills = await q(`SELECT slug FROM ${S}."mst_skills" WHERE enabled`)
+const dest = Object.entries(config?.advice?.destinations ?? {}).filter(([, d]) => d?.enabled !== false).map(([k]) => k)
+const { defs, trace } = assembleToolDefs({
+  skill: null, toolsOn: true, interactiveTurn: true, invocableSkills: skills.map((s) => ({ id: s.slug })),
+  oneShotAllowedTools: null, useMemory: true, path: 'none', adviceDestinations: dest,
+})
+const names = (defs || []).map((d) => d.function?.name)
+const persisted = (inc.traces || []).map((t) => t?.count)
+const countMatch = persisted.length > 0 && persisted.every((n) => n === trace.count)
+console.log(`  reconstructed: count=${trace.count} (registry ${toolDefinitions()?.length}, +infra) · persisted count(s)=${persisted.join(',')}`
+  + ` · ${countMatch ? '✅ EXACT MATCH' : '⛔ MISMATCH — the reconstruction is not the incident set'}`)
+console.log(`  retrieve_conversations in the reconstructed set: ${names.includes('retrieve_conversations') ? '✅ YES' : '⛔ NO'}`
+  + ` · search_conversations: ${names.includes('search_conversations') ? '✅ YES' : '⛔ NO'}`)
+console.log(`  a memory.v2 consumer (strippable by the memory gate)? ${memoryToolNames().has('retrieve_conversations') ? 'yes' : '⛔ no — and useMemory was on anyway'}`)
+console.log('  ⓘ chat dispatch calls runTool() with no authorizeToolCall ⇒ "withheld by authorization" is not a chat mechanism')
+console.log(`  ⇒ VERDICT: ${countMatch && names.includes('retrieve_conversations') ? 'ADVERTISED + NOT CHOSEN' : 'UNRESOLVED — do not conclude'}`)
+
 await pg.end()
 await db.sequelize?.close?.()
 console.log('\n⛔ READ-ONLY. Nothing was written; search() does not reinforce.')

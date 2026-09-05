@@ -30,7 +30,7 @@ She answered *"here's what we talked about today"* with a list that was mostly t
 ```
 ④ relayed speech became Ote's identity                 ✅ CLOSED — proved 14/14 · two rows retired 13/13
 ① no dates on memories about him                       ✅ CLOSED — when:{date,basis} shipped, 21/21
-② a TIME question answered as a TOPIC search           ⭐ DERIVED 09-05 — ⏸ awaiting ratification
+② the 09-04 recap was a JOIN of transcript + memory      ⭐ PREMISE SUPERSEDED · routing contract DERIVED — ⏸ awaiting ratification
 ③ the working-memory summary outranked the transcript  ⏸ AFTER ② — ⛔ untouched
 ```
 
@@ -51,8 +51,14 @@ PROVED   no temporal parameter exists on ANY of the 9 memory tools (additionalPr
 
 ⇒ ⭐ **RECOMMENDED: option C** — route the three questions apart, add the missing DENOMINATOR to the
 memory read (*"8 returned, 0 from the day you named, N undateable"*), ⛔ give `recall_memory` no date
-parameter. ⏸ **BLOCKING SUB-QUESTION §7.3**: was `retrieve_conversations` ADVERTISED that turn? ⛔ Not
-established — `tools_offered` logs only the retention occasion's own two tools.
+parameter. ✅ **SETTLED 09-05: ADVERTISED + NOT CHOSEN.** Persisted trace `{count:49}` on all 14 incident turns; the same
+registry (PID 15548 up since 09-03 22:50) rebuilds exactly 49 containing `retrieve_conversations`; chat dispatch has
+no `authorizeToolCall`. ⚠️ Count, not names — a reconstruction. ⇒ `DERIVATION_SOTERA_TEMPORAL_ROUTING.md`:
+corpus routing measured (she reaches for conversations only when the SOURCE IS NAMED; 0 read-tool calls ever
+followed a relative-day word); boundary derived by EVIDENCE KIND; contract = **the MERGE RULE + the DENOMINATOR**
+(R-C), ⛔ no classifier in `memoryHint`, ⛔ `when` is not a router, ⛔ no date on `recall_memory`; R-D (a SPAN-capable
+conversation read — `{in:"here"}` is a 9-turn PASSAGE, radius fixed) recorded as a separate capability gap.
+⏸ Awaiting Ote's ruling on §7.1 (5 items) and the 3-layer red-proof design (§8).
 
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 

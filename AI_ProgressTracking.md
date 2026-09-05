@@ -7906,3 +7906,52 @@ read, ⛔ give `recall_memory` no date parameter. ⏸ Awaiting Ote's ruling; not
 ⓘ Two residuals found en route, ⛔ neither acted on, both in a different contract:
 `retrieve_conversations.between` filters `c.updated_at` (*conversations active then*, ⛔ not *what was said
 then*), and `new Date('2026-08-26')` parses as UTC midnight — the same off-by-one family ① paid for.
+
+---
+
+## 2026-09-05 08:40 (+07:00) — ②-b · advertisement SETTLED · routing contract DERIVED · ⛔ nothing built
+
+**Ote accepted the corrected diagnosis** — the incident was a JOIN, not a lying `recall_memory` — and the
+original premise of ② is now marked SUPERSEDED in the derivation rather than carried forward.
+
+**THE PREREQUISITE IS SETTLED: `retrieve_conversations` WAS ADVERTISED AND NOT CHOSEN.** Every one of the
+14 assistant turns in the incident carries the persisted toolset trace `{count:49, path:none, skill:null}`.
+The Sotera process on :8210 (PID 15548) started 2026-09-03 22:50 — before the incident — and has not been
+restarted, so the registry in memory is the one that served it. Rebuilding the set with the incident's own
+inputs (no Skill, tools on, interactive, four invocable skills, memory on, the Hermes advice destination)
+yields **exactly 49**, containing `retrieve_conversations` and `search_conversations`; without the advice
+destination it is 48, so the count identifies the variant. Chat dispatch calls `runTool` with no
+`authorizeToolCall`, so *withheld by authorization* is not a mechanism that exists in chat; the tool is not
+a `memory.v2` consumer, so the memory gate could not strip it. ⚠️ Stated at its exact strength: the trace
+is a **count and two labels, never names** — this is a reconstruction on the same registry, not a
+read-back. Recorded as an observability residual.
+
+**THE CORPUS (Ote's rooms: 28 conversations, 291 user turns, 126 question-shaped).** Read-tool calls joined
+to the user turn that preceded each: **not one followed a relative-day word**, and `memoryHint`'s read
+branch has never preceded a recall in his rooms. Conversation-history questions — *"what have you and
+Hermes been talking about?"* — went to **memory tools first**, conversation tools sometimes added as a
+shotgun; **13 of 15 `retrieve_conversations` calls followed an instruction that NAMED the source**
+(*check conversations / hermes room / dig to each*), not a question. The one spontaneous temporal
+conversation question Ote asked — *"how long did that we no see?"* — routed correctly. ⚠️ Caveat stated:
+most of the history-shaped questions in the corpus were my own probes on his login, not his.
+
+**THE BOUNDARY IS DERIVED BY EVIDENCE KIND, NOT WORDING.** A history question is made of turns (memory is a
+~4% sample); a memory question is made of durable facts; a by-date question is an enumeration with `when`
+and a denominator. Where the distinction is safe: when the asker names the source; when the answer's shape
+is a span of things said; and always at the RESULT, because both result types already carry provenance
+(`when` on memories; `at · speaker · activeContext` on turns). Where it is not — mixed questions — the
+contract targets **the merge**: items of different source or time basis may not share one heading that
+asserts one time. ⛔ Not a classifier in `memoryHint`; ⛔ `when` is not a router; ⛔ no date parameter on
+`recall_memory`. Three clocks kept apart: `said` · `recorded` · `recency` — none is *happened*.
+
+**⚠️ THE INSTRUMENT'S WINDOW IS A PASSAGE, NOT A SPAN.** `{in:"here"}` is `readWindow(recent)` — the last
+~9 turns, radius fixed at 4, not model-controllable; `between` filters `c.updated_at`. ⛔ No tool can return
+a day's turns. Recorded as R-D, a separate capability decision.
+
+**RECOMMENDED: R-C** — the denominator (three populations, the undated one visible) + the merge rule.
+Red-proof designed in three layers (backend · tool · model), with the model layer *recording* her routing
+and *asserting* only the merge rule — the check that would have gone red on 09-04. Observability constraint
+named: tool results must be captured from the SSE stream; `log_tool_calls` holds only `arg_keys`.
+
+Instruments (read-only): `measure-temporal-read.mjs` §9–§10, `measure-temporal-routing.mjs`. Docs
+`Reference` `DERIVATION_SOTERA_TEMPORAL_ROUTING.md`. **③ untouched. M2 unchanged. Ranking unchanged.**
