@@ -184,11 +184,12 @@ recoverable — only its token count and utility are logged. Fixing that observa
 
 ```
 79/80 suites (D5 order drift — EXTERNAL, see 0-E) · @ote/memory 94/94 · migrations through 049
-:8210 PID 15548 (Sotera) · :8201 PID 27160 (OLS) · :54322 PID 7132 (pg)
+:8210 PID 22896 (Sotera — RESTARTED 09-05 12:34 on the AXES build, Ote's instruction) · :8201 PID 27160 (OLS) · :54322 PID 7132 (pg)
 memories 151 · live 113 · slots 84 · BOUND 1 · questions 1 · bindings 2 · pinned 14 (all canary, 1 live)
 Ote's live `preferred_name` rows: 0  ⭐ correct — the two false "Cogito" rows are RETIRED, ⛔ not replaced
 ⭐ AXES: 158 rows classified · 77 evidence refs · said 89→43 · 8 reflection acts NOT recorded · lint defects 8 (those rows)
-⚠️ :8210 PID 15548 still runs PRE-AXES code — rows written since the backfill (2 so far) carry no axes
+✅ :8210 restarted on the axes build; stragglers backfilled (2 → unknown, fixtures); live probe: chat-tool rows carry writer/act/reach + span-verified refs
+⏸ GEN-4 CITATION PLAN written (`PLAN_SOTERA_REFLECTION_GENERATION_4_CITATION.md`) — awaiting Ote's GO/NO-GO; prompt UNCHANGED
 ⓘ 10 legacy `zz_` slots hold 0 memories — empty shells, ⛔ not new residue
 ⓘ `tool-call-log-check` is MODEL-DEPENDENT and has flaked twice; green standalone and on re-run
 ```
@@ -233,7 +234,8 @@ ORIGIN PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 UNTOUCHED · ROME UNTOUCHE
 ⓘ Closed field lists remain the standing hazard — 14 recorded instances (the 14th: `@ote/memory remember()` dropped `evidenceRefs`).
 ⚠️ 8 reflection rows have act NOT recorded (strict reading) ⇒ 8 standing `pass-writer-without-act` lint DEFECTS until Ote
    permits the unambiguous 20-min window link (PHASE1 §8) as a separate audited act.
-⚠️ :8210 still runs pre-axes code — live rows since the backfill carry no axes; re-run the idempotent backfill after restart.
+ⓘ reflection reached for the WITHHELD `remember_fact` 449 times in 14 days (all refused) vs 515 `retain` — a finding for the
+   reflection tool-generation record, ⛔ not acted on.
 ⓘ D5a/D5b (R-C's frozen-order search snapshot): same id set, same per-id relevance, ORDER moved because two of his rows were
    accessed at 04:30:49Z (after the 01:22Z snapshot) — `last_access` is the third clock. ⛔ R-C untouched.
 ⓘ Three ledger rows link `wrote_memory_id` to lesson/decline records; those rows keep the `record` act (the contract).
