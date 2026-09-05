@@ -77,6 +77,16 @@ that are not mine in the same two files — attribution is the standing item. �
 DESIGN as a reachability anchor. Genuine speaker contradictions **2/156** (`294f8f26`, `0966ab33`), one reflection pass.
 ⚠️ `top` ≠ `up_to_rolling_id`: 3 rows anchored 89 turns BEYOND what the pass reviewed. ⛔ Nothing changed, nothing decided.
 
+⭐ **REFLECTION ANCHOR DERIVED 09-05 (read-only) — `DERIVATION_SOTERA_REFLECTION_ANCHOR.md`.** A: TWO concepts are read
+from one column TODAY — 5 readers assume PROVENANCE (`when.said`, `getSource`, lineage, corrections, relayed-speech), 4 assume
+OCCASION (M2 turn key, lint, refusal record, noteRetrieved), 2 REACHABILITY; they coincide on the extractor path, diverge on
+reflection; `getSource`(±2) reaches the proposition on 2/13 reflection rows. B: the transcript is `role: text` — NO ids, NO
+timestamps — a retained item CANNOT be tied to a turn; only the pass anchor exists. C: anchor promise written twice (08-21
+`top` = 'end of the stretch'; 08-26 ledger moved to `reviewedTo`) — composition-order artefact; content grounded IN range,
+pointer 89 turns beyond it; 1 of 89 passes. D: proposition-day ≠ anchor-day **NOT OBSERVED** (13/13 same-day).
+ⓘ New question: ①'s `said` gloss assumes the source turn is the ACCOUNT HOLDER's — on all 13 reflection rows it is HERS.
+⛔ Undecided by ruling: one field vs two · `top` vs `up_to_rolling_id` · retain naming a turn · speaker validation.
+
 ⇒ ⏸ **② IS THE NEXT DECISION, AND IT IS SEMANTIC, ⛔ NOT AN IMPLEMENTATION:**
 
 > **Can `recall_memory` actually answer a temporal question, or must it REFUSE rather than silently

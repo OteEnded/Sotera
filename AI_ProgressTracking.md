@@ -8081,3 +8081,49 @@ by construction and not yet observed (checked on both two-day conversations).
 turn (and whether she can) · `top` vs `up_to_rolling_id` as the anchor. **Additional questions recorded:**
 writer labelling (reflection `remember` → `source NULL`, `retain` → `'model-tool'`); `recall_memory_source`
 on a reflection row opens on her words; the three beyond-range rows.
+
+---
+
+## 2026-09-05 14:10 (+07:00) — reflection anchor DERIVED · A–D measured · ⛔ nothing changed, nothing decided
+
+Instrument `test/maintenance/measure-reflection-anchor.mjs` (read-only); derivation
+`DERIVATION_SOTERA_REFLECTION_ANCHOR.md`. The provenance report stands as written; this is the next pass.
+
+**A · Reachability vs provenance — MEASURED as two concepts read from one column today.** Readers classified from
+source: five treat `source_message_id` as PROVENANCE (`when.said`, `getSource`/`recall_memory_source` with
+`learnedOn`, `memory-lineage`, `corrections-host` `learnedFrom`, the relayed-speech `sourceText`); four as OCCASION
+(M2 `checkConsumingOccasion` turn key, `memory-lint` "traceable occasion", `memory-refusal-record`,
+`noteRetrieved`); two as REACHABILITY (`dreaming-candidate-host` room resolution, reflection's own comment). Writers:
+extractor = proposition turn (= occasion turn on that path, which is why the overload was invisible); chat tools =
+`lastUserMsg.id`; reflection = `top.id`; **the episode distiller = `last.id` — a fourth writer with the same anchor
+shape**. On the 13 reflection rows the proposition sits 1–193 turns from the anchor; `getSource`'s default ±2 window
+reaches it on **2 of 13**. Established: two concepts exist and diverge for one writer class. ⛔ Whether that requires
+two fields: undecided by ruling.
+
+**B · Evidence identity — ESTABLISHED: she cannot.** `transcriptLine = \`${role}: ${content}\`` — no message id,
+no rolling id, **no timestamp, no date**. The prompt adds only *"A conversation you had with ${who}"* and the
+question. The tool context carries one `conversationId` and one `messageId = top.id` per pass; `retain` has no
+turn parameter; 0/13 retained rows contain any id. ⇒ reflection operates over a role-labelled window where only the
+pass anchor exists; per-item association to a proposition turn is not possible from what she has. Quoted spans (4 of
+13 rows) are the only per-item signal, locatable afterwards by search — which is how this instrument located them.
+
+**C · The three beyond-review anchors — ESTABLISHED as a composition-order artefact.** The 13:40 pass was the FIRST
+on a 182-turn conversation, budget-bounded to 51 messages (`up_to 6450`); 89 more had arrived; `top` = 6539, an
+assistant turn she never saw in that pass. The propositions of `c5567db5` (rid 6406), `c35fbb5a` (6346), `9d71b989`
+(6432) all sit INSIDE the reviewed range — the content is grounded, the pointer is not. The anchor's promise is written
+twice and the texts disagree: `:432` (08-21) says *"the LAST message considered — the end of the stretch… the anchor
+that makes the conversation reachable"*; `selectReviewableRange` (08-26, option B) says *"every message ≤ reviewedTo
+was in the prompt; `up_to_rolling_id` may only be set to reviewedTo, never to the top"*. The ledger followed; the
+anchor did not. Reachability kept, end-of-stretch broken, on exactly the passes where the range is bounded: 1 of 89.
+The 14:00 pass anchored its rows at the same 6539 correctly — the column cannot tell the two apart. ⛔ `top` vs
+`up_to_rolling_id`: undecided by ruling.
+
+**D · The temporal consequence — NOT OBSERVED.** Every located proposition shares its anchor's day (13/13, incl. both
+two-day conversations). One row carries an explicit other-time phrase — `7fb034c5` *"dating back to August 18"* — but it
+is her own note about her history, not a report of what the user said on another day. ⛔ No synthetic failure offered.
+The divergence stays possible by construction.
+
+**Additional questions recorded, ⛔ not pursued:** ①'s `said` gloss ("the account holder said this on that date")
+assumes the source turn is the account holder's — on all 13 reflection rows it is HERS; the episode distiller's
+`last.id` anchor is unexamined; quoted spans as a provenance signal; `getSource`'s ±2 window is tuned for the extractor
+path.
