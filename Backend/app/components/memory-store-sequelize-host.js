@@ -55,6 +55,9 @@ import { governsReplacement, REPLACEMENT } from './memory-replacement-gate.js'
 import { admissibleToSlot } from './memory-ownership-boundary.js'
 import { recordRefusal, describeRefusal } from './memory-refusal-record.js'
 import { tracedMemoryIds } from './memory-retrieval-trace.js'
+// ⭐ 049 · THE FOUR AXES — writer contracts (occasion · reachability · declared coincidence) and provenance references.
+import { contractFor, normalizeAct, normalizeReach, actKey, consumingOccasionFor, COINCIDENCE, VERIFICATION, WRITER as WRITER_KIND } from './memory-writer-contracts.js'
+import { createReferences, provenanceFor, saidFor, spanAppears } from './memory-evidence.js'
 // ⭐ 035 · THE ONE LEGAL WAY TO ASK "IS THIS ROOM ROOT'S?" — config-defined, and that module's whole
 // point is what it REFUSES to look at. ⛔ Root-ness must never be inferred from a NULL role or a missing
 // id here, any more than it may be anywhere else.
@@ -107,7 +110,7 @@ const OWNED_KIND_OR_UNCLASSIFIED = { [Op.or]: [{ [Op.in]: OWNED_KINDS }, { [Op.i
  * @param {object|null} [deps.log]
  * @param {()=>number}  [deps.now]
  */
-export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', scope = 'room', sourceText = null, occasion = null, config = null, log = null, now = () => Date.now() } = {}) {
+export function createSequelizeMemoryStore({ db, persona = null, userId = null, author = 'account', scope = 'room', sourceText = null, occasion = null, writer = null, act = null, reach = null, config = null, log = null, now = () => Date.now() } = {}) {
   const txn_memories = db?.txn_memories
   if (!txn_memories) throw new TypeError('createSequelizeMemoryStore: db.txn_memories is required')
   const P = persona ?? null
@@ -187,6 +190,16 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
   // ⚠️ The row's own turn key WINS where there is one: an operator-named occasion is the fallback for an
   // act that genuinely has no turn, ⛔ never an override for one that does.
   const OCCASION = occasion == null ? null : String(occasion)
+  // ══ ⭐⭐⭐ 049 · THE FOUR AXES, declared ONCE at construction by the host that knows which occasion it serves ═══════
+  //   WRITER   the contract key — ⛔ never derived from `source`'s prefix
+  //   ACT      the identity of this memory act (a turn · a pass · a ruling) — a PASS writer may not write without one
+  //   REACH    the material the act worked from — a pass writer's material is a RANGE, never a point
+  // A malformed act or reach THROWS here (normalizeAct / normalizeReach): an axis is never guessed into shape.
+  const WRITER = writer == null ? null : String(writer)
+  const CONTRACT = contractFor(WRITER ?? WRITER_KIND.unknown)
+  const ACT = normalizeAct(act)
+  const REACH = normalizeReach(reach)
+  const ACT_KEY = actKey(ACT)
 
   // ── ⭐⭐⭐ AND THE AUTHORITY IS DERIVED HERE, ⛔ NEVER ACCEPTED AS A CLAIM ──────────────────────
   //
@@ -307,7 +320,8 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
   const lineageFor = (row) => {
     // The turn key IS the occasion id: the same anchor the trace is recorded under, so the derivation is
     // found THROUGH the occasion while staying a separate answer from it.
-    const turnKey = row?.source_message_id ?? null
+    // ⭐ 049 · the ACT key first — two passes used to share `top.id` and would have shared each other's in-context trace
+    const turnKey = ACT_KEY ?? row?.source_message_id ?? null
     if (!turnKey || derivedFromOf(row?.evidence)) return row?.evidence ?? null
     const mech = mechanismOf(row?.source)
     // ⭐ Synthesis lanes only. `document`, `consolidation` and `episode` describe their own derivation
@@ -363,7 +377,8 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // ⚠️ AND THE INPUT IS NOT MANUFACTURABLE HERE. `reconcileFact` — the ONLY path that resolves a slot
       // — writes `source_message_id` from ITS construction-time constant and accepts no argument for it.
       // ⇒ what a model asks for cannot change which occasion it is judged in.
-      const consumingOccasion = row?.source_message_id ?? OCCASION
+      // ⭐ 049 · the ACT key first (a pass is its own occasion, ⛔ not its newest message); beneath it the ratified legacy order
+      const consumingOccasion = consumingOccasionFor({ act: ACT, legacyMessageId: row?.source_message_id ?? null, occasionLabel: OCCASION })
       const selfAuth = checkConsumingOccasion({
         consumingOccasion,
         declaredInOccasion: resolved.declaredInOccasion,
@@ -443,20 +458,22 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     try {
       const { schema: sch } = txn_memories.getTableName()
       const got = await txn_memories.sequelize.query(
-        `SELECT m.id::text AS id,
-                (m.created_at AT TIME ZONE :tz)::date::text AS recorded_on,
-                (msg.created_at AT TIME ZONE :tz)::date::text AS said_on
+        `SELECT m.id::text AS id, (m.created_at AT TIME ZONE :tz)::date::text AS recorded_on
            FROM "${sch}"."txn_memories" m
-           LEFT JOIN "${sch}"."txn_messages" msg ON msg.id = m.source_message_id
           WHERE m.id = ANY(ARRAY[:ids]::uuid[])`,
         { replacements: { ids, tz: DISPLAY_TZ }, type: txn_memories.sequelize.QueryTypes.SELECT, logging: false },
       )
+      // ⭐⭐⭐ 049 · `said` IS GROUNDED IN PROVENANCE, ⛔ NOT IN THE OCCASION POINTER (I4, F5). The legacy pointer meant
+      // three different things by writer; it is no longer an input here. `said_on` is the ONE day of the established
+      // account-holder TURN references — several days ⇒ withheld; none ⇒ absent, and the projection falls to `recorded`.
+      const saidBy = await saidFor(db, ids, { tz: DISPLAY_TZ })
       const by = new Map(got.map((d) => [String(d.id), d]))
       for (const r of rows) {
         const d = by.get(String(r.id))
         if (!d) continue
         r.recorded_on = d.recorded_on
-        if (d.said_on) r.said_on = d.said_on
+        const said = saidBy.get(String(r.id))
+        if (said) r.said_on = said
       }
     } catch (e) {
       const msg = `[memory] could not resolve local dates — memories will carry no date: ${e?.message}`
@@ -710,7 +727,50 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
      * JS — measured at **70 messages loaded to return 5**. The blast radius of an authorization mistake
      * should be the window, and the window should not be in process memory before the check.
      */
-    async getSource({ id, context = 2 } = {}) {
+    /**
+     * ⭐⭐⭐ 049 · ONE POINTER, TWO QUESTIONS — answered SEPARATELY now.
+     *   MATERIAL   (reachability) what the writing act worked from: a turn, a RANGE, a document, or none — with the
+     *              legacy pointer's `reviewed` flag: inside the act's range ⇒ true; outside ⇒ REACHABLE BUT UNREVIEWED.
+     *   EVIDENCE   (provenance) the references the row rests on — 0..n, each resolving its own speaker and date.
+     *              Zero ⇒ `provenanceEstablished:false`, `speaker:'not established'`.
+     * The legacy fields (`evidenceState`, `sourceMessageId`, `context`, `learnedOn`) are kept unchanged for compat; ⛔ the
+     * description no longer calls the pointer "the message it was saved from".
+     */
+    async getSource(args = {}) {
+      const res = await this._getSourceLegacy(args)
+      if (!res?.found) return res
+      const m = res.memory ?? {}
+      let srcRid = res.sourceRollingId ?? null
+      if (srcRid == null && m.source_message_id && db?.txn_messages) {
+        const t = await db.txn_messages.findOne({ where: { id: m.source_message_id }, attributes: ['rolling_id'], raw: true })
+        srcRid = t?.rolling_id ?? null
+      }
+      const material = (() => {
+        switch (m.reach_kind) {
+          case 'turn': return { kind: 'turn', conversationId: m.reach_conversation_id ?? null, messageId: m.reach_message_id, reviewed: m.source_message_id ? String(m.source_message_id) === String(m.reach_message_id) : null }
+          case 'range': return { kind: 'range', conversationId: m.reach_conversation_id, from: m.reach_from_rolling_id, to: m.reach_to_rolling_id, reviewed: srcRid == null ? null : (srcRid >= m.reach_from_rolling_id && srcRid <= m.reach_to_rolling_id) }
+          case 'document': return { kind: 'document', document: m.reach_document }
+          case 'none': return { kind: 'none' }
+          default: return { kind: null, note: 'reachability not recorded for this row' }
+        }
+      })()
+      let prov = { established: false, references: [] }
+      try { prov = (await provenanceFor(db, [m.id], { tz: DISPLAY_TZ })).get(String(m.id)) ?? prov } catch { /* references unavailable ⇒ not established, said in words below */ }
+      const speakers = new Set(prov.references.filter((r) => r.kind === 'turn' && r.established && r.speaker).map((r) => r.speaker))
+      return {
+        ...res,
+        material,
+        evidence: prov.references,
+        provenanceEstablished: prov.established,
+        speaker: speakers.size === 1 ? [...speakers][0] : (speakers.size > 1 ? 'mixed' : 'not established'),
+        occasionMessageId: m.source_message_id ?? null,
+        // ⓘ the caution is owed only where there is MATERIAL that could be mistaken for evidence; a row with no pointer and
+        //    no reach keeps the legacy shape (evidenceState source-never-recorded, no note) — nothing is there to mislabel
+        note: (prov.established || (!m.source_message_id && !m.reach_kind)) ? res.note
+          : `${res.note ? res.note + ' ' : ''}No evidence reference is recorded for this memory: its provenance is NOT established. The material below is what the writing act worked from, not evidence that anyone said this.`,
+      }
+    },
+    async _getSourceLegacy({ id, context = 2 } = {}) {
       if (!id) throw new Error('id is required')
       const m = await txn_memories.findOne({ where: { id, persona: P }, raw: true })
       // (1) THE MEMORY. Unchanged.
@@ -884,7 +944,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         subjectEstablished: row.subjectEstablished ?? null,
       })
       if (refusal) {
-        const recorded = await recordRefusal(db, { refusal, row, userId: U, persona: P, author: AUTHOR, log })
+        const recorded = await recordRefusal(db, { refusal, row, userId: U, persona: P, author: AUTHOR, act: ACT, log })
         log?.warn?.({ class: refusal.class, belongsTo: refusal.belongsTo, destinationExists: refusal.destinationExists,
           recorded, entity: row?.entity, attribute: row?.attribute },
         `[memory] ${describeRefusal(refusal)}`)
@@ -942,7 +1002,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
             destinationNote: 'scope=persona_global exists (029); this refusal is about who may write it (035)',
             retainAs: 'room', // ⛔ a SUGGESTION for the writer, ⛔ never applied here — see "refuses, never downgrades"
           }
-          const recorded = await recordRefusal(db, { refusal, row, userId: U, persona: P, author: AUTHOR, log })
+          const recorded = await recordRefusal(db, { refusal, row, userId: U, persona: P, author: AUTHOR, act: ACT, log })
           log?.warn?.({ class: refusal.class, author: AUTHOR, recorded, entity: row?.entity, attribute: row?.attribute },
             `[memory] refused a persona-global write: ${refusal.why}`)
           const e4 = new Error(`refused: ${refusal.why}`)
@@ -1057,9 +1117,34 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         }
       }
       const admittedQuestionId = governance.pin
+      // ══ ⭐⭐⭐ 049 · I1 / I9 — A PASS-DRIVEN WRITER MAY NOT WRITE WITHOUT AN ACT. Fail closed, ⛔ never a silent row. ══
+      if (CONTRACT.pass && !ACT) {
+        const eA = new Error(`refused: the ${WRITER} writer is pass-driven and carries no act identity — a pass must be claimed before it writes`)
+        eA.code = 'NO_ACT'
+        eA.reason = 'pass-writer-without-act'
+        throw eA
+      }
+      // ⛔ `evidenceRefs` is an instruction to this method, not a column
+      const { evidenceRefs: _refsIgnored, ...persistableAxes } = persistable
+      // a turn reach resolves its conversation from the message itself (a join on the pointer, not a guess)
+      let reachConversationId = REACH?.conversationId ?? null
+      if (REACH?.kind === 'turn' && !reachConversationId && db?.txn_messages) {
+        const t = await db.txn_messages.findOne({ where: { id: REACH.messageId }, attributes: ['conversation_id'], raw: true })
+        reachConversationId = t?.conversation_id ?? null
+      }
       const created = await txn_memories.create({
-        ...persistable,
+        ...persistableAxes,
         question_id_at_admission: admittedQuestionId,
+        // ── ⭐ 049 · the axes, stamped from construction — ⛔ never from the row's own fields ──
+        writer: WRITER,
+        act_kind: ACT?.kind ?? null,
+        act_id: ACT?.id ?? null,
+        reach_kind: REACH?.kind ?? null,
+        reach_conversation_id: REACH?.kind === 'turn' || REACH?.kind === 'range' ? reachConversationId : null,
+        reach_message_id: REACH?.kind === 'turn' ? REACH.messageId : null,
+        reach_from_rolling_id: REACH?.kind === 'range' ? REACH.from : null,
+        reach_to_rolling_id: REACH?.kind === 'range' ? REACH.to : null,
+        reach_document: REACH?.kind === 'document' ? REACH.document : null,
         // ⭐⭐⭐ THE DERIVATION AXIS — what this row rests on, kept apart from the OCCASION it was written on.
         //
         // ⚠️⚠️ THE MEASURED FAILURE: `676e17b9` says *"we will build 'Rome' together as our shared project
@@ -1100,7 +1185,32 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         // Sotera's memory."* A memory she authored ABOUT Ote has subject = Ote and author = persona.
         subject_person_id: row.subject_person_id ?? subjectDefault,
       })
-      return created.get ? created.get({ plain: true }) : created
+      const plain = created.get ? created.get({ plain: true }) : created
+      // ══ ⭐⭐⭐ 049 · PROVENANCE — written by the WRITER or not at all. ⛔ No reader completes it (I3). ═════════════════
+      try {
+        const refs = []
+        // (a) the declared coincidence — the writer's MECHANISM guarantees the occasion turn is the evidence turn
+        if (CONTRACT.coincidence === COINCIDENCE.occasionTurnIsEvidence && ACT?.kind === 'turn') {
+          refs.push({ kind: 'turn', target: ACT.id, credential: plain.provenance ?? null, how: VERIFICATION.declaredCoincidence })
+        }
+        // (b) span verification — the SAME standard that earns `quoted`: the value appears verbatim in the occasion turn.
+        //     ⛔ No other turn is searched. No match ⇒ NO reference (nothing was cited, so nothing failed).
+        if (CONTRACT.verify === 'span-in-occasion-turn' && ACT?.kind === 'turn' && db?.txn_messages) {
+          const turn = await db.txn_messages.findOne({ where: { id: ACT.id }, attributes: ['content'], raw: true })
+          const span = plain.value != null && String(plain.value).trim().length >= 4 ? String(plain.value)
+            : (String(plain.content ?? '').trim().length >= 8 ? String(plain.content) : null)
+          if (turn?.content && span && spanAppears(turn.content, span)) {
+            refs.push({ kind: 'turn', target: ACT.id, span, credential: 'quoted', how: VERIFICATION.spanVerified })
+          }
+        }
+        // (c) explicit references the writer named — verified; a failed one is RECORDED as failed, the row stands (I10)
+        if (Array.isArray(row?.evidenceRefs)) refs.push(...row.evidenceRefs)
+        if (refs.length) await createReferences(db, { memoryId: plain.id, refs, act: ACT, reach: REACH ? { ...REACH, conversationId: REACH.conversationId ?? reachConversationId } : null, attests: CONTRACT.attests })
+      } catch (e) {
+        const msg = `[memory] provenance references could not be recorded — the row stands with provenance NOT established: ${e?.message}`
+        if (log?.warn) log.warn({ err: e?.message, id: plain?.id }, msg); else console.warn(msg)
+      }
+      return plain
     },
 
     async update(ids, patch = {}) {

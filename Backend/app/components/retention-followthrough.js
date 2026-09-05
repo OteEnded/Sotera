@@ -291,6 +291,10 @@ export async function runFollowThrough(fastify, {
   // which still refuses to guess. This step must not become a second place where authorship is decided.
   const ctx = buildToolContext(fastify, { user }, {
     origin: 'retention-followthrough', conversationId, messageId,
+    // ⭐ 049 · follow-through is turn-driven: the act is the turn it fired on; its material is that turn
+    writer: 'followthrough',
+    act: messageId ? { kind: 'turn', id: messageId } : null,
+    reach: messageId ? { kind: 'turn', messageId, conversationId } : null,
   })
 
   const all = toolDefinitions() || []

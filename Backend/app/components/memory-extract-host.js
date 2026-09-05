@@ -96,6 +96,11 @@ export async function captureFacts(fastify, { userId = null, persona, sourceMess
     const { pipeline } = buildMemoryPipeline(fastify, {
       userId, persona, sourceMessageId, serializeCommits: true,
       sourceText: gated.extract ? gated.text : '',
+      // ⭐ 049 · the extractor reads exactly one turn: its act is that turn and — by DECLARED coincidence in its writer
+      // contract — that turn is also its evidence. The store writes the turn reference; nothing here infers it.
+      writer: 'extractor',
+      act: sourceMessageId ? { kind: 'turn', id: sourceMessageId } : null,
+      reach: sourceMessageId ? { kind: 'turn', messageId: sourceMessageId } : null,
     })
     const { observations, results } = await pipeline.observe(text, [factInterpreter(fastify, { userId, source })])
     if (!observations) return { facts: 0 }

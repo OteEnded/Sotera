@@ -70,8 +70,10 @@ export async function resolveFormationContext({ query, schema, memoryId = null, 
             t.subject_person_id::text AS subject_person_id,
             t.attribute, t.value
        FROM ${S}."txn_memories" t
-       JOIN ${S}."txn_messages" m ON m.id = t.source_message_id
-       JOIN ${S}."txn_conversations" c ON c.id = m.conversation_id
+       -- ⭐ 049 · REACHABILITY: the row's own reach conversation first; the legacy pointer's conversation only as the
+       -- reachability meaning it always had (⛔ never as evidence). LEFT JOINs so an unreachable row is REPORTED, not dropped.
+       LEFT JOIN ${S}."txn_messages" m ON m.id = t.source_message_id
+       LEFT JOIN ${S}."txn_conversations" c ON c.id = coalesce(t.reach_conversation_id, m.conversation_id)
        LEFT JOIN ${S}."mst_users" u ON u.id = c.user_id
       WHERE ($1::uuid IS NULL OR t.id = $1::uuid)
         AND ($2::text IS NULL OR t.attribute = $2::text)
@@ -79,6 +81,7 @@ export async function resolveFormationContext({ query, schema, memoryId = null, 
       ORDER BY t.created_at DESC LIMIT 1`,
     [memoryId, attribute])
   const r = rows[0]
+  // ⭐ 049 · a row that exists but cannot be walked to a room is UNRESOLVED — `null` here means exactly that, never "none"
   if (!r?.formation_context) return null
   return {
     formationContext: r.formation_context,

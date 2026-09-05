@@ -2256,7 +2256,14 @@ export default async function chatSiteRoutes(fastify) {
       reasoningEnabled: settings.reasoning?.enabled === true,
       capabilities: capGate.caps ?? null,
     }
-    const toolCtx = buildToolContext(fastify, request, { origin: 'chat', model: modelId, timezone: userTz, conversationId: convo.id, interactive: interactiveTurn, messageId: lastUserMsg?.id ?? null, turn: turnShape })
+    const toolCtx = buildToolContext(fastify, request, {
+      origin: 'chat', model: modelId, timezone: userTz, conversationId: convo.id, interactive: interactiveTurn, messageId: lastUserMsg?.id ?? null, turn: turnShape,
+      // ⭐ 049 · a chat tool write's ACT is the turn (unchanged occasion key); its material is that turn. ⛔ No coincidence is
+      // declared here — a model call sees the whole context, so the turn is verified as evidence, never assumed (F8).
+      writer: 'chat-tool',
+      act: lastUserMsg?.id ? { kind: 'turn', id: lastUserMsg.id } : null,
+      reach: lastUserMsg?.id ? { kind: 'turn', messageId: lastUserMsg.id, conversationId: convo.id } : null,
+    })
     const maxRounds = getSetting(fastify.config, 'chat.toolsMaxCalls') ?? 8
 
     // ---- token-budget guard (visible, never silent) ----

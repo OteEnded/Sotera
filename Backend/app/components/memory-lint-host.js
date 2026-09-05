@@ -94,6 +94,29 @@ export const LINT_RULES = Object.freeze([
   // text says so — *"an existing row is not hidden by this; the rows already written are Ote's to retire."*
   { id: 'live-self-state-claim', severity: 'suspect',
     what: "a LIVE semantic row asserting what her own memory contains or can reach — the shape the F4 write gate now refuses. ⚠️ SUSPECT: it names rows for a human to judge, and retiring one is a decision with an owner. ⓘ This is the ONE rule that reads content in order to decide; it still reports ids and a pattern name only, never the belief" },
+  // ══ ⭐⭐⭐ 049 · THE FOUR AXES — occasion · reachability · provenance · temporal (SPEC §13) ═══════════════════════════
+  // Each rule states an invariant of `FINAL_SEMANTIC_REMEDIATION_ARCHITECTURE_V1.md`. Rows written BEFORE the axes existed
+  // are expected to fire `reach-not-recorded` until the audited historical pass classifies them — that is the rule doing
+  // its job, not noise. ⓘ `said-without-evidence` from the spec is computed (never stored), so its stored-side tripwire is
+  // `dangling-evidence-target`: an established turn reference whose message no longer exists.
+  { id: 'pass-writer-without-act', severity: 'defect',
+    what: 'a PASS-driven writer (reflection · dreaming · distiller) wrote a row with no act identity — I1/I9: a pass must be claimed before it writes' },
+  { id: 'pass-writer-point-reach', severity: 'defect',
+    what: 'a PASS-driven writer\'s material recorded as a single turn — I6: a pass reviews a RANGE, never a point' },
+  { id: 'coverage-exceeds-reviewed', severity: 'defect',
+    what: 'a reflection row whose reach range ends beyond the up_to_rolling_id its pass actually reviewed — the coverage claim exceeds what was shown' },
+  { id: 'dangling-evidence-target', severity: 'defect',
+    what: 'an ESTABLISHED turn reference whose message no longer exists — the evidence a `said` would rest on is gone' },
+  { id: 'credential-without-reference', severity: 'defect',
+    what: 'a row whose credential is quoted/elicited with NO established turn reference — F10: a credential is a property of a reference; without one it has no referent' },
+  { id: 'coincidence-without-contract', severity: 'defect',
+    what: 'a declared-coincidence reference on a row whose writer contract declares no coincidence — only the extractor and identity capture may' },
+  { id: 'reach-not-recorded', severity: 'suspect',
+    what: 'a row with no reachability recorded (reach_kind NULL) — legacy until the audited historical pass classifies it' },
+  { id: 'reachable-but-unreviewed', severity: 'suspect',
+    what: 'a range-reach row whose legacy pointer lies OUTSIDE its pass\'s reviewed range — reachable, ⛔ not evidence of what she saw' },
+  { id: 'unreferenced-speaker-claim', severity: 'suspect',
+    what: 'content that asserts the account holder SAID something, with no established account-holder turn reference — speaker: not established. ⓘ Reads content to decide; reports ids only' },
 ])
 
 const qualified = (model) => {
@@ -148,9 +171,12 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
     { type: seq.QueryTypes.SELECT, replacements: { schema } })).map((r) => r.tablename))
   const EMB = present.has('txn_message_embeddings') ? rawTable('txn_message_embeddings') : null
   const REFL = present.has('log_conversation_revisits') ? rawTable('log_conversation_revisits') : null
+  const EVID = present.has('txn_memory_evidence') ? rawTable('txn_memory_evidence') : null
   const notRun = {}
   if (!EMB) notRun['orphan-embedding'] = 'table txn_message_embeddings not found'
   if (!REFL) notRun['untraceable-persona-authorship'] = 'table log_conversation_revisits not found'
+  if (!REFL) notRun['coverage-exceeds-reviewed'] = 'table log_conversation_revisits not found'
+  if (!EVID) for (const r of ['dangling-evidence-target', 'credential-without-reference', 'coincidence-without-contract', 'unreferenced-speaker-claim']) notRun[r] = 'table txn_memory_evidence not found'
 
   const Q = (sql, replacements = {}) => seq.query(sql, { type: seq.QueryTypes.SELECT, replacements })
   // ⭐ ONE owner filter, spelled once, so no rule can accidentally run unscoped.
@@ -224,6 +250,65 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
   }
 
   // ── 5 · dead-slot ───────────────────────────────────────────────────────────────────────────────
+  // ── 049 · the four axes ──────────────────────────────────────────────────────────────────────────
+  const PASS_WRITERS = `('reflection', 'dreaming', 'distiller')`
+  add('pass-writer-without-act', await Q(
+    `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.writer${excerpt}
+       FROM ${MEM} m
+      WHERE m.writer IN ${PASS_WRITERS} AND m.act_kind IS NULL ${own('m.user_id')}
+      ORDER BY m.id`, rep))
+  add('pass-writer-point-reach', await Q(
+    `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.writer${excerpt}
+       FROM ${MEM} m
+      WHERE m.writer IN ${PASS_WRITERS} AND m.reach_kind = 'turn' ${own('m.user_id')}
+      ORDER BY m.id`, rep))
+  if (REFL) {
+    add('coverage-exceeds-reviewed', await Q(
+      `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.reach_to_rolling_id, r.up_to_rolling_id AS reviewed_to${excerpt}
+         FROM ${MEM} m JOIN ${REFL} r ON r.id::text = m.act_id
+        WHERE m.act_kind = 'revisit' AND m.reach_kind = 'range' AND m.reach_to_rolling_id > r.up_to_rolling_id ${own('m.user_id')}
+        ORDER BY m.id`, rep))
+  }
+  if (EVID) {
+    add('dangling-evidence-target', await Q(
+      `SELECT m.id::text AS id, m.user_id::text AS owner_id, e.target AS points_at${excerpt}
+         FROM ${MEM} m JOIN ${EVID} e ON e.memory_id = m.id
+        WHERE e.ref_kind = 'turn' AND e.established
+          AND NOT EXISTS (SELECT 1 FROM ${MSG} x WHERE x.id::text = e.target) ${own('m.user_id')}
+        ORDER BY m.id`, rep))
+    add('credential-without-reference', await Q(
+      `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.provenance::text AS credential${excerpt}
+         FROM ${MEM} m
+        WHERE m.provenance IN ('quoted', 'elicited')
+          AND NOT EXISTS (SELECT 1 FROM ${EVID} e WHERE e.memory_id = m.id AND e.ref_kind = 'turn' AND e.established) ${own('m.user_id')}
+        ORDER BY m.id`, rep))
+    add('coincidence-without-contract', await Q(
+      `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.writer${excerpt}
+         FROM ${MEM} m JOIN ${EVID} e ON e.memory_id = m.id
+        WHERE e.verification->>'how' = 'declared-coincidence'
+          AND coalesce(m.writer, '') NOT IN ('extractor', 'identity') ${own('m.user_id')}
+        ORDER BY m.id`, rep))
+    // ⓘ the one axes rule that reads content: a speech claim about the account holder with nothing to establish who spoke.
+    add('unreferenced-speaker-claim', await Q(
+      `SELECT m.id::text AS id, m.user_id::text AS owner_id${excerpt}
+         FROM ${MEM} m
+        WHERE m.content ~* '\\m(the user|user|ote|dad)\\M[^.]{0,30}\\m(said|says|clarified|clarifies|told|tells|mentioned|mentions|explained|asked|confirmed|stated|shared|expressed|noted|replied|answered|wrote)\\M'
+          AND ${liveSqlFor('m')}
+          AND NOT EXISTS (SELECT 1 FROM ${EVID} e JOIN ${MSG} x ON x.id::text = e.target
+                           WHERE e.memory_id = m.id AND e.ref_kind = 'turn' AND e.established AND x.role = 'user') ${own('m.user_id')}
+        ORDER BY m.id`, rep))
+  }
+  add('reach-not-recorded', await Q(
+    `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.writer${excerpt}
+       FROM ${MEM} m
+      WHERE m.reach_kind IS NULL ${own('m.user_id')}
+      ORDER BY m.id`, rep))
+  add('reachable-but-unreviewed', await Q(
+    `SELECT m.id::text AS id, m.user_id::text AS owner_id, x.rolling_id AS pointer_rid, m.reach_from_rolling_id, m.reach_to_rolling_id${excerpt}
+       FROM ${MEM} m JOIN ${MSG} x ON x.id = m.source_message_id
+      WHERE m.reach_kind = 'range' AND (x.rolling_id < m.reach_from_rolling_id OR x.rolling_id > m.reach_to_rolling_id) ${own('m.user_id')}
+      ORDER BY m.id`, rep))
+
   add('dead-slot', await Q(
     `SELECT s.id::text AS id, s.user_id::text AS owner_id, s.entity, s.write_count
        FROM ${SLOT} s

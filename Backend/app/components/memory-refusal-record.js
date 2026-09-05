@@ -27,7 +27,7 @@
  * @param {object|null} o.log
  * @returns {Promise<boolean>} whether it was recorded
  */
-export async function recordRefusal(db, { refusal, row = {}, userId = null, persona = null, author = null, log = null } = {}) {
+export async function recordRefusal(db, { refusal, row = {}, userId = null, persona = null, author = null, act = null, log = null } = {}) {
   if (!db?.sequelize || !refusal) return false
   const schema = db.txn_memories?.getTableName?.()?.schema ?? null
   const table = schema ? `"${schema}"."log_memory_refusals"` : '"log_memory_refusals"'
@@ -36,10 +36,10 @@ export async function recordRefusal(db, { refusal, row = {}, userId = null, pers
       `INSERT INTO ${table}
          (user_id, persona, refusal_class, why, belongs_to, destination_exists, destination_note,
           proposed_content, proposed_entity, proposed_attribute, proposed_value, retain_as,
-          source, source_message_id, author, declared_axes)
+          source, source_message_id, author, declared_axes, act_kind, act_id)
        VALUES (:userId, :persona, :cls, :why, :belongsTo, :destExists, :destNote,
                :content, :entity, :attribute, :value, :retain,
-               :source, :smid, :author, CAST(:axes AS jsonb))`,
+               :source, :smid, :author, CAST(:axes AS jsonb), :actKind, :actId)`,
       {
         replacements: {
           userId: userId ?? null,
@@ -63,6 +63,9 @@ export async function recordRefusal(db, { refusal, row = {}, userId = null, pers
           smid: row.source_message_id ?? null,
           author: author ?? null,
           axes: JSON.stringify(refusal.declared ?? {}),
+          // ⭐ 049 · the refusal inherits the identity of the ACT it refused (a pass, a turn, a ruling)
+          actKind: act?.kind ?? null,
+          actId: act?.id ?? null,
         },
       })
     return true

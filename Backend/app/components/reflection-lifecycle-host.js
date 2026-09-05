@@ -431,7 +431,16 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     // `buildMemoryToolService({ sourceMessageId })`. The reflection host simply never passed it.
     // ⭐ `top.id` is the LAST message considered — the end of the stretch she was reflecting on, which is
     // the anchor that makes the whole conversation reachable from the memory.
-  }, { origin: 'reflection', conversationId, messageId: top.id, memoryAuthor: 'persona' })
+  }, {
+    origin: 'reflection', conversationId, messageId: top.id, memoryAuthor: 'persona',
+    // ⭐⭐⭐ 049 · THE PASS IS THE ACT, ⛔ NOT ITS NEWEST MESSAGE. `claim.id` was minted before any tool ran; two passes on a
+    // quiet conversation used to share `top.id` (measured: 6539, 13:40 and 14:00). The reach is the RANGE she was shown —
+    // `reviewedTo` is the last message actually in the prompt — so a row can never claim material the pass did not review.
+    // `messageId: top.id` still flows to `source_message_id` unchanged (legacy pointer; read by no remediated consumer).
+    writer: 'reflection',
+    act: { kind: 'revisit', id: claim.id },
+    reach: { kind: 'range', conversationId, from: slice[0]?.rolling_id ?? reviewedTo, to: reviewedTo },
+  })
 
   // ⭐⭐ CAPTURING THE MEMORY ID WITHOUT BECOMING A SECOND WRITER.
   // `remember` is fire-and-forget by design — `rememberAsync` validates, enqueues, and returns

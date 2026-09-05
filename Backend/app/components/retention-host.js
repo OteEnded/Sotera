@@ -104,6 +104,8 @@ export function buildRetention(fastify, {
   // keep the named operator occasion exactly as currently established."* ⚠️ In a real request this stays
   // null and the TURN KEY is the occasion; ⛔ an operator name never overrides one.
   occasion = null,
+  // ⭐ 049 · the four axes, threaded from the occasion that built this service (a turn · a reflection pass)
+  writer = null, act = null, reach = null,
 } = {}) {
   // ⭐ The specialised hosts stay exactly as they are and are reached THROUGH here — a front door, ⛔ not
   // a demolition. `lesson` and `ownMemory` already write persona-authored rows by construction, so they
@@ -115,7 +117,7 @@ export function buildRetention(fastify, {
   // ⭐ 035 · scope joins author on the CONSTRUCTION path, for the reason the header above gives about
   // author: honouring a per-call decision means building the store that already means what she said,
   // ⛔ never reaching in and reassigning a field afterwards.
-  const memoryFor = (author, scope = 'room') => buildMemoryToolService(fastify, { userId, sourceMessageId, self, author, scope, occasion })
+  const memoryFor = (author, scope = 'room') => buildMemoryToolService(fastify, { userId, sourceMessageId, self, author, scope, occasion, writer, act, reach })
 
   /**
    * ⭐⭐⭐ THE ONE BOUNDED WAIT — turn a QUEUED receipt into an OBSERVED outcome.
@@ -498,9 +500,9 @@ export function buildRetention(fastify, {
         await seq.query(
           `INSERT INTO "${schema}"."log_retention_decisions"
              (content, kind, mine, about, attribute, distinction, state, why, memory_id, store,
-              user_id, conversation_id, source)
+              user_id, conversation_id, source, act_kind, act_id)
            VALUES (:content, :kind, :mine, :about, :attribute, :distinction, :state, :why, :memoryId, :store,
-                   :userId, :conversationId, :source)`,
+                   :userId, :conversationId, :source, :actKind, :actId)`,
           {
             replacements: {
               content: String(decision.content ?? '').slice(0, 8000),
@@ -510,6 +512,9 @@ export function buildRetention(fastify, {
               attribute: decision.attribute ?? null,
               distinction: decision.distinction ?? null,
               state: receipt.state,
+              // ⭐ 049 · the decision carries the ACT it was taken in (a reflection pass, a turn) — `revisit_id` was never populated
+              actKind: act?.kind ?? null,
+              actId: act?.id == null ? null : String(act.id),
               why: receipt.why ? String(receipt.why).slice(0, 2000) : null,
               // ⭐⭐ THE RECEIPT CONTRACT, HELD HERE TOO: an id may accompany `persisted` and nothing else.
               // ⛔ 038's CHECK enforces it in the database as well — two guards, because this is the third
@@ -553,6 +558,9 @@ export function initRetention() {
     buildRetention(f, {
       userId: user?.id ?? null,
       sourceMessageId: extras?.messageId ?? null,
+      writer: extras?.writer ?? null,
+      act: extras?.act ?? null,
+      reach: extras?.reach ?? null,
       conversationId: extras?.conversationId ?? null,
       isRoot: user?.isRoot === true,
       user,

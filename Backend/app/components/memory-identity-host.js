@@ -262,7 +262,12 @@ export async function captureIdentity(fastify, { userId = null, persona, sourceM
     // judges the words the interpreter actually read, ⛔ not a wider turn it never saw. A pasted document
     // is material the account holder was HANDLING, and its contents must not count as their own words.
     const asserted = assertionGate(String(text)).text ?? null
-    const { pipeline } = buildMemoryPipeline(fastify, { userId, persona, sourceMessageId, ask, sourceText: asserted })
+    const { pipeline } = buildMemoryPipeline(fastify, {
+      userId, persona, sourceMessageId, ask, sourceText: asserted,
+      writer: 'identity',
+      act: sourceMessageId ? { kind: 'turn', id: sourceMessageId } : null,
+      reach: sourceMessageId ? { kind: 'turn', messageId: sourceMessageId } : null,
+    })
     const { results } = await pipeline.observe(text, [identityInterpreter(fastify, { source, userId, requireCue })])
     const r = results[0]
     if (!r) return { identity: false } // nothing name-like in this turn

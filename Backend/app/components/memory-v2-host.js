@@ -50,7 +50,7 @@ export function buildMemoryStoreFor(fastify, { userId = null, persona = DEFAULT_
   return createSequelizeMemoryStore({ db: fastify.db, persona, userId, log: fastify.log })
 }
 
-export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSONA, sourceMessageId = null, self = null, actor = null, author = 'account', scope = 'room', sourceText = null, occasion = null } = {}) {
+export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSONA, sourceMessageId = null, self = null, actor = null, author = 'account', scope = 'room', sourceText = null, occasion = null, writer = null, act = null, reach = null } = {}) {
   const embed = makeEmbedder(fastify, { userId })
   // RESOLUTION comes from the host so the CHAIN is assembled from settings (cosine → gray-zone → …).
   // With `memory.resolver.grayZoneMode` off (the default) this is exactly the cosine resolver: no added
@@ -68,7 +68,8 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
   // ⭐ `occasion` is the TURN KEY, declared once beside `author`/`scope`/`sourceText`. ⓘ On this path the
   // row carries it too (`reconcileFact` stamps `source_message_id` from the same constant), so this is
   // the store's fallback for a write that has no row-level turn — ⛔ never a way to override one.
-  const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, author, scope, sourceText, occasion: occasion ?? sourceMessageId, config: fastify.config, log })
+  // ⭐ 049 · the four axes travel with the construction: WRITER (contract key) · ACT (occasion) · REACH (material).
+  const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, author, scope, sourceText, occasion: occasion ?? sourceMessageId, writer, act, reach, config: fastify.config, log })
   const slotStore = createSlotStore({ db: fastify.db, persona, userId, log })
   // Bind the writer to THIS host's storage. The cognition calls `auditLog(entry)` and never learns that
   // a database was involved. ⚠️ It used to call `logMemoryChange(db, …)` directly with a `db` the
@@ -81,8 +82,10 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
   // its own belief. It now hands over the raw row and the writer decides what is worth persisting,
   // which is where a persistence decision belongs. (`after` is always a plain object built by the
   // cognition — a description of the CHANGE, not of a row — so it is passed through untouched.)
+  // ⭐ 049 · every audit row carries the ACT of the change (M7) — the audit trail is never the one place acts stay anonymous
   const auditLog = (entry) => logMemoryChange(fastify.db, {
     ...entry,
+    act: entry?.act ?? act ?? null,
     ...(entry?.before ? { before: snapshot(entry.before) } : {}),
   })
 

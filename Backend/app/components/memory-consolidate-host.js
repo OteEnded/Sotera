@@ -60,8 +60,11 @@ function makeConsolidateLlm(fastify, { userId = null } = {}) {
  * induce — and PROPOSES a CardObservation per topic; the OBSERVATION PIPELINE resolves and persists it
  * (RFC §14). Dreaming no longer writes to the store directly, so there is exactly one write path.
  */
-export async function consolidateScope(fastify, { persona = null, userId = null, minSize, dryRun = false } = {}) {
-  const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona })
+export async function consolidateScope(fastify, { persona = null, userId = null, minSize, dryRun = false, passId = null } = {}) {
+  // ⭐ 049 · Dreaming is PASS-DRIVEN: without a pass identity the store REFUSES the write (NO_ACT) — enabling Cards without a
+  // pass fails loudly instead of writing rows the contract forbids. Cards' material is not a conversation (reach none);
+  // their provenance is their MEMBERS, which `commitCard` records.
+  const { mem, pipeline } = buildMemoryPipeline(fastify, { userId, persona, writer: 'dreaming', act: passId ? { kind: 'dreaming', id: passId } : null, reach: { kind: 'none' } })
   return runDream({
     mem,
     llm: makeConsolidateLlm(fastify, { userId }),

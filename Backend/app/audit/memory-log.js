@@ -75,7 +75,7 @@ export function memoryActorLabel(actor) {
  */
 export async function logMemoryChange(db, {
     memoryId, action, relatedId = null, userId = null, persona = null, slotId = null,
-    actor = null, reason = null, before = null, after = null, source = null, log = null,
+    actor = null, reason = null, before = null, after = null, source = null, act = null, log = null,
 } = {}) {
     if (!db?.log_memory_changes || !memoryId || !action) return null
     try {
@@ -91,6 +91,9 @@ export async function logMemoryChange(db, {
             before,
             after,
             source: source == null ? null : String(source).slice(0, 200),
+            // ⭐ 049 · the ACT this change belongs to (M7) — an operator label for repairs, the writing act otherwise
+            act_kind: act?.kind ?? null,
+            act_id: act?.id == null ? null : String(act.id),
         })
     } catch (e) {
         log?.warn?.(e, `[memory-audit] failed to record ${action} on ${memoryId}`)

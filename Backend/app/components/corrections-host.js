@@ -21,6 +21,8 @@
 
 import { registerHostService } from './runtime.js'
 import { buildMemoryStoreFor } from './memory-v2-host.js'
+import { provenanceFor } from './memory-evidence.js'
+const DISPLAY_TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' } })()
 
 /**
  * @returns {{ listCorrections: Function, countCorrections: Function }}
@@ -31,6 +33,9 @@ export function buildCorrections(fastify, { userId = null } = {}) {
   return {
     async listCorrections({ limit = 20 } = {}) {
       const rows = await store.listContradicted({ limit })
+      // ⭐ 049 · "where did the belief come from" is answered from PROVENANCE REFERENCES, ⛔ not from the occasion pointer
+      let prov = new Map()
+      try { prov = await provenanceFor(fastify.db, rows.map((r) => r.id), { tz: DISPLAY_TZ }) } catch { prov = new Map() }
       return {
         count: rows.length,
         // ⭐ THE SHAPE IS DELIBERATELY NOT A MEMORY'S SHAPE. A memory read returns `{content, …}` and
@@ -42,8 +47,11 @@ export function buildCorrections(fastify, { userId = null } = {}) {
           contradictedAt: r.contradicted_at,
           // The pointer, not the content. `recall_memory_source` authorizes reading it.
           contradictedByMessageId: r.contradicted_by_message_id ?? null,
-          // Where the belief itself came from, so *"why did I believe that?"* has an answer.
-          learnedFrom: r.source_message_id ?? null,
+          // ⭐ 049 · Where the belief itself came from — the ESTABLISHED evidence references, or "not established".
+          // The legacy pointer is the OCCASION (which turn the write happened in) and is named as such.
+          learnedFrom: (prov.get(String(r.id))?.references ?? []).filter((e) => e.established).map((e) => ({ kind: e.kind, target: e.target, speaker: e.speaker ?? null, date: e.date ?? null })),
+          provenanceEstablished: prov.get(String(r.id))?.established === true,
+          occasionMessageId: r.source_message_id ?? null,
           writtenAt: r.created_at,
         })),
         note: 'These are beliefs you no longer hold. Say that you used to think them and what changed — '
