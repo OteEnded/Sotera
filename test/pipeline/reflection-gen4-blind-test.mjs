@@ -87,7 +87,7 @@ const htmlPair = (d) => `
   <h2>Pair ${d.n} <span class="state" id="state-${d.n}">unanswered</span></h2>
   ${d.identical
     ? `<h3>Source <small>— the material she reviewed${esc(sourceNote(d))}</small></h3>
-  <pre class="source">${d.source.map((l) => { const i = l.indexOf(': '); return `<span class="${l.startsWith('user:') ? 'u' : 'a'}"><b>${esc(l.slice(0, i + 1))}</b>${esc(l.slice(i + 1))}</span>` }).join('\n')}</pre>
+  <div class="chat">${d.source.map((l) => { const i = l.indexOf(': '); const u = l.startsWith('user:'); return `<div class="row ${u ? 'u' : 'a'}"><div class="bubble"><div class="who">${u ? 'user' : 'assistant'}</div>${esc(l.slice(i + 2))}</div></div>` }).join('')}</div>
   <div class="endsrc">— end of source —</div>`
     : '<p class="flag">⚠️ FLAGGED: the two arms did not review identical material — this pair cannot be judged blind and is shown without a source.</p>'}
   <div class="sides">
@@ -121,9 +121,13 @@ const html = `<!doctype html>
   .pair h3 small{text-transform:none;letter-spacing:0;font-weight:normal}
   .state{font:12px ui-monospace,Consolas,monospace;color:var(--mute);margin-left:8px;padding:2px 8px;border:1px solid var(--rule);border-radius:10px;vertical-align:middle}
   .state.done{color:#fff;background:var(--acc);border-color:var(--acc)}
-  pre.source{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f5f7;border:1px solid var(--rule);border-radius:4px;padding:12px 14px;font:13px/1.55 ui-monospace,Consolas,monospace;max-height:520px;overflow:auto;margin:0}
-  pre.source .u b{color:var(--u)} pre.source .a b{color:var(--a)}
-  pre.source span{display:block;padding:3px 0;border-bottom:1px dotted #e2e4e9}
+  .chat{background:#f4f5f7;border:1px solid var(--rule);border-radius:6px;padding:14px;max-height:600px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+  .row{display:flex} .row.u{justify-content:flex-end} .row.a{justify-content:flex-start}
+  .bubble{max-width:78%;padding:10px 14px;border-radius:14px;font:15px/1.5 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+  .row.u .bubble{background:#dbe9f7;color:#0b2540;border-bottom-right-radius:4px}
+  .row.a .bubble{background:#fff;color:var(--ink);border:1px solid var(--rule);border-bottom-left-radius:4px}
+  .who{font:11px ui-monospace,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;opacity:.7}
+  .row.u .who{color:var(--u)} .row.a .who{color:var(--a)}
   .endsrc{text-align:center;color:var(--mute);font-style:italic;border-top:2px solid var(--acc);margin:8px 0 4px;padding-top:4px}
   .sides{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media (max-width:760px){.sides{grid-template-columns:1fr}}
@@ -159,7 +163,7 @@ const html = `<!doctype html>
       <li><b>Y</b> — Y captures the better things to carry forward.</li>
       <li><b>Neither</b> — neither contains something you would want carried forward.</li>
     </ul>
-    <p>The <b>Source</b> block is exactly the material the reflection pass was shown, in order, as the lane shaped it: one line per turn, <code>user:</code> / <code>assistant:</code>, whitespace folded, a turn longer than 1,500 characters clipped there (flagged where it happened). Both sides reviewed the same lines. She was told the conversation was with “Claude” (the fixture account's display name). The source ends at the rule marked <i>— end of source —</i>; everything after it is her output.</p>
+    <p>The <b>Source</b> block is exactly the material the reflection pass was shown, in order, as the lane shaped it: one bubble per turn (the account holder on the right, Sotera on the left), whitespace folded, a turn longer than 1,500 characters clipped there (flagged where it happened). Both sides reviewed the same lines. She was told the conversation was with “Claude” (the fixture account's display name). The source ends at the rule marked <i>— end of source —</i>; everything after it is her output.</p>
     <p>Your answers autosave in this browser as you go. When all 20 are done, <b>Save answers (JSON)</b> downloads <code>gen4-blind-answers.json</code>; if the download is blocked, <b>Copy JSON</b> puts the same text on the clipboard.</p>
   </div>
   ${data.map(htmlPair).join('\n')}
