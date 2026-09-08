@@ -35,7 +35,7 @@ async function reviewed(cid) {
   const [tot] = await q(`SELECT count(*)::int AS n FROM ${S}."txn_messages" WHERE conversation_id = $1::uuid`, [cid])
   const lines = msgs.map((m) => transcriptLine(m))
   const clipped = msgs.filter((m) => String(m.content || '').replace(/\s+/g, ' ').length > 1500).length
-  return { lines, considered: led.messages_considered, reconstructed: msgs.length, total: tot.n, outcome: led.outcome, clipped }
+  return { lines, msgs: msgs.map((m) => ({ role: m.role, content: String(m.content || '') })), considered: led.messages_considered, reconstructed: msgs.length, total: tot.n, outcome: led.outcome, clipped }
 }
 // the memory exactly as stored: kind · slot label (if she gave one) · content — no whitespace folding, no truncation
 const items = (h) => (h.rows ?? []).map((r) => ({ kind: r.kind ?? 'memory', label: r.attribute ? String(r.attribute).trim() : null, text: String(r.value ?? r.content ?? '').trim() }))
@@ -49,7 +49,7 @@ for (const p of pairs) {
   const identical = !a.error && !b.error && a.lines.length === b.lines.length && a.lines.every((l, i) => l === b.lines[i])
   const whole = !a.error && a.reconstructed === a.total && a.considered === a.reconstructed && b.considered === b.reconstructed
   data.push({ n: p.index, identical, whole, considered: [a.considered, b.considered], reconstructed: [a.reconstructed, b.reconstructed], total: a.total, clipped: a.clipped,
-    source: identical ? a.lines : null, X: items(p[k.X].harvest), Y: items(p[k.Y].harvest) })
+    source: identical ? a.lines : null, msgs: identical ? a.msgs : null, X: items(p[k.X].harvest), Y: items(p[k.Y].harvest) })
 }
 await pg.end()
 
@@ -81,13 +81,63 @@ for (const d of data) {
 
 // ── html (self-contained; no network) ──
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-const htmlSide = (xs) => (xs.length ? `<ul class="mem">${xs.map((r) => `<li><span class="kind">${esc(r.kind)}</span>${r.label ? `<span class="label">${esc(r.label)}</span>` : ''}<div class="text">${esc(r.text)}</div></li>`).join('')}</ul>` : '<p class="none">Nothing retained</p>')
+// ── a small markdown renderer: headings · bold/italic/code · fenced code · tables · lists · paragraphs. DISPLAY ONLY. ──
+function inline(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<i>$2</i>')
+}
+export function md2html(src) {
+  const lines = String(src).replace(/\r\n?/g, '\n').split('\n')
+  const out = []; let i = 0
+  const isRow = (l) => /^\s*\|.*\|\s*$/.test(l)
+  const isSep = (l) => /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(l)
+  const isBlockStart = (l) => /^\s*(```|#{1,6}\s|([-*•]|\d+[.)])\s|\|)/.test(l)
+  while (i < lines.length) {
+    const l = lines[i]
+    if (/^\s*```/.test(l)) { const buf = []; i++; while (i < lines.length && !/^\s*```/.test(lines[i])) buf.push(lines[i++]); i++; out.push(`<pre class="code">${esc(buf.join('\n'))}</pre>`); continue }
+    const h = l.match(/^\s*(#{1,6})\s+(.*)$/)
+    if (h) { const lv = Math.min(6, h[1].length + 2); out.push(`<h${lv} class="mdh">${inline(h[2])}</h${lv}>`); i++; continue }
+    if (isRow(l) && i + 1 < lines.length && isSep(lines[i + 1])) {
+      const cells = (r) => r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => inline(c.trim()))
+      const head = cells(l); i += 2; const rows = []
+      while (i < lines.length && isRow(lines[i])) rows.push(cells(lines[i++]))
+      out.push(`<table><thead><tr>${head.map((c) => `<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`); continue
+    }
+    if (/^\s*([-*•]|\d+[.)])\s+/.test(l)) {
+      const ordered = /^\s*\d+[.)]\s+/.test(l); const items = []
+      while (i < lines.length && /^\s*([-*•]|\d+[.)])\s+/.test(lines[i])) items.push(inline(lines[i++].replace(/^\s*([-*•]|\d+[.)])\s+/, '')))
+      out.push(`<${ordered ? 'ol' : 'ul'}>${items.map((x) => `<li>${x}</li>`).join('')}</${ordered ? 'ol' : 'ul'}>`); continue
+    }
+    if (/^\s*(---|\*\*\*|___)\s*$/.test(l)) { out.push('<hr>'); i++; continue }
+    if (!l.trim()) { i++; continue }
+    const para = [lines[i++]]
+    while (i < lines.length && lines[i].trim() && !isBlockStart(lines[i])) para.push(lines[i++])
+    out.push(`<p>${para.map(inline).join('<br>')}</p>`)
+  }
+  return out.join('')
+}
+// where the lane's 1,500-char clip fell, mapped back onto the ORIGINAL text (the lane folds whitespace to single spaces, then slices)
+export function clipPoint(original, limit = 1500) {
+  // mirrors transcriptLine exactly: every whitespace RUN (leading ones included) becomes one character; no trim
+  let folded = 0, inWs = false
+  for (let i = 0; i < original.length; i++) {
+    const ws = /\s/.test(original[i])
+    if (ws) { if (!inWs) { folded++; inWs = true } }
+    else { inWs = false; folded++ }
+    if (folded > limit) return i
+  }
+  return -1
+}
+const htmlSide = (xs) => (xs.length ? `<ul class="mem">${xs.map((r) => `<li><span class="kind">${esc(r.kind)}</span>${r.label ? `<span class="label">${esc(r.label)}</span>` : ''}<div class="text md">${md2html(r.text)}</div></li>`).join('')}</ul>` : '<p class="none">Nothing retained</p>')
 const htmlPair = (d) => `
 <section class="pair" id="pair-${d.n}" data-pair="${d.n}">
   <h2>Pair ${d.n} <span class="state" id="state-${d.n}">unanswered</span></h2>
   ${d.identical
     ? `<h3>Source <small>— the material she reviewed${esc(sourceNote(d))}</small></h3>
-  <div class="chat">${d.source.map((l) => { const i = l.indexOf(': '); const u = l.startsWith('user:'); return `<div class="row ${u ? 'u' : 'a'}"><div class="bubble"><div class="who">${u ? 'user' : 'assistant'}</div>${esc(l.slice(i + 2))}</div></div>` }).join('')}</div>
+  <div class="chat">${d.msgs.map((m) => { const u = m.role === 'user'; const cut = clipPoint(m.content); const seen = cut < 0 ? m.content : m.content.slice(0, cut); const rest = cut < 0 ? '' : m.content.slice(cut)
+    return `<div class="row ${u ? 'u' : 'a'}"><div class="bubble"><div class="who">${u ? 'user' : 'assistant'}</div><div class="md">${md2html(seen)}</div>${rest ? `<details class="unseen"><summary>⚠️ clipped here — she was shown the text up to this point only; the rest of the turn (${rest.length} chars) was NOT in front of her</summary><div class="md">${md2html(rest)}</div></details>` : ''}</div></div>` }).join('')}</div>
   <div class="endsrc">— end of source —</div>`
     : '<p class="flag">⚠️ FLAGGED: the two arms did not review identical material — this pair cannot be judged blind and is shown without a source.</p>'}
   <div class="sides">
@@ -127,6 +177,13 @@ const html = `<!doctype html>
   .row.u .bubble{background:#dbe9f7;color:#0b2540;border-bottom-right-radius:4px}
   .row.a .bubble{background:#fff;color:var(--ink);border:1px solid var(--rule);border-bottom-left-radius:4px}
   .who{font:11px ui-monospace,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;opacity:.7}
+  .bubble{white-space:normal}
+  .md p{margin:0 0 8px} .md p:last-child{margin-bottom:0} .md .mdh{margin:10px 0 6px;font-size:1em;font-weight:700} .md h3.mdh{font-size:1.1em}
+  .md ul,.md ol{margin:4px 0 8px;padding-left:22px} .md li{margin:2px 0}
+  .md table{border-collapse:collapse;margin:6px 0 10px;font-size:.93em;display:block;max-width:100%;overflow-x:auto} .md th,.md td{border:1px solid #c9cdd6;padding:4px 8px;text-align:left;vertical-align:top} .md th{background:#eef0f3}
+  .md code{font:.9em ui-monospace,Consolas,monospace;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px} .md pre.code{background:#1f2328;color:#e6e8eb;padding:10px 12px;border-radius:6px;overflow-x:auto;font:.85em ui-monospace,Consolas,monospace;white-space:pre}
+  .md hr{border:0;border-top:1px solid var(--rule);margin:8px 0}
+  details.unseen{margin-top:8px;border-top:1px dashed var(--acc);padding-top:6px} details.unseen summary{cursor:pointer;color:var(--acc);font-size:.9em} details.unseen .md{opacity:.55;margin-top:6px}
   .row.u .who{color:var(--u)} .row.a .who{color:var(--a)}
   .endsrc{text-align:center;color:var(--mute);font-style:italic;border-top:2px solid var(--acc);margin:8px 0 4px;padding-top:4px}
   .sides{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -163,7 +220,7 @@ const html = `<!doctype html>
       <li><b>Y</b> — Y captures the better things to carry forward.</li>
       <li><b>Neither</b> — neither contains something you would want carried forward.</li>
     </ul>
-    <p>The <b>Source</b> block is exactly the material the reflection pass was shown, in order, as the lane shaped it: one bubble per turn (the account holder on the right, Sotera on the left), whitespace folded, a turn longer than 1,500 characters clipped there (flagged where it happened). Both sides reviewed the same lines. She was told the conversation was with “Claude” (the fixture account's display name). The source ends at the rule marked <i>— end of source —</i>; everything after it is her output.</p>
+    <p>The <b>Source</b> block is exactly the material the reflection pass was shown, in order, as the lane shaped it: one bubble per turn (the account holder on the right, Sotera on the left), rendered here as formatted text for readability (headings, tables, lists) — the stored text is unchanged; a turn longer than 1,500 characters was clipped for her at the marked point, and the part she did not see is collapsed and greyed. Both sides reviewed the same lines. She was told the conversation was with “Claude” (the fixture account's display name). The source ends at the rule marked <i>— end of source —</i>; everything after it is her output.</p>
     <p>Your answers autosave in this browser as you go. When all 20 are done, <b>Save answers (JSON)</b> downloads <code>gen4-blind-answers.json</code>; if the download is blocked, <b>Copy JSON</b> puts the same text on the clipboard.</p>
   </div>
   ${data.map(htmlPair).join('\n')}
