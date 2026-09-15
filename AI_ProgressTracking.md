@@ -8432,3 +8432,24 @@ came from Gen 3 and both won. ⭐ Hypothesis named and explicitly NOT establishe
 **Falsifiers closed:** F1 no (retains ROSE) · F2 no · F3 no · F4 no (confounded) · F5 UNDEFINED · adoption precondition NOT MET.
 ⭐ "No falsifier tripped" and "the precondition is met" are two claims and stay separate. **Verdict ITERATE.** ⏸ Production on
 Gen 3; 40 runs + clones preserved; 8 historical rows unknown; distiller off; remember_fact / R-C / D5 / BASIS untouched.
+
+## 2026-09-15 (+07:00) — ⚠️⚠️ WRITER SEAM DEFECT · the Phase-7 "every writer wired" claim WITHDRAWN · `GATE_SOTERA_PROVENANCE_NEXT_DECISIONS.md`
+
+Audited each of the 13 declared writers by **which caller passes it**: **6 reachable** (extractor · identity · chat-tool ·
+followthrough · reflection · dreaming), **7 declared and unfed** (lesson · decline · operator · ingest · admin · job ·
+distiller). `operator`/`ingest` carry rows only because the BACKFILL passed them by hand — no live path does.
+
+⭐ **Found by the Gen-4 A/B's own data, not by the audit that should have caught it.** The experiment wrote 12 rows: 6 with
+`reflection · revisit · range`, **6 with writer/act/reach ALL NULL**, an hour after the restart that put the axes live.
+Cause: `keep()` has four destinations; `memoryFor()` is threaded, `buildLesson()`/`buildOwnMemory()` are not ⇒ **which axes a
+memory carries depends on the KIND she chose**. 11 unaxised rows post-restart (9 lesson + 2 from a caller with no writer).
+
+⭐⭐ **THE REAL GAP: the missing argument is LEGAL.** `writer: null` → `WRITER.unknown` → inert contract → a valid row with no
+axes, silently. The SAME constructor refuses a pass writer with no act loudly (`NO_ACT`). ⇒ one axis fail-closed, the other
+opt-in. Recorded as a new instance on `declared-axis-needs-a-mandatory-seam` — the lesson recurring inside its own fix.
+⛔ Nothing repaired; the 11 rows stand as written.
+
+**GATE:** D1 (is a writer identity MANDATORY — refuse / record / leave optional) is the recommended first decision and gates
+everything else; my recommendation is **record-the-absence now, refuse once the callers are enumerated**, ⛔ never leave it
+opt-in. Then ② the Gen-4 iteration as a 3-arm split (numbered-only · affordance-only · Gen-3 control) — ⛔ not before D1, since
+a measurement over a leaking seam measures the leak. Then ③ D2/D4 together. D3 Gen-4 = ITERATE. D5/D6/D7 unchanged.
