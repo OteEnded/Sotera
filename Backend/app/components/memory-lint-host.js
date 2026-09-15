@@ -42,6 +42,7 @@
 // ⛔ The rule is NOT reimplemented here. The write gate and this audit must agree by construction, because
 // the whole point of the audit is to find what the gate would refuse today.
 import { admissible } from './memory-self-state-claim.js'
+import { CONTRACTS } from './memory-writer-contracts.js'
 
 /**
  * ⭐ LIVENESS, WRITTEN ONCE. `memory-store-sequelize-host.js` defines `LIVE = { invalid_at: null,
@@ -100,7 +101,7 @@ export const LINT_RULES = Object.freeze([
   // its job, not noise. ⓘ `said-without-evidence` from the spec is computed (never stored), so its stored-side tripwire is
   // `dangling-evidence-target`: an established turn reference whose message no longer exists.
   { id: 'pass-writer-without-act', severity: 'defect',
-    what: 'a PASS-driven writer (reflection · dreaming · distiller) wrote a row with no act identity — I1/I9: a pass must be claimed before it writes' },
+    what: 'a PASS-driven writer (every contract with pass:true — reflection · notes · dreaming · distiller) wrote a row with no act identity — I1/I9: a pass must be claimed before it writes' },
   { id: 'pass-writer-point-reach', severity: 'defect',
     what: 'a PASS-driven writer\'s material recorded as a single turn — I6: a pass reviews a RANGE, never a point' },
   { id: 'coverage-exceeds-reviewed', severity: 'defect',
@@ -258,7 +259,12 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
 
   // ── 5 · dead-slot ───────────────────────────────────────────────────────────────────────────────
   // ── 049 · the four axes ──────────────────────────────────────────────────────────────────────────
-  const PASS_WRITERS = `('reflection', 'dreaming', 'distiller')`
+  // ⭐⭐ DERIVED FROM THE REGISTRY, ⛔ NOT HAND-WRITTEN. This was the literal `('reflection', 'dreaming', 'distiller')`, and
+  // adding a fourth pass writer (D8(b)'s `notes`, 2026-09-16) would have left it SILENTLY EXEMPT from the rule that a pass
+  // must be claimed before it writes — a green lint over a writer nobody was checking. That is the
+  // `allowlist-drops-what-it-was-not-told` family, which this project has now recorded eighteen times.
+  // ⓘ The writer names are registry constants, not user input; they are still quoted through a literal-safe map.
+  const PASS_WRITERS = `(${Object.values(CONTRACTS).filter((c) => c.pass).map((c) => `'${String(c.writer).replace(/'/g, "''")}'`).join(', ')})`
   add('pass-writer-without-act', await Q(
     `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.writer${excerpt}
        FROM ${MEM} m

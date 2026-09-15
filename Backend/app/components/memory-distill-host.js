@@ -21,6 +21,8 @@ import {
   shapeTranscript, buildEpisodePrompt, classifyEpisodeReply, episodeSource, episodeWatermarks,
 } from '@ote/memory/cognition/memory-distill.js'
 import { EVIDENTIAL_WHERE } from './corpus-eligibility.js'
+import { WRITER, ACT_KIND, REACH_KIND } from './memory-writer-contracts.js'
+import { randomUUID } from 'node:crypto'
 
 const DAY = 864e5
 const DEFAULT_DISTILL_MODEL = 'ollama/gemma4:e4b'
@@ -74,7 +76,10 @@ function makeDistillLlm(fastify, { userId = null } = {}) {
  * @returns {{skipped?:boolean, reason?:string, scanned:number, distilled:number, nothingNotable:number,
  *            thin:number, empty:number, overlong:number, errors:number, truncated?:number, episodes:Array}}
  */
-export async function distillAll(fastify, { maxConvos = 25, lookbackDays = 2, dryRun = false, force = false } = {}) {
+// ⓘ `llm` is an INJECTION SEAM, and it mirrors `reflectScope`'s existing one exactly (`reflection-host.js`): a check must
+// be able to exercise the real write path — axes and all — without a model round trip, and without anyone enabling the
+// feature to find out whether it declares itself. ⛔ Null in production, which is every caller but the check.
+export async function distillAll(fastify, { maxConvos = 25, lookbackDays = 2, dryRun = false, force = false, llm = null } = {}) {
   if (!force && !distillEnabled(fastify.config)) return { skipped: true, reason: 'disabled' }
   const db = fastify.db || {}
   if (!db.txn_conversations || !db.txn_messages || !db.txn_memories) return { skipped: true, reason: 'no-db' }
@@ -99,7 +104,19 @@ export async function distillAll(fastify, { maxConvos = 25, lookbackDays = 2, dr
   const tally = { scanned: batch.length, distilled: 0, nothingNotable: 0, thin: 0, empty: 0, overlong: 0, errors: 0 }
   const episodes = []
   const declined = []
-  const pipelines = new Map() // one pipeline (and resolved name) per conversation owner, reused across the batch
+  // ⭐⭐⭐ D9(a) · THE RUN IS THE ACT (Ote, 2026-09-16). `PHASE1 §3` specified one act per run, minted before writing;
+  // nobody had built it, so `WRITER.distiller` was a contract with no executable caller. One id per `distillAll`, shared by
+  // every episode the run writes — so tonight's batch is one occasion, and last night's is a different one.
+  // ⛔ THIS DOES NOT ENABLE THE DISTILLER. `memory.episodeDistillEnabled` is a separate gate and stays OFF; wiring a
+  // writer is not switching on a feature. ⓘ The contract is `pass: true`, so a run that somehow reached the store WITHOUT
+  // this act would be refused (`NO_ACT`) rather than writing unattributed rows — it already failed closed, and now it
+  // has a way to succeed honestly.
+  const runAct = { kind: ACT_KIND.job, id: randomUUID() }
+  // ⚠️ KEYED BY CONVERSATION, NOT BY OWNER, AND THAT IS FORCED BY THE AXES: the REACH is the reviewed range of ONE
+  // conversation, and writer/act/reach are declared when the pipeline is CONSTRUCTED. Reusing one pipeline per owner
+  // across conversations would have stamped every episode with the first conversation's range — a coverage claim about
+  // material the episode never came from. The cache stays (a conversation is visited once per run); its KEY changed.
+  const pipelines = new Map() // one pipeline per conversation — see above; reused if a conversation is ever revisited
   const names = new Map()
 
   /** Who this human is to the persona — the PROFILE SERVICE's canonical answer (account name ▸
@@ -136,8 +153,8 @@ export async function distillAll(fastify, { maxConvos = 25, lookbackDays = 2, dr
       })
       if (fresh.length < minMsgs) { tally.thin++; continue }
       const who = await resolveWho(c.user_id)
-      const llm = makeDistillLlm(fastify, { userId: c.user_id ?? null })
-      const raw = await llm(buildEpisodePrompt({ who, transcript: shapeTranscript(fresh) }))
+      const ask = llm || makeDistillLlm(fastify, { userId: c.user_id ?? null })
+      const raw = await ask(buildEpisodePrompt({ who, transcript: shapeTranscript(fresh) }))
       const cls = classifyEpisodeReply(raw)
       if (cls.verdict !== 'episode') {
         tally[cls.verdict === 'nothing-notable' ? 'nothingNotable' : cls.verdict]++
@@ -148,8 +165,17 @@ export async function distillAll(fastify, { maxConvos = 25, lookbackDays = 2, dr
       }
       const last = fresh[fresh.length - 1]
       if (!dryRun) {
-        if (!pipelines.has(c.user_id)) pipelines.set(c.user_id, buildMemoryPipeline(fastify, { userId: c.user_id ?? null }))
-        const { pipeline } = pipelines.get(c.user_id)
+        // ⭐ The reach was ALREADY COMPUTED — `fresh` is exactly the stretch this episode was distilled from, so the
+        // range needs no new query and can never exceed what the run actually read.
+        if (!pipelines.has(c.id)) {
+          pipelines.set(c.id, buildMemoryPipeline(fastify, {
+            userId: c.user_id ?? null,
+            writer: WRITER.distiller,
+            act: runAct,
+            reach: { kind: REACH_KIND.range, conversationId: c.id, from: fresh[0].rolling_id, to: last.rolling_id },
+          }))
+        }
+        const { pipeline } = pipelines.get(c.id)
         // importance 3 = within the nightly decay rule's reach (decayImportanceMax default 3): an event
         // that is never recalled MAY fade after 30 idle days — that is what episodic means. Cards
         // consolidate clusters long before that when enabled.

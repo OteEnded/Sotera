@@ -73,7 +73,7 @@ export const VERIFICATION = Object.freeze({
 
 export const WRITER = Object.freeze({
   extractor: 'extractor', identity: 'identity', chatTool: 'chat-tool', followthrough: 'followthrough',
-  reflection: 'reflection', dreaming: 'dreaming', distiller: 'distiller', operator: 'operator', ingest: 'ingest',
+  reflection: 'reflection', notes: 'notes', dreaming: 'dreaming', distiller: 'distiller', operator: 'operator', ingest: 'ingest',
   lesson: 'lesson', decline: 'decline', admin: 'admin', job: 'job', unknown: 'unknown',
 })
 
@@ -88,7 +88,25 @@ export const CONTRACTS = Object.freeze({
   [WRITER.chatTool]: contract(WRITER.chatTool, { actKind: ACT_KIND.turn, reach: REACH_KIND.turn, verify: 'span-in-occasion-turn' }),
   [WRITER.followthrough]: contract(WRITER.followthrough, { actKind: ACT_KIND.turn, reach: REACH_KIND.turn, verify: 'span-in-occasion-turn' }),
   [WRITER.reflection]: contract(WRITER.reflection, { actKind: ACT_KIND.revisit, pass: true, reach: REACH_KIND.range }),
+  // ⭐⭐ D8(b), ruled by Ote 2026-09-16 — the L3 PERSONA-NOTES writer, which had no contract at all.
+  //
+  // ⚠️⚠️ WHY ITS REACH IS `none` AND NOT THE PASS'S RANGE, WHICH IS THE WHOLE POINT OF GIVING IT ITS OWN CONTRACT.
+  // Ote: *"A persona note is a self-authored generalization about practice; the revisit occasion explains WHEN it was
+  // formed, but it does not establish that the reviewed conversation is EVIDENCE for the generalized note."* Reusing
+  // `reflection`'s `range` would have been the smaller edit and would have made every note claim a stretch of material as
+  // its support — `coverage-exceeds-reviewed` pointed the other way. ⇒ the occasion is declared; the reachability claim is
+  // declared to be NOTHING. ⭐ That is §0's rule working: no axis is derived from another.
+  //
+  // ⓘ AND IT IS ALSO NOT DERIVED FROM CONVERSATION AT ALL: `reflectScope` distils from her own FACTS AND CARDS, never
+  // from raw turns, so there is no message, no range and no document a note could honestly point at.
+  // ⛔ A CONTRACT IS NOT AN ENABLEMENT. `memory.reflectMode` stays OFF; this says what the writer IS when it runs.
+  [WRITER.notes]: contract(WRITER.notes, { actKind: ACT_KIND.revisit, pass: true, reach: REACH_KIND.none }),
   [WRITER.dreaming]: contract(WRITER.dreaming, { actKind: ACT_KIND.dreaming, pass: true, reach: REACH_KIND.none }),
+  // ⭐ D9(a), ruled 2026-09-16: the act is now MINTED and the writer is wired (`memory-distill-host.js`). The FEATURE gate
+  // `memory.episodeDistillEnabled` is a separate thing and stays OFF — wiring a writer is not enabling a feature.
+  // ⚠️ `enabled` is read by NOTHING in this codebase (checked 2026-09-16) — it is a declaration with no reader, the shape
+  // `declared-axis-needs-a-mandatory-seam` warns about. It is left as-is and reported rather than quietly flipped, because
+  // changing a field nobody reads would look like a behaviour change and be none.
   [WRITER.distiller]: contract(WRITER.distiller, { actKind: ACT_KIND.job, pass: true, reach: REACH_KIND.range, enabled: false }),
   [WRITER.operator]: contract(WRITER.operator, { actKind: ACT_KIND.operator, attests: true }),
   [WRITER.ingest]: contract(WRITER.ingest, { actKind: ACT_KIND.ingest, reach: REACH_KIND.none }),

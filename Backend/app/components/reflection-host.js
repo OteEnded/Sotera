@@ -18,6 +18,8 @@ import { buildMemoryPipeline } from './memory-pipeline-host.js'
 import { chat } from '../chat-runtime/index.js'
 import { getSetting } from '../settings/index.js'
 import { buildReflectionPrompt, parseNotes, classifyNotesReply, selectSignals } from './reflection.js'
+import { WRITER, REACH_KIND, ACT_KIND } from './memory-writer-contracts.js'
+import { randomUUID } from 'node:crypto'
 
 /**
  * WHICH L3 NOTES THIS TURN GETS, AND IN WHAT ORDER — **DETERMINISTICALLY, AND THAT IS THE WHOLE POINT.**
@@ -81,13 +83,22 @@ export async function reinforceNotes(mem, ids = []) {
  * @param {*} fastify
  * @param {{userId?:string|null, persona?:string|null}} scope
  */
-export function buildReflection(fastify, { userId = null, persona } = {}) {
+export function buildReflection(fastify, { userId = null, persona, act = null } = {}) {
   // Reflection is JUST ANOTHER OBSERVER (RFC §4/§14): it reads knowledge and emits Observations, it never
   // writes the store itself. So notes go through the OBSERVATION PIPELINE (prose → EpisodicResolver, whose
   // dedup-by-similarity gives the same convergent behaviour addNote always relied on).
+  //
+  // ── ⭐⭐ D8(b) · THE NOTES WRITER, DECLARED (Ote, 2026-09-16) ────────────────────────────────────────────────────
+  // `WRITER.notes` is PASS-DRIVEN, so the store REFUSES a write without an act — which is why `act` is a parameter and
+  // not a default. ⭐ THE READ-ONLY CALLERS PASS NOTHING ON PURPOSE: the host service and the chat route's Composer
+  // gather only ever call `listActiveNotes` / `reinforceNotes`, and if either of them ever tried to WRITE, it would fail
+  // loudly (`NO_ACT`) instead of quietly producing an unattributed row. That is the contract doing its job, not a gap.
+  // ⛔ REACH IS `none`, AND THAT IS THE RULING: a note is a self-authored generalization about practice. The revisit
+  // occasion says WHEN it was formed; it does not make the reviewed material evidence FOR it. See the contract's header.
+  const axes = { writer: WRITER.notes, act, reach: { kind: REACH_KIND.none } }
   const { mem, pipeline } = persona === undefined
-    ? buildMemoryPipeline(fastify, { userId })
-    : buildMemoryPipeline(fastify, { userId, persona })
+    ? buildMemoryPipeline(fastify, { userId, ...axes })
+    : buildMemoryPipeline(fastify, { userId, persona, ...axes })
   return {
     /** Active L3 notes for this persona+user, most-important-first (list() already returns newest-first,
      *  so a stable importance sort keeps freshest within a tie). Capped small — L3 is a few sticky notes. */
@@ -169,7 +180,14 @@ function makeReflectLlm(fastify, { userId = null } = {}) {
  */
 export async function reflectScope(fastify, { persona = null, userId = null, dryRun = false, llm = null } = {}) {
   const mem = buildMemoryV2(fastify, { userId, persona })
-  const refl = buildReflection(fastify, { userId, persona })
+  // ⭐⭐ D8(b) · THE PASS IS THE ACT. One id per reflect pass, minted here, shared by every note the pass writes — so two
+  // notes formed in one sitting are recognisably one occasion, and a note from a later pass is not folded into it.
+  // ⚠️ IT IS MINTED, NOT LOOKED UP, AND THAT IS HONEST: unlike the episode path there is no revisit LEDGER for a notes
+  // pass, because this pass reviews her own facts and cards rather than a conversation. No lint rule resolves an act id
+  // against a ledger (checked), so a minted id is a real occasion identity and not a dangling pointer — it says "these
+  // notes were formed together", which is exactly what the act axis is for and ⛔ nothing more.
+  const act = { kind: ACT_KIND.revisit, id: randomUUID() }
+  const refl = buildReflection(fastify, { userId, persona, act })
   const cap = reflectMaxNotes(fastify.config)
   const [facts, cards, existing] = await Promise.all([
     mem.list({ kind: 'semantic', limit: 200 }),
