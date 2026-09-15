@@ -69,9 +69,15 @@ export const REFLECTION_GENERATION = 3
  *       `quote` a verbatim span) that the host resolves against THIS pass's slice — `PLAN_SOTERA_REFLECTION_GENERATION_4_CITATION.md`.
  * ⛔ The question text is the same in both. ⛔ Nothing reads this table with a default other than REFLECTION_GENERATION.
  */
+// ⚠️⚠️ 5 AND 6 ARE THE DECOMPOSITION OF 4, ⛔ NOT SUCCESSORS TO IT. Generation 4 changed TWO things at once — it numbered
+// the transcript AND added the citation fields — so its measured effect (retains/pass 0.40 → 0.70, content 252 → 103 chars,
+// and 0 citations in 14 retains) cannot be attributed to either half. 5 and 6 each move ONE of them, against the same
+// frozen corpus, so the sum can be split. A higher number means a later instrument here, ⛔ never a better one.
 export const REFLECTION_GENERATIONS = Object.freeze({
-  3: Object.freeze({ numbered: false, citations: false }),
-  4: Object.freeze({ numbered: true, citations: true }),
+  3: Object.freeze({ numbered: false, citations: false }),   // the live control
+  4: Object.freeze({ numbered: true, citations: true }),      // measured 2026-09-05; verdict ITERATE
+  5: Object.freeze({ numbered: true, citations: false }),     // arm N — does the NUMBERING alone move retention?
+  6: Object.freeze({ numbered: false, citations: true }),     // arm C — can the affordance reach her WITHOUT the numbering?
 })
 export function generationSpec(generation) {
   const spec = Number.isInteger(generation) ? REFLECTION_GENERATIONS[generation] : null

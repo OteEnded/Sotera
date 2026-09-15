@@ -17,7 +17,11 @@ test('G · the live generation is still 3, and the spec table knows exactly what
   assert.equal(REFLECTION_GENERATION, 3)
   assert.deepEqual(generationSpec(3), { numbered: false, citations: false })
   assert.deepEqual(generationSpec(4), { numbered: true, citations: true })
-  assert.throws(() => generationSpec(5), /generation/)
+  // 5 and 6 decompose 4 — each moves exactly ONE of its two halves
+  assert.deepEqual(generationSpec(5), { numbered: true, citations: false })
+  assert.deepEqual(generationSpec(6), { numbered: false, citations: true })
+  assert.notDeepEqual(generationSpec(5), generationSpec(6))
+  assert.throws(() => generationSpec(7), /generation/)
   assert.throws(() => generationSpec('4'), /generation/)
 })
 

@@ -8453,3 +8453,36 @@ opt-in. Recorded as a new instance on `declared-axis-needs-a-mandatory-seam` —
 everything else; my recommendation is **record-the-absence now, refuse once the callers are enumerated**, ⛔ never leave it
 opt-in. Then ② the Gen-4 iteration as a 3-arm split (numbered-only · affordance-only · Gen-3 control) — ⛔ not before D1, since
 a measurement over a leaking seam measures the leak. Then ③ D2/D4 together. D3 Gen-4 = ITERATE. D5/D6/D7 unchanged.
+
+## 2026-09-15 (+07:00) — ✅ D1(b) IMPLEMENTED · Phases 1+2 · `GATE_SOTERA_PROVENANCE_NEXT_DECISIONS.md`
+
+Ote ruled **(b)**: admit the write, record the missing writer identity loudly; staged 1 visible → 2 wire callers → 3 refuse.
+
+**Phase 1.** Store: an undeclared write is admitted and `log.warn`s with `{id, source, kind, namespace, author}` — the row
+exists, the absence is named. Lint: new **`writer-not-declared` (defect)**. ⭐⭐ Its whole design is the `NOT EXISTS` clause —
+it EXCLUDES rows the backfill ratified as unknown (they carry its audit act). Without that it would fire on all 44 unaxised
+rows for ever, mixing a **decision** (33, M3 "unknown stays unknown") with a **defect** (11, a live path never wired) — and a
+count that mixes them trains the reader to ignore it. Now reports exactly **11** (9 lesson + 2 unlabelled, all agent_dev,
+⛔ none of Ote's); the 33 stay silent. Defects 8 → 19: the leak became VISIBLE, ⛔ not new damage.
+
+**Phase 2 · callers enumerated by asking "which caller passes it", ⛔ not by reading the registry.** 6 of 13 were wired.
+⭐⭐ And the two leaking paths were worse than unthreaded: `lesson.commit` and `lesson.decline` write **raw `INSERT INTO
+txn_memories`** — bypassing the store and every gate in it — with an explicit column list that predates 049, so the axis
+columns were absent by construction (the `allowlist-drops-what-it-was-not-told` shape; the write succeeded, so nothing looked
+wrong). Both now declare `writer` (from the REGISTRY, ⛔ not a string literal), `act_kind record` with the **record's own id**
+as the act, and `reach none`. ⓘ `CAST(:x AS enum)` not `::enum` — a `::` beside a named replacement is ambiguous to the parser.
+⏸ Left unwired and now SELF-REPORTING via the rule: the **distiller** (contract exists but needs the act-minting PHASE1 §3
+specified and nobody built; config-gated OFF) and the **L3 persona-notes writer** in `reflection-host.js` (⛔ no contract
+exists — a semantic decision, not a wiring one). ⛔ Phase 3 (refuse) NOT built.
+
+Red-proof `test/checks/writer-seam-check.mjs` 11/11 — incl. W4b (a ratified unknown is NOT a defect), W6 (⛔ reporting is not
+repair: the row is byte-unchanged after being reported) and W9 (the lesson still reached its destination). ⭐ W7 first failed
+on MY check, not the code: it looked the row up by content LIKE, but a lesson stores its own ABSTRACTION — fixed to use the
+returned id. All in-process checks green (8/8) · unit 704/704. ⛔ No existing row repaired. Sotera `e068837`.
+
+⚠️ The box rebooted 06:17; :8210 was down since. Ote authorised the restart mid-turn → **PID 25012**, health 200 in 2 s.
+OLS :8201 (PID 28072) untouched; :8220 is another project's, untouched.
+
+**Generations 5 and 6 declared as the DECOMPOSITION of 4** (⛔ not successors): 5 = numbered only, 6 = affordance only.
+Three-arm run started, 60 passes, same frozen corpus — the source ids READ from the prior run's record, ⛔ not re-derived
+(the earlier clones are now agent_dev conversations and re-deriving would clone a clone).
