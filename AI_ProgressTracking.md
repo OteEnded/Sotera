@@ -8486,3 +8486,26 @@ OLS :8201 (PID 28072) untouched; :8220 is another project's, untouched.
 **Generations 5 and 6 declared as the DECOMPOSITION of 4** (⛔ not successors): 5 = numbered only, 6 = affordance only.
 Three-arm run started, 60 passes, same frozen corpus — the source ids READ from the prior run's record, ⛔ not re-derived
 (the earlier clones are now agent_dev conversations and re-deriving would clone a clone).
+
+## 2026-09-15 (+07:00) — ⚠️⚠️ THREE-ARM DECOMPOSITION RUN · the CONTROL did not reproduce · `MEASUREMENT_SOTERA_REFLECTION_ARMS.md`
+
+60 passes (20 sources × arm 3 / N / C), same frozen corpus (source ids READ from run 1's record), same model
+(`ollama/qwen3.6:35b`, confirmed from both runs' ledgers), arm order rotated per source.
+
+⚠️⚠️ **THE HEADLINE IS NOT THE DECOMPOSITION — IT IS THAT THE CONTROL MOVED.** Generation 3, identical instrument, identical
+corpus, ten days apart: **8 retains then 2**. ⇒ retains-per-pass is NOT reproducible here, and the drift is LARGER than any
+gap between arms. ⭐⭐ But one statistic held EXACTLY: **breadth — how many passes retained anything — was 2/20 both times.**
+⇒ depth is noise on this corpus; breadth is the measure. Judged on breadth: control **2/20** · N **3/20** · C **2/20** ·
+gen 4 **7/20**. Neither half alone reproduces gen 4; C is IDENTICAL to control. ⇒ either an interaction, or gen 4's 7 was a
+high draw — ⛔ underpowered to tell, and **Gen 4's 0.40 → 0.70 headline must now be read as possibly run variance**.
+
+⭐ **AND THE CORPUS IS THE BINDING CONSTRAINT: 9 of 20 sources produced ANY retain in ANY of the five arm-runs.** Every arm
+is really measured on ~9 conversations. ⛔ No further reflection experiment on this corpus can resolve a small effect.
+
+⭐⭐⭐ **THE ONE ROBUST RESULT — THE CITATION AFFORDANCE, POOLED: 0 of 16 retains across BOTH presentations** (arm C 0/2 with a
+plain transcript; gen 4 0/14 with a numbered one). Arm C alone is too thin; pooled it is no longer a sample-size question.
+The field is offered, optional, in her vocabulary, and invisible at the moment she decides. ⇒ Ote's pre-registered reading
+applies: **a salience/mechanism problem, ⛔ not a wording problem** — the same wall as `retention-salience-unresolved`
+(`keep()` ships 38/38, unprompted calls zero). ⛔ Do NOT reword the field.
+
+⏸ Production on Gen 3. 100 passes and their clones (40 + 60) preserved. Nothing adopted.

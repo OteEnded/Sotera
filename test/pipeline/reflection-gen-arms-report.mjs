@@ -45,6 +45,21 @@ const per = (a, n) => (a.passes ? f(n / a.passes) : 'n/a')
 const pct = (a, b) => (b ? `${Math.round((100 * a) / b)} %` : 'n/a')
 const col = (a) => [per(a, a.retains), per(a, a.rows), per(a, a.declines), f(mean(a.chars)), JSON.stringify(a.kinds), f(mean(a.calls)), f(mean(a.secs))]
 
+const retainsOf = (h) => h.calls.filter((c) => c.tool === 'retain').length
+const g3run1 = (PRIOR.pairs ?? []).map((p) => retainsOf(p.A.harvest))
+const g3run2 = (R.runs ?? []).filter((r) => r.arm === '3').map((r) => retainsOf(r.harvest))
+const d1 = g3run1.reduce((a, b) => a + b, 0), d2 = g3run2.reduce((a, b) => a + b, 0)
+const b1 = g3run1.filter((x) => x > 0).length, b2 = g3run2.filter((x) => x > 0).length
+const breadth = (a) => a.passes ? `${a.rows > -1 ? '' : ''}` : ''
+const breadthOf = (list) => list.filter((x) => x > 0).length
+const armRetains = (id) => (R.runs ?? []).filter((r) => r.arm === id).map((r) => retainsOf(r.harvest))
+const g4Retains = (PRIOR.pairs ?? []).map((p) => retainsOf(p.B.harvest))
+const everySource = {}
+for (const p of PRIOR.pairs ?? []) { everySource[p.source] = (everySource[p.source] ?? 0) + retainsOf(p.A.harvest) + retainsOf(p.B.harvest) }
+for (const r of R.runs ?? []) { everySource[r.source] = (everySource[r.source] ?? 0) + retainsOf(r.harvest) }
+const allSources = Object.keys(everySource).length
+const liveSources = Object.values(everySource).filter((x) => x > 0).length
+const pooledCiting = arms.C.citing + G4.citing, pooledRetains = arms.C.retains + G4.retains
 const citationOffered = (k) => k === 'C' || k === 'G4'
 const cRate = (a) => (a.retains ? `${a.citing}/${a.retains} = ${pct(a.citing, a.retains)}` : 'no retains')
 const zeroInC = arms.C.retains > 0 && arms.C.citing === 0
@@ -69,12 +84,34 @@ ids read from the first experiment's own record).
 
 **Arm C citation rate: ${cRate(arms.C)}** ⇒ ${zeroInC ? '**ZERO. The pre-registered reading applies: this is a salience/mechanism finding.**' : arms.C.citing > 0 ? '**non-zero — the affordance CAN reach her without the numbering.**' : 'no retains were made in arm C, so the rate is undefined — ⚠️ not the same as zero.'}
 
+## ⚠️⚠️ FIRST — THE CONTROL DID NOT REPRODUCE, SO READ EVERY ROW BELOW THROUGH THIS
+
+The same instrument (generation 3) was run over the same frozen corpus on two days, with the same model
+(\`ollama/qwen3.6:35b\`, confirmed from the ledger). Two statistics behaved very differently:
+
+| statistic | run 1 (09-05) | run 2 (09-15) | reproduced? |
+|---|---|---|---|
+| **depth** — total retains over 20 passes | ${d1} | ${d2} | ⛔ **NO — ${d1} vs ${d2}** |
+| **breadth** — passes that retained anything | ${b1}/20 | ${b2}/20 | ✅ **exactly** |
+
+⇒ **Retains-per-pass is not a reproducible measure on this corpus** — the identical control moved by ${Math.abs(d1 - d2)} retains
+between runs, which is larger than any gap between the arms. ⛔ The Generation-4 headline (0.40 → 0.70 retains/pass) must
+therefore be read as *possibly run variance*, and every "mean content chars" figure below is a mean over a handful of rows.
+⭐ **Breadth is the statistic that held**, so the decomposition is judged on it.
+
+## ⭐ AND THE CORPUS IS THE BINDING CONSTRAINT
+
+**${liveSources} of ${allSources} source conversations produced ANY retain in ANY of the five arm-runs.** Every arm is
+effectively measured on ${liveSources} informative conversations, not 20 — which is why the counts are small enough for one
+lucky pass to move a rate. ⛔ No future reflection experiment on this corpus can resolve a small effect.
+
 ## The decomposition
 
 | metric | arm 3 (control) | arm N (numbered) | arm C (affordance) | gen 4 (both) |
 |---|---|---|---|---|
 | passes · completed | ${arms[3].passes} · ${arms[3].ok} | ${arms.N.passes} · ${arms.N.ok} | ${arms.C.passes} · ${arms.C.ok} | ${G4.passes} · ${G4.ok} |
-| **retains per pass** | ${col(arms[3])[0]} | ${col(arms.N)[0]} | ${col(arms.C)[0]} | ${col(G4)[0]} |
+| **breadth — passes that retained** ⭐ | ${breadthOf(armRetains('3'))}/20 | ${breadthOf(armRetains('N'))}/20 | ${breadthOf(armRetains('C'))}/20 | ${breadthOf(g4Retains)}/20 |
+| retains per pass ⚠️ not reproducible | ${col(arms[3])[0]} | ${col(arms.N)[0]} | ${col(arms.C)[0]} | ${col(G4)[0]} |
 | rows written per pass | ${col(arms[3])[1]} | ${col(arms.N)[1]} | ${col(arms.C)[1]} | ${col(G4)[1]} |
 | declines per pass | ${col(arms[3])[2]} | ${col(arms.N)[2]} | ${col(arms.C)[2]} | ${col(G4)[2]} |
 | **mean content chars** | ${col(arms[3])[3]} | ${col(arms.N)[3]} | ${col(arms.C)[3]} | ${col(G4)[3]} |
@@ -93,6 +130,18 @@ ids read from the first experiment's own record).
 | verification rate — quotes that verify | ${arms.C.spanGiven ? pct(arms.C.spanOk, arms.C.spanGiven) : 'undefined — no quotes'} | ${G4.spanGiven ? pct(G4.spanOk, G4.spanGiven) : 'undefined — no quotes'} |
 | establishment rate — rows with ≥1 established ref | ${arms.C.rows ? pct(arms.C.estRows, arms.C.rows) : 'n/a'} | ${G4.rows ? pct(G4.estRows, G4.rows) : 'n/a'} |
 | speaker of established refs | ${JSON.stringify(arms.C.speakers)} | ${JSON.stringify(G4.speakers)} |
+
+## ⭐⭐⭐ THE CITATION AFFORDANCE, POOLED ACROSS BOTH PRESENTATIONS
+
+| | retains | of which cited a line |
+|---|---|---|
+| arm C — affordance, plain transcript | ${arms.C.retains} | **${arms.C.citing}** |
+| gen 4 — affordance, numbered transcript | ${G4.retains} | **${G4.citing}** |
+| **pooled** | **${pooledRetains}** | **${pooledCiting}** |
+
+⇒ ${pooledCiting === 0
+  ? `**${pooledRetains} retentions across two different presentations of the same affordance, and she reached for it ZERO times.** Arm C alone is only ${arms.C.retains} retains — too thin to conclude from — but pooled with Generation 4's ${G4.retains}, the evidence is no longer about sample size: the field is offered, optional, described in her own vocabulary, and invisible at the moment she decides. ⭐ The pre-registered reading applies: **a salience/mechanism problem, ⛔ not a wording problem.**`
+  : `she used it ${pooledCiting} time(s) of ${pooledRetains} — the affordance IS reachable; the question becomes when.`}
 
 ## Per source (retains · rows · citing)
 
