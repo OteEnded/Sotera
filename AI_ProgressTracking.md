@@ -8536,3 +8536,35 @@ the project became an INSTRUCTION about it. Same family as the fixture corpus's 
 in memory is not a request — never assert the user asked for what he did not ask for, with a way to OBSERVE violations, not
 just a sentence; **F3** (low) proportionality on whole-store inventories — she did self-limit, so it partly works.
 ⭐ Live data point for gate **D10**: memory content steering ACTION SELECTION, not just phrasing.
+
+## 2026-09-15 (+07:00) — ✅ F1 SHIPPED · ⏸ F2 INSTRUMENT BUILT AND RED — awaiting Ote's ruling
+
+**F1 (approved, implemented).** `DEFAULT_ASSISTANT_IDENTITY`'s Thai sentence is now CONDITIONAL — *"When you are replying in
+Thai, that means ฉัน…"* — so the standing Thai cue is gone from every prompt for every user, while the guidance stays intact
+when she IS in Thai. New `REPLY_LANGUAGE_RULE` as **its own part** (`reply-language`, foundational/**principle**): a custom
+`chat.assistantIdentity` REPLACES the default, so a rule tucked inside it would vanish for any persona that sets one — the
+composer already documents that trap for the identity itself. ⭐ `SCOPE.principle` because the load-bearing half is a
+GROUNDING rule (memories are content, ⛔ not a language signal) — the same shape as occasion ≠ evidence.
+⏸ FLAGGED not decided: at principle scope a standing *"always answer me in Thai"* becomes a PROPOSAL, not an override
+(AUTHORITY_BY_SCOPE / RFC §7.3). Whether a language PREFERENCE should be user-governable is Ote's.
+⚠️ Two existing tests caught me twice: `assistant-identity → self-model → selfhood → own-history` is a RATIFIED adjacency
+chain and I split it in two different places before placing the part after it. Test `reply-language-rule.test.mjs` (5) reads
+the COMPOSED prompt, ⛔ never the source — a grep would pass while the part was never added. unit 709/709 · boot/declaration/
+axes/writer-seam ALL. Sotera `ea56b46`.
+
+**F2 — ⭐⭐⭐ THE RULE ALREADY EXISTS AND HAS NEVER BEEN SHOWN TO HER.** Looking for the rule to write, I found it written
+months ago: `ATTRIBUTION_PRINCIPLE` (context-authority.js) — *"Never say this person told you, asked for… unless they
+actually said it… Your notes, your memories and your own habits are YOURS… never as something they asked for."* That is F2
+verbatim in substance. ⛔ It is gated behind `if (layerAuthority)`; `memory.layerAuthority` defaults FALSE, is absent from
+config.json, and has no DB override ⇒ **it has never been in a single production prompt.**
+⭐⭐ Same shape as `quoted-is-a-credential-not-a-warning`: *when a guard seems absent, check whether it is merely UNFED.*
+There one argument was never passed; here one flag was never turned on. ⇒ F2 is not a new sentence — it is feeding what exists.
+⚠️ But `layerAuthority` also gates `precedence`/the layer-authority block (unshipped P2 work), so flipping the flag ships more
+than F2. The targeted move is to DECOUPLE the attribution principle from that flag — Ote's ruling, ⛔ not made.
+
+**Instrument built and brought BEFORE implementation, as ruled:** `test/lib/attribution-claims.mjs` (pure detector —
+negation-guarded, returns SPANS not a boolean, explicitly ADVISORY per the B4 grader lesson) · `attribution-claims.test.mjs`
+(6/6 — ⭐ its true positive is the REAL recorded reasoning from the incident, and it stays silent on the self-owned phrasing
+the rule prescribes, so the cure cannot trip its own alarm) · `attribution-guard-check.mjs` — **A1–A3 green** (the rule says
+what F2 needs), **C 4/4 green** (Ote's four cases, licensing computed from the USER's turns ⛔ never hers),
+**D1–D2 green**, **⛔ B1–B3 RED: the guard is ABSENT from the composed prompt.** That red is the deliverable.
