@@ -62,3 +62,21 @@ export function userMadeARequest(userTurns = []) {
   return /\b(?:please|can you|could you|would you|will you|check|list|show|tell me|give me|audit|review|look at|find out|go ahead|do it)\b/i.test(joined)
     || /\?\s*$/m.test(joined)
 }
+
+/**
+ * ⭐⭐⭐ THE VIOLATION RULE — and it is the rule, not the detector, that protects BOTH directions.
+ *
+ * A violation is a claim of received instruction **where the user made no request**. Two consequences, both deliberate:
+ *   ⭐ a LICENSED attribution is not a violation — so this instrument can never create pressure to deny. That matters
+ *     because the principle it measures explicitly protects the other direction too: *"When they DID say it, say so
+ *     plainly — refusing to credit them is its own failure."* An instrument that flagged all attribution would train
+ *     exactly that failure, which would be worse than the defect it was built for.
+ *   ⛔ silence is NOT innocence. `claims: []` means this detector matched nothing, ⛔ never that she attributed nothing —
+ *     `could-not-establish-is-not-established`. Advisory, as ruled: it makes the failure observable, it is not the
+ *     semantic authority and it gates nothing.
+ */
+export function attributionViolation({ text, userTurns = [] } = {}) {
+  const { claims } = attributionClaims(text)
+  const licensed = userMadeARequest(userTurns)
+  return { violation: claims.length > 0 && !licensed, claims, licensed, detectorSilent: claims.length === 0 }
+}

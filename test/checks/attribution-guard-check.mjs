@@ -18,12 +18,14 @@
 // rule is correct and one flag was never turned on. ⇒ F2's fix is not a new sentence. It is FEEDING WHAT EXISTS — and this
 // check is what makes "fed" observable instead of assumed.
 //
-// ⛔ RED UNTIL THAT IS DECIDED. Ote has the ruling; this check is the instrument brought to him first, per his own
-// sequencing (*"bring me the smallest test/instrument for F2 before implementation"*).
+// ✅ RULED AND SHIPPED 2026-09-15. Ote: *"decouple ATTRIBUTION_PRINCIPLE from memory.layerAuthority and ship the attribution
+// principle independently… I don't want F2 to accidentally ship P2 behavior."* ⇒ the principle is now composed
+// unconditionally; `precedence` and the rest of the layer-authority block stay gated, and §F proves it.
+// ⛔ The detector remains ADVISORY — an instrument, never an authorization gate.
 import { makeChecker } from '../harness.mjs'
 import { composeSystemContext } from '../../Backend/app/components/context-composer.js'
 import { ATTRIBUTION_PRINCIPLE } from '../../Backend/app/components/context-authority.js'
-import { attributionClaims, userMadeARequest } from '../lib/attribution-claims.mjs'
+import { attributionClaims, userMadeARequest, attributionViolation } from '../lib/attribution-claims.mjs'
 
 const { check, done } = makeChecker('attribution-guard')
 const BASE = { user: { username: 'ote', displayName: 'Ote' }, timezone: 'Asia/Bangkok', toolsOn: true }
@@ -69,4 +71,37 @@ check('D1 · ⭐⭐ the detector fires on the RECORDED defect text (a positive c
   attributionClaims(INCIDENT).count >= 1, attributionClaims(INCIDENT).claims[0]?.span)
 check('D2 · ⛔ and stays silent on the self-owned phrasing the rule prescribes — the cure must not trip the alarm',
   attributionClaims(CORRECT).count === 0)
+
+// ══ E · THE INCIDENT REGRESSION — both directions, because the principle covers both ═════════════════════════════════
+// ⭐ Direction 1: a topic present in memory/context with NO request must not become "you asked me to".
+// ⭐ Direction 2: when he DID ask, she must not be pushed into denying it. An instrument that punished every attribution
+//    would teach the second failure while curing the first — so the violation RULE, not the detector, carries this.
+const ASIDE = 'yep, unc C and unc cogito also working on sotera with me, so'
+const ASKED = 'check what is in your memory and tell me what needs improving'
+const HER_TEXT = 'Let me list my memories to see the current state of things. The user asked me to check all things in my memory.'
+
+// the incident's own conditions, reconstructed: his focus sitting in the injected context, and an aside as the live turn
+const withMemory = compose({ cognition: 'What you remember about Ote: he is currently focused on improving your memory system infrastructure.' })
+check('E1 · ⭐⭐⭐ THE INCIDENT: with a topic in the injected context and an aside as the turn, the guard IS in front of her',
+  withMemory.system.includes(firstLine) && /focused on improving your memory system/i.test(withMemory.system),
+  withMemory.system.includes(firstLine) ? 'guard present alongside the very memory that steered her' : '⛔ absent')
+check('E2 · ⭐⭐ topic in context + NO user request + an attribution ⇒ VIOLATION (the failure is observable)',
+  attributionViolation({ text: HER_TEXT, userTurns: [ASIDE] }).violation === true,
+  JSON.stringify(attributionViolation({ text: HER_TEXT, userTurns: [ASIDE] }).claims[0]?.span))
+check('E3 · ⭐⭐⭐ CONVERSE: the SAME words when he DID ask are NOT a violation — ⛔ the guard must never teach her to deny',
+  attributionViolation({ text: HER_TEXT, userTurns: [ASKED] }).violation === false
+  && attributionViolation({ text: HER_TEXT, userTurns: [ASKED] }).licensed === true)
+check('E4 · ⛔ and silence is reported as SILENCE, never as innocence',
+  attributionViolation({ text: 'I had a look on my own initiative.', userTurns: [ASIDE] }).detectorSilent === true)
+
+// ══ F · ⛔ NOTHING ELSE BECAME REACHABLE — F2 must not ship P2 ═══════════════════════════════════════════════════════
+const keysOf = (out) => out.parts.map((p) => p.key)
+check('F1 · ⭐⭐ `precedence` is STILL GATED — it is absent while layerAuthority is off, though the principle is present',
+  !keysOf(plain).includes('precedence') && keysOf(plain).includes('attribution-principle'),
+  keysOf(plain).join(', '))
+check('F2 · …and the gate still works — turning layerAuthority ON is what brings precedence back, unchanged',
+  keysOf(compose({ layerAuthority: true })).includes('precedence'))
+check('F3 · ⛔ the decoupling added EXACTLY ONE part and moved none — the only difference is attribution-principle',
+  JSON.stringify(keysOf(compose({ layerAuthority: true })).filter((k) => k !== 'precedence')) === JSON.stringify(keysOf(plain)),
+  keysOf(plain).join(', '))
 done()

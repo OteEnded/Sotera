@@ -449,9 +449,26 @@ export function composeSystemContext({
   } else if (scopeAwareness) {
     part('scope-awareness', SCOPE_AWARENESS, AUTHORITY.foundational, SCOPE.principle)
   }
+  // ══ ⭐⭐⭐ ALWAYS PRESENT — DECOUPLED FROM `layerAuthority` BY OTE'S RULING, 2026-09-15 ════════════════════════════
+  //
+  // ⚠️⚠️ WHY IT MOVED OUT OF THE FLAG. On 2026-09-15 she wrote *"The user asked me to check all things in my memory"* when
+  // Ote had said only *"unc C and unc cogito also working on sotera with me"* — a topic present in a hot memory became an
+  // instruction she claimed to have received. Going to write the rule, I found it already written, right below, and gated:
+  // `memory.layerAuthority` is false by default, absent from config.json, with no stored override ⇒ **this principle had
+  // never appeared in a single production prompt.**
+  //
+  // ⭐⭐ THAT IS AN ACTIVATION DEFECT, ⛔ NOT A MISSING-PRINCIPLE ONE — the `quoted-is-a-credential-not-a-warning` shape:
+  // *when a guard seems absent, check whether it is merely UNFED.* There one argument was never passed; here one flag was
+  // never turned on.
+  //
+  // ⛔ AND ONLY THIS PART LEFT THE FLAG. `precedence` stays gated below because it is unshipped P2 behaviour that has not
+  // been separately ratified — Ote: *"I don't want F2 to accidentally ship P2 behavior."* Turning the flag on wholesale
+  // would have been the smaller edit and the wrong one.
+  // ⓘ Position is unchanged, so every composed-prompt adjacency assertion still holds; only the GATE changed.
+  part('attribution-principle', ATTRIBUTION_PRINCIPLE, AUTHORITY.foundational, SCOPE.principle)
   if (layerAuthority) {
-    part('attribution-principle', ATTRIBUTION_PRINCIPLE, AUTHORITY.foundational, SCOPE.principle)
     // Derived from AUTHORITY_BY_SCOPE, never hand-written — see declarePrecedence.
+    // ⏸ STILL GATED, deliberately: this is the layer-authority/precedence behaviour F2 must not ship.
     const precedence = declarePrecedence()
     if (precedence) part('precedence', precedence, AUTHORITY.foundational, SCOPE.principle)
   }
