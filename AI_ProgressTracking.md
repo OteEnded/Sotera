@@ -8408,3 +8408,27 @@ F2 no (kinds identical), F3 no, F5 UNDEFINED, F4 ⏸ Ote. ⚠️ The numbered tr
 content (252 → 103 chars mean) — a prompt change is a prompt change. 12 of 20 pairs retained nothing on both sides (fixture material).
 Docs: `MEASUREMENT_SOTERA_REFLECTION_GENERATION_4_PAIRS.md` (blind, X/Y by hash) · `…_METRICS.md` · key
 `test/results/reflection-gen4-ab-key.json`. ⛔ Production stays Gen 3. ⛔ Not adopted on mechanics. Clones kept until the decision.
+
+## 2026-09-15 (+07:00) — ✅ F4 CLOSED · Gen-4 verdict ITERATE (unchanged) · `MEASUREMENT_SOTERA_REFLECTION_GENERATION_4_F4.md`
+
+Ote judged the 20 identity-blind pairs himself (HTML test, source conversations shown as the reviewed slice) and submitted;
+two supporting raters agreed 20/20. Key opened after submission; mapping verified byte-identical to the one the blind document
+was built from (only its timestamp had drifted from a report re-run).
+
+**Scored:** no preference **13** (both arms retained nothing — a fact about the CORPUS, ⛔ not the instruments) · **Gen 4
+preferred 5** (pairs 4, 7, 12, 16, 20) · **Gen 3 preferred 2** (pairs 3, 8). **F4 NOT tripped.**
+
+⚠️⚠️ **THE CONFOUND, MEASURED RATHER THAN ASSERTED: the preferred side retained MORE rows in 7 of 7 contested pairs**, and in
+6 of those the loser retained NOTHING. Only **pair 3** had content on both sides — and it went to **Gen 3** (3 items vs 1).
+⇒ F4 on this corpus is substantially a restatement of the retention-rate gap (0.70 vs 0.40/pass, F1), ⛔ not a measure of
+retention QUALITY. Recorded as a limit of the instrument, not a reading of the result.
+
+**What F4 does add beyond the rate:** Gen 4's extra retentions cleared a human bar in all 5 cases — the rate rise bought
+coverage, ⛔ not junk (the human-side counterpart of F3). ⚠️ But the two densest retentions in the corpus (3 items each) both
+came from Gen 3 and both won. ⭐ Hypothesis named and explicitly NOT established: *Gen 4 retains more often but more thinly*
+(consistent with the 252 → 103 char shortening; tested by nothing here). ⛔ And F4 says NOTHING about the citation instrument:
+0 citations in 14 retains, so every Gen-4 effect measured came from the NUMBERED TRANSCRIPT, the other half of the generation.
+
+**Falsifiers closed:** F1 no (retains ROSE) · F2 no · F3 no · F4 no (confounded) · F5 UNDEFINED · adoption precondition NOT MET.
+⭐ "No falsifier tripped" and "the precondition is met" are two claims and stay separate. **Verdict ITERATE.** ⏸ Production on
+Gen 3; 40 runs + clones preserved; 8 historical rows unknown; distiller off; remember_fact / R-C / D5 / BASIS untouched.

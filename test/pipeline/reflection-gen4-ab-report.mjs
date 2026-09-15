@@ -16,6 +16,14 @@ const KEY = new URL('../results/reflection-gen4-ab-key.json', import.meta.url)
 const PAIRS_DOC = new URL('../../../../Reference/docs/MEASUREMENT_SOTERA_REFLECTION_GENERATION_4_PAIRS.md', import.meta.url)
 const METRICS_DOC = new URL('../../../../Reference/docs/MEASUREMENT_SOTERA_REFLECTION_GENERATION_4_METRICS.md', import.meta.url)
 const R = JSON.parse(readFileSync(IN, 'utf8'))
+// ⭐ F4, once judged: the submitted blind judgments scored against the sealed key. Absent ⇒ still pending.
+let F4 = null
+try {
+  const ans = JSON.parse(readFileSync(new URL('../results/reflection-gen4-blind-answers.json', import.meta.url), 'utf8'))
+  const key = JSON.parse(readFileSync(new URL('../results/reflection-gen4-ab-key.json', import.meta.url), 'utf8'))
+  const picks = Object.entries(ans.answers).map(([n, a]) => ({ n: Number(n), choice: a['rater-1'], arm: a['rater-1'] === 'Neither' ? null : key.pairs[n][a['rater-1']] }))
+  F4 = { gen3: picks.filter((p) => p.arm === 'A').length, gen4: picks.filter((p) => p.arm === 'B').length, neither: picks.filter((p) => !p.arm).length }
+} catch { F4 = null }
 const pairs = (R.pairs ?? []).filter((p) => p.A?.harvest && p.B?.harvest).sort((a, b) => a.index - b.index)
 const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
@@ -63,7 +71,8 @@ const F = [
   { id: 'F1', text: 'retains per pass drop > 30 % under Gen 4', tripped: dropRetains > 0.30, value: `A ${fmt(retainsPerPass(A))} · B ${fmt(retainsPerPass(B))} · drop ${Math.round(dropRetains * 100)} %` },
   { id: 'F2', text: 'kinds collapse toward fact under Gen 4', tripped: factShare(B) - factShare(A) > 0.30, value: `fact/semantic share A ${pct(Math.round(factShare(A) * 100), 100)} · B ${pct(Math.round(factShare(B) * 100), 100)} · kinds A ${JSON.stringify(A.kinds)} · B ${JSON.stringify(B.kinds)}` },
   { id: 'F3', text: 'citing without content change ("quota" behaviour) — judged on the BLIND pairs by Ote; mechanical proxy: cited retains whose content length is within ±10 % of the arm-A mean AND every retain cites', tripped: citationRate === 1 && B.retains > 3, value: `citation rate ${citationRate == null ? 'n/a' : pct(B.cited, B.retains)} · mean content chars A ${fmt(mean(A.contentChars))} · B ${fmt(mean(B.contentChars))}` },
-  { id: 'F4', text: "Ote's blind pairing prefers Gen 3", tripped: null, value: 'AWAITING OTE — the pairs file' },
+  { id: 'F4', text: "Ote's blind pairing prefers Gen 3", tripped: F4 ? F4.gen3 > F4.gen4 : null,
+    value: F4 ? `preferred Gen 3 on ${F4.gen3} pair(s) · Gen 4 on ${F4.gen4} · no preference on ${F4.neither}. ⚠️ CONFOUNDED: the preferred side retained more rows in 7 of 7 contested pairs, and only ONE pair had content on both sides` : 'AWAITING OTE — the pairs file' },
   { id: 'F5', text: 'resolution rate < 80 % (she cannot use ordinals reliably)', tripped: resolutionRate == null ? 'undefined' : resolutionRate < 0.80, value: resolutionRate == null ? 'no citations made — undefined (⚠️ the affordance was not used)' : pct(B.resolved, B.refsAll) },
 ]
 const adoptionPrecondition = establishmentRate != null && B.estRows > 0 && accountHolderRefs > 0
