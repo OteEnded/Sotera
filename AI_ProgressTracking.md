@@ -8568,3 +8568,27 @@ negation-guarded, returns SPANS not a boolean, explicitly ADVISORY per the B4 gr
 the rule prescribes, so the cure cannot trip its own alarm) · `attribution-guard-check.mjs` — **A1–A3 green** (the rule says
 what F2 needs), **C 4/4 green** (Ote's four cases, licensing computed from the USER's turns ⛔ never hers),
 **D1–D2 green**, **⛔ B1–B3 RED: the guard is ABSENT from the composed prompt.** That red is the deliverable.
+
+## 2026-09-15 (+07:00) — ✅ F2 SHIPPED · the attribution guard is FED · `attribution-guard-check.mjs` 16/16
+
+Ote's ruling: *"decouple ATTRIBUTION_PRINCIPLE from memory.layerAuthority and ship the attribution principle independently…
+I don't want F2 to accidentally ship P2 behavior."*
+
+**The change is one unwrapping.** `part('attribution-principle', …)` moved OUT of `if (layerAuthority)`; `declarePrecedence()`
+and its part stayed INSIDE. Position unchanged, so every composed-prompt adjacency assertion still holds — only the GATE moved.
+⇒ **an activation defect, ⛔ not a missing-principle one.** The rule was written months ago and had never reached a single
+production prompt because `memory.layerAuthority` is false by default, absent from config.json, with no stored override.
+⭐⭐ `quoted-is-a-credential-not-a-warning` again: *when a guard seems absent, check whether it is merely UNFED* — there one
+argument was never passed, here one flag was never turned on.
+
+**What became reachable: exactly one part.** `attribution-principle` (519 chars, 3 lines) now in every prompt. Proven by §F:
+`precedence` is ABSENT with the flag off and returns when it is on, and the part list with the flag on minus `precedence` is
+BYTE-IDENTICAL to the list with it off. ⛔ The second `layerAuthority` usage (the persona-notes WORDING variant, an S3
+experiment baseline Ote ratified 2026-08-18) was not touched.
+
+**Both directions regressed, because the principle covers both:** E2 — topic in injected context + NO request + an
+attribution ⇒ VIOLATION (the real incident's recorded text, detected). E3 — ⭐ the SAME words when he DID ask ⇒ NOT a
+violation, licensed true. That is carried by the violation RULE, ⛔ not the detector: an instrument that flagged every
+attribution would train the opposite failure the principle also forbids (*"refusing to credit them is its own failure"*).
+E4 — silence is reported as SILENCE, never innocence. E1 — the guard is now in front of her alongside the very memory that
+steered her. ⛔ Detector stays ADVISORY, gates nothing. ⛔ Memory ranking/salience untouched. F3 parked. Sotera `<this commit>`.
