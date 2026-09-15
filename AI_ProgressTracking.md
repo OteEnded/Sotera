@@ -8698,3 +8698,44 @@ Trees clean: Sotera and Reference fully committed; `@ote/memory` still carries t
 R-C hunks (standing item **D7**, ⛔ not mine to bundle). Instruments preserved and runnable: `attribution-guard-check` ·
 `writer-seam-check` · `provenance-axes-check` · `incident-replay-check` · `reflection-generation-4-check` ·
 `attribution-successor-run --pilot` · the blind-test generator.
+
+## 2026-09-15 (+07:00) — ⛔ NATURAL-TRAJECTORY REPRODUCTION: 0 of 24 confirmed · GATE NOT MET · no further corpus
+
+Ote's ruling on the pilot: correct stop, no threshold edit, no full run; vary ①+②+③ together as a natural-trajectory set built
+around `ca672514`, with domain variants, the incident itself as the positive-control trajectory; ④ held separately; probe kept
+as an aside, requested:false; tools ON; reasoning + reply scored; if zero again, stop constructing corpora and make live
+detection the primary instrument.
+
+**Built** — `attribution-natural-extract.mjs` builds the canonical fixture FROM THE RECORD (txn_messages verbatim; the
+composer's cognition / scope-facts / working-memory blocks verbatim from `cognition-debug.log`; her three `list_memories`
+payloads from the same log — the DB copies are truncated at 4000 chars) · `lib/attribution-natural-trajectory.mjs` assembles
+T0 · T0-abl (one line removed) · V1–V4 (domain tokens only, every substitution `replaceOnce`) · red-proof 9/9 (positive
+control fires on the recorded reasoning; probe identical everywhere and requested:false; her frozen turns carry no claim or
+denial; ablation differs by exactly one line, variants by exactly four fields; stubs store-free) · `attribution-natural-run.mjs`
+composes with HER composer under production's inputs for that room, the route's own 49-tool assembly, principle removed
+(asserted both ways), up to 3 stub-answered tool rounds. Pre-registered in `PLAN_SOTERA_ATTRIBUTION_NATURAL_TRAJECTORY.md`.
+
+**Result** (`MEASUREMENT_SOTERA_ATTRIBUTION_NATURAL_TRAJECTORY.md`): 24 turns, 4 min, 0 errors. **0 detector-positive · 0 human-
+confirmed** (a detector-independent sweep of all 24 traces found 3 hits, all read: an offer, an offer, "if he needs to") ·
+2 proposals (the good behaviour) · **0 tool calls** — production made 3 on this exact turn · she CONSIDERED a memory check in
+4 of 24 reasonings and talked herself out of it. **Not truncated**: one T0 call evaluated 18,194 tokens inside a 32,768
+window (69% of production's 26,275; the tail recall + Conversation-Search items are the unrecoverable remainder).
+⇒ THREE constructions have failed to elicit it (0/40 · 0/24 · 0/24). Evidence about elicitation. ⛔ Not that the principle
+works; ⛔ not that it is rare. **F2 remains fed = established · obeyed = unknown.**
+
+⭐⭐ **OBSERVATION during extraction (presence, ⛔ not cause):** her "the user asked me to check all things in my memory" matches
+near-verbatim Ote's REAL 25-August request ("hi sotera, can you check all things in your memory?"), rendered under a
+remembered conversation in her recollection block on 6 of 6 turns of the incident. "Attributed instruction" therefore splits:
+a real request DISPLACED IN TIME is its own class. The ablation removing that line also scored zero — it decided nothing.
+
+**Per the ruling:** ⛔ no third corpus. `PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md` designs the live instrument (end-of-turn
+fire-and-forget scan with the existing advisory detector, versioned; `log_attribution_scans` denominator; a candidate row
+freezing the surrounding conversation + composed blocks + a `sources` pre-work listing every place a request could have come
+from; six human classes REQ_NOW · REQ_THIS_CONV · REQ_PRIOR_CONV · TOPIC_ONLY · OWN_INFERENCE · NO_SOURCE; a violation exists
+only when human-confirmed; no causality from a hit). ⏸ NOT implemented — D11–D14 are his. ④ parked as the one remaining
+single variable. Fixed en route: the runner's tool-argument reads now try `args` first (repo shape guard); `--count` added
+as the truncation check. Unit 736/736.
+
+**Also logged as a TO-DO at Ote's request:** prefill/TTFT — his `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (cognition
+block in the leading system message busts the prefix cache every turn; 7.9% hit rate; proposed config-gated
+`memory.cognitionInTail` arm, default OFF; ⛔ not a pure perf knob). Recorded in §0-E; nothing done.

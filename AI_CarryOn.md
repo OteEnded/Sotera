@@ -75,8 +75,29 @@ F3 ⏸ PARKED (proportionality on whole-store inventories — she already self-l
 ⭐ The run was NOT vacuous (reasoning 24/24, 9 tool rounds, arms verified per turn, her reasoning visibly used the injected
 memory). ⇒ **the second corpus in a row to fail to elicit the phenomenon** (2026-08-18 was 0/40). Every condition the first
 lacked was supplied and the rate is still zero.
-⭐⭐⭐ **ONE occurrence has EVER been observed, and a HUMAN reading a conversation found it — no instrument did.** The recorded
-option: run the advisory detector over LIVE conversations rather than build a third fixture.
+⭐⭐⭐ **ONE occurrence has EVER been observed, and a HUMAN reading a conversation found it — no instrument did.**
+
+⚠️⚠️⚠️ **THEN THE NATURAL-TRAJECTORY REPRODUCTION ALSO FAILED ITS GATE** (`MEASUREMENT_SOTERA_ATTRIBUTION_NATURAL_TRAJECTORY.md`,
+plan pre-registered in `PLAN_…_NATURAL_TRAJECTORY.md`). The incident itself, **rebuilt from the record, nothing authored**:
+his turns and her five turns verbatim, the composer's cognition/scope-facts/working-memory blocks **verbatim from the log**,
+the tool payloads she received from the log, production's 49-tool set by the route's own assembler, the principle removed
+(production's state). ①+②+③ moved together; ④ held at `think:true`. T0×6 · T0 minus one line ×6 · 4 domain variants ×3.
+**0 detector-positive · 0 human-confirmed · 0 TOOL CALLS in 24 (production made 3 on this exact turn)** · not truncated
+(18,194 tok in a 32k window = 69% of production's prompt; the tail recall + conversation evidence are unrecoverable).
+⇒ **THREE constructions, 0/40 · 0/24 · 0/24.** Evidence about ELICITATION only. ⛔ Not "the principle works". ⛔ Not "rare".
+⏸ **F2 stands: fed = established · obeyed = unknown.**
+
+⭐⭐ **OBSERVATION from the record (presence, ⛔ not cause):** her sentence *"the user asked me to check all things in my
+memory"* matches near-verbatim a REAL request of his from **25 August** (*"hi sotera, can you check all things in your
+memory?"*), and that line sat in her recollection block on **6 of 6 turns** of the incident. ⇒ "attributed instruction"
+splits: a real request DISPLACED IN TIME (the TEMPORAL axis) is a different case from a topic upgraded or a fabrication.
+The one-line ablation (T0-abl) produced the same zero, so it decided nothing.
+
+⭐ **OTE'S RULING NOW APPLIES: ⛔ no further constructed corpus.** Live-conversation detection is the PRIMARY instrument —
+designed in `PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md` (six human classes incl. REQ_PRIOR_CONV; frozen surrounding
+conversation; scan denominator; human confirmation before anything counts; no causality from a hit). ⏸ **NOT IMPLEMENTED —
+stopped at the gate.** ④ (effort:low) is recorded as the only single variable still separating replay from production,
+to be varied ONLY if a constructed reproduction is ever wanted again.
 
 ---
 
@@ -107,7 +128,9 @@ option: run the advisory detector over LIVE conversations rather than build a th
 :8210 PID 25012 (Sotera — restarted 09-15 after the 06:17 reboot, Ote authorised) · :8201 PID 28072 (OLS, HIS, untouched)
 :8220 another project's, untouched · :54322 pg · migrations through 049 · live reflection generation = 3
 suite 79/83 → the 4 reds triaged: 2 were LIVE-TRAFFIC contention (pass standalone), 1 was the known D5 snapshot drift,
-1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 716/716.
+1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 736/736 (09-15 late).
+natural-trajectory replay preserved: test/results/attribution-natural-trajectory.jsonl (24 rows) · its fixture holds Ote's
+own conversation + the memory list she received, BY HIS RULING, in its own file so it can be excluded by name
 memories 160+ · axes: writer set on 129 · 44 unaxised (33 ratified unknown + 11 leaked, agent_dev only, ⛔ none of Ote's)
 evidence refs 77, all established · lint defects: 8 pass-writer-without-act + 11 writer-not-declared
 experiment assets PRESERVED: 40 Gen-4 clones/passes · 60 three-arm clones/passes · blind-test key unopened→opened & scored
@@ -115,7 +138,8 @@ experiment assets PRESERVED: 40 Gen-4 clones/passes · 60 three-arm clones/passe
 
 **BUILT THIS CHECKPOINT:** the four provenance axes + audited backfill · D1(b) writer seam · reflection generations 5/6 and
 the three-arm decomposition · the F4 blind test (HTML, chat-bubble source, JSON save) · F1 reply-language rule · F2
-attribution-principle decoupling · the attribution detector + successor corpus/scorer/runner.
+attribution-principle decoupling · the attribution detector + successor corpus/scorer/runner · the natural-trajectory
+extractor (record → fixture), assembly lib, red-proof (9) and replay runner (`attribution-natural-run.mjs`, `--count` = truncation check).
 
 # 0-D · ⛔⛔ FENCES
 
@@ -124,6 +148,8 @@ production reflection = GEN 3 · 40 Gen-4 + 60 three-arm runs and clones PRESERV
 UNKNOWN and UNREPAIRED · episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 search snapshot UNTOUCHED ·
 BASIS rename DEFERRED · ⛔ no provenance inference or repair · ⛔ no weakening of occasion/reachability/provenance separation
 ⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · ⛔ no pilot-threshold edit · F3 PARKED
+⛔ NO THIRD CONSTRUCTED CORPUS (ruled 09-15) · ⛔ the detector stays ADVISORY, never a gate · ⛔ live instrument NOT built until D11–D14
+⛔ no causality inferred from any live hit — presence is recorded, cause is not · ⛔ the natural-trajectory set is not enlarged
 ⛔ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ ③ (working-memory vs transcript) UNTOUCHED
 ⛔ never test on Ote's account — agent_dev, zz_ fixtures, removed after · ⛔ never restart :8210 unasked · :8201 is HIS
 ```
@@ -139,8 +165,16 @@ PROVENANCE   D3′ close the Gen-4 arc (⭐ recommend REJECT the instrument, KEE
              D2/D4  the 8 historical rows (an unambiguous 20-min window link exists) + what a ratified permanent unknown
                  should look like in the lint. Not urgent.
              D6 BASIS rename · D7 @ote/memory attribution (my earlier R-C hunks still interleaved with foreign work)
-ATTRIBUTION  which of ①–④ to vary for a third corpus (goal live in CONVERSATION as well as memory · her own prior turns in
-             history · depth · reasoning.effort low) — ⭐ OR move to the LIVE-DETECTOR route instead of a fixture
+ATTRIBUTION  ⛔ no third corpus (ruled). The LIVE instrument is designed, not built — `PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md`:
+             D11 scope (every room, or agent_dev + his?) · D12 retention of the frozen surrounding-conversation copy ·
+             D13 who confirms · D14 scan-denominator table vs derived N. ⭐ GO on those = implement (migration 050 + hook +
+             check), nothing else changes. ④ effort:low stays parked as the one remaining single variable.
+PERF         ⏸ TO DO (Ote, 09-15): prefill / TTFT — `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (his secondary-dev
+             lane). Finding: `cognition` sits in the LEADING system message ahead of ~12.7k tok of tool schemas and moves
+             every turn ⇒ prefix reuse lands 7.9%; ollama reuse itself measured at 100×. Proposed: config-gated arm
+             `memory.cognitionInTail`, default OFF (⛔ NOT a pure perf knob — it changes what she sees when; the ratified
+             adjacency + F2 position tests must stay green). Secondary: tool-schema trim (6a), `num_batch` unmeasured,
+             Anthropic system-folding trap (latent). ⛔ Nothing done yet; the four probes in test/pipeline/prefill-*.mjs.
 LANGUAGE     should a standing user language PREFERENCE override the reply-language rule? (at SCOPE.principle it is a
              proposal, not an override)
 STANDING     D10 what makes an option SALIENT inside her deciding — `keep()` 38/38 yet unprompted calls zero; the citation
