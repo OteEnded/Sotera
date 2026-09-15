@@ -8780,3 +8780,47 @@ declared indexes under its own names at boot (3 duplicates dropped, `indexes` re
 
 ⛔ Fences held: F1/F2 shipped and unreworded · no ranking or salience change · the detector is advisory and gates nothing ·
 no third corpus · no causality inferred · F3 parked · no provenance repair · no D3′/D8/D9 work.
+
+## 2026-09-16 (+07:00) — ⏸ ATTRIBUTION HELD · ⭐ PROVENANCE GATE: the D8/D9 material, measured read-only
+
+**Attribution.** Ote accepted D11–D14 as shipped and ruled the 4/4 first reading is **instrument validation, ⛔ not evidence
+about the phenomenon** — zero candidates there must never enter the behavioural base rate as absence. Standing: F2 fed =
+established / obeyed = unknown · three constructed attempts failed / one natural occurrence · the detector is operational.
+⛔ No manufactured traffic, ⛔ no provocation, ⛔ no detector or principle change. **Held.**
+
+⭐ One thing he asked for, done: *"keep the positive-control persistence test as a regression."* It already runs — `test-all.mjs`
+globs `checks/` — but the REPORT file sitting beside it could only ever pass, which is the `a-passing-test-can-test-nothing`
+shape. `attribution-live-check.mjs` now asserts **nine instrument invariants** and exits non-zero: a counted claim with no
+evidence behind it · a candidate no scan counts · a judgement with no human · a class outside the six · evidence pruned from
+an unreviewed row · a pruned row that kept its copies · an unreviewed row missing its evidence · **a scan outside the D11
+scope** · a row with no detector version. ⭐ Each query was RED-PROOFED against a violating row inside a rolled-back
+transaction (scope, orphan-candidate and unreviewed-pruned all fire; the DB itself refuses a class with no confirmer);
+live state after rollback unchanged at 4 scans / 0 candidates. Sotera `ced0553`.
+
+**Provenance gate** (his: *"continue with the existing provenance gate rather than waiting for attribution evidence; keep the
+two arcs separate"*). Read-only investigation → `GATE_SOTERA_PROVENANCE_D8_D9_MATERIAL.md`. ⛔ Nothing wired, repaired or enabled.
+
+⭐⭐ **The measurement that changes the shape of D1 Phase 3.** Of 144 writer-bearing rows, **137 were stamped by the historical
+backfill**; only **reflection (11)** and **lesson (6)** were written live by a declaring caller. Of the 30 rows created since
+the axes shipped, 17 are declared and **13 are not — and all 13 are exactly two paths**: **9 lesson rows from BEFORE the
+2026-09-15 wiring** (that path is now fixed — its 07:25-onward rows carry `writer='lesson'`) and **4 from
+`test/checks/m2-rollback-check.mjs`**, which builds its store with no `writer` although its own comment calls it *"an operator
+writer"*. `test-all.mjs` globs `checks/`, so **the suite adds 2 undeclared rows to the live corpus every run** (11 → 13 since
+the last checkpoint). ⇒ **no PRODUCTION path has leaked since it was wired.**
+⚠️ And the honest other half: **6 of the 8 wired writers have written no live row at all since 09-05**, so their declaration is
+proven by code (and, for chat-tool, by a probe whose rows were removed) — ⛔ not by anything on disk. `positive-control-must-
+cross-persistence` applies.
+
+**D8** — `reflection-host.js addNote()` ingests `kind:'note'` with no writer/act/reach; there is NO contract for it;
+`memory.reflectMode` is **off** (no config value, no stored override) and there are **0 note rows ever**. Options laid out:
+(a) reuse reflection's act+`range` — ⛔ makes every note claim a stretch it does not support · (b) ⭐ its own contract, act
+`revisit` + reach **`none`** · (c) stay contract-less, and let Phase 3 make it fail closed if anyone enables it.
+**D9** — the contract already specifies act `job`, reach `range`, `pass:true` (⇒ it ALREADY fails closed without an act) and
+`enabled:false`; the distiller is off; 0 rows; ⭐ **the reach data is already computed in the write loop**, so only the act id
+is missing. Options: (a) build the minting (small; ⛔ does not enable it) · (b) rule it stays off. Either completes the caller set.
+**D1 Phase 3, what it breaks on day one**: ① the canary check (one argument) · ② other harnesses building a store with no
+writer, ⛔ not yet enumerated · ③ `retention-host.js`'s `writer: extras?.writer ?? null` — throw or stay permissive.
+
+⛔ Fences: D3′ still open and unchanged (recommend REJECT the instrument, KEEP the store side) · reflectMode and
+episodeDistillEnabled untouched · canary check NOT edited · no row repaired · no lint severity changed · D2/D4/D6/D7 untouched ·
+nothing from the attribution arc reopened and nothing here depends on it.
