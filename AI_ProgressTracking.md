@@ -8824,3 +8824,60 @@ writer, ⛔ not yet enumerated · ③ `retention-host.js`'s `writer: extras?.wri
 ⛔ Fences: D3′ still open and unchanged (recommend REJECT the instrument, KEEP the store side) · reflectMode and
 episodeDistillEnabled untouched · canary check NOT edited · no row repaired · no lint severity changed · D2/D4/D6/D7 untouched ·
 nothing from the attribution arc reopened and nothing here depends on it.
+
+## 2026-09-16 (+07:00) — ✅ D3′ / D8(b) / D9(a) RULED AND IMPLEMENTED · ⭐⭐ D1 PHASE-3 CALLER MATRIX MEASURED · ⏸ flip NOT made
+
+**D3′ — Generation 4 CLOSED as REJECT / NOT ADOPTED**, store side KEPT, production stays Gen 3, experiments preserved as
+historical evidence. `DECISION_SOTERA_REFLECTION_GENERATION_4_CLOSED.md`; closure banners appended to the F4, arms and plan
+documents; the gate doc marked. ⛔ No further iteration of the corpus or the citation affordance unless he reopens it.
+
+**D8(b)** — `WRITER.notes`: pass-driven, act `revisit:<pass-id>` minted once per reflect pass, **reach `none`**. His reason,
+recorded in the contract: a persona note is a self-authored generalization about PRACTICE — the revisit occasion says when it
+formed, it does not make the reviewed conversation EVIDENCE for it. `reflectMode` untouched (off). The read-only callers
+(host service, Composer gather) construct with no act, so a write from them FAILS CLOSED — and loudly: the pipeline turns the
+store's throw into `{ok:false}` **plus a warn carrying the reason verbatim**, asserted as W13b rather than hoped for.
+
+**D9(a)** — `distillAll` mints `job:<run-id>` once per run; reach is the reviewed range of EACH conversation. ⭐ The pipeline
+cache had to be re-keyed from OWNER to CONVERSATION: writer/act/reach are declared at construction, so one pipeline per owner
+would have stamped every episode with the FIRST conversation's range — a coverage claim about material the episode never came
+from. `episodeDistillEnabled` untouched (off) — wiring a writer is not enabling a feature. An `llm` injection seam was added,
+mirroring the one `reflectScope` already had, so the write path can be exercised without a model call.
+
+⭐ The lint's `PASS_WRITERS` is now DERIVED from the registry. It was the literal `('reflection','dreaming','distiller')`, and
+adding a fourth pass writer would have left `notes` **silently exempt** from "a pass must be claimed before it writes".
+
+**Proof** — `writer-seam-check` W10–W17 + W13b/W15b, all crossing persistence. ⚠️ **And it caught me**: run with the obvious
+`lookbackDays: 1` the distiller case distilled three conversations and wrote a fixture episode **into Ote's own store** —
+the `never-test-on-his-account` fence. Row removed (store back to its exact prior count); the case is now windowed to a
+single future-dated conversation with `lookbackDays: 0`, and **W15b asserts its own blast radius** instead of trusting it.
+
+**D1 PHASE-3 CALLER MATRIX** — `GATE_SOTERA_D1_PHASE3_CALLER_MATRIX.md`. The enumeration is a SCRIPT
+(`test/maintenance/writer-caller-matrix.mjs`), ⛔ not a list in a document — a hand-written list is right the day it is written
+and silently wrong after, which is exactly how the canary leaked while a document said the callers were enumerated.
+113 construction sites. ⭐⭐⭐ **PRODUCTION IS COMPLETE**: every one of the 13 production sites declaring no writer is plumbing,
+read-only, or writes a different table. ⭐⭐ And it is MEASURED, not only read — the store's existing undeclared-write warn now
+appends its call stack under `SOTERA_WRITER_TRACE` (inert otherwise), and a full suite traced **71 undeclared writes · 44 call
+sites · 13 files · ZERO in `Backend/`**. ⚠️ Two of those 13 files (`writer-seam-check` W1, `memory-store-contract`) *should*
+write undeclared and need an escape or a rewrite — the one new design question.
+
+⚠️ Three detection failures found while building the matrix, all of the same family: a **spread** and an **ES6 shorthand** each
+read as "declares nothing" (the shorthand is how `retention-host` threads its axes ⇒ the whole retention path was being
+mis-reported as undeclared), and a shell-side edit turned every `\b` into a literal **backspace** so the scan compiled, ran,
+and matched nothing. The patterns are now named once and **anchored against samples that must and must not match**.
+
+**M2 canary check FIXED** as he instructed — it called itself "an operator writer" in a comment and passed none, adding 2
+undeclared rows to the live corpus per suite run (11 → 13 → 15). Now declares `operator` + act; count **held at 15 across two
+further runs**. ⛔ Existing unaxised rows NOT repaired.
+
+**Suite, reported as found: 4 of 85 failed, ⛔ none from this work**, each triaged standalone: `dense-admission` and
+`dreaming-m1` fail on the *same* hardcoded corpus count (`nonEvidential === 8`, now 19) — one drift reporting as two
+failures; `temporal-denominator` is the known fenced D5 snapshot drift; `memory-lifecycle` is clean on re-run (live-traffic
+contention). Unit 748/748 + the 12 live-detection tests.
+
+⏸ **STOPPED BEFORE THE FLIP, as ruled.** Four questions are his: ① declare `writer: 'job'` at `schedules/service.js:222`
+FIRST, then make `extras.writer ?? null` throw — exact impact is that ONE site and **0 configured schedules** ·
+② does a MUTATION of an existing row need a writer, or only an INSERT · ③ lint severity after the flip (recommend: keep it a
+defect — it is the only guard on the 19 raw-SQL sites the store cannot see) · ④ how the two deliberately-undeclared tests write.
+
+⛔ Fences: attribution HELD (detector watching, F2 shipped, nothing reopened) · no ranking/salience · R-C, `remember_fact`,
+D2/D4, D6/D7 untouched · no provenance inference or historical repair · production reflection = Gen 3.

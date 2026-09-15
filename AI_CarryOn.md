@@ -145,7 +145,7 @@ reproduction is ever wanted again.
 
 ```
 :8210 PID 26564 (Sotera — restarted 09-15 17:00 onto the live-detection build) · :8201 PID 28072 (OLS, HIS, untouched)
-:8220 another project's, untouched · :54322 pg · migrations through 050 · live reflection generation = 3
+:8220 another project's, untouched · :54322 pg · migrations through 050 · writer contracts 15 (notes added 09-16) · live reflection generation = 3
 suite 79/83 → the 4 reds triaged: 2 were LIVE-TRAFFIC contention (pass standalone), 1 was the known D5 snapshot drift,
 1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 748/748 (09-15 17:00).
 natural-trajectory replay preserved: test/results/attribution-natural-trajectory.jsonl (24 rows) · its fixture holds Ote's
@@ -180,26 +180,38 @@ BASIS rename DEFERRED · ⛔ no provenance inference or repair · ⛔ no weakeni
 # 0-E · ⏸ OPEN DECISIONS — all Ote's, none blocking
 
 ```
-PROVENANCE   ⭐ MATERIAL PREPARED 09-16, read-only: `GATE_SOTERA_PROVENANCE_D8_D9_MATERIAL.md`. Measured: of 144 writer-bearing
-             rows, 137 were stamped by the BACKFILL; only reflection (11) and lesson (6) were written live by a declaring
-             caller. ⭐⭐ The 13 `writer-not-declared` rows are exactly TWO paths — 9 are lesson rows from BEFORE the 09-15
-             wiring (that path is fixed) and 4 come from `m2-rollback-check.mjs`, which builds a store with no writer and
-             so adds 2 EVERY SUITE RUN. ⇒ no PRODUCTION path has leaked since it was wired. ⚠ But 6 of 8 wired writers have
-             written NO live row since 09-05, so their declaration is proven by code, ⛔ not by anything on disk.
-             D3′ close the Gen-4 arc (⭐ recommend REJECT the instrument, KEEP the store side — the reference mechanism is
-                 built and is what any future citation mechanism writes into)
-             D8  persona-notes writer: NO contract; reflectMode OFF; ZERO note rows ever. Options (a) reuse reflection's
-                 act+range ⛔ (claims a range a note does not support) · (b) ⭐ own contract, act revisit + reach NONE ·
-                 (c) stay contract-less ⇒ Phase 3 makes it FAIL CLOSED if anyone enables it. — gates D1 Phase 3
-             D9  distiller: the contract ALREADY says act `job` + reach `range`, `pass:true` (⇒ already fails closed) and
-                 `enabled:false`; the reach data is already computed in the write loop. Options (a) build the act minting
-                 (small, does NOT enable it) · (b) rule it stays off. Either one completes the caller set. — gates D1 Phase 3
-             D1 Phase 3  REFUSE an undeclared write — only after D8+D9. ⚠ What it breaks on day one, measured: ① the
-                 canary check (one argument: `writer:'operator', act:{kind:'operator',id:occasion}` — what its own comment
-                 already claims) · ② any other harness building a store with no writer (⛔ NOT yet enumerated) ·
-                 ③ `retention-host.js`'s `writer: extras?.writer ?? null` default — throw, or stay permissive?
-             D2/D4  the 8 historical rows (an unambiguous 20-min window link exists) + what a ratified permanent unknown
-                 should look like in the lint. Not urgent.
+PROVENANCE   ✅ D3′ / D8 / D9 ALL RULED AND DONE 09-16. ⏸ ONLY THE PHASE-3 FLIP REMAINS, and it is HIS.
+             D3′ ✅ Generation 4 CLOSED as REJECT / NOT ADOPTED · store side KEPT · production stays GEN 3 · experiments
+                 preserved as historical evidence. ⛔ Do not iterate the corpus or the citation affordance unless a
+                 future decision explicitly reopens it. `DECISION_SOTERA_REFLECTION_GENERATION_4_CLOSED.md`
+             D8 ✅ (b) — `WRITER.notes`: pass-driven, act `revisit:<pass-id>` minted per reflect pass, reach **NONE**
+                 (a note is a generalization about PRACTICE; the occasion says WHEN it formed, it does not make the
+                 reviewed material evidence FOR it). reflectMode stays OFF. Read-only callers construct with no act and
+                 so FAIL CLOSED + loudly. Proven W10–W14 (crosses persistence).
+             D9 ✅ (a) — distiller mints `job:<run-id>` per run; reach = the reviewed range of EACH conversation (the
+                 pipeline cache is keyed by CONVERSATION now, or every episode would claim the first one's range).
+                 `episodeDistillEnabled` untouched and still OFF. Proven W15–W17.
+             ⭐⭐ D1 PHASE 3 — THE MATRIX IS DONE: `GATE_SOTERA_D1_PHASE3_CALLER_MATRIX.md`. Enumeration is a SCRIPT
+                 (`test/maintenance/writer-caller-matrix.mjs`), ⛔ not a list that rots. 113 sites.
+                 ⭐⭐⭐ **PRODUCTION IS COMPLETE** — all 13 production sites declaring no writer are plumbing, read-only, or
+                 write a DIFFERENT table (`txn_intentions` / `txn_relational_records`). MEASURED, not just read: a full
+                 suite under `SOTERA_WRITER_TRACE=1` traced **71 undeclared writes, 44 call sites, 13 files, ZERO in
+                 Backend/**. ⚠ 13 TEST files would break; 2 of them (writer-seam W1, memory-store-contract) SHOULD write
+                 undeclared and need an escape or a rewrite — that is the one new design question (§3.1 item 4).
+                 ⚠ The ONE open production path is `schedules/service.js:222` (`runToolAction`) — builds a tool context
+                 with no writer ⇒ a scheduled `remember_fact`/`keep` would write unattributed. **0 schedules exist**, so
+                 nothing has. `WRITER.job` is the contract waiting for it. A scheduled SKILL turn is safe (it injects
+                 into the chat route ⇒ chat-tool).
+                 ⛔ PHASE 3 CANNOT SEE RAW SQL — 19 sites bypass the store (2 production, both declaring). The lint is the
+                 only guard there ⇒ keep `writer-not-declared` a defect after the flip.
+             ✅ M2 canary check FIXED (his instruction): it called itself an operator writer and declared none, adding 2
+                 undeclared rows PER SUITE RUN. Now declares operator + act. Count held at 15 across two further runs.
+                 ⛔ Existing unaxised rows NOT repaired.
+             ⏸ BEFORE THE FLIP, his call: ① declare a writer at `schedules/service.js:222` FIRST, then make
+                 `extras.writer ?? null` throw (exact impact: that one site, zero schedules) · ② does a MUTATION of an
+                 existing row (`restore`/`forget`) need a writer, or only an INSERT? · ③ lint severity after the flip ·
+                 ④ how the two deliberately-undeclared tests write once the store refuses.
+             D2/D4  the 8 historical rows + what a ratified permanent unknown looks like in the lint. Not urgent.
              D6 BASIS rename · D7 @ote/memory attribution (my earlier R-C hunks still interleaved with foreign work)
 ATTRIBUTION  ✅ D11–D14 RULED AND SHIPPED. Nothing open but the READING: when candidates appear, OTE classifies them —
              `node test/checks/attribution-live-check.mjs` (denominator + queue) → `--id <uuid>` (spans · sources ·
