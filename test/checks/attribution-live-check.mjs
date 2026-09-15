@@ -9,8 +9,14 @@
 // silence is reported as silence.
 // ⛔ It classifies nothing. It shows a person what the detector matched and where a request COULD have come from
 // (`sources`), and points at test/maintenance/attribution-confirm.mjs for the judgement.
+//
+// ⭐⭐ AND IT ASSERTS THE INSTRUMENT'S OWN INVARIANTS (§0), so it is a CHECK and not only a report. It lives in `checks/`,
+// which the suite globs — and a file there that can only ever pass is the `a-passing-test-can-test-nothing` shape. The
+// invariants below are the ones that would make a future reading a lie: a claim counted with no evidence behind it, a
+// judgement with no human on it, evidence pruned from a row nobody reviewed, or the D11 scope silently widening.
+import { readFileSync } from 'node:fs'
 import { devPg, devSchema } from '../harness.mjs'
-import { CLASSES, VIOLATION_CLASSES, FUTURE_BOUNDARY } from '../../Backend/app/components/attribution-live-detection.js'
+import { CLASSES, VIOLATION_CLASSES, FUTURE_BOUNDARY, DETECTOR_VERSION } from '../../Backend/app/components/attribution-live-detection.js'
 
 const argv = process.argv.slice(2)
 const has = (f) => argv.includes(`--${f}`)
@@ -47,6 +53,38 @@ if (one) {
   console.log(`\nto classify:  node test/maintenance/attribution-confirm.mjs ${c.id} <CLASS> --by <you> [--notes "..."]`)
   await pg.end(); process.exit(0)
 }
+
+// ── §0 · THE INSTRUMENT'S OWN INVARIANTS — ⛔ a failure here means a READING would be a lie ────────────────────────
+const failures = []
+const invariant = async (what, sql, params = []) => {
+  const rows = await q(sql, params)
+  if (rows.length) { failures.push(`${what} — ${rows.length} row(s): ${rows.slice(0, 3).map((r) => r.id ?? JSON.stringify(r)).join(', ')}`) }
+  console.log(`${rows.length ? '✖' : '✓'} ${what}`)
+}
+const scopeCfg = JSON.parse(readFileSync(new URL('../../Backend/config.json', import.meta.url), 'utf8'))?.attribution?.liveDetectionUsernames ?? []
+console.log('══ INSTRUMENT INVARIANTS ══')
+await invariant('every counted claim has a candidate row behind it',
+  `SELECT s.id FROM "${S}".log_attribution_scans s LEFT JOIN "${S}".log_attribution_candidates c ON c.id = s.candidate_id
+     WHERE s.claims_found > 0 AND c.id IS NULL`)
+await invariant('every candidate is counted by a scan row',
+  `SELECT c.id FROM "${S}".log_attribution_candidates c LEFT JOIN "${S}".log_attribution_scans s ON s.candidate_id = c.id WHERE s.id IS NULL`)
+await invariant('D13 · no judgement without a named human and a time',
+  `SELECT id FROM "${S}".log_attribution_candidates
+     WHERE (classification IS NOT NULL) <> (confirmed_by IS NOT NULL) OR (classification IS NOT NULL) <> (confirmed_at IS NOT NULL)`)
+await invariant('D13 · no classification outside the six',
+  `SELECT id FROM "${S}".log_attribution_candidates WHERE classification IS NOT NULL AND NOT (classification = ANY($1))`, [[...CLASSES]])
+await invariant('D12 · evidence is never pruned from a candidate nobody reviewed',
+  `SELECT id FROM "${S}".log_attribution_candidates WHERE evidence_pruned_at IS NOT NULL AND classification IS NULL`)
+await invariant('D12 · a row marked pruned really has no frozen copies left',
+  `SELECT id FROM "${S}".log_attribution_candidates WHERE evidence_pruned_at IS NOT NULL AND (surrounding IS NOT NULL OR composed IS NOT NULL)`)
+await invariant('D12 · an unreviewed candidate still has its evidence',
+  `SELECT id FROM "${S}".log_attribution_candidates WHERE classification IS NULL AND (surrounding IS NULL OR composed IS NULL)`)
+await invariant(`D11 · nothing was scanned outside the configured scope (${scopeCfg.join(', ') || 'EMPTY'})`,
+  `SELECT id FROM "${S}".log_attribution_scans WHERE NOT (username = ANY($1))`, [scopeCfg])
+await invariant('every row carries a detector version',
+  `SELECT id FROM "${S}".log_attribution_scans WHERE detector_version IS NULL OR detector_version = ''`)
+const versions = (await q(`SELECT DISTINCT detector_version AS v FROM "${S}".log_attribution_scans`)).map((r) => r.v)
+if (versions.length && !versions.includes(DETECTOR_VERSION)) console.log(`⚠ the running detector is v${DETECTOR_VERSION}; rows on disk: ${versions.join(', ')} — readings must not be pooled across versions`)
 
 // ── D14 · THE DENOMINATOR ─────────────────────────────────────────────────────────────────────────────────────────
 const [d] = await q(`
@@ -99,3 +137,5 @@ for (const c of rows) {
 }
 if (!rows.length) console.log('  none')
 await pg.end()
+if (failures.length) { console.error(`\n⛔ ${failures.length} INSTRUMENT INVARIANT(S) FAILED — a reading taken now would be a lie:\n  ${failures.join('\n  ')}`); process.exit(1) }
+console.log('\nALL — instrument invariants hold; the numbers above mean what they say')
