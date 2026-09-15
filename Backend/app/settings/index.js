@@ -506,6 +506,22 @@ const SETTING_DEFS = {
   // Steering: let a user send a mid-generation message the in-flight reply reacts to.
   // B2 (immediate): the running round is cut on arrival — the partial answer is kept
   // as a visible step and the reply continues reacting to the steer. Default OFF.
+  // ── ⭐⭐ ATTRIBUTION LIVE DETECTION (D11–D14, 2026-09-15) — a MEASUREMENT instrument, ⛔ not a gate ──────────────────
+  'attribution.liveDetection': {
+    fromConfig: (c) => c?.attribution?.liveDetection ?? false,
+    validate: (v) => typeof v === 'boolean',
+    describe: "Scan every in-scope assistant turn, AFTER it is persisted, with the advisory attribution detector (does her reasoning or reply CLAIM she was given an instruction?). A match freezes the evidence a human needs — the spans with the surface they appeared on, the surrounding conversation, the composed context blocks, and a `sources` pre-work listing every place a request could have come from — into `log_attribution_candidates`; every scanned turn writes a `log_attribution_scans` row so '0 violations' is never reported without its denominator. ⭐ WHY: three constructed corpora (0/40 · 0/24 · 0/24) could not elicit the misattribution production produced once, and that one was found by a human reading a real conversation. ⛔ Advisory: alters no reply, blocks no turn, sets no flag, classifies nothing — a person assigns one of six classes (REQ_NOW · REQ_THIS_CONV · REQ_PRIOR_CONV · TOPIC_ONLY · OWN_INFERENCE · NO_SOURCE) through the confirm script, and only a confirmed row is a violation. ⛔ Infers no cause from a hit. Fire-and-forget off the hot path; a scan failure is recorded as an error row, never surfaced to the turn. DEFAULT OFF.",
+  },
+  'attribution.liveDetectionUsernames': {
+    fromConfig: (c) => c?.attribution?.liveDetectionUsernames ?? ['agent_dev'],
+    validate: (v) => Array.isArray(v) && v.every((s) => typeof s === 'string' && s.length > 0),
+    describe: "D11 · WHICH ACCOUNTS' TURNS ARE SCANNED. Initially agent_dev plus Ote's room; kept narrow on purpose and widened only if the evidence warrants it. Passive observation of traffic that exists anyway — ⛔ never a reason to send experiment traffic into a room.",
+  },
+  'attribution.evidenceRetentionDays': {
+    fromConfig: (c) => c?.attribution?.evidenceRetentionDays ?? 90,
+    validate: (v) => Number.isInteger(v) && v >= 1 && v <= 3650,
+    describe: "D12 · THE EVIDENCE LIFECYCLE. A candidate's bulky frozen copies (`surrounding`, `composed`) are pruned this many days AFTER a human confirmed it; the spans, the `sources` pre-work and the judgement stay. Unreviewed candidates are never pruned (the evidence is the only thing the row is for) and no row is ever deleted — the frozen copies are evidence for a confirmation, ⛔ not a new memory store. Applied by test/maintenance/attribution-evidence-prune.mjs.",
+  },
   'chat.steerEnabled': {
     fromConfig: (c) => c?.chat?.steerEnabled ?? false,
     validate: (v) => typeof v === 'boolean',

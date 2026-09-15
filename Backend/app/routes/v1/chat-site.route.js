@@ -11,6 +11,8 @@ import { capsOf, inferCapsFromName } from '../../adapters/model-caps.js'
 import { capsForModel, capsVerdictForModel, mergeCapVerdict, SPECIALIST_CAPS } from '../../adapters/capabilities.js'
 import { extractFile, MAX_FILES } from '../../files/extract.js'
 import { toolDefinitions, runTool, buildToolContext, resolveSkill, listSkills, memoryToolNames, attachLogger, attachToolAudit } from '../../components/runtime.js'
+// ⭐ Attribution live detection (D11–D14): an advisory MEASUREMENT instrument that scans the persisted turn — never a gate.
+import { recordAttributionTurn, inScope as attributionInScope } from '../../components/attribution-live-detection.js'
 import { readSkillFile } from '../../components/skill-store.js'
 // ⭐ S1: the turn's toolset is assembled in ONE place, for the bound Skill and the triggered one alike.
 import { assembleToolDefs, MEMORY_WRITE_TOOLS } from '../../chat/tool-defs.js'
@@ -3468,6 +3470,31 @@ export default async function chatSiteRoutes(fastify) {
         // "ran as X" trace — bound OR model-triggered (use_skill) alike
         skill: (activeSkill || dynamicSkill) ? { id: (activeSkill || dynamicSkill).id, name: (activeSkill || dynamicSkill).name } : null,
       })
+
+      // ── ⭐⭐ ATTRIBUTION LIVE DETECTION (D11–D14, 2026-09-15) — a MEASUREMENT instrument, ⛔ not a gate ──────────
+      //
+      // Three constructed corpora (0/40 · 0/24 · 0/24) could not elicit the misattribution production produced once
+      // ("The user asked me to check all things in my memory", conversation ca672514); the one occurrence was found by
+      // a human reading a real conversation. So the instrument lives HERE, after the turn is persisted: the advisory
+      // detector reads her reasoning and reply, a match freezes the evidence a person needs (`log_attribution_candidates`),
+      // and every in-scope turn writes its denominator row (`log_attribution_scans`) so "0" is never reported bare.
+      // ⛔ Fire-and-forget, fail-soft, alters nothing: no reply, no flag, no memory. ⛔ Classifies nothing — a human does.
+      // ⛔ Infers no cause from a hit. Scope (D11) is the configured username list, initially agent_dev + Ote's room.
+      if (getSetting(fastify.config, 'attribution.liveDetection') === true
+        && attributionInScope(request.user?.username, getSetting(fastify.config, 'attribution.liveDetectionUsernames'))) {
+        recordAttributionTurn(fastify, {
+          username: request.user?.username, conversationId: convo.id, assistantMessageId: saved.id, userMessageId: lastUserMsg?.id ?? null,
+          model: modelId, settings: { reasoning: settings?.reasoning ?? null, useMemory: settings?.useMemory ?? null, toolsOn },
+          reasoning: reasoning || '', reply: answer || '',
+          history: history.map((m) => ({ id: m.id, rolling_id: m.rolling_id, role: m.role, content: m.content, reasoning: m.reasoning ?? null, tool_calls: m.tool_calls ?? null })),
+          blocks: {
+            cognition: sysInputs?.cognition ?? null, scopeFacts: sysInputs?.scopeFacts ?? null,
+            workingMemory: keptWorking ?? null, recall: keptRecall ?? [], conversationEvidence: keptConversation ?? [],
+          },
+          parts: composed?.parts ?? [], toolset: toolsetTrace ?? null,
+          toolCalls: toolActivity.map((t) => ({ name: t.name, args: t.args })),
+        }).catch(() => {})
+      }
 
       // Naming a NEW chat is a whole extra model round-trip (generateTitle). In STREAM mode we
       // must NOT block the `done` event on it: the client only clears its "generating" state

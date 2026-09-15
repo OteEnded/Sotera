@@ -56,6 +56,8 @@ import define_log_user_changes from "./log_user_changes.model.js";
 import define_log_trigger_job_runs from "./log_trigger_job_runs.model.js";
 import define_log_config_changes from "./log_config_changes.model.js";
 import define_log_memory_changes from "./log_memory_changes.model.js";
+import define_log_attribution_scans from "./log_attribution_scans.model.js";
+import define_log_attribution_candidates from "./log_attribution_candidates.model.js";
 
 // NOTE: THREE real tables have NO model here, all raw SQL only, and each one is deliberate:
 //   · txn_message_embeddings   (app/components/conversation-search.js)
@@ -241,6 +243,11 @@ export default function initModels(sequelize, schema) {
     // volume, not install-wide configuration — see the model file for the incident that forced it.
     const log_memory_changes = def(define_log_memory_changes);
 
+    // ⭐ Attribution live detection (050, D11–D14): the scan DENOMINATOR and the frozen-evidence CANDIDATES a human
+    // classifies. Advisory instrument — nothing reads these into a prompt, nothing gates on them.
+    const log_attribution_scans = def(define_log_attribution_scans);
+    const log_attribution_candidates = def(define_log_attribution_candidates);
+
     // ── associations ──────────────────────────────────────────────────────────────────────────────
     // The `as:` aliases below are QUERY-level names used by every `include:` in the app. They are not
     // table names and were deliberately left untouched by the rename.
@@ -341,6 +348,8 @@ export default function initModels(sequelize, schema) {
             log_trigger_job_runs,
             log_config_changes,
             log_memory_changes,
+            log_attribution_scans,
+            log_attribution_candidates,
         },
         choices,
     };

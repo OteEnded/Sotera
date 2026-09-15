@@ -93,11 +93,30 @@ memory?"*), and that line sat in her recollection block on **6 of 6 turns** of t
 splits: a real request DISPLACED IN TIME (the TEMPORAL axis) is a different case from a topic upgraded or a fabrication.
 The one-line ablation (T0-abl) produced the same zero, so it decided nothing.
 
-⭐ **OTE'S RULING NOW APPLIES: ⛔ no further constructed corpus.** Live-conversation detection is the PRIMARY instrument —
-designed in `PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md` (six human classes incl. REQ_PRIOR_CONV; frozen surrounding
-conversation; scan denominator; human confirmation before anything counts; no causality from a hit). ⏸ **NOT IMPLEMENTED —
-stopped at the gate.** ④ (effort:low) is recorded as the only single variable still separating replay from production,
-to be varied ONLY if a constructed reproduction is ever wanted again.
+⭐ **OTE'S RULING: ⛔ no further constructed corpus.** Live-conversation detection is the PRIMARY instrument, and as of
+2026-09-15 17:00 it is ✅ **BUILT AND RUNNING** — D11–D14 ruled and implemented; `:8210` restarted on the build (PID 26564).
+`PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md` §10 · `MEASUREMENT_SOTERA_ATTRIBUTION_LIVE_DETECTION_FIRST.md`.
+
+```
+D11 scope  agent_dev + Ote's room (attribution.liveDetectionUsernames) — narrow on purpose
+D12 frozen evidence YES, with a LIFECYCLE: surrounding+composed pruned 90d AFTER confirmation; spans/sources/judgement
+    kept; ⛔ unreviewed NEVER pruned; ⛔ no row ever deleted. ⛔ It is evidence for a confirmation, NOT a new memory store.
+D13 confirmer OTE. A DB CHECK makes class · person · time travel together ⇒ a classification cannot exist without a
+    named human. Mr C prepares the candidate and never becomes the authority on what Ote asked for.
+D14 denominator TABLE. ⛔ never a bare "0 violations": observed / scanned / errors / claims / confirmed / unreviewed.
+six classes REQ_NOW · REQ_THIS_CONV · REQ_PRIOR_CONV · TOPIC_ONLY · OWN_INFERENCE · NO_SOURCE
+⚠ FUTURE BOUNDARY, carried in CODE (`FUTURE_BOUNDARY`, asserted + printed + warned on): a TRUTHFUL attribution of a prior
+  request vs USING a prior request as CURRENT authorization. ⛔ Not a 7th class yet — recorded so it is never collapsed.
+```
+
+⭐ **FIRST READING: 4 turns observed · 4 scanned · 0 errors · 0 candidates · 0 confirmed.** ⛔ Four ordinary agent_dev turns say
+NOTHING about the phenomenon; this reading is that the INSTRUMENT RUNS. Proven before it counted: a positive control that
+CROSSES PERSISTENCE (the recorded incident through the real models → candidate+scan rows, spans keep their `reasoning`
+surface, the 25-August request appears in `sources`, the DB refuses an unconfirmed or unknown class; control rows removed),
+ONE detector definition (test lib re-exports the component; identity asserted), migration↔model column parity, and the
+route hook pinned as after-persistence / gated / never awaited. unit 748/748.
+④ (effort:low) stays the only single variable separating replay from production — varied ONLY if a constructed
+reproduction is ever wanted again.
 
 ---
 
@@ -125,10 +144,10 @@ to be varied ONLY if a constructed reproduction is ever wanted again.
 # 0-C · LIVE STATE — 2026-09-15
 
 ```
-:8210 PID 25012 (Sotera — restarted 09-15 after the 06:17 reboot, Ote authorised) · :8201 PID 28072 (OLS, HIS, untouched)
-:8220 another project's, untouched · :54322 pg · migrations through 049 · live reflection generation = 3
+:8210 PID 26564 (Sotera — restarted 09-15 17:00 onto the live-detection build) · :8201 PID 28072 (OLS, HIS, untouched)
+:8220 another project's, untouched · :54322 pg · migrations through 050 · live reflection generation = 3
 suite 79/83 → the 4 reds triaged: 2 were LIVE-TRAFFIC contention (pass standalone), 1 was the known D5 snapshot drift,
-1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 736/736 (09-15 late).
+1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 748/748 (09-15 17:00).
 natural-trajectory replay preserved: test/results/attribution-natural-trajectory.jsonl (24 rows) · its fixture holds Ote's
 own conversation + the memory list she received, BY HIS RULING, in its own file so it can be excluded by name
 memories 160+ · axes: writer set on 129 · 44 unaxised (33 ratified unknown + 11 leaked, agent_dev only, ⛔ none of Ote's)
@@ -139,7 +158,10 @@ experiment assets PRESERVED: 40 Gen-4 clones/passes · 60 three-arm clones/passe
 **BUILT THIS CHECKPOINT:** the four provenance axes + audited backfill · D1(b) writer seam · reflection generations 5/6 and
 the three-arm decomposition · the F4 blind test (HTML, chat-bubble source, JSON save) · F1 reply-language rule · F2
 attribution-principle decoupling · the attribution detector + successor corpus/scorer/runner · the natural-trajectory
-extractor (record → fixture), assembly lib, red-proof (9) and replay runner (`attribution-natural-run.mjs`, `--count` = truncation check).
+extractor (record → fixture), assembly lib, red-proof (9) and replay runner (`attribution-natural-run.mjs`, `--count` = truncation check)
+· ⭐ THE LIVE DETECTION INSTRUMENT: migration 050 (2 log tables, 5 CHECKs), the two models, `attribution-detector.js` (the ONE
+definition), `attribution-live-detection.js` (pre-work · candidate · hook · prune), the route hook, 12 unit tests, the
+persistence-crossing positive control, `attribution-live-check.mjs` and the confirm/prune maintenance scripts.
 
 # 0-D · ⛔⛔ FENCES
 
@@ -148,7 +170,8 @@ production reflection = GEN 3 · 40 Gen-4 + 60 three-arm runs and clones PRESERV
 UNKNOWN and UNREPAIRED · episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 search snapshot UNTOUCHED ·
 BASIS rename DEFERRED · ⛔ no provenance inference or repair · ⛔ no weakening of occasion/reachability/provenance separation
 ⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · ⛔ no pilot-threshold edit · F3 PARKED
-⛔ NO THIRD CONSTRUCTED CORPUS (ruled 09-15) · ⛔ the detector stays ADVISORY, never a gate · ⛔ live instrument NOT built until D11–D14
+⛔ NO THIRD CONSTRUCTED CORPUS (ruled 09-15) · ⛔ the detector stays ADVISORY, ⛔ NEVER a behavioural gate
+⛔ a CANDIDATE is not a violation — only a HUMAN-CONFIRMED class is · ⛔ Mr C never classifies · ⛔ frozen evidence is not a memory store
 ⛔ no causality inferred from any live hit — presence is recorded, cause is not · ⛔ the natural-trajectory set is not enlarged
 ⛔ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ ③ (working-memory vs transcript) UNTOUCHED
 ⛔ never test on Ote's account — agent_dev, zz_ fixtures, removed after · ⛔ never restart :8210 unasked · :8201 is HIS
@@ -165,10 +188,10 @@ PROVENANCE   D3′ close the Gen-4 arc (⭐ recommend REJECT the instrument, KEE
              D2/D4  the 8 historical rows (an unambiguous 20-min window link exists) + what a ratified permanent unknown
                  should look like in the lint. Not urgent.
              D6 BASIS rename · D7 @ote/memory attribution (my earlier R-C hunks still interleaved with foreign work)
-ATTRIBUTION  ⛔ no third corpus (ruled). The LIVE instrument is designed, not built — `PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md`:
-             D11 scope (every room, or agent_dev + his?) · D12 retention of the frozen surrounding-conversation copy ·
-             D13 who confirms · D14 scan-denominator table vs derived N. ⭐ GO on those = implement (migration 050 + hook +
-             check), nothing else changes. ④ effort:low stays parked as the one remaining single variable.
+ATTRIBUTION  ✅ D11–D14 RULED AND SHIPPED. Nothing open but the READING: when candidates appear, OTE classifies them —
+             `node test/checks/attribution-live-check.mjs` (denominator + queue) → `--id <uuid>` (spans · sources ·
+             surrounding) → `node test/maintenance/attribution-confirm.mjs <id> <CLASS> --by ote [--notes]`.
+             ⛔ Nothing is a violation until he does. ④ effort:low parked. Widening D11 scope = evidence-led, his call.
 PERF         ⏸ TO DO (Ote, 09-15): prefill / TTFT — `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (his secondary-dev
              lane). Finding: `cognition` sits in the LEADING system message ahead of ~12.7k tok of tool schemas and moves
              every turn ⇒ prefix reuse lands 7.9%; ollama reuse itself measured at 100×. Proposed: config-gated arm

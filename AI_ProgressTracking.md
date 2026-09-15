@@ -8739,3 +8739,44 @@ as the truncation check. Unit 736/736.
 **Also logged as a TO-DO at Ote's request:** prefill/TTFT — his `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (cognition
 block in the leading system message busts the prefix cache every turn; 7.9% hit rate; proposed config-gated
 `memory.cognitionInTail` arm, default OFF; ⛔ not a pure perf knob). Recorded in §0-E; nothing done.
+
+## 2026-09-15 17:00 (+07:00) — ✅ ATTRIBUTION LIVE DETECTION SHIPPED (D11–D14) · first reading: 4 scanned, 0 candidates
+
+Ote ruled all four decisions and asked for the instrumentation only, with the frozen-evidence lifecycle explicit, then a stop
+and a report. `PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md` §10 · `MEASUREMENT_SOTERA_ATTRIBUTION_LIVE_DETECTION_FIRST.md`.
+
+**Built** — migration **050** (`log_attribution_scans` 14 cols · `log_attribution_candidates` 23 cols · 5 CHECKs, 0 rows) ·
+both models, registered · `Backend/app/components/attribution-detector.js` — **the ONE detector definition**, moved from the
+test lib UNCHANGED, `DETECTOR_VERSION = '1'` stamped on every row, and `test/lib/attribution-claims.mjs` now re-exports it
+(function identity asserted, so the three corpora and the live instrument can never fire differently) ·
+`attribution-live-detection.js` (remembered-speech parser · the `sources` pre-work · candidate builder · the hook · the
+prune) · the **route hook** after the assistant row is persisted, gated on `attribution.liveDetection` + the D11 username
+list, never awaited, `.catch(() => {})` · three settings registered · `attribution-live-check.mjs` (the D14 report and the
+D13 review surface, `--id` for one candidate in full) · `attribution-confirm.mjs` · `attribution-evidence-prune.mjs`.
+
+**D11** agent_dev + Ote's room. **D12** frozen copies YES, lifecycle explicit: `surrounding`+`composed` pruned 90 days AFTER
+confirmation, spans/sources/judgement kept, ⛔ unreviewed never pruned, ⛔ nothing deleted, run deliberately. **D13** Ote —
+a DB CHECK makes class · person · time travel together, so a classification cannot exist without a named human; Mr C
+prepares and never decides. **D14** explicit table; the check never prints a bare zero. Six classes kept; the future
+boundary (truthful prior-request attribution **vs** using a prior request as current authorization) is carried in CODE as
+`FUTURE_BOUNDARY` — asserted by a test, printed by the review surface, warned on by the confirm script — ⛔ not a 7th class.
+
+**Proven before the first reading counted:** 12 unit tests (the incident produces a candidate with spans on the REASONING
+surface and none on the reply; the pre-work finds the 25-August request in the remembered speech AND the literal question
+earlier in the conversation; scope; classes; migration↔model column parity; the route hook's position/gate/fire-and-forget;
+a throwing scan recorded as an error row) **plus** `attribution-live-control.mjs` — a positive control that **crosses
+persistence**: the recorded incident through the REAL models → linked candidate+scan rows, spans keep their surface, the
+frozen copy and composed block come back verbatim, the row is unclassified, and the database REFUSES a classification
+without a confirmer and refuses a class outside the six. Control rows removed (`zz_control`). Unit **748/748**.
+
+**First reading** — `:8210` restarted onto the build (PID 25012 → **26564**, health 200 in 1 s; OLS :8201 untouched), four
+ordinary agent_dev turns through the real route: **observed 4 · scanned 4 · errors 0 · candidate claims 0 · confirmed 0 ·
+unreviewed 0.** ⛔ Four turns say nothing about the phenomenon — the reading is that the instrument runs. Detector silence
+is silence.
+
+**Two build-time corrections, recorded:** 050 first ran without `SET search_path` and created the tables in `public` (moved
+with `ALTER TABLE … SET SCHEMA`, line added — every migration since 040 has it); and Sequelize `sync` re-created the models'
+declared indexes under its own names at boot (3 duplicates dropped, `indexes` removed from both models — migration is truth).
+
+⛔ Fences held: F1/F2 shipped and unreworded · no ranking or salience change · the detector is advisory and gates nothing ·
+no third corpus · no causality inferred · F3 parked · no provenance repair · no D3′/D8/D9 work.
