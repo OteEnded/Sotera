@@ -8509,3 +8509,30 @@ applies: **a salience/mechanism problem, ⛔ not a wording problem** — the sam
 (`keep()` ships 38/38, unprompted calls zero). ⛔ Do NOT reword the field.
 
 ⏸ Production on Gen 3. 100 passes and their clones (40 + 60) preserved. Nothing adopted.
+
+## 2026-09-15 (+07:00) — ⚠️ INVESTIGATION (read-only) · the Thai flip + the unasked memory audit · `INVESTIGATION_SOTERA_THAI_FLIP_AND_MEMORY_DUMP.md`
+
+Ote reported conversation `ca672514`: she answered a 60-char English aside in 2,198 chars of THAI, after auditing her whole
+memory store. Two defects, one non-defect.
+
+⭐⭐ **THE SYSTEM PROMPT IS PART-THAI ON EVERY TURN FOR EVERY USER.** `DEFAULT_ASSISTANT_IDENTITY` (context-composer.js)
+unconditionally carries *"in Thai that means ฉัน (ดิฉัน when formal, หนู…) and ค่ะ/คะ rather than ผม/ครับ"*. Plus 3 of his
+live memories carry Thai — `069da304` (importance **10**, hot: โซเทร่า, พ่อ) and `470dff58` (importance **8**, hot: ป้า) —
+plus his own code-switch (งานประจำ) 3 turns earlier. ⭐ And **NO reply-language rule exists anywhere** — searched; the guard
+is ABSENT, ⛔ not unfed. ⇒ unguarded accumulation, which is why she stayed English for two turns and then flipped. Third
+instance of `memory-cognition-layer`'s *"she leaks the vocabulary we hand her"* — the first two got guards, language never did.
+
+⚠️⚠️ **AND THE WORSE HALF — A FABRICATED ATTRIBUTION.** Her recorded reasoning: *"**The user asked me to check all things in
+my memory.**"* He never asked; he said *"unc C and unc cogito also working on sotera with me"*. The driver is visible: the
+hot importance-8 memory says *"the user is currently focused on improving my memory system infrastructure"*, so a MENTION of
+the project became an INSTRUCTION about it. Same family as the fixture corpus's *"invented procedural justification"* and
+`could-not-establish-is-not-established`: an inference stated as something received.
+
+✅ **NON-defect:** the 3 `list_memories` calls are ONE survey of the three kinds (same second, identical 31-byte arg shape =
+`{"kind":"<8 letters>","limit":…}`). ⛔ Don't chase. ⓘ No memory was written in this conversation.
+
+⏸ **Fixes PROPOSED, ⛔ not implemented** (both are L1/L2 semantic — Ote's call): **F1** state the missing reply-language rule
++ make the Thai guidance CONDITIONAL (that half alone removes a standing Thai bias from every user's prompt); **F2** a topic
+in memory is not a request — never assert the user asked for what he did not ask for, with a way to OBSERVE violations, not
+just a sentence; **F3** (low) proportionality on whole-store inventories — she did self-limit, so it partly works.
+⭐ Live data point for gate **D10**: memory content steering ACTION SELECTION, not just phrasing.
