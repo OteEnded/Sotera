@@ -4,8 +4,23 @@
 // differently: that is empirical, measured by the 24-scenario corpus, and reported as a rate with a
 // stated N. A unit test cannot know whether a sentence works.
 //
-// The load-bearing property here is that the treatment is OFF by default, so nothing about live
-// behaviour changed when it landed.
+// ⚠️⚠️ THE BOUNDARY MOVED ON 2026-09-15 — read this before trusting the assertions below.
+//
+// This file used to pin one load-bearing property: *the treatment is OFF by default, so nothing about live behaviour
+// changed when it landed.* That was true of all THREE components — attribution principle, precedence, note reframing.
+//
+// ⭐ The attribution principle now ships UNCONDITIONALLY (Ote's F2 ruling). The cause was a production failure on
+// 2026-09-15: she wrote *"The user asked me to check all things in my memory"* when he had said only *"unc C and unc
+// cogito also working on sotera with me"* — and the rule forbidding exactly that had never been in a prompt, because it
+// sat behind this flag. ⇒ the principle left the treatment; `precedence` and the note reframing did NOT.
+//
+// ⭐⭐ AND THE EXPERIMENT'S H1 INTERPRETATION IS RETIRED, ⛔ NOT ITS RESULTS. `ANALYSIS_LAYER_ATTRIBUTION_RESULTS_V1.md`
+// reported H1 misattribution 0/40 at baseline and read it as *"an absence of the phenomenon."* The 2026-09-15 incident is
+// the **first observed positive H1 case** on the same model — so the corpus failed to elicit a phenomenon that exists,
+// which is a fact about the corpus, ⛔ not about the model. The old numbers stand exactly as recorded; only the
+// *"absence"* reading is withdrawn. See `GATE_SOTERA_ATTRIBUTION_EXPERIMENT_CONFLICT.md` and the results doc's addendum.
+//
+// ⇒ what this file pins NOW: the principle is always present · precedence stays gated · the note reframing stays gated.
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -23,14 +38,23 @@ const TURN = {
   personaNotes: ['When structuring multi-step tasks, anticipate a four-round workflow.'],
 }
 
-test('⭐ OFF BY DEFAULT — the treatment adds nothing unless asked for', () => {
+test('⭐ THE NEW BOUNDARY — the principle always ships; the REST of the treatment is still off by default', () => {
   const off = composeSystemContext(TURN)
   const keys = off.parts.map((p) => p.key)
-  assert.ok(!keys.includes('attribution-principle'), 'principle must not appear by default')
-  assert.ok(!keys.includes('precedence'), 'precedence must not appear by default')
-  // and the note block is still the baseline wording
+  // ⭐ CHANGED 2026-09-15: this used to assert the principle was ABSENT. It ships now — that is F2.
+  assert.ok(keys.includes('attribution-principle'), 'the attribution principle must be present with the flag OFF')
+  // ⛔ and everything else the treatment carried is still gated — F2 must not have shipped P2
+  assert.ok(!keys.includes('precedence'), 'precedence must NOT appear by default — it is unshipped P2 behaviour')
+  // the note block is still the BASELINE wording; the treatment's reframing stays behind the flag
   assert.match(off.preHistory.find((m) => /Notes you have kept/.test(m.content)).content,
     /they are not the user's instructions/)
+})
+
+test('⛔ the decoupling moved exactly ONE part — flag-on minus precedence is the flag-off render', () => {
+  // The guard against F2 having quietly widened: turning the flag on may add `precedence` and nothing else.
+  const off = composeSystemContext(TURN).parts.map((p) => p.key)
+  const on = composeSystemContext({ ...TURN, layerAuthority: true }).parts.map((p) => p.key)
+  assert.deepEqual(on.filter((k) => k !== 'precedence'), off)
 })
 
 test('the default render is byte-identical to explicitly disabling the treatment', () => {
@@ -40,6 +64,8 @@ test('the default render is byte-identical to explicitly disabling the treatment
   assert.deepEqual(implicit.preHistory, explicit.preHistory)
 })
 
+// ⓘ Since 2026-09-15 the principle is present in BOTH renders; what turning the flag on still adds is `precedence`.
+// This test is kept whole because it also pins the authority/scope classification of both parts, which did not change.
 test('ON — the principle and the precedence statement both enter the prefix', () => {
   const on = composeSystemContext({ ...TURN, layerAuthority: true })
   const byKey = Object.fromEntries(on.parts.map((p) => [p.key, p]))
