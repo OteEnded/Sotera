@@ -1,167 +1,84 @@
 # AI_CarryOn — Sotera
 
-**Checkpoint 2026-09-05 11:45 (+07:00).** ⭐ Read §0-A first; everything below §0-F is history.
+**Checkpoint 2026-09-15 (+07:00).** ⭐ Read §0-A first; §0-B..§0-E are the live state; everything below §0-F is history.
 
 ---
 
-# 0-A · ⏸ TWO ARCS ARE OPEN. NEITHER IS BLOCKED.
+# 0-A · ⏸ WHAT IS OPEN. ⛔ NOTHING IS BLOCKED.
 
 ## ⓐ M2 GOVERNANCE — `MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`
 
-⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled"
-(it is **enabled**; 83 of 84 slots are NOT-IN-SCOPE, which is different) · ⛔ NOT "waiting on more tests".
+⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled" (it is **enabled**;
+83 of 84 slots are NOT-IN-SCOPE, which is different). ⭐⭐ **THE MECHANISM BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE
+TWO CLAIMS.** The first is TRUE; the second is ⛔ deliberately FALSE until production evidence exists. ⛔ Never merge them.
 
-> ⭐⭐ **THE MECHANISM BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE TWO DIFFERENT CLAIMS.**
-> The first is TRUE; the second is ⛔ DELIBERATELY FALSE until production evidence exists. ⛔ Never merge them.
+⚠️⚠️ The blocker is ⛔ NOT corpus scarcity: **no non-operator writer can produce an ALLOWED governed UPDATE**, because
+compliance needs the slot's question KEY and nothing exposes one. ⇒ M2's operational closure is **COUPLED to the deferred
+governance-READ decision**. ⛔ Not reopened.
 
-⚠️⚠️ **AND THE BLOCKER IS NOT CORPUS SCARCITY.** Even with a perfect slot, **no non-operator writer can
-produce an ALLOWED governed UPDATE**: compliance needs the slot's question KEY, and the model has no way to
-learn one — no read exposes it, the refusal deliberately withholds it, the tool says omit rather than guess.
-⇒ ⭐⭐⭐ **M2's operational closure is COUPLED to the deferred governance-READ decision.** ⛔ Not reopened.
+## ⓑ ✅ THE PROVENANCE ARC — SHIPPED AND LIVE
 
-⭐ Eligibility is now OBSERVED, not remembered: `memory-bind-eligibility-host.js` rides the boot+daily cron
-beside the memory lint, and `test/maintenance/audit-bind-candidates.mjs` renders the same function.
-Today: bound=1 · newly-eligible=0 · excluded=3 · already-ruled-on=2 (each with its date and reason).
-
-## ⓑ THE 2026-09-04 RECALL INCIDENT — four defects, worked INDEPENDENTLY
-
-She answered *"here's what we talked about today"* with a list that was mostly ten days old.
+The 2026-09-04 recall incident is closed. All four defects resolved; the four axes shipped 2026-09-05 (migration 049),
+historical corpus classified, production activated. Detail: `REPORT_SOTERA_PROVENANCE_AXES_LIFECYCLE.md` (verdict PASS),
+and `provenance-axes-shipped` in memory.
 
 ```
-④ relayed speech became Ote's identity                 ✅ CLOSED — proved 14/14 · two rows retired 13/13
-① no dates on memories about him                       ✅ CLOSED — when:{date,basis} shipped, 21/21
-② the 09-04 recap was a JOIN of transcript + memory      ✅ R-C RATIFIED + IMPLEMENTED 09-05 · ⭐⭐⭐ PROVENANCE AXES SHIPPED 09-05 (PASS)
-③ the working-memory summary outranked the transcript  ⏸ AFTER ② — ⛔ untouched
+OCCASION  (act_kind, act_id) — turn · revisit:<ledger id> · dreaming · operator · ingest · record. Pass writers
+          FAIL CLOSED without an act (NO_ACT). ⇒ the 6539 collision dissolved: two act keys, one legacy pointer.
+REACH     turn | range | document | none. `reviewed` is COMPUTED at read — "reachable but unreviewed" is first-class.
+PROV      0..n typed refs in txn_memory_evidence. Speaker/date resolved FROM THE TURN, never stored. A failed citation
+          is RECORDED as failed and the item still stands (I10). Reflection rows are `not established` BY DESIGN.
+TEMPORAL  `said` ⇐ established account-holder turn refs on ONE day. 89 pointer rows → 43; **46 withdrawn** as projected.
+⭐ THE §0 RULE: no axis is derived from another. The only bridge is a WRITER-DECLARED coincidence, true by mechanism.
 ```
 
-⇒ ⭐⭐⭐ **② IS DERIVED AND THE PREMISE DID NOT SURVIVE — `DERIVATION_SOTERA_TEMPORAL_READ.md`.**
+⚠️ **D1(b) shipped 2026-09-15 after a defect in that delivery:** only **6 of 13 declared writers had a caller**. An
+undeclared write is now ADMITTED but recorded LOUDLY (store warn + `writer-not-declared` lint **defect**, which EXCLUDES the
+33 rows the backfill ratified as unknown and reports the **11** a live path leaked). `lesson.commit`/`lesson.decline` — which
+wrote **raw `INSERT INTO txn_memories`**, bypassing the store and every gate in it — now declare writer/act/reach.
+⛔ Phase 3 (REFUSE an undeclared write) is NOT built; it waits on D8+D9.
+
+## ⓒ ⏸ REFLECTION GENERATION 4 — **ITERATE**, production stays Gen 3
+
+Two experiments, 100 passes, both recorded. `MEASUREMENT_SOTERA_REFLECTION_GENERATION_4_F4.md` · `…_ARMS.md`.
 
 ```
-PROVED   removing "today" from the query returns the IDENTICAL 8 memories ⇒ it is a topic word
-PROVED   no temporal parameter exists on ANY of the 9 memory tools (additionalProperties:false)
-⭐⭐⭐    the 09-04 incident was a JOIN, ⛔ not a silent search: she MERGED the live transcript
-         (genuinely today) with TWO 26-Aug instrument memories under one heading "what we talked about today"
-         (⚠️ corrected 09-05: the Rome-as-metaphor item WAS said that day, at 22:38 — not the 10-Aug memory)
-⭐⭐⭐    the temporal instrument ALREADY EXISTS — `retrieve_conversations` with `between:` /
-         `in:"here"`, 5 successful `between` calls in production. She did not reach for it.
-⭐⭐      `list_memories` + `when` ALREADY answers all five of his probes exactly (34 rows, all dated)
-⚠️⚠️     THREE CLOCKS: the ranker's `recency` is `last_access` — drifted up to 25.8 days off both
-⚠️       memory is a ~4% sample of the conversation, 0% on 5 of 11 days ⇒ a perfect date filter on
-         MEMORY still answers "what did we talk about today" wrongly
+F4 blind pairing (Ote + 2 raters, 20/20 agreement): Gen 4 preferred 5 · Gen 3 preferred 2 · no preference 13. NOT tripped
+   ⚠️ CONFOUNDED: the preferred side retained MORE in 7 of 7 contested pairs; only ONE pair had content on both sides.
+3-arm decomposition: ⛔ INCONCLUSIVE. The CONTROL DID NOT REPRODUCE (8 retains then 2 on identical material) ⇒ retains/pass
+   is unusable and Gen 4's 0.40→0.70 headline is downgraded to possibly-variance. Breadth held: control 2/20 · N 3/20 ·
+   C 2/20 · gen4 7/20 — neither half reproduces the whole.
+⭐⭐⭐ THE ONE ROBUST RESULT: the citation affordance was used **0 times in 16 retentions across BOTH presentations**.
+   Ote's pre-registered reading applies — a SALIENCE/MECHANISM problem, ⛔ not a wording problem. ⛔ Do not reword the field.
+⭐ The corpus is the binding constraint: 9 of 20 sources produce any retention at all.
 ```
 
-⇒ ⭐ **RECOMMENDED: option C** — route the three questions apart, add the missing DENOMINATOR to the
-memory read (*"8 returned, 0 from the day you named, N undateable"*), ⛔ give `recall_memory` no date
-parameter. ✅ **SETTLED 09-05: ADVERTISED + NOT CHOSEN.** Persisted trace `{count:49}` on all 14 incident turns; the same
-registry (PID 15548 up since 09-03 22:50) rebuilds exactly 49 containing `retrieve_conversations`; chat dispatch has
-no `authorizeToolCall`. ⚠️ Count, not names — a reconstruction. ⇒ `DERIVATION_SOTERA_TEMPORAL_ROUTING.md`:
-corpus routing measured (she reaches for conversations only when the SOURCE IS NAMED; 0 read-tool calls ever
-followed a relative-day word); boundary derived by EVIDENCE KIND; contract = **the MERGE RULE + the DENOMINATOR**
-(R-C), ⛔ no classifier in `memoryHint`, ⛔ `when` is not a router, ⛔ no date on `recall_memory`; R-D (a SPAN-capable
-conversation read — `{in:"here"}` is a 9-turn PASSAGE, radius fixed) recorded as a separate capability gap.
-✅ **R-C RATIFIED 09-05** (merge rule · denominator on the ENUMERATION · retrieve_conversations = history instrument,
-recorded as a PASSAGE · R-B rejected · `when` ≠ routing · routing MEASURED not asserted). ⭐ Red-proof DESIGNED around the
-VOLUNTEERED recap — `REDPROOF_DESIGN_SOTERA_MERGE_RULE.md`: must-fire = the real 23:03:19 reply (exactly the two 26-Aug
-instrument items, ⛔ not Rome — corrected: Rome was said that day at 22:38); fixture MARKERS (streamed tool results are
-CLIPPED at 4,000 chars, so mapping is marker→fixture); L-MODEL elicits a recap with a CLOSING CUE, ⛔ no question.
-✅ **R-C IMPLEMENTED AND RUN 09-05** (`REDPROOF_DESIGN…` §10): `partitionByWhen` + window on `list_memories` (⛔ not
-recall_memory) · merge-rule-check 30/30 — must-fire flags EXACTLY 6864d087 + b9c9a133 on the real reply, Rome WITHIN ·
-temporal-denominator-check 32/32 vs the DB oracle · suite 78/78 · unit 689 · package 94/94. ⓘ MODEL ARM: 0/6 volunteered
-recaps under the closing cue — an OBSERVATION, ⛔ not a pass; ⚠️ run against the LIVE server which still runs the PRE-R-C
-package (PID 15548, no restart — Ote's call). ⛔ `@ote/memory` UNCOMMITTED: my R-C hunks sit beside pre-existing hunks
-that are not mine in the same two files — attribution is the standing item. ⏸ STOPPED as ruled; ③ untouched.
+## ⓓ ⏸ THE ATTRIBUTION DEFECT — F1 shipped · F2 shipped · elicitation is the wall
 
-⭐ **294f8f26 INVESTIGATED 09-05 (read-only) — `REPORT_SOTERA_PROVENANCE_WRONG_SPEAKER_SOURCE.md` §INVESTIGATION.**
-`source_message_id` has THREE meanings by writer: extractor/reconcile = the turn that SAID it · chat tools =
-`lastUserMsg.id`, the OCCASION turn · reflection = `top.id`, the conversation's NEWEST message (assistant 13/13), by
-DESIGN as a reachability anchor. Genuine speaker contradictions **2/156** (`294f8f26`, `0966ab33`), one reflection pass.
-⚠️ `top` ≠ `up_to_rolling_id`: 3 rows anchored 89 turns BEYOND what the pass reviewed. ⛔ Nothing changed, nothing decided.
+2026-09-15, conversation `ca672514`: she answered a 60-char English aside in 2,198 chars of **Thai**, after auditing her whole
+memory store, and her reasoning said ***"The user asked me to check all things in my memory"*** — which he never did.
+`INVESTIGATION_SOTERA_THAI_FLIP_AND_MEMORY_DUMP.md`.
 
-⭐ **REFLECTION ANCHOR DERIVED 09-05 (read-only) — `DERIVATION_SOTERA_REFLECTION_ANCHOR.md`.** A: TWO concepts are read
-from one column TODAY — 5 readers assume PROVENANCE (`when.said`, `getSource`, lineage, corrections, relayed-speech), 4 assume
-OCCASION (M2 turn key, lint, refusal record, noteRetrieved), 2 REACHABILITY; they coincide on the extractor path, diverge on
-reflection; `getSource`(±2) reaches the proposition on 2/13 reflection rows. B: the transcript is `role: text` — NO ids, NO
-timestamps — a retained item CANNOT be tied to a turn; only the pass anchor exists. C: anchor promise written twice (08-21
-`top` = 'end of the stretch'; 08-26 ledger moved to `reviewedTo`) — composition-order artefact; content grounded IN range,
-pointer 89 turns beyond it; 1 of 89 passes. D: proposition-day ≠ anchor-day **NOT OBSERVED** (13/13 same-day).
-ⓘ New question: ①'s `said` gloss assumes the source turn is the ACCOUNT HOLDER's — on all 13 reflection rows it is HERS.
-⛔ Undecided by ruling: one field vs two · `top` vs `up_to_rolling_id` · retain naming a turn · speaker validation.
+```
+F1 ✅ the Thai guidance in DEFAULT_ASSISTANT_IDENTITY is now CONDITIONAL (it was an unconditional Thai cue in EVERY prompt
+   for EVERY user), and REPLY_LANGUAGE_RULE ships as its OWN part (foundational/principle) so a replaced persona identity
+   cannot take it away. ⏸ FLAGGED not decided: at principle scope a standing "always answer in Thai" becomes a PROPOSAL.
+F2 ✅ ⭐⭐ THE RULE ALREADY EXISTED AND HAD NEVER BEEN SHOWN TO HER. `ATTRIBUTION_PRINCIPLE` sat behind `if (layerAuthority)`,
+   false by default ⇒ never in a single production prompt. An ACTIVATION defect, ⛔ not a missing-principle one. Now
+   decoupled and composed unconditionally; `precedence` + the note reframing STAY gated (⛔ F2 must not ship P2).
+F3 ⏸ PARKED (proportionality on whole-store inventories — she already self-limited).
+⛔ F2 establishes the guard is FED. Whether it is OBEYED is UNTESTED.
+```
 
-⭐⭐ **SEMANTICS DERIVED 09-05 — `DERIVATION_SOTERA_PROVENANCE_OCCASION_REACHABILITY.md`.** Three concepts, three
-cardinalities: PROVENANCE 0..n evidence refs (speaker+said-date derive from it; absence = 'not established') · OCCASION
-exactly one act (equality only; unique per ACT — a pass, ⛔ not the conversation's newest message) · REACHABILITY one
-conversation (a RANGE for pass writes). ⭐ The store ALREADY defines `source_message_id` as the OCCASION (`lineageFor`,
-`memory-lineage`) and keeps `evidence.derivedFrom.messageIds` for derivation — written on 0 rows. Provenance readers
-(`when.said`, `getSource` ±2, `corrections.learnedFrom`) rely on the EXTRACTOR's coincidence (occasion == evidence turn).
-`said` = provenance-glossed, occasion-computed ⇒ already an overloaded temporal label (wrong gloss on 15 rows; wrong DATE
-on 0). Distiller = same writer class (watermark `source` + end-of-window anchor; 0 rows). Beyond-range rows: promise (i)
-reachability kept, (ii) end-of-stretch broken; ⚠️ passes 13:40/14:00 SHARE occasion id 6539 (latent M2 collision).
-⛔ Undecided by ruling: fields · anchor · question generation · retain reference · `said` restriction · `decided` basis.
+⚠️⚠️ **AND THE SUCCESSOR EXPERIMENT'S PILOT FAILED ITS GATE** (`MEASUREMENT_SOTERA_ATTRIBUTION_SUCCESSOR_PILOT.md`):
+**1 detector-positive, 0 human-confirmed, of 24** — gate needed ≥2. ⛔ Threshold NOT edited, full run NOT performed.
+⭐ The run was NOT vacuous (reasoning 24/24, 9 tool rounds, arms verified per turn, her reasoning visibly used the injected
+memory). ⇒ **the second corpus in a row to fail to elicit the phenomenon** (2026-08-18 was 0/40). Every condition the first
+lacked was supplied and the rate is still zero.
+⭐⭐⭐ **ONE occurrence has EVER been observed, and a HUMAN reading a conversation found it — no instrument did.** The recorded
+option: run the advisory detector over LIVE conversations rather than build a third fixture.
 
-⭐ **COMPATIBILITY REVIEW 09-05 — `REVIEW_SOTERA_PROVENANCE_CONTRACT_COMPATIBILITY.md`** (13 consumers, GREEN/YELLOW/RED).
-GREEN: lineage/supersession · relayed-speech · lint · manual reconcile (the contract's exemplar: occasion in `source`,
-provenance in the pointer). YELLOW (right concept, pass-key = conversation state): M2 admission · refusal records · retrieval
-traces (TTL 15 min — a shared key within it leaks derivation across passes) · corrections.learnedFrom · Dreaming writes.
-RED: `when.said` · `getSource` (provenance half) · reflection retention · distiller (0 rows) · speaker attribution (no field
-on memories; implied speaker = anchor's role). ABSENCES: no-provenance **RED** (unrepresentable when an anchor exists — the
-anchor MANUFACTURES `said`); no-occasion GREEN where governed; no-reachability GREEN at getSource (3 flavours), RED for
-'reachable but unreviewed'; 29 rows carry all three absences on one NULL. COLLISION 6539: **REAL violation** (key = conversation
-state, not act), LATENT by circumstance (20-min gap > 15-min TTL; no recall calls; operator-only declaration). ⛔ Nothing decided.
-
-⭐⭐ **REMEDIATION ARCHITECTURE DESIGNED 09-05 — `DESIGN_SOTERA_PROVENANCE_REMEDIATION_ARCHITECTURE.md`** (semantic only).
-§0 THE RULE: no axis is derived from another; the only bridge is a WRITER-DECLARED coincidence (relayed-speech's `sourceText &&`
-is the model). OCCASION = the ACT, minted before it writes — turn key (turn-driven) · PASS identity (reflection/Dreaming; the
-distiller has NO act record and needs one) · label (operator) · refusals inherit the act; 6539 dissolves by moving the key to
-the act (`top` demoted to reachability). PROVENANCE = 0..n typed refs {turn|memory|document|record}, each establishing
-support (+speaker/date for TURN refs only); written by the writer or not at all; reflection = NOT established; ⛔ no reader
-completes it; ⛔ phrase locations are investigation, not repair. REACHABILITY = turn | RANGE (pass) | document | none, four
-states kept + the DISTINCTION 'reachable but unreviewed'. TEMPORAL: said ← account-holder turn refs ONLY; recorded ← row;
-decided ← act. Migration meaning: extractor said STANDS (declared coincidence); reflection said WITHDRAWN; chat-tool said
-withdrawn unless a turn ref exists (37 rows — the visible cost; a chat coincidence is a §10 writer-contract decision).
-⛔ No schema/migration/code/rename/validator/repair. Representation is §10 — not decided.
-
-⭐⭐⭐ **FINAL GATE DOC 09-05 — `FINAL_SEMANTIC_REMEDIATION_ARCHITECTURE_V1.md`** (§10 items closed; FACT→RULE→RECOMMENDATION→
-UNDECIDED each). Reflection provenance: she may cite slice ORDINALS (+ optional verbatim span) and memory ids she was given;
-⛔ no uuids, ⛔ no dates shown; host RESOLVES and VERIFIES (classifyCapture-style), never mints; failed citation recorded, item
-still retained (`not established`). Chat-tool same-turn coincidence: ⛔ NOT declarable (measured: 4 verbatim / 16 partial /
-17 <50% of 37; lineage header's own Rome counter-example) — YES as write-time VERIFICATION against the occasion turn only;
-cost: 33/37 rows lose coincidental `said`. `decided`: internal for account reads; `decidedOn` preserved as its own-memory
-exposure, grounding declared. Multi-day `said`: WITHHOLD scalar, refs carry dates, no span basis. Two BASIS: two concepts
-(reference kind vs belief grounds), one-way mapping, no merge/rename now. Credential = property of a REFERENCE; `quoted` w/o
-ref is meaningless; elicited/observed are act facts. Distiller: act per (conversation, run) before write; adopt reflection's
-coverage invariant (watermark = reviewed end, elision refuses); no `last.id` evidence; ⏸ enable-or-not is Ote's. Admin acts:
-label or request identity + actor + reason; audit rows must carry the act id. Speaker: NO write refusal; consumer rule +
-integrity report; `speaker: not established` defined. §12 representation boundary listed; §13 seven Ote-level decisions;
-§11 invariants I1–I10 + forbidden inferences F1–F10; §14 migration principles. ✅ GATE PASSED — implemented below.
-
-⭐⭐⭐ **PROVENANCE AXES SHIPPED 09-05 11:40 — Phases 1–7, `REPORT_SOTERA_PROVENANCE_AXES_LIFECYCLE.md` · VERDICT PASS.**
-Phases 1–3 (Reference `7eb4807`): `PHASE1_…DECISIONS` (seven §13 decisions closed) · `SPEC_…IMPLEMENTATION` · `REDPROOF_PLAN_…`
-(tests before code). Phase 4 (Sotera `08f4742` `398aa28` `381f6eb` `ad852b8` · package `d489b6a`): **mig 049** — `writer`,
-`(act_kind, act_id)`, `reach_*` + CHECKs on `txn_memories`; `txn_memory_evidence`; act on refusals/changes/retention decisions.
-`memory-writer-contracts.js` (13 writers; pass writers REFUSED without an act — `NO_ACT`; declared coincidence ONLY extractor/
-identity; chat tools VERIFY value-in-occasion-turn; operator attests) · `memory-evidence.js` (refs verified: exists · in range ·
-in conversation · span; failures RECORDED, item stands; speaker/date resolved from the TURN, never stored; `saidFor` = one day of
-account-holder turn refs). Store stamps axes from construction only; `said` from evidence only; `getSource` = MATERIAL ≠
-EVIDENCE + `speaker: not established`. Every writer wired (reflection `revisit:<ledger id>` + range; Dreaming `dreaming:<pass>`;
-chat route turn act; M2 admission act-first with the ratified precedence kept; traces/lineage keyed by act; lint +9 rules;
-`@ote/memory remember()` passes `evidenceRefs`). Phase 5 (`test/maintenance/migrate-provenance-axes.mjs --apply`, act
-`provenance-axes-backfill-2026-09-05`): 158 rows · 77 refs (36 coincidence · 4 span · 3 attested · 34 document) · 158 audit
-rows; reflection 5 ledger-linked → act+range, **8 unlinked → act NOT recorded** (strict reading; window link is Ote's);
-`c5567db5` pointer OUTSIDE its range ⇒ `reviewed:false`; 0 refs for any reflection row; **`said` 89 → 43 = 46 withdrawn
-(13 reflection + 33 chat-tool), exactly FINAL §14's projection**; 31 unknown rows = ALL agent_dev fixtures. Phase 6:
-provenance-axes 49/49 · incident-replay 21/21 · temporal-provenance ALL · lint/evidence-auth/cogito ALL · unit 699 · package
-94 · suite 79/80 (the one = D5 order drift, EXTERNAL — 0-E) · `measure-temporal-read` §9/§10 unchanged. ⭐ Clarified inside
-the contract: a SPAN is verified before attestation; chat-tool = `model-tool` whatever the author; ledger `from NULL` accepted
-only where `messages_considered` = messages ≤ `up_to` (8/8). ⛔ R-C · M2 · ③ · privacy · relayed speech · reflection prompt ·
-`source_message_id` all untouched. ⏸ **OTE'S (report §F):** window link for the 8 rows · restart :8210 then re-run the
-backfill · Generation-4 reflection citations (store side built) · distiller enablement · historical severity · BASIS rename.
-
-⇒ ✅ **② IS SETTLED** (R-C: the merge rule + the denominator; `recall_memory` gets no date parameter) and the provenance
-defect beneath it is closed. ⏸ **③ IS NEXT — ⛔ untouched.**
-
-ⓘ For ③, the measured facts: her prompt was **24,037 tokens** (the whole conversation was present), and the
-composer's highest-utility item was the **89-token** working-memory block. ⚠️ Its rendered text is NOT
-recoverable — only its token count and utility are logged. Fixing that observability gap is part of ③.
+---
 
 # 0-B · ⭐⭐⭐ THE RULES THAT GOVERN ANY FURTHER WORK HERE
 
@@ -178,67 +95,56 @@ recoverable — only its token count and utility are logged. Fixing that observa
 ⑤ `quoted` = VERBATIM, ⛔ NOT speaker attribution. It is a CREDENTIAL — the strongest class we have.
    ⇒ ⛔ never teach it to carry who spoke; fix the EVIDENCE BOUNDARY instead.
 ⑥ A DATE MUST SAY WHAT IT IS A DATE **OF**: `said` · `recorded` · ⛔ there is no `happened`.
+⑦ ⭐ NO AXIS IS DERIVED FROM ANOTHER (049). Occasion ≠ evidence ≠ reachability. The only bridge is a
+   writer-DECLARED coincidence, true by mechanism. ⛔ A reader never completes provenance.
+⑧ ⭐ RELEVANCE ≠ INSTRUCTION · INFERENCE ≠ RECEIVED REQUEST · MEMORY CONTENT ≠ AUTHORIZATION (Ote, 09-15).
+   A topic in memory or context is not a request. She may OFFER; she may ⛔ never attribute it to him as asked-for.
 ```
 
-# 0-C · LIVE STATE — 2026-09-05 11:45
+# 0-C · LIVE STATE — 2026-09-15
 
 ```
-79/80 suites (D5 order drift — EXTERNAL, see 0-E) · @ote/memory 94/94 · migrations through 049
-:8210 PID 22896 (Sotera — RESTARTED 09-05 12:34 on the AXES build, Ote's instruction) · :8201 PID 27160 (OLS) · :54322 PID 7132 (pg)
-memories 151 · live 113 · slots 84 · BOUND 1 · questions 1 · bindings 2 · pinned 14 (all canary, 1 live)
-Ote's live `preferred_name` rows: 0  ⭐ correct — the two false "Cogito" rows are RETIRED, ⛔ not replaced
-⭐ AXES: 158 rows classified · 77 evidence refs · said 89→43 · 8 reflection acts NOT recorded · lint defects 8 (those rows)
-✅ :8210 restarted on the axes build; stragglers backfilled (2 → unknown, fixtures); live probe: chat-tool rows carry writer/act/reach + span-verified refs
-⏸ GEN-4 CITATION PLAN written (`PLAN_SOTERA_REFLECTION_GENERATION_4_CITATION.md`) — awaiting Ote's GO/NO-GO; prompt UNCHANGED
-ⓘ 10 legacy `zz_` slots hold 0 memories — empty shells, ⛔ not new residue
-ⓘ `tool-call-log-check` is MODEL-DEPENDENT and has flaked twice; green standalone and on re-run
+:8210 PID 25012 (Sotera — restarted 09-15 after the 06:17 reboot, Ote authorised) · :8201 PID 28072 (OLS, HIS, untouched)
+:8220 another project's, untouched · :54322 pg · migrations through 049 · live reflection generation = 3
+suite 79/83 → the 4 reds triaged: 2 were LIVE-TRAFFIC contention (pass standalone), 1 was the known D5 snapshot drift,
+1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 716/716.
+memories 160+ · axes: writer set on 129 · 44 unaxised (33 ratified unknown + 11 leaked, agent_dev only, ⛔ none of Ote's)
+evidence refs 77, all established · lint defects: 8 pass-writer-without-act + 11 writer-not-declared
+experiment assets PRESERVED: 40 Gen-4 clones/passes · 60 three-arm clones/passes · blind-test key unopened→opened & scored
 ```
 
-**BUILT SINCE THE LAST CHECKPOINT:** ⭐⭐⭐ the four provenance axes (mig 049 · writer contracts · evidence table · audited
-backfill — see ⓑ) · the model-tool `claimKind` capability · the always-settling receipt
-(`persisted / refused / accepted`) · the model-facing write result · the self-authorisation rule wired at
-admission · the rehearsed namespace kill switch · continuous bind-eligibility on the cron · the
-relayed-speech threading fix · `when:{date,basis}` on every memory · the `sotera_chat_` export rename.
-
-⚠️⚠️ **`PortableComponents/Packages/Memory` IS UNCOMMITTED, AND SO IS `Tools/Retention`.** ⭐ 09-05 11:40: the two AXES hunks
-are committed ALONE (`d489b6a`, staged as blobs — the working tree was not touched); everything below is still uncommitted. ⭐ 09-05: R-C added
-`normalizeWindow`/`labelByWhen`/`partitionByWhen`/`WINDOW_LABEL` + `list()` window (service) and `on`/`between`/`basis` on
-`list_memories` (index.js) + `test/temporal-window.test.mjs` — MINE, in the same files as the pre-existing hunks.
-The package repo ALSO holds **pre-existing work that is NOT mine** — `cognition/memory-pipeline.js`, two
-`.bak` files, two test files, and earlier hunks in `memory-v2-service.js` and `index.js`.
-
-⭐ **MINE, cleanly separable:** `claimKind` in `reconcileFact` · `claimKind` in `makeObservation`'s `common`
-· `modelResult` + the two tool handlers in `index.js` · `temporalProvenance` / `TEMPORAL_BASIS` / `when` in
-`view()`. ⏸ Ote: this must become **independently attributable in git before M2 closeout**, ⛔ without
-disturbing the pre-existing work.
+**BUILT THIS CHECKPOINT:** the four provenance axes + audited backfill · D1(b) writer seam · reflection generations 5/6 and
+the three-arm decomposition · the F4 blind test (HTML, chat-bubble source, JSON save) · F1 reply-language rule · F2
+attribution-principle decoupling · the attribution detector + successor corpus/scorer/runner.
 
 # 0-D · ⛔⛔ FENCES
 
 ```
-ORIGIN PARKED · M2-6 UNWIRED · 12b FROZEN 4/4 · P1 UNTOUCHED · ROME UNTOUCHED · POST-M2 OUT
-⭐ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE
-⛔ THE EXTRACTOR IS NOT MODIFIED TO FIT M2 · ⛔ ② AND ③ UNTOUCHED · ⛔ NO GENERATED M2 TRAFFIC
+production reflection = GEN 3 · 40 Gen-4 + 60 three-arm runs and clones PRESERVED · the 8 historical reflection rows stay
+UNKNOWN and UNREPAIRED · episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 search snapshot UNTOUCHED ·
+BASIS rename DEFERRED · ⛔ no provenance inference or repair · ⛔ no weakening of occasion/reachability/provenance separation
+⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · ⛔ no pilot-threshold edit · F3 PARKED
+⛔ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ ③ (working-memory vs transcript) UNTOUCHED
+⛔ never test on Ote's account — agent_dev, zz_ fixtures, removed after · ⛔ never restart :8210 unasked · :8201 is HIS
 ```
 
-# 0-E · ⏸ RESIDUALS — recorded, ⛔ none of them fixed
+# 0-E · ⏸ OPEN DECISIONS — all Ote's, none blocking
 
 ```
-⚠️ `recall_own_memory.decidedOn` is a bare `created_at::date` through Sequelize ⇒ renders in UTC and is a
-   DAY EARLY before 07:00 local. ⛔ Ote ratified `decidedOn` unchanged; correcting it is its own decision.
-⚠️ the `when` date uses the DEPLOYMENT's timezone, ⛔ not the individual user's — no per-account column.
-⚠️ INLINE ATTRIBUTED SPEECH is caught today only by the shipped rule's 8-character floor. ATTRIBUTION
-   itself — who the surrounding clause assigns a span to — is computed NOWHERE. Open residual.
-ⓘ Ote's room holds live rows under TWO persona scopes (`null` 34 · `'sotera'` 20). A read scoped to one
-   cannot see the other. ⛔ Not investigated. ⭐ 09-05 shape: null = extractor 14 · chat-tool 8 · reflection 11 ·
-   decline 1; 'sotera' = ingest 17 · operator 3 (the Rome reconcile rows); production reads the null scope.
-ⓘ Closed field lists remain the standing hazard — 14 recorded instances (the 14th: `@ote/memory remember()` dropped `evidenceRefs`).
-⚠️ 8 reflection rows have act NOT recorded (strict reading) ⇒ 8 standing `pass-writer-without-act` lint DEFECTS until Ote
-   permits the unambiguous 20-min window link (PHASE1 §8) as a separate audited act.
-ⓘ reflection reached for the WITHHELD `remember_fact` 449 times in 14 days (all refused) vs 515 `retain` — a finding for the
-   reflection tool-generation record, ⛔ not acted on.
-ⓘ D5a/D5b (R-C's frozen-order search snapshot): same id set, same per-id relevance, ORDER moved because two of his rows were
-   accessed at 04:30:49Z (after the 01:22Z snapshot) — `last_access` is the third clock. ⛔ R-C untouched.
-ⓘ Three ledger rows link `wrote_memory_id` to lesson/decline records; those rows keep the `record` act (the contract).
+PROVENANCE   D3′ close the Gen-4 arc (⭐ recommend REJECT the instrument, KEEP the store side — the reference mechanism is
+                 built and is what any future citation mechanism writes into)
+             D8  the L3 persona-notes writer in reflection-host.js has NO CONTRACT (act? reach?) — gates D1 Phase 3
+             D9  the distiller's act-minting: PHASE1 §3 specified it, nobody built it; config-gated OFF — gates D1 Phase 3
+             D1 Phase 3  REFUSE an undeclared write — only after D8+D9 complete the caller set
+             D2/D4  the 8 historical rows (an unambiguous 20-min window link exists) + what a ratified permanent unknown
+                 should look like in the lint. Not urgent.
+             D6 BASIS rename · D7 @ote/memory attribution (my earlier R-C hunks still interleaved with foreign work)
+ATTRIBUTION  which of ①–④ to vary for a third corpus (goal live in CONVERSATION as well as memory · her own prior turns in
+             history · depth · reasoning.effort low) — ⭐ OR move to the LIVE-DETECTOR route instead of a fixture
+LANGUAGE     should a standing user language PREFERENCE override the reply-language rule? (at SCOPE.principle it is a
+             proposal, not an override)
+STANDING     D10 what makes an option SALIENT inside her deciding — `keep()` 38/38 yet unprompted calls zero; the citation
+             affordance 0/16. TWO capabilities, same shape. ⛔ Research direction, not a code change.
 ```
 
 # 0-F · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof

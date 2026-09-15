@@ -8678,3 +8678,23 @@ may have removed a necessary condition) · ③ depth: turn 11 of an engaged conv
 conversation found it — no instrument did. If the base rate is that low, no corpus will contain it, and running the
 (advisory, reasoning-reading) detector over LIVE conversations may be the right instrument instead of a fixture.
 ⏸ F2 unchanged: the guard is FED; whether it is OBEYED is untested. ⛔ No ranking change, no reword, no threshold edit.
+
+## 2026-09-15 (+07:00) — 📌 COMPACTION CHECKPOINT · `AI_CarryOn.md` §0 rewritten inline
+
+§0-A..§0-E replaced; §0-F (the lessons) and all history below it preserved verbatim. What §0 now carries: ⓐ M2 unchanged ·
+ⓑ **the provenance arc SHIPPED** (four axes, migration 049, audited backfill, production live) plus D1(b)'s writer seam and
+the defect that prompted it (6 of 13 writers had a caller; `lesson.*` wrote raw SQL past every store gate) · ⓒ reflection
+**Gen 4 = ITERATE**, production stays Gen 3, the control that did not reproduce, and the one robust result (**0 citations in
+16 retentions across both presentations** ⇒ salience, ⛔ not wording) · ⓓ the attribution defect — F1 and F2 shipped, F2
+being an **activation** defect (the rule existed and had never been in a prompt), and the successor pilot that **failed its
+pre-registered gate** (0 of 24 human-confirmed; threshold not edited; full run not performed).
+
+§0-B gains two rules earned this arc: ⑦ no axis is derived from another · ⑧ **relevance ≠ instruction · inference ≠ received
+request · memory content ≠ authorization**. §0-D is the full fence list. §0-E lists every open decision (D3′ · D8 · D9 ·
+D1 Phase 3 · D2/D4 · D6 · D7 · the third-corpus-vs-live-detector choice · the language-preference scope question · D10
+salience) — all Ote's, none blocking.
+
+Trees clean: Sotera and Reference fully committed; `@ote/memory` still carries the pre-existing foreign hunks + my earlier
+R-C hunks (standing item **D7**, ⛔ not mine to bundle). Instruments preserved and runnable: `attribution-guard-check` ·
+`writer-seam-check` · `provenance-axes-check` · `incident-replay-check` · `reflection-generation-4-check` ·
+`attribution-successor-run --pilot` · the blind-test generator.
