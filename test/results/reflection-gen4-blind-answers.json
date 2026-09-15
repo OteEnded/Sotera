@@ -1,0 +1,44 @@
+{
+  "test": "BLIND_TEST_SOTERA_REFLECTION_GENERATION_4",
+  "question": "Given the conversation material Sotera reviewed, which of X or Y contains the things you would rather she carry forward as durable knowledge from that conversation?",
+  "note": "Judgments recorded BEFORE the X/Y key was opened. F4 is not scored in this file. Ote endorsed rater-1's choices ('agreed with your choice') and supplied rater-2 as a further opinion; whether this stands as HIS F4 submission is his call.",
+  "raters": [
+    {
+      "id": "rater-1",
+      "who": "Claude (this session)",
+      "blindness": "PARTIAL — judged content only, but had already seen the mechanical metrics (one arm retained more overall). Not a second blind rater.",
+      "recordedAt": "2026-09-08"
+    },
+    {
+      "id": "rater-2",
+      "who": "further opinion supplied by Ote",
+      "blindness": "unknown to this session; reasons cite source detail only, no arm-revealing content",
+      "recordedAt": "2026-09-15"
+    }
+  ],
+  "answers": {
+    "1":  { "rater-1": "Neither", "rater-2": "Neither" },
+    "2":  { "rater-1": "Neither", "rater-2": "Neither" },
+    "3":  { "rater-1": "Y", "rater-2": "Y" },
+    "4":  { "rater-1": "Y", "rater-2": "Y" },
+    "5":  { "rater-1": "Neither", "rater-2": "Neither" },
+    "6":  { "rater-1": "Neither", "rater-2": "Neither" },
+    "7":  { "rater-1": "Y", "rater-2": "Y" },
+    "8":  { "rater-1": "X", "rater-2": "X" },
+    "9":  { "rater-1": "Neither", "rater-2": "Neither" },
+    "10": { "rater-1": "Neither", "rater-2": "Neither" },
+    "11": { "rater-1": "Neither", "rater-2": "Neither" },
+    "12": { "rater-1": "X", "rater-2": "X" },
+    "13": { "rater-1": "Neither", "rater-2": "Neither" },
+    "14": { "rater-1": "Neither", "rater-2": "Neither" },
+    "15": { "rater-1": "Neither", "rater-2": "Neither" },
+    "16": { "rater-1": "Y", "rater-2": "Y" },
+    "17": { "rater-1": "Neither", "rater-2": "Neither" },
+    "18": { "rater-1": "Neither", "rater-2": "Neither" },
+    "19": { "rater-1": "Neither", "rater-2": "Neither" },
+    "20": { "rater-1": "X", "rater-2": "X" }
+  },
+  "agreement": { "pairs": 20, "identical": 20, "disagreements": [] },
+  "tally": { "X": 3, "Y": 4, "Neither": 13 },
+  "limitOfTheInstrument": "In 6 of the 7 contested pairs (4, 7, 8, 12, 16, 20) one side retained NOTHING. Only pair 3 is a true head-to-head with content on both sides. On this corpus a preference therefore mostly measures WHETHER an arm retained, not WHICH retention is better — and the metrics already record a retention-rate difference between the arms (0.70 vs 0.40 retains per pass). Stated before the key was opened."
+}
