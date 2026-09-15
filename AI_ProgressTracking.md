@@ -8619,3 +8619,31 @@ selecting an action. Different claims. ⓘ Likely also explains H3's *"metric un
 **Decision (his):** A keep F2 + retire the control arm (⭐ recommended — the old design answers a mis-specified question) ·
 B revert and re-run first · C keep F2 + commission a successor corpus (memory channel, tools on, score REASONING too).
 ⚠️ Stated plainly: F2 proves the guard is FED, ⛔ not that it is OBEYED. ⛔ No ranking/salience change. F3 parked.
+
+## 2026-09-15 (+07:00) — ✅ A DONE (boundary retired, history preserved) · ⏸ C DESIGNED, awaiting review
+
+**A — the control-arm CLAIM retired, ⛔ the experiment preserved.** `layer-authority-treatment.test.mjs` now pins the NEW
+boundary: attribution principle **always present** · `precedence` **still gated** · persona-notes reframing **still gated**.
+The old *"principle must not appear by default"* assertion is replaced, and a new test pins the containment directly —
+**flag-on minus `precedence` === flag-off**, so F2 cannot have quietly widened. unit **716/716**, attribution-guard 16/16.
+
+⭐⭐ **The historical conclusion is retired by ADDENDUM, ⛔ not by edit.** `ANALYSIS_LAYER_ATTRIBUTION_RESULTS_V1.md` keeps
+every original word (§1's *"H1's zero… is an absence of the phenomenon"* still stands at line 23); a dated addendum at the
+end records that **the 2026-09-15 incident is the FIRST OBSERVED POSITIVE H1 CASE**, on the same model, and retires two
+interpretations only: (i) the *absence* reading of 0/40 — the corpus failed to elicit a phenomenon that exists, a fact about
+the CORPUS ⛔ not the model; (ii) the control arm as a live reproducible control. ✅ Everything else stands, including
+*"P1's render cannot be shipped on this evidence"* — which is why only ONE of the three components shipped, on a different
+basis. ⚠️ Recorded as PRESENCE not cause: retrieved memory about his goal was IN CONTEXT. ⛔ No ranking/salience claim, no
+ranking change.
+
+**C — successor experiment DESIGNED, ⛔ not built, ⛔ not run.** `PLAN_SOTERA_ATTRIBUTION_SUCCESSOR_EXPERIMENT.md`.
+Conditions seeded from the real mechanism: retrieved memory about the USER's goal (⛔ not personaNotes) · tools **ON** ·
+scores **reasoning AND reply** · final turn a topic/aside that requests nothing · ground truth from the ACTUAL user turn.
+12 scenarios: family **H** (8, `requested:false`) + family **R** (4, `requested:true`) — R exists because a treatment that
+cured H by teaching her never to credit him would be the OTHER failure the principle forbids.
+⭐⭐⭐ **PILOT-GATED**: baseline-only, 24 turns; the phenomenon must appear ≥ 2/24 and be human-confirmed, or the full run
+does NOT happen and the corpus is reported unfit. That is the direct lesson of the last one spending 240 turns to discover
+its corpus was wrong. ⭐ **Baseline run TWICE in independent blocks** with its own spread reported before the arms are
+compared — `control-must-be-rerun-not-run-once`, which cost the reflection arc a 60-pass experiment ten days ago.
+⭐ Baseline arm is obtained by REMOVING the principle block from the composed prompt, verified per turn — ⛔ no production
+flag added for an experiment's convenience. Detector stays advisory; silence reported as silence.
