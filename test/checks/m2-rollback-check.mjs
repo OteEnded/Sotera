@@ -25,6 +25,7 @@ import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
 import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
 import { createSlotStore } from '../../Backend/app/components/memory-slot-store-host.js'
+import { WRITER, ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
 import { createMemoryV2Service } from '@ote/memory/cognition/memory-v2-service.js'
 
 const { check, done } = makeChecker('m2-rollback')
@@ -40,9 +41,22 @@ const KEY = 'build-tag'
 const t = Date.now()
 let flipped = false
 
-/** ⭐ An operator writer that names its occasion — the canary's established shape. */
+/**
+ * ⭐ An operator writer that names its occasion — the canary's established shape.
+ *
+ * ⚠️⚠️ AND IT NOW *DECLARES* THAT, WHICH IT DID NOT. This comment said "operator writer" while the construction passed no
+ * `writer` at all, so every run wrote rows with `writer IS NULL` — 2 per full suite, accumulating in the live corpus
+ * (measured 2026-09-16: the `writer-not-declared` lint count had drifted 11 → 13, and 4 of the 13 came from here).
+ * ⇒ a comment is not a declaration. Ote, ruling it in as Phase-3 preparation: *"fix the M2 rollback check, not by
+ * pretending its undeclared rows don't exist. Its own comment already says it is an operator writer, so give it the
+ * corresponding writer/act."*
+ * ⛔ The rows already written are NOT repaired — they stay exactly as written, as historical residue.
+ */
 const writer = (userId, occasion) => {
-  const store = createSequelizeMemoryStore({ db, persona: null, userId, occasion })
+  const store = createSequelizeMemoryStore({
+    db, persona: null, userId, occasion,
+    writer: WRITER.operator, act: { kind: ACT_KIND.operator, id: occasion },
+  })
   const slotStore = createSlotStore({ db, persona: null, userId })
   return createMemoryV2Service({ store, slotStore, persona: null, userId })
 }

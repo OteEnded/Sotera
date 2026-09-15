@@ -58,6 +58,8 @@ import { tracedMemoryIds } from './memory-retrieval-trace.js'
 // ⭐ 049 · THE FOUR AXES — writer contracts (occasion · reachability · declared coincidence) and provenance references.
 import { contractFor, normalizeAct, normalizeReach, actKey, consumingOccasionFor, COINCIDENCE, VERIFICATION, WRITER as WRITER_KIND } from './memory-writer-contracts.js'
 import { createReferences, provenanceFor, saidFor, spanAppears } from './memory-evidence.js'
+// ⓘ D1 Phase-3 preparation only, and only under SOTERA_WRITER_TRACE — see the undeclared-write warn below.
+import { appendFileSync as fsAppend } from 'node:fs'
 // ⭐ 035 · THE ONE LEGAL WAY TO ASK "IS THIS ROOM ROOT'S?" — config-defined, and that module's whole
 // point is what it REFUSES to look at. ⛔ Root-ness must never be inferred from a NULL role or a missing
 // id here, any more than it may be anywhere else.
@@ -1203,6 +1205,16 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         const why = '[memory] a row was written with NO declared writer — its occasion, reachability and provenance are unattributable'
         const where = { id: plain.id, source: plain.source ?? null, kind: plain.kind ?? null, namespace: plain.namespace ?? null, author: AUTHOR }
         if (log?.warn) log.warn(where, why); else console.warn(why, where)
+        // ⭐ D1 PHASE-3 PREPARATION, off unless asked for. `SOTERA_WRITER_TRACE=1` appends the CALL STACK of every
+        // undeclared write to a file, so "which callers would break under a mandatory-writer rule" is MEASURED across a
+        // full suite run instead of inferred by reading ninety-odd construction sites. ⛔ Inert in production: no env
+        // var, no cost, no behaviour change. Writing the trace must never be able to fail a write.
+        if (process.env.SOTERA_WRITER_TRACE) {
+          try {
+            const site = (new Error().stack || '').split('\n').slice(2, 9).join('\n')
+            fsAppend(process.env.SOTERA_WRITER_TRACE_FILE || 'writer-trace.log', `── ${plain.id} · ${plain.source ?? 'no-source'}\n${site}\n`)
+          } catch { /* a diagnostic must never break the thing it is diagnosing */ }
+        }
       }
       // ══ ⭐⭐⭐ 049 · PROVENANCE — written by the WRITER or not at all. ⛔ No reader completes it (I3). ═════════════════
       try {

@@ -54,17 +54,30 @@ function walk(dir, out = []) {
 // character — the regexes still compiled, still ran, and silently matched NOTHING, so the matrix reported four correctly
 // wired production sites as undeclared. A pattern that cannot match is indistinguishable from a caller that does not
 // declare, which is the whole `source-scan-anchor-can-go-vacuous` family. The anchor test below is the guard.
+// ⚠️⚠️ A PROPERTY CAN BE DECLARED THREE WAYS, and two of them have already fooled this scan:
+//   `writer: WRITER.lesson`   explicit
+//   `{ userId, writer, act }` ES6 SHORTHAND — `retention-host.js` threads its axes exactly like this, and a `writer:`
+//                             regex called it undeclared, which would have put the whole retention path on the
+//                             "breaks under Phase 3" list when it is correctly wired
+//   `{ ...axes }`             SPREAD — handled separately as the `?` state, because the name is not visible here at all
+// ⛔ `(?<![\w.])` keeps `sourceWriter` and `o.writer` out; the trailing class is what makes shorthand visible.
 const RX = {
-  writer: /\bwriter\s*:/,
-  act: /\bact\s*:/,
-  reach: /\breach\s*:/,
+  writer: /(?<![\w.])writer\s*(?::|,|\}|$)/,
+  act: /(?<![\w.])act\s*(?::|,|\}|$)/,
+  reach: /(?<![\w.])reach\s*(?::|,|\}|$)/,
   spread: /\.\.\./,
 }
-// ⛔ ANCHOR: prove the patterns match what they are for, before trusting a single count.
-for (const [k, sample] of [['writer', 'writer: WRITER.lesson'], ['act', 'act: { kind }'], ['reach', 'reach: { kind }'], ['spread', '{ ...axes }']]) {
-  if (!RX[k].test(sample)) { console.error(`⛔ the ${k} pattern matches nothing — the matrix would report every caller as undeclared`); process.exit(2) }
+// ⛔ ANCHOR: prove the patterns match what they are for, before trusting a single count. A scan that matches nothing
+// and a codebase that declares nothing produce the identical report — `source-scan-anchor-can-go-vacuous`.
+const MUST = [
+  ['writer', 'writer: WRITER.lesson'], ['writer', '{ userId, writer, act, reach }'], ['writer', 'sourceMessageId, self, author, scope, occasion, writer, act, reach }'],
+  ['act', 'act: { kind }'], ['act', '{ writer, act, reach }'], ['reach', 'reach: { kind }'], ['reach', '{ act, reach }'], ['spread', '{ ...axes }'],
+]
+for (const [k, sample] of MUST) {
+  if (!RX[k].test(sample)) { console.error(`⛔ the ${k} pattern misses a real declaration (${sample}) — the matrix would under-report wiring`); process.exit(2) }
 }
-for (const [k, sample] of [['writer', 'userId: x'], ['act', 'contact: x'], ['reach', 'outreach: x']]) {
+const MUST_NOT = [['writer', 'userId: x'], ['writer', 'sourceWriter: x'], ['writer', 'o.writer'], ['act', 'contact: x'], ['reach', 'outreach: x'], ['act', 'redactId, x']]
+for (const [k, sample] of MUST_NOT) {
   if (RX[k].test(sample)) { console.error(`⛔ the ${k} pattern over-matches (${sample}) — counts would be inflated`); process.exit(2) }
 }
 
