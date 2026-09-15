@@ -1186,6 +1186,24 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         subject_person_id: row.subject_person_id ?? subjectDefault,
       })
       const plain = created.get ? created.get({ plain: true }) : created
+      // ══ ⭐⭐⭐ D1(b) · A WRITE THAT DID NOT SAY WHO WROTE IT IS ADMITTED — AND SAYS SO. ════════════════════════════
+      //
+      // Ote's ruling, 2026-09-15: *"(b) now — admit the write, but record the missing writer identity loudly."*
+      //
+      // ⚠️⚠️ THE DEFECT THIS EXISTS TO SURFACE, MEASURED: migration 049 gave every write a declared writer, act and
+      // reach — and six weeks later only 6 of the 13 declared writers had a CALLER. The gap was not the missing
+      // argument; it was that the missing argument was LEGAL: `writer: null` resolved to an inert contract and produced
+      // a valid row with no axes, silently, while this same method refuses a pass writer with no act LOUDLY.
+      // ⇒ one axis fail-closed, the other opt-in, in one constructor. Found by an unrelated experiment's own data.
+      //
+      // ⭐ SO THE ABSENCE IS RECORDED RATHER THAN ASSUMED. ⛔ It does NOT refuse — Phase 1 must break no caller, and
+      // the caller set is not yet known to be complete. Phase 3 turns this into a refusal once it is; until then the
+      // warn plus the `writer-not-declared` lint rule are what make an unwired path enumerate itself instead of leaking.
+      if (!WRITER) {
+        const why = '[memory] a row was written with NO declared writer — its occasion, reachability and provenance are unattributable'
+        const where = { id: plain.id, source: plain.source ?? null, kind: plain.kind ?? null, namespace: plain.namespace ?? null, author: AUTHOR }
+        if (log?.warn) log.warn(where, why); else console.warn(why, where)
+      }
       // ══ ⭐⭐⭐ 049 · PROVENANCE — written by the WRITER or not at all. ⛔ No reader completes it (I3). ═════════════════
       try {
         const refs = []

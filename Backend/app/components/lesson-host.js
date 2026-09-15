@@ -40,7 +40,10 @@
 //                reference goes through `getSource`, which authorizes the evidence separately (E-1).
 
 import { registerHostService } from './runtime.js'
+import { randomUUID } from 'node:crypto'
 import { createRelationalWriteLease } from './relational-writer.js'
+// ⭐ 049/D1(b) · the contracts REGISTRY, ⛔ not string literals — a hand-typed 'lesson' here is a second source of truth
+import { WRITER, ACT_KIND, REACH_KIND } from './memory-writer-contracts.js'
 
 /** Hard caps. A lesson is an abstraction; anything longer is a transcript wearing a hat. */
 const CAP = { happened: 400, learned: 300, distinction: 300, doDifferently: 300 }
@@ -178,16 +181,29 @@ export function buildLesson(fastify, { userId = null, conversationId = null } = 
     }
     return lease.enqueue('lesson.commit', async () => {
       const [row] = await seq.query(
+        // ⭐⭐ D1(b) PHASE 2 · THIS INSERT NOW DECLARES ITS WRITER. It is a RAW insert — it does not pass through the
+        // store — so migration 049's columns were absent from its explicit column list and every lesson landed with
+        // writer, act and reach all NULL. ⚠️ The column list is the `allowlist-drops-what-it-was-not-told` shape: the
+        // write succeeded, so nothing looked wrong. ⓘ `CAST(… AS enum)` rather than `::enum`, because a `::` next to a
+        // named replacement is ambiguous to the replacement parser.
+        // ⭐ The act is the RECORD'S OWN ID (SPEC: a record writer's act is its own identity), minted here so the row
+        // and its act cannot disagree; reach is `none` — a lesson's material is not a conversation range.
         `INSERT INTO "${schema}"."txn_memories"
            (id, persona, user_id, author, namespace, kind, content, entity, attribute, importance,
-            source, subject_person_id, evidence, created_at, updated_at)
-         VALUES (gen_random_uuid(), :persona, :userId, 'persona', 'default', 'semantic', :content,
-                 'sotera', 'lesson', 7, :source, :subject, :evidence::jsonb, now(), now())
+            source, subject_person_id, evidence, writer, act_kind, act_id, reach_kind, created_at, updated_at)
+         VALUES (:recordId, :persona, :userId, 'persona', 'default', 'semantic', :content,
+                 'sotera', 'lesson', 7, :source, :subject, :evidence::jsonb,
+                 :writer, CAST(:actKind AS "${schema}".enum_txn_memories_act_kind), :recordId,
+                 CAST(:reachKind AS "${schema}".enum_txn_memories_reach_kind), now(), now())
          RETURNING id::text`,
         {
           replacements: {
             persona,
             userId,
+            recordId: randomUUID(),
+            writer: WRITER.lesson,
+            actKind: ACT_KIND.record,
+            reachKind: REACH_KIND.none,
             content: dry.abstraction,
             source: conversationId ? `lesson:${conversationId}` : 'lesson',
             subject: args.subjectPersonId ?? null,
@@ -257,15 +273,22 @@ export function buildLesson(fastify, { userId = null, conversationId = null } = 
     if (!lease) return { ok: false, reason: 'no write lease (this account has no person row)' }
     return lease.enqueue('lesson.decline', async () => {
       const [row] = await seq.query(
+        // ⭐ D1(b) PHASE 2 · same correction as `commit` above — a DECLINE is a record too, and it was writing raw.
         `INSERT INTO "${schema}"."txn_memories"
            (id, persona, user_id, author, namespace, kind, content, entity, attribute, importance,
-            source, evidence, created_at, updated_at)
-         VALUES (gen_random_uuid(), :persona, :userId, 'persona', 'default', 'semantic', :content,
-                 'sotera', 'declined', 2, :source, :evidence::jsonb, now(), now())
+            source, evidence, writer, act_kind, act_id, reach_kind, created_at, updated_at)
+         VALUES (:recordId, :persona, :userId, 'persona', 'default', 'semantic', :content,
+                 'sotera', 'declined', 2, :source, :evidence::jsonb,
+                 :writer, CAST(:actKind AS "${schema}".enum_txn_memories_act_kind), :recordId,
+                 CAST(:reachKind AS "${schema}".enum_txn_memories_reach_kind), now(), now())
          RETURNING id::text`,
         {
           replacements: {
             persona, userId, content: what,
+            recordId: randomUUID(),
+            writer: WRITER.decline,
+            actKind: ACT_KIND.record,
+            reachKind: REACH_KIND.none,
             source: conversationId ? `decline:${conversationId}` : 'decline',
             evidence: JSON.stringify({ declineKind: kind, meaning: DECLINE_KINDS[kind] }),
           },

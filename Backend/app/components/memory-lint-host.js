@@ -115,6 +115,10 @@ export const LINT_RULES = Object.freeze([
     what: 'a row with no reachability recorded (reach_kind NULL) — legacy until the audited historical pass classifies it' },
   { id: 'reachable-but-unreviewed', severity: 'suspect',
     what: 'a range-reach row whose legacy pointer lies OUTSIDE its pass\'s reviewed range — reachable, ⛔ not evidence of what she saw' },
+  { id: 'writer-not-declared', severity: 'defect',
+    what: 'a row written by a caller that declared NO writer identity — D1(b): admitted, but unattributable on all three axes. '
+      + '⛔ EXCLUDES rows the historical backfill ratified as unknown (M3, "unknown stays unknown"): those carry its audit act '
+      + 'and are a recorded absence, ⛔ not a leak. What this counts is a LIVE path that has not been wired.' },
   { id: 'unreferenced-speaker-claim', severity: 'suspect',
     what: 'content that asserts the account holder SAID something, with no established account-holder turn reference — speaker: not established. ⓘ Reads content to decide; reports ids only' },
 ])
@@ -172,10 +176,13 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
   const EMB = present.has('txn_message_embeddings') ? rawTable('txn_message_embeddings') : null
   const REFL = present.has('log_conversation_revisits') ? rawTable('log_conversation_revisits') : null
   const EVID = present.has('txn_memory_evidence') ? rawTable('txn_memory_evidence') : null
+  // ⭐ the backfill's audit rows are what separate a RATIFIED unknown from an unwired caller — without them the rule cannot tell them apart
+  const CHG = present.has('log_memory_changes') ? rawTable('log_memory_changes') : null
   const notRun = {}
   if (!EMB) notRun['orphan-embedding'] = 'table txn_message_embeddings not found'
   if (!REFL) notRun['untraceable-persona-authorship'] = 'table log_conversation_revisits not found'
   if (!REFL) notRun['coverage-exceeds-reviewed'] = 'table log_conversation_revisits not found'
+  if (!CHG) notRun['writer-not-declared'] = 'table log_memory_changes not found — a ratified unknown cannot be told from a leak'
   if (!EVID) for (const r of ['dangling-evidence-target', 'credential-without-reference', 'coincidence-without-contract', 'unreferenced-speaker-claim']) notRun[r] = 'table txn_memory_evidence not found'
 
   const Q = (sql, replacements = {}) => seq.query(sql, { type: seq.QueryTypes.SELECT, replacements })
@@ -296,6 +303,18 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
           AND ${liveSqlFor('m')}
           AND NOT EXISTS (SELECT 1 FROM ${EVID} e JOIN ${MSG} x ON x.id::text = e.target
                            WHERE e.memory_id = m.id AND e.ref_kind = 'turn' AND e.established AND x.role = 'user') ${own('m.user_id')}
+        ORDER BY m.id`, rep))
+  }
+  if (CHG) {
+    // ⛔ THE `NOT EXISTS` IS THE WHOLE RULE. Without it this fires on all 44 unaxised rows for ever — 33 of which are a
+    // DECISION (the backfill left them unknown because nothing recorded who wrote them) and 11 of which are a DEFECT.
+    // A count that mixes a ratified absence with a live leak is worse than no count: it trains the reader to ignore it.
+    add('writer-not-declared', await Q(
+      `SELECT m.id::text AS id, m.user_id::text AS owner_id, coalesce(m.source, '(no source label)') AS wrote_as${excerpt}
+         FROM ${MEM} m
+        WHERE m.writer IS NULL
+          AND NOT EXISTS (SELECT 1 FROM ${CHG} c WHERE c.memory_id = m.id AND c.action = 'axes-backfill')
+          ${own('m.user_id')}
         ORDER BY m.id`, rep))
   }
   add('reach-not-recorded', await Q(
