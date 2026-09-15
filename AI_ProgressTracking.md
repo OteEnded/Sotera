@@ -8592,3 +8592,30 @@ violation, licensed true. That is carried by the violation RULE, ⛔ not the det
 attribution would train the opposite failure the principle also forbids (*"refusing to credit them is its own failure"*).
 E4 — silence is reported as SILENCE, never innocence. E1 — the guard is now in front of her alongside the very memory that
 steered her. ⛔ Detector stays ADVISORY, gates nothing. ⛔ Memory ranking/salience untouched. F3 parked. Sotera `<this commit>`.
+
+## 2026-09-15 (+07:00) — ⚠️ GATE RAISED · F2 collides with a ratified experiment · `GATE_SOTERA_ATTRIBUTION_EXPERIMENT_CONFLICT.md`
+
+Full suite after F2: **79 of 83**. Triaged, ⛔ not assumed:
+- `dreaming-m1f-check` and `memory-lifecycle-check` — **PASS standalone**; they failed in-suite because there was LIVE
+  TRAFFIC (16 messages in 30 min — Ote chatting). Both assert "the measurement mutated nothing", which a live user breaks.
+  ⇒ contention, ⛔ not regressions.
+- `temporal-denominator` D5a/D5b — the known pre-existing snapshot drift. Untouched.
+- **`unit` — 1 real failure, caused by F2** and left RED deliberately.
+
+⭐⭐ **`memory.layerAuthority` IS NOT A FEATURE FLAG — it is the TREATMENT ARM of a controlled experiment** (principle +
+precedence + reframed note block), and its off-by-default state is the CONTROL. `layer-authority-treatment.test.mjs` exists
+to pin exactly that. Shipping one component unconditionally put a third of the treatment into the control ⇒ the 2026-08-18
+design can no longer be replicated without reverting (`prompt-contamination-invalidates-the-finding`). ⓘ Ote's ruling does
+not contradict the experiment's CONCLUSION (*"P1's render cannot be shipped on this evidence"* — the render being all three;
+he refused `precedence`). The collision is mechanical, and still his to decide.
+
+⭐⭐⭐ **AND THE INCIDENT FALSIFIES THE EXPERIMENT'S CENTRAL RESULT.** It reported H1 misattribution **0/40 baseline** on the
+SAME model and called it *"an absence of the phenomenon"*. The phenomenon occurred in production on 2026-09-15.
+**Why the corpus missed it, specifically:** it injected `personaNotes` (HER OWN notes) with `toolsOn: false`; the real failure
+came from a RETRIEVED MEMORY ABOUT THE USER'S GOAL with tools ON, and appeared in her REASONING while choosing a tool call.
+⇒ the corpus tested whether she'd credit him for her own note; the failure was crediting him for a memory about him, while
+selecting an action. Different claims. ⓘ Likely also explains H3's *"metric unsound"* 25 % baseline.
+
+**Decision (his):** A keep F2 + retire the control arm (⭐ recommended — the old design answers a mis-specified question) ·
+B revert and re-run first · C keep F2 + commission a successor corpus (memory channel, tools on, score REASONING too).
+⚠️ Stated plainly: F2 proves the guard is FED, ⛔ not that it is OBEYED. ⛔ No ranking/salience change. F3 parked.
