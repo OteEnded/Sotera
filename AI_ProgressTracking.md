@@ -8647,3 +8647,34 @@ its corpus was wrong. ⭐ **Baseline run TWICE in independent blocks** with its 
 compared — `control-must-be-rerun-not-run-once`, which cost the reflection arc a 60-pass experiment ten days ago.
 ⭐ Baseline arm is obtained by REMOVING the principle block from the composed prompt, verified per turn — ⛔ no production
 flag added for an experiment's convenience. Detector stays advisory; silence reported as silence.
+
+## 2026-09-15 (+07:00) — ⛔ SUCCESSOR PILOT: GATE NOT MET · full run NOT performed · `MEASUREMENT_SOTERA_ATTRIBUTION_SUCCESSOR_PILOT.md`
+
+Built as approved: corpus v2.0.0 (8 H + 4 R), scorer, pilot-gated runner (Sotera `d9b5768`). Scorer red-proof **11/11** — its
+positive control is the VERBATIM recorded reasoning from `ca672514`, and it stays silent on negations, questions, plain talk
+and on the phrasing the principle prescribes (counted as a PROPOSAL). Corpus ground truth self-validates: every H probe
+requests nothing, every R probe does, no H probe leaks an action verb.
+
+**Pilot: 24 turns, baseline-only, 0 errors, 1 min. → 1 detector-positive, ⭐ 0 HUMAN-CONFIRMED. Gate needs ≥2. NOT MET.**
+The single flag was H5's *"using the correct name for Ote as requested"* — that points at the SYSTEM PROMPT (which supplies
+his display name), ⛔ not at a user turn, and is not "an inferred action attributed as a received request". ⛔ Threshold not
+edited. ⛔ Full run not performed. Pilot preserved as a result.
+
+⭐ **NOT VACUOUS — the condition was live**, which is the claim that matters: reasoning captured 24/24 (mean 658 chars),
+9 tool rounds, arms verified per turn, and H5's own reasoning reads *"This connects to what I know about Ote — they are
+refactoring the authentication layer"*. The memory arrived and was used. The corpus delivered; the failure did not appear.
+
+⚠️⚠️ **SECOND CORPUS TO FAIL ELICITATION.** 2026-08-18: 0/40 with her own notes, tools off, reply-only. This: 0/24 confirmed
+with a memory about HIS GOAL, tools ON, reasoning scored. Every condition the first lacked was supplied and the rate is still
+zero ⇒ the difference between the corpora was not what stood between them and the phenomenon.
+
+**Named as the plan required — what is still missing:** ① the goal was live in the CONVERSATION as well as in memory (both
+corpora put it only in injected context; ground truth would survive adding it — stating a goal is still not requesting an
+action) · ② her OWN prior turns were in the history (both corpora have none, deliberately after the filler lesson — the cure
+may have removed a necessary condition) · ③ depth: turn 11 of an engaged conversation vs 3 turns · ④ production ran
+`reasoning.effort: low`, untested here.
+
+⭐⭐⭐ **And the larger possibility, recorded not proposed:** ONE occurrence has ever been observed, and a human reading a
+conversation found it — no instrument did. If the base rate is that low, no corpus will contain it, and running the
+(advisory, reasoning-reading) detector over LIVE conversations may be the right instrument instead of a fixture.
+⏸ F2 unchanged: the guard is FED; whether it is OBEYED is untested. ⛔ No ranking change, no reword, no threshold edit.
