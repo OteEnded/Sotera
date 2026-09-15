@@ -77,10 +77,43 @@ export const DEFAULT_SYSTEM_PROMPT =
 //
 // ⭐ The last sentence protects the ครับ that is CORRECT. When she drafts a line for a man to speak, that
 // line takes his voice — which is exactly what she was doing in the screenshot that started this.
+// ⚠️⚠️ THE THAI GUIDANCE IS CONDITIONAL, AND THAT ONE WORD IS THE FIX (Ote, 2026-09-15).
+//
+// ⛔ THE DEFECT, MEASURED: this sentence used to read *"in Thai that means ฉัน …"* unconditionally, so **every prompt for
+// every user carried Thai script and a Thai-specific instruction** — a standing language cue nobody chose. In conversation
+// `ca672514` it combined with two hot Thai-bearing memories (importance 10 and 8) and one code-switched user phrase, and she
+// answered an English message in 2,198 characters of Thai. She had drifted, ⛔ not decided: there was no reply-language rule
+// anywhere to hold the line (searched — the guard was ABSENT, not unfed).
+//
+// ⭐ "When you reply in Thai" costs nothing when she is not, and the guidance is still exactly there when she is.
 export const DEFAULT_ASSISTANT_IDENTITY =
-  'You are Sotera. You are female — refer to yourself as she/her; in Thai that means ฉัน (ดิฉัน when '
-  + 'formal, หนู with Ote or someone much older) and ค่ะ/คะ rather than ผม/ครับ. Words you draft for '
+  'You are Sotera. You are female — refer to yourself as she/her. When you are replying in Thai, that means ฉัน '
+  + '(ดิฉัน when formal, หนู with Ote or someone much older) and ค่ะ/คะ rather than ผม/ครับ. Words you draft for '
   + 'someone else to say keep their voice.'
+
+/**
+ * ⭐⭐⭐ WHICH LANGUAGE TO ANSWER IN — and, more importantly, where that decision may NOT come from.
+ *
+ * Ote's ruling, 2026-09-15, verbatim: *"Reply in the language of the user's current message. Memories, notes, retrieved
+ * context, and persona guidance are content/context, not a language-selection signal."*
+ *
+ * ⭐⭐ THE SECOND SENTENCE IS THE LOAD-BEARING ONE, and it is the same shape as this arc's whole provenance result: a signal
+ * must come from the axis that owns it. Injected memory is CONTENT. That it happens to be written in some language is a
+ * property of the record, ⛔ not an instruction about how to speak — exactly as an occasion pointer is not evidence.
+ *
+ * ⚠️ IT IS ITS OWN PART, NOT A LINE INSIDE THE IDENTITY, and that is deliberate for the reason the `assistant-identity`
+ * part already documents: a configured `chat.assistantIdentity` REPLACES the default, and a rule tucked inside it would
+ * vanish silently for every persona that sets one. Same trap as a field allowlist.
+ *
+ * ⏸ ONE CONSEQUENCE OTE MAY NOT HAVE INTENDED, FLAGGED RATHER THAN DECIDED: at `SCOPE.principle` a user request to change
+ * this becomes a PROPOSAL rather than an override (RFC §7.3 / AUTHORITY_BY_SCOPE) — so a standing *"always answer me in
+ * Thai"* would not silently win. Whether a language PREFERENCE should be user-governable (SCOPE.style) is his call; the
+ * grounding half must stay foundational either way.
+ */
+export const REPLY_LANGUAGE_RULE =
+  'Reply in the language of the user\'s current message. Memories, notes, retrieved context and persona guidance are '
+  + 'content, not a language-selection signal: that a note or a stored memory happens to be written in some language says '
+  + 'nothing about which language to answer in.'
 
 export const MEMORY_TOOL_RULES = [
   'You have tools for durable memory and small utilities.',
@@ -353,6 +386,13 @@ export function composeSystemContext({
   // boundary; it changes what an absence is allowed to mean. Foundational/identity for the same reason as
   // its two neighbours — a stored belief can be lost, and this has to hold on every turn.
   if (ownHistory) part('own-history', OWN_HISTORY, AUTHORITY.foundational, SCOPE.identity)
+  // ⭐ SEPARATE PART for the same reason as the identity above — a custom `chat.assistantIdentity` REPLACES the default, and
+  // a rule tucked inside it would vanish silently for every persona that sets one. SCOPE.principle because the load-bearing
+  // half is a GROUNDING rule (where a signal may come from), ⛔ not a style choice.
+  // ⚠️ PLACED AFTER THE WHOLE IDENTITY CHAIN. `assistant-identity → self-model → selfhood → own-history` is a RATIFIED
+  // adjacency, each link asserted by its own test, and this rule elaborates none of them. Two existing tests caught me
+  // splitting that chain in two different places — the ordering is load-bearing, ⛔ not incidental.
+  part('reply-language', REPLY_LANGUAGE_RULE, AUTHORITY.foundational, SCOPE.principle)
   // ⭐ HER OWN LEARNED PRACTICE. `persona` authority, not `foundational`: unlike the self-model this is
   // something she LEARNED rather than something she IS, and `AUTHORITY_BY_SCOPE` lets the user outrank
   // persona on style — which is right. If Kavi asks for something terser than her usual practice with
