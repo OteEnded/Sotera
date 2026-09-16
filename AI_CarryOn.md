@@ -170,7 +170,10 @@ production reflection = GEN 3 · 40 Gen-4 + 60 three-arm runs and clones PRESERV
 UNKNOWN and UNREPAIRED · episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 search snapshot UNTOUCHED ·
 BASIS rename DEFERRED · ⛔ no provenance inference or repair · ⛔ no weakening of occasion/reachability/provenance separation
 ⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · ⛔ no pilot-threshold edit · F3 PARKED
-✅ D1 PHASE 3 LIVE ⇒ ⛔ NO undeclared write or memory-semantic mutation · ⛔ historical rows NEVER repaired
+✅ D1 PHASE 3 CLOSED/LIVE. THE INVARIANT, IN HIS WORDS — ⛔ NEVER shorten it: *"Every memory-SEMANTIC state mutation
+requires a declared writer. NON-SEMANTIC BOOKKEEPING mutations performed as part of READS remain permitted."* W5c guards that
+distinction. ⭐ WRITER mandatory · ACT only where the operation HAS an occasion — ⛔ never manufacture an act to satisfy the seam
+⛔ NO undeclared write or memory-semantic mutation · ⛔ historical rows NEVER repaired
 ⛔ NO THIRD CONSTRUCTED CORPUS (ruled 09-15) · ⛔ the detector stays ADVISORY, ⛔ NEVER a behavioural gate
 ⛔ a CANDIDATE is not a violation — only a HUMAN-CONFIRMED class is · ⛔ Mr C never classifies · ⛔ frozen evidence is not a memory store
 ⛔ no causality inferred from any live hit — presence is recorded, cause is not · ⛔ the natural-trajectory set is not enlarged
@@ -231,7 +234,23 @@ PROVENANCE   ✅ D3′ / D8 / D9 ALL RULED AND DONE 09-16. ⏸ ONLY THE PHASE-3 
                  id never reaches the gate — `forget` returns early — so the first version passed VACUOUSLY).
                  ⛔ NO historical row repaired: the 15 are frozen residue. ⛔ Lint stays a DEFECT (the only guard on the 19
                  raw-SQL sites the store cannot see). ⛔ `runtime.js` memory.v2's `?? null` deliberately left + flagged.
-             D2/D4  the 8 historical rows + what a ratified permanent unknown looks like in the lint. Not urgent.
+             ⭐ D2/D4 MATERIAL PREPARED 09-16, read-only: `GATE_SOTERA_D2_D4_MATERIAL.md`. ⚠ THE OLD FRAMING DID NOT
+                 SURVIVE RE-MEASUREMENT — 2 of its 3 load-bearing claims changed:
+                 ① the "unambiguous ≥20-min window" is a KNIFE EDGE: exactly-one-candidate holds 8/8 at ±10 and ±15,
+                   but only **4/8 at the stated ±20** — four rows sit between two consecutive passes over ONE
+                   conversation **19.9 minutes apart**, six seconds inside the boundary the claim is named after.
+                 ② ⭐⭐ THE "ONE MEMORY PER PASS" OBJECTION DISSOLVED: post-049 passes DO write several (one act wrote 3,
+                   two wrote 2; 16 rows across 12 passes). That is a LEDGER limit (`wrote_memory_id` is ONE column),
+                   ⛔ not a fact about passes ⇒ "the candidate pass already claims another memory" is NOT an objection.
+                 ③ ⭐⭐⭐ ALL 8 ALREADY CARRY an `axes-backfill` RATIFICATION — and `writer-not-declared` EXCLUDES ratified
+                   rows while `pass-writer-without-act` does NOT. Two rules read the identical stamp differently; nobody
+                   decided that — the exclusion was written for one rule and never carried across.
+                 ⇒ D2's real question is ⛔ NOT "is the window clean" (it nearly is) but **may an OCCASION be inferred
+                 from TEMPORAL proximity** — and §0-B rule ⑦ says NO. ⭐ Recommend **D2 = leave them unknown by ruling**
+                 (if ever revisited, an inferred occasion must be VISIBLE on the row, never indistinguishable from a
+                 declared one); **D4 = carry the axes-backfill exclusion across** — ⛔ not a new mechanism, the removal
+                 of an inconsistency; a NEW pass-writer row with no act stays a defect, loudly.
+                 ⚠ RULE D2 FIRST — D4 only makes sense if the rows stay unknown. ⛔ Nothing linked, repaired or changed.
              D6 BASIS rename · D7 @ote/memory attribution (my earlier R-C hunks still interleaved with foreign work)
 ATTRIBUTION  ✅ D11–D14 SHIPPED · ⭐ FIRST CANDIDATE CAUGHT AND CLASSIFIED 09-16: `769f6a65` → **REQ_NOW by ote**,
              a confirmed NON-violation (the user turn DID carry an explicit inventory instruction ⇒ accurate attribution;
