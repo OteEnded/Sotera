@@ -15,6 +15,8 @@ import { chat } from '../chat-runtime/index.js'
 import { getSetting } from '../settings/index.js'
 import { createCosineSlotResolver, SLOT_SEM_THRESHOLD } from '@ote/memory/cognition/memory-slot-resolver.js'
 import { createGrayZoneResolver, GRAY_ZONE_MODE } from '@ote/memory/cognition/memory-grayzone-resolver.js'
+import { createOntologyResolver } from '@ote/memory/cognition/memory-ontology.js'
+import { bump } from '@ote/memory/cognition/memory-resolver-telemetry.js'
 import { extractModel } from './memory-extract-host.js'
 
 const DEFAULTS = { min: 0.70, max: 0.85, tie: 0.02 }
@@ -117,6 +119,27 @@ function makeResolverLlm(fastify, { userId = null } = {}) {
  * @param {(text:string)=>Promise<{vector:number[]|null}>|null} embed
  * @param {(slots:object[], ctx:object)=>Promise<Map<string,number[]>>} loadIndex the §8a private-index port
  */
+/**
+ * ⭐⭐⭐ A1 · THE ONTOLOGY MODE — `memory.resolver.ontologyMode`, 'off' (default) | 'shadow'.
+ *
+ * ⛔ THERE IS NO 'on'. Authority is a separate decision and is STRUCTURALLY BLOCKED ON A-D4: today "not the same
+ * slot" falls through to MINT NEW, so granting authority while A-D4 is open would decide `broader → mint new
+ * slot` BY DEFAULT — the exact thing A-D4 refuses. Shadow is safe precisely because it cannot make that call.
+ */
+export function ontologyMode(config) {
+  return getSetting(config, 'memory.resolver.ontologyMode') === 'shadow' ? 'shadow' : 'off'
+}
+
+/** ⭐ The shadow sink: one counter per relation, so `unknown` is REPORTED SEPARATELY from `different`. */
+function ontologyObserver(fastify) {
+  return (entry) => {
+    bump(`ontology_${entry.relation}`)
+    // ⭐⭐ THE NUMBER THE MEASUREMENT EXISTS FOR: the shipped resolver bound it, and structure says otherwise.
+    if (entry.wouldDiffer) bump(`ontology_would_differ_${entry.relation}`)
+    fastify?.events?.emit?.('memory.ontology.shadow', entry)
+  }
+}
+
 export function buildSlotResolver(fastify, { embed = null, loadIndex = null, userId = null } = {}) {
   // No host (a lightweight harness) → the chain has no gateway to call and no settings to read, so the
   // cheap resolver at its compiled-in default is the only honest answer. A genuine capability check, NOT
@@ -124,8 +147,15 @@ export function buildSlotResolver(fastify, { embed = null, loadIndex = null, use
   if (!fastify?.config) return createCosineSlotResolver({ embed, loadIndex })
   const threshold = slotSemThreshold(fastify.config)
   const cosine = createCosineSlotResolver({ embed, loadIndex, threshold })
+  // ⭐ A1 · the ontology step OBSERVES whatever chain is built below it — it is the OUTERMOST link, so it sees
+  // the answer that was actually reached (cosine's, or the gray zone's), ⛔ never an intermediate one.
+  const onto = ontologyMode(fastify.config)
+  const observed = (chain) => (onto === 'shadow'
+    ? createOntologyResolver({ base: chain, mode: 'shadow', observe: ontologyObserver(fastify), log: fastify.log ?? null })
+    : chain)
+
   const mode = grayZoneMode(fastify.config)
-  if (mode === GRAY_ZONE_MODE.off) return cosine
+  if (mode === GRAY_ZONE_MODE.off) return observed(cosine)
   const { min, max, tie } = grayZoneBand(fastify.config)
   // ⚠️ NO UNJUDGED DEAD ZONE. These two settings are independent but must not be set independently:
   // cosine self-resolves at >= `threshold`, and the adjudicator is only consulted within [min, max].
@@ -145,11 +175,11 @@ export function buildSlotResolver(fastify, { embed = null, loadIndex = null, use
       'memory.resolver: grayZone.max sits below slotSemThreshold — raising it, or scores between them would be judged by nothing and silently split',
     )
   }
-  return createGrayZoneResolver({
+  return observed(createGrayZoneResolver({
     base: cosine,
     llm: makeResolverLlm(fastify, { userId }),
     mode, min, max: ceiling, tie,
     log: fastify.log ?? null,
     events: fastify.events ?? null,
-  })
+  }))
 }

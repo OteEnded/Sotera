@@ -144,6 +144,23 @@ governance-READ decision. ⛔ Not reopened.
    programming language"` and `"schedule" ⊂ "work schedule"` are the SAME token test and OPPOSITE facts.
    ⇒ ⛔ never let a SHORTER phrase inherit a longer slot on subset alone; and ⛔ do not answer this with a
    threshold — cosine scored the same bad pair 0.9104. BOTH arms make it.
+⑮ ⭐⭐⭐ DREAMING IS SOTERA THINKING, ⛔ NOT A BACKGROUND JOB WITH A SMALLER BRAIN (Ote, 09-16).
+   ⛔ Do NOT inherit the OLS pattern "background task = smaller CPU model + small context window". Its
+   objective was right (don't block the GPU) and its solution does not transfer.
+   ⭐ FOREGROUND: full-capability model · high priority. BACKGROUND/DREAMING: **the SAME class of capable
+   model — potentially the exact same main model** · LOWER priority · INTERRUPTIBLE · RESUMABLE.
+   ⇒ a user message PAUSES Dreaming, foreground takes the resources, then Dreaming RESUMES **from its
+   cognitive state** — a train of thought picked back up, ⛔ not a job restarted from the top.
+   ⭐ LOWER PRIORITY is the answer to contention; ⛔ a weaker brain is not. The model yields to Ote; the
+   COGNITION must not get less capable because it is background.
+   ⭐ And Dreaming is ⛔ NOT "summarize the last turn": she explores a conversation as an EVIDENCE SPACE —
+   follow a thread, notice a correction, compare statements many turns apart, question her own reading —
+   keeping `explicit evidence / observation / inference / durable belief` apart.
+   ⭐⭐ EXPLORATION IS NOT AUTOMATICALLY BELIEF (the safety property; a pass that commits nothing SUCCEEDED).
+   ⇒ ⭐⭐ B1 IS THE FIRST STEP OF DREAMING'S NAVIGATION SURFACE, not only a correctness fix: *"the
+   conversation should be something she can LOOK THROUGH, not merely something a small summarizer sees
+   once."* ⇒ B-D1 (the radius) is not only "how much text fits" but "what must she be able to move through".
+   Full context: `CONTEXT_SOTERA_DREAMING_IS_SOTERA_THINKING.md`.
 ⑭ ⭐⭐⭐ ASK WHAT THE QUERY SELECTED BEFORE BLAMING THE RANKING — AND BEFORE BLAMING THE MODEL (09-16). Her
    wrong answer was the CORRECT inference from a transcript excerpt built by `ORDER BY rolling_id ASC LIMIT 2`,
    which had silently dropped the correction. The comment above it read *"a convenience, never load-bearing."*
