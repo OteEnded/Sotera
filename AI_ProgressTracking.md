@@ -9484,3 +9484,46 @@ and is already self-audited inline ⇒ audit the BINDING, leave the rest."* A3 s
 
 State: 112 slots · 8 aliases · location collision armed · Mira and shelter fixtures intact · 22 scans · 5 candidates,
 4 still unreviewed · both `.bak` files present · no code changed in `@ote/memory` or `Backend/app`.
+
+---
+
+## 2026-09-16 · A3 LANDED — the alias is a governed semantic operation
+
+A-D7 ruled YES: move `touch()` with the governed alias write, grounded specifically in `last_write` participating in
+slot resolution ordering, and explicitly not a reopening of the wider 048 bookkeeping model. A3 then authorized.
+
+**Shipped:** `WRITER.resolver` (`pass: false`) · migration **051 `log_slot_aliases`** · `recordAlias` and `touch`
+relocated into `finalizeSlot(memoryId)` called at the two *successful* exits (`plan.target` / `created.id`) · teaching
+gated on `evidence.learn`. "A refused write teaches nothing" is now a control-flow fact rather than a rule anyone has
+to remember, because a refused write never reaches either exit.
+
+**Red-proof first**, verified failing against unmodified source — 6 failures. One of them only appeared after I fixed
+my own vacuous assertion: I compared `last_write` as `Date` objects, whose string form hides milliseconds, so a
+`touch()` 22ms later compared *equal* and the assertion passed against source that had not been changed yet. Reading
+the timestamp as text with `.MS` made it red. The check also carries a **positive control that crosses persistence** —
+an adjudicated verdict still teaches, with writer/act/relation/declared/memoryId, and the ledger answers "which
+equivalences did this occasion teach?". Without it the whole check would be satisfied by "nothing ever teaches".
+
+⚠️⚠️ **I contaminated the shelter evidence slot with my own fixture, and the blast-radius assertion caught it.**
+A `zz_` prefix is not a fence against containment: a prefix makes a name *longer*, and containment matches when the
+*shorter* token set is contained — so `zz_a3 work schedule` scored **1.0000** against the real `work schedule` slot.
+It bound there, taught an alias, refreshed `last_write`, and superseded the reflection row `33926415`. Restored in
+full: alias removed, `write_count` 4→3, `last_write` returned to its pre-contamination value (ordering exact; the
+millisecond is a declared approximation), the row re-LIVEd, my audit row deleted, guardrail re-verified green. The
+check now runs a **pre-flight scan** proving its fixture names collide with nothing before it writes — naming
+convention is not a fence, the scan is.
+
+⚠️ Two implementation facts worth keeping: **051 has no FK on `slot_id`**, unlike `log_slot_bindings` — the first
+version had one and it pinned slots alive, breaking `retention-receipt`'s teardown; `ON DELETE CASCADE` would be worse,
+deleting the audit of what a slot taught at exactly the moment someone removes the slot. History outlives its subject,
+which is why `canonical_label` was already snapshotted. And **the ledger insert qualifies the schema from the model** —
+a raw `INSERT INTO log_slot_aliases` fails with *relation does not exist* because a raw query inherits only the session
+`search_path`, the query-side of the lesson 050 taught on the DDL side.
+
+ⓘ New observation, not a decision: the ledger writes a `refuse` row per cheap-arm bind — **9 rows from one
+`retention-receipt` run**. That is the measurement Ote asked for, but its volume and retention are unruled.
+
+Verification: unit **753/753** · `@ote/memory` **94/94** · 13 checks green including the evidence baseline.
+`dense-admission` still red on its known hardcoded corpus count (19 rows) — pre-existing, not this change.
+`grayZoneMode` untouched; no classifier has authority; A1 remains shadow-only and blocked on A-D4.
+:8210 is still running the pre-A3 build — a restart is Ote's call.

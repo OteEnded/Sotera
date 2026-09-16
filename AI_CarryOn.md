@@ -202,40 +202,40 @@ DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ①
            ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
            not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
            ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-A/B        ⭐⭐⭐ SLOT IDENTITY (A) + EVIDENCE PROJECTION (B). **ALL DECISIONS CLOSED 09-16. PLAN RATIFIED.
-           GUARDRAIL SHIPPED. A3 IN PROGRESS.** `PLAN_SOTERA_A_B_IMPLEMENTATION.md` is the live document;
-           `DESIGN_SOTERA_A_SLOT_IDENTITY.md` · `DESIGN_SOTERA_B_EVIDENCE_PROJECTION.md` are the designs.
-           A1 relation {same|different|broader|narrower|sibling|unknown}; ONLY `same` may bind; `unknown`
-              stays distinguishable from `different`. ⛔ NO threshold change is part of A1, ever.
-           A2 Normalization contract RATIFIED: an op belongs to it iff computable from the observation
-              ALONE and unchanged if no slot existed. + head/qualifiers. ⛔ never reads mst_slots.
-              ⚠ the unknown fallback is part of the contract — Thai must degrade to TODAY's behaviour.
-           A3 alias: writer=resolver · explicit act · pass=false · memoryId · relation=same · declared.
-              ⭐⭐ ONLY AN ADJUDICATED `same` MAY TEACH. A cheap-arm hit may BIND but may not TEACH.
-           A-D3 ledger = β: mst_slots.aliases stays the INDEX + append-only `log_slot_aliases` (mig 051).
-           A-D2 SHADOW ONLY — ⛔ grayZoneMode NOT turned on. Shadow: no bind, no teach, no mutation, no repair.
-           A-D4 `broader` handling LEFT OPEN ⇒ ⭐ A1 AUTHORITY IS STRUCTURALLY BLOCKED ON IT: today
-              "not same" falls through to MINT NEW, so authority-while-open would decide A-D4 by default.
-           A-D5 the bad aliases + armed `location` collision: ⛔ DO NOT TOUCH. A-D6 the 8 existing aliases
-              are an AUDITED UNKNOWN — ⛔ no retroactive writer/act/memory lineage invented.
-           B1/B2 ratified. B-D1 radius MEASURED not guessed (implement the span as a PARAMETER) ·
-              B-D2 incomplete presentation OPEN · B-D3 ⛔ lattice NOT touched · B-D4 new scans carry a
-              projection version; ⛔ detector/principle/22 scans/4 candidates untouched; RED-PROOF that a
-              gap marker can NEVER match the "X said to me:" pattern.
-           ⭐ R3 the grant-count control: REVOKE live grants FIRST or it proves nothing.
-           ✅ SHIPPED `test/checks/evidence-baseline-check.mjs` — destruction-detecting, ⛔ NOT
-              count-equality (that would fail for the right store and pass for a wrong one). Names every
-              evidence row/alias/candidate and its state; population REPORTED, only a DROP fails; writes
-              NOTHING. ⭐⭐ FALSIFIED in a rolled-back txn: alias delete / belief repair / collision disarm
-              were each caught. Runs before and after every A/B step.
-           ⚠⚠ FOUND IMPLEMENTING A3 (demonstrated with injected fakes, no DB): **recordAlias + touch run
-              BEFORE store.create** ⇒ a write the D1 Phase 3 gate REFUSES has already taught a permanent
-              equivalence AND refreshed last_write. ⇒ the ratified `memoryId` FORCES the alias write to
-              move after the row resolves; "a refused write teaches nothing" then falls out.
-              ⏸ **A-D7 NEW, NOT TAKEN: does `touch()` move too?** It IS the candidate order and the
-              tie-break ⇒ moving it changes resolution ordering for EVERY slot. ⛔ I did not change it.
-              ı Migration 048 §③ reasoned the opposite ("recordAlias changes only RESOLUTION"); A3
-              supersedes that specific judgement, and 051's header must say so.
+A/B        ⭐⭐⭐ **A3 IS LANDED AND GREEN (09-16).** A1 = SHADOW-ONLY and structurally blocked on A-D4.
+           B not started, independent. `PLAN_SOTERA_A_B_IMPLEMENTATION.md` is the live document.
+           ✅ A3 SHIPPED: `WRITER.resolver` (pass:false) · migration **051 `log_slot_aliases`** (append-only,
+              records REFUSALS as well as promotions) · `recordAlias`+`touch` RELOCATED into `finalizeSlot()`
+              at the two SUCCESSFUL exits · teaching gated on `evidence.learn`.
+              ⭐ "a refused write teaches nothing" is now a CONTROL-FLOW FACT, not a rule to remember.
+              ⭐ ONLY AN ADJUDICATED `same` MAY TEACH — a cheap-arm hit BINDS and is LOGGED as `refuse`.
+           ✅ GUARDRAIL `test/checks/evidence-baseline-check.mjs` — destruction-detecting, ⛔ NOT
+              count-equality; falsified in a rolled-back txn; writes nothing. RUN IT BEFORE AND AFTER EVERY STEP.
+           ✅ RED-PROOF `test/checks/slot-alias-accountability-check.mjs` — verified FAILING first (6 fails).
+              ⚠ One of those only appeared after fixing a VACUOUS assertion: comparing `last_write` as Date
+              objects hides ms, so a `touch` 22ms later compared EQUAL. Read timestamps AS TEXT WITH MS.
+              ⭐ Carries a POSITIVE CONTROL crossing persistence (an adjudicated verdict still teaches) —
+              without it the whole check is satisfied by "nothing ever teaches".
+           ⚠⚠⚠ **A `zz_` PREFIX IS NOT A FENCE AGAINST CONTAINMENT.** A prefix makes a name LONGER, and
+              containment matches the SHORTER token set ⇒ `zz_a3 work schedule` scored **1.0000** on the REAL
+              `work schedule` slot. My first red-proof taught it an alias, refreshed its last_write and
+              SUPERSEDED the reflection row `33926415`. Caught by the check's OWN blast-radius assertion,
+              fully restored (alias removed · write_count 4→3 · last_write · row re-LIVEd · audit row deleted),
+              guardrail re-verified green. ⇒ the check now has a **PRE-FLIGHT guard** that proves its fixture
+              names collide with NOTHING before it writes. ⛔ Naming convention is not a fence; the scan is.
+           ⚠ 051 has **NO FK on slot_id**, unlike `log_slot_bindings`, and that is deliberate: the FK PINNED
+              SLOTS ALIVE and broke `retention-receipt`'s teardown. ⛔ CASCADE would be worse — it deletes the
+              audit of what a slot taught at the moment someone removes it. History outlives its subject.
+           ⚠ The ledger insert QUALIFIES THE SCHEMA FROM THE MODEL — a raw `INSERT INTO log_slot_aliases`
+              fails with *relation does not exist* because a raw query inherits only the session `search_path`.
+              Same family as 050 landing in `public`.
+           ⏸ OPEN: A-D4 `broader` handling (⭐ A1 authority blocked on it) · A-D2 classifier = SHADOW ONLY,
+              `grayZoneMode` still 'off' · A-D5 bad aliases + armed `location` collision UNTOUCHED ·
+              A-D6 the 8 aliases = AUDITED UNKNOWN, no backfill · B-D1..D4 · B not started.
+           ı NEW OBSERVATION, not a decision: the ledger records a `refuse` row per cheap-arm bind — 9 rows
+              from ONE `retention-receipt` run. That IS the measurement Ote asked for, but its VOLUME and
+              retention are unruled. Report the rate before it becomes a table nobody reads.
+           ı :8210 is still running the PRE-A3 build — a restart is HIS call, never mine.
 NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
            `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
            here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial
