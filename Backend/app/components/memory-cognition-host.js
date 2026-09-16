@@ -85,6 +85,26 @@ import { buildMemoryToolService } from './memory-pipeline-host.js'
 import { log } from '../../lib/utility.js'
 
 /** Per-operation limits. ⭐ Bounds on the WORK of one look, never on how many times she may look. */
+// ══ ⭐⭐⭐ B-D4 · THE PROJECTION VERSION — declared HERE, beside the thing it versions ═══════════════════
+//
+// `attribution-live-detection.js` classifies by PARSING THIS MODULE'S RENDERED BLOCK (`X said to me:` lines are
+// its REQ_PRIOR_CONV source set). ⇒ THE PROJECTION IS THE DETECTOR'S INPUT, and the detector is frozen. A change
+// here changes what is classifiable without the instrument changing at all, so every new scan records which
+// projection produced the block it read (migration 052).
+//
+// ⛔ BUMP THIS WHENEVER THE RENDERED SHAPE CHANGES — which turns are selected, how they are ordered, or what a
+// gap says. ⓘ It lives in this file and not in the detector on purpose: a version kept next to its consumer
+// drifts from its producer, and the producer is here.
+//
+//   (unversioned)  pre-2026-09-16. Counterpart half = `role='user' ORDER BY rolling_id ASC LIMIT 2` — the two
+//                  OLDEST user turns of the whole conversation, so a correction could essentially never appear.
+//                  Her half = rolling_id arithmetic, which silently collapsed on interleaved conversations.
+//                  ⛔ The 22 scans taken under it keep projection_version NULL: an absent version is the honest
+//                  record of an instrument that had no version concept, ⛔ never a backfilled one.
+//   '2'            2026-09-16 (B1/B2/B-D2). ONE contiguous POSITIONAL window, centred, both speakers; every
+//                  position SHOWN or MARKED; elision and withholding declared as distinct epistemic states.
+export const PROJECTION_VERSION = '2'
+
 const LIMITS = Object.freeze({
   workingSet: 12,     // recent turns of this conversation
   semantic: 8,

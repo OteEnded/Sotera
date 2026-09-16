@@ -272,7 +272,14 @@ A/B        ✅ **A3 · A2 · A1(shadow) · B1/B2 ALL LANDED 09-16.** :8210 on th
            ⏸ OPEN: **A-D4** (broader/narrower/sibling durable behaviour — A1 authority STRUCTURALLY blocked
               on it; and §1 makes it HARDER: broader is not always an error) · B-D1 · B-D2 (incomplete
               PRESENTATION — field landed, rendering deliberately did not) · B-D3 (⛔ lattice untouched) ·
-              B-D4 scan stamping not yet built · the `unknown`/extractor-naming investigation.
+           ✅ **B-D4 DONE: mig 052 `projection_version` on scans + candidates, `PROJECTION_VERSION='2'`
+              declared in `memory-cognition-host.js` — BESIDE the thing it versions, so it cannot drift from
+              its producer.** The detector parses the episode block as its source set ⇒ the PROJECTION IS ITS
+              INPUT, and B changed that input while the detector stayed frozen.
+              ⛔ The 22 pre-B scans keep `projection_version` NULL — an absent version is the HONEST record;
+              the DATE is the discriminator, ⛔ never a backfilled value (same ruling as A-D6).
+              ⭐ Proven ACROSS PERSISTENCE (row written, re-read from the DB, probe removed, denominator back
+              at 22). ⛔ Detector, principle, 22 scans and 4 unreviewed candidates all untouched.
            ⚠ `` BECAME A LITERAL BACKSPACE AGAIN (2nd time this arc) via a shell-layer edit — a regex
               silently matched nothing. ⇒ prefer regexes that need NO escapes; check bytes when a match is 0.
 NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,

@@ -9668,3 +9668,41 @@ armed collisions intact · A1 still shadow and accumulating.
 
 ⏸ Still open and deliberately uncollapsed: **A-D4** · **B-D1** (radius unchanged at ±4) · **B-D3** (lattice
 untouched) · **B-D4** scan versioning not built · the `unknown`/extractor-naming investigation.
+
+---
+
+## 2026-09-16 · B-D4 — the projection version, stamped while the boundary is still clean
+
+Checked the timing before building: **no scans had been taken since B shipped** (the last was 13:05, before any
+of the day's changes). So all 22 existing scans are cleanly pre-B, and adding the stamp *now* makes every row
+unambiguous — the 22 carry none, everything after carries one. That window would have closed on the next turn.
+
+Migration 052 adds `projection_version` to `log_attribution_scans` and `log_attribution_candidates`, nullable
+**with no default** — a default would silently stamp the existing rows with a version they were never taken
+under, which is the backfill the ruling refuses. The 22 keep NULL: an absent version is the honest record of an
+instrument that had no version concept, and the date is the discriminator. Same ruling as A-D6 on the 8 aliases.
+
+`PROJECTION_VERSION = '2'` is declared in `memory-cognition-host.js` — **beside the thing it versions**, not in
+the detector — because a version kept next to its consumer drifts from its producer, and the producer is the
+projection. The detector imports it and records it; it never reads it to classify. Detector, principle, the 22
+scans and the 4 unreviewed candidates are all untouched.
+
+⭐ **Proven across persistence**, because a returned object is not proof a value survived the write: a real scan
+row was written through `recordAttributionTurn`, re-read from the database (`projection_version: "2"`), then the
+probe was deleted and the denominator verified back at 22.
+
+⚠️ **An existing guard caught the half-done column and it was strengthened, not relaxed.** A unit test asserts
+that the attribution migrations and the models declare the *same* columns — it went red the moment 052 added a
+column, which is exactly the `migration-column-needs-a-model-declaration` failure it exists to catch. The fix was
+to teach it about the migration *set* and about `ALTER TABLE … ADD COLUMN`; the equality itself is untouched,
+because the equality is the whole instrument. Both models now declare the column.
+
+ⓘ Recorded in `CONTEXT_SOTERA_DREAMING_IS_SOTERA_THINKING.md` §4.5, at Ote's request: **retrieval for an answer
+vs exploration for cognition** — bounded retrieval versus a navigable evidence space, and *"she decides because
+she wants to investigate something, not because a fixed algorithm decided to dump another N messages."* A radius
+is a projection primitive, ⛔ not the permanent definition of Dreaming's visibility. The `(121 earlier turns…)`
+marker is named as the load-bearing part: *"I have not seen the rest of this conversation"* is fundamentally
+different from *"there is no earlier context"* — and a future session must not optimise it away as noise.
+
+Verification: unit **753/753** · evidence baseline green · evidence-projection, memory-cognition and
+attribution-guard green · 22 scans, 5 candidates, 4 still unreviewed · both armed collisions intact.

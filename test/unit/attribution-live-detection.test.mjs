@@ -124,12 +124,24 @@ test('R · remembered-speech parsing: the person\'s lines only, with date and bl
   assert.ok(!lines.some((l) => /I said to Ote/.test(l.text)), 'her own lines are excluded')
 })
 
-test('M · ⭐⭐ migration 050 and the two models declare the SAME columns', () => {
-  const sql = read('Backend/database/migrations/050_attribution_live_detection.sql')
+// ⭐⭐ EXTENDED 2026-09-16: the guard compares the models against the MIGRATION SET, not one file.
+// ⚠️ It went red when 052 added `projection_version` — which is the guard WORKING. An ADD COLUMN has a SECOND
+// HALF, and a column the model does not declare never surfaces through Sequelize. ⛔ The fix is to teach the
+// guard about the new migration, ⛔ NEVER to relax the equality: the equality is the whole instrument.
+// ⓘ Any future ALTER TABLE on these two tables must be listed here, or this fails — by design.
+const ATTRIBUTION_MIGRATIONS = [
+  'Backend/database/migrations/050_attribution_live_detection.sql',
+  'Backend/database/migrations/052_attribution_projection_version.sql',
+]
+test('M · ⭐⭐ the attribution migrations and the two models declare the SAME columns', () => {
+  const sql = ATTRIBUTION_MIGRATIONS.map(read).join('\n')
   const cols = (table) => {
     const m = new RegExp(`CREATE TABLE IF NOT EXISTS ${table} \\(([\\s\\S]*?)\\n\\);`).exec(sql)
     assert.ok(m, `no CREATE TABLE for ${table}`)
-    return m[1].split('\n').map((l) => l.trim().split(/\s+/)[0]).filter((c) => c && !/^(CHECK|CONSTRAINT)/.test(c))
+    const created = m[1].split('\n').map((l) => l.trim().split(/\s+/)[0]).filter((c) => c && !/^(CHECK|CONSTRAINT)/.test(c))
+    // ⭐ …plus every column a LATER migration ADDED to the same table.
+    const added = [...sql.matchAll(new RegExp(`ALTER TABLE ${table}\\s+ADD COLUMN(?: IF NOT EXISTS)?\\s+(\\w+)`, 'g'))].map((x) => x[1])
+    return [...created, ...added]
   }
   const modelCols = (file) => [...read(file).matchAll(/^\s{12}(\w+):\s*\{/gm)].map((m) => m[1])
   for (const [table, file] of [['log_attribution_scans', 'Backend/database/models/log_attribution_scans.model.js'], ['log_attribution_candidates', 'Backend/database/models/log_attribution_candidates.model.js']]) {

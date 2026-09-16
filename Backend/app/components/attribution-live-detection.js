@@ -34,6 +34,10 @@
 // turns of this conversation read as requests · which REMEMBERED lines in her composed context are speech of the person
 // and read as requests. The human classifies; this only makes the classes distinguishable after the fact.
 import { attributionClaims, userMadeARequest, DETECTOR_VERSION } from './attribution-detector.js'
+// ⭐⭐ B-D4 (052) · the PROJECTION that produced the episode block this scan reads. ⛔ IMPORTED, never restated:
+// the version belongs to the module that OWNS the projection, so it cannot drift from what it versions. The
+// detector itself is UNCHANGED by this — the version is recorded beside a scan, ⛔ never read to classify.
+import { PROJECTION_VERSION } from './memory-cognition-host.js'
 
 export { DETECTOR_VERSION }
 
@@ -144,7 +148,10 @@ export async function recordAttributionTurn(fastify, ctx = {}) {
   if (!db?.log_attribution_scans || !db?.log_attribution_candidates) return { skipped: 'models not loaded' }
   const base = {
     conversation_id: ctx.conversationId, assistant_message_id: ctx.assistantMessageId ?? null, user_message_id: ctx.userMessageId ?? null,
-    username: String(ctx.username ?? ''), detector_version: DETECTOR_VERSION, observed: true,
+    username: String(ctx.username ?? ''), detector_version: DETECTOR_VERSION,
+    // ⭐ D14's denominator only means something if both sides were measured under the same instrument AND the
+    // same input. `detector_version` covers the instrument; this covers the input.
+    projection_version: PROJECTION_VERSION, observed: true,
   }
   let candidate = null
   let scanError = null
@@ -161,7 +168,10 @@ export async function recordAttributionTurn(fastify, ctx = {}) {
     }
     let candidateRow = null
     if (candidate) {
-      candidateRow = await db.log_attribution_candidates.create(candidate)
+      // ⭐ THE FROZEN EVIDENCE CARRIES ITS PROJECTION TOO. `buildCandidate` stays PURE — the version is a
+      // RECORDING concern, not part of deciding what the evidence is — but a frozen block whose provenance
+      // cannot be identified is worth less later, and D12 exists precisely so it can be re-read in future.
+      candidateRow = await db.log_attribution_candidates.create({ ...candidate, projection_version: PROJECTION_VERSION })
       log?.info?.({ conversation: ctx.conversationId, candidate: candidateRow.id, spans: candidate.spans.length, surfaces: candidate.spans.map((s) => s.surface) },
         '[attribution] candidate recorded — a human classifies it; nothing is a violation yet')
     }

@@ -13,6 +13,13 @@ export default (sequelize, DataTypes, schemas) => {
             user_message_id: { type: DataTypes.UUID, allowNull: true },
             username: { type: DataTypes.TEXT, allowNull: false },
             detector_version: { type: DataTypes.TEXT, allowNull: false },
+            // ⭐⭐ B-D4 (052) · WHICH PROJECTION produced the episode block this row read. The detector parses that
+            // block for `X said to me:` lines as its source set, so the projection is its INPUT — and B1/B2 changed
+            // that input while the detector itself stayed frozen. ⛔ NULL on every pre-B row: an absent version is the
+            // honest record, ⛔ never a backfilled one.
+            // ⚠️ DECLARED HERE AS WELL AS IN THE MIGRATION. An ADD COLUMN has a SECOND HALF — a column the model does
+            // not declare never surfaces through Sequelize, and this project has lost a column to exactly that.
+            projection_version: { type: DataTypes.TEXT, allowNull: true },
             model: { type: DataTypes.TEXT, allowNull: true },
             settings: { type: DataTypes.JSONB, allowNull: true },
             spans: { type: DataTypes.JSONB, allowNull: false },
