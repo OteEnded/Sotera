@@ -255,6 +255,16 @@ A/B        ✅ **A3 · A2 · A1(shadow) · B1/B2 ALL LANDED 09-16.** :8210 on th
               it — **33% of conversations returned FEWER than the radius promises, mean 7.36/9, worst 2/9**
               (one conv: 176 messages over 1,312 ids). The shelter conv was contiguous, which is why this hid
               in plain sight. ⇒ B1 counts POSITIONS, never ids.
+           ✅ **B-D2 DONE: `incomplete` now means what the word means.** ⚠ It reported **false** on a view
+              showing **9 of 170 messages** — it only asked whether the window filled ITSELF, i.e. the SHAPE
+              of the contract satisfied while its SEMANTICS were violated (rule ⑯).
+              ⇒ the projection declares `ofConversation` + `elidedBefore/After`; `incomplete` covers BOTH
+              causes — window unfilled (capacity) OR conversation extends past it (structural).
+              ⭐ THREE EPISTEMIC STATES, THREE SENTENCES, ⛔ never collapsed:
+                WITHHELD  "X said something here that I can't see."             (a door stayed shut)
+                ELIDED    "(N earlier turns of this conversation, not shown)"   (there is more to move through)
+                UNFILLED  "(part of what I looked at here could not be read)"   (a read failed)
+              ⛔ all parenthesised, no `said to me:` ⇒ B-D4 holds: a gap marker can never be read as speech.
            ⏸ **B-D1 MEASURED, NOT DECIDED — radius UNCHANGED at ±4.** Reach to the conversation's opening
               statement: ±4=63% · ±6=83% · ±8=85% · ±12=96%. ⭐⭐ COST IS NOT THE CONSTRAINT: even ±12 is
               ~3.2k tokens of a ~99k budget ⇒ B-D1 is a purely COGNITIVE question, exactly as Ote framed it.
