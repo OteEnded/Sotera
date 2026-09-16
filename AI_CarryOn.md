@@ -248,6 +248,31 @@ decision. ⛔ Not reopened.
    and that is a LOWER BOUND. ⓘ 53 slotless live rows sit in the candidate set; 0 claimable by phrase TODAY
    — ⚠️ one matching alias would change that.
    → `INVESTIGATION_SOTERA_SLOT_ID_AS_AUTHORITY.md` · `test/checks/slot-authority-map.mjs`
+㉔ ⭐⭐⭐ MEMBERSHIP IS AN ACT, AND IT IS UNRECORDED. Census 2026-09-17 over 142 memberships:
+   ⛔⛔ THE MECHANISM IS NOT RECOVERABLE FOR A SINGLE ONE OF THEM. The audit vocabulary is
+   `supersede·collapse·forget·archive·revive·delete` — ⭐ EVERY ONE A DESTRUCTIVE TRANSITION, and
+   ⛔ MEMBERSHIP IS NOT AMONG THEM. ⇒ `slot_id` states THAT a memory belongs to a slot, ⛔ never HOW.
+   ⛔ MECHANISM C DOES NOT EXIST — exactly two assignment sites, pinned by inventory.
+     A · EXPLICIT AT ADMISSION   act? ⚠️ the ROW has one, the MEMBERSHIP declares none · reversible? ⛔ NO
+     B · PHRASE/ALIAS ADOPTION   act? ⛔ NONE · writer? ⛔ NONE · ⭐ AFTER the write, ⛔ not transactional
+   ⭐⭐ B'S TWO PROPERTIES, MECHANICALLY VERIFIED: it is declared BEFORE `finalizeSlot` (⇒ A3's ACT rule
+   never reaches it) and the service opens NO TRANSACTION (⇒ ⭐ A REFUSED WRITE LEAVES THE ADOPTION).
+   ⭐⭐⭐ THE ALIAS EFFECT: alias learning → `claimedBy` changes → a previously slotless memory becomes
+   claimable → `slot_id` persisted → IT ENTERS THE COMPETITION SET. ⇒ ⚠️ AN ALIAS DOES NOT ONLY TEACH THE
+   RESOLVER HOW TO READ FUTURE OBSERVATIONS — IT CAN ALTER THE MEMBERSHIP OF EXISTING HISTORICAL ROWS.
+   And A3 already ruled aliases memory-semantic ⇒ one memory-semantic op silently produces another.
+   ⭐ THE 53 SLOTLESS LIVE ROWS ARE NOT ACCIDENTALLY SLOTLESS: 34 `project-decision` (doc ingest) +
+   19 `sotera` (lessons/decline). ⛔ `lesson-host` NEVER calls `reconcileFact` ⇒ never routed, never
+   refused — written by paths that DO NOT USE SLOTS. ⭐ Converges with ⑱ from an independent direction.
+   ⚠️⚠️ SHARED-KEY EXPOSURE: **18 live rows share `sotera | lesson`.** One mint under that key claims ALL
+   18 in one step, adopts them permanently, and puts them in ONE competition set — 17 collapse/supersede.
+   ⛔ NOT ARMED (no slot under any slotless key; the writing path cannot mint one) · ⛔ NOT TESTED.
+   ⭐ LANGUAGE CORRECTION, ADOPTED: ⛔ STOP SAYING "routing establishes membership". Say:
+   **routing is ONE mechanism; phrase/alias adoption is ANOTHER** · **membership establishes the
+   competition boundary used for replacement.**
+   ⛔⛔ THE ADOPTION PATH IS NOT REPAIRED — not moved into `finalizeSlot`, no ACT, no transaction, no audit.
+   *"First establish WHAT IS A SLOT MEMBERSHIP CLAIM. Only then decide who is authorized to make it."*
+   → `INVESTIGATION_SOTERA_MEMBERSHIP_SEMANTICS.md` · `test/checks/membership-semantics-census.mjs`
 ```
 
 ---
@@ -356,7 +381,9 @@ SLOT/OBS ⭐⭐⭐ THE GATE BEFORE THE GATE (Ote, 2026-09-17): *"Before A-D4, le
            (Claude: brother → uncle), in a single value. ⚠️ I first called it a re-statement FROM A 100-CHAR
            TRUNCATION; the full value inverted it.
        → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md` · `INVESTIGATION_SOTERA_REPLACEMENT_SEMANTICS.md`
-A-D4   ⭐⭐⭐ Durable behaviour for `broader` / `narrower` / `sibling`. ⛔ HELD BEHIND SLOT/OBS ABOVE.
+A-D4   ⭐⭐⭐ Durable behaviour for `broader` / `narrower` / `sibling`. ⛔ OPEN · BLOCKED ON THREE THINGS
+       (Ote, 2026-09-17): ① REPLACEMENT SEMANTICS · ② MEMBERSHIP SEMANTICS · ③ the unresolved
+       relationship between ROUTING and 047. ⛔ HELD BEHIND SLOT/OBS ABOVE.
        ⚠️ A1's measurement made it HARDER, not easier: `broader` is NOT always an error, so "broader → mint a
        new slot" would fragment `programming_language` into a FOURTH sibling of three that already exist.
        ⇒ A1 authority is blocked on this. Shadow is safe precisely because it cannot decide it.

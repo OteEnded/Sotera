@@ -10165,3 +10165,66 @@ schema change, no relation field. Dreaming frozen, same two-layer blocker.
 **Verification:** slot-authority map green · routing check green after correction · 047 scope green ·
 relation census green · unit **753/753** · evidence baseline green · both collisions armed.
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · MEMBERSHIP SEMANTICS CENSUS — the act exists, and it is unrecorded
+
+Ote: *"A memory becoming a member of a Slot is itself an act with semantic consequences. We don't yet know
+what that act should mean or who should be allowed to perform it."* ⛔ Read-only; **the adoption path was
+deliberately not repaired**; no alias was created to test anything.
+
+**Instrument** → `test/checks/membership-semantics-census.mjs`.
+
+### The headline: the mechanism is not recoverable for a single one of the 142
+
+The audit log is the only place a membership event could be recorded. Its entire vocabulary is
+`supersede · collapse · forget · archive · revive · delete` — **every one a destructive transition, and
+membership is not among them.** Live log: supersede 412, axes-backfill 160, forget 4. ⇒ **`slot_id` states
+*that* a memory belongs to a slot and never *how* it came to.** The A/B/C classification Ote asked for
+**cannot be performed per row**. The one hard proof (a row older than its own slot) yields 0 — **a lower
+bound, not a count.**
+
+### The ten questions
+
+Mechanism **C does not exist** — exactly two assignment sites, pinned by inventory. For **B**, two claims
+verified mechanically rather than read off comments: it is declared **before** `finalizeSlot` (so A3's ACT
+requirement never reaches it), and the service opens **no transaction** (so a later refused write leaves the
+adoption in place). B requires no act, names no writer, runs *after* the memory was written — potentially
+weeks after — and is irreversible.
+
+**The alias effect, stated precisely:** alias learning → `claimedBy` changes → a previously slotless memory
+becomes claimable → `slot_id` is persisted → it enters the competition set. **An alias does not only teach
+the resolver how to read future observations; it can alter the membership of existing historical rows.**
+And A3 already ruled aliases to be memory-semantic state — so one memory-semantic operation silently
+produces another across a seam that governs neither.
+
+### The 53 slotless rows are not accidentally slotless
+
+34 `project-decision` (document ingest) + 19 `sotera` (lessons and a decline). **None has any prior slot
+membership** — 38 audit rows reference them, 0 carry a `slot_id`. `lesson-host` **never calls
+`reconcileFact`**, so these rows were never routed and never refused: they were written by paths that do not
+use slots at all. That converges with the slot-vs-observation boundary from an independent direction.
+
+### Shared-key exposure
+
+**18 live rows share `sotera | lesson`.** One mint under that key would claim all 18 in a single step, adopt
+them permanently, and place them in one competition set where 17 are collapsed or superseded. ⛔ **Not
+armed** — no slot exists under any slotless row's key, and the writing path cannot mint one. ⛔ Not tested.
+
+### Language correction, adopted
+
+Stop saying *"routing establishes membership."* The measured statements are: **routing is one mechanism that
+can establish membership; phrase/alias adoption is another** — and **membership establishes the competition
+boundary used for replacement.** The corrected figure stands at **75/75**, not 77/77.
+
+### Unchanged
+
+A-D4 now records all three blockers: replacement semantics · membership semantics · the routing/047
+relationship. Replacement semantics untouched — `newer string ≠ newer truth`, `superseded ≠ world changed`,
+nine-transition corpus canonical, six outcomes still **fates** (no enum, no relation field, no `invalid_at`
+reinterpretation, no historical repair). Dreaming frozen, same two-layer blocker.
+
+**Verification:** membership census green · slot-authority map green · routing check green · 047 scope green
+· relation census green · unit **753/753** · evidence baseline green · both collisions armed.
+⛔ Nothing was written.
