@@ -9388,3 +9388,60 @@ distinct from "withheld half". B is explicitly NOT a ranking question: `LIMIT 2`
 
 ⓘ Method note: my first scripted edit to `AI_CarryOn.md` inserted LF lines into a CRLF file. Caught by checking the
 byte counts rather than trusting the "ok", and normalized; the diff is 22/4 on the intended region only.
+
+---
+
+## 2026-09-16 · A/B RULINGS CLOSED · implementation designs delivered (no code)
+
+Ote ruled all five YES — A1 Resolution needs a real ontology/classification step (not another threshold) · A2
+Normalization becomes a real stage, its contract defined FIRST · A3 a learned alias is memory-semantic state, its
+writer/occasion/lineage defined FIRST rather than mechanically wrapping `recordAlias()` in the row gate · B1 excerpts
+contiguous and centred, withheld material represented rather than silently closed up · B2 `partial` stays
+authorization/withheld and must not be overloaded into completeness. Then: produce the designs, no implementation.
+
+Delivered: `DESIGN_SOTERA_A_SLOT_IDENTITY.md` and `DESIGN_SOTERA_B_EVIDENCE_PROJECTION.md`.
+⛔ No code, rows, schema or aliases changed; fixtures and the armed `location` collision intact; verified.
+
+**A — the smallest change is a missing return value, not a score.** `Resolution` collapses three answers into two:
+`slotId === null` means both "unrelated" and "related but not identical". Adding `relation ∈ {same, different, broader,
+narrower, sibling, unknown}`, with binding legal only on `same`, is what makes A1 expressible at all — and it is why no
+threshold could ever have fixed it.
+
+Normalization's contract is proposed with a positive test rather than only the RFC's prohibition: an operation belongs
+to Normalization iff it is computable from the observation alone and would give the same answer if no slot existed.
+That test assigns every case, and it makes "never read `mst_slots`" an enforceable invariant. Its one proposed
+addition is head+qualifier decomposition, which is exactly what containment destroys — with three limits stated up
+front, including that a token-structural rule is the kind that dies on Thai, so it must be able to return `unknown`
+and degrade to today's behaviour.
+
+For A3 the key question turned out to be *who asserts the alias*. The extractor never claimed "schedule means work
+schedule" — the resolver did, so the writer is the resolver, `pass: false` because it always has an occasion. And the
+project already set the precedent for this shape: `log_slot_bindings` records `derived_act` beside `declared_intent`
+because "a call that creates a permission and applies it is the self-authorisation shape the occasion rule exists to
+prevent." The resolver currently does exactly that. From it falls out the rule that stops the cascade without being
+asserted: **only an adjudicated `same` verdict may promote an alias — a cheap-arm hit may bind, but may not teach.**
+
+**A's order is forced: A3 → A2 → A1.** An alias permanently changes future resolution and today records nothing
+identifying what created it, so without A3 first, A1's trial cannot be rolled back — only apologised for.
+
+**B — the branch was created to avoid a cost it did not have.** `decideAccess` is a no-op in the same room, so
+`inspectAround` costs zero grants there; 84e2c18's 15→2 win came entirely from her own half across rooms. Restoring
+the contiguous projection to the same-room counterpart half therefore gives back nothing, and B1 is not the
+quality-vs-authorization trade-off it looked like. B has no migration, no schema and no durable state; rollback is
+reverting the commit.
+
+B2 resolves as two causes of one shape: withheld (policy) and incomplete (capacity) both render as a marked gap and
+differ only in reason — so it is a labelling change on the existing marker machinery, not a second mechanism. It lives
+beside the four axes, not in them, because completeness describes the rendering rather than the material; and
+`incomplete` is derived, never hand-set, so it cannot disagree with what it describes.
+
+⚠️ Cross-arc coupling found: `attribution-live-detection.js` classifies by parsing the episode block's "X said to me:"
+lines as its REQ_PRIOR_CONV source set. B changes that input while the instrument stays frozen ⇒ a gap marker must not
+match that regex, and per D14 the scan denominator needs a projection marker. Detector, principle, the 22 scans and
+the 4 unreviewed candidates all untouched.
+
+10 decisions left open, none pre-empted — A-D1..D6 and B-D1..D4. The sharpest: what actually performs the
+classification (grayZoneMode is 'off'; 'shadow' exists to measure first, and skipping it would confuse "containment is
+wrong" with "the replacement is right"); what happens on `broader`; the two existing bad aliases are wrong rather than
+merely undeclared, so removing them would be a row repair; and B's single span, since ±4 on both roles is roughly
+double the text per episode.

@@ -202,33 +202,29 @@ DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ①
            ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
            not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
            ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-NEW ①      SLOT IDENTITY — ⭐⭐ TRACED TWICE, 09-16. `INVESTIGATION_SOTERA_A_SLOT_IDENTITY_B_EVIDENCE_SELECTION.md`
-           carries the CONTRACT trace and **5 semantic decisions for Ote (its §7)** — A1 how the ontology call
-           (generic vs specific) gets made ⛔ NOT a threshold ·  A2 does Normalization become real or does the
-           unread `attributeCandidate` seam get deleted · A3 is a learned ALIAS a memory-semantic mutation (it
-           carries NO writer/act/reach) · B1 must an excerpt be CONTIGUOUS · B2 is a term needed for "incomplete
-           excerpt" as distinct from "withheld half". ⭐ The RFC's OWN §5 example ties 4 ways at 1.0000.
-           ⓘ `attributeSimilarity` has ONE production consumer ⇒ any eventual change is confined to one function.
-           The earlier four open questions (below) are subsumed by §7 and kept for continuity:
-           (investigation §8): ⓐ where does a slot's NAME come from? (one word of prompt guidance on one isolated
-           turn) ⓑ should containment be DIRECTIONAL — safe for abbreviation, refused for hypernym — and what tells
-           them apart without an ontology? ⓒ may an excerpt be a proper SUBSET without saying so? ⓓ is ARRIVAL ORDER
-           an acceptable authority rule once two beliefs can actually meet? (§2.5: today it is all there is)
-           ⚠️ ARMED HAZARD, not repaired: alias `location` → the *work schedule* slot, which sorts first.
-NEW ②      CONVERSATION EVIDENCE SELECTION — ⭐ the premise did not survive the trace: **her two beliefs never met.**
-           The counterpart read (`ASC LIMIT 2`, no window) + DATE-ONLY temporal resolution ⇒ the original and its
-           correction 40 s later carry the IDENTICAL timestamp. ⛔ NOT a model, ranking or salience question —
-           `LIMIT 2` closes BEFORE relevance is consulted, so tuning the floor/cues/scorer changes nothing.
-           ⭐⭐ ORIGIN FOUND: `84e2c18` (08-21) split ONE centred read into three to stop spending authorization
-           grants on her own sentences (15→2 — it succeeded). The same-room counterpart branch is NEW code with
-           no antecedent and the only one that dropped the centre. `7baa136` (D1, 08-23) then fixed the centre
-           TWO DAYS LATER — for a window this branch had already stopped using. ≥40.7% of episodes take it.
-           ⭐⭐⭐ The contract is written down TWICE (disclosure-host + a comment directly above the offending
-           block): ONE contiguous window, centred, BOTH speakers, and **what is not shown is MARKED** — because
-           "her lines with the replies closed up read as a monologue". That is exactly what she was handed.
-           ⭐ `partial` = "the counterpart's half was WITHHELD" (an authorization flag; it renders as *"I can only
-           reach my own side of that one"*). Its load-bearing clause `state === 'own_only'` was lost in the split.
-           ⛔ It NEVER meant "this excerpt is a subset" — before the split, contiguity was STRUCTURAL.
+A/B        ⭐⭐⭐ SLOT IDENTITY (A) + EVIDENCE PROJECTION (B) — **5 RULINGS CLOSED 09-16, DESIGNS DELIVERED,
+           ⛔ NOT IMPLEMENTED.** `DESIGN_SOTERA_A_SLOT_IDENTITY.md` · `DESIGN_SOTERA_B_EVIDENCE_PROJECTION.md`.
+           A1 YES Resolution needs a real ontology/classification step ⛔ NOT another similarity threshold
+           A2 YES Normalization becomes a real stage — ⛔ define its contract FIRST, do not invent it silently
+           A3 YES a learned alias IS memory-semantic state — ⛔ define writer/occasion/lineage FIRST,
+                  ⛔ do NOT just wrap recordAlias() in the row gate
+           B1 YES excerpts contiguous + centred; the same-room counterpart branch is the broken one;
+                  withheld material must be REPRESENTED, never silently closed up
+           B2 YES `partial` = authorization/withheld ⛔ must NOT be overloaded into completeness
+           ⭐ A's smallest change: Resolution must be able to say "related but NOT the same"; binding legal
+             only on `same`. The hypernym failure is a MISSING RETURN VALUE, not a scoring error.
+           ⭐⭐⭐ A's ORDER IS FORCED: **A3 → A2 → A1.** An alias permanently changes future resolution and
+             carries no lineage today ⇒ without A3 first, A1's trial CANNOT be rolled back, only apologised for.
+           ⭐⭐⭐ B's key finding: `decideAccess` is a NO-OP same-room ⇒ `inspectAround` costs ZERO grants there.
+             84e2c18's 15→2 win came from HER HALF. ⇒ the branch was created to avoid a cost it did not have,
+             and restoring the contract gives back NOTHING. B has NO migration and NO durable state.
+           ⚠⚠ B CHANGES WHAT THE ATTRIBUTION DETECTOR READS — it parses the episode block's "X said to me:"
+             lines as its REQ_PRIOR_CONV source set. ⇒ a gap marker must NOT match that regex, and per D14 the
+             scan denominator needs a projection marker. ⛔ Detector/principle/scans untouched.
+           ⏸ 10 decisions left OPEN, none pre-empted: A-D1..D6 (⭐ A-D2 = what performs the classification;
+             grayZoneMode is 'off' and 'shadow' exists to measure first · A-D5 = the 2 bad aliases are WRONG,
+             not merely undeclared, and removing them is a ROW REPAIR) and B-D1..D4 (⭐ B-D1 = the one span;
+             ±4 on both roles is ~2× the text per episode).
 NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
            `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
            here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial
