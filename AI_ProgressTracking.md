@@ -9889,3 +9889,77 @@ truncation was mine. My first `valid_at` claim rested on a **source comment** ra
 **Verification:** replacement-semantics census all green with data-backed assertions · unit **753/753** ·
 `@ote/memory` **123/123** · evidence baseline green · 4 candidates still unreviewed · both collisions armed.
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · REPLACEMENT RELATION + THE SLOT MODEL — read-only, and A-D4 is now formally blocked
+
+Ote's next investigation: for each replacement, establish the old and new proposition, whether they are the
+same, what kind of difference it is, whether the old should remain useful and in what role — and, decisively,
+**can the stored evidence establish that reason, or are we inferring beyond the record?** With *"the record
+cannot establish this"* preserved as a valid result. ⛔ Read-only throughout.
+
+**Instrument** → `test/checks/replacement-relation-census.mjs`. It deliberately does **not** classify
+automatically. It computes the one question with a mechanical answer and leaves the rest as declared,
+pinned human judgements.
+
+### ⭐⭐⭐ The relation was never recorded — but the evidence is not lost
+
+```
+relation IS established by the record          1 of 9
+relation is NOT established by the record      8 of 9
+⭐ BOTH source turns still reachable            9 of 9
+```
+
+The single exception is `current goal`, the extraction repair — and the reason is in the record only because
+a human `operator` set `contradicted_at`. The pipeline has never set it.
+
+**Why the fields that *are* present cannot help:** `timezone` (RE-STATEMENT) and `work schedule` (WRONG SLOT)
+both carry `writer=extractor, act=turn`. Identical provenance, opposite semantics — those fields describe
+*how the write happened*, never what the new value means relative to the old. `supersedes_id` names **which**
+row, never **in what sense**.
+
+⇒ **the substrate is UNCLASSIFIED, not LOSSY.** A materially different and more tractable problem. And no
+cleverness over the stored columns can recover it — the answer is in the conversation, not in the row.
+
+### ⭐⭐ Does the ontology need more than one relation? Yes — and not on the lesson axis
+
+Grouping the nine by **what should become of the displaced observation** gives at least three distinct fates —
+*still-true-and-better* (2), *true-but-past* (1), *false/erroneous* (1) — plus *mis-routed* (2), *undefinable
+as one value* (1), *clean* (1) and *undetermined* (1). **One `invalid_at` expresses all of them identically.**
+
+⚠️ And the axis is not the lesson vocabulary's: `lesson-host` classifies *how the new understanding relates*;
+the fact evidence demands *what becomes of the old observation*. **They do not map onto each other**, so
+adopting `refines/coexists_with/qualifies` by default would answer a question the evidence did not ask.
+Ote's `?` was guarding exactly this, and the evidence says the guard was right.
+
+### ⭐⭐⭐ There is a third Slot model, and it is already declared
+
+Migration **047** (M2-10/M2-11, locked): *"Kind is the QUESTION a slot asks, not the datatype of its value."*
+`mst_slot_questions` is a subject-free definition; `mst_slots.question_id` a room-scoped instance; and the
+ruling is explicit — *declared by something that knows it, never inferred from values, never guessed by a
+classifier, never backfilled.*
+
+**It is empty:** 1 question declared (the harness canary), 1 of 112 slots carries a `question_id`, 35 of 233
+memories pinned to one.
+
+⚠️ **The collision this exposes, surfaced and left to Ote:** A-D4 asks the resolver to decide *from
+similarity* that two labels name the same property; 047 ruled that what question a slot asks may **only** be
+declared. ⛔ Not a ruling and not a recommendation — recorded so that deciding A-D4 cannot silently overrule
+047. It is also possible 047 was scoped to answer *validity* rather than slot *sameness*; the record does not
+establish which, and that reading is his.
+
+### Pinned as a blocker, not fixed
+
+`dreaming-candidate-host` filters `invalid_at IS NULL AND expired_at IS NULL AND contradicted_at IS NULL` —
+so the component meant to reason about change would see none. ⚠️ And lifting that filter alone would not be
+enough, because the trail it exposes is unclassified. What Dreaming needs is the thing that *is* intact: the
+reachable evidence. ⛔ Recorded as an M-series blocker; unchanged.
+
+**One more instrument defect (ledger at 13):** I grouped the fates **by slot**, folding the two
+`communication preference` transitions together and silently giving the *contested* one its sibling's fate —
+rule ⑰ violated in the very next instrument after writing it. Each transition now declares its own fate and a
+check asserts none defaulted.
+
+**Verification:** relation census all green · unit **753/753** · `@ote/memory` **123/123** · evidence baseline
+green · 4 candidates unreviewed · both collisions armed. ⛔ Nothing was written.

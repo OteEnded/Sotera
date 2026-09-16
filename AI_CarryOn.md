@@ -173,7 +173,21 @@ decision. ⛔ Not reopened.
    ⭐⭐ THE PRECEDENT IS OTE'S OWN, ALREADY BUILT — `lesson-host.revise()`:
    `['supersedes','refines','coexists_with','qualifies']`, only `supersedes` archives the prior.
    *"We should not force every change into a simple replacement chain."* ⛔ The FACT path still does.
-   → `INVESTIGATION_SOTERA_REPLACEMENT_SEMANTICS.md`
+   ⚠️⚠️ ⛔ BUT DO NOT ADOPT THOSE NAMES FOR FACTS. Measured: the lesson vocabulary classifies HOW THE NEW
+   UNDERSTANDING RELATES; the fact evidence demands WHAT BECOMES OF THE OLD OBSERVATION. Different axes.
+   → `INVESTIGATION_SOTERA_REPLACEMENT_SEMANTICS.md` · `…_REPLACEMENT_RELATION_AND_SLOT_MODEL.md`
+⑳ ⭐⭐⭐ THERE IS A **THIRD** SLOT MODEL AND IT IS ALREADY DECLARED — migration 047 (M2-10/M2-11, LOCKED):
+   *"Kind is the QUESTION a slot asks, ⛔ not the datatype of its value."*
+     `mst_slot_questions`    a SUBJECT-FREE definition — "what does a valid answer look like?"
+     `mst_slots.question_id` a ROOM-SCOPED instance   — "this room's slot asks that question"
+   ⛔ *"DECLARED by something that actually knows it, ⛔ never inferred from values, ⛔ never guessed by a
+   classifier, ⛔ never backfilled."* ⚠️ AND IT IS EMPTY: 1 question declared (the harness canary),
+   1 of 112 slots carries a `question_id`, 35 of 233 memories are pinned to one.
+   ⇒ ⚠️⚠️ THE COLLISION, ⛔ WHICH IS OTE'S TO RESOLVE: A-D4 asks the RESOLVER to decide FROM SIMILARITY
+   that two labels name the same property; 047 ruled that what question a slot asks may ONLY be DECLARED.
+   ⛔ NOT A RULING AND NOT A RECOMMENDATION — surfaced so that deciding A-D4 cannot silently overrule 047.
+   ⚠️ It is also possible 047 was scoped to ANSWER VALIDITY and not to SLOT SAMENESS. ⛔ THE RECORD DOES
+   NOT ESTABLISH WHICH, and that reading is his.
 ```
 
 ---
@@ -239,6 +253,25 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
 # 0-E · ⏸ OPEN — all Ote's, none blocking
 
 ```
+⭐⭐⭐ REPLACEMENT SEMANTICS — ⛔ THE CURRENT INVESTIGATION BLOCKER (Ote, 2026-09-17, his words)
+       Question: what semantic relationship exists between successive observations that currently appear
+                 as "superseded"?
+       Blocks:   ⛔ A-D4 broader-slot behaviour · ⛔ the interpretation of Slot identity / current value /
+                 history · ⛔ the future Dreaming treatment of change
+       ⛔ NO IMPLEMENTATION CHANGES.
+       ⭐ EVIDENCE IN (`replacement-relation-census.mjs`): ⭐⭐⭐ THE RELATION WAS NEVER RECORDED — 1 of 9
+       transitions is establishable from the record, and that one is the `operator` repair where a HUMAN set
+       `contradicted_at`. ⚠️ `writer`/`act_kind`/`reach_kind` CANNOT help — identical provenance produced a
+       RE-STATEMENT and a WRONG-SLOT. `supersedes_id` names WHICH row, ⛔ never IN WHAT SENSE.
+       ⭐⭐ BUT BOTH SOURCE TURNS ARE REACHABLE 9 OF 9 ⇒ ⭐ THE SUBSTRATE IS **UNCLASSIFIED, ⛔ NOT LOSSY** —
+       a materially different and more tractable problem. ⛔ And no cleverness over the stored columns can
+       recover it: the answer is in the conversation, ⛔ not in the row.
+       ⭐⭐ DOES THE ONTOLOGY NEED >1 RELATION? YES — ⭐ at least THREE FATES: still-true-and-better ·
+       true-but-past · false. ⛔ ONE `invalid_at` EXPRESSES ALL THREE IDENTICALLY.
+       ⚠️⚠️ AND THE AXIS IS NOT THE LESSON VOCABULARY'S: lesson-host asks *how does the NEW understanding
+       relate?*; the evidence asks *what becomes of the OLD observation?* ⇒ ⛔ DO NOT ADOPT
+       `refines/coexists_with/qualifies` BY DEFAULT — Ote's `?` was right, and they answer a different axis.
+       → `INVESTIGATION_SOTERA_REPLACEMENT_RELATION_AND_SLOT_MODEL.md`
 SLOT/OBS ⭐⭐⭐ THE GATE BEFORE THE GATE (Ote, 2026-09-17): *"Before A-D4, let's understand the slot/observation
        semantic boundary."* ⇒ A-D4 asks what it should MEAN to bind two phrasings into one slot, and that is
        unanswerable while *what a slot is FOR* is open:
