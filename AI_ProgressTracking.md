@@ -9014,3 +9014,37 @@ inconsistency; a NEW pass-writer row with no act would still be a defect, loudly
 sense if the rows stay unknown.
 
 ⛔ Attribution remains observation-only · R-C closed · D3′ closed · D2/D4 untouched pending his ruling.
+
+## 2026-09-16 (+07:00) — ✅✅ D2 AND D4 RULED AND CLOSED · the eight rows stay unknown, the ratification is honoured
+
+**D2 = (a).** The eight historical reflection rows remain **permanently without an occasion**. ⛔ Not linked by temporal
+proximity — the operation would be *temporal → inferred occasion*, which breaks §0-B rule ⑦. Ote's reasoning, recorded
+because it sharpens the rule: the ±15/±20 measurements are **evidence about ambiguity, ⛔ not authority to create an
+occasion**, and the 19.9-minute knife edge is precisely why a time-window rule must never become an implicit semantic
+authority. ⭐ Standing condition if inferred occasions are ever revisited: they must use an explicitly **distinct and
+visible** representation, so an inferred occasion can never be mistaken for a writer-declared one.
+
+**D4 = (a).** `pass-writer-without-act` now carries the same `axes-backfill` exclusion `writer-not-declared` has always
+had. One clause, mirrored; ⓘ omitted entirely when `log_memory_changes` is absent, so the rule stays LOUD rather than
+silently forgiving. A consistency correction, ⛔ not a new severity or mechanism:
+
+```
+axes-backfill + missing act               → ratified historical unknown, ⛔ NOT a defect
+new pass writer + missing act + no stamp  → DEFECT, loudly
+```
+
+**Result:** `pass-writer-without-act` **8 → 0** · `writer-not-declared` **15 → 15** (unchanged) · total defects
+**23 → 15** · suspects 123. The eight rows re-read after the change: **all eight still `act_kind NULL`, `act_id NULL`,
+`reach_kind NULL`**, and the 160 `axes-backfill` rows in the log untouched. They remain fully visible in provenance and
+history reporting — they are simply no longer counted as an active defect nobody could ever clear.
+
+**Regression** — `writer-seam-check` **W18a–d**, read-only and against the REAL rows, ⛔ not a fixture: the corpus has 8
+ratified unknowns to test against (⛔ no vacuous control) · a ratified row is NOT reported · ⭐ **the UNRATIFIED fixture
+is STILL reported** (the positive control that stops the exclusion silencing the rule and the zero looking like success)
+· the eight rows are untouched. All green: writer-seam · memory-lint · provenance-axes · incident-replay · m2-rollback ·
+attribution-live-control. Unit **752/752**.
+
+⛔ No temporal linking · no migration · no historical repair · no severity change · no new mechanism.
+⛔ D1 Phase 3, attribution (observation-only), R-C and D3′ untouched.
+
+⏸ **The provenance arc's decision list is now empty except D6 (BASIS rename) and D7 (@ote/memory attribution).**

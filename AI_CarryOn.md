@@ -234,23 +234,23 @@ PROVENANCE   ✅ D3′ / D8 / D9 ALL RULED AND DONE 09-16. ⏸ ONLY THE PHASE-3 
                  id never reaches the gate — `forget` returns early — so the first version passed VACUOUSLY).
                  ⛔ NO historical row repaired: the 15 are frozen residue. ⛔ Lint stays a DEFECT (the only guard on the 19
                  raw-SQL sites the store cannot see). ⛔ `runtime.js` memory.v2's `?? null` deliberately left + flagged.
-             ⭐ D2/D4 MATERIAL PREPARED 09-16, read-only: `GATE_SOTERA_D2_D4_MATERIAL.md`. ⚠ THE OLD FRAMING DID NOT
-                 SURVIVE RE-MEASUREMENT — 2 of its 3 load-bearing claims changed:
-                 ① the "unambiguous ≥20-min window" is a KNIFE EDGE: exactly-one-candidate holds 8/8 at ±10 and ±15,
-                   but only **4/8 at the stated ±20** — four rows sit between two consecutive passes over ONE
-                   conversation **19.9 minutes apart**, six seconds inside the boundary the claim is named after.
-                 ② ⭐⭐ THE "ONE MEMORY PER PASS" OBJECTION DISSOLVED: post-049 passes DO write several (one act wrote 3,
-                   two wrote 2; 16 rows across 12 passes). That is a LEDGER limit (`wrote_memory_id` is ONE column),
-                   ⛔ not a fact about passes ⇒ "the candidate pass already claims another memory" is NOT an objection.
-                 ③ ⭐⭐⭐ ALL 8 ALREADY CARRY an `axes-backfill` RATIFICATION — and `writer-not-declared` EXCLUDES ratified
-                   rows while `pass-writer-without-act` does NOT. Two rules read the identical stamp differently; nobody
-                   decided that — the exclusion was written for one rule and never carried across.
-                 ⇒ D2's real question is ⛔ NOT "is the window clean" (it nearly is) but **may an OCCASION be inferred
-                 from TEMPORAL proximity** — and §0-B rule ⑦ says NO. ⭐ Recommend **D2 = leave them unknown by ruling**
-                 (if ever revisited, an inferred occasion must be VISIBLE on the row, never indistinguishable from a
-                 declared one); **D4 = carry the axes-backfill exclusion across** — ⛔ not a new mechanism, the removal
-                 of an inconsistency; a NEW pass-writer row with no act stays a defect, loudly.
-                 ⚠ RULE D2 FIRST — D4 only makes sense if the rows stay unknown. ⛔ Nothing linked, repaired or changed.
+             ✅✅ D2 + D4 RULED AND CLOSED 09-16 — `GATE_SOTERA_D2_D4_MATERIAL.md` §5.
+                 D2 = (a) **the 8 rows stay PERMANENTLY UNKNOWN.** ⛔ Not linked by temporal proximity, ever: the
+                 operation would be *temporal → inferred occasion*, which breaks §0-B rule ⑦. His words: the ±15/±20
+                 measurements are evidence about AMBIGUITY, ⛔ not authority to CREATE an occasion, and the 19.9-minute
+                 knife edge is exactly why a time-window rule must not become an implicit semantic authority.
+                 ⭐ STANDING CONDITION if ever revisited: an inferred occasion must have an explicitly DISTINCT, VISIBLE
+                 representation — it must never be mistakable for a writer-declared one.
+                 D4 = (a) **the act rule now honours the same `axes-backfill` ratification the writer rule always did.**
+                 A consistency correction, ⛔ not a new severity or mechanism:
+                   axes-backfill + missing act              → ratified historical unknown, ⛔ NOT a defect
+                   new pass writer + missing act + no stamp → DEFECT, loudly
+                 RESULT: `pass-writer-without-act` **8 → 0** · `writer-not-declared` **15 → 15** (unchanged) · total
+                 defects **23 → 15** · suspects 123. The 8 rows re-read after the change: **all still act NULL, reach
+                 NULL**, and the 160 axes-backfill log rows untouched. They stay VISIBLE in provenance/history reporting
+                 — only no longer counted as an ACTIVE defect. Regression `writer-seam-check` **W18a–d** (real rows, ⛔
+                 not a fixture), incl. W18c: the UNRATIFIED fixture is STILL reported ⇒ the exclusion did not silence
+                 the rule. unit 752/752. ⛔ No temporal linking · no migration · no historical repair.
              D6 BASIS rename · D7 @ote/memory attribution (my earlier R-C hunks still interleaved with foreign work)
 ATTRIBUTION  ✅ D11–D14 SHIPPED · ⭐ FIRST CANDIDATE CAUGHT AND CLASSIFIED 09-16: `769f6a65` → **REQ_NOW by ote**,
              a confirmed NON-violation (the user turn DID carry an explicit inventory instruction ⇒ accurate attribution;
