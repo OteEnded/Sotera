@@ -202,15 +202,33 @@ DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ①
            ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
            not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
            ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-NEW ①      SLOT IDENTITY — ⭐ INVESTIGATED 09-16, ⛔ no fix proposed and none should be inferred. Four open questions
+NEW ①      SLOT IDENTITY — ⭐⭐ TRACED TWICE, 09-16. `INVESTIGATION_SOTERA_A_SLOT_IDENTITY_B_EVIDENCE_SELECTION.md`
+           carries the CONTRACT trace and **5 semantic decisions for Ote (its §7)** — A1 how the ontology call
+           (generic vs specific) gets made ⛔ NOT a threshold ·  A2 does Normalization become real or does the
+           unread `attributeCandidate` seam get deleted · A3 is a learned ALIAS a memory-semantic mutation (it
+           carries NO writer/act/reach) · B1 must an excerpt be CONTIGUOUS · B2 is a term needed for "incomplete
+           excerpt" as distinct from "withheld half". ⭐ The RFC's OWN §5 example ties 4 ways at 1.0000.
+           ⓘ `attributeSimilarity` has ONE production consumer ⇒ any eventual change is confined to one function.
+           The earlier four open questions (below) are subsumed by §7 and kept for continuity:
            (investigation §8): ⓐ where does a slot's NAME come from? (one word of prompt guidance on one isolated
            turn) ⓑ should containment be DIRECTIONAL — safe for abbreviation, refused for hypernym — and what tells
            them apart without an ontology? ⓒ may an excerpt be a proper SUBSET without saying so? ⓓ is ARRIVAL ORDER
            an acceptable authority rule once two beliefs can actually meet? (§2.5: today it is all there is)
            ⚠️ ARMED HAZARD, not repaired: alias `location` → the *work schedule* slot, which sorts first.
-NEW ②      SELF-BELIEF CONFLICT — ⭐ the premise did not survive the trace: **her two beliefs never met.** The real
-           finding is the counterpart read (`ASC LIMIT 2`, no window) and DATE-ONLY temporal resolution, so the
-           original and its correction 40 s later carry the IDENTICAL timestamp. ⛔ Not a model or salience question.
+NEW ②      CONVERSATION EVIDENCE SELECTION — ⭐ the premise did not survive the trace: **her two beliefs never met.**
+           The counterpart read (`ASC LIMIT 2`, no window) + DATE-ONLY temporal resolution ⇒ the original and its
+           correction 40 s later carry the IDENTICAL timestamp. ⛔ NOT a model, ranking or salience question —
+           `LIMIT 2` closes BEFORE relevance is consulted, so tuning the floor/cues/scorer changes nothing.
+           ⭐⭐ ORIGIN FOUND: `84e2c18` (08-21) split ONE centred read into three to stop spending authorization
+           grants on her own sentences (15→2 — it succeeded). The same-room counterpart branch is NEW code with
+           no antecedent and the only one that dropped the centre. `7baa136` (D1, 08-23) then fixed the centre
+           TWO DAYS LATER — for a window this branch had already stopped using. ≥40.7% of episodes take it.
+           ⭐⭐⭐ The contract is written down TWICE (disclosure-host + a comment directly above the offending
+           block): ONE contiguous window, centred, BOTH speakers, and **what is not shown is MARKED** — because
+           "her lines with the replies closed up read as a monologue". That is exactly what she was handed.
+           ⭐ `partial` = "the counterpart's half was WITHHELD" (an authorization flag; it renders as *"I can only
+           reach my own side of that one"*). Its load-bearing clause `state === 'own_only'` was lost in the split.
+           ⛔ It NEVER meant "this excerpt is a subset" — before the split, contiguity was STRUCTURAL.
 NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
            `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
            here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial

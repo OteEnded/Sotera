@@ -9336,3 +9336,55 @@ blaming the ranking or the model — and a subset that does not declare itself a
 
 D10 gains exactly one datum and no more: zero voluntary write calls across this conversation while four durable facts
 went past. That is evidence about what she notices; it does not show that salience explains it.
+
+---
+
+## 2026-09-16 · INVESTIGATION — A slot identity · B conversation evidence selection (read-only)
+
+Ote: investigate the two upstream failures SEPARATELY; trace A's full path and B's origin; establish what contract each
+is trying to implement; report whether either needs a new semantic decision. ⛔ No changes. Deliverable:
+`Reference/docs/INVESTIGATION_SOTERA_A_SLOT_IDENTITY_B_EVIDENCE_SELECTION.md`.
+
+**Both failures are the same kind of thing: a stage that exists, is documented, and is bypassed.**
+
+**A — the contract is written down in three places and all three agree.** RFC §5: Normalization produces canonical
+CANDIDATES, the Resolver owns canonical IDENTITY and makes "the ontology call — preferred_ vs current_ vs favorite_".
+The resolver's own header: "CLASSIFICATION, not pairwise similarity shopping." RFC §8's endpoint: "classify, don't
+string-match." Three cuts lose the information:
+
+1. The domain word dies in extraction — one message, no history, prompt says the attribute must be "short".
+   Per RFC §0 that is the design working, not an extractor bug.
+2. `normalizeObservation` IS wired and DOES emit `attributeCandidate` — written in 1 file, **read in 0**. The
+   `resolver.resolve({owner, attribute})` call constructs a fresh two-field object and drops it. Stated honestly:
+   v1's candidate carries no extra information, so there is no latent fix sitting unused — what is lost is the
+   designated HOME for the fix.
+3. The ontology call is made by containment, which cannot make it. Running the RFC's own §5 worked example through the
+   shipped resolver gives a **four-way tie at 1.0000** across preferred_/current_/favorite_/plain — the tie broken by
+   `last_write DESC` plus a strict `>`. Cosine scores the same bad pair 0.9104, so this is not a threshold question.
+
+Alias evidence from the store: 8 aliases, 7 of 112 slots. **Two REAL hypernym merges, not one** — `"preference" →
+"communication preference"` on 08-24, three weeks before `"schedule" → "work schedule"`. And the cascade is caught in
+the act: `volunteer_schedule_and_location` sits in the alias list with a label-similarity of **0.5**, below the
+admission floor, because it entered via the alias rather than the concept. An alias carries `{phrase, by, confidence,
+at}` — no writer, act, reach or evidence — and `mst_slots` writes do not pass the D1 Phase 3 gate.
+
+**B — the origin is a refactor whose subject was authorization.** `84e2c18` (08-21) split ONE symmetric centred read
+into three, to stop spending disclosure grants on her own sentences (15→2; it succeeded). The same-room counterpart
+branch is new code with no antecedent and the only one that dropped the centre. `7baa136` (D1, 08-23) then fixed the
+centre two days later — for a window that branch had already stopped using, and its regression guard still protects it.
+At least 40.7% of assembled episodes take the uncentred branch; nothing in the suite tests its shape.
+
+The intended contract is written down twice — in `disclosure-host.js` and in a comment directly above the offending
+block: one contiguous window, centred, both speakers, and **what is not shown is MARKED**, because "her lines with the
+replies closed up read as a monologue and invite her to infer what was said to her." That is precisely what she was
+handed. And `partial` is an AUTHORIZATION flag — it renders as "I can only reach my own side of that one", and its
+load-bearing clause `state === 'own_only'` was lost in the split. It never meant "this excerpt is a subset", because
+before the split contiguity was structural. The split removed the guarantee and left the vocabulary that assumed it.
+
+**Five semantic decisions raised, none recommended** (§7): A1 how the generic-vs-specific ontology call gets made
+(explicitly NOT a threshold) · A2 does Normalization become real or does the unread seam get deleted · A3 is a learned
+alias a memory-semantic mutation · B1 must an excerpt be contiguous · B2 is a term needed for "incomplete excerpt" as
+distinct from "withheld half". B is explicitly NOT a ranking question: `LIMIT 2` closes before relevance is consulted.
+
+ⓘ Method note: my first scripted edit to `AI_CarryOn.md` inserted LF lines into a CRLF file. Caught by checking the
+byte counts rather than trusting the "ok", and normalized; the diff is 22/4 on the intended region only.
