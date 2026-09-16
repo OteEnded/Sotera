@@ -9208,3 +9208,49 @@ the live-but-starved reflection lane and produces the lineage inspection he aske
 is left out rather than pretending the diagram is complete.
 
 ⓘ The four fictional agent_dev Mira memories are KEPT as the worked E2E fixture, per his instruction.
+
+## 2026-09-16 (+07:00) — ⭐⭐ DIRECT-LOOP E2E VALIDATION RUN · the loop is real and ⛔ NOT trustworthy for corrections
+
+`MEASUREMENT_SOTERA_DIRECT_LOOP_E2E.md`. One natural non-probe conversation (10 messages · 2 durable facts · 1 correction ·
+incognito false · probe false · useMemory true), then a fresh conversation for retrieval, then lineage inspection.
+⛔ No switch changed · `dryRun` untouched · Dreaming not involved · Mira fixture untouched.
+
+**FORMATION ✅ but ⛔ ENTIRELY INVOLUNTARY.** 5 memories formed, all with complete axes. **She made ZERO tool calls across
+all five turns** — every row came from the FALLBACK EXTRACTOR. She tracked the correction *conversationally* (her closing
+turn says "Sundays… Saturdays are family time") and wrote nothing. ⇒ ⭐ direct D10 evidence in the narrow form ruled: the
+Mira probe (a flatly-stated fact) drew two voluntary `remember_fact` calls; this relational conversation, carrying four
+durable facts, drew none.
+
+**PROVENANCE / AXIS INTEGRITY ✅ CLEAN.** All 5 rows: `writer extractor · act turn:<msg> · reach turn:<msg>` + **5 evidence
+references** established by the extractor's declared coincidence. ⇒ the axes survive the AUTOMATIC path exactly as they
+survive the tool path.
+
+**SUPERSESSION ⛔ FAILED.** The correction created a NEW SLOT instead of replacing the belief it corrected:
+`work schedule = Saturdays` (LIVE) and `shelter shift day = sundays` (LIVE) — **two live rows disagreeing about the same
+real-world fact**. One-live-belief-per-slot is intact because they are DIFFERENT slots ⇒ no integrity rule fires. The
+defect is upstream of the invariant: **slot resolution keys on the attribute NAME, and the correction used a different
+name.** ⚠️ And the first write was mis-slotted DESTRUCTIVELY — "volunteering on saturdays" resolved into the user's
+**`work schedule`** slot and superseded a pre-existing belief (`"up past 2am"`, 08-26). Nothing flagged it.
+
+**RETRIEVAL ⚠️ PARTIAL.** Fresh conversation: she **detected the contradiction herself** ("there's a bit of a contradiction
+here") — the good behaviour — and answered location correctly. ⛔ But she **resolved toward the STALE value**: *"my stored
+record says Sundays, but … he volunteers on Saturdays. It looks like I recorded it wrong."* Final answer **Saturdays**;
+ground truth is **Sundays**. She inverted the correction — reading the opening statement as truth and her corrected store
+row as her own error, having not read the correction three turns later.
+
+ⓘ **A false defect I nearly filed, recorded because the method matters.** First reading: "Bangkok" had bled from Mira's
+row. It had NOT — `user/location = Bangkok` and `user/timezone = Bangkok` are real long-standing rows, so her answer was
+correct. A plausible cause that was the wrong cause, caught by checking BEFORE reporting.
+
+**⭐⭐ BONUS, UNPROMPTED: the reflection lane fired in production.** Mid-run the reflection cron picked up the earlier Mira
+conversation (4 msgs, non-probe, quiet) and wrote `c6b415bc · writer reflection · act revisit:136365f7… · reach range
+conv=b60cd585 rows 11478..11481` — *"Mira is the user's youngest sister and works as a paramedic in Bangkok."*
+⇒ **experience → reflection → retention → durable memory executed in production, unprompted, with full axes.** That lane
+moves from "registered but idle" to **PROVEN LIVE**, and it consolidated a two-row supersession chain into one standing
+statement.
+
+⇒ **The loop is real and it is not trustworthy for corrections.** ⛔ NOT a reason to change memory semantics: the defect is
+in **slot resolution** and **conflict resolution**, ⛔ not in the axes, the store or D1–D9. Nothing was repaired — the
+contradicting rows are LEFT IN PLACE as evidence, beside the Mira fixture.
+⏸ Two NEW questions for Ote (⛔ not reopened ones): slot resolution on a correction, and **what she does when two of her
+own beliefs disagree** — the natural sibling of D10.
