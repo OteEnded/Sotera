@@ -9121,3 +9121,47 @@ classification with the one documented exception.
 ⭐ **THE PROVENANCE ARC'S DECISION LIST IS NOW EMPTY.** D1 · D2 · D3′ · D4 · D6 · D7 · D8 · D9 all closed; R-C closed;
 attribution observation-only with its instrument watching. ⏸ Open: only the PERF to-do (prefill/TTFT, his lane) and D10
 (salience — a research direction, ⛔ not a code change).
+
+## 2026-09-16 (+07:00) — ⭐ COGNITIVE LOOP AUDIT · the core loop IS operational; Dreaming is not in it
+
+`AUDIT_SOTERA_COGNITIVE_LOOP_STATE.md`. Read-only apart from four probe turns on agent_dev through the real route.
+
+**PROVEN LIVE TODAY, post-Phase-3** — formation → durable → later conversation → retrieval → supersession:
+· *"my youngest sister is called Mira…"* → she called `remember_fact` **unprompted**; the row carries
+`writer chat-tool · act turn:8d10d901 · reach turn:8d10d901 · source_message_id` ⇒ all four axes survived the real path.
+ⓘ 0 provenance refs, and that is CORRECT — the stored value is a paraphrase and span verification refuses a quote that is
+not verbatim. · A **fresh** conversation answered correctly **with no tool call** (automatic recall), and she tied it to a
+sister from a different earlier conversation ⇒ cross-conversation retrieval live. · A correction superseded cleanly:
+old `live=false`, new `live=true sup=318282ac`, same slot, **0 slots with >1 live row**, `supersede=1` in the change log,
+and the next answer said **Bangkok** — the superseded state did not resurface.
+
+**LIVE BUT IDLE — reflection → retention.** `reflectionEnabled=true`, cron every 20 min, healthy. Historically 194 revisit
+passes, **26 wrote a memory**, last 09-15. Right now: `scanned=307 reflected=0 skipped={thin:230, probe:68, empty:6,
+memory-off:1, unchanged:2}` ⇒ ⛔ not a defect, an **eligibility famine** — and 68 of those skips are harness probes, much
+of it my own traffic. ⭐ The end-to-end milestone must therefore produce a conversation substantial enough to be eligible,
+or reflection is silently skipped and the test proves nothing.
+
+**⛔ DREAMING IS NOT RUNNING, for TWO independent reasons** — and the second is the one that matters:
+① `memory.dreamingEnabled` is unset ⇒ the hourly job is never registered. ② ⭐⭐ **even when registered the cron calls
+`runOnePass({ dryRun: true })` — it observes and writes NOTHING by design.** So flipping the switch would not put Dreaming
+into the loop. Measured: 5 passes ever, last 09-02, **0 memories or cards ever from dreaming/consolidation**.
+Also off: consolidation (cards) `false` · episode distiller `false` · L3 notes `reflectMode 'off'` (0 note rows ever).
+ⓘ D8/D9 proved those WRITERS correct when they run; ⛔ none of them has run in production.
+
+**⭐⭐⭐ "DOES SHE ACTUALLY LEARN" — UNPROVEN, evidence BOTH ways, ⛔ neither side quotable alone.**
+AGAINST: across Ote's last four real conversations — **34 assistant turns, 49 tools offered every turn** — she called
+**only READ tools** (`list_memories`×4 · `recall_memory`×2 · `recall_own_memory`×1) and **ZERO write tools**; no memory has
+been written from his traffic since **09-04**. FOR: in today's probes she called `remember_fact` **twice, unprompted**,
+including to correct a belief. ⇒ the difference is neither capability nor tool availability but **what the turn contains**:
+my probes carried an explicit new durable fact; his conversations were relational and emotional. ⇒ the real question is
+⛔ not *"does she write memories"* but **"is what she notices the right thing to notice"** — which is D10, and this audit is
+evidence FOR opening it, ⛔ not an answer to it.
+
+**RECOMMENDATION: move to Sotera Cognitive End-to-End Validation.** ⛔ Not another semantic remediation cycle — nothing
+measured needs a design change; the gaps are switches that are off and material that is absent. Two things the milestone
+must handle or it passes vacuously: eligibility (§3) and the fact that **Dreaming cannot execute at all today** (§4), which
+is a decision only Ote can make. ⭐ The validation must inspect the LINEAGE (writer · act · reach · evidence · supersession
+chain), ⛔ not just that a row appeared — today's Mira chain is the worked example.
+
+ⓘ Left in place: four probe memories on agent_dev (the Mira chain) as the first end-to-end lineage evidence. Removable on
+his word. ⏸ D10 and prefill/TTFT stay separate tracks.
