@@ -202,29 +202,40 @@ DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ①
            ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
            not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
            ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-A/B        ⭐⭐⭐ SLOT IDENTITY (A) + EVIDENCE PROJECTION (B) — **5 RULINGS CLOSED 09-16, DESIGNS DELIVERED,
-           ⛔ NOT IMPLEMENTED.** `DESIGN_SOTERA_A_SLOT_IDENTITY.md` · `DESIGN_SOTERA_B_EVIDENCE_PROJECTION.md`.
-           A1 YES Resolution needs a real ontology/classification step ⛔ NOT another similarity threshold
-           A2 YES Normalization becomes a real stage — ⛔ define its contract FIRST, do not invent it silently
-           A3 YES a learned alias IS memory-semantic state — ⛔ define writer/occasion/lineage FIRST,
-                  ⛔ do NOT just wrap recordAlias() in the row gate
-           B1 YES excerpts contiguous + centred; the same-room counterpart branch is the broken one;
-                  withheld material must be REPRESENTED, never silently closed up
-           B2 YES `partial` = authorization/withheld ⛔ must NOT be overloaded into completeness
-           ⭐ A's smallest change: Resolution must be able to say "related but NOT the same"; binding legal
-             only on `same`. The hypernym failure is a MISSING RETURN VALUE, not a scoring error.
-           ⭐⭐⭐ A's ORDER IS FORCED: **A3 → A2 → A1.** An alias permanently changes future resolution and
-             carries no lineage today ⇒ without A3 first, A1's trial CANNOT be rolled back, only apologised for.
-           ⭐⭐⭐ B's key finding: `decideAccess` is a NO-OP same-room ⇒ `inspectAround` costs ZERO grants there.
-             84e2c18's 15→2 win came from HER HALF. ⇒ the branch was created to avoid a cost it did not have,
-             and restoring the contract gives back NOTHING. B has NO migration and NO durable state.
-           ⚠⚠ B CHANGES WHAT THE ATTRIBUTION DETECTOR READS — it parses the episode block's "X said to me:"
-             lines as its REQ_PRIOR_CONV source set. ⇒ a gap marker must NOT match that regex, and per D14 the
-             scan denominator needs a projection marker. ⛔ Detector/principle/scans untouched.
-           ⏸ 10 decisions left OPEN, none pre-empted: A-D1..D6 (⭐ A-D2 = what performs the classification;
-             grayZoneMode is 'off' and 'shadow' exists to measure first · A-D5 = the 2 bad aliases are WRONG,
-             not merely undeclared, and removing them is a ROW REPAIR) and B-D1..D4 (⭐ B-D1 = the one span;
-             ±4 on both roles is ~2× the text per episode).
+A/B        ⭐⭐⭐ SLOT IDENTITY (A) + EVIDENCE PROJECTION (B). **ALL DECISIONS CLOSED 09-16. PLAN RATIFIED.
+           GUARDRAIL SHIPPED. A3 IN PROGRESS.** `PLAN_SOTERA_A_B_IMPLEMENTATION.md` is the live document;
+           `DESIGN_SOTERA_A_SLOT_IDENTITY.md` · `DESIGN_SOTERA_B_EVIDENCE_PROJECTION.md` are the designs.
+           A1 relation {same|different|broader|narrower|sibling|unknown}; ONLY `same` may bind; `unknown`
+              stays distinguishable from `different`. ⛔ NO threshold change is part of A1, ever.
+           A2 Normalization contract RATIFIED: an op belongs to it iff computable from the observation
+              ALONE and unchanged if no slot existed. + head/qualifiers. ⛔ never reads mst_slots.
+              ⚠ the unknown fallback is part of the contract — Thai must degrade to TODAY's behaviour.
+           A3 alias: writer=resolver · explicit act · pass=false · memoryId · relation=same · declared.
+              ⭐⭐ ONLY AN ADJUDICATED `same` MAY TEACH. A cheap-arm hit may BIND but may not TEACH.
+           A-D3 ledger = β: mst_slots.aliases stays the INDEX + append-only `log_slot_aliases` (mig 051).
+           A-D2 SHADOW ONLY — ⛔ grayZoneMode NOT turned on. Shadow: no bind, no teach, no mutation, no repair.
+           A-D4 `broader` handling LEFT OPEN ⇒ ⭐ A1 AUTHORITY IS STRUCTURALLY BLOCKED ON IT: today
+              "not same" falls through to MINT NEW, so authority-while-open would decide A-D4 by default.
+           A-D5 the bad aliases + armed `location` collision: ⛔ DO NOT TOUCH. A-D6 the 8 existing aliases
+              are an AUDITED UNKNOWN — ⛔ no retroactive writer/act/memory lineage invented.
+           B1/B2 ratified. B-D1 radius MEASURED not guessed (implement the span as a PARAMETER) ·
+              B-D2 incomplete presentation OPEN · B-D3 ⛔ lattice NOT touched · B-D4 new scans carry a
+              projection version; ⛔ detector/principle/22 scans/4 candidates untouched; RED-PROOF that a
+              gap marker can NEVER match the "X said to me:" pattern.
+           ⭐ R3 the grant-count control: REVOKE live grants FIRST or it proves nothing.
+           ✅ SHIPPED `test/checks/evidence-baseline-check.mjs` — destruction-detecting, ⛔ NOT
+              count-equality (that would fail for the right store and pass for a wrong one). Names every
+              evidence row/alias/candidate and its state; population REPORTED, only a DROP fails; writes
+              NOTHING. ⭐⭐ FALSIFIED in a rolled-back txn: alias delete / belief repair / collision disarm
+              were each caught. Runs before and after every A/B step.
+           ⚠⚠ FOUND IMPLEMENTING A3 (demonstrated with injected fakes, no DB): **recordAlias + touch run
+              BEFORE store.create** ⇒ a write the D1 Phase 3 gate REFUSES has already taught a permanent
+              equivalence AND refreshed last_write. ⇒ the ratified `memoryId` FORCES the alias write to
+              move after the row resolves; "a refused write teaches nothing" then falls out.
+              ⏸ **A-D7 NEW, NOT TAKEN: does `touch()` move too?** It IS the candidate order and the
+              tie-break ⇒ moving it changes resolution ordering for EVERY slot. ⛔ I did not change it.
+              ı Migration 048 §③ reasoned the opposite ("recordAlias changes only RESOLUTION"); A3
+              supersedes that specific judgement, and 051's header must say so.
 NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
            `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
            here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial

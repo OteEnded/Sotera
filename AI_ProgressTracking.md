@@ -9445,3 +9445,42 @@ classification (grayZoneMode is 'off'; 'shadow' exists to measure first, and ski
 wrong" with "the replacement is right"); what happens on `broader`; the two existing bad aliases are wrong rather than
 merely undeclared, so removing them would be a row repair; and B's single span, since ±4 on both roles is roughly
 double the text per episode.
+
+---
+
+## 2026-09-16 · A/B decisions closed · plan ratified · guardrail shipped · A3 opened
+
+Ote closed all outstanding decisions: A1/A2/A3 ratified as designed · A-D2 shadow only, grayZoneMode NOT turned on ·
+A-D3 ledger β · A-D4 `broader` left open · A-D5 bad aliases untouched · A-D6 audited unknown · B1/B2 ratified ·
+B-D1 radius measured not guessed · B-D2 and B-D3 left open · B-D4 new scans carry a projection version.
+Work authorized only after the decisions were reflected in an implementation plan.
+
+Delivered `PLAN_SOTERA_A_B_IMPLEMENTATION.md` — the gate. It carries every ratification verbatim, keeps the five open
+questions open, and states one consequence he did not have to spell out: **A1 authority is structurally blocked on
+A-D4**, because "not the same slot" falls through to mint-new today, so granting authority while A-D4 is open would
+decide `broader → mint new slot` by default — the exact thing A-D4 refuses.
+
+**The guardrail shipped first: `test/checks/evidence-baseline-check.mjs`.** Deliberately not a count-equality check —
+that would fail for the right store (any `zz_` run mints slots, so it would be disabled within a day) and pass for a
+wrong one (delete an evidence alias, add an unrelated one, count unmoved). It is destruction-detecting: every
+assertion names a specific row, alias or candidate and asserts its state; population is reported and only a drop
+fails; it writes nothing at all. **Falsified before being trusted** — inside a rolled-back transaction, deleting the
+`schedule` alias, un-invalidating the work-schedule belief, and touching the location slot were each caught by their
+own assertion; store verified back at baseline afterwards.
+
+⚠️ **Then A3 turned up a defect, demonstrated with injected fakes rather than argued:** `recordAlias` and `touch` both
+run *before* `store.create`. So a write the D1 Phase 3 gate refuses has already taught a permanent equivalence and
+already refreshed `last_write` — steps ②③ of the compounding loop running on a write that produced no belief at all.
+
+The ratified `memoryId` field forces the alias write to move after the row resolves (write branch → `created.id`,
+noop branch → `plan.target`), and "a refused write teaches nothing" then falls out of the relocation rather than
+being a separate rule. **A-D7 raised and not taken: does `touch()` move too?** It is the candidate order and the
+tie-break, so moving it changes resolution ordering for every slot — a durable semantic effect of exactly the kind
+this phase gates, so it is his call and I changed nothing.
+
+ⓘ Continuity recorded rather than quietly overridden: migration 048 §③ reasoned *"recordAlias changes only RESOLUTION
+and is already self-audited inline ⇒ audit the BINDING, leave the rest."* A3 supersedes that specific judgement, and
+051's header must say so rather than pretending the question was never decided.
+
+State: 112 slots · 8 aliases · location collision armed · Mira and shelter fixtures intact · 22 scans · 5 candidates,
+4 still unreviewed · both `.bak` files present · no code changed in `@ote/memory` or `Backend/app`.
