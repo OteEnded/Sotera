@@ -8979,3 +8979,38 @@ now attempts the mutation on a REAL row and asserts that row survives.
 raw-SQL sites the store cannot see. ⛔ `runtime.js` memory.v2's `?? null` deliberately left and flagged (built eagerly for
 every context, including read-only ones; its writes are now covered by the store gate itself). ⛔ Attribution, R-C, D2/D4,
 D3′ untouched; production reflection stays Gen 3; reflectMode and episodeDistillEnabled remain off.
+
+## 2026-09-16 (+07:00) — ✅ D1 PHASE 3 CLOSED BY OTE · ⭐ D2/D4 DECISION MATERIAL (read-only, nothing implemented)
+
+**D1 Phase 3 closed.** Ote accepted the invariant in this exact form, and asked that it never be summarised loosely:
+*"Every memory-semantic state mutation requires a declared writer. Non-semantic bookkeeping mutations performed as part of
+reads remain permitted."* ⛔ Do NOT later shorten this to "every update requires a writer" — **W5c exists specifically to
+preserve the read/bookkeeping distinction.** He also accepted the occasion rule: **writer mandatory, act required only
+where the operation actually HAS an occasion** — ⛔ never manufacture an act to satisfy the writer seam. Historical rows
+stay unrepaired; `memory.v2` stays unchanged and flagged.
+
+**D2/D4 material prepared** — `GATE_SOTERA_D2_D4_MATERIAL.md`. ⛔ Nothing linked, repaired or changed.
+⚠️ **The old framing did not survive re-measurement**, and I re-derived it rather than quoting it. Two of its three
+load-bearing claims changed:
+
+① **The "unambiguous ≥20-minute window" is a knife edge.** Exactly-one-candidate holds for 8/8 at ±10 and ±15 minutes —
+but only **4/8 at the stated ±20**. Four rows sit between two consecutive passes over the SAME conversation, **19.9
+minutes apart**: six seconds inside the boundary the claim is named after.
+② ⭐⭐ **The "one memory per pass" objection dissolved.** Post-049, passes routinely write several memories (one act wrote
+3, two wrote 2; 16 linked rows across 12 passes). The ledger's single `wrote_memory_id` column is a LIMITATION OF THE
+LEDGER, ⛔ not a fact about passes ⇒ "the candidate pass already claims another memory" is not an objection to linking.
+③ ⭐⭐⭐ **All 8 rows already carry an `axes-backfill` ratification** — and `writer-not-declared` EXCLUDES ratified rows
+while `pass-writer-without-act` does not. The two lint rules read the identical stamp differently. Nobody decided that:
+the exclusion was written for one rule and never carried across.
+
+⇒ **D2's real question is not whether the window is clean** (it nearly is) **but whether an OCCASION may be inferred from
+TEMPORAL proximity** — and §0-B rule ⑦, earned by this arc, says no. The 19.9-minute margin is beside the point: a rule
+that holds only while the clock cooperates is a habit, not a guarantee.
+
+⭐ Recommendations, both his to rule: **D2 = leave them unknown, permanently and by ruling** (if ever revisited, an
+inferred occasion must be VISIBLE on the row, never indistinguishable from a declared one). **D4 = carry the
+`axes-backfill` exclusion across to `pass-writer-without-act`** — ⛔ not a new mechanism, the removal of an
+inconsistency; a NEW pass-writer row with no act would still be a defect, loudly. ⚠️ **Rule D2 first** — D4 only makes
+sense if the rows stay unknown.
+
+⛔ Attribution remains observation-only · R-C closed · D3′ closed · D2/D4 untouched pending his ruling.
