@@ -219,40 +219,40 @@ DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ①
            ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
            not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
            ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-A/B        ⭐⭐⭐ **A3 ✅ · A2 ✅ (09-16). NEXT = A1 INFRASTRUCTURE, SHADOW ONLY.** B independent, not started.
-           `PLAN_SOTERA_A_B_IMPLEMENTATION.md` is the live document. :8210 RESTARTED onto the A2 build.
-           ✅ A3: `WRITER.resolver` (pass:false) · mig **051 `log_slot_aliases`** (append-only, logs REFUSALS
-              too) · `recordAlias`+`touch` relocated into `finalizeSlot()` at the two SUCCESSFUL exits.
-              ⭐ "a refused write teaches nothing" is a CONTROL-FLOW FACT. ⭐ ONLY AN ADJUDICATED `same` TEACHES.
-           ✅ A2: `attributeShapeOf()` → `{head, qualifiers, analysed, why}` on every fact observation, threaded
-              normalize → **commitToMemory allowlist** → reconcileFact → resolver. **SEMANTICALLY INERT** and
-              asserted so: the resolver's answer is byte-identical with and without the shape.
-              ⭐⭐⭐ R4 FOUND A REAL DEFECT: `attributeCandidate` has existed since Phase 2, is named in the RFC
-              as the Resolver's input, and arrived at the resolver as **`undefined`** — `commitToMemory` had
-              been dropping it the whole time. THIRD instance of that family (installComponents 08-12,
-              claimKind 09-03). ⛔ A GREP WOULD HAVE SAID IT WAS WIRED. The delegating spy is why we know.
-              ⚠ DECLARED LIMIT: the script guard detects SCRIPT, not LANGUAGE — a head-INITIAL language in
-              ASCII (French "langue preferee") gets the WRONG head. Inert now; **MUST be revisited before A1
-              gets authority.** Thai/CJK/coordinations/post-modifiers ⇒ explicit `analysed:false` + a WHY.
-           ⭐ TEST PATTERN NOW STANDARD FOR THIS ARC: red-proof verified FAILING first · PRE-FLIGHT collision
-              scan · blast radius asserted · positive control crossing persistence · ms-precision timestamps.
-           ⚠⚠⚠ A `zz_` PREFIX IS NOT A FENCE AGAINST CONTAINMENT (a prefix makes a name LONGER). My first A3
-              red-proof scored 1.0000 on the REAL `work schedule` slot, taught it an alias, refreshed
-              last_write and SUPERSEDED `33926415`. Caught by its OWN blast-radius assertion, fully restored,
-              guardrail re-verified. ⇒ every writing check now PRE-FLIGHTS its fixture names.
-           ⏸ NEXT, IN ORDER: A1 infra (relation) → **shadow measurement** → A-D4 → only then authority.
-              ⛔ `grayZoneMode` must go to **'shadow'**, NEVER 'on'. Shadow: emits relation + telemetry,
-              returns base behaviour, WRITES NOTHING. ⭐ A1 authority is STRUCTURALLY blocked on A-D4 — today
-              "not same" falls through to MINT NEW, so authority-while-open decides A-D4 by default.
-              Measure: same/different/broader/narrower/sibling/**unknown reported SEPARATELY** · the RFC
-              4-way tie · schedule→work schedule · favorite language→favorite programming language · the
-              14-pair collision scan · the 2 real hypernyms · the armed `location` collision.
-           ⏸ B: B1 contiguous centred projection + B2 withheld/incomplete → measure → B-D1/D2/D3.
-              ⛔ gap markers must NEVER match the detector's "X said to me:" pattern · new scans carry a
-              projection version · RADIUS MEASURED, not chosen.
-           ı Alias ledger `refuse`-row volume: OBSERVED (9 from one retention run), ⛔ RULING DEFERRED by Ote
-              — do not optimise or redesign it.
-           ı stderr carries a standing advisory: `auth.root.password` is weak and root is network-reachable.
+A/B        ✅ **A3 · A2 · A1(shadow) · B1/B2 ALL LANDED 09-16.** :8210 on the B build. `PLAN_SOTERA_A_B_
+           IMPLEMENTATION.md` is the live doc; measurements in `MEASUREMENT_SOTERA_A1_ONTOLOGY_SHADOW.md`
+           and `MEASUREMENT_SOTERA_B_EVIDENCE_PROJECTION.md`.
+           ✅ A3 alias accountability · mig 051 `log_slot_aliases` · only an ADJUDICATED `same` may TEACH ·
+              a refused write teaches nothing and touches nothing (control-flow fact, not a rule).
+           ✅ A2 `attributeShapeOf()` → head+qualifiers, threaded to the resolver, SEMANTICALLY INERT.
+           ✅ A1 `memory-ontology.js` · RELATION{same|different|broader|narrower|sibling|unknown} · only
+              `same` may bind · **SHADOW ONLY, there is deliberately NO 'on' mode** · ontologyMode +
+              grayZoneMode both 'shadow' and ACCUMULATING on live traffic.
+           ✅ B1 ONE contiguous POSITIONAL centred window, both speakers, every position SHOWN or MARKED.
+              B2 `partial`=authorization (restored) · `incomplete`=DERIVED capacity · ⛔ neither is a 5th axis.
+           ⭐⭐ A1 SAID SOMETHING THAT CONTRADICTED MY OWN DESIGN DOC, and it is right: the RFC's
+              "abbreviation" example is NOT one — `favorite language` → `favorite programming language` is
+              **BROADER** (it could mean a spoken language). ⛔ I did not bend the classifier to match R3.
+              RFC §5's 4-way tie breaks to 1 `same` + 3 `broader`. 16 over-bindings corpus-wide (4 real),
+              **every one at containment exactly 1.0000** ⇒ ⛔ NOT threshold-edge cases. ZERO under-bindings.
+              ⚠ `unknown` = 886/3,368 (26%) — mostly `function-word`, i.e. attribute labels that are PHRASES.
+              ⇒ **Ote: that is an EXTRACTOR NAMING problem and the fix belongs UPSTREAM, not in the resolver.**
+              ⚠ 2nd armed collision found: `deploy schedule` → `work schedule` is NARROWER. Left armed.
+           ⭐⭐⭐ B EXPOSED A THIRD DEFECT, worse than the one we set out to fix: the window was `rolling_id`
+              arithmetic and **rolling_id is ONE GLOBAL SEQUENCE**, so any interleaved conversation collapsed
+              it — **33% of conversations returned FEWER than the radius promises, mean 7.36/9, worst 2/9**
+              (one conv: 176 messages over 1,312 ids). The shelter conv was contiguous, which is why this hid
+              in plain sight. ⇒ B1 counts POSITIONS, never ids.
+           ⏸ **B-D1 MEASURED, NOT DECIDED — radius UNCHANGED at ±4.** Reach to the conversation's opening
+              statement: ±4=63% · ±6=83% · ±8=85% · ±12=96%. ⭐⭐ COST IS NOT THE CONSTRAINT: even ±12 is
+              ~3.2k tokens of a ~99k budget ⇒ B-D1 is a purely COGNITIVE question, exactly as Ote framed it.
+              ⭐ ±4→±6 is the biggest single gain; beyond ±8 the return flattens.
+           ⏸ OPEN: **A-D4** (broader/narrower/sibling durable behaviour — A1 authority STRUCTURALLY blocked
+              on it; and §1 makes it HARDER: broader is not always an error) · B-D1 · B-D2 (incomplete
+              PRESENTATION — field landed, rendering deliberately did not) · B-D3 (⛔ lattice untouched) ·
+              B-D4 scan stamping not yet built · the `unknown`/extractor-naming investigation.
+           ⚠ `` BECAME A LITERAL BACKSPACE AGAIN (2nd time this arc) via a shell-layer edit — a regex
+              silently matched nothing. ⇒ prefer regexes that need NO escapes; check bytes when a match is 0.
 NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
            `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
            here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial

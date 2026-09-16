@@ -9572,3 +9572,57 @@ and after, `location` collision still computing as a tie and still sorting armed
 
 Next, in order: A1 infrastructure (the `relation` value) → `grayZoneMode = 'shadow'` → measurement → A-D4 → only then
 any question of authority. A1 authority remains structurally blocked on A-D4.
+
+---
+
+## 2026-09-16 · A1 shadow + B1/B2 landed — and each found a defect the other could not have
+
+**A1 (shadow only, no authority).** `memory-ontology.js` derives a relation from A2's head+qualifiers; only
+`same` may bind; there is deliberately no `'on'` mode. `ontologyMode` and `grayZoneMode` are both `'shadow'` and
+accumulating on live traffic.
+
+⭐⭐ **The measurement contradicted my own design doc and I reported it rather than bending the classifier.**
+`DESIGN_SOTERA_A_SLOT_IDENTITY.md` listed R3 as *"`favorite language` → `favorite programming language` is still
+`same`"*, taken from `memory-extract.js`'s own docstring justifying containment. The structure says **BROADER** —
+*favorite language* could mean a spoken language. **The docstring's justifying example was itself a hypernym.**
+
+Corpus: 3,368 pairs — 2,434 `different`, **886 `unknown` (26%)**, 30 `sibling`, 14 `same`, 2 `broader`, 2
+`narrower`. **16 over-bindings, 4 of them real, every one at containment exactly 1.0000** — these are the cases
+containment is *most confident about and most wrong about*, not threshold-edge calls. **Zero under-bindings.**
+The RFC §5 four-way tie breaks to 1 `same` + 3 `broader`. A second armed collision surfaced: `deploy schedule` →
+`work schedule` is NARROWER, from the same alias. Left armed.
+
+⇒ Ote's read, which the numbers support: `unknown` at 26% is mostly `function-word` — attribute labels that are
+*phrases* — so **the fix belongs upstream in extractor naming, not in teaching the resolver to guess.**
+
+**B1/B2.** Red-proof first. `R1 · the CORRECTION appears in the projection` — 5 contiguous positions
+`[11487…11491]`, zero gaps, both speakers. Turn 11488 is the correction she could not see.
+
+⚠️⚠️ **B exposed a third defect, worse than the one we set out to fix.** The window was `rolling_id` arithmetic,
+and **`rolling_id` is ONE GLOBAL SEQUENCE** — any conversation interleaved with another has interior gaps, so the
+window silently collapsed. **33% of conversations returned fewer messages than the radius promises, mean 7.36 of
+9, worst 2 of 9**; one conversation has 176 messages spanning 1,312 ids. The shelter conversation happened to be
+contiguous, which is exactly why this hid while we were staring at it. B1 counts **positions**, never ids.
+
+Three divergent reads became one contiguous positional window over both speakers; every position is shown or
+**marked**. The authorization boundary is unchanged and asserted: R3 measures **zero** new disclosure grants with
+live grants cleared first. `partial` is restored to authorization; `incomplete` is a derived capacity fact and
+cannot be hand-set.
+
+**B-D1 measured, not decided — radius unchanged at ±4.** Reach to the conversation's opening statement: ±4=63%,
+±6=83%, ±8=85%, ±12=96%. ⭐⭐ **Cost is not the constraint**: even ±12 is ~3.2k tokens of a ~99k budget, so B-D1
+is a purely cognitive question exactly as Ote framed it. ±4→±6 is the biggest single gain; beyond ±8 it flattens.
+⚠️ I had to correct my own instrument first — it centred on the *last* turn and was measuring conversation
+*length*, not reach.
+
+**Two stale anchors re-anchored rather than weakened**, both of which failed loudly rather than passing
+vacuously — `memory-cognition-check` §9 and the D4 guard. The D4 guard now names its consumers instead of
+counting occurrences, because a count cannot tell a real consumer from a coincidence of spelling: I had briefly
+named a local `centreIdx`, whose name *contains* `centreId`.
+
+⚠️ **`\b` became a literal backspace again** — second time this arc — via a shell-layer edit, so a regex silently
+matched nothing. Caught because the assertion failed. Prefer regexes needing no escapes; check the bytes when a
+match count is inexplicably 0.
+
+Verification: unit **753/753** · `@ote/memory` **123/123** · 9 checks green · evidence baseline green before and
+after both steps · 112 slots · 8 aliases · both armed collisions intact. :8210 restarted onto the B build.
