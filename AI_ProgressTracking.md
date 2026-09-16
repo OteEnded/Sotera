@@ -8881,3 +8881,52 @@ defect — it is the only guard on the 19 raw-SQL sites the store cannot see) ·
 
 ⛔ Fences: attribution HELD (detector watching, F2 shipped, nothing reopened) · no ranking/salience · R-C, `remember_fact`,
 D2/D4, D6/D7 untouched · no provenance inference or historical repair · production reflection = Gen 3.
+
+## 2026-09-16 (+07:00) — ✅ D1 PHASE-3 PREPARATION APPLIED AND VERIFIED · ⏸ STOPPED BEFORE THE FLIP · ⭐ first live candidate classified
+
+**Attribution, first full cycle.** Candidate `769f6a65` recorded as **REQ_NOW by ote** — a confirmed NON-violation. The user
+turn carried an explicit instruction to inventory every memory store, so *"the user asked me to check…"* was ACCURATE;
+detector-positive is not itself a violation. ⓘ The traffic was a suite check driving the chat route, not a natural
+conversation. Standing: **0 confirmed violations of 6 scanned · 1 confirmed non-violation · 0 unreviewed.** ⇒ detect →
+preserve → human classify → count has now run end to end. ⛔ Nothing else in the attribution arc touched.
+
+**His four Phase-3 rulings, applied in his stated order** — `AUDIT_SOTERA_D1_PHASE3_PRE_FLIP.md`.
+
+① **Known caller first, then the boundary.** `schedules/service.js` `runToolAction` declares `writer:'job'` + a MINTED act
+(⭐ `store.createRun` writes the run row AFTER the performer returns, so the run's own id does not exist at that point;
+`row.id` would have made two firings share one occasion). Only then did retention's tool-context factory stop accepting
+`extras.writer ?? null` — it now refuses with `NO_WRITER`.
+⚠️⚠️ **And that refusal would have been SILENT.** Host-service factories run inside an **empty** `catch`, so a factory that
+refuses on purpose became an *absent service* with nothing said — the exact silent degrade his ruling exists to prevent.
+Implementing the instruction literally would have defeated its purpose. The catch now logs service + origin + reason; the
+"a failing factory never breaks the turn" contract is unchanged. ⓘ `runtime.js:141` (`memory.v2`) deliberately LEFT and
+flagged: built eagerly for every context including read-only ones, and its writes are covered by the store at the flip.
+
+② **Mutations are authored acts** ⇒ the admin `forget` and `restore` handlers declare `admin` + act `request:<request.id>`
+(Fastify's own request id — one forget, one act, nothing minted). `reflection-host.removeNote` already declared via D8.
+
+③ **Lint severity unchanged** — `writer-not-declared` stays a defect; it is the only guard on the 19 raw-SQL sites.
+
+④ **The two deliberately-undeclared tests were already compliant**, and that is now measured, not assumed: the unit contract
+test writes to a `fakeDb` (never Postgres), and W1 removes its row in `finally`. ⏸ Both still need rewriting from
+*admitted* to *refused* AT the flip. Plus `model-tool-claim-kind-check` now declares the chat-turn axes it already exercised.
+
+**VERIFICATION** — `:8210` restarted onto the build FIRST (PID 26564 → **19420**, 200 in 2 s) so the route paths exercised the
+new boundary, then the full suite under `SOTERA_WRITER_TRACE=1`:
+⭐⭐⭐ **62 undeclared writes · 41 call sites · 12 files · ZERO leaf frames in `Backend/`.** `m2-rollback-check` has vanished
+from the list (2 → 0) — the canary fix confirmed by measurement, not by reading the diff.
+⭐⭐ **`writer IS NULL` held 48 → 48 and `writer-not-declared` held 15 → 15** ⇒ 62 undeclared writes happened and **none
+survived the run**. Item 4 is satisfied suite-wide, not just for the two named files. ⛔ The 15 are frozen historical
+residue and are NOT repaired.
+Suite **3 of 85 failed, down from 4, none from this work**: `dense-admission` and `dreaming-m1` share ONE hardcoded corpus
+count (`nonEvidential === 8`, now 19) — one drift reporting twice; `temporal-denominator` is the fenced D5 drift;
+`memory-lifecycle` **passed** this run, confirming it was the contention flake.
+
+⛔⛔ **ONE BLOCKER, AND IT IS SEMANTIC, NOT WIRING**: `chat-site.route.js:3980`, `DELETE /chat/memory/v2/:id` — the person
+deleting THEIR OWN memory. Act kind `request` is documented as *"an operator act through the **admin surface**"*, which this
+is not. (a) use `admin` anyway · (b) ⭐ a NEW writer (e.g. `person`) · (c) widen `request`'s meaning. ⛔ I did not pick: a
+registry addition is the same class of decision D8 was, so it is his.
+
+⏸ **STOPPED IMMEDIATELY BEFORE THE FLIP, as instructed.** Remaining: rule that writer → wire it → make the store refuse a
+write OR MUTATION with no writer → rewrite the two refusal tests → declare at the remaining test sites → re-run enumeration
+and suite → confirm zero. ⛔ Historical rows never repaired. ⛔ D3′, attribution, R-C, D2/D4 untouched.
