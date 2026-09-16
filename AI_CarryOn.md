@@ -38,17 +38,44 @@ replay built from the incident's own record. ⇒ **live detection is the instrum
 ```
 ✅ PROVEN LIVE:  conversation → formation → durable (all 4 axes) → fresh conversation → automatic retrieval
 ✅ PROVEN LIVE:  experience → REFLECTION → retention → durable memory   (fired UNPROMPTED via the cron)
-⛔ FAILED:       a CORRECTION does not supersede
-⚠️ PARTIAL:      she DETECTS a contradiction, then resolves toward the STALE value
+                 ⭐ RULED 09-16: this lane moves "registered but idle" → PROVEN LIVE. ⛔ That is the lane ONLY;
+                 the M-series Dreaming/consolidation system stays a separate DESIGN question (ⓓ).
+⛔ FAILED:       a correction did not reach the belief it corrected
+⚠️ PARTIAL:      she reasoned CORRECTLY to the WRONG answer — see the investigation, the evidence was truncated
 ```
 
-**The two defects, both NEW questions (⛔ not reopened ones), both left UNREPAIRED as evidence:**
-1. **Slot resolution keys on the attribute NAME.** A correction phrased differently makes a NEW slot:
-   `work schedule = Saturdays` and `shelter shift day = sundays` are **both LIVE**. One-live-belief-per-slot is intact
-   because they are different slots ⇒ no rule fires. ⚠️ And the first write was mis-slotted DESTRUCTIVELY — a
-   volunteering day landed in the user's `work schedule` slot and superseded `"up past 2am"`.
-2. **Conflict resolution prefers the transcript over the store**, and read the opening statement rather than the
-   correction three turns later ⇒ the wrong answer reached the user.
+**Two defects, both NEW questions (⛔ not reopened ones), both left UNREPAIRED as evidence.**
+⭐⭐ **INVESTIGATED 09-16 — `INVESTIGATION_SOTERA_SLOT_IDENTITY_AND_SELF_BELIEF_CONFLICT.md`. Read it before touching
+either; several first-pass readings did not survive the trace.**
+
+1. **SLOT IDENTITY.** The extractor is handed ONE user turn, no history, and told the attribute must be **"short"**.
+   It named *"volunteering at the shelter on saturdays"* → **`schedule`**. The domain word died there. Then
+   `attributeSimilarity` = `max(jaccard, CONTAINMENT)` scored `{schedule} ⊂ {work, schedule}` = **1.000**.
+   ⭐ **Containment is only safe when the short phrase is the more SPECIFIC one.** Here it was a HYPERNYM — the
+   function cannot tell an abbreviation from a broader category. ⚠️ Cosine agrees (0.9104): **both arms make this
+   error.** ⇒ a generic attribute name is a skeleton key for every slot containing its word.
+   ⛔ It destroyed `work schedule = "up past 2am"`, which has **NO live replacement** to this day.
+2. **⭐⭐⭐ HER TWO BELIEFS NEVER MET — the framing "conflict resolved toward the stale belief" is WRONG.** Both rows
+   were live and in scope; she was shown ONE. What she weighed was **one memory against one conversation excerpt**,
+   and `memory-cognition-host.js` selects the counterpart's half with **`role='user' ORDER BY rolling_id ASC LIMIT 2`
+   — no window, no centre, no relevance, no recency.** ⇒ **the two OLDEST user turns. A correction is by definition
+   LATER, so that query can essentially never contain one.** Her own half IS properly windowed (centre ±4).
+   ⇒ she saw the user say *Saturdays*, and everything saying *Sundays* was **her own voice** ⇒ *"I recorded it wrong"*
+   was the CORRECT inference from that evidence. ⭐ **An evidence-selection failure, ⛔ NOT a judgement failure** —
+   nothing here argues for touching the model, the prompt, ranking or salience.
+
+⚠️ **THREE THINGS THE TRACE OVERTURNED — do not re-inherit the earlier wording:**
+- **The contradiction is GONE.** Reflection superseded `Saturdays` at 13:40, unprompted, with the correct value.
+  The evidence survives as **LINEAGE** (`baf35aa0` dead-but-kept), ⛔ not as a live disagreement.
+- **The stale row was written 2.8 s AFTER the correction was spoken** (extraction lags 29–43 s, fire-and-forget).
+  ⇒ it was never a correction meeting a belief; it was two extractions of two turns, racing.
+  ⛔ Therefore wiring `memory-contradiction.js` (unwired, 0 production imports) would **NOT** have caught this: its
+  rule needs the memory to have been IN CONTEXT when the correction was made, and it did not yet EXIST.
+- **⭐⭐ A COMPOUNDING LOOP, not a stable error.** A bad merge PROMOTES the generic phrase to a permanent alias →
+  refreshes `last_write` → `slotStore.list()` orders `last_write DESC` → the resolver's `>` is STRICT ⇒ **first wins
+  every tie** ⇒ the slot that just swallowed something is the one most likely to swallow the next thing.
+  ⚠️ **ARMED NOW:** alias `volunteer_schedule_and_location` makes the phrase **`location`** score 1.000 on the
+  *work schedule* slot, which currently sorts AHEAD of the real `location` slot. ⛔ Not repaired — his call.
 
 ⭐ **D10 evidence, in the narrow form ruled:** a flatly-stated durable fact drew **two voluntary `remember_fact` calls**;
 a relational conversation carrying four durable facts drew **ZERO tool calls** — all 5 rows came from the fallback
@@ -113,6 +140,15 @@ governance-READ decision. ⛔ Not reopened.
 ⑫ ⭐⭐⭐ A TOOL REPORTING SUCCESS IS NOT EVIDENCE THE RESULT IS RIGHT (D7, 09-16). `git apply` accepted three
    successive patches WITHOUT ERROR and produced subtly wrong files. Only a BYTE COMPARISON against an
    untouched backup caught it. ⇒ the comparison is the GATE, ⛔ not a formality.
+⑬ ⭐⭐ CONTAINMENT CANNOT TELL AN ABBREVIATION FROM A HYPERNYM (09-16). `"favorite language" ⊂ "favorite
+   programming language"` and `"schedule" ⊂ "work schedule"` are the SAME token test and OPPOSITE facts.
+   ⇒ ⛔ never let a SHORTER phrase inherit a longer slot on subset alone; and ⛔ do not answer this with a
+   threshold — cosine scored the same bad pair 0.9104. BOTH arms make it.
+⑭ ⭐⭐⭐ ASK WHAT THE QUERY SELECTED BEFORE BLAMING THE RANKING — AND BEFORE BLAMING THE MODEL (09-16). Her
+   wrong answer was the CORRECT inference from a transcript excerpt built by `ORDER BY rolling_id ASC LIMIT 2`,
+   which had silently dropped the correction. The comment above it read *"a convenience, never load-bearing."*
+   ⇒ ⛔ a component that decides what she SEES is load-bearing whatever its comment says; and ⇒ a subset that
+   does not declare itself a subset is a lie the reader cannot detect (`partial:false` on 2 of 5 turns).
 ```
 
 # 0-C · LIVE STATE — 2026-09-16
@@ -124,11 +160,16 @@ unit 753/753 · @ote/memory 94/94 · suite 3 of 85 red, ALL pre-existing: 2 shar
   (nonEvidential===8, now 19) and 1 is the FENCED D5 snapshot drift
 lint: 15 writer-not-declared (frozen residue) · pass-writer-without-act 0 · duplicate-live-slot 0
 attribution: 12 turns scanned · 0 confirmed violations · 1 confirmed NON-violation (REQ_NOW)
-CRONS LIVE: noticing (15m) · reflection (20m, reflectAllQuiet) — reflection is STARVED:
-  scanned=307 reflected=0 skipped={thin:230, probe:68, empty:6, memory-off:1, unchanged:2}
+CRONS LIVE: noticing (15m) · reflection (20m, reflectAllQuiet) — ⭐ NO LONGER STARVED: on 09-16 it reflected
+  UNPROMPTED on the validation conversation and wrote 3 rows (13:40), one of which CORRECTED a bad extractor row
 OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · reflectMode ('off', 0 note rows EVER)
-FIXTURES KEPT ON PURPOSE (his instruction): the Mira chain + the 5 shelter/bakery rows incl. the LIVE CONTRADICTION
-  (`work schedule = Saturdays` vs `shelter shift day = sundays`) — evidence for the next milestone, ⛔ not repaired
+FIXTURES KEPT ON PURPOSE (his instruction) — ⭐ TWO SETS, KEPT SEPARATE, ⛔ neither repaired:
+  KNOWN-GOOD  the Mira chain (318282ac→1fd59a3b, slot 9ed7d99c; + reflection row c6b415bc)
+              = the DIRECT TOOL-WRITE path working end to end
+  THE FAILURE the shelter/bakery set: slot f792b628 chain 365e774e→baf35aa0→33926415, plus 994dd66a, 8fc8e793,
+              60edebfc, 8a142ce8 = the EXTRACTOR + EXCERPT path failing
+  ⚠️ The Saturdays/Sundays contradiction is NO LONGER LIVE — reflection superseded it at 13:40. The evidence is
+     the LINEAGE (dead-but-kept rows + supersedes_id), ⛔ not a live disagreement. Do not describe it as live.
 ```
 
 **BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) writer seam → **Phase 3 refusal** · reflection
@@ -161,10 +202,19 @@ DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ①
            ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
            not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
            ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-NEW ①      SLOT RESOLUTION ON A CORRECTION — keys on the attribute NAME, so a re-phrased correction makes a new slot
-           instead of superseding. Live contradiction preserved as evidence. ⛔ NOT a memory-semantics defect.
-NEW ②      WHAT SHE DOES WHEN TWO OF HER OWN BELIEFS DISAGREE — she DETECTS it, then prefers the transcript over the
-           store and reads the opening statement rather than the correction. The natural sibling of D10.
+NEW ①      SLOT IDENTITY — ⭐ INVESTIGATED 09-16, ⛔ no fix proposed and none should be inferred. Four open questions
+           (investigation §8): ⓐ where does a slot's NAME come from? (one word of prompt guidance on one isolated
+           turn) ⓑ should containment be DIRECTIONAL — safe for abbreviation, refused for hypernym — and what tells
+           them apart without an ontology? ⓒ may an excerpt be a proper SUBSET without saying so? ⓓ is ARRIVAL ORDER
+           an acceptable authority rule once two beliefs can actually meet? (§2.5: today it is all there is)
+           ⚠️ ARMED HAZARD, not repaired: alias `location` → the *work schedule* slot, which sorts first.
+NEW ②      SELF-BELIEF CONFLICT — ⭐ the premise did not survive the trace: **her two beliefs never met.** The real
+           finding is the counterpart read (`ASC LIMIT 2`, no window) and DATE-ONLY temporal resolution, so the
+           original and its correction 40 s later carry the IDENTICAL timestamp. ⛔ Not a model or salience question.
+NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
+           `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
+           here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial
+           excerpt. ⛔ Observations, ⛔ not requirements.
 D10        WHAT MAKES AN OPTION SALIENT INSIDE HER DECIDING — `keep()` 38/38 yet unprompted calls ~zero; the citation
            affordance 0/16; and now 0 tool calls across a 5-turn relational conversation. ⛔ Research, not a code change.
 ATTRIBUTION only the READING: when candidates appear OTE classifies them —

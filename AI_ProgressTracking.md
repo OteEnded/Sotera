@@ -9280,3 +9280,59 @@ does when two of her own beliefs disagree), D10, the attribution reading, PERF, 
 
 Trees: Sotera committed and **pushed** (origin/main in sync); Reference committed; `@ote/memory` clean apart from the two
 deliberately-retained `.bak` files. Final verification green.
+
+---
+
+## 2026-09-16 · INVESTIGATION — slot identity + self-belief conflict resolution (read-only)
+
+Ote's ruling: the reflection lane moves **"registered but idle" → PROVEN LIVE** (that lane only; the M-series
+Dreaming/consolidation system stays a separate design question). Then: **investigate, do not implement**; keep the two
+questions apart — *are these the same semantic attribute?* vs *which belief has authority?*; preserve the contradictory
+rows and keep the Mira fixture separate; keep D10 narrow.
+
+Deliverable: `Reference/docs/INVESTIGATION_SOTERA_SLOT_IDENTITY_AND_SELF_BELIEF_CONFLICT.md`.
+⛔ No code changed · no row repaired · no alias removed · no threshold/setting/switch touched · D1–D9 not reopened ·
+Dreaming and `dryRun` untouched · the 4 attribution candidates left unclassified (D13).
+
+**Four things the trace overturned, each of which I would otherwise have carried forward wrong:**
+
+1. **The contradiction is gone, and was already gone before I started.** Reflection superseded `Saturdays` at 13:40 —
+   unprompted, with the correct value. The evidence lives in the LINEAGE (dead-but-kept + `supersedes_id`), not in a
+   live disagreement. The measurement doc's §3 was true when written and is no longer true.
+2. **The stale row was written 2.8 s AFTER the correction was spoken.** Extraction is fire-and-forget and lagged
+   29–43 s on every row. ⇒ never a correction meeting a belief; two extractions of two turns, racing.
+3. **Her two beliefs never met.** Both rows were live and in scope; she was shown one. The framing "conflict resolution
+   resolved toward the stale belief" does not describe what happened — she weighed one memory against one conversation
+   excerpt.
+4. **`memory-contradiction.js` would NOT have caught this.** It is unwired (0 production imports) and I nearly
+   recommended wiring it as the fix. Its rule requires the memory to have been in context when the correction was made;
+   per (2) the row did not yet exist. Out of scope by its own definition.
+
+**A · slot identity.** The extractor gets ONE turn, no history, and an instruction that the attribute be *"short"* — it
+named the volunteering fact `schedule`. `attributeSimilarity = max(jaccard, containment)` then scored
+`{schedule} ⊂ {work, schedule}` = **1.000**, logged by the store itself as `lexical 1.000 · "schedule" → slot "work
+schedule"`. Containment is only safe when the short phrase is the more SPECIFIC one; here it was a hypernym, and the
+token test cannot tell those apart. Cosine scored the same pair 0.9104 ⇒ **both arms make the error**; this is not a
+threshold problem. It destroyed `work schedule = "up past 2am"`, which still has no live replacement.
+
+**⭐ The compounding loop** — the part I did not predict. A bad merge promotes the generic phrase to a permanent alias,
+refreshes `last_write`, and `slotStore.list()` orders `last_write DESC` while the resolver's comparison is strictly `>`
+⇒ **first wins every tie** ⇒ the slot that just swallowed something is the one most likely to swallow the next. Measured
+consequence, armed now and left unrepaired: the phrase `location` scores 1.000 on the *work schedule* slot, which
+currently sorts ahead of the real `location` slot.
+
+**B · authority.** Attributed against Ote's six candidates. PRIMARY: prompt/context presentation and retrieval
+ordering — and the ordering is a **query, not a ranking**: the counterpart's half of an episode is selected by
+`role='user' ORDER BY rolling_id ASC LIMIT 2`, with no window, no centre, no relevance, no recency, while her own half
+IS properly windowed (centre ±4). The two oldest user turns; a correction is by definition later. Counterfactual,
+measured: her own centre ±4 would have returned the correction. CONTRIBUTING: slot semantics (the generic name kept the
+competing row out of retrieval entirely) and temporal information — present but **date-only**, so the statement and its
+correction 40 s later carry the identical timestamp. NOT the cause: model reasoning — her inference was sound on the
+evidence shown, and her rule (*prefer what the person said over my own note*) is the right rule. NOT involved:
+provenance. ⇒ **an evidence-selection failure, not a judgement failure.**
+
+Two rules added to §0-B: ⑬ containment cannot tell an abbreviation from a hypernym; ⑭ ask what the QUERY selected before
+blaming the ranking or the model — and a subset that does not declare itself a subset is a lie the reader cannot detect.
+
+D10 gains exactly one datum and no more: zero voluntary write calls across this conversation while four durable facts
+went past. That is evidence about what she notices; it does not show that salience explains it.
