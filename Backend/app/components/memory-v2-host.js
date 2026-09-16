@@ -70,7 +70,10 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
   // the store's fallback for a write that has no row-level turn — ⛔ never a way to override one.
   // ⭐ 049 · the four axes travel with the construction: WRITER (contract key) · ACT (occasion) · REACH (material).
   const store = createSequelizeMemoryStore({ db: fastify.db, persona, userId, author, scope, sourceText, occasion: occasion ?? sourceMessageId, writer, act, reach, config: fastify.config, log })
-  const slotStore = createSlotStore({ db: fastify.db, persona, userId, log })
+  // ⭐ A3 · the slot store now receives the ACT too. An alias is asserted by `WRITER.resolver` (a fixed actor,
+  // so it is not passed) on THIS write's occasion (which only the caller knows). ⛔ Absent ⇒ it refuses to teach
+  // rather than teaching anonymously — `WRITER.resolver` is `pass: false`.
+  const slotStore = createSlotStore({ db: fastify.db, persona, userId, log, act })
   // Bind the writer to THIS host's storage. The cognition calls `auditLog(entry)` and never learns that
   // a database was involved. ⚠️ It used to call `logMemoryChange(db, …)` directly with a `db` the
   // factory no longer receives — syntactically valid, ReferenceError at runtime, inside a swallowing

@@ -86,7 +86,12 @@ export const VERIFICATION = Object.freeze({
 export const WRITER = Object.freeze({
   extractor: 'extractor', identity: 'identity', chatTool: 'chat-tool', followthrough: 'followthrough',
   reflection: 'reflection', notes: 'notes', dreaming: 'dreaming', distiller: 'distiller', operator: 'operator', ingest: 'ingest',
-  lesson: 'lesson', decline: 'decline', admin: 'admin', person: 'person', job: 'job', unknown: 'unknown',
+  lesson: 'lesson', decline: 'decline', admin: 'admin', person: 'person', job: 'job',
+  // ⭐⭐⭐ A3 (Ote, 2026-09-16) — the actor that asserts an EQUIVALENCE between a phrasing and a slot.
+  // ⛔ It writes no memory row. It is here because an alias IS memory-semantic state, and the seam that
+  // answers "who claimed that?" is the writer axis. See §RESOLVER below.
+  resolver: 'resolver',
+  unknown: 'unknown',
 })
 
 const contract = (writer, o) => Object.freeze({
@@ -136,6 +141,25 @@ export const CONTRACTS = Object.freeze({
   // The actor distinction rides on the writer, never on the act. See ACT_KIND.request above.
   [WRITER.person]: contract(WRITER.person, { actKind: ACT_KIND.request, reach: REACH_KIND.none }),
   [WRITER.job]: contract(WRITER.job, { actKind: ACT_KIND.job }),
+
+  // ══ ⭐⭐⭐ §RESOLVER · A3 — THE EQUIVALENCE WRITER (Ote, 2026-09-16) ═════════════════════════════════════════════
+  //
+  // The extractor said:   `schedule = Saturdays`
+  // The RESOLVER said:    `schedule ≡ work schedule`
+  //
+  // ⭐ Two different claims ⇒ two different actors. Attributing the alias to the triggering row's writer would file
+  // the equivalence under someone who never asserted it — the same defect the writer axis exists to prevent.
+  //
+  // ⛔ `pass: false`, and this is the deliberate half. A PASS writer may write without an occasion because it has
+  // none (a dreaming pass, a note). The resolver ALWAYS has one: it only ever runs inside a write that is already
+  // happening, so its act is that write's act. ⇒ an occasion-less resolver alias is not a gap to be tolerated, it
+  // is an equivalence nobody can be asked about.
+  //
+  // ⛔ `reach: none` — an alias is not a belief and takes no material. ⛔ No coincidence, no verification: it makes
+  // no claim about the world, only about two phrasings. ⓘ It is NOT a fifth axis (A-D3); its accountability lives
+  // in `log_slot_aliases` (migration 051), which also records the equivalences that were REFUSED.
+  [WRITER.resolver]: contract(WRITER.resolver, { actKind: null, pass: false, reach: REACH_KIND.none }),
+
   [WRITER.unknown]: contract(WRITER.unknown, {}),
 })
 
