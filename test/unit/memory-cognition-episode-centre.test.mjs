@@ -105,9 +105,19 @@ test('⛔⛔ the D4 cue-centre term ships OFF, and it FALLS BACK rather than fil
   // best-ranked centre and stays in the running.
   assert.match(CODE_ALL, /const centreId = episodeCentreCueMatch \? \(ep\.cueCentre \?\? ep\.centre\) : ep\.centre/,
     'the cue centre must FALL BACK to the best-ranked centre — without the fallback this drops conversations')
-  // ⛔ And it must be the two consumers, not one: the own-half read AND the counterpart's disclosure call.
-  assert.equal((CODE_ALL.match(/centreId/g) ?? []).length, 3,
-    'centreId must be resolved once and used by BOTH the own-half window and inspectAround')
+  // ⛔ And it must be the CONSUMERS, not one. ⚠️ This used to assert `length === 3`, a brittle proxy that broke
+  // when B1 landed — for two reasons worth keeping apart: the projection legitimately gained a THIRD consumer
+  // (it now declares its own centre), and a new local was briefly named `centreIdx`, whose name CONTAINS
+  // `centreId` and inflated a substring count. ⇒ assert the CONSUMERS BY NAME rather than counting occurrences;
+  // a count cannot tell a real consumer from a coincidence of spelling.
+  assert.equal((CODE_ALL.match(/centreId/g) ?? []).length, 4,
+    'centreId is resolved once and used by the window resolution, the disclosure call, and the declared projection')
+  assert.match(CODE_ALL, /findIndex\(\(m\) => m\.id === centreId\)/,
+    'the WINDOW must be positioned from centreId — this is the read that replaced the own-half window')
+  assert.match(CODE_ALL, /inspectAround\(\{ messageId: centreId/,
+    'the counterpart disclosure call must still centre on the same message')
+  assert.match(CODE_ALL, /centre: centreId/,
+    'the projection must DECLARE the centre it was built around — an undeclared centre cannot be audited')
   // ⓘ The two candidate flags are independent, so neither can be credited with the other's effect.
   assert.ok(!/episodeTopHit && episodeCentreCueMatch|episodeCentreCueMatch && episodeTopHit/.test(CODE_ALL),
     'the two D2/D4 flags must stay independent — bundling them makes the 2x2 impossible')

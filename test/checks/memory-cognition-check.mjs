@@ -299,12 +299,24 @@ ok(typeof first.dropped === 'number' && typeof second.dropped === 'number',
     new URL('../../Backend/app/components/memory-cognition-host.js', import.meta.url), 'utf8')
   ok(/requiresAuthorization\(/.test(src),
     '9 · ⭐ the host CONSULTS the ownership rule — two copies of an ownership rule is how they stop agreeing')
-  const stage5a = src.slice(src.indexOf('5a · HER OWN LINES'), src.indexOf('5b · THE COUNTERPART'))
-  ok(stage5a.length > 100, '9 · the own-half stage exists to inspect', `${stage5a.length} chars`)
-  ok(!/disclosure\.|inspectAround|grantFromInteraction|requestRoomAccess/.test(stage5a),
-    '9 · ⛔⛔ the own-half read contains NO disclosure call — the path is not entered, not entered-and-allowed')
-  ok(/role: 'assistant'/.test(stage5a),
-    '9 · ⭐ …and the ownership rule is the query itself: her utterances, in any room')
+  // ⚠️ RE-ANCHORED FOR B1 (2026-09-16), and the GUARANTEE is unchanged while the STRUCTURE is not.
+  // This used to slice between `5a · HER OWN LINES` and `5b · THE COUNTERPART` and assert that her half was a
+  // plain `role: 'assistant'` query with no disclosure call. B1 replaced THREE divergent reads with ONE
+  // contiguous window over both speakers, so there is no longer a separate own-half stage to slice — and the
+  // old anchor FAILED LOUDLY rather than passing vacuously, which is what it was built to do.
+  // ⭐ The guarantee to prove is the same one: CONTENT IS READ WITHOUT A DOOR; the door only decides whether
+  // the counterpart's words are WITHHELD. ⇒ assert that on the projection stage.
+  const stage = src.slice(src.indexOf('5 · THE PROJECTION'), src.indexOf('5c · ⭐⭐ EVERY POSITION'))
+  ok(stage.length > 100, '9 · the projection stage exists to inspect', `${stage.length} chars`)
+  const windowRead = src.slice(src.indexOf('const orderedIds'), src.indexOf('── 5b · THE DOOR'))
+  ok(!/disclosure\.|inspectAround|grantFromInteraction|requestRoomAccess/.test(windowRead),
+    '9 · ⛔⛔ the WINDOW READ contains NO disclosure call — the path is not entered, not entered-and-allowed')
+  ok(/conversation_id: ep\.cid/.test(windowRead) && /order: \[\['rolling_id', 'ASC'\]\]/.test(windowRead),
+    '9 · ⭐ …and it is a plain windowed read of the conversation, positioned on the centre')
+  // ⛔ The door still exists and is still consulted — ONLY cross-room. Removing it would be a real regression,
+  // so its absence must fail as loudly as its misuse would.
+  ok(/ep\.roomUserId !== userId[\s\S]{0,200}inspectAround/.test(src),
+    '9 · ⛔ the counterpart door is still there and is still gated on CROSS-ROOM — 84e2c18 preserved')
 }
 
 // ── ⭐⭐⭐ 10 · §3B · PAST SELF-REPORT IS MEMORY, NOT LAW — ON HER REAL HISTORY ────────────────────

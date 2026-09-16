@@ -634,87 +634,98 @@ export function buildMemoryCognition(fastify, {
 
     const items = []
     for (const ep of scored.slice(0, LIMITS.episodes)) {
-      // ── 5a · HER OWN LINES · ownership, no authorization, no grant ────────────────────────────────
+      // ══ ⭐⭐⭐ 5 · THE PROJECTION — ONE CONTIGUOUS WINDOW, CENTRED, BOTH SPEAKERS (B1, ratified 2026-09-16) ══
+      //
+      // ⛔ THIS REPLACED THREE DIVERGENT READS WITH ONE. `84e2c18` (2026-08-21) split a single symmetric
+      // `inspectAround` into her-half / counterpart-cross-room / counterpart-same-room, to stop spending
+      // authorization grants on her own sentences — a real win (15 grants → 2). But the THIRD branch was new
+      // code with no antecedent, and it read `role='user' ORDER BY rolling_id ASC LIMIT 2` — the two OLDEST
+      // user turns of the whole conversation, with no window, no centre, no relevance and no recency.
+      // ⇒ a CORRECTION is by definition a LATER turn, so that branch could essentially never contain one. On
+      // 2026-09-16 she was handed her own three replies saying "Sundays" and the user's single opening line
+      // saying "saturdays", concluded *"I recorded it wrong"*, and told him Saturdays. Her reasoning was
+      // CORRECT; the evidence had been truncated exactly where the truth changed.
+      //
+      // ⭐⭐ AND THE SPLIT WAS NEVER NEEDED FOR THE SAME-ROOM CASE: `decideAccess` is a NO-OP in the same room
+      // (`if (!sameRoom) {…}`), so `inspectAround` costs ZERO grants there. The 15→2 saving came entirely from
+      // HER HALF across rooms, which still reads directly below. ⇒ restoring the contract gives back nothing.
+      //
+      // ══ ⭐⭐⭐ AND THE WINDOW IS POSITIONAL, ⛔ NEVER rolling_id ARITHMETIC ═══════════════════════════════
+      // `rolling_id` is ONE GLOBAL SEQUENCE across all conversations, so `rolling_id BETWEEN centre-4 AND
+      // centre+4` silently shrinks whenever a conversation was interleaved with another. MEASURED over 46
+      // conversations of ≥12 messages: the shipped arithmetic returns a mean of **6.70 of 9** messages and as
+      // few as **2**, and is short on **46%** of them. ⇒ the radius is counted in MESSAGES OF THIS
+      // CONVERSATION, which is the only reading under which "±4" means what it says.
       // ⭐⭐ D4 · WHICH MESSAGE THE WINDOW IS BUILT AROUND. ⛔ FALLS BACK, ALWAYS: a conversation with no
       // cue-matching candidate keeps its best-ranked centre and stays in the running. This changes which
-      // MESSAGE a window centres on; it must never change which CONVERSATIONS survive, or it becomes a
-      // second relevance floor upstream of the real one — which Ote has ruled out repeatedly.
+      // MESSAGE a window centres on; it must never change which CONVERSATIONS survive, or it becomes a second
+      // relevance floor upstream of the real one — which Ote has ruled out repeatedly.
       const centreId = episodeCentreCueMatch ? (ep.cueCentre ?? ep.centre) : ep.centre
-      // A plain windowed read of HER messages around the centre. ⛔ No disclosure call, in any room.
-      let mine = []
-      try {
-        const centre = await db.txn_messages.findOne({
-          where: { id: centreId }, attributes: ['rolling_id'], raw: true,
-        })
-        if (centre) {
-          mine = await db.txn_messages.findAll({
-            where: {
-              conversation_id: ep.cid,
-              role: 'assistant', // ⭐ THE OWNERSHIP RULE, EXPRESSED AS THE QUERY ITSELF
-              rolling_id: {
-                [Op.gte]: Number(centre.rolling_id) - LIMITS.windowRadius * 2,
-                [Op.lte]: Number(centre.rolling_id) + LIMITS.windowRadius * 2,
-              },
-            },
-            attributes: ['id', 'content', 'created_at', 'rolling_id'],
-            order: [['rolling_id', 'ASC']], limit: LIMITS.windowRadius * 2 + 1, raw: true,
-          })
-        }
-      } catch (e) {
-        await log?.(`[cognition] own-half read failed for ${ep.cid}: ${e.message}`, import.meta.url)
+      const orderedIds = await db.txn_messages.findAll({
+        where: { conversation_id: ep.cid },
+        attributes: ['id', 'rolling_id'], order: [['rolling_id', 'ASC']], raw: true,
+      }).catch(() => [])
+      const centrePos = orderedIds.findIndex((m) => m.id === centreId)
+      const R = LIMITS.windowRadius * 2 // ⭐ ONE SPAN, DECLARED ONCE — three different spans is how this broke
+      const lo = centrePos < 0 ? 0 : Math.max(0, centrePos - R)
+      const hi = centrePos < 0 ? -1 : Math.min(orderedIds.length - 1, centrePos + R)
+      const wantIds = centrePos < 0 ? [] : orderedIds.slice(lo, hi + 1).map((m) => m.id)
+
+      let window = []
+      if (wantIds.length) {
+        window = await db.txn_messages.findAll({
+          where: { id: { [Op.in]: wantIds } },
+          attributes: ['id', 'role', 'content', 'created_at', 'rolling_id'],
+          order: [['rolling_id', 'ASC']], raw: true,
+        }).catch(() => [])
       }
 
-      // ── 5b · THE COUNTERPART'S LINES · authorization, and only if it is not her own room ──────────
-      // ⓘ Her own room needs no door either — the material there is the account she is talking to, and
-      // that is the ordinary same-room case the disclosure layer already returns freely.
-      let theirs = []
-      let refused = false
+      // ── 5b · THE DOOR — unchanged, and only where it was ever needed ──────────────────────────────
+      // ⭐ Cross-room, the counterpart's words are the ACCOUNT's and the disclosure layer decides. Same-room,
+      // they are the account she is talking to and no door has ever been required. ⛔ The authorization
+      // boundary is IDENTICAL to before this change; only the WINDOW changed.
+      let counterpartRefused = false
       if (theirHalfNeedsADoor && ep.roomUserId && ep.roomUserId !== userId) {
         try {
           const opened = await disclosure.inspectAround({ messageId: centreId, radius: LIMITS.windowRadius })
-          const ok = opened?.ok === true && opened.state === 'verified'
-          if (ok) {
-            theirs = (Array.isArray(opened.window) ? opened.window : [])
-              .filter((w) => w.who !== 'you' && w.said)
-              .map((w) => ({ who: w.who ?? ep.who ?? 'them', said: clip(w.said, 260), when: w.when ?? null, withheld: false }))
-          } else {
-            // ⭐ EXISTENCE-ONLY for HIS half. ⛔ Never for hers — hers is above and needed no permission.
-            refused = true
-          }
-        } catch { refused = true }
-      } else {
-        try {
-          const rows = await db.txn_messages.findAll({
-            where: { conversation_id: ep.cid, role: 'user' },
-            attributes: ['content', 'created_at'], order: [['rolling_id', 'ASC']], limit: LIMITS.windowRadius, raw: true,
-          })
-          theirs = rows.map((r) => ({ who: ep.who ?? 'them', said: clip(r.content, 260), when: r.created_at, withheld: false }))
-        } catch { /* the same-room counterpart read is a convenience, never load-bearing */ }
+          counterpartRefused = !(opened?.ok === true && opened.state === 'verified')
+        } catch { counterpartRefused = true }
       }
 
-      // ── 5c · ONE EPISODE, INTERLEAVED BY TIME, GAPS SHOWN AS GAPS ─────────────────────────────────
-      // ⛔ Her lines with the replies closed up read as a monologue and invite her to infer what was said
-      // to her — the reason change A returns withheld markers instead of a filtered list.
-      const exchanges = [
-        ...mine.map((m) => ({
-          who: 'me',
-          said: clip(m.content, 260),
+      // ── 5c · ⭐⭐ EVERY POSITION IS SHOWN OR MARKED — ⛔ never silently dropped ─────────────────────
+      // The rule this restores, from `disclosure-host.js`, which the same-room branch had bypassed:
+      //   *"handing her only her own sentences with the gaps closed up would let her read her replies as a
+      //    MONOLOGUE and infer what was said to her. A marked gap is more honest than a seamless one."*
+      // ⇒ a withheld counterpart line keeps its POSITION and its TIME (structure, ⛔ not content) and loses
+      // only its words. ⓘ `rollingId` rides along for the same reason: a position is structure.
+      const exchanges = window.map((m) => {
+        const mine = m.role === 'assistant'
+        const withheld = !mine && counterpartRefused
+        return {
+          who: mine ? 'me' : (ep.who ?? 'them'),
+          said: withheld ? null : clip(m.content, 260),
           when: m.created_at,
-          withheld: false,
-          // ⭐⭐ §3B · TYPED HERE, AND ON THE **FULL** TEXT RATHER THAN THE CLIPPED QUOTE — a self-report
-          // three sentences into a long answer is still a self-report, and clipping is a display concern.
-          // ⛔ Her words are not altered; only the way the line is introduced changes.
-          timeBound: timeBoundOf({
-            text: m.content, owner: ownerOf({ kind: 'message', role: 'assistant' }), source: SOURCE.ownUtterance,
-          }),
-        })),
-        ...theirs,
-      ].sort((a, b) => new Date(a.when || 0) - new Date(b.when || 0))
-      if (refused && exchanges.length) {
-        exchanges.push({ who: ep.who ?? 'them', said: null, when: null, withheld: true })
-      }
+          rollingId: m.rolling_id,
+          withheld,
+          // ⭐⭐ §3B · TYPED ON THE **FULL** TEXT, not the clipped quote — a self-report three sentences into a
+          // long answer is still a self-report, and clipping is a display concern.
+          ...(mine ? { timeBound: timeBoundOf({ text: m.content, owner: ownerOf({ kind: 'message', role: 'assistant' }), source: SOURCE.ownUtterance }) } : {}),
+        }
+      })
 
-      const anyMine = mine.length > 0
+      // ⭐⭐⭐ THE PROJECTION DECLARES HOW IT WAS BUILT — its claimed scope, and whether it filled it.
+      // ⛔ It is NOT one of the four cognition axes (SOURCE/BASIS/AVAILABILITY/RETENTION): those describe what
+      // the MATERIAL is; this describes how it was RENDERED. Overloading an axis with a rendering property is
+      // how `partial` came to mean two things at once.
+      const projection = Object.freeze({
+        window: wantIds.length ? 'centred' : 'none',
+        centre: centreId,
+        radius: R,
+        ofSpan: wantIds.length,      // positions the claimed window contains
+        covered: exchanges.length,   // positions actually rendered
+      })
+
+      const anyMine = exchanges.some((x) => x.who === 'me')
       const bothSides = exchanges.some((x) => x.said && x.who !== 'me')
 
       items.push({
@@ -740,7 +751,21 @@ export function buildMemoryCognition(fastify, {
         supportedBy: ep.matches,
         here: ep.roomUserId === userId,
         // ⭐ Her side without his is PARTIAL, and saying so is what keeps the gap honest.
-        partial: anyMine && !bothSides,
+        // ══ ⭐⭐⭐ B2 · `partial` vs `incomplete` — TWO CAUSES OF ONE SHAPE (ratified 2026-09-16) ══════
+        // ⭐ `partial` is an AUTHORIZATION fact and always was: it renders as *"I can only reach my own side of
+        // that one."* Its load-bearing clause was `state === 'own_only'` — the disclosure layer reporting a
+        // DOOR STAYED SHUT — and that clause was lost in the `84e2c18` split, leaving only the backstop.
+        // Restored here: a WITHHELD position is what makes it true. ⛔ Never overloaded to mean "a subset".
+        partial: exchanges.some((x) => x.withheld) || (anyMine && !bothSides),
+        // ⭐⭐ `incomplete` is a CAPACITY fact and entirely separate: the projection did not fill the window it
+        // claims. ⛔ DERIVED, never hand-set — a field nobody can assign cannot disagree with what it
+        // describes, which is exactly how `partial: false` survived on a 2-of-5 excerpt.
+        // ⓘ Before the split, contiguity was STRUCTURAL and this could not arise, so the vocabulary never
+        // needed the word. The split removed the guarantee and left the vocabulary that assumed it.
+        incomplete: projection.covered < projection.ofSpan,
+        // ⓘ HOW IT WAS BUILT. Observability, ⛔ not a decision input, and ⛔ NOT a fifth cognition axis: the
+        // axes describe the MATERIAL; this describes the RENDERING.
+        projection,
         // ⓘ §3B, for observability and for the tests: does this episode contain a dated self-report of hers?
         // ⛔ Not used to filter, rank or drop the episode — nothing about her history is reordered away.
         hasTimeBoundSelfReport: exchanges.some((x) => isTimeBound(x)),
