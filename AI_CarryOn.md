@@ -251,27 +251,31 @@ PROVENANCE   ✅ D3′ / D8 / D9 ALL RULED AND DONE 09-16. ⏸ ONLY THE PHASE-3 
                  — only no longer counted as an ACTIVE defect. Regression `writer-seam-check` **W18a–d** (real rows, ⛔
                  not a fixture), incl. W18c: the UNRATIFIED fixture is STILL reported ⇒ the exclusion did not silence
                  the rule. unit 752/752. ⛔ No temporal linking · no migration · no historical repair.
-             ⭐ D6 MATERIAL 09-16, read-only: `GATE_SOTERA_D6_BASIS_RENAME_MATERIAL.md`. ⚠ THREE vocabularies, not two:
-                 cognition `BASIS` (grounds of belief) · lineage `BASIS` (PRESENCE of material) · `TEMPORAL_BASIS`
-                 (said/recorded) — plus `REFERENCE_KIND`, already named AROUND the clash. ⭐ NO FILE IMPORTS BOTH ⇒ the
-                 collision is a READER'S, never ambiguous at runtime. ⭐⭐ PERSISTED SURFACE = **5 JSONB values, all
-                 `in-context`**; cognition + temporal basis are computed at READ time and stored NOWHERE; no column named
-                 basis exists. One-way touch: `BELIEF_CEILING` hardcodes 2 cognition words as LITERALS. The boundary is
-                 already pinned (`memory-evidence.test.mjs:113`). ⭐ Recommend (a): rename LINEAGE's constant only,
-                 `BASIS` → `PRESENCE` (the word its own header argues for) — ⛔ no migration, ⛔ no row touched, ⛔ not a
-                 semantics change. (b) renaming VALUES would need a 5-row historical repair — the trade D2 just declined.
-             ⭐ D7 AUDIT 09-16, read-only: `GATE_SOTERA_D7_MEMORY_ATTRIBUTION_AUDIT.md`. ⚠⚠ **THE INHERITED CLAIM DID NOT
-                 SURVIVE CHECKING** — this doc said for several checkpoints that the tree held "pre-existing FOREIGN
-                 hunks". **I could not find one.** All 17 hunks / 4 files / 3 untracked tests / 2 .bak files trace to THIS
-                 arc's themes and to dated entries in the project log: temporal provenance · ② R-C window · claimKind ·
-                 write receipt+lane+`code` · subject_person_id · tool-description fixes. ⛔ Stated as *"could not
-                 establish foreign"*, ⛔ NOT *"none is foreign"* — git authorship is uninformative (13 commits, all the
-                 same identity, which is the repo convention). ⚠ 2 of the 4 themes are ALREADY LOAD-BEARING for shipped
-                 behaviour and are running from an UNCOMMITTED tree. ⭐ Recommend (d) then (a): he reads the §1.3 table and
-                 confirms none is his/another agent's, THEN four thematic commits each carrying its red-proof.
-                 ⛔ I will NOT commit unilaterally — re-deciding a claim about someone else's work alone is the thing to
-                 avoid. ⛔ The .bak files stay: deleting somebody's safety net to tidy `git status` is the convenience
-                 this decision exists to refuse.
+             ✅ D6 CLOSED 09-16 — lineage's `BASIS` is now **`PRESENCE`** (`8bf2817`). ⭐ THE FOUR VOCABULARIES STAY FOUR:
+                 cognition `BASIS` = grounds of belief · lineage `PRESENCE` = presence of material · `TEMPORAL_BASIS` =
+                 said/recorded · `REFERENCE_KIND` = reference type. ⛔ NO value migration, ⛔ no row changed, ⛔ not a
+                 semantics change — the 5 stored rows keep `in-context` and the object key stays `basis`. A mirror test
+                 now pins the boundary from BOTH sides (`memory-evidence` had one direction; `memory-lineage` has the
+                 other). unit 753/753.
+             ✅✅ D7 CLOSED 09-16 — the `@ote/memory` tree is committed in FOUR thematic commits, tree preserved EXACTLY:
+                 `e061c7f` temporal provenance + ② R-C window · `cc34671` claimKind · `7888cb0` a failed write is
+                 reported as failed (receipt · lane · opaque `code`) · `3a48cf0` subject_person_id + 2 descriptions.
+                 Each carries its red-proof. ⚠ ONE LINE could not be split (the reconcile_fact handler is a single
+                 expression serving 3 themes) ⇒ committed with theme 3 and DECLARED in the message ⇒ the boundaries are
+                 THEMATIC, ⛔ not bisectable.
+                 ⭐⭐ METHOD LESSON WORTH KEEPING: hand-emitted patch hunks were abandoned after **`git apply` accepted
+                 three successive patches WITHOUT ERROR and produced subtly wrong files** (off-by-one insertions). Only a
+                 BYTE COMPARISON against an untouched backup caught it. ⇒ *a patch tool reporting success is not evidence
+                 the file is right.* Final method: direct line assembly + byte comparison as the gate.
+                 VERIFIED: tree byte-identical to the pre-split backup · working tree otherwise CLEAN except the **two
+                 `.bak` files, untouched at their Sep 2 timestamps** (⛔ not deleted to tidy `git status`) · memory pkg
+                 94/94 · Sotera unit 753/753 · shipped behaviour unchanged through the REAL runtime
+                 (model-tool-claim-kind · retention-receipt · m2-rollback · writer-seam · memory-lineage) · :8210 200 ·
+                 no foreign work overwritten, no existing commit rewritten.
+                 ⓘ The two previously load-bearing-and-UNCOMMITTED behaviours are now committed (commits 2 and 3).
+⭐ THE PROVENANCE ARC'S DECISION LIST IS NOW EMPTY. D1·D2·D3′·D4·D6·D7·D8·D9 all closed; R-C closed; attribution
+  observation-only, its instrument watching. ⏸ Open: only the PERF to-do below and D10 (salience, research).
+
 ATTRIBUTION  ✅ D11–D14 SHIPPED · ⭐ FIRST CANDIDATE CAUGHT AND CLASSIFIED 09-16: `769f6a65` → **REQ_NOW by ote**,
              a confirmed NON-violation (the user turn DID carry an explicit inventory instruction ⇒ accurate attribution;
              detector-positive is not itself a violation; the traffic was a suite check, not a natural conversation).

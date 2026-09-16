@@ -9084,3 +9084,40 @@ this decision exists to refuse.
 
 ⛔ Nothing renamed, committed, staged, reverted or cleaned. D1/D2/D3′/D4/D8/D9 closed, R-C closed, attribution
 observation-only — all untouched.
+
+## 2026-09-16 (+07:00) — ✅ D6 CLOSED (BASIS → PRESENCE) · ✅✅ D7 CLOSED (four thematic commits) · the provenance decision list is EMPTY
+
+**D6 · lineage's `BASIS` is now `PRESENCE`** (Sotera `8bf2817`). The four vocabularies stay four: cognition `BASIS` =
+grounds of belief · lineage `PRESENCE` = presence of material · `TEMPORAL_BASIS` = said/recorded · `REFERENCE_KIND` =
+reference type. ⛔ No value migration, ⛔ no row changed, ⛔ not a semantics change — the 5 stored rows keep the exact
+string `in-context` and the object key stays `basis`. `PRESENCE` is the word the constant's own header already argued for.
+⭐ A mirror test now pins the boundary from BOTH sides: `memory-evidence` proved a reference ceiling is never a presence
+word; `memory-lineage` now proves presence shares no value with the cognition or temporal vocabularies, and that the old
+name is gone. Unit 753/753.
+
+**D7 · the `@ote/memory` tree is committed, in four thematic commits, with the tree preserved exactly.**
+`e061c7f` temporal provenance + ② R-C window · `cc34671` claimKind · `7888cb0` a failed write is reported as failed
+(receipt · lane · opaque `code`) · `3a48cf0` subject_person_id + the two descriptions. Each carries its red-proof.
+
+⚠️ **One line could not be split** — `index.js`'s `reconcile_fact` handler is a single expression that awaits the receipt
+and forwards `subject` and `claimKind`. It is committed with theme 3 and **declared in the commit message**, so the
+boundaries are thematic, ⛔ not bisectable. Said rather than hidden.
+
+⭐⭐ **METHOD LESSON, worth more than the commits.** I hand-emitted patch hunks three times and **`git apply` accepted all
+three WITHOUT ERROR while producing subtly wrong files** — off-by-one insertions from zero-context hunk headers. Nothing
+in git's output said so. Only a **byte comparison against an untouched backup** caught it. ⇒ *a patch tool reporting
+success is not evidence that the file is right.* The final method assembles each snapshot by direct line walking with the
+insertion semantics written down, and the byte comparison is the GATE, not a formality. ⓘ This belongs with
+`proof-instrument-must-be-whole-and-dated` and `a-passing-test-can-test-nothing`: a green tool is not a verified result.
+
+**Verified after the last commit:** working tree **byte-identical to the pre-split backup** (all 4 files) · otherwise
+clean except the **two `.bak` files, untouched at their original Sep 2 timestamps** (⛔ not deleted to tidy a
+`git status`) · `@ote/memory` **94/94** · Sotera unit **753/753** · shipped behaviour unchanged through the REAL runtime
+(`model-tool-claim-kind` · `retention-receipt` · `m2-rollback` · `writer-seam` · `memory-lineage`) · `:8210` 200 ·
+**no foreign work overwritten or deleted, no existing commit rewritten** · commit boundaries match the audit's
+classification with the one documented exception.
+ⓘ The two previously load-bearing-and-uncommitted behaviours (`claimKind`, the write receipt/lane) are now committed.
+
+⭐ **THE PROVENANCE ARC'S DECISION LIST IS NOW EMPTY.** D1 · D2 · D3′ · D4 · D6 · D7 · D8 · D9 all closed; R-C closed;
+attribution observation-only with its instrument watching. ⏸ Open: only the PERF to-do (prefill/TTFT, his lane) and D10
+(salience — a research direction, ⛔ not a code change).
