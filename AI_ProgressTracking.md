@@ -9254,3 +9254,29 @@ in **slot resolution** and **conflict resolution**, ⛔ not in the axes, the sto
 contradicting rows are LEFT IN PLACE as evidence, beside the Mira fixture.
 ⏸ Two NEW questions for Ote (⛔ not reopened ones): slot resolution on a correction, and **what she does when two of her
 own beliefs disagree** — the natural sibling of D10.
+
+## 2026-09-16 (+07:00) — 📌 COMPACTION CHECKPOINT · `AI_CarryOn.md` §0 rewritten inline
+
+§0-A..§0-E replaced; **§0-F (the lessons) and all 1030 lines of history below it preserved BYTE-IDENTICALLY** (verified by
+comparison, not assumed). New §0 carries five states instead of four:
+
+ⓐ **THE PROVENANCE ARC IS CLOSED** — D1·D2·D3′·D4·D6·D7·D8·D9 all ruled; **D1 Phase 3 LIVE** with the invariant quoted in
+Ote's own words and the ⛔ never-shorten warning beside it (it is a FIELD list, not a method — W5c guards that). 16 writer
+contracts · 15 frozen residue defects · `pass-writer-without-act` 0 · the 8 rows permanently unknown.
+ⓑ **ATTRIBUTION observation-only** — three corpora failed (0/40·0/24·0/24), live detection shipped, first candidate
+classified REQ_NOW by Ote. F2: fed established / obeyed unknown.
+ⓒ **THE COGNITIVE LOOP, validated and NOT clean** — formation→durable→retrieval PROVEN, reflection→retention PROVEN
+(fired unprompted), ⛔ supersession FAILED on a correction, ⚠️ she detects a contradiction then prefers the STALE value.
+ⓓ **DREAMING CANNOT WRITE** — `runOnePass` THROWS unless dryRun; M1 is the instrument, not the reasoner; and there are
+**TWO Dreamings** running in opposite directions.
+ⓔ **M2 governance** unchanged.
+
+§0-B gained four rules earned this arc: ⑨ temporal proximity is not authority to create an occasion · ⑩ an audited unknown
+is not a defect · ⑪ consolidation ≠ Dreaming · ⑫ **a tool reporting success is not evidence the result is right**
+(`git apply` accepted three patches without error and produced wrong files; only a byte comparison caught it).
+§0-C is the live state incl. the deliberately-kept fixtures. §0-D is the full fence list incl. the harness `probe:true`
+trap. §0-E lists what is open: the 5 Dreaming decisions, the 2 NEW questions (slot resolution on a correction; what she
+does when two of her own beliefs disagree), D10, the attribution reading, PERF, language, M2.
+
+Trees: Sotera committed and **pushed** (origin/main in sync); Reference committed; `@ote/memory` clean apart from the two
+deliberately-retained `.bak` files. Final verification green.

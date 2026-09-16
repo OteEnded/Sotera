@@ -1,122 +1,86 @@
 # AI_CarryOn — Sotera
 
-**Checkpoint 2026-09-15 (+07:00).** ⭐ Read §0-A first; §0-B..§0-E are the live state; everything below §0-F is history.
+**Checkpoint 2026-09-16 (+07:00).** ⭐ Read §0-A first; §0-B..§0-E are the live state; everything below §0-F is history.
 
 ---
 
 # 0-A · ⏸ WHAT IS OPEN. ⛔ NOTHING IS BLOCKED.
 
-## ⓐ M2 GOVERNANCE — `MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`
+## ⓐ ✅ THE PROVENANCE ARC IS CLOSED — every decision ruled
 
-⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled" (it is **enabled**;
-83 of 84 slots are NOT-IN-SCOPE, which is different). ⭐⭐ **THE MECHANISM BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE
-TWO CLAIMS.** The first is TRUE; the second is ⛔ deliberately FALSE until production evidence exists. ⛔ Never merge them.
-
-⚠️⚠️ The blocker is ⛔ NOT corpus scarcity: **no non-operator writer can produce an ALLOWED governed UPDATE**, because
-compliance needs the slot's question KEY and nothing exposes one. ⇒ M2's operational closure is **COUPLED to the deferred
-governance-READ decision**. ⛔ Not reopened.
-
-## ⓑ ✅ THE PROVENANCE ARC — SHIPPED AND LIVE
-
-The 2026-09-04 recall incident is closed. All four defects resolved; the four axes shipped 2026-09-05 (migration 049),
-historical corpus classified, production activated. Detail: `REPORT_SOTERA_PROVENANCE_AXES_LIFECYCLE.md` (verdict PASS),
-and `provenance-axes-shipped` in memory.
+**D1·D2·D3′·D4·D6·D7·D8·D9 all closed 2026-09-15/16.** R-C closed. The four axes shipped (migration 049) and
+**D1 PHASE 3 IS LIVE**: mandatory writer identity, enforced in the store.
 
 ```
-OCCASION  (act_kind, act_id) — turn · revisit:<ledger id> · dreaming · operator · ingest · record. Pass writers
-          FAIL CLOSED without an act (NO_ACT). ⇒ the 6539 collision dissolved: two act keys, one legacy pointer.
-REACH     turn | range | document | none. `reviewed` is COMPUTED at read — "reachable but unreviewed" is first-class.
-PROV      0..n typed refs in txn_memory_evidence. Speaker/date resolved FROM THE TURN, never stored. A failed citation
-          is RECORDED as failed and the item still stands (I10). Reflection rows are `not established` BY DESIGN.
-TEMPORAL  `said` ⇐ established account-holder turn refs on ONE day. 89 pointer rows → 43; **46 withdrawn** as projected.
-⭐ THE §0 RULE: no axis is derived from another. The only bridge is a WRITER-DECLARED coincidence, true by mechanism.
+⭐ THE INVARIANT, IN OTE'S WORDS — ⛔ NEVER shorten it:
+  "Every memory-SEMANTIC state mutation requires a declared writer.
+   NON-SEMANTIC BOOKKEEPING mutations performed as part of READS remain permitted."
+⚠️ It is a FIELD LIST, ⛔ not a method: `update()` also carries every recall's `tier:'hot'` promotion, so gating
+   the METHOD would have stopped READING. `writer-seam-check` W5c exists solely to guard that distinction.
+⭐ WRITER mandatory · ACT only where the operation HAS an occasion — ⛔ never manufacture an act to satisfy the seam.
+⛔ Refused as NO_WRITER in: create · semantic update · markContradicted. ⛔ Raw SQL bypasses it ⇒ the
+   `writer-not-declared` lint stays a DEFECT (the only guard on 19 raw-SQL sites).
 ```
 
-⚠️ **D1(b) shipped 2026-09-15 after a defect in that delivery:** only **6 of 13 declared writers had a caller**. An
-undeclared write is now ADMITTED but recorded LOUDLY (store warn + `writer-not-declared` lint **defect**, which EXCLUDES the
-33 rows the backfill ratified as unknown and reports the **11** a live path leaked). `lesson.commit`/`lesson.decline` — which
-wrote **raw `INSERT INTO txn_memories`**, bypassing the store and every gate in it — now declare writer/act/reach.
-⛔ Phase 3 (REFUSE an undeclared write) is NOT built; it waits on D8+D9.
+16 writer contracts (`notes` D8 · `person` D6/D7 era). **15 historical `writer-not-declared` defects are FROZEN
+RESIDUE — ⛔ never repaired.** `pass-writer-without-act` = 0 (D4 carried the `axes-backfill` ratification across).
+The 8 unlinked reflection rows stay **permanently unknown** (D2): ⛔ no temporal→occasion inference, ever.
 
-## ⓒ ⏸ REFLECTION GENERATION 4 — **ITERATE**, production stays Gen 3
+## ⓑ ⏸ ATTRIBUTION — observation-only, the instrument is watching
 
-Two experiments, 100 passes, both recorded. `MEASUREMENT_SOTERA_REFLECTION_GENERATION_4_F4.md` · `…_ARMS.md`.
+F1 + F2 shipped. **Three constructed corpora failed to elicit the phenomenon (0/40 · 0/24 · 0/24)**, the third being a
+replay built from the incident's own record. ⇒ **live detection is the instrument** (D11–D14 shipped, migration 050).
+⭐ First candidate caught and classified 09-16: `769f6a65` → **REQ_NOW by ote**, a confirmed NON-violation.
+**F2 stands: fed = established · obeyed = unknown.** ⛔ No third corpus. ⛔ The detector is advisory, never a gate.
 
-```
-F4 blind pairing (Ote + 2 raters, 20/20 agreement): Gen 4 preferred 5 · Gen 3 preferred 2 · no preference 13. NOT tripped
-   ⚠️ CONFOUNDED: the preferred side retained MORE in 7 of 7 contested pairs; only ONE pair had content on both sides.
-3-arm decomposition: ⛔ INCONCLUSIVE. The CONTROL DID NOT REPRODUCE (8 retains then 2 on identical material) ⇒ retains/pass
-   is unusable and Gen 4's 0.40→0.70 headline is downgraded to possibly-variance. Breadth held: control 2/20 · N 3/20 ·
-   C 2/20 · gen4 7/20 — neither half reproduces the whole.
-⭐⭐⭐ THE ONE ROBUST RESULT: the citation affordance was used **0 times in 16 retentions across BOTH presentations**.
-   Ote's pre-registered reading applies — a SALIENCE/MECHANISM problem, ⛔ not a wording problem. ⛔ Do not reword the field.
-⭐ The corpus is the binding constraint: 9 of 20 sources produce any retention at all.
-```
-
-## ⓓ ⏸ THE ATTRIBUTION DEFECT — F1 shipped · F2 shipped · elicitation is the wall
-
-2026-09-15, conversation `ca672514`: she answered a 60-char English aside in 2,198 chars of **Thai**, after auditing her whole
-memory store, and her reasoning said ***"The user asked me to check all things in my memory"*** — which he never did.
-`INVESTIGATION_SOTERA_THAI_FLIP_AND_MEMORY_DUMP.md`.
+## ⓒ ⭐⭐ THE COGNITIVE LOOP — validated 09-16, and it is NOT clean
 
 ```
-F1 ✅ the Thai guidance in DEFAULT_ASSISTANT_IDENTITY is now CONDITIONAL (it was an unconditional Thai cue in EVERY prompt
-   for EVERY user), and REPLY_LANGUAGE_RULE ships as its OWN part (foundational/principle) so a replaced persona identity
-   cannot take it away. ⏸ FLAGGED not decided: at principle scope a standing "always answer in Thai" becomes a PROPOSAL.
-F2 ✅ ⭐⭐ THE RULE ALREADY EXISTED AND HAD NEVER BEEN SHOWN TO HER. `ATTRIBUTION_PRINCIPLE` sat behind `if (layerAuthority)`,
-   false by default ⇒ never in a single production prompt. An ACTIVATION defect, ⛔ not a missing-principle one. Now
-   decoupled and composed unconditionally; `precedence` + the note reframing STAY gated (⛔ F2 must not ship P2).
-F3 ⏸ PARKED (proportionality on whole-store inventories — she already self-limited).
-⛔ F2 establishes the guard is FED. Whether it is OBEYED is UNTESTED.
+✅ PROVEN LIVE:  conversation → formation → durable (all 4 axes) → fresh conversation → automatic retrieval
+✅ PROVEN LIVE:  experience → REFLECTION → retention → durable memory   (fired UNPROMPTED via the cron)
+⛔ FAILED:       a CORRECTION does not supersede
+⚠️ PARTIAL:      she DETECTS a contradiction, then resolves toward the STALE value
 ```
 
-⚠️⚠️ **AND THE SUCCESSOR EXPERIMENT'S PILOT FAILED ITS GATE** (`MEASUREMENT_SOTERA_ATTRIBUTION_SUCCESSOR_PILOT.md`):
-**1 detector-positive, 0 human-confirmed, of 24** — gate needed ≥2. ⛔ Threshold NOT edited, full run NOT performed.
-⭐ The run was NOT vacuous (reasoning 24/24, 9 tool rounds, arms verified per turn, her reasoning visibly used the injected
-memory). ⇒ **the second corpus in a row to fail to elicit the phenomenon** (2026-08-18 was 0/40). Every condition the first
-lacked was supplied and the rate is still zero.
-⭐⭐⭐ **ONE occurrence has EVER been observed, and a HUMAN reading a conversation found it — no instrument did.**
+**The two defects, both NEW questions (⛔ not reopened ones), both left UNREPAIRED as evidence:**
+1. **Slot resolution keys on the attribute NAME.** A correction phrased differently makes a NEW slot:
+   `work schedule = Saturdays` and `shelter shift day = sundays` are **both LIVE**. One-live-belief-per-slot is intact
+   because they are different slots ⇒ no rule fires. ⚠️ And the first write was mis-slotted DESTRUCTIVELY — a
+   volunteering day landed in the user's `work schedule` slot and superseded `"up past 2am"`.
+2. **Conflict resolution prefers the transcript over the store**, and read the opening statement rather than the
+   correction three turns later ⇒ the wrong answer reached the user.
 
-⚠️⚠️⚠️ **THEN THE NATURAL-TRAJECTORY REPRODUCTION ALSO FAILED ITS GATE** (`MEASUREMENT_SOTERA_ATTRIBUTION_NATURAL_TRAJECTORY.md`,
-plan pre-registered in `PLAN_…_NATURAL_TRAJECTORY.md`). The incident itself, **rebuilt from the record, nothing authored**:
-his turns and her five turns verbatim, the composer's cognition/scope-facts/working-memory blocks **verbatim from the log**,
-the tool payloads she received from the log, production's 49-tool set by the route's own assembler, the principle removed
-(production's state). ①+②+③ moved together; ④ held at `think:true`. T0×6 · T0 minus one line ×6 · 4 domain variants ×3.
-**0 detector-positive · 0 human-confirmed · 0 TOOL CALLS in 24 (production made 3 on this exact turn)** · not truncated
-(18,194 tok in a 32k window = 69% of production's prompt; the tail recall + conversation evidence are unrecoverable).
-⇒ **THREE constructions, 0/40 · 0/24 · 0/24.** Evidence about ELICITATION only. ⛔ Not "the principle works". ⛔ Not "rare".
-⏸ **F2 stands: fed = established · obeyed = unknown.**
+⭐ **D10 evidence, in the narrow form ruled:** a flatly-stated durable fact drew **two voluntary `remember_fact` calls**;
+a relational conversation carrying four durable facts drew **ZERO tool calls** — all 5 rows came from the fallback
+extractor. ⇒ *She CAN voluntarily form memories when a conversation contains an explicit durable fact. We do NOT know
+whether she notices the right things in relational/emotional conversations.* ⛔ A research question, ⛔ not an
+architecture fix.
 
-⭐⭐ **OBSERVATION from the record (presence, ⛔ not cause):** her sentence *"the user asked me to check all things in my
-memory"* matches near-verbatim a REAL request of his from **25 August** (*"hi sotera, can you check all things in your
-memory?"*), and that line sat in her recollection block on **6 of 6 turns** of the incident. ⇒ "attributed instruction"
-splits: a real request DISPLACED IN TIME (the TEMPORAL axis) is a different case from a topic upgraded or a fabrication.
-The one-line ablation (T0-abl) produced the same zero, so it decided nothing.
-
-⭐ **OTE'S RULING: ⛔ no further constructed corpus.** Live-conversation detection is the PRIMARY instrument, and as of
-2026-09-15 17:00 it is ✅ **BUILT AND RUNNING** — D11–D14 ruled and implemented; `:8210` restarted on the build (PID 26564).
-`PLAN_SOTERA_ATTRIBUTION_LIVE_DETECTION.md` §10 · `MEASUREMENT_SOTERA_ATTRIBUTION_LIVE_DETECTION_FIRST.md`.
+## ⓓ ⛔⛔ DREAMING CANNOT WRITE — and it is NOT a switch
 
 ```
-D11 scope  agent_dev + Ote's room (attribution.liveDetectionUsernames) — narrow on purpose
-D12 frozen evidence YES, with a LIFECYCLE: surrounding+composed pruned 90d AFTER confirmation; spans/sources/judgement
-    kept; ⛔ unreviewed NEVER pruned; ⛔ no row ever deleted. ⛔ It is evidence for a confirmation, NOT a new memory store.
-D13 confirmer OTE. A DB CHECK makes class · person · time travel together ⇒ a classification cannot exist without a
-    named human. Mr C prepares the candidate and never becomes the authority on what Ote asked for.
-D14 denominator TABLE. ⛔ never a bare "0 violations": observed / scanned / errors / claims / confirmed / unreviewed.
-six classes REQ_NOW · REQ_THIS_CONV · REQ_PRIOR_CONV · TOPIC_ONLY · OWN_INFERENCE · NO_SOURCE
-⚠ FUTURE BOUNDARY, carried in CODE (`FUTURE_BOUNDARY`, asserted + printed + warned on): a TRUTHFUL attribution of a prior
-  request vs USING a prior request as CURRENT authorization. ⛔ Not a 7th class yet — recorded so it is never collapsed.
+runOnePass() THROWS unless dryRun === true:
+  "refused: M1 runs dryRun only — it cannot commit, and a non-dry run has nothing to do"
+M1 is THE INSTRUMENT, NOT THE REASONER: no model call, no claim, no memory. ⇒ there is NO write path to enable.
 ```
 
-⭐ **FIRST READING: 4 turns observed · 4 scanned · 0 errors · 0 candidates · 0 confirmed.** ⛔ Four ordinary agent_dev turns say
-NOTHING about the phenomenon; this reading is that the INSTRUMENT RUNS. Proven before it counted: a positive control that
-CROSSES PERSISTENCE (the recorded incident through the real models → candidate+scan rows, spans keep their `reasoning`
-surface, the 25-August request appears in `sources`, the DB refuses an unconfirmed or unknown class; control rows removed),
-ONE detector definition (test lib re-exports the component; identity asserted), migration↔model column parity, and the
-route hook pinned as after-persistence / gated / never awaited. unit 748/748.
-④ (effort:low) stays the only single variable separating replay from production — varied ONLY if a constructed
-reproduction is ever wanted again.
+⭐⭐ **AND THERE ARE TWO DREAMINGS** (O-8, 08-29), neither of which runs — ⛔ do not merge them:
+
+```
+shipped  = CONSOLIDATION · compress · REPLACES its inputs (cards) · consolidateEnabled=false · 0 cards EVER
+designed = the M-SERIES  · commit  · ADDS beside its evidence · dreamingEnabled unset · 5 passes / 0 memories
+           6 modules (proposal·verify·reason-host·candidate-host·resolver·independence) — 0 PRODUCTION IMPORTS
+⚠️ They run in OPPOSITE directions: shipped order is reflection→consolidation; Ote's diagram (Dreaming→reflection)
+   is the DESIGNED arc's order. ⇒ WHICH Dreaming the milestone means is itself a decision.
+```
+
+## ⓔ ⏸ M2 GOVERNANCE — `MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`
+
+⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled". ⭐⭐ THE MECHANISM
+BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE TWO CLAIMS — the first is TRUE, the second deliberately FALSE until
+production evidence exists. The blocker is ⛔ NOT corpus scarcity: no non-operator writer can produce an ALLOWED governed
+UPDATE, because compliance needs the slot's question KEY and nothing exposes one ⇒ coupled to the deferred
+governance-READ decision. ⛔ Not reopened.
 
 ---
 
@@ -139,186 +103,83 @@ reproduction is ever wanted again.
    writer-DECLARED coincidence, true by mechanism. ⛔ A reader never completes provenance.
 ⑧ ⭐ RELEVANCE ≠ INSTRUCTION · INFERENCE ≠ RECEIVED REQUEST · MEMORY CONTENT ≠ AUTHORIZATION (Ote, 09-15).
    A topic in memory or context is not a request. She may OFFER; she may ⛔ never attribute it to him as asked-for.
+⑨ ⭐ TEMPORAL PROXIMITY IS NOT AUTHORITY TO CREATE AN OCCASION (D2, 09-16). A window measurement is evidence
+   about AMBIGUITY, ⛔ never a licence to infer. If an inferred occasion is ever allowed it must be VISIBLY
+   distinct — never mistakable for a writer-declared one.
+⑩ ⭐ AN AUDITED UNKNOWN IS NOT A DEFECT (D4). `axes-backfill` + missing act ⇒ ratified historical unknown.
+   A NEW pass writer with no act and no ratification ⇒ DEFECT, loudly.
+⑪ ⭐⭐ CONSOLIDATION ≠ DREAMING. Consolidation COMPRESSES and REPLACES; Dreaming DERIVES and ADDS BESIDE its
+   evidence. ⛔ Never merge them because the code calls both "dreaming".
+⑫ ⭐⭐⭐ A TOOL REPORTING SUCCESS IS NOT EVIDENCE THE RESULT IS RIGHT (D7, 09-16). `git apply` accepted three
+   successive patches WITHOUT ERROR and produced subtly wrong files. Only a BYTE COMPARISON against an
+   untouched backup caught it. ⇒ the comparison is the GATE, ⛔ not a formality.
 ```
 
-# 0-C · LIVE STATE — 2026-09-15
+# 0-C · LIVE STATE — 2026-09-16
 
 ```
-:8210 PID 12648 (Sotera — restarted 09-16 onto the D1 PHASE 3 build; mandatory writer identity LIVE) · :8201 PID 28072 (OLS, HIS, untouched)
-:8220 another project's, untouched · :54322 pg · migrations through 050 · writer contracts 16 (notes + person, 09-16) · D1 Phase 3 LIVE · live reflection generation = 3
-suite 79/83 → the 4 reds triaged: 2 were LIVE-TRAFFIC contention (pass standalone), 1 was the known D5 snapshot drift,
-1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 752/752 (09-16, post-flip).
-natural-trajectory replay preserved: test/results/attribution-natural-trajectory.jsonl (24 rows) · its fixture holds Ote's
-own conversation + the memory list she received, BY HIS RULING, in its own file so it can be excluded by name
-memories 160+ · axes: writer set on 129 · 44 unaxised (33 ratified unknown + 11 leaked, agent_dev only, ⛔ none of Ote's)
-evidence refs 77, all established · lint defects: 8 pass-writer-without-act + 11 writer-not-declared
-experiment assets PRESERVED: 40 Gen-4 clones/passes · 60 three-arm clones/passes · blind-test key unopened→opened & scored
+:8210 PID 12648 (Sotera — on the D1 PHASE 3 build) · :8201 PID 28072 (OLS, HIS, untouched) · :8220 another project's
+:54322 pg · migrations through 050 · writer contracts 16 · live reflection generation = 3 · memories 220
+unit 753/753 · @ote/memory 94/94 · suite 3 of 85 red, ALL pre-existing: 2 share ONE hardcoded corpus count
+  (nonEvidential===8, now 19) and 1 is the FENCED D5 snapshot drift
+lint: 15 writer-not-declared (frozen residue) · pass-writer-without-act 0 · duplicate-live-slot 0
+attribution: 12 turns scanned · 0 confirmed violations · 1 confirmed NON-violation (REQ_NOW)
+CRONS LIVE: noticing (15m) · reflection (20m, reflectAllQuiet) — reflection is STARVED:
+  scanned=307 reflected=0 skipped={thin:230, probe:68, empty:6, memory-off:1, unchanged:2}
+OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · reflectMode ('off', 0 note rows EVER)
+FIXTURES KEPT ON PURPOSE (his instruction): the Mira chain + the 5 shelter/bakery rows incl. the LIVE CONTRADICTION
+  (`work schedule = Saturdays` vs `shelter shift day = sundays`) — evidence for the next milestone, ⛔ not repaired
 ```
 
-**BUILT THIS CHECKPOINT:** the four provenance axes + audited backfill · D1(b) writer seam · reflection generations 5/6 and
-the three-arm decomposition · the F4 blind test (HTML, chat-bubble source, JSON save) · F1 reply-language rule · F2
-attribution-principle decoupling · the attribution detector + successor corpus/scorer/runner · the natural-trajectory
-extractor (record → fixture), assembly lib, red-proof (9) and replay runner (`attribution-natural-run.mjs`, `--count` = truncation check)
-· ⭐ THE LIVE DETECTION INSTRUMENT: migration 050 (2 log tables, 5 CHECKs), the two models, `attribution-detector.js` (the ONE
-definition), `attribution-live-detection.js` (pre-work · candidate · hook · prune), the route hook, 12 unit tests, the
-persistence-crossing positive control, `attribution-live-check.mjs` and the confirm/prune maintenance scripts.
+**BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) writer seam → **Phase 3 refusal** · reflection
+generations 5/6 + the three-arm decomposition · the F4 blind test · F1 reply-language rule · F2 attribution principle
+decoupled · the attribution detector + 3 corpora + **the live-detection instrument (050)** · D8 `notes` contract ·
+D9 distiller act · D4 lint consistency · D6 `BASIS`→`PRESENCE` · D7 four thematic commits · the caller matrix.
 
 # 0-D · ⛔⛔ FENCES
 
 ```
-production reflection = GEN 3 · 40 Gen-4 + 60 three-arm runs and clones PRESERVED · the 8 historical reflection rows stay
-UNKNOWN and UNREPAIRED · episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 search snapshot UNTOUCHED ·
-BASIS rename DEFERRED · ⛔ no provenance inference or repair · ⛔ no weakening of occasion/reachability/provenance separation
-⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · ⛔ no pilot-threshold edit · F3 PARKED
-✅ D1 PHASE 3 CLOSED/LIVE. THE INVARIANT, IN HIS WORDS — ⛔ NEVER shorten it: *"Every memory-SEMANTIC state mutation
-requires a declared writer. NON-SEMANTIC BOOKKEEPING mutations performed as part of READS remain permitted."* W5c guards that
-distinction. ⭐ WRITER mandatory · ACT only where the operation HAS an occasion — ⛔ never manufacture an act to satisfy the seam
-⛔ NO undeclared write or memory-semantic mutation · ⛔ historical rows NEVER repaired
-⛔ NO THIRD CONSTRUCTED CORPUS (ruled 09-15) · ⛔ the detector stays ADVISORY, ⛔ NEVER a behavioural gate
-⛔ a CANDIDATE is not a violation — only a HUMAN-CONFIRMED class is · ⛔ Mr C never classifies · ⛔ frozen evidence is not a memory store
-⛔ no causality inferred from any live hit — presence is recorded, cause is not · ⛔ the natural-trajectory set is not enlarged
-⛔ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ ③ (working-memory vs transcript) UNTOUCHED
-⛔ never test on Ote's account — agent_dev, zz_ fixtures, removed after · ⛔ never restart :8210 unasked · :8201 is HIS
+production reflection = GEN 3 · Gen-4 arc CLOSED as REJECT/NOT ADOPTED (D3′) · 40 + 60 experiment runs PRESERVED
+✅ D1 PHASE 3 LIVE ⇒ ⛔ no undeclared write or memory-semantic mutation · ⛔ historical rows NEVER repaired
+⛔ the 8 reflection rows stay UNKNOWN · ⛔ no temporal→occasion inference · ⛔ no provenance repair
+⛔ NO THIRD ATTRIBUTION CORPUS · ⛔ the detector is ADVISORY, never a gate · ⛔ a CANDIDATE is not a violation
+⛔ Mr C never classifies · ⛔ no causality inferred from a live hit · ⛔ frozen evidence is not a memory store
+⛔ NO DREAMING SWITCH CHANGE · ⛔ `dryRun` UNTOUCHED · ⛔ no M1 change · ⛔ no M2 reasoner built
+⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · F3 PARKED
+⛔ episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 snapshot UNTOUCHED
+⛔ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ ③ UNTOUCHED
+⛔ never test on Ote's account — agent_dev only · ⛔ never restart :8210 unasked · :8201 is HIS
+⚠️ `test/harness.mjs` marks EVERY check conversation `probe:true`; `ask-sotera.mjs` sets `probe:false`
+   ⇒ a validation run MUST use the opting-out path or it exercises nothing
 ```
 
-# 0-E · ⏸ OPEN DECISIONS — all Ote's, none blocking
+# 0-E · ⏸ OPEN — all Ote's, none blocking
 
 ```
-PROVENANCE   ✅ D3′ / D8 / D9 ALL RULED AND DONE 09-16. ⏸ ONLY THE PHASE-3 FLIP REMAINS, and it is HIS.
-             D3′ ✅ Generation 4 CLOSED as REJECT / NOT ADOPTED · store side KEPT · production stays GEN 3 · experiments
-                 preserved as historical evidence. ⛔ Do not iterate the corpus or the citation affordance unless a
-                 future decision explicitly reopens it. `DECISION_SOTERA_REFLECTION_GENERATION_4_CLOSED.md`
-             D8 ✅ (b) — `WRITER.notes`: pass-driven, act `revisit:<pass-id>` minted per reflect pass, reach **NONE**
-                 (a note is a generalization about PRACTICE; the occasion says WHEN it formed, it does not make the
-                 reviewed material evidence FOR it). reflectMode stays OFF. Read-only callers construct with no act and
-                 so FAIL CLOSED + loudly. Proven W10–W14 (crosses persistence).
-             D9 ✅ (a) — distiller mints `job:<run-id>` per run; reach = the reviewed range of EACH conversation (the
-                 pipeline cache is keyed by CONVERSATION now, or every episode would claim the first one's range).
-                 `episodeDistillEnabled` untouched and still OFF. Proven W15–W17.
-             ⭐⭐ D1 PHASE 3 — THE MATRIX IS DONE: `GATE_SOTERA_D1_PHASE3_CALLER_MATRIX.md`. Enumeration is a SCRIPT
-                 (`test/maintenance/writer-caller-matrix.mjs`), ⛔ not a list that rots. 113 sites.
-                 ⭐⭐⭐ **PRODUCTION IS COMPLETE** — all 13 production sites declaring no writer are plumbing, read-only, or
-                 write a DIFFERENT table (`txn_intentions` / `txn_relational_records`). MEASURED, not just read: a full
-                 suite under `SOTERA_WRITER_TRACE=1` traced **71 undeclared writes, 44 call sites, 13 files, ZERO in
-                 Backend/**. ⚠ 13 TEST files would break; 2 of them (writer-seam W1, memory-store-contract) SHOULD write
-                 undeclared and need an escape or a rewrite — that is the one new design question (§3.1 item 4).
-                 ⚠ The ONE open production path is `schedules/service.js:222` (`runToolAction`) — builds a tool context
-                 with no writer ⇒ a scheduled `remember_fact`/`keep` would write unattributed. **0 schedules exist**, so
-                 nothing has. `WRITER.job` is the contract waiting for it. A scheduled SKILL turn is safe (it injects
-                 into the chat route ⇒ chat-tool).
-                 ⛔ PHASE 3 CANNOT SEE RAW SQL — 19 sites bypass the store (2 production, both declaring). The lint is the
-                 only guard there ⇒ keep `writer-not-declared` a defect after the flip.
-             ✅ M2 canary check FIXED (his instruction): it called itself an operator writer and declared none, adding 2
-                 undeclared rows PER SUITE RUN. Now declares operator + act. Count held at 15 across two further runs.
-                 ⛔ Existing unaxised rows NOT repaired.
-             ✅✅✅ **D1 PHASE 3 IS FLIPPED — MANDATORY WRITER IDENTITY IS LIVE** (09-16). `REPORT_SOTERA_D1_PHASE3_FLIPPED.md`.
-                 THE INVARIANT: a row cannot enter `txn_memories`, and a belief cannot be changed / invalidated /
-                 superseded / archived / forgotten / pinned / contradicted, unless the caller declared WHO. `NO_WRITER`,
-                 raised in `create` · semantic `update` · `markContradicted`.
-                 ⚠⚠ "MEMORY-SEMANTIC" IS A **FIELD LIST**, ⛔ NOT A METHOD, AND THAT IS LOAD-BEARING: `update()` also
-                 carries **every recall's `tier:'hot'` promotion**. Gating the METHOD would have stopped READING.
-                 Gated: invalid_at · expired_at · supersedes_id · pinned · contradicted_* · content · value · entity ·
-                 attribute · importance · confidence · kind · namespace. ⛔ NOT gated: tier · slot_embedding · embedding ·
-                 access_count · last_access · slot_id. `writer-seam-check` **W5c** pins that a recall still works.
-                 ⭐ `person` JOINED THE REGISTRY (16 writers): `admin` = root through the admin surface · `person` = the
-                 account holder on their own memory. `DELETE /chat/memory/v2/:id` declares `person` + `request:<req.id>`.
-                 The `request` act kind's doc said "through the ADMIN surface" — too narrow ⇒ CLARIFIED: it means the HTTP
-                 REQUEST AS THE OCCASION; the WRITER carries the actor. ⛔ No `act = person`.
-                 VERIFIED (server restarted onto the build; full suite under `SOTERA_WRITER_TRACE=1`):
-                   suites 3 → 19 → **3** (back to baseline) · refusals 52 → **8, ALL of them the deliberate refusal tests**
-                   · **production leaf frames: 0, before and after** · **writer-NULL 48 → 48** · lint 15 → 15 · unit 752/752.
-                 16 checks began refusing and now DECLARE. ⚠ One needed thought, not a declaration:
-                 `declaration-self-authorisation` exists to prove an OCCASION-LESS write is refused, and a blanket act
-                 erased its own subject — its axes now follow the ORIGIN (writer always, act only when there IS an occasion).
-                 W1 + memory-store-contract REWRITTEN admitted→refused. W5b attempts the mutation on a REAL row (a made-up
-                 id never reaches the gate — `forget` returns early — so the first version passed VACUOUSLY).
-                 ⛔ NO historical row repaired: the 15 are frozen residue. ⛔ Lint stays a DEFECT (the only guard on the 19
-                 raw-SQL sites the store cannot see). ⛔ `runtime.js` memory.v2's `?? null` deliberately left + flagged.
-             ✅✅ D2 + D4 RULED AND CLOSED 09-16 — `GATE_SOTERA_D2_D4_MATERIAL.md` §5.
-                 D2 = (a) **the 8 rows stay PERMANENTLY UNKNOWN.** ⛔ Not linked by temporal proximity, ever: the
-                 operation would be *temporal → inferred occasion*, which breaks §0-B rule ⑦. His words: the ±15/±20
-                 measurements are evidence about AMBIGUITY, ⛔ not authority to CREATE an occasion, and the 19.9-minute
-                 knife edge is exactly why a time-window rule must not become an implicit semantic authority.
-                 ⭐ STANDING CONDITION if ever revisited: an inferred occasion must have an explicitly DISTINCT, VISIBLE
-                 representation — it must never be mistakable for a writer-declared one.
-                 D4 = (a) **the act rule now honours the same `axes-backfill` ratification the writer rule always did.**
-                 A consistency correction, ⛔ not a new severity or mechanism:
-                   axes-backfill + missing act              → ratified historical unknown, ⛔ NOT a defect
-                   new pass writer + missing act + no stamp → DEFECT, loudly
-                 RESULT: `pass-writer-without-act` **8 → 0** · `writer-not-declared` **15 → 15** (unchanged) · total
-                 defects **23 → 15** · suspects 123. The 8 rows re-read after the change: **all still act NULL, reach
-                 NULL**, and the 160 axes-backfill log rows untouched. They stay VISIBLE in provenance/history reporting
-                 — only no longer counted as an ACTIVE defect. Regression `writer-seam-check` **W18a–d** (real rows, ⛔
-                 not a fixture), incl. W18c: the UNRATIFIED fixture is STILL reported ⇒ the exclusion did not silence
-                 the rule. unit 752/752. ⛔ No temporal linking · no migration · no historical repair.
-             ✅ D6 CLOSED 09-16 — lineage's `BASIS` is now **`PRESENCE`** (`8bf2817`). ⭐ THE FOUR VOCABULARIES STAY FOUR:
-                 cognition `BASIS` = grounds of belief · lineage `PRESENCE` = presence of material · `TEMPORAL_BASIS` =
-                 said/recorded · `REFERENCE_KIND` = reference type. ⛔ NO value migration, ⛔ no row changed, ⛔ not a
-                 semantics change — the 5 stored rows keep `in-context` and the object key stays `basis`. A mirror test
-                 now pins the boundary from BOTH sides (`memory-evidence` had one direction; `memory-lineage` has the
-                 other). unit 753/753.
-             ✅✅ D7 CLOSED 09-16 — the `@ote/memory` tree is committed in FOUR thematic commits, tree preserved EXACTLY:
-                 `e061c7f` temporal provenance + ② R-C window · `cc34671` claimKind · `7888cb0` a failed write is
-                 reported as failed (receipt · lane · opaque `code`) · `3a48cf0` subject_person_id + 2 descriptions.
-                 Each carries its red-proof. ⚠ ONE LINE could not be split (the reconcile_fact handler is a single
-                 expression serving 3 themes) ⇒ committed with theme 3 and DECLARED in the message ⇒ the boundaries are
-                 THEMATIC, ⛔ not bisectable.
-                 ⭐⭐ METHOD LESSON WORTH KEEPING: hand-emitted patch hunks were abandoned after **`git apply` accepted
-                 three successive patches WITHOUT ERROR and produced subtly wrong files** (off-by-one insertions). Only a
-                 BYTE COMPARISON against an untouched backup caught it. ⇒ *a patch tool reporting success is not evidence
-                 the file is right.* Final method: direct line assembly + byte comparison as the gate.
-                 VERIFIED: tree byte-identical to the pre-split backup · working tree otherwise CLEAN except the **two
-                 `.bak` files, untouched at their Sep 2 timestamps** (⛔ not deleted to tidy `git status`) · memory pkg
-                 94/94 · Sotera unit 753/753 · shipped behaviour unchanged through the REAL runtime
-                 (model-tool-claim-kind · retention-receipt · m2-rollback · writer-seam · memory-lineage) · :8210 200 ·
-                 no foreign work overwritten, no existing commit rewritten.
-                 ⓘ The two previously load-bearing-and-UNCOMMITTED behaviours are now committed (commits 2 and 3).
-⭐⭐ NEXT MILESTONE · COGNITIVE E2E VALIDATION — `PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md`.
-  ✅ PROVEN LIVE 09-16: conversation → formation (`remember_fact` UNPROMPTED) → durable (all 4 axes) → later
-    conversation → automatic retrieval (NO tool call) → correction → supersession → correct current answer.
-    The Mira chain on agent_dev is the worked fixture — KEEP until validation completes (his instruction).
-  ⚠ REGISTERED BUT IDLE: reflection cron (20 min) + noticing (15 min) are live; reflection is STARVED —
-    `scanned=307 reflected=0 skipped={thin:230, probe:68, empty:6, memory-off:1, unchanged:2}`.
-  ⛔⛔ DREAMING CANNOT WRITE, AND IT IS NOT A FLAG: `runOnePass` THROWS unless `dryRun===true`
-    (*"M1 runs dryRun only — it cannot commit"*). M1 is THE INSTRUMENT, NOT THE REASONER — no model call, no claim.
-  ⭐⭐ AND THERE ARE **TWO** DREAMINGS (O-8): shipped = CONSOLIDATION (compress, REPLACES inputs, cards,
-    `consolidateEnabled` false, 0 cards ever) vs designed = the M-SERIES (commit, ADDS beside, 6 modules with
-    **0 production imports**, `dreamingEnabled` unset, 5 passes / 0 memories). ⚠ They run in OPPOSITE directions:
-    shipped order is reflection→consolidation; Ote's diagram (Dreaming→reflection) is the DESIGNED arc.
-  ⏸ 5 DECISIONS ARE HIS (plan §6): which Dreaming · may it write · commission the M2 reasoner or DEFER ·
-    milestone scope · (D10 + prefill stay separate tracks). ⭐ My recommendation: **defer Dreaming E2E** (it is a
-    DESIGN milestone, not a validation one) and **run the DIRECT-loop validation now**, which exercises the live
-    reflection lane. ⛔ NO switch changed, `dryRun` UNTOUCHED, no architecture expanded.
-  ⭐ ELIGIBILITY, measured: not incognito · **not probe-marked** · memory on · ≥ **4 messages** · **30 min quiet** ·
-    new since last reflection. ⚠⚠ THE TRAP IS IN OUR OWN TOOLING: `test/harness.mjs` marks EVERY check conversation
-    `probe:true` (that is the 68); `ask-sotera.mjs` sets `probe:false` ⇒ a validation run MUST use the opting-out
-    path or it exercises nothing. For a MEANINGFUL pass: 8–12 messages, ≥2 durable facts + 1 correction.
-  ⭐ D10, NARROW (his words): *she CAN voluntarily form memories when a conversation contains an explicit durable
-    fact; we do NOT know whether she notices the right things in relational/emotional conversations.*
-
-⭐ THE PROVENANCE ARC'S DECISION LIST IS NOW EMPTY. D1·D2·D3′·D4·D6·D7·D8·D9 all closed; R-C closed; attribution
-  observation-only, its instrument watching. ⏸ Open: only the PERF to-do below and D10 (salience, research).
-
-ATTRIBUTION  ✅ D11–D14 SHIPPED · ⭐ FIRST CANDIDATE CAUGHT AND CLASSIFIED 09-16: `769f6a65` → **REQ_NOW by ote**,
-             a confirmed NON-violation (the user turn DID carry an explicit inventory instruction ⇒ accurate attribution;
-             detector-positive is not itself a violation; the traffic was a suite check, not a natural conversation).
-             Standing: **0 confirmed violations of 6 scanned · 1 confirmed non-violation · 0 unreviewed**. The full cycle
-             detect → preserve → human classify → count has now run once end to end. HELD; the instrument watches.
-             When candidates appear, OTE classifies them —
-             `node test/checks/attribution-live-check.mjs` (denominator + queue) → `--id <uuid>` (spans · sources ·
-             surrounding) → `node test/maintenance/attribution-confirm.mjs <id> <CLASS> --by ote [--notes]`.
-             ⛔ Nothing is a violation until he does. ④ effort:low parked. Widening D11 scope = evidence-led, his call.
-PERF         ⏸ TO DO (Ote, 09-15): prefill / TTFT — `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (his secondary-dev
-             lane). Finding: `cognition` sits in the LEADING system message ahead of ~12.7k tok of tool schemas and moves
-             every turn ⇒ prefix reuse lands 7.9%; ollama reuse itself measured at 100×. Proposed: config-gated arm
-             `memory.cognitionInTail`, default OFF (⛔ NOT a pure perf knob — it changes what she sees when; the ratified
-             adjacency + F2 position tests must stay green). Secondary: tool-schema trim (6a), `num_batch` unmeasured,
-             Anthropic system-folding trap (latent). ⛔ Nothing done yet; the four probes in test/pipeline/prefill-*.mjs.
-LANGUAGE     should a standing user language PREFERENCE override the reply-language rule? (at SCOPE.principle it is a
-             proposal, not an override)
-STANDING     D10 what makes an option SALIENT inside her deciding — `keep()` 38/38 yet unprompted calls zero; the citation
-             affordance 0/16. TWO capabilities, same shape. ⛔ Research direction, not a code change.
+DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ① WHICH Dreaming (shipped/compress vs
+           designed/commit) — everything depends on it ② may it write at all ③ commission the M2 reasoner or DEFER
+           ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
+           not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
+           ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
+NEW ①      SLOT RESOLUTION ON A CORRECTION — keys on the attribute NAME, so a re-phrased correction makes a new slot
+           instead of superseding. Live contradiction preserved as evidence. ⛔ NOT a memory-semantics defect.
+NEW ②      WHAT SHE DOES WHEN TWO OF HER OWN BELIEFS DISAGREE — she DETECTS it, then prefers the transcript over the
+           store and reads the opening statement rather than the correction. The natural sibling of D10.
+D10        WHAT MAKES AN OPTION SALIENT INSIDE HER DECIDING — `keep()` 38/38 yet unprompted calls ~zero; the citation
+           affordance 0/16; and now 0 tool calls across a 5-turn relational conversation. ⛔ Research, not a code change.
+ATTRIBUTION only the READING: when candidates appear OTE classifies them —
+           `node test/checks/attribution-live-check.mjs` → `--id <uuid>` → `attribution-confirm.mjs <id> <CLASS> --by ote`
+           ⛔ Nothing is a violation until he does. ④ effort:low parked. Widening D11 scope is evidence-led.
+PERF       prefill / TTFT — `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (HIS lane). `cognition` sits in the LEADING
+           system message ahead of ~12.7k tok of tool schemas and moves every turn ⇒ prefix reuse lands 7.9%; ollama
+           reuse itself measured at 100×. Proposed: config-gated `memory.cognitionInTail`, default OFF (⛔ NOT a pure
+           perf knob — it changes what she sees when). ⛔ Nothing done. Probes in test/pipeline/prefill-*.mjs.
+LANGUAGE   should a standing user language PREFERENCE override the reply-language rule? (at SCOPE.principle it is a
+           proposal, not an override)
+M2         D2/D4-era governance items: the deferred governance-READ decision (couples to ⓔ). Not urgent.
 ```
+
+---
 
 # 0-F · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
 
