@@ -10,7 +10,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   MECHANISM, mechanismOf, occasionOf, isExtraction,
-  BASIS, derivedFrom, withDerivedFrom, derivedFromOf, lineageRestatesTheOccasion, LINEAGE_KEY,
+  PRESENCE, derivedFrom, withDerivedFrom, derivedFromOf, lineageRestatesTheOccasion, LINEAGE_KEY,
 } from '../../Backend/app/components/memory-lineage.js'
 import {
   noteRetrieved, traceFor, hasTrace, tracedMemoryIds, clearTrace, traceStats,
@@ -62,23 +62,23 @@ test('the Rome row is correctly classified by every axis this module has, and is
   assert.equal(isExtraction(source), true)                 // ✅ true
   // ⛔ and there is no modality here to consult, by design — Ote's decision A is unmade.
   assert.equal(typeof MECHANISM.figurative, 'undefined')
-  assert.equal(typeof BASIS.figurative, 'undefined')
+  assert.equal(typeof PRESENCE.figurative, 'undefined')
 })
 
 // ── DERIVATION ────────────────────────────────────────────────────────────────────────────────────
 test('a lineage that names nothing is null, not an empty envelope', () => {
   // ⚠️ "It rests on nothing" and "nobody recorded what it rests on" must not look alike. The persisted
   // difference between `null` and `{basis:'in-context'}` is the difference between those two claims.
-  assert.equal(derivedFrom({ basis: BASIS.inContext, memoryIds: [] }), null)
-  assert.equal(derivedFrom({ basis: BASIS.memories, memoryIds: [] }), null)
-  assert.equal(derivedFrom({ basis: BASIS.messages, messageIds: [] }), null)
-  assert.equal(derivedFrom({ basis: BASIS.document, document: {} }), null)
+  assert.equal(derivedFrom({ basis: PRESENCE.inContext, memoryIds: [] }), null)
+  assert.equal(derivedFrom({ basis: PRESENCE.memories, memoryIds: [] }), null)
+  assert.equal(derivedFrom({ basis: PRESENCE.messages, messageIds: [] }), null)
+  assert.equal(derivedFrom({ basis: PRESENCE.document, document: {} }), null)
   assert.equal(derivedFrom({ basis: 'invented' }), null)
   assert.equal(derivedFrom({}), null)
 })
 
 test('derivedFrom de-duplicates and stringifies ids, and keeps only what it was given', () => {
-  const l = derivedFrom({ basis: BASIS.inContext, memoryIds: ['b', 'a', 'b', null, undefined], via: 'x' })
+  const l = derivedFrom({ basis: PRESENCE.inContext, memoryIds: ['b', 'a', 'b', null, undefined], via: 'x' })
   assert.deepEqual(l, { basis: 'in-context', memoryIds: ['b', 'a'], via: 'x' })
   assert.equal('messageIds' in l, false)  // absent, not an empty array
 })
@@ -88,7 +88,7 @@ test('withDerivedFrom is ADDITIVE — the four payloads already in that column s
   // reasons (1) and card membership, with NO discriminator. `evidence = {derivedFrom}` would destroy
   // whichever one it landed on, silently, because the row still writes.
   const doc = { kind: 'project-decision', path: 'docs/X.md', commit: 'abc', quote: 'a phrase' }
-  const l = derivedFrom({ basis: BASIS.inContext, memoryIds: ['m1'] })
+  const l = derivedFrom({ basis: PRESENCE.inContext, memoryIds: ['m1'] })
   const merged = withDerivedFrom(doc, l)
   assert.equal(merged.path, 'docs/X.md')
   assert.equal(merged.quote, 'a phrase')
@@ -103,7 +103,7 @@ test('derivedFromOf refuses to read back a lineage it did not write', () => {
   assert.equal(derivedFromOf({ quote: 'x' }), null)
   assert.equal(derivedFromOf({ derivedFrom: { basis: 'not-a-basis' } }), null)
   assert.equal(derivedFromOf({ derivedFrom: 'a string' }), null)
-  const l = derivedFrom({ basis: BASIS.messages, messageIds: ['m'] })
+  const l = derivedFrom({ basis: PRESENCE.messages, messageIds: ['m'] })
   assert.deepEqual(derivedFromOf({ derivedFrom: l }), l)
 })
 
@@ -112,9 +112,9 @@ test('a lineage that only restates the occasion is DETECTABLE', () => {
   // this written" and "what does it rest on". A row whose whole lineage is its own occasion has
   // recorded one answer twice and the other not at all.
   const smid = '11111111-1111-1111-1111-111111111111'
-  const collapsed = { source_message_id: smid, evidence: { derivedFrom: derivedFrom({ basis: BASIS.messages, messageIds: [smid] }) } }
+  const collapsed = { source_message_id: smid, evidence: { derivedFrom: derivedFrom({ basis: PRESENCE.messages, messageIds: [smid] }) } }
   assert.equal(lineageRestatesTheOccasion(collapsed), true)
-  const honest = { source_message_id: smid, evidence: { derivedFrom: derivedFrom({ basis: BASIS.inContext, memoryIds: ['other'] }) } }
+  const honest = { source_message_id: smid, evidence: { derivedFrom: derivedFrom({ basis: PRESENCE.inContext, memoryIds: ['other'] }) } }
   assert.equal(lineageRestatesTheOccasion(honest), false)
   assert.equal(lineageRestatesTheOccasion({ source_message_id: smid, evidence: null }), false)
 })
@@ -196,4 +196,30 @@ test('merged candidates keep NAMED as the ground when a row arrives both ways', 
   const merged = mergeCandidates(named, inCtx)
   assert.equal(merged.length, 1)
   assert.equal(merged[0].ground, GROUND.named)
+})
+
+// ══ ⭐⭐⭐ D6 · THE FOUR VOCABULARIES STAY FOUR (Ote, 2026-09-16) ═══════════════════════════════════════════════════
+//
+// `memory-evidence.test.mjs` already proves one direction: a REFERENCE ceiling is never a presence word. This is the
+// mirror, so the boundary is pinned from BOTH sides rather than one — the shape `a-passing-test-can-test-nothing`
+// warns about, where every assertion proves a door shut and none proves the other open.
+//
+//   cognition BASIS   grounds of belief    attested-by-source · told · inferred · synthesized
+//   lineage PRESENCE  material present     turn · in-context · memories · messages · document · prior
+//   TEMPORAL_BASIS    what a date is OF    said · recorded
+//   REFERENCE_KIND    what a ref points at turn · memory · document · record
+test('D6 · ⭐⭐ PRESENCE and the cognition BASIS share NO value — one word never named one axis', async () => {
+  const { BASIS: COGNITION_BASIS } = await import('../../Backend/app/components/memory-cognition-axes.js')
+  const { TEMPORAL_BASIS } = await import('@ote/memory/cognition/memory-v2-service.js')
+  const presence = new Set(Object.values(PRESENCE))
+  for (const v of Object.values(COGNITION_BASIS)) {
+    assert.ok(!presence.has(v), `"${v}" is a GROUNDS-of-belief word and must never be a PRESENCE value`)
+  }
+  for (const v of Object.values(TEMPORAL_BASIS)) {
+    assert.ok(!presence.has(v), `"${v}" says what a DATE is of and must never be a PRESENCE value`)
+  }
+  // …and the constant no longer answers to the colliding name
+  const mod = await import('../../Backend/app/components/memory-lineage.js')
+  assert.equal(mod.BASIS, undefined, 'the lineage module must no longer export BASIS — D6 renamed it to PRESENCE')
+  assert.ok(Object.values(PRESENCE).includes('in-context'), 'the VALUES did not change — 5 stored rows depend on it')
 })

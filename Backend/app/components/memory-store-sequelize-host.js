@@ -40,7 +40,7 @@ import { admissible } from './memory-self-state-claim.js'
 // EXPLICIT FIELD LIST, three doors any new field has to survive, and the episodic one is dropping
 // `provenance` today. ⛔ A field that has to pass three allowlists to reach the database will one day
 // not, and the failure will be silent because the row still writes.
-import { BASIS, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFromOf } from './memory-lineage.js'
+import { PRESENCE, MECHANISM, mechanismOf, derivedFrom, withDerivedFrom, derivedFromOf } from './memory-lineage.js'
 // ⭐⭐ AND THE SECOND PREDICATE THAT LIVES IN ITS OWN FILE — one predicate, one place, same discipline as
 // `memory-self-state-claim.js` and `memory-ownership.js`. This file holds the ENFORCEMENT and none of the
 // judgement about what a modality means.
@@ -380,7 +380,7 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
     if (mech !== MECHANISM.modelTool && mech !== MECHANISM.unrecorded) return row?.evidence ?? null
     const memoryIds = tracedMemoryIds(turnKey)
     if (!memoryIds.length) return row?.evidence ?? null
-    return withDerivedFrom(row.evidence, derivedFrom({ basis: BASIS.inContext, memoryIds, via: 'turn-retrieval' }))
+    return withDerivedFrom(row.evidence, derivedFrom({ basis: PRESENCE.inContext, memoryIds, via: 'turn-retrieval' }))
   }
 
   /**

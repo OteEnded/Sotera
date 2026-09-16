@@ -114,7 +114,24 @@ export const UNKNOWN_IS_A_FAILURE = true
 //
 // ⛔ POINTERS, NEVER A SECOND COPY. This records ids. The same rule the disclosure log follows: a record
 // that carries the material becomes another copy of it, in a place nobody is auditing.
-export const BASIS = Object.freeze({
+/**
+ * ⭐⭐ PRESENCE — what material was IN FRONT OF HER when this row was written.
+ *
+ * ⚠️⚠️ RENAMED FROM `BASIS` ON 2026-09-16 (D6, Ote's ruling (a)) AND THE NAME WAS THE WHOLE PROBLEM.
+ * Three constants were called some form of "basis", answering three different questions:
+ *     cognition `BASIS`   (memory-cognition-axes.js)  on what GROUNDS is it believed — attested-by-source · inferred · …
+ *     this one            (here)                      what material was PRESENT — turn · in-context · memories · …
+ *     `TEMPORAL_BASIS`    (memory-v2-service.js)      what the date is a date OF — said · recorded
+ * ⓘ `REFERENCE_KIND` was already named around the clash, and its header says so.
+ *
+ * ⭐ `PRESENCE` is the word this constant's own documentation already argued for: *"PRESENCE, NOT USAGE — and the
+ * distinction is the whole point of the name."* The identifier now says what the values always meant.
+ *
+ * ⛔ THE VALUES DID NOT CHANGE, AND NOTHING WAS MIGRATED. The 5 stored rows keep the exact string `in-context`; the
+ * object key stays `basis` so no persisted shape moves. This was a reader-level collision, ⛔ never a runtime
+ * ambiguity — no file ever imported two of these constants, so nothing was ever shadowed.
+ */
+export const PRESENCE = Object.freeze({
   turn: 'turn',             // the words of the current turn
   // ⭐⭐⭐ PRESENCE, NOT USAGE — AND THE DISTINCTION IS THE WHOLE POINT OF THE NAME.
   //
@@ -132,7 +149,7 @@ export const BASIS = Object.freeze({
   document: 'document',     // a file at a pinned commit
   priorMemory: 'prior',     // an earlier version of this same belief
 })
-const BASIS_VALUES = new Set(Object.values(BASIS))
+const PRESENCE_VALUES = new Set(Object.values(PRESENCE))
 
 /** The key `derivedFrom` lives under inside `evidence`. Named so nothing has to spell it twice. */
 export const LINEAGE_KEY = 'derivedFrom'
@@ -144,7 +161,7 @@ export const LINEAGE_KEY = 'derivedFrom'
  * must not look alike — that ambiguity is what let a 4-in-5 fact drop stay invisible for a week.
  *
  * @param {object} o
- * @param {string} o.basis              one of BASIS
+ * @param {string} o.basis              one of PRESENCE
  * @param {string[]} [o.memoryIds]      ids of memories this was synthesised from
  * @param {string[]} [o.messageIds]     ids of messages this was read from
  * @param {object}   [o.document]       { repo, path, commit } — pinned, so the reference cannot rot
@@ -152,15 +169,15 @@ export const LINEAGE_KEY = 'derivedFrom'
  * @returns {object|null}
  */
 export function derivedFrom({ basis, memoryIds = [], messageIds = [], document = null, via = null } = {}) {
-  if (!BASIS_VALUES.has(basis)) return null
+  if (!PRESENCE_VALUES.has(basis)) return null
   const ids = (a) => [...new Set((Array.isArray(a) ? a : []).filter(Boolean).map(String))]
   const mem = ids(memoryIds)
   const msg = ids(messageIds)
   // A basis of `memories` or `messages` that names none is not a lineage — it is a claim about a
   // lineage. Refuse it rather than persisting an envelope that says nothing and looks like it does.
-  if ((basis === BASIS.memories || basis === BASIS.inContext) && !mem.length) return null
-  if (basis === BASIS.messages && !msg.length) return null
-  if (basis === BASIS.document && !document?.path) return null
+  if ((basis === PRESENCE.memories || basis === PRESENCE.inContext) && !mem.length) return null
+  if (basis === PRESENCE.messages && !msg.length) return null
+  if (basis === PRESENCE.document && !document?.path) return null
   const out = { basis }
   if (mem.length) out.memoryIds = mem
   if (msg.length) out.messageIds = msg
@@ -186,7 +203,7 @@ export function withDerivedFrom(evidence, lineage) {
 /** Read a lineage back out. Null when the row carries none — which most rows do, honestly. */
 export function derivedFromOf(evidence) {
   const l = evidence?.[LINEAGE_KEY]
-  return (l && typeof l === 'object' && BASIS_VALUES.has(l.basis)) ? l : null
+  return (l && typeof l === 'object' && PRESENCE_VALUES.has(l.basis)) ? l : null
 }
 
 /**
