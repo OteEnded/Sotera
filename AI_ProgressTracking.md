@@ -9527,3 +9527,48 @@ Verification: unit **753/753** · `@ote/memory` **94/94** · 13 checks green inc
 `dense-admission` still red on its known hardcoded corpus count (19 rows) — pre-existing, not this change.
 `grayZoneMode` untouched; no classifier has authority; A1 remains shadow-only and blocked on A-D4.
 :8210 is still running the pre-A3 build — a restart is Ote's call.
+
+---
+
+## 2026-09-16 · A2 LANDED — Normalization is real, and R4 found a live defect
+
+Evidence baseline green before and after. A2 implemented exactly as ratified, and asserted semantically inert.
+
+**`attributeShapeOf()`** decomposes an attribute phrase head-final — `"work schedule"` → head `schedule`, qualifiers
+`["work"]` — which is precisely the information containment destroys. `{schedule} ⊂ {work, schedule}` scores 1.0000
+whether the short phrase is an *abbreviation* (same slot) or a *hypernym* (broader concept); the token test is
+identical and the meaning inverted. With head + qualifiers the difference is structural: same head, strictly fewer
+qualifiers ⇒ broader. **A2 only exposes that. Nothing reads it.**
+
+The explicit-unknown fallback: a coordination has no single head; a post-modifier breaks head-final (`"day of the
+week"` has head *day*, not *week*); a non-Latin script means the assumption doesn't hold. Each returns
+`{head: null, qualifiers: [], analysed: false, why}` — every refusal names its reason, because an unexplained unknown
+is indistinguishable from a bug. An unanalysable phrase still gets ordinary canonicalization, so today's behaviour is
+preserved rather than replaced by a guess.
+
+⚠️ **Declared limit, recorded rather than left to be found later:** the guard detects **script, not language**. A
+head-initial language written in ASCII (French *"langue preferee"*) would be analysed as if head-final and get the
+wrong head. Inert while nothing reads the shape; **must be revisited before A1 receives authority.**
+
+⭐⭐⭐ **R4 found a real defect, and only because it was a spy rather than a grep.** `attributeCandidate` has been
+produced by `normalizeObservation` since Phase 2 and is named in RFC §5 as the Resolver's input — and the delegating
+spy on `resolver.resolve` saw it arrive as **`undefined`**. `commitToMemory`'s explicit allowlist had been dropping it
+that whole time. **Third instance of that family** after `installComponents` (08-12) and `claimKind` (09-03), and a
+grep would have found the field in both files and concluded it was wired. This is why Ote asked for the spy.
+
+The proof crosses the real seam: `createObservationPipeline` calls the real `normalizeObservation` (deliberately not
+injected, so the check cannot test its own copy), `commitToMemory` is the real allowlist, and the resolver is **wrapped,
+not substituted** — every call delegates to the real cosine resolver and returns its real answer.
+
+Inertness is asserted, not claimed: the resolver's answer is byte-identical with and without the shape. The structural
+prohibition is kept and strengthened — Normalization's *code* (comments stripped, since they discuss slots) never names
+`mst_slots`, `slotStore`, `canonicalLabel` or `aliases`, and imports nothing from the resolver or store.
+
+Verification: unit **753/753** · `@ote/memory` **109/109** (15 new) · 14 checks green · evidence baseline green before
+and after, `location` collision still computing as a tie and still sorting armed · 112 slots · 8 aliases.
+
+**:8210 restarted onto the A2 build** (pid 2992), healthy and serving. ⓘ stderr carries a standing advisory that
+`auth.root.password` is weak while root is network-reachable — pre-existing, not from this work, and Ote's to rule on.
+
+Next, in order: A1 infrastructure (the `relation` value) → `grayZoneMode = 'shadow'` → measurement → A-D4 → only then
+any question of authority. A1 authority remains structurally blocked on A-D4.

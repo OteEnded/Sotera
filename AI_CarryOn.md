@@ -202,40 +202,40 @@ DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ①
            ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
            not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
            ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-A/B        ⭐⭐⭐ **A3 IS LANDED AND GREEN (09-16).** A1 = SHADOW-ONLY and structurally blocked on A-D4.
-           B not started, independent. `PLAN_SOTERA_A_B_IMPLEMENTATION.md` is the live document.
-           ✅ A3 SHIPPED: `WRITER.resolver` (pass:false) · migration **051 `log_slot_aliases`** (append-only,
-              records REFUSALS as well as promotions) · `recordAlias`+`touch` RELOCATED into `finalizeSlot()`
-              at the two SUCCESSFUL exits · teaching gated on `evidence.learn`.
-              ⭐ "a refused write teaches nothing" is now a CONTROL-FLOW FACT, not a rule to remember.
-              ⭐ ONLY AN ADJUDICATED `same` MAY TEACH — a cheap-arm hit BINDS and is LOGGED as `refuse`.
-           ✅ GUARDRAIL `test/checks/evidence-baseline-check.mjs` — destruction-detecting, ⛔ NOT
-              count-equality; falsified in a rolled-back txn; writes nothing. RUN IT BEFORE AND AFTER EVERY STEP.
-           ✅ RED-PROOF `test/checks/slot-alias-accountability-check.mjs` — verified FAILING first (6 fails).
-              ⚠ One of those only appeared after fixing a VACUOUS assertion: comparing `last_write` as Date
-              objects hides ms, so a `touch` 22ms later compared EQUAL. Read timestamps AS TEXT WITH MS.
-              ⭐ Carries a POSITIVE CONTROL crossing persistence (an adjudicated verdict still teaches) —
-              without it the whole check is satisfied by "nothing ever teaches".
-           ⚠⚠⚠ **A `zz_` PREFIX IS NOT A FENCE AGAINST CONTAINMENT.** A prefix makes a name LONGER, and
-              containment matches the SHORTER token set ⇒ `zz_a3 work schedule` scored **1.0000** on the REAL
-              `work schedule` slot. My first red-proof taught it an alias, refreshed its last_write and
-              SUPERSEDED the reflection row `33926415`. Caught by the check's OWN blast-radius assertion,
-              fully restored (alias removed · write_count 4→3 · last_write · row re-LIVEd · audit row deleted),
-              guardrail re-verified green. ⇒ the check now has a **PRE-FLIGHT guard** that proves its fixture
-              names collide with NOTHING before it writes. ⛔ Naming convention is not a fence; the scan is.
-           ⚠ 051 has **NO FK on slot_id**, unlike `log_slot_bindings`, and that is deliberate: the FK PINNED
-              SLOTS ALIVE and broke `retention-receipt`'s teardown. ⛔ CASCADE would be worse — it deletes the
-              audit of what a slot taught at the moment someone removes it. History outlives its subject.
-           ⚠ The ledger insert QUALIFIES THE SCHEMA FROM THE MODEL — a raw `INSERT INTO log_slot_aliases`
-              fails with *relation does not exist* because a raw query inherits only the session `search_path`.
-              Same family as 050 landing in `public`.
-           ⏸ OPEN: A-D4 `broader` handling (⭐ A1 authority blocked on it) · A-D2 classifier = SHADOW ONLY,
-              `grayZoneMode` still 'off' · A-D5 bad aliases + armed `location` collision UNTOUCHED ·
-              A-D6 the 8 aliases = AUDITED UNKNOWN, no backfill · B-D1..D4 · B not started.
-           ı NEW OBSERVATION, not a decision: the ledger records a `refuse` row per cheap-arm bind — 9 rows
-              from ONE `retention-receipt` run. That IS the measurement Ote asked for, but its VOLUME and
-              retention are unruled. Report the rate before it becomes a table nobody reads.
-           ı :8210 is still running the PRE-A3 build — a restart is HIS call, never mine.
+A/B        ⭐⭐⭐ **A3 ✅ · A2 ✅ (09-16). NEXT = A1 INFRASTRUCTURE, SHADOW ONLY.** B independent, not started.
+           `PLAN_SOTERA_A_B_IMPLEMENTATION.md` is the live document. :8210 RESTARTED onto the A2 build.
+           ✅ A3: `WRITER.resolver` (pass:false) · mig **051 `log_slot_aliases`** (append-only, logs REFUSALS
+              too) · `recordAlias`+`touch` relocated into `finalizeSlot()` at the two SUCCESSFUL exits.
+              ⭐ "a refused write teaches nothing" is a CONTROL-FLOW FACT. ⭐ ONLY AN ADJUDICATED `same` TEACHES.
+           ✅ A2: `attributeShapeOf()` → `{head, qualifiers, analysed, why}` on every fact observation, threaded
+              normalize → **commitToMemory allowlist** → reconcileFact → resolver. **SEMANTICALLY INERT** and
+              asserted so: the resolver's answer is byte-identical with and without the shape.
+              ⭐⭐⭐ R4 FOUND A REAL DEFECT: `attributeCandidate` has existed since Phase 2, is named in the RFC
+              as the Resolver's input, and arrived at the resolver as **`undefined`** — `commitToMemory` had
+              been dropping it the whole time. THIRD instance of that family (installComponents 08-12,
+              claimKind 09-03). ⛔ A GREP WOULD HAVE SAID IT WAS WIRED. The delegating spy is why we know.
+              ⚠ DECLARED LIMIT: the script guard detects SCRIPT, not LANGUAGE — a head-INITIAL language in
+              ASCII (French "langue preferee") gets the WRONG head. Inert now; **MUST be revisited before A1
+              gets authority.** Thai/CJK/coordinations/post-modifiers ⇒ explicit `analysed:false` + a WHY.
+           ⭐ TEST PATTERN NOW STANDARD FOR THIS ARC: red-proof verified FAILING first · PRE-FLIGHT collision
+              scan · blast radius asserted · positive control crossing persistence · ms-precision timestamps.
+           ⚠⚠⚠ A `zz_` PREFIX IS NOT A FENCE AGAINST CONTAINMENT (a prefix makes a name LONGER). My first A3
+              red-proof scored 1.0000 on the REAL `work schedule` slot, taught it an alias, refreshed
+              last_write and SUPERSEDED `33926415`. Caught by its OWN blast-radius assertion, fully restored,
+              guardrail re-verified. ⇒ every writing check now PRE-FLIGHTS its fixture names.
+           ⏸ NEXT, IN ORDER: A1 infra (relation) → **shadow measurement** → A-D4 → only then authority.
+              ⛔ `grayZoneMode` must go to **'shadow'**, NEVER 'on'. Shadow: emits relation + telemetry,
+              returns base behaviour, WRITES NOTHING. ⭐ A1 authority is STRUCTURALLY blocked on A-D4 — today
+              "not same" falls through to MINT NEW, so authority-while-open decides A-D4 by default.
+              Measure: same/different/broader/narrower/sibling/**unknown reported SEPARATELY** · the RFC
+              4-way tie · schedule→work schedule · favorite language→favorite programming language · the
+              14-pair collision scan · the 2 real hypernyms · the armed `location` collision.
+           ⏸ B: B1 contiguous centred projection + B2 withheld/incomplete → measure → B-D1/D2/D3.
+              ⛔ gap markers must NEVER match the detector's "X said to me:" pattern · new scans carry a
+              projection version · RADIUS MEASURED, not chosen.
+           ı Alias ledger `refuse`-row volume: OBSERVED (9 from one retention run), ⛔ RULING DEFERRED by Ote
+              — do not optimise or redesign it.
+           ı stderr carries a standing advisory: `auth.root.password` is weak and root is network-reachable.
 NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
            `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
            here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial

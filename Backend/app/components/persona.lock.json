@@ -1,7 +1,7 @@
 {
   "lockfileVersion": 1,
   "sdkVersion": "0.6.4",
-  "resolvedAt": "2026-09-16T09:02:51.469Z",
+  "resolvedAt": "2026-09-16T09:05:52.756Z",
   "projects": {
     "../../../../../PortableComponents/Tools/CurrentTime": {
       "id": "@ote/tool-current-time",
@@ -36,7 +36,7 @@
       "type": "capability",
       "sdk": "^0.6.0",
       "trust": "first-party",
-      "integrity": "sha256-af308d1db6b289c23c1d46ecdd4cec53a5dffdca9e803bdfd894df2680199144",
+      "integrity": "sha256-ea610333907e58f9e9ec3061549c3b594b1a79dd2ac183d482fa473ec3b1473e",
       "components": [
         "persona_memory",
         "recall_memory",
