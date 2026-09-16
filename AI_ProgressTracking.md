@@ -9755,3 +9755,33 @@ were filed as non-Latin script; and my first adjacency criterion was strict enou
 including one I had already spotted by eye.
 
 Verification: unit **753/753** · evidence baseline green · 112 slots · 8 aliases · both armed collisions intact.
+
+---
+
+## 2026-09-17 · COMPACTION CHECKPOINT
+
+`AI_CarryOn.md` §0-A..§0-E rewritten inline for the A/B arc. **§0-F and all 1,029 lines of history below it
+verified byte-identical** by comparison against an untouched copy, not assumed — §0-B rule ⑫.
+
+**What §0 now carries:** ⓐ the closed arcs (provenance D1–D9 with the invariant in Ote's exact words and the
+never-shorten warning; A3/A2/B all landed) · ⓑ attribution observation-only, 22 scanned, 4 awaiting him ·
+ⓒ the A/B arc with the **four findings that inverted an assumption** · ⓓ Dreaming cannot write, the two
+Dreamings, and *Dreaming is Sotera thinking* · ⓔ M2 unchanged.
+
+§0-B gained four rules this stretch — ⑬ containment cannot tell an abbreviation from a hypernym (and a threshold
+cannot fix it, because cosine makes the same error) · ⑭ ask what the QUERY selected before blaming the ranking
+or the model · ⑮ Dreaming is Sotera thinking, lower priority not a smaller brain · ⑯ **a shape-satisfying check
+is not a semantic one**, with the five instrument failures that illustrate it.
+
+§0-C is the live state: `:8210` PID 29644 on the B-D4 build, migrations through 052, 17 writer contracts, both
+resolver modes on `'shadow'` and accumulating, and the **evidence corpus** — the Mira known-good chain, the
+shelter failure set, and **two armed collisions** — all guarded by `evidence-baseline-check.mjs`.
+
+§0-E lists what is open, with **A-D4 named as the gate** and the note that A1's own measurement made it harder
+rather than easier. It also carries two FYIs for Ote: the `SECURITY_CASE_*` file is committed and safe only
+because that repo has no remote (a convention, not a mechanism), and `:8210` stderr carries a standing weak-root-
+password advisory.
+
+**Final verification:** unit **753/753** · `@ote/memory` **123/123** · evidence baseline green · 15 checks green ·
+112 slots · 8 aliases · 22 scans with 4 unreviewed · both armed collisions intact · `:8210` and `:8201` healthy ·
+all three trees committed, Sotera pushed.

@@ -1,113 +1,99 @@
 # AI_CarryOn — Sotera
 
-**Checkpoint 2026-09-16 (+07:00).** ⭐ Read §0-A first; §0-B..§0-E are the live state; everything below §0-F is history.
+**Checkpoint 2026-09-17 (+07:00).** ⭐ Read §0-A first; §0-B..§0-E are the live state; everything below §0-F is history.
 
 ---
 
 # 0-A · ⏸ WHAT IS OPEN. ⛔ NOTHING IS BLOCKED.
 
-## ⓐ ✅ THE PROVENANCE ARC IS CLOSED — every decision ruled
+## ⓐ ✅ CLOSED ARCS — ruled, shipped, ⛔ not to be reopened
 
-**D1·D2·D3′·D4·D6·D7·D8·D9 all closed 2026-09-15/16.** R-C closed. The four axes shipped (migration 049) and
-**D1 PHASE 3 IS LIVE**: mandatory writer identity, enforced in the store.
+**PROVENANCE (D1–D9)** — every decision ruled. The invariant, in Ote's exact words:
 
-```
-⭐ THE INVARIANT, IN OTE'S WORDS — ⛔ NEVER shorten it:
-  "Every memory-SEMANTIC state mutation requires a declared writer.
-   NON-SEMANTIC BOOKKEEPING mutations performed as part of READS remain permitted."
-⚠️ It is a FIELD LIST, ⛔ not a method: `update()` also carries every recall's `tier:'hot'` promotion, so gating
-   the METHOD would have stopped READING. `writer-seam-check` W5c exists solely to guard that distinction.
-⭐ WRITER mandatory · ACT only where the operation HAS an occasion — ⛔ never manufacture an act to satisfy the seam.
-⛔ Refused as NO_WRITER in: create · semantic update · markContradicted. ⛔ Raw SQL bypasses it ⇒ the
-   `writer-not-declared` lint stays a DEFECT (the only guard on 19 raw-SQL sites).
-```
+> **"Every memory-SEMANTIC state mutation requires a declared writer. NON-SEMANTIC BOOKKEEPING mutations
+> performed as part of READS remain permitted."**
 
-16 writer contracts (`notes` D8 · `person` D6/D7 era). **15 historical `writer-not-declared` defects are FROZEN
-RESIDUE — ⛔ never repaired.** `pass-writer-without-act` = 0 (D4 carried the `axes-backfill` ratification across).
-The 8 unlinked reflection rows stay **permanently unknown** (D2): ⛔ no temporal→occasion inference, ever.
+⛔ **NEVER shorten that to "every update requires a writer"** — `W5c` exists specifically to preserve the
+read/bookkeeping distinction. Writer is mandatory; **act is required only where the operation HAS an occasion**,
+and ⛔ an act is never manufactured to satisfy the seam. ⛔ Historical rows stay unrepaired. The 8 unlinked
+reflection rows stay **permanently unknown** (D2) — ⛔ no temporal→occasion inference, ever.
+
+**A3 · the alias is a governed semantic operation** (09-16) · **A2 · Normalization is real** (09-16) ·
+**B1/B2/B-D2/B-D4** (09-16/17). All shipped, all green. Detail in ⓒ.
 
 ## ⓑ ⏸ ATTRIBUTION — observation-only, the instrument is watching
 
-F1 + F2 shipped. **Three constructed corpora failed to elicit the phenomenon (0/40 · 0/24 · 0/24)**, the third being a
-replay built from the incident's own record. ⇒ **live detection is the instrument** (D11–D14 shipped, migration 050).
-⭐ First candidate caught and classified 09-16: `769f6a65` → **REQ_NOW by ote**, a confirmed NON-violation.
-**F2 stands: fed = established · obeyed = unknown.** ⛔ No third corpus. ⛔ The detector is advisory, never a gate.
+Three corpora produced **0 human-confirmed violations**; the third stopped at its gate and the threshold was
+never edited. The live instrument runs. ⛔ **The detector is ADVISORY and must never become a gate** ·
+⛔ a candidate is **not** a violation until Ote confirms it (D13) · ⛔ Mr C never classifies.
+⇒ **Reading: 22 scanned · 0 confirmed violations · 1 confirmed NON-violation (REQ_NOW) · ⏸ 4 AWAITING OTE.**
+⛔ Never report a bare "0 violations" without its scan denominator (D14).
 
-## ⓒ ⭐⭐ THE COGNITIVE LOOP — validated 09-16, and it is NOT clean
+## ⓒ ⭐⭐ THE A/B ARC — A3 · A2 · A1(shadow) · B1/B2/B-D2/B-D4 ALL LANDED
+
+`PLAN_SOTERA_A_B_IMPLEMENTATION.md` is the live document.
 
 ```
-✅ PROVEN LIVE:  conversation → formation → durable (all 4 axes) → fresh conversation → automatic retrieval
-✅ PROVEN LIVE:  experience → REFLECTION → retention → durable memory   (fired UNPROMPTED via the cron)
-                 ⭐ RULED 09-16: this lane moves "registered but idle" → PROVEN LIVE. ⛔ That is the lane ONLY;
-                 the M-series Dreaming/consolidation system stays a separate DESIGN question (ⓓ).
-⛔ FAILED:       a correction did not reach the belief it corrected
-⚠️ PARTIAL:      she reasoned CORRECTLY to the WRONG answer — see the investigation, the evidence was truncated
+✅ A3   alias accountability · mig 051 `log_slot_aliases` · ONLY AN ADJUDICATED `same` MAY TEACH
+        ⭐ a refused write teaches nothing and touches nothing — a CONTROL-FLOW FACT, not a rule to remember
+✅ A2   `attributeShapeOf()` → head + qualifiers, threaded to the resolver, SEMANTICALLY INERT (asserted)
+✅ A1   `memory-ontology.js` · RELATION{same|different|broader|narrower|sibling|unknown} · only `same` may bind
+        ⛔ SHADOW ONLY — there is deliberately NO 'on' mode. Accumulating on live traffic.
+✅ B1   ONE contiguous POSITIONAL centred window, both speakers, every position SHOWN or MARKED
+✅ B2   `partial` = AUTHORIZATION (restored) · `incomplete` = DERIVED · ⛔ neither is a 5th cognition axis
+✅ B-D2 `incomplete` covers BOTH causes; three epistemic states, three sentences, ⛔ never collapsed
+✅ B-D4 mig 052 `projection_version` · `PROJECTION_VERSION='2'` declared BESIDE the projection, not the detector
 ```
 
-**Two defects, both NEW questions (⛔ not reopened ones), both left UNREPAIRED as evidence.**
-⭐⭐ **INVESTIGATED 09-16 — `INVESTIGATION_SOTERA_SLOT_IDENTITY_AND_SELF_BELIEF_CONFLICT.md`. Read it before touching
-either; several first-pass readings did not survive the trace.**
+### ⭐⭐⭐ The four findings that inverted an assumption
 
-1. **SLOT IDENTITY.** The extractor is handed ONE user turn, no history, and told the attribute must be **"short"**.
-   It named *"volunteering at the shelter on saturdays"* → **`schedule`**. The domain word died there. Then
-   `attributeSimilarity` = `max(jaccard, CONTAINMENT)` scored `{schedule} ⊂ {work, schedule}` = **1.000**.
-   ⭐ **Containment is only safe when the short phrase is the more SPECIFIC one.** Here it was a HYPERNYM — the
-   function cannot tell an abbreviation from a broader category. ⚠️ Cosine agrees (0.9104): **both arms make this
-   error.** ⇒ a generic attribute name is a skeleton key for every slot containing its word.
-   ⛔ It destroyed `work schedule = "up past 2am"`, which has **NO live replacement** to this day.
-2. **⭐⭐⭐ HER TWO BELIEFS NEVER MET — the framing "conflict resolved toward the stale belief" is WRONG.** Both rows
-   were live and in scope; she was shown ONE. What she weighed was **one memory against one conversation excerpt**,
-   and `memory-cognition-host.js` selects the counterpart's half with **`role='user' ORDER BY rolling_id ASC LIMIT 2`
-   — no window, no centre, no relevance, no recency.** ⇒ **the two OLDEST user turns. A correction is by definition
-   LATER, so that query can essentially never contain one.** Her own half IS properly windowed (centre ±4).
-   ⇒ she saw the user say *Saturdays*, and everything saying *Sundays* was **her own voice** ⇒ *"I recorded it wrong"*
-   was the CORRECT inference from that evidence. ⭐ **An evidence-selection failure, ⛔ NOT a judgement failure** —
-   nothing here argues for touching the model, the prompt, ranking or salience.
-
-⚠️ **THREE THINGS THE TRACE OVERTURNED — do not re-inherit the earlier wording:**
-- **The contradiction is GONE.** Reflection superseded `Saturdays` at 13:40, unprompted, with the correct value.
-  The evidence survives as **LINEAGE** (`baf35aa0` dead-but-kept), ⛔ not as a live disagreement.
-- **The stale row was written 2.8 s AFTER the correction was spoken** (extraction lags 29–43 s, fire-and-forget).
-  ⇒ it was never a correction meeting a belief; it was two extractions of two turns, racing.
-  ⛔ Therefore wiring `memory-contradiction.js` (unwired, 0 production imports) would **NOT** have caught this: its
-  rule needs the memory to have been IN CONTEXT when the correction was made, and it did not yet EXIST.
-- **⭐⭐ A COMPOUNDING LOOP, not a stable error.** A bad merge PROMOTES the generic phrase to a permanent alias →
-  refreshes `last_write` → `slotStore.list()` orders `last_write DESC` → the resolver's `>` is STRICT ⇒ **first wins
-  every tie** ⇒ the slot that just swallowed something is the one most likely to swallow the next thing.
-  ⚠️ **ARMED NOW:** alias `volunteer_schedule_and_location` makes the phrase **`location`** score 1.000 on the
-  *work schedule* slot, which currently sorts AHEAD of the real `location` slot. ⛔ Not repaired — his call.
-
-⭐ **D10 evidence, in the narrow form ruled:** a flatly-stated durable fact drew **two voluntary `remember_fact` calls**;
-a relational conversation carrying four durable facts drew **ZERO tool calls** — all 5 rows came from the fallback
-extractor. ⇒ *She CAN voluntarily form memories when a conversation contains an explicit durable fact. We do NOT know
-whether she notices the right things in relational/emotional conversations.* ⛔ A research question, ⛔ not an
-architecture fix.
+1. **A1 contradicted my own design doc, and it was right.** The RFC's "abbreviation" example is not one:
+   `favorite language` → `favorite programming language` is **BROADER** (it could mean a spoken language).
+   ⛔ The classifier was not bent to match R3. RFC §5's four-way tie breaks to **1 `same` + 3 `broader`**.
+   **16 over-bindings** corpus-wide (4 real), **every one at containment exactly 1.0000** ⇒ ⛔ these are not
+   threshold-edge cases; they are where containment is most confident and most wrong. **ZERO under-bindings.**
+2. ⭐⭐ **B exposed a THIRD defect, worse than the one it set out to fix.** The window was `rolling_id`
+   arithmetic and **`rolling_id` is ONE GLOBAL SEQUENCE**, so any interleaved conversation collapsed it —
+   **33% of conversations returned FEWER than the radius promises, mean 7.36/9, worst 2/9** (one conversation:
+   176 messages over 1,312 ids). The shelter conversation was contiguous, which is why it hid in plain sight.
+   ⇒ B1 counts **POSITIONS**, never ids.
+3. ⭐⭐ **`incomplete` reported FALSE on a view showing 9 of 170 messages** — it only asked whether the window
+   filled *itself*. The shape of the contract satisfied while its semantics were violated (rule ⑯).
+4. ⭐⭐⭐ **The `unknown` hypothesis INVERTED.** Not 29% of the corpus — **23 LABELS** (21.3%) amplified across
+   976 pairs, ~42 each. **The extractor is the BEST-behaved writer: 1 of 27 = 3.7%.** `chat-tool` (her own
+   `remember_fact`) = **11 of 26 = 42.3%**; `reflection` = 4 of 12. ⭐ **The cause is a sentence we wrote** —
+   `remember_fact` promises *"it finds the existing fact for this slot — EVEN IF YOU WORD THE ATTRIBUTE
+   DIFFERENTLY than before"*. She names descriptively because she was told it is safe. ⚠️ That promise is
+   **false both ways**: A1 showed it over-merges; this shows it cannot relate 23 labels at all.
+   ⇒ **4 of 23 genuinely MALFORMED** (coordinations — a slot cannot hold two answers) · **19 of 23 LEGITIMATE
+   OBSERVATIONS wearing a descriptive title** · **0 of 23 are ONTOLOGY questions.**
+   ⛔ The resolver is NOT what needs work; forcing the 19 into property names would be LOSSY.
 
 ## ⓓ ⛔⛔ DREAMING CANNOT WRITE — and it is NOT a switch
 
 ```
-runOnePass() THROWS unless dryRun === true:
-  "refused: M1 runs dryRun only — it cannot commit, and a non-dry run has nothing to do"
-M1 is THE INSTRUMENT, NOT THE REASONER: no model call, no claim, no memory. ⇒ there is NO write path to enable.
+runOnePass() THROWS unless dryRun === true — M1 is THE INSTRUMENT, NOT THE REASONER.
+⇒ there is NO write path to enable. "Enable Dreaming" is a BUILD, not a flag.
 ```
 
-⭐⭐ **AND THERE ARE TWO DREAMINGS** (O-8, 08-29), neither of which runs — ⛔ do not merge them:
+⭐⭐ **TWO DREAMINGS, opposite directions, ⛔ never merged:** shipped = **CONSOLIDATION** (compress, REPLACES its
+inputs, `consolidateEnabled=false`, 0 cards ever) · designed = the **M-SERIES** (commit, ADDS beside its
+evidence, `dreamingEnabled` unset, 5 passes / 0 memories, 6 modules with 0 production imports).
 
-```
-shipped  = CONSOLIDATION · compress · REPLACES its inputs (cards) · consolidateEnabled=false · 0 cards EVER
-designed = the M-SERIES  · commit  · ADDS beside its evidence · dreamingEnabled unset · 5 passes / 0 memories
-           6 modules (proposal·verify·reason-host·candidate-host·resolver·independence) — 0 PRODUCTION IMPORTS
-⚠️ They run in OPPOSITE directions: shipped order is reflection→consolidation; Ote's diagram (Dreaming→reflection)
-   is the DESIGNED arc's order. ⇒ WHICH Dreaming the milestone means is itself a decision.
-```
+⭐⭐⭐ **AND DREAMING IS SOTERA THINKING** — see rule ⑮ and
+`CONTEXT_SOTERA_DREAMING_IS_SOTERA_THINKING.md`. Same class of capable model, **lower scheduling priority**,
+interruptible, **resumable from its cognitive state**. ⛔ Not a smaller brain.
+⭐ And the distinction that decides what B becomes: **retrieval for an answer** (bounded) vs **exploration for
+cognition** (a navigable evidence space, where *she* chooses to investigate). B-D2's
+`(121 earlier turns … not shown)` is the first epistemic signal of it: *"I have not seen the rest"* ≠ *"there is
+no earlier context."* ⛔ Navigation is DESIGN-ONLY; nothing below "there is more" exists or is authorised.
 
 ## ⓔ ⏸ M2 GOVERNANCE — `MECHANISM CLOSED · AWAITING ELIGIBLE PRODUCTION TRAFFIC`
 
-⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled". ⭐⭐ THE MECHANISM
-BEING LIVE AND M2 BEING OPERATIONALLY CLOSED ARE TWO CLAIMS — the first is TRUE, the second deliberately FALSE until
-production evidence exists. The blocker is ⛔ NOT corpus scarcity: no non-operator writer can produce an ALLOWED governed
-UPDATE, because compliance needs the slot's question KEY and nothing exposes one ⇒ coupled to the deferred
-governance-READ decision. ⛔ Not reopened.
+⛔ NOT "operationally closed" (2 of 5 criteria never observed) · ⛔ NOT "blocked" · ⛔ NOT "disabled". The
+blocker is ⛔ **not** corpus scarcity: no non-operator writer can produce an ALLOWED governed UPDATE, because
+compliance needs the slot's question KEY and nothing exposes one ⇒ coupled to the deferred governance-READ
+decision. ⛔ Not reopened.
 
 ---
 
@@ -116,203 +102,125 @@ governance-READ decision. ⛔ Not reopened.
 ```
 ① CONTAINMENT · a slot may be bound only if EVERY writer that has ever superseded a row in it can
    declare a claim kind AND name an occasion. ⛔ "it probably won't be touched" is not evidence.
-   ⇒ the auto-extractor CANNOT declare a kind and must NOT be modified to fit M2.
-② NEW IS OUT OF M2 SCOPE, permanently. A NEW row may still carry a pin; that pin says WHICH QUESTION
-   IT WAS ADMITTED UNDER and that the write was UNGATED — ⛔ never that a replacement was authorised.
+② NEW IS OUT OF M2 SCOPE, permanently. A NEW row may carry a pin saying WHICH QUESTION IT WAS ADMITTED
+   UNDER and that the write was UNGATED — ⛔ never that a replacement was authorised.
 ③ GOVERNANCE KNOWLEDGE IS A **READ** CONCERN; GOVERNANCE COMPLIANCE IS A **WRITE** CONCERN.
-   ⛔ The refusal stays opaque — returning a question key would make the gate a permission oracle
-   and the refusal a read channel.
+   ⛔ The refusal stays opaque — a returned question key would make the gate a permission oracle.
 ④ THE M2 WINDOW IS COUNT-BASED, ⛔ never time-based. Elapsed time without traffic proves nothing.
 ⑤ `quoted` = VERBATIM, ⛔ NOT speaker attribution. It is a CREDENTIAL — the strongest class we have.
-   ⇒ ⛔ never teach it to carry who spoke; fix the EVIDENCE BOUNDARY instead.
 ⑥ A DATE MUST SAY WHAT IT IS A DATE **OF**: `said` · `recorded` · ⛔ there is no `happened`.
-⑦ ⭐ NO AXIS IS DERIVED FROM ANOTHER (049). Occasion ≠ evidence ≠ reachability. The only bridge is a
-   writer-DECLARED coincidence, true by mechanism. ⛔ A reader never completes provenance.
-⑧ ⭐ RELEVANCE ≠ INSTRUCTION · INFERENCE ≠ RECEIVED REQUEST · MEMORY CONTENT ≠ AUTHORIZATION (Ote, 09-15).
-   A topic in memory or context is not a request. She may OFFER; she may ⛔ never attribute it to him as asked-for.
-⑨ ⭐ TEMPORAL PROXIMITY IS NOT AUTHORITY TO CREATE AN OCCASION (D2, 09-16). A window measurement is evidence
-   about AMBIGUITY, ⛔ never a licence to infer. If an inferred occasion is ever allowed it must be VISIBLY
-   distinct — never mistakable for a writer-declared one.
-⑩ ⭐ AN AUDITED UNKNOWN IS NOT A DEFECT (D4). `axes-backfill` + missing act ⇒ ratified historical unknown.
-   A NEW pass writer with no act and no ratification ⇒ DEFECT, loudly.
-⑪ ⭐⭐ CONSOLIDATION ≠ DREAMING. Consolidation COMPRESSES and REPLACES; Dreaming DERIVES and ADDS BESIDE its
-   evidence. ⛔ Never merge them because the code calls both "dreaming".
-⑫ ⭐⭐⭐ A TOOL REPORTING SUCCESS IS NOT EVIDENCE THE RESULT IS RIGHT (D7, 09-16). `git apply` accepted three
-   successive patches WITHOUT ERROR and produced subtly wrong files. Only a BYTE COMPARISON against an
-   untouched backup caught it. ⇒ the comparison is the GATE, ⛔ not a formality.
-⑬ ⭐⭐ CONTAINMENT CANNOT TELL AN ABBREVIATION FROM A HYPERNYM (09-16). `"favorite language" ⊂ "favorite
+⑦ ⭐ NO AXIS IS DERIVED FROM ANOTHER (049). The only bridge is a writer-DECLARED coincidence, true by
+   mechanism. ⛔ A reader never completes provenance.
+⑧ ⭐ RELEVANCE ≠ INSTRUCTION · INFERENCE ≠ RECEIVED REQUEST · MEMORY CONTENT ≠ AUTHORIZATION.
+⑨ ⭐ TEMPORAL PROXIMITY IS NOT AUTHORITY TO CREATE AN OCCASION (D2). If an inferred occasion is ever
+   allowed it must be VISIBLY distinct — never mistakable for a writer-declared one.
+⑩ ⭐ AN AUDITED UNKNOWN IS NOT A DEFECT (D4). A NEW pass writer with no act and no ratification ⇒ DEFECT.
+⑪ ⭐⭐ CONSOLIDATION ≠ DREAMING. Consolidation COMPRESSES and REPLACES; Dreaming DERIVES and ADDS BESIDE.
+⑫ ⭐⭐⭐ A TOOL REPORTING SUCCESS IS NOT EVIDENCE THE RESULT IS RIGHT (D7). `git apply` accepted three
+   patches WITHOUT ERROR and produced subtly wrong files. The BYTE COMPARISON is the gate.
+⑬ ⭐⭐ CONTAINMENT CANNOT TELL AN ABBREVIATION FROM A HYPERNYM. `"favorite language" ⊂ "favorite
    programming language"` and `"schedule" ⊂ "work schedule"` are the SAME token test and OPPOSITE facts.
-   ⇒ ⛔ never let a SHORTER phrase inherit a longer slot on subset alone; and ⛔ do not answer this with a
-   threshold — cosine scored the same bad pair 0.9104. BOTH arms make it.
-⑯ ⭐⭐⭐ A SHAPE-SATISFYING CHECK IS NOT A SEMANTIC ONE (Ote, 09-16, after B). **The old implementation
-   could satisfy the SHAPE of the contract while violating the SEMANTIC contract** — and the instrument
-   failures this arc keeps hitting are all one family:
-     · `incomplete: false` on a view showing **9 of 170 messages** — true to its own narrow definition,
-       false to what the word MEANS.
+   ⛔ Do not answer this with a threshold — cosine scored the same bad pair 0.9104. BOTH arms make it.
+⑭ ⭐⭐⭐ ASK WHAT THE QUERY SELECTED BEFORE BLAMING THE RANKING — AND BEFORE BLAMING THE MODEL. Her wrong
+   answer was the CORRECT inference from an excerpt built by `ORDER BY rolling_id ASC LIMIT 2`. ⇒ a
+   component that decides what she SEES is load-bearing whatever its comment says.
+⑮ ⭐⭐⭐ DREAMING IS SOTERA THINKING, ⛔ NOT A BACKGROUND JOB WITH A SMALLER BRAIN. ⛔ Do not inherit the
+   OLS pattern. FOREGROUND: full model, high priority. BACKGROUND: **the SAME class of model**, LOWER
+   priority, INTERRUPTIBLE, RESUMABLE **from its cognitive state**. A user message PAUSES it; the model
+   yields to Ote and the COGNITION does not get weaker. ⭐ EXPLORATION IS NOT AUTOMATICALLY BELIEF — a
+   pass that commits nothing SUCCEEDED.
+⑯ ⭐⭐⭐ A SHAPE-SATISFYING CHECK IS NOT A SEMANTIC ONE (Ote). **An implementation can satisfy the SHAPE of
+   the contract while violating the SEMANTIC contract.** Instances, all one family:
+     · `incomplete: false` on a view showing 9 of 170 messages — true to its definition, false to the word.
      · a source scan COUNTING `centreId`, inflated by a local named `centreIdx` (a name, not a use).
-     · `` written as a LITERAL BACKSPACE by a shell layer — TWICE now — so a regex matched nothing.
+     · `\b` written as a LITERAL BACKSPACE by a shell layer — THREE times now — so a regex matched nothing.
      · a red-proof calling `recollect({ asked })` when the parameter is `text` ⇒ it never activated and
-       every assertion failed VACUOUSLY. ⚠ A red proof red for the WRONG reason misleads exactly as much
-       as a green one that tests nothing.
+       every assertion failed VACUOUSLY. ⚠️ Red for the WRONG reason misleads as much as a green that
+       tests nothing.
+     · my own shape classifier matching a RAW label, misfiling 5 labels while judging someone else's naming.
    ⇒ ⭐ ASSERT BEHAVIOUR ACROSS THE ACTUAL SEAM — ⛔ not grep, not counts, not names — and assert the
    instrument ENGAGED (activation / anti-vacuity) before believing a single thing it reports.
-⑮ ⭐⭐⭐ DREAMING IS SOTERA THINKING, ⛔ NOT A BACKGROUND JOB WITH A SMALLER BRAIN (Ote, 09-16).
-   ⛔ Do NOT inherit the OLS pattern "background task = smaller CPU model + small context window". Its
-   objective was right (don't block the GPU) and its solution does not transfer.
-   ⭐ FOREGROUND: full-capability model · high priority. BACKGROUND/DREAMING: **the SAME class of capable
-   model — potentially the exact same main model** · LOWER priority · INTERRUPTIBLE · RESUMABLE.
-   ⇒ a user message PAUSES Dreaming, foreground takes the resources, then Dreaming RESUMES **from its
-   cognitive state** — a train of thought picked back up, ⛔ not a job restarted from the top.
-   ⭐ LOWER PRIORITY is the answer to contention; ⛔ a weaker brain is not. The model yields to Ote; the
-   COGNITION must not get less capable because it is background.
-   ⭐ And Dreaming is ⛔ NOT "summarize the last turn": she explores a conversation as an EVIDENCE SPACE —
-   follow a thread, notice a correction, compare statements many turns apart, question her own reading —
-   keeping `explicit evidence / observation / inference / durable belief` apart.
-   ⭐⭐ EXPLORATION IS NOT AUTOMATICALLY BELIEF (the safety property; a pass that commits nothing SUCCEEDED).
-   ⇒ ⭐⭐ B1 IS THE FIRST STEP OF DREAMING'S NAVIGATION SURFACE, not only a correctness fix: *"the
-   conversation should be something she can LOOK THROUGH, not merely something a small summarizer sees
-   once."* ⇒ B-D1 (the radius) is not only "how much text fits" but "what must she be able to move through".
-   Full context: `CONTEXT_SOTERA_DREAMING_IS_SOTERA_THINKING.md`.
-⑭ ⭐⭐⭐ ASK WHAT THE QUERY SELECTED BEFORE BLAMING THE RANKING — AND BEFORE BLAMING THE MODEL (09-16). Her
-   wrong answer was the CORRECT inference from a transcript excerpt built by `ORDER BY rolling_id ASC LIMIT 2`,
-   which had silently dropped the correction. The comment above it read *"a convenience, never load-bearing."*
-   ⇒ ⛔ a component that decides what she SEES is load-bearing whatever its comment says; and ⇒ a subset that
-   does not declare itself a subset is a lie the reader cannot detect (`partial:false` on 2 of 5 turns).
 ```
 
-# 0-C · LIVE STATE — 2026-09-16
+---
+
+# 0-C · LIVE STATE — 2026-09-17
 
 ```
-:8210 PID 12648 (Sotera — on the D1 PHASE 3 build) · :8201 PID 28072 (OLS, HIS, untouched) · :8220 another project's
-:54322 pg · migrations through 050 · writer contracts 16 · live reflection generation = 3 · memories 220
-unit 753/753 · @ote/memory 94/94 · suite 3 of 85 red, ALL pre-existing: 2 share ONE hardcoded corpus count
-  (nonEvidential===8, now 19) and 1 is the FENCED D5 snapshot drift
-lint: 15 writer-not-declared (frozen residue) · pass-writer-without-act 0 · duplicate-live-slot 0
-attribution: 12 turns scanned · 0 confirmed violations · 1 confirmed NON-violation (REQ_NOW)
-CRONS LIVE: noticing (15m) · reflection (20m, reflectAllQuiet) — ⭐ NO LONGER STARVED: on 09-16 it reflected
-  UNPROMPTED on the validation conversation and wrote 3 rows (13:40), one of which CORRECTED a bad extractor row
+:8210 PID 29644 (Sotera — on the B-D4 build) · :8201 (OLS, HIS, untouched, healthy)
+:54322 pg · migrations through 052 · writer contracts 17 (+ `resolver`) · slots 112 · aliases 8 · memories 231
+resolver: grayZoneMode='shadow' · ontologyMode='shadow'  ⇒ BOTH ACCUMULATING, ⛔ neither has authority
+unit 753/753 · @ote/memory 123/123 · alias ledger 4 rows (all `refuse`)
+attribution: 22 scans · 5 candidates · 4 UNREVIEWED (Ote's) · projection_version NULL on all 22 (pre-B, honest)
+CRONS LIVE: noticing (15m) · reflection (20m) — reflection is PROVEN LIVE (fired unprompted 09-16, wrote 3 rows)
 OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · reflectMode ('off', 0 note rows EVER)
-FIXTURES KEPT ON PURPOSE (his instruction) — ⭐ TWO SETS, KEPT SEPARATE, ⛔ neither repaired:
-  KNOWN-GOOD  the Mira chain (318282ac→1fd59a3b, slot 9ed7d99c; + reflection row c6b415bc)
-              = the DIRECT TOOL-WRITE path working end to end
-  THE FAILURE the shelter/bakery set: slot f792b628 chain 365e774e→baf35aa0→33926415, plus 994dd66a, 8fc8e793,
+
+⛔ EVIDENCE KEPT ON PURPOSE — `node test/checks/evidence-baseline-check.mjs` guards ALL of it:
+  KNOWN-GOOD  the Mira chain (318282ac→1fd59a3b, slot 9ed7d99c; + reflection c6b415bc) = the DIRECT TOOL path
+              working end to end
+  THE FAILURE the shelter set: slot f792b628 chain 365e774e→baf35aa0→33926415, plus 994dd66a, 8fc8e793,
               60edebfc, 8a142ce8 = the EXTRACTOR + EXCERPT path failing
-  ⚠️ The Saturdays/Sundays contradiction is NO LONGER LIVE — reflection superseded it at 13:40. The evidence is
-     the LINEAGE (dead-but-kept rows + supersedes_id), ⛔ not a live disagreement. Do not describe it as live.
+  ARMED ×2    `location` → the work-schedule slot (1.0000, sorts ahead of the real `location` slot)
+              `deploy schedule` → the work-schedule slot (1.0000, NARROWER) — both from the `schedule` alias
+  ⚠️ The Saturdays/Sundays contradiction is NOT live — reflection superseded it 09-16 13:40. The evidence is
+     the LINEAGE (dead-but-kept + supersedes_id). ⛔ Do not describe it as a live disagreement.
 ```
 
-**BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) writer seam → **Phase 3 refusal** · reflection
-generations 5/6 + the three-arm decomposition · the F4 blind test · F1 reply-language rule · F2 attribution principle
-decoupled · the attribution detector + 3 corpora + **the live-detection instrument (050)** · D8 `notes` contract ·
-D9 distiller act · D4 lint consistency · D6 `BASIS`→`PRESENCE` · D7 four thematic commits · the caller matrix.
+**BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) → **Phase 3 refusal** · the attribution
+detector + 3 corpora + **the live instrument (050)** · D6/D7/D8/D9 · **A3 (051) · A2 · A1 shadow · B1/B2/B-D2 ·
+B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, falsified before trusted).
+
+---
 
 # 0-D · ⛔⛔ FENCES
 
 ```
-production reflection = GEN 3 · Gen-4 arc CLOSED as REJECT/NOT ADOPTED (D3′) · 40 + 60 experiment runs PRESERVED
-✅ D1 PHASE 3 LIVE ⇒ ⛔ no undeclared write or memory-semantic mutation · ⛔ historical rows NEVER repaired
-⛔ the 8 reflection rows stay UNKNOWN · ⛔ no temporal→occasion inference · ⛔ no provenance repair
-⛔ NO THIRD ATTRIBUTION CORPUS · ⛔ the detector is ADVISORY, never a gate · ⛔ a CANDIDATE is not a violation
-⛔ Mr C never classifies · ⛔ no causality inferred from a live hit · ⛔ frozen evidence is not a memory store
-⛔ NO DREAMING SWITCH CHANGE · ⛔ `dryRun` UNTOUCHED · ⛔ no M1 change · ⛔ no M2 reasoner built
-⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · F3 PARKED
-⛔ episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 snapshot UNTOUCHED
-⛔ ONE GOVERNED SLOT (the canary) · ⛔ NO SECOND BIND · ⛔ NO GOVERNANCE READ SURFACE · ⛔ ③ UNTOUCHED
-⛔ never test on Ote's account — agent_dev only · ⛔ never restart :8210 unasked · :8201 is HIS
-⚠️ `test/harness.mjs` marks EVERY check conversation `probe:true`; `ask-sotera.mjs` sets `probe:false`
-   ⇒ a validation run MUST use the opting-out path or it exercises nothing
+⛔ NEVER test on Ote's account — agent_dev only.          ⛔ :8201 is HIS; :8210 restart is now permitted.
+⛔ No historical row repair · no provenance inference · no ranking/salience change.
+⛔ ATTRIBUTION: detector advisory, never a gate · never reword ATTRIBUTION_PRINCIPLE · a candidate is not a
+   violation until OTE confirms · ⛔ do not touch the 22 scans or the 4 unreviewed candidates.
+⛔ A1 has NO AUTHORITY and is STRUCTURALLY BLOCKED ON A-D4 — "not the same slot" falls through to MINT NEW,
+   so authority-while-A-D4-is-open would decide `broader → new slot` BY DEFAULT.
+⛔ The two ARMED collisions and the 8 existing aliases stay EXACTLY as they are. A-D6: audited unknown.
+⛔ Dreaming: no switch change · `dryRun` untouched · no M1 change · M2 reasoner not commissioned.
+⛔ `memory-contradiction.js` stays UNWIRED — its rule needs the memory to exist when the correction was made,
+   and in the shelter case the row was written 2.8s AFTER the correction. ⇒ wiring it would NOT have helped.
+⛔ Keep the Mira + shelter fixtures. ⛔ Keep the two `.bak` files UNTRACKED in @ote/memory.
+⛔ Do NOT change the `remember_fact` tool description or the extractor prompt — model steering AND a
+   behaviour change. The finding is recorded; the fix is not authorised.
+⛔ No cleanup merely because a tree would look nicer.
 ```
+
+---
 
 # 0-E · ⏸ OPEN — all Ote's, none blocking
 
 ```
-DREAMING   5 decisions (PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md §6): ① WHICH Dreaming (shipped/compress vs
-           designed/commit) — everything depends on it ② may it write at all ③ commission the M2 reasoner or DEFER
-           ④ milestone scope ⑤ (D10 + prefill stay separate). ⭐ My recommendation: DEFER — it is a DESIGN milestone,
-           not a validation one. Steps ①③⑤ are rulings, ② is a build, ④ is small and unspecifiable until ② settles.
-           ⓘ `WRITER.dreaming` is `pass:true` ⇒ a Dreaming write ALREADY fails closed without an act; nothing mints one.
-A/B        ✅ **A3 · A2 · A1(shadow) · B1/B2 ALL LANDED 09-16.** :8210 on the B build. `PLAN_SOTERA_A_B_
-           IMPLEMENTATION.md` is the live doc; measurements in `MEASUREMENT_SOTERA_A1_ONTOLOGY_SHADOW.md`
-           and `MEASUREMENT_SOTERA_B_EVIDENCE_PROJECTION.md`.
-           ✅ A3 alias accountability · mig 051 `log_slot_aliases` · only an ADJUDICATED `same` may TEACH ·
-              a refused write teaches nothing and touches nothing (control-flow fact, not a rule).
-           ✅ A2 `attributeShapeOf()` → head+qualifiers, threaded to the resolver, SEMANTICALLY INERT.
-           ✅ A1 `memory-ontology.js` · RELATION{same|different|broader|narrower|sibling|unknown} · only
-              `same` may bind · **SHADOW ONLY, there is deliberately NO 'on' mode** · ontologyMode +
-              grayZoneMode both 'shadow' and ACCUMULATING on live traffic.
-           ✅ B1 ONE contiguous POSITIONAL centred window, both speakers, every position SHOWN or MARKED.
-              B2 `partial`=authorization (restored) · `incomplete`=DERIVED capacity · ⛔ neither is a 5th axis.
-           ⭐⭐ A1 SAID SOMETHING THAT CONTRADICTED MY OWN DESIGN DOC, and it is right: the RFC's
-              "abbreviation" example is NOT one — `favorite language` → `favorite programming language` is
-              **BROADER** (it could mean a spoken language). ⛔ I did not bend the classifier to match R3.
-              RFC §5's 4-way tie breaks to 1 `same` + 3 `broader`. 16 over-bindings corpus-wide (4 real),
-              **every one at containment exactly 1.0000** ⇒ ⛔ NOT threshold-edge cases. ZERO under-bindings.
-              ✅ **`unknown` INVESTIGATED 09-17 — THE HYPOTHESIS INVERTED.** `INVESTIGATION_SOTERA_UNKNOWN_LABELS.md`
-                 ⛔ evidence only, nothing fixed, no tool/prompt/resolver change.
-                 ⭐ NOT 29% of the corpus — **23 LABELS** (21.3%) amplified across 976 pairs, ~42 pairs each.
-                    All 23 are REAL; zero `zz` fixtures. The whole problem fits on one screen.
-                 ⭐⭐⭐ **THE EXTRACTOR IS THE BEST-BEHAVED WRITER: 1 of 27 = 3.7%.** `chat-tool` (HER OWN
-                    `remember_fact`) = **11 of 26 = 42.3%** · `reflection` = 4 of 12 = 33.3%.
-                 ⭐⭐ CAUSE IS A SENTENCE WE WROTE — `remember_fact`'s description promises *"it finds the
-                    existing fact for this slot — EVEN IF YOU WORD THE ATTRIBUTE DIFFERENTLY than before"*.
-                    She names descriptively because she was told it is safe. ⚠ That promise is FALSE BOTH WAYS:
-                    A1 showed it OVER-merges (containment 1.0000); this shows it cannot relate 23 labels at all.
-                    ⛔ NOT changed — a tool description is model steering AND a behaviour change.
-                 ⭐ THE SPLIT: 4 of 23 genuinely MALFORMED (coordinations — `occupation_and_location` — a slot
-                    cannot hold two answers) · 19 of 23 are LEGITIMATE OBSERVATIONS wearing a descriptive title
-                    (`"nature of relationship"` → *"Ote is my father"*) · **0 of 23 are ONTOLOGY questions.**
-                    ⇒ ⛔ the resolver is NOT what needs work; forcing the 19 into property names would be LOSSY.
-                 ⓘ 886→976 is the ANALYSER getting more honest (B-D2 added wh-words + compound-phrase),
-                    ⛔ not the corpus getting worse.
-              ⚠ 2nd armed collision found: `deploy schedule` → `work schedule` is NARROWER. Left armed.
-           ⭐⭐⭐ B EXPOSED A THIRD DEFECT, worse than the one we set out to fix: the window was `rolling_id`
-              arithmetic and **rolling_id is ONE GLOBAL SEQUENCE**, so any interleaved conversation collapsed
-              it — **33% of conversations returned FEWER than the radius promises, mean 7.36/9, worst 2/9**
-              (one conv: 176 messages over 1,312 ids). The shelter conv was contiguous, which is why this hid
-              in plain sight. ⇒ B1 counts POSITIONS, never ids.
-           ✅ **B-D2 DONE: `incomplete` now means what the word means.** ⚠ It reported **false** on a view
-              showing **9 of 170 messages** — it only asked whether the window filled ITSELF, i.e. the SHAPE
-              of the contract satisfied while its SEMANTICS were violated (rule ⑯).
-              ⇒ the projection declares `ofConversation` + `elidedBefore/After`; `incomplete` covers BOTH
-              causes — window unfilled (capacity) OR conversation extends past it (structural).
-              ⭐ THREE EPISTEMIC STATES, THREE SENTENCES, ⛔ never collapsed:
-                WITHHELD  "X said something here that I can't see."             (a door stayed shut)
-                ELIDED    "(N earlier turns of this conversation, not shown)"   (there is more to move through)
-                UNFILLED  "(part of what I looked at here could not be read)"   (a read failed)
-              ⛔ all parenthesised, no `said to me:` ⇒ B-D4 holds: a gap marker can never be read as speech.
-           ⏸ **B-D1 MEASURED, NOT DECIDED — radius UNCHANGED at ±4.** Reach to the conversation's opening
-              statement: ±4=63% · ±6=83% · ±8=85% · ±12=96%. ⭐⭐ COST IS NOT THE CONSTRAINT: even ±12 is
-              ~3.2k tokens of a ~99k budget ⇒ B-D1 is a purely COGNITIVE question, exactly as Ote framed it.
-              ⭐ ±4→±6 is the biggest single gain; beyond ±8 the return flattens.
-           ⏸ OPEN: **A-D4** (broader/narrower/sibling durable behaviour — A1 authority STRUCTURALLY blocked
-              on it; and §1 makes it HARDER: broader is not always an error) · B-D1 · B-D2 (incomplete
-              PRESENTATION — field landed, rendering deliberately did not) · B-D3 (⛔ lattice untouched) ·
-           ✅ **B-D4 DONE: mig 052 `projection_version` on scans + candidates, `PROJECTION_VERSION='2'`
-              declared in `memory-cognition-host.js` — BESIDE the thing it versions, so it cannot drift from
-              its producer.** The detector parses the episode block as its source set ⇒ the PROJECTION IS ITS
-              INPUT, and B changed that input while the detector stayed frozen.
-              ⛔ The 22 pre-B scans keep `projection_version` NULL — an absent version is the HONEST record;
-              the DATE is the discriminator, ⛔ never a backfilled value (same ruling as A-D6).
-              ⭐ Proven ACROSS PERSISTENCE (row written, re-read from the DB, probe removed, denominator back
-              at 22). ⛔ Detector, principle, 22 scans and 4 unreviewed candidates all untouched.
-           ⚠ `` BECAME A LITERAL BACKSPACE AGAIN (2nd time this arc) via a shell-layer edit — a regex
-              silently matched nothing. ⇒ prefer regexes that need NO escapes; check bytes when a match is 0.
-NEW ③      ADJACENT, from the same trace (investigation §5) — reflection writes FREE-TEXT entities (`the user's home`,
-           `the user's brother`) that `sameEntity` can never reconcile against `user`; `preferred_name = "i just be
-           here temporary"` is live at importance 9 / confidence 0.99; `partial:false` on a demonstrably partial
-           excerpt. ⛔ Observations, ⛔ not requirements.
-D10        WHAT MAKES AN OPTION SALIENT INSIDE HER DECIDING — `keep()` 38/38 yet unprompted calls ~zero; the citation
-           affordance 0/16; and now 0 tool calls across a 5-turn relational conversation. ⛔ Research, not a code change.
-ATTRIBUTION only the READING: when candidates appear OTE classifies them —
-           `node test/checks/attribution-live-check.mjs` → `--id <uuid>` → `attribution-confirm.mjs <id> <CLASS> --by ote`
-           ⛔ Nothing is a violation until he does. ④ effort:low parked. Widening D11 scope is evidence-led.
-PERF       prefill / TTFT — `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (HIS lane). `cognition` sits in the LEADING
-           system message ahead of ~12.7k tok of tool schemas and moves every turn ⇒ prefix reuse lands 7.9%; ollama
-           reuse itself measured at 100×. Proposed: config-gated `memory.cognitionInTail`, default OFF (⛔ NOT a pure
-           perf knob — it changes what she sees when). ⛔ Nothing done. Probes in test/pipeline/prefill-*.mjs.
-LANGUAGE   should a standing user language PREFERENCE override the reply-language rule? (at SCOPE.principle it is a
-           proposal, not an override)
-M2         D2/D4-era governance items: the deferred governance-READ decision (couples to ⓔ). Not urgent.
+A-D4   ⭐⭐⭐ THE GATE. Durable behaviour for `broader` / `narrower` / `sibling`. ⚠️ A1's measurement made it
+       HARDER, not easier: `broader` is NOT always an error, so "broader → mint a new slot" would fragment
+       `programming_language` into a FOURTH sibling of three that already exist.
+       ⇒ A1 authority is blocked on this. Shadow is safe precisely because it cannot decide it.
+A1     shadow + ACCUMULATE. Next: read `memory.resolver.ontology_*` telemetry on real traffic.
+B-D1   the radius. MEASURED, ⛔ NOT DECIDED — unchanged at ±4. Reach to the conversation's opening statement:
+       ±4=63% · ±6=83% · ±8=85% · ±12=96%. ⭐⭐ COST IS NOT THE CONSTRAINT (±12 ≈ 3.2k of ~99k tokens) ⇒ this
+       is a purely COGNITIVE question: *what must she be able to move through and see?*
+B-D3   may an `incomplete` projection still claim `BASIS.attestedBySource`? ⛔ LATTICE UNTOUCHED.
+UNKNOWN the upstream naming question. Evidence is in; ⛔ no fix authorised. 4 malformed coordinations · 19
+       legitimate observations in a property-shaped slot · 0 ontology questions.
+       ⏸ The real question it raises: **what is a slot FOR**, if 19 of 23 real memories do not fit one?
+DREAMING 5 decisions (`PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md` §6): ① WHICH Dreaming ② may it write
+       ③ commission M2 or defer ④ milestone scope ⑤ D10 + prefill separate. ⭐ Recommendation: DEFER.
+NAVIGATION design-only. `inspect → follow → compare`. ⛔ Nothing below "there is more" exists or is authorised;
+       ⛔ a future session must NOT "optimise away" the elision marker — it is the load-bearing part.
+D10    what makes an option SALIENT inside her deciding. ⛔ Research, not a code change.
+ATTRIBUTION the READING only: `node test/checks/attribution-live-check.mjs` → `--id <uuid>` →
+       `attribution-confirm.mjs <id> <CLASS> --by ote`. ⛔ Nothing is a violation until he does it.
+PERF   prefill / TTFT — `INVESTIGATION_SOTERA_PREFILL_PREFIX_CACHE.md` (HIS lane). Nothing done.
+LANGUAGE should a standing user language PREFERENCE override the reply-language rule?
+M2     the deferred governance-READ decision (couples to ⓔ). Not urgent.
+⚠️ SECURITY, FYI: `Reference/docs/SECURITY_CASE_*` is committed and marked "never share"; it is safe only
+   because that repo has NO REMOTE. A convention, not a mechanism. And `:8210` stderr carries a standing
+   advisory that `auth.root.password` is weak while root is network-reachable.
 ```
 
 ---
