@@ -9836,3 +9836,56 @@ local clock; an uncommitted doc now falls back to mtime and is **marked** `⁺` 
 **Verification:** unit **753/753** · `@ote/memory` **123/123** · `evidence-baseline-check` green — 22 scans,
 5 candidates, **4 still unreviewed**, both armed collisions intact, 112 slots / 8 aliases, both `.bak` files
 preserved. ⛔ The census wrote nothing.
+
+---
+
+## 2026-09-17 · REPLACEMENT SEMANTICS — what a slot represents when a second value arrives
+
+Ote's narrowing after the slot/observation evidence: classify the actual replacement cases, and establish
+whether the abstraction has `identity + current value + history` or just `identity + latest arrival`.
+⛔ No repairs, no behaviour change, rows and collisions preserved exactly.
+
+**Instrument** → `test/checks/replacement-semantics-census.mjs` (read-only). It contains a human judgement and
+says so: Ote supplied the taxonomy, the assignment is mine, and **each judgement is declared and pinned to the
+values it was made from** — the check re-reads both and fails if either changed, so a stale classification
+announces itself instead of quietly describing a row that no longer exists.
+
+**The nine replacement events, classified:** 4 RE-STATEMENT · 1 MIXED · 1 CORRECTION/REPAIR · **1 WORLD
+CHANGE** · 2 WRONG SLOT. ⇒ **8 of 9 were not a belief being revised.**
+
+- ⚠️ **A fifth class the evidence forced.** `soteras_family_lineage…` restates one proposition (Ote:
+  Creator/Dad → Dad/Creator), elaborates a second (Hermes), and **genuinely changes a third** (Claude:
+  Builder/*Brother*, "friend/colleague" → *Uncle*/Builder, "Dad's friend") — inside one value. None of the four
+  classes fits, and picking the closest would have hidden why. Sharpest demonstration yet of *one slot holds
+  one answer*.
+- ⚠️ **One contested call, flagged for Ote:** `"sharp edge over comfort"` → `"friction over agreement"`.
+  Charitably the same disposition; strictly, comfort ≠ agreement. **The record cannot settle it** — which is
+  itself the finding.
+- ⚠️ **Two re-statements were lossy** — the longer, more informative value was archived by a shorter one.
+  `supersede` means *a different string arrived later*, and later is not better.
+
+**The structural answer.** The schema declares a full bi-temporal design; the mechanism does not use it.
+Verified against the data rather than the source comment that says so: of 211 rows carrying `valid_at`, **177
+are within 2 seconds of `created_at`**, all 14 outliers are `doc:` ingest, and **0** carry a genuine world
+"true since". `invalid_at` is likewise the system clock at the moment a different string arrived — so the
+`timezone` row is marked *invalid in the world* and is still true. `expired_at` 2 of 233; `contradicted_at` 3,
+and its one use in a transition was set by a human `operator`, never by the pipeline.
+
+⇒ **four distinct semantic classes share one recorded state.** The substrate is **identity + latest arrival**
+plus an append-only trail no cognitive read can see (`LIVE = { invalid_at: null, expired_at: null }` on every
+recall). And `dreaming-candidate-host` additionally filters `contradicted_at IS NULL` — **the one component
+meant to reason about change is guaranteed never to see any.**
+
+⭐⭐ **The precedent is Ote's own and already shipped.** `lesson-host.revise()` implements his decision 4:
+`['supersedes', 'refines', 'coexists_with', 'qualifies']`, where only `supersedes` archives the prior —
+*"We should not force every change into a simple replacement chain."* The fact/slot path still does, and
+decides which one by string inequality. ⛔ Recorded as the precedent, **not proposed as the answer.**
+
+**Three more instrument defects (ledger now at 12):** I classified the mixed transition from a **100-character
+truncation** and got it backwards — a truncated read is a different observation, not a shorter one, and the
+truncation was mine. My first `valid_at` claim rested on a **source comment** rather than the column. And
+"no fragmentation detected" is not "none" — 114 of 330 live slot pairs return `unknown`.
+
+**Verification:** replacement-semantics census all green with data-backed assertions · unit **753/753** ·
+`@ote/memory` **123/123** · evidence baseline green · 4 candidates still unreviewed · both collisions armed.
+⛔ Nothing was written.

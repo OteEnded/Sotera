@@ -158,6 +158,22 @@ decision. ⛔ Not reopened.
    ⚠️ And it is ⛔ NOT the naming axis: 43 WELL-NAMED slots have also never held a second answer.
    ⇒ ⭐⭐ DO NOT MAKE THE RESOLVER CARRY SEMANTICS THAT BELONG SOMEWHERE ELSE.
    → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md`
+⑲ ⭐⭐⭐ `superseded` IS NOT A SEMANTIC VERDICT — it is the residue of `norm(a) !== norm(b)`.
+   ⭐ 8 of the 9 replacement events in the corpus were NOT a belief being revised: 4 RE-STATEMENTS ·
+   1 MIXED · 1 REPAIR · 2 WRONG-SLOT · **1** genuine world change. ⛔ And FOUR of those semantic classes
+   share ONE recorded state (`invalid_at` set, nothing else) ⇒ THE RECORD CANNOT TELL THEM APART.
+   ⚠️ TWO DECLARED TIME AXES, ONE ACTUAL ONE. `valid_at` is COMMIT time — measured: 177/211 rows within
+   2s of `created_at`, all 14 outliers `doc:` ingest, **0** carrying a real world "true since".
+   `invalid_at` is likewise the system clock at the moment a DIFFERENT STRING arrived — so the `timezone`
+   row is marked *invalid in the world* and is **still true**. `expired_at` 2/233 · `contradicted_at`
+   3/233, and its ONE use in a transition was set by a HUMAN `operator`, never by the pipeline.
+   ⇒ ⭐⭐⭐ THE SUBSTRATE IS **identity + LATEST ARRIVAL** + an append-only trail ⛔ no cognitive read sees
+   (`LIVE = {invalid_at:null, expired_at:null}` on every recall). ⚠️ And `dreaming-candidate-host` ALSO
+   filters `contradicted_at IS NULL` ⇒ ⛔ THE ONE COMPONENT MEANT TO REASON ABOUT CHANGE CANNOT SEE ANY.
+   ⭐⭐ THE PRECEDENT IS OTE'S OWN, ALREADY BUILT — `lesson-host.revise()`:
+   `['supersedes','refines','coexists_with','qualifies']`, only `supersedes` archives the prior.
+   *"We should not force every change into a simple replacement chain."* ⛔ The FACT path still does.
+   → `INVESTIGATION_SOTERA_REPLACEMENT_SEMANTICS.md`
 ```
 
 ---
@@ -237,7 +253,16 @@ SLOT/OBS ⭐⭐⭐ THE GATE BEFORE THE GATE (Ote, 2026-09-17): *"Before A-D4, le
        ⭐ The defensible claim is narrower: **we have no evidence the slot model is doing the work it was
        built to do, and the one instrument that would tell us cannot tell a CHANGED ANSWER from a REWORDED
        one** — `reconcilePlan` supersedes on `norm(a) !== norm(b)`, pure string inequality.
-       ⏸ ⛔ NOTHING AUTHORISED. Ote has the ruling. → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md`
+       ✅ FOLLOW-UP DONE (Ote asked 09-17): the 9 replacement events CLASSIFIED against his taxonomy, and the
+       structural question ANSWERED — the substrate is **identity + latest arrival**, ⛔ not identity +
+       current + history. 4 semantic classes share ONE recorded state. See §0-B ⑲ for the whole finding.
+       ⭐⭐ And the vocabulary he wants is ALREADY BUILT on the lesson path, by his own decision 4.
+       ⏸ ⛔ NOTHING AUTHORISED. Ote has the ruling. Two calls flagged FOR HIM:
+         ③ `"sharp edge over comfort"` → `"friction over agreement"` — ⚠️ CONTESTED, the record cannot settle it
+         ④ `soteras_family_lineage…` — MIXED: one proposition restated, one elaborated, one CHANGED
+           (Claude: brother → uncle), in a single value. ⚠️ I first called it a re-statement FROM A 100-CHAR
+           TRUNCATION; the full value inverted it.
+       → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md` · `INVESTIGATION_SOTERA_REPLACEMENT_SEMANTICS.md`
 A-D4   ⭐⭐⭐ Durable behaviour for `broader` / `narrower` / `sibling`. ⛔ HELD BEHIND SLOT/OBS ABOVE.
        ⚠️ A1's measurement made it HARDER, not easier: `broader` is NOT always an error, so "broader → mint a
        new slot" would fragment `programming_language` into a FOURTH sibling of three that already exist.
