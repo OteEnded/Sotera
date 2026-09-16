@@ -19,6 +19,14 @@
 import { makeChecker, devPg, devSchema } from '../harness.mjs'
 import { admissibleToSlot } from '../../Backend/app/components/memory-ownership-boundary.js'
 import { assertionGate } from '@ote/memory/cognition/memory-extract.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_relayed_identity_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker('relayed-identity')
 const pg = devPg(); await pg.connect()
@@ -68,7 +76,7 @@ try {
     `select id::text, value from ${S}.txn_memories
       where user_id=$1 and attribute='preferred_name' and value in ('zz_Cogito','zz_Ripley')`, [agent.id])
 
-  const storeWith = (sourceText) => createSequelizeMemoryStore({
+  const storeWith = (sourceText) => createSequelizeMemoryStore({ ...ZZ_AXES,
     db, userId: agent.id, author: 'account', sourceText, config,
   })
 

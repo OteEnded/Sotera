@@ -203,6 +203,55 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
   const REACH = normalizeReach(reach)
   const ACT_KEY = actKey(ACT)
 
+  // ══ ⭐⭐⭐ D1 PHASE 3 · MANDATORY WRITER IDENTITY (Ote, 2026-09-16) ═══════════════════════════════════════════════
+  //
+  // *"Make the store refuse both writes and memory-semantic mutations when writer is absent."*
+  //
+  // Phase 1 (2026-09-15) ADMITTED an undeclared write and reported it loudly; Phase 2 wired the callers; this is Phase 3,
+  // and it refuses. The audit that licensed it measured a full suite under stack tracing: **zero undeclared writes
+  // originated in production** — see `AUDIT_SOTERA_D1_PHASE3_PRE_FLIP.md`.
+  //
+  // ── ⚠️⚠️ WHAT "MEMORY-SEMANTIC" HAD TO MEAN, AND WHY IT IS A FIELD LIST AND NOT A METHOD ─────────────────────────
+  // `update()` is shared between BELIEF CHANGES and BOOKKEEPING, and the sharing is not incidental:
+  //     store.update(ids, { tier: 'hot' })          ← **every recall does this** (memory-v2-service.js:818)
+  //     store.update([id], { slot_embedding: … })   ← index maintenance
+  //     store.update([id], { expired_at, tier })    ← a forget
+  //     store.update(ids,  { invalid_at: … })       ← a supersede / collapse / invalidate
+  // ⛔ Gating the METHOD would have refused every recall from a read-only store — reading would have stopped working.
+  // ⇒ the gate keys on the FIELDS being patched. A patch that changes what is believed, or whether it is believed,
+  // needs a writer; a patch that changes where it sits in a cache does not. Ote's enumeration — insert · update ·
+  // supersede · invalidate · archive · forget — is exactly the list below.
+  const SEMANTIC_FIELDS = new Set([
+    'invalid_at', 'expired_at', 'supersedes_id', 'pinned',
+    'contradicted_at', 'contradicted_by', 'contradicted_by_message_id',
+    'content', 'value', 'entity', 'attribute', 'importance', 'confidence', 'kind', 'namespace',
+  ])
+  // ⛔ deliberately NOT here: `tier` · `slot_embedding` · `embedding` · `access_count` · `last_access` · `slot_id`.
+  // They are placement and index state. ⓘ `tier` rides along in a forget patch (`{ expired_at, tier }`), which gates on
+  // `expired_at` — so the belief change is caught and the bare cache promotion is not.
+  const isSemantic = (patch) => Object.keys(patch ?? {}).some((k) => SEMANTIC_FIELDS.has(k))
+
+  /**
+   * ⭐ Refuse an unattributable memory act. `NO_WRITER` is the code; `writer-not-declared` is the lint rule it matches,
+   * so a refusal and the standing report speak the same word.
+   * ⓘ `SOTERA_WRITER_TRACE` still works, and now records the REFUSAL's call stack — which is what the pre-flip audit
+   * used, and what still answers "who tried?" without anyone adding a logger.
+   */
+  const requireWriter = (what, detail = null) => {
+    if (WRITER) return
+    if (process.env.SOTERA_WRITER_TRACE) {
+      try {
+        const site = (new Error().stack || '').split('\n').slice(2, 9).join('\n')
+        fsAppend(process.env.SOTERA_WRITER_TRACE_FILE || 'writer-trace.log', `── REFUSED ${what}${detail ? ` · ${detail}` : ''}\n${site}\n`)
+      } catch { /* a diagnostic must never break the thing it is diagnosing */ }
+    }
+    const e = new Error(`refused: ${what} with no declared writer — a memory act must name its writer `
+      + '(D1 Phase 3; the occasion, reachability and provenance of an undeclared row are unattributable)')
+    e.code = 'NO_WRITER'
+    e.reason = 'writer-not-declared'
+    throw e
+  }
+
   // ── ⭐⭐⭐ AND THE AUTHORITY IS DERIVED HERE, ⛔ NEVER ACCEPTED AS A CLAIM ──────────────────────
   //
   // Ote, 2026-09-02: *"Root: always authorized. Explicit account permission: authorized when the account
@@ -876,6 +925,9 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
 
     // ── WRITES ───────────────────────────────────────────────────────────────────────────────
     async create(row = {}) {
+      // ⭐⭐⭐ D1 PHASE 3 · THE INSERT GATE. First thing in the method, before any other gate runs: an unattributable
+      // row must not reach the self-state gate, the governance gate or the disk. See `requireWriter` above.
+      requireWriter('a memory write', row?.kind ?? null)
       // ── ⭐⭐⭐ THE SELF-STATE GATE · EVERY LANE PASSES THROUGH HERE, WHICH IS WHY IT IS HERE ─────────
       //
       // ⚠️⚠️ MEASURED 2026-08-25. The distiller read one of her own messages narrating a search that found
@@ -1188,34 +1240,14 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
         subject_person_id: row.subject_person_id ?? subjectDefault,
       })
       const plain = created.get ? created.get({ plain: true }) : created
-      // ══ ⭐⭐⭐ D1(b) · A WRITE THAT DID NOT SAY WHO WROTE IT IS ADMITTED — AND SAYS SO. ════════════════════════════
+      // ══ ⭐⭐⭐ D1 PHASE 3 · THERE IS NO UNDECLARED WRITE TO REPORT HERE ANY MORE ═══════════════════════
       //
-      // Ote's ruling, 2026-09-15: *"(b) now — admit the write, but record the missing writer identity loudly."*
-      //
-      // ⚠️⚠️ THE DEFECT THIS EXISTS TO SURFACE, MEASURED: migration 049 gave every write a declared writer, act and
-      // reach — and six weeks later only 6 of the 13 declared writers had a CALLER. The gap was not the missing
-      // argument; it was that the missing argument was LEGAL: `writer: null` resolved to an inert contract and produced
-      // a valid row with no axes, silently, while this same method refuses a pass writer with no act LOUDLY.
-      // ⇒ one axis fail-closed, the other opt-in, in one constructor. Found by an unrelated experiment's own data.
-      //
-      // ⭐ SO THE ABSENCE IS RECORDED RATHER THAN ASSUMED. ⛔ It does NOT refuse — Phase 1 must break no caller, and
-      // the caller set is not yet known to be complete. Phase 3 turns this into a refusal once it is; until then the
-      // warn plus the `writer-not-declared` lint rule are what make an unwired path enumerate itself instead of leaking.
-      if (!WRITER) {
-        const why = '[memory] a row was written with NO declared writer — its occasion, reachability and provenance are unattributable'
-        const where = { id: plain.id, source: plain.source ?? null, kind: plain.kind ?? null, namespace: plain.namespace ?? null, author: AUTHOR }
-        if (log?.warn) log.warn(where, why); else console.warn(why, where)
-        // ⭐ D1 PHASE-3 PREPARATION, off unless asked for. `SOTERA_WRITER_TRACE=1` appends the CALL STACK of every
-        // undeclared write to a file, so "which callers would break under a mandatory-writer rule" is MEASURED across a
-        // full suite run instead of inferred by reading ninety-odd construction sites. ⛔ Inert in production: no env
-        // var, no cost, no behaviour change. Writing the trace must never be able to fail a write.
-        if (process.env.SOTERA_WRITER_TRACE) {
-          try {
-            const site = (new Error().stack || '').split('\n').slice(2, 9).join('\n')
-            fsAppend(process.env.SOTERA_WRITER_TRACE_FILE || 'writer-trace.log', `── ${plain.id} · ${plain.source ?? 'no-source'}\n${site}\n`)
-          } catch { /* a diagnostic must never break the thing it is diagnosing */ }
-        }
-      }
+      // Phase 1 (2026-09-15) warned HERE that a row had been written with no declared writer, because Ote ruled (b):
+      // admit the write, record the absence loudly. That warn stood where the row had already been created.
+      // ⭐ Phase 3 refuses at the TOP of this method instead (`requireWriter`), so a row with no writer never reaches
+      // this point and the warn became unreachable. It is removed rather than left as dead code that would tell a
+      // future reader undeclared writes are still admitted. The lint rule `writer-not-declared` stays a DEFECT — it is
+      // the guard on the raw-SQL paths this store cannot see, and on the frozen historical rows, which are NOT repaired.
       // ══ ⭐⭐⭐ 049 · PROVENANCE — written by the WRITER or not at all. ⛔ No reader completes it (I3). ═════════════════
       try {
         const refs = []
@@ -1247,6 +1279,9 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       // BY ID ONLY, never by predicate — a predicate is the component composing a query again.
       const list = Array.isArray(ids) ? ids.filter(Boolean) : (ids ? [ids] : [])
       if (!list.length) return 0
+      // ⭐ D1 PHASE 3 · the MUTATION gate — by FIELD, never by method. See SEMANTIC_FIELDS above for why: this same
+      // method carries recall's `tier: 'hot'` promotion, and gating the method would have stopped reading.
+      if (isSemantic(patch)) requireWriter('a memory-semantic mutation', Object.keys(patch).join(','))
       const [n] = await txn_memories.update(patch, { where: { id: list } })
       return n
     },
@@ -1277,6 +1312,8 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
      * @returns {Promise<{ok:boolean, reason?:string, id?:string}>}
      */
     async markContradicted({ id, byMessageId = null, byMemoryId = null } = {}) {
+      // ⭐ D1 PHASE 3 · repudiating a belief is a memory act — it needs a writer like any other.
+      requireWriter('a contradiction mark')
       if (!id) return { ok: false, reason: 'no memory id' }
       // ⛔ A CONTRADICTION THAT CANNOT NAME ITS OPPONENT IS A FEELING. Migration 003 said so about
       // `contradicted_by`; it is just as true here. Refuse rather than mark a row on nothing.

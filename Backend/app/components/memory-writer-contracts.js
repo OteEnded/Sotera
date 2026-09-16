@@ -25,7 +25,19 @@ export const ACT_KIND = Object.freeze({
   operator: 'operator',   // a named ruling, e.g. `reconcile:rome-2026-09-02` — the label IS the act
   ingest: 'ingest',       // a document ingest at a commit — `doc:<path>@<sha>` — the label IS the act
   record: 'record',       // a lesson / decline record — its own id
-  request: 'request',     // an operator act through the admin surface — the request identity
+  // ⭐⭐ CLARIFIED BY OTE, 2026-09-16, when `person` joined `admin` on this kind. It used to read "an operator act
+  // through the ADMIN SURFACE", which was too narrow the moment a second writer used it.
+  //
+  //   *"I want `request:<request.id>` to mean the HTTP request as the occasion identity, with the WRITER carrying the
+  //    actor distinction. Do not introduce act=person; actor identity belongs on writer, while request identifies the
+  //    occasion/mechanism."*
+  //
+  //   admin  + request:<id>   root/operator acting through the admin surface
+  //   person + request:<id>   the account holder acting on their own memory
+  //
+  // ⇒ the two axes answer two questions and neither answers the other's: WHO acted is the writer, WHAT OCCASION it was
+  // is the act. ⛔ Never encode the actor here — that would make the same occasion kind mean two things.
+  request: 'request',     // an HTTP request as the occasion — its identity IS the act; the WRITER says who acted
 })
 
 /** What material the act worked from. */
@@ -74,7 +86,7 @@ export const VERIFICATION = Object.freeze({
 export const WRITER = Object.freeze({
   extractor: 'extractor', identity: 'identity', chatTool: 'chat-tool', followthrough: 'followthrough',
   reflection: 'reflection', notes: 'notes', dreaming: 'dreaming', distiller: 'distiller', operator: 'operator', ingest: 'ingest',
-  lesson: 'lesson', decline: 'decline', admin: 'admin', job: 'job', unknown: 'unknown',
+  lesson: 'lesson', decline: 'decline', admin: 'admin', person: 'person', job: 'job', unknown: 'unknown',
 })
 
 const contract = (writer, o) => Object.freeze({
@@ -112,7 +124,17 @@ export const CONTRACTS = Object.freeze({
   [WRITER.ingest]: contract(WRITER.ingest, { actKind: ACT_KIND.ingest, reach: REACH_KIND.none }),
   [WRITER.lesson]: contract(WRITER.lesson, { actKind: ACT_KIND.record, reach: REACH_KIND.none }),
   [WRITER.decline]: contract(WRITER.decline, { actKind: ACT_KIND.record, reach: REACH_KIND.none }),
+  // ⭐ ADMIN · root or an operator acting THROUGH THE ADMIN SURFACE, on somebody's memory.
   [WRITER.admin]: contract(WRITER.admin, { actKind: ACT_KIND.request, reach: REACH_KIND.none }),
+  // ⭐⭐ PERSON · THE ACCOUNT HOLDER ACTING ON THEIR OWN MEMORY (Ote, 2026-09-16, ruling option (b)).
+  //
+  // ⛔ NOT `admin`, AND THE DISTINCTION IS DELIBERATE: *"admin = root/operator acting through admin surface; person =
+  // account holder acting on their own memory. Do not use writer: admin for the chat deletion."* Collapsing the two
+  // would lose, at the cheapest possible point, the difference between someone editing THEIR OWN beliefs and someone
+  // editing SOMEBODY ELSE'S — which is exactly the question the writer axis exists to answer.
+  // ⓘ Same act kind as admin (`request:<request.id>`) because the OCCASION is the same mechanism — an HTTP request.
+  // The actor distinction rides on the writer, never on the act. See ACT_KIND.request above.
+  [WRITER.person]: contract(WRITER.person, { actKind: ACT_KIND.request, reach: REACH_KIND.none }),
   [WRITER.job]: contract(WRITER.job, { actKind: ACT_KIND.job }),
   [WRITER.unknown]: contract(WRITER.unknown, {}),
 })

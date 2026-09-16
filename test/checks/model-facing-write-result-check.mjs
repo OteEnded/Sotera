@@ -29,6 +29,14 @@ import { initSettings } from '../../Backend/app/settings/index.js'
 import { buildMemoryToolService } from '../../Backend/app/components/memory-pipeline-host.js'
 import { RETENTION_STATE, forModel, settleWrite } from '../../Backend/app/components/memory-write-receipt.js'
 import { effected } from '../../Backend/app/components/retention-followthrough.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_model_facing_write_result_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker('model-facing-write-result')
 const config = loadConfig()
@@ -54,7 +62,7 @@ if (!me) { console.error('✖ agent_dev not found — ⛔ never run this as root
 // it happens in, or it cannot establish that it is not the very act that declared or bound the
 // question. ⓘ In a real request this is the TURN KEY; an operator act names its own.
 const OCC = `zz_mfw_consuming_${t}`
-const mem = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room', occasion: OCC })
+const mem = buildMemoryToolService(fastify, { ...ZZ_AXES, userId: me.id, author: 'account', scope: 'room', occasion: OCC })
 
 /** ⭐ EXACTLY what the package handlers do — ⛔ the check must not model it differently. */
 const asModel = async (queued) => (await queued.settled)?.forModel ?? null
@@ -126,7 +134,7 @@ try {
   check('B10 · ⛔ …and NO replacement row was written', leak.n === 0, `rows=${leak.n}`)
 
   // ══ PART C · ⭐⭐⭐ ACCEPTED — a REAL blocked lane, both doors ═════════════════════════════════════
-  const blocker = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room', occasion: OCC })
+  const blocker = buildMemoryToolService(fastify, { ...ZZ_AXES, userId: me.id, author: 'account', scope: 'room', occasion: OCC })
   const BLOCK_MS = 25_000
   const held = blocker.enqueue('zz_mfw_block', () => new Promise((r) => { setTimeout(r, BLOCK_MS) }))
   const startedAt = Date.now()

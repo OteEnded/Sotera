@@ -16,6 +16,14 @@
 // two legacy persona_global rows are never read, modified or counted as ours.
 
 import { makeChecker, devPg, devSchema } from '../harness.mjs'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_persona_global_write_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker('persona-global-write')
 const pg = devPg(); await pg.connect()
@@ -53,7 +61,7 @@ try {
   check('⭐ root is config-defined, ⛔ not derived from a NULL role',
     (await one(`select 1 x from ${S}.mst_users where id=$1`, [rootId]))?.x === 1, rootId.slice(0, 8))
 
-  const pipelineFor = (userId, scope) => buildMemoryPipeline(fastify, {
+  const pipelineFor = (userId, scope) => buildMemoryPipeline(fastify, { ...ZZ_AXES,
     userId, serializeCommits: true, author: 'persona', scope,
   }).pipeline
   const obs = (value) => ({ type: 'fact', entity: 'sotera', attribute: ATTR, value })
@@ -85,7 +93,7 @@ try {
     && refusalRow?.cls === 'persona-global-unauthorized-room', `${refusalRow?.cls}`)
 
   // ── ③ author='account' + global is a CONTRADICTION, refused even for an authorized room ────────
-  const wrongAuthor = await buildMemoryPipeline(fastify, {
+  const wrongAuthor = await buildMemoryPipeline(fastify, { ...ZZ_AXES,
     userId: rootId, serializeCommits: true, author: 'account', scope: 'persona_global',
   }).pipeline.ingest(obs('zz_global_wrong_author'))
   check('③ ⛔ author=account + persona_global is refused even in ROOT\'s room',
@@ -115,7 +123,7 @@ try {
 
   // ── ⑦ ⭐⭐⭐ READ-BACK FROM A DIFFERENT ROOM — the assertion that proves REACHABILITY ───────────
   const { createSequelizeMemoryStore } = await import('../../Backend/app/components/memory-store-sequelize-host.js')
-  const otherRoomStore = createSequelizeMemoryStore({ db, userId: other.id, config })
+  const otherRoomStore = createSequelizeMemoryStore({ ...ZZ_AXES, db, userId: other.id, config })
   const visible = (await otherRoomStore.findVisible({})).filter((r) => r.attribute === ATTR)
   check('⑦ ⭐⭐⭐ a THIRD room, which wrote nothing, can READ both global rows',
     visible.length === 2, `${visible.length} visible from kavi's room`)
@@ -149,12 +157,12 @@ try {
   // by persona|userId) — this drain returned instantly on an empty lane and the rows it was waiting for
   // were still in flight. ⭐ A harness that configures itself differently from production tests a
   // system nobody runs.
-  const drain = (userId) => buildMemoryV2(fastify, { userId })._drainWrites()
+  const drain = (userId) => buildMemoryV2(fastify, { ...ZZ_AXES, userId })._drainWrites()
   const rootUser = { isRoot: true }
   const plainUser = { isRoot: false, roles: ['admin'], memoryAccessScope: 'sotera_memory' }
   const KEPT = `${ATTR}_keep`
 
-  const keepAs = (userId, user) => buildRetention(fastify, { userId, user, isRoot: user?.isRoot === true }).keep
+  const keepAs = (userId, user) => buildRetention(fastify, { ...ZZ_AXES, userId, user, isRoot: user?.isRoot === true }).keep
 
   // ⑩a · ROOM A (root's room) writes something true of her everywhere.
   const keptGlobal = await keepAs(rootId, rootUser)({
@@ -173,7 +181,7 @@ try {
     `${keptRow?.scope}/${keptRow?.author}/${keptRow?.user_id === rootId ? 'root-room' : keptRow?.user_id}`)
 
   // ⑩b · ROOM B reads it back. ⭐ The capability, end to end, through the door she uses.
-  const roomBStore = createSequelizeMemoryStore({ db, userId: other.id, config })
+  const roomBStore = createSequelizeMemoryStore({ ...ZZ_AXES, db, userId: other.id, config })
   check('⑩b ⭐⭐⭐ ROOM B reads what ROOM A wrote — global reachability through the real front door',
     (await roomBStore.findVisible({})).some((r) => r.attribute === KEPT))
 

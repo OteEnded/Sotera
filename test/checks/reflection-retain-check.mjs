@@ -12,6 +12,14 @@
 // ⛔ Runs as agent_dev. Every fixture is removed at the end.
 
 import { makeChecker, devPg, devSchema } from '../harness.mjs'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_reflection_retain_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker('reflection-retain')
 const pg = devPg(); await pg.connect()
@@ -42,7 +50,7 @@ try {
   // without one — which `memory-lineage-check` does not recognise. ⭐ A harness that configures itself
   // differently from production tests a system nobody runs; that lesson has now cost twice.
   const convo = await one(`select id::text from ${S}.txn_conversations where user_id=$1 order by created_at desc limit 1`, [agent.id])
-  const { retain } = buildRetention(fastify, { userId: agent.id, user, isRoot: false, conversationId: convo?.id ?? null })
+  const { retain } = buildRetention(fastify, { ...ZZ_AXES, userId: agent.id, user, isRoot: false, conversationId: convo?.id ?? null })
   check('agent_dev resolves — ⛔ never root', Boolean(agent?.id && persona?.id))
 
   const decisions = async (state) => q(

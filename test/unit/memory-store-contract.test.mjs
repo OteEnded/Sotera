@@ -25,6 +25,7 @@ import {
   assertMemoryStore, resolveSlotStore,
 } from '@ote/memory/cognition/memory-store-port.js'
 import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
+import { WRITER, ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
 
 // ── a models bag good enough to construct against, with the query arm under our control ──────────
 function fakeDb({ queryThrows = false, withConversations = true } = {}) {
@@ -129,7 +130,7 @@ test('an empty/absent query vector also yields null, not a wrong answer', async 
 
 test('create() STAMPS scope — the component never passes persona or user_id', async () => {
   const { db, calls } = fakeDb()
-  const s = createSequelizeMemoryStore({ db, persona: 'p1', userId: 'u1' })
+  const s = createSequelizeMemoryStore({ db, persona: 'p1', userId: 'u1', writer: WRITER.operator, act: { kind: ACT_KIND.operator, id: 'zz_contract' } })
   await s.create({ kind: 'semantic', content: 'x' })
   assert.equal(calls.create[0].persona, 'p1')
   assert.equal(calls.create[0].user_id, 'u1')
@@ -137,7 +138,7 @@ test('create() STAMPS scope — the component never passes persona or user_id', 
 
 test('...and enforces identity-is-persona-global rather than trusting every caller', async () => {
   const { db, calls } = fakeDb()
-  const s = createSequelizeMemoryStore({ db, persona: 'p1', userId: 'u1' })
+  const s = createSequelizeMemoryStore({ db, persona: 'p1', userId: 'u1', writer: WRITER.operator, act: { kind: ACT_KIND.operator, id: 'zz_contract' } })
   await s.create({ kind: 'identity', content: 'x' })
   // ⭐⭐ 029: THE RULE IS UNCHANGED — an identity row is persona-global, enforced here and not trusted to
   // callers. What changed is that it is now SAID rather than smuggled.
@@ -151,7 +152,7 @@ test('...and enforces identity-is-persona-global rather than trusting every call
 
 test('update() takes IDS, never a predicate — and no ids is a no-op, not a full-table write', async () => {
   const { db, calls } = fakeDb()
-  const s = createSequelizeMemoryStore({ db, userId: 'u1' })
+  const s = createSequelizeMemoryStore({ db, userId: 'u1', writer: WRITER.operator, act: { kind: ACT_KIND.operator, id: 'zz_contract' } })
   assert.equal(await s.update([], { pinned: true }), 0)
   assert.equal(await s.update(null, { pinned: true }), 0)
   assert.equal(calls.update.length, 0, 'an empty id list must never reach the database')
@@ -202,4 +203,47 @@ test('getSource on a row OUT OF SCOPE reads as absent, never as a hit', async ()
 
 test('getSource still refuses a missing id — a bug is not a degradation', async () => {
   await assert.rejects(() => store().getSource({}), /id is required/)
+})
+
+// ═══ ⭐⭐⭐ D1 PHASE 3 · MANDATORY WRITER IDENTITY ═══════════════════════════════════════════════════════════════
+//
+// Ote, 2026-09-16: *"Make the store refuse both writes and memory-semantic mutations when writer is absent… rewrite
+// W1 and memory-store-contract.test.mjs to assert refusal rather than admitted-and-cleaned behaviour."*
+//
+// ⭐ These are the REFUSAL tests. Their subject IS the writer axis, so they pass no writer on purpose — and they assert
+// that nothing reaches the database, which is what makes "no durable undeclared row" a property rather than a promise.
+
+test('P3 · ⭐⭐⭐ a WRITE with no declared writer is REFUSED — and never reaches the database', async () => {
+  const { db, calls } = fakeDb()
+  const s = createSequelizeMemoryStore({ db, userId: 'u1' })
+  await assert.rejects(() => s.create({ kind: 'semantic', content: 'x' }), (e) => e.code === 'NO_WRITER')
+  assert.equal(calls.create.length, 0, '⛔ the refusal must happen BEFORE the insert, not after it')
+})
+
+test('P3 · ⭐⭐ a MEMORY-SEMANTIC MUTATION with no declared writer is REFUSED — forget, invalidate, supersede, pin', async () => {
+  const { db, calls } = fakeDb()
+  const s = createSequelizeMemoryStore({ db, userId: 'u1' })
+  for (const patch of [{ expired_at: new Date() }, { invalid_at: new Date() }, { supersedes_id: 'x' }, { pinned: true }]) {
+    await assert.rejects(() => s.update(['id-1'], patch), (e) => e.code === 'NO_WRITER', JSON.stringify(patch))
+  }
+  await assert.rejects(() => s.markContradicted({ id: 'id-1', byMessageId: 'm1' }), (e) => e.code === 'NO_WRITER')
+  assert.equal(calls.update.length, 0, '⛔ nothing reached the database')
+})
+
+test('P3 · ⭐⭐⭐ …but BOOKKEEPING is NOT gated — recall promotes to hot through the SAME method, and reading must still work', async () => {
+  const { db, calls } = fakeDb()
+  const s = createSequelizeMemoryStore({ db, userId: 'u1' })
+  // ⚠️ THIS IS THE TEST THAT STOPS THE GATE BEING PUT ON THE METHOD. `recall` ends in
+  // `store.update(ids, { tier: 'hot' })` — gate the method and every read from a read-only store throws.
+  assert.equal(await s.update(['id-1'], { tier: 'hot' }), 1)
+  assert.equal(await s.update(['id-1'], { slot_embedding: [0.1] }), 1)
+  assert.equal(calls.update.length, 2, 'both bookkeeping patches reached the database')
+})
+
+test('P3 · a DECLARED write is admitted exactly as before — the gate fires on the absence, ⛔ not on writes in general', async () => {
+  const { db, calls } = fakeDb()
+  const s = createSequelizeMemoryStore({ db, userId: 'u1', writer: WRITER.operator, act: { kind: ACT_KIND.operator, id: 'zz_contract' } })
+  await s.create({ kind: 'semantic', content: 'x' })
+  assert.equal(calls.create.length, 1)
+  assert.equal(calls.create[0].writer, 'operator')
 })

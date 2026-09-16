@@ -33,6 +33,14 @@ import { initSettings } from '../../Backend/app/settings/index.js'
 import { buildRetention, RETENTION_STATE, KINDS } from '../../Backend/app/components/retention-host.js'
 import { effected } from '../../Backend/app/components/retention-followthrough.js'
 import { buildMemoryToolService } from '../../Backend/app/components/memory-pipeline-host.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_retention_receipt_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker('retention-receipt')
 const config = loadConfig()
@@ -59,7 +67,7 @@ const [convo] = await q(
 // it happens in, or it cannot establish that it is not the very act that declared or bound the
 // question. ⓘ In a real request this is the TURN KEY; an operator act names its own.
 const OCC = `zz_rcpt_consuming_${t}`
-const R = buildRetention(fastify, {
+const R = buildRetention(fastify, { ...ZZ_AXES,
   userId: me.id, self: { username: me.username }, conversationId: convo?.id ?? null, occasion: OCC,
 })
 
@@ -108,7 +116,7 @@ try {
   // ══ PART C · ⭐⭐⭐ ACCEPTED — produced by a REAL blocked lane, ⛔ not a stub ══════════════════════
   // ⭐ The lane is module-level in @ote/memory and keyed by (persona, userId), so a service built the SAME
   // way shares it. ⇒ this occupies the very queue `keep` is about to wait on.
-  const blocker = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room' })
+  const blocker = buildMemoryToolService(fastify, { ...ZZ_AXES, userId: me.id, author: 'account', scope: 'room' })
   const BLOCK_MS = 25_000
   const held = blocker.enqueue('zz_rcpt_block', () => new Promise((r) => { setTimeout(r, BLOCK_MS) }))
   const startedAt = Date.now()

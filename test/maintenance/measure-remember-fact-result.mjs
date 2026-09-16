@@ -13,6 +13,14 @@ import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
 import { buildMemoryToolService } from '../../Backend/app/components/memory-pipeline-host.js'
 import { devPg, devSchema } from '../harness.mjs'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_measure_remember_fact_result_${Date.now()}` } }
+
 
 const config = loadConfig()
 const db = await initDB(); setDB(db); await initSettings(db)
@@ -28,7 +36,7 @@ const t = Date.now()
 const ATTR_OK = `zz_rf_${t}`
 const CANARY = 'build tag for this cycle'
 
-const mem = buildMemoryToolService(fastify, { userId: me.id, author: 'account', scope: 'room' })
+const mem = buildMemoryToolService(fastify, { ...ZZ_AXES, userId: me.id, author: 'account', scope: 'room' })
 
 // ⭐ EXACTLY what `PortableComponents/Packages/Memory/index.js:113` hands back from the tool handler.
 const a = mem.reconcileFactAsync({ entity: 'user', attribute: ATTR_OK, value: 'probe' })

@@ -24,6 +24,14 @@ import { initDB } from '../../Backend/database/index.js'
 import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
 import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_memory_author_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker()
 const ok = (c, l, d = '') => check(l, c, d)
@@ -70,14 +78,14 @@ try {
   }
 
   // ── A · an ACCOUNT-authored write. The status quo, unchanged. ───────────────────────────────────
-  const acctStore = createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev })
+  const acctStore = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: PERSONA, userId: users.agent_dev })
   const a = await mk(acctStore)
   const [aRow] = await Q('SELECT author, user_id::text, subject_person_id::text FROM persona_sotera.txn_memories WHERE id=:id', { id: a.id })
   ok(aRow.author === 'account', "A · ⭐ the default writer produces author='account'", aRow.author)
   ok(aRow.user_id === users.agent_dev, 'A · …and the row still belongs to the room, exactly as before')
 
   // ── P · a PERSONA-authored write, in the SAME room ──────────────────────────────────────────────
-  const personaStore = createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev, author: 'persona' })
+  const personaStore = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: PERSONA, userId: users.agent_dev, author: 'persona' })
   const p = await mk(personaStore, { content: 'zz_test author axis — hers' })
   const [pRow] = await Q('SELECT author, user_id::text FROM persona_sotera.txn_memories WHERE id=:id', { id: p.id })
   ok(pRow.author === 'persona', "P · ⭐⭐ a writer that declares itself produces author='persona' — the axis exists", pRow.author)
@@ -100,15 +108,15 @@ try {
 
   // ── G · the guard on the constructor ────────────────────────────────────────────────────────────
   let threw = null
-  try { createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev, author: 'sotera' }) } catch (e) { threw = e }
+  try { createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: PERSONA, userId: users.agent_dev, author: 'sotera' }) } catch (e) { threw = e }
   ok(threw instanceof TypeError, 'G · ⭐ an unknown author FAILS LOUDLY — a silently-corrected author is the bug this column ends', threw?.message)
-  ok(createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev }) && true,
+  ok(createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: PERSONA, userId: users.agent_dev }) && true,
     'G · …and omitting it is legal, because the default is the safe value')
 
   // ── Z · ⛔⛔ NO READ WAS WIDENED. The promise that gets forgotten, asserted instead. ─────────────
   // Her row was formed in agent_dev's room. From agent_dev_alt — a DIFFERENT room of the SAME person —
   // it must still be invisible, because the constraint stage that would govern crossing does not exist.
-  const altStore = createSequelizeMemoryStore({ db, persona: PERSONA, userId: users.agent_dev_alt })
+  const altStore = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: PERSONA, userId: users.agent_dev_alt })
   const seenFromAlt = await altStore.findVisible({})
   ok(!seenFromAlt.some((r) => r.id === p.id),
     'Z · ⭐⭐ a persona-authored row is NOT yet visible from another room — 015 added the axis and widened NOTHING',

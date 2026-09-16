@@ -26,6 +26,14 @@ import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-
 import { createSlotStore } from '../../Backend/app/components/memory-slot-store-host.js'
 import { createMemoryV2Service } from '@ote/memory/cognition/memory-v2-service.js'
 import { declareQuestion, proposeBind, confirmBind } from '../../Backend/app/components/memory-declaration-host.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_declaration_transport_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker()
 loadConfig()
@@ -60,7 +68,7 @@ try {
   if (!u) throw new Error('agent_dev not found — this check must never run as root')
   userId = u.id
 
-  const realStore = createSequelizeMemoryStore({ db, persona: null, userId, occasion: OCC })
+  const realStore = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: null, userId, occasion: OCC })
   // ⭐ BOUNDARY SPY — wraps the real store and records the row `reconcileFact` handed it. It DELEGATES,
   // so what is asserted below is the row that genuinely went on to be written, ⛔ not a stub's echo.
   const seen = []

@@ -29,6 +29,14 @@ import {
 } from '../../Backend/app/components/memory-declaration-host.js'
 import { checkKind, KIND_OUTCOME } from '../../Backend/app/components/memory-kind-precondition.js'
 import { evaluate, OUTCOME } from '../../Backend/app/components/memory-question-checks.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_declaration_rp_register_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker()
 loadConfig()
@@ -85,7 +93,7 @@ try {
   const [u] = await Q(`SELECT id::text FROM "${schema}"."mst_users" WHERE username = 'agent_dev'`)
   if (!u) throw new Error('agent_dev not found — this check must never run as root')
   userId = u.id
-  const store = createSequelizeMemoryStore({ db, persona: null, userId, occasion: OCC })
+  const store = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: null, userId, occasion: OCC })
   const write = async (slotId, claimKind, extra = {}) => {
     const r = await store.create({
       kind: 'semantic', namespace: 'default', content: `zz_rpreg ${claimKind ?? 'none'}`,
@@ -226,7 +234,7 @@ try {
 
   // ══ RP-D3 · NO ORIGIN OF THIS WORK TOUCHES REACHABILITY ═════════════════════════════════════════
   const visibleFor = async (uid) => {
-    const s = createSequelizeMemoryStore({ db, persona: null, userId: uid })
+    const s = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: null, userId: uid })
     return JSON.stringify((await s.findVisible({})).map((r) => r.id).sort())
   }
   const accounts = await Q(`SELECT id::text FROM "${schema}"."mst_users" WHERE username IN ('agent_dev','ote','hermes')`)

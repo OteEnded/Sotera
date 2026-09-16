@@ -29,6 +29,14 @@ import { createSlotStore } from '../../Backend/app/components/memory-slot-store-
 import { createMemoryV2Service } from '@ote/memory/cognition/memory-v2-service.js'
 import { declareQuestion, proposeBind, confirmBind, resolveSlotQuestion } from '../../Backend/app/components/memory-declaration-host.js'
 import { checkConsumingOccasion } from '../../Backend/app/components/memory-bind-rules.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_declaration_self_authorisation_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker('declaration-self-authorisation')
 loadConfig()
@@ -67,7 +75,18 @@ const MADE = { memories: [], slots: [], messages: [], convo: null }
  * ⇒ a named operator occasion travels the store's construction-scoped `occasion` instead.
  */
 const writer = (userId, { turn = null, operatorOccasion = null } = {}) => {
-  const store = createSequelizeMemoryStore({ db, persona: null, userId, occasion: turn ?? operatorOccasion })
+  // ⭐⭐ D1 PHASE 3 · THE AXES FOLLOW THE ORIGIN, ⛔ NOT A BLANKET CONSTANT.
+  // ⚠️ A flat `{ ...ZZ_AXES }` here broke this check's own subject: tests 3 and 5 exist to prove an OCCASION-LESS write
+  // is refused, and handing every store an act meant there was no longer an occasion-less case to refuse. ⇒ the WRITER
+  // is declared always (Phase 3 requires it), and the ACT is declared only when there IS an occasion — which is exactly
+  // the distinction this check measures.
+  const act = turn ? { kind: ZZ_ACT_KIND.turn, id: turn }
+    : operatorOccasion ? { kind: ZZ_ACT_KIND.operator, id: operatorOccasion }
+      : null
+  const store = createSequelizeMemoryStore({
+    db, persona: null, userId, occasion: turn ?? operatorOccasion,
+    writer: turn ? ZZ_WRITER.chatTool : ZZ_WRITER.operator, act,
+  })
   const slotStore = createSlotStore({ db, persona: null, userId })
   return createMemoryV2Service({ store, slotStore, persona: null, userId, sourceMessageId: turn })
 }

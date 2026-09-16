@@ -13,6 +13,7 @@ import { extractFile, MAX_FILES } from '../../files/extract.js'
 import { toolDefinitions, runTool, buildToolContext, resolveSkill, listSkills, memoryToolNames, attachLogger, attachToolAudit } from '../../components/runtime.js'
 // ⭐ Attribution live detection (D11–D14): an advisory MEASUREMENT instrument that scans the persisted turn — never a gate.
 import { recordAttributionTurn, inScope as attributionInScope } from '../../components/attribution-live-detection.js'
+import { WRITER, ACT_KIND } from '../../components/memory-writer-contracts.js'
 import { readSkillFile } from '../../components/skill-store.js'
 // ⭐ S1: the turn's toolset is assembled in ONE place, for the bound Skill and the triggered one alike.
 import { assembleToolDefs, MEMORY_WRITE_TOOLS } from '../../chat/tool-defs.js'
@@ -3980,6 +3981,14 @@ export default async function chatSiteRoutes(fastify) {
     const mem = buildMemoryV2(fastify, {
       userId: ownerIdOf(request.user, 'this memory'),
       actor: 'user', // a person pressed delete — distinct from 'model' and from the decay pass
+      // ⭐⭐⭐ D1 PHASE 3 · `person`, ⛔ NOT `admin` — Ote's ruling, 2026-09-16, option (b):
+      // *"admin = root/operator acting through admin surface; person = account holder acting on their own memory.
+      //  Do not use writer: admin for the chat deletion."*
+      // ⇒ this is the account holder deleting THEIR OWN memory, and that difference is worth keeping at the one point
+      // where it is free to record. ⓘ The act is the same kind as admin's because the OCCASION is the same mechanism —
+      // an HTTP request, identified by its own id. The actor distinction rides on the WRITER, never on the act.
+      writer: WRITER.person,
+      act: { kind: ACT_KIND.request, id: String(request.id) },
     })
     const res = await mem.forget({ id: request.params.id })
     if (!res.forgotten) return reply.code(404).send({ error: { code: 'not_found', message: 'Memory not found' } })

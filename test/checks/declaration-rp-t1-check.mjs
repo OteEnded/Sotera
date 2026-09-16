@@ -25,8 +25,16 @@ import { setDB, loadConfig } from '../../Backend/lib/utility.js'
 import { initSettings } from '../../Backend/app/settings/index.js'
 import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
 import {
+
   declareQuestion, proposeBind, confirmBind, currentBinding,
 } from '../../Backend/app/components/memory-declaration-host.js'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_declaration_rp_t1_check_${Date.now()}` } }
 
 const { check, done } = makeChecker()
 loadConfig()
@@ -77,7 +85,7 @@ try {
     { uid: u.id, label: LABEL })
   slotId = s.id
 
-  const store = createSequelizeMemoryStore({ db, persona: null, userId: u.id, occasion: OCC })
+  const store = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: null, userId: u.id, occasion: OCC })
   const admit = async (claimKind, marker) => {
     const r = await store.create({
       kind: 'semantic', namespace: 'default', content: `zz_rpt1 ${marker}`,

@@ -47,25 +47,37 @@ const rowOf = async (id) => one(`SELECT writer, act_kind::text AS act_kind, act_
 const fired = (rep, rule) => (rep.owners ?? []).flatMap((o) => o.findings ?? []).filter((f) => f.rule === rule).map((f) => f.id)
 
 try {
-  // ══ W1 · an UNDECLARED write is ADMITTED — this is (b), ⛔ not (a) ═══════════════════════════════════════════════
-  const bare = buildMemoryV2(fastify, { userId: agent.id })            // ⛔ no writer, no act, no reach — today's legal call
-  const w1 = M(await bare.remember({ content: `${MARK} a row written with no declared writer`, kind: 'semantic' }))
-  const r1 = w1?.id ? await rowOf(w1.id) : null
-  check('W1 · ⭐ a write with NO declared writer is ADMITTED and the row exists — Phase 1 breaks no caller',
-    !!w1?.id && r1?.writer === null, JSON.stringify(r1))
+  // ══ W1 · ⭐⭐⭐ D1 PHASE 3 · AN UNDECLARED WRITE IS NOW *REFUSED* ══════════════════════════════════════════════════
+  //
+  // ⚠️⚠️ THIS ASSERTION WAS INVERTED ON 2026-09-16, AND THAT IS THE POINT OF THE WHOLE ARC.
+  //   Phase 1 (09-15, Ote's ruling (b)): *admit* the write, record the absence loudly. W1 asserted the row EXISTED.
+  //   Phase 3 (09-16, after the pre-flip audit measured ZERO production undeclared writes): the store REFUSES.
+  // ⛔ The old assertion is not kept "for history" — a test that asserts admitted behaviour under a refusing store
+  // would be asserting a lie. What it proved is preserved in `AI_ProgressTracking.md` and the audit.
+  // ⭐ Ote: *"There must be no intentional test path where missing writer produces a durable memory row."* ⇒ this test
+  // now proves the ABSENCE of a row rather than cleaning one up afterwards.
+  const bare = buildMemoryV2(fastify, { userId: agent.id })            // ⛔ no writer, no act, no reach — now illegal
+  let refusal = null
+  try { refusal = await bare.remember({ content: `${MARK} a row written with no declared writer`, kind: 'semantic' }) } catch (e) { refusal = e }
+  const leakedW1 = await one(`SELECT id::text AS id FROM ${S}."txn_memories" WHERE user_id = $1::uuid AND content LIKE '${MARK} a row written with no declared writer%'`, [agent.id])
+  check('W1 · ⭐⭐⭐ a write with NO declared writer is REFUSED — and NO row exists afterwards',
+    !leakedW1?.id && (refusal?.code === 'NO_WRITER' || refusal?.ok === false || /NO_WRITER|no declared writer/i.test(String(refusal?.message ?? refusal?.error ?? ''))),
+    JSON.stringify({ refusal: String(refusal?.code ?? refusal?.message ?? JSON.stringify(refusal)).slice(0, 120), leaked: leakedW1?.id ?? null }))
 
-  // ══ W2 · …and the store SAID SO, at write time, with enough to find the caller ═══════════════════════════════════
-  const warned = said.filter((s) => /writer/i.test(String(s.m)))
-  check('W2 · ⭐⭐ the store logged the absence LOUDLY — a warn naming the memory and what it could not attribute',
-    warned.length > 0 && warned.some((s) => s.o?.id === w1.id || s.o?.memoryId === w1.id),
-    warned.length ? `${warned.length} warn(s): ${String(warned[warned.length - 1].m).slice(0, 110)}` : 'the store said NOTHING')
+  // ══ W2 · …and the refusal SAYS WHY, with enough to find the caller ═══════════════════════════════════════════════
+  const warned = said.filter((s) => /writer/i.test(String(s.m ?? '')) || /NO_WRITER|no declared writer/i.test(String(s.o?.err ?? '')))
+  check('W2 · ⭐⭐ the refusal is AUDIBLE — a silent drop and a refusal must not look alike',
+    warned.length > 0 || /no declared writer/i.test(String(refusal?.message ?? '')),
+    warned.length ? `${warned.length} line(s): ${String(warned[warned.length - 1].m ?? warned[warned.length - 1].o?.err).slice(0, 110)}` : `error: ${String(refusal?.message ?? '').slice(0, 110)}`)
 
   // ══ W3 · the standing lint reports it as a DEFECT ═══════════════════════════════════════════════════════════════
-  const lint = await lintMemory(db, { userId: agent.id })
+  const lint = await lintMemory(db, {})
   const rule = (lint.rules ?? []).find((r) => r.id === 'writer-not-declared')
   check('W3a · the rule EXISTS and is a defect — ⛔ zero is a result, a missing rule is not', !!rule && rule.severity === 'defect', rule ? rule.severity : 'rule absent')
-  check('W3b · ⭐⭐⭐ the undeclared row is REPORTED — the leak is visible without anyone remembering to look',
-    fired(lint, 'writer-not-declared').includes(w1.id))
+  // ⭐ The rule still has work to do AFTER the flip: it is the only guard on the raw-SQL paths the store cannot see,
+  // and on the frozen historical rows. ⛔ Ote kept it at `defect` severity for exactly that reason.
+  check('W3b · ⭐⭐ the rule still REPORTS the frozen historical residue — the store gate does not cover raw SQL',
+    fired(lint, 'writer-not-declared').length > 0, `${fired(lint, 'writer-not-declared').length} row(s) still reported`)
 
   // ══ W4 · ⛔ a RATIFIED historical unknown stays QUIET — the rule separates the two absences ═══════════════════════
   const hist = await one(`SELECT m.id::text AS id FROM ${S}."txn_memories" m
@@ -89,10 +101,30 @@ try {
   check('W5 · a DECLARED write is not reported — the rule fires on the absence, ⛔ not on writes in general',
     !fired(lint5, 'writer-not-declared').includes(w5.id))
 
-  // ══ W6 · ⛔ NOTHING WAS REPAIRED — Ote: "preserve them exactly as written" ═══════════════════════════════════════
-  const after = await rowOf(w1.id)
-  check('W6 · ⭐⭐ the undeclared row is UNCHANGED after being reported — reporting is not repair (M2)',
-    after?.writer === null && after?.act_kind === null && after?.reach_kind === null, JSON.stringify(after))
+  // ══ W5b · ⭐⭐⭐ D1 PHASE 3, Ote's item 2 — A MUTATION IS AN AUTHORED ACT TOO, ⛔ not only an insert ═══════════════
+  // ⚠️ It has to be attempted on a REAL row: `forget` looks the target up first and returns early when there is none,
+  // so a made-up id never reaches the gate — the first version of this check passed vacuously for that reason.
+  let mutRefusal = null
+  try { mutRefusal = await bare.forget({ id: w5.id }) } catch (e) { mutRefusal = e }
+  const stillLive = await one(`SELECT (expired_at IS NULL AND invalid_at IS NULL) AS live FROM ${S}."txn_memories" WHERE id = $1::uuid`, [w5.id])
+  check('W5b · a FORGET with no declared writer is REFUSED — and the row it targeted is untouched',
+    (mutRefusal?.code === 'NO_WRITER' || /NO_WRITER|no declared writer/i.test(String(mutRefusal?.message ?? ''))) && stillLive?.live === true,
+    JSON.stringify({ refusal: String(mutRefusal?.code ?? mutRefusal?.message ?? JSON.stringify(mutRefusal)).slice(0, 110), stillLive: stillLive?.live }))
+
+  // ══ W5c · ⛔ …but BOOKKEEPING is NOT gated — recall's promotion runs through the same method ══════════════════════
+  // ⭐ The gate keys on the FIELDS being patched, not on the method, because `recall` ends in
+  // `store.update(ids, { tier: 'hot' })`. Gate the method and reading stops working — this is what stops that regression.
+  let recalled = null
+  try { recalled = await bare.recall({ query: `${MARK} they keep bees`, limit: 3 }) } catch (e) { recalled = e }
+  check('W5c · ⭐⭐ a RECALL from an undeclared store still works — the gate is on belief changes, ⛔ not on cache state',
+    !(recalled instanceof Error), recalled instanceof Error ? String(recalled.message).slice(0, 120) : `${recalled?.memories?.length ?? recalled?.matches?.length ?? 0} hit(s)`)
+
+  // ══ W6 · ⛔ THE HISTORICAL RESIDUE IS UNCHANGED — Ote, at every phase: "do not repair historical undeclared rows" ══
+  // ⭐ Re-pointed at a REAL historical row when Phase 3 removed W1's fixture: the flip refuses new undeclared writes,
+  // and it must NOT have touched the old ones. `hist` is a row the 049 backfill ratified as a permanent unknown.
+  const after = hist?.id ? await rowOf(hist.id) : null
+  check('W6 · ⭐⭐ a historical undeclared row is UNCHANGED by the flip — refusing new writes is not repairing old ones',
+    !!after && after.writer === null && after.act_kind === null, JSON.stringify(after))
 
   // ══ PHASE 2 · the enumerated callers now declare themselves ═════════════════════════════════════════════════════
   const retention = buildRetention(fastify, { userId: agent.id, conversationId: cid, isRoot: false, user: { id: agent.id, isRoot: false } })

@@ -35,6 +35,14 @@ import { initSettings } from '../../Backend/app/settings/index.js'
 import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
 import { onlyInsideQuotes, quotedRegions } from '../../Backend/app/components/memory-ownership-boundary.js'
 import { readFileSync } from 'node:fs'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_reproduced_boundary_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker('reproduced-boundary')
 loadConfig()
@@ -96,7 +104,7 @@ try {
 
   // ══ THE STORE, END TO END, ON THE REAL TURNS ════════════════════════════════════════════════════
   const write = async (sourceText, row) => {
-    const store = createSequelizeMemoryStore({ db, persona: null, userId: me.id, sourceText })
+    const store = createSequelizeMemoryStore({ ...ZZ_AXES, db, persona: null, userId: me.id, sourceText })
     const r = await store.create({
       kind: 'semantic', importance: 5, source: 'zz_relay', entity: 'user',
       content: `zz_relay ${row.attribute}`, ...row,

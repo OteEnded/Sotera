@@ -17,6 +17,14 @@
 // ⚠️ Every assertion reads the database. No return values, no HTTP statuses.
 
 import { makeChecker, devPg, devSchema } from '../harness.mjs'
+import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
+
+// ⭐ D1 PHASE 3 (Ote, 2026-09-16): the store now REFUSES a write or a memory-semantic mutation with no declared
+// writer. This check drives the store DIRECTLY, as an operator would, so it declares the axes it was already
+// exercising — *"test/check → declares the writer/act/reach it claims to exercise."* ⛔ Spread FIRST, so any call
+// that declares its own writer still wins.
+const ZZ_AXES = { writer: ZZ_WRITER.operator, act: { kind: ZZ_ACT_KIND.operator, id: `zz_memory_subject_write_check_${Date.now()}` } }
+
 
 const { check, done } = makeChecker()
 const db = devPg(); await db.connect()
@@ -67,7 +75,7 @@ try {
   // stub has to answer that too. Stubbing a Sequelize model always ends up here: the seam is honest
   // about what it needs, and each missing method is a real dependency being named out loud.
   db2.txn_memories.getTableName = () => ({ schema: S, tableName: 'txn_memories' })
-  const store = createSequelizeMemoryStore({ db: db2, persona: 'sotera', userId: owner.id })
+  const store = createSequelizeMemoryStore({ ...ZZ_AXES, db: db2, persona: 'sotera', userId: owner.id })
 
   // ── 1 · EXPLICIT SUBJECT wins ───────────────────────────────────────────────────────────────────
   const a = await store.create({ kind: 'semantic', entity: 'zz_priya', content: 'zz_test_ Priya is sharp about root causes.', subject_person_id: priya.id })
