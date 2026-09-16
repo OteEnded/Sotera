@@ -9706,3 +9706,52 @@ different from *"there is no earlier context"* — and a future session must not
 
 Verification: unit **753/753** · evidence baseline green · evidence-projection, memory-cognition and
 attribution-guard green · 22 scans, 5 candidates, 4 still unreviewed · both armed collisions intact.
+
+---
+
+## 2026-09-17 · the `unknown` investigation — the hypothesis inverted
+
+Evidence only. Nothing fixed, no tool description, prompt, resolver, alias or row touched; A1 still shadow,
+A-D4 still open.
+
+**It is not 29% of the corpus. It is 23 labels, amplified.** A pair is `unknown` if *either* side is unreadable,
+so one bad label contaminates every pair it appears in — a mean of 42 each. 21.3% of labels poison 29% of pairs,
+and all 23 are real (zero `zz` fixtures). The whole problem fits on one screen.
+
+⭐⭐⭐ **The extractor is the best-behaved writer in the corpus, by an order of magnitude: 1 of 27 = 3.7%.** The
+unreadable labels come from **`chat-tool` — Sotera naming her own memories through `remember_fact` — at 11 of 26
+= 42.3%**, and from `reflection` at 4 of 12.
+
+⭐⭐ **And the cause is a sentence we wrote.** `remember_fact`'s description promises: *"it finds the existing
+fact for this slot — **even if you word the attribute differently than before** — and updates it in place."* The
+tool explicitly tells her attribute wording does not matter, so she names descriptively. She is behaving exactly
+as instructed. ⚠️ That promise is false in **both** directions — A1 showed the resolver over-merges (`schedule` ⊂
+`work schedule` at containment 1.0000), and this shows it cannot relate 23 labels at all. The upstream cause is
+a capability claim in a tool description that the resolver does not have. ⛔ Left alone: changing it is model
+steering *and* a behaviour change.
+
+**The split Ote asked for, answered:** 4 of 23 are genuinely malformed — coordinations like
+`occupation_and_location`, where one slot is asked to hold two answers. **19 of 23 are legitimate observations
+wearing a descriptive title** (`"nature of relationship"` → *"Ote is my father"*). **0 of 23 are ontology
+questions** — not one is a `"primary language"` vs `"first language"` problem. ⇒ the resolver is not what needs
+work here, and forcing the 19 into head-final property names would be *lossy*, not corrective. That is a
+question about what a slot is for.
+
+On whether naming costs merges: adjacent pairs exist (`"response to thank you"` / `"response to appreciation"`
+are the same observation about the same person, and neither is readable, so the ontology is never asked) — ⚠️ but
+even renamed head-final those two resolve to `sibling`, not `same`. Better naming buys **the question**, not
+automatically **the merge**. Anyone citing that should cite the caveat with it.
+
+ⓘ 886 → 976 is the **analyser** getting more honest between the two runs (B-D2 added wh-words and split
+`compound-phrase` out of `script-unsupported`), not the corpus getting worse. Recorded because an unexplained
+moving number is exactly what this project keeps getting burned by.
+
+⚠️ **Four defects in my own instruments, all found and three fixed during this pass** — recorded in the report's
+§7 because the pattern is now the point: `"nature/origin"` reported as `script-unsupported` when the cause is a
+slash (third dishonest-reason case, left unfixed as evidence); my shape classifier matched the raw label so
+`how_to_be_stored` found no boundary inside `_to_` and **five labels were misfiled by my own instrument while it
+was being used to judge someone else's naming**; `[^\x20-\x7E]` also matches an em-dash so dash-joined labels
+were filed as non-Latin script; and my first adjacency criterion was strict enough to return **zero** pairs
+including one I had already spotted by eye.
+
+Verification: unit **753/753** · evidence baseline green · 112 slots · 8 aliases · both armed collisions intact.

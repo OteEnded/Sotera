@@ -247,8 +247,23 @@ A/B        ✅ **A3 · A2 · A1(shadow) · B1/B2 ALL LANDED 09-16.** :8210 on th
               **BROADER** (it could mean a spoken language). ⛔ I did not bend the classifier to match R3.
               RFC §5's 4-way tie breaks to 1 `same` + 3 `broader`. 16 over-bindings corpus-wide (4 real),
               **every one at containment exactly 1.0000** ⇒ ⛔ NOT threshold-edge cases. ZERO under-bindings.
-              ⚠ `unknown` = 886/3,368 (26%) — mostly `function-word`, i.e. attribute labels that are PHRASES.
-              ⇒ **Ote: that is an EXTRACTOR NAMING problem and the fix belongs UPSTREAM, not in the resolver.**
+              ✅ **`unknown` INVESTIGATED 09-17 — THE HYPOTHESIS INVERTED.** `INVESTIGATION_SOTERA_UNKNOWN_LABELS.md`
+                 ⛔ evidence only, nothing fixed, no tool/prompt/resolver change.
+                 ⭐ NOT 29% of the corpus — **23 LABELS** (21.3%) amplified across 976 pairs, ~42 pairs each.
+                    All 23 are REAL; zero `zz` fixtures. The whole problem fits on one screen.
+                 ⭐⭐⭐ **THE EXTRACTOR IS THE BEST-BEHAVED WRITER: 1 of 27 = 3.7%.** `chat-tool` (HER OWN
+                    `remember_fact`) = **11 of 26 = 42.3%** · `reflection` = 4 of 12 = 33.3%.
+                 ⭐⭐ CAUSE IS A SENTENCE WE WROTE — `remember_fact`'s description promises *"it finds the
+                    existing fact for this slot — EVEN IF YOU WORD THE ATTRIBUTE DIFFERENTLY than before"*.
+                    She names descriptively because she was told it is safe. ⚠ That promise is FALSE BOTH WAYS:
+                    A1 showed it OVER-merges (containment 1.0000); this shows it cannot relate 23 labels at all.
+                    ⛔ NOT changed — a tool description is model steering AND a behaviour change.
+                 ⭐ THE SPLIT: 4 of 23 genuinely MALFORMED (coordinations — `occupation_and_location` — a slot
+                    cannot hold two answers) · 19 of 23 are LEGITIMATE OBSERVATIONS wearing a descriptive title
+                    (`"nature of relationship"` → *"Ote is my father"*) · **0 of 23 are ONTOLOGY questions.**
+                    ⇒ ⛔ the resolver is NOT what needs work; forcing the 19 into property names would be LOSSY.
+                 ⓘ 886→976 is the ANALYSER getting more honest (B-D2 added wh-words + compound-phrase),
+                    ⛔ not the corpus getting worse.
               ⚠ 2nd armed collision found: `deploy schedule` → `work schedule` is NARROWER. Left armed.
            ⭐⭐⭐ B EXPOSED A THIRD DEFECT, worse than the one we set out to fix: the window was `rolling_id`
               arithmetic and **rolling_id is ONE GLOBAL SEQUENCE**, so any interleaved conversation collapsed
