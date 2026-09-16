@@ -273,6 +273,29 @@ PROVENANCE   ✅ D3′ / D8 / D9 ALL RULED AND DONE 09-16. ⏸ ONLY THE PHASE-3 
                  (model-tool-claim-kind · retention-receipt · m2-rollback · writer-seam · memory-lineage) · :8210 200 ·
                  no foreign work overwritten, no existing commit rewritten.
                  ⓘ The two previously load-bearing-and-UNCOMMITTED behaviours are now committed (commits 2 and 3).
+⭐⭐ NEXT MILESTONE · COGNITIVE E2E VALIDATION — `PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md`.
+  ✅ PROVEN LIVE 09-16: conversation → formation (`remember_fact` UNPROMPTED) → durable (all 4 axes) → later
+    conversation → automatic retrieval (NO tool call) → correction → supersession → correct current answer.
+    The Mira chain on agent_dev is the worked fixture — KEEP until validation completes (his instruction).
+  ⚠ REGISTERED BUT IDLE: reflection cron (20 min) + noticing (15 min) are live; reflection is STARVED —
+    `scanned=307 reflected=0 skipped={thin:230, probe:68, empty:6, memory-off:1, unchanged:2}`.
+  ⛔⛔ DREAMING CANNOT WRITE, AND IT IS NOT A FLAG: `runOnePass` THROWS unless `dryRun===true`
+    (*"M1 runs dryRun only — it cannot commit"*). M1 is THE INSTRUMENT, NOT THE REASONER — no model call, no claim.
+  ⭐⭐ AND THERE ARE **TWO** DREAMINGS (O-8): shipped = CONSOLIDATION (compress, REPLACES inputs, cards,
+    `consolidateEnabled` false, 0 cards ever) vs designed = the M-SERIES (commit, ADDS beside, 6 modules with
+    **0 production imports**, `dreamingEnabled` unset, 5 passes / 0 memories). ⚠ They run in OPPOSITE directions:
+    shipped order is reflection→consolidation; Ote's diagram (Dreaming→reflection) is the DESIGNED arc.
+  ⏸ 5 DECISIONS ARE HIS (plan §6): which Dreaming · may it write · commission the M2 reasoner or DEFER ·
+    milestone scope · (D10 + prefill stay separate tracks). ⭐ My recommendation: **defer Dreaming E2E** (it is a
+    DESIGN milestone, not a validation one) and **run the DIRECT-loop validation now**, which exercises the live
+    reflection lane. ⛔ NO switch changed, `dryRun` UNTOUCHED, no architecture expanded.
+  ⭐ ELIGIBILITY, measured: not incognito · **not probe-marked** · memory on · ≥ **4 messages** · **30 min quiet** ·
+    new since last reflection. ⚠⚠ THE TRAP IS IN OUR OWN TOOLING: `test/harness.mjs` marks EVERY check conversation
+    `probe:true` (that is the 68); `ask-sotera.mjs` sets `probe:false` ⇒ a validation run MUST use the opting-out
+    path or it exercises nothing. For a MEANINGFUL pass: 8–12 messages, ≥2 durable facts + 1 correction.
+  ⭐ D10, NARROW (his words): *she CAN voluntarily form memories when a conversation contains an explicit durable
+    fact; we do NOT know whether she notices the right things in relational/emotional conversations.*
+
 ⭐ THE PROVENANCE ARC'S DECISION LIST IS NOW EMPTY. D1·D2·D3′·D4·D6·D7·D8·D9 all closed; R-C closed; attribution
   observation-only, its instrument watching. ⏸ Open: only the PERF to-do below and D10 (salience, research).
 

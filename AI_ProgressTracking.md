@@ -9165,3 +9165,46 @@ chain), ⛔ not just that a row appeared — today's Mira chain is the worked ex
 
 ⓘ Left in place: four probe memories on agent_dev (the Mira chain) as the first end-to-end lineage evidence. Removable on
 his word. ⏸ D10 and prefill/TTFT stay separate tracks.
+
+## 2026-09-16 (+07:00) — ⭐ DELIVERABLE · Dreaming production-path decision + Cognitive E2E validation plan
+
+`PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md`. ⛔ No switch changed, `dryRun` untouched, no architecture expanded,
+D1–D9 not reopened. The five states separated as he asked.
+
+**⛔⛔ I UNDERSTATED THE DREAMING GAP YESTERDAY AND THE CORRECTION MATTERS.** I reported *"the cron passes `dryRun: true`"*.
+The truth is stronger: **`runOnePass` THROWS unless `dryRun === true`** — *"refused: M1 runs dryRun only — it cannot
+commit, and a non-dry run has nothing to do."* Its header: *"M1: THE INSTRUMENT, NOT THE REASONER… creates no memory,
+calls no model."* ⇒ **there is no write path to enable.** "Enable Dreaming" is not a switch flip; it is building the stage
+that does not exist.
+
+**⭐⭐ AND THERE ARE TWO DREAMINGS** (`DECISION_SOTERA_O8_SHIPPED_VS_DESIGNED_DREAMING.md`, 08-29), neither of which runs:
+**shipped** = consolidation — compress, **REPLACES** its inputs, produces cards, `consolidateEnabled` false, **0 cards
+ever**. **designed** = the M-series — commit a claim no single item supports alone, **ADDS beside** its evidence,
+6 modules (`proposal` · `verify` · `reason-host` · `candidate-host` · `resolver` · `independence`) with **0 production
+imports**, `dreamingEnabled` unset, 5 passes / 0 memories. ⚠️ They run in OPPOSITE directions — the shipped order is
+`reflection → consolidation`, while Ote's diagram (`Dreaming → reflection`) is the designed arc's order. ⇒ **which
+Dreaming the milestone means is itself a decision.**
+
+**B · what must change** (enumerated, ⛔ not proposed): ① decide which Dreaming ② **a reasoner** — M1 formulates no claim,
+so without one Dreaming can only ever conclude "nothing to say" ③ lift M1's refusal (⛔ deliberate: it is what stops M1
+resolving an open question by accident) ④ a retention-decision seam — the retention machinery is proven, the JOIN is
+missing; ⓘ `WRITER.dreaming` is `pass:true` so a Dreaming write already **fails closed without an act**, and nothing
+mints one ⑤ register the cron, last and meaningless before ② and ③. ⇒ **Dreaming E2E is a DESIGN milestone, not a
+validation one** — validating it now would measure an instrument designed not to act.
+
+**C · eligibility, measured** from `reflection-lifecycle-host.js`: not incognito · **not probe-marked** · memory on ·
+**≥ 4 messages** · **30 minutes quiet** · new since the last reflection. ⚠️⚠️ **The trap he warned about is in our own
+tooling**: `test/harness.mjs` marks EVERY check conversation `probe: true` — that is the 68 skips — while
+`ask-sotera.mjs` deliberately sets `probe: false`. ⇒ a validation run must use the opting-out path or it exercises
+nothing. For a *meaningful* pass: 8–12 messages carrying ≥2 durable facts and one correction, so retention has something
+to choose between. ⓘ Worked check: today's Mira correction conversation (4 msgs, not probe-marked) becomes eligible 30
+min after its last turn; the formation conversation (2 msgs) is `thin`.
+
+**D · D10 kept narrow, in his words:** she CAN voluntarily form memories when a conversation contains an explicit durable
+fact; we do NOT know whether she notices the right things in relational/emotional conversations. Separate track.
+
+**Recommendation (his call, plan §6):** **defer Dreaming E2E** and **run the direct-loop validation now** — it exercises
+the live-but-starved reflection lane and produces the lineage inspection he asked for, while saying plainly that Dreaming
+is left out rather than pretending the diagram is complete.
+
+ⓘ The four fictional agent_dev Mira memories are KEPT as the worked E2E fixture, per his instruction.
