@@ -111,9 +111,48 @@ check('B2-② · ⭐⭐ `incomplete` EXISTS as its own fact, distinct from `part
 check('B2-③ · ⭐ the PROJECTION declares how it was built — centre, span, and what it covered',
   !!shelter?.projection?.window && Number.isFinite(shelter?.projection?.covered) && Number.isFinite(shelter?.projection?.ofSpan),
   JSON.stringify(shelter?.projection ?? null))
-check('B2-④ · ⛔ `incomplete` is DERIVED from the projection, never hand-set',
-  shelter && shelter.incomplete === (shelter.projection?.covered < shelter.projection?.ofSpan),
-  `incomplete=${shelter?.incomplete} covered=${shelter?.projection?.covered} of=${shelter?.projection?.ofSpan}`)
+// ⚠️ UPDATED FOR B-D2, and STRENGTHENED rather than relaxed. This used to assert the narrow derivation
+// (`covered < ofSpan`) and correctly went red when `incomplete` was widened to its ruled meaning —
+// STRUCTURAL INCOMPLETENESS OF WHAT WAS RETRIEVED, which includes the conversation extending past the window.
+check('B2-④ · ⛔ `incomplete` is DERIVED from the projection, never hand-set — BOTH causes',
+  shelter && shelter.incomplete === (shelter.projection.covered < shelter.projection.ofSpan
+    || shelter.projection.elidedBefore > 0 || shelter.projection.elidedAfter > 0),
+  `incomplete=${shelter?.incomplete} covered=${shelter?.projection?.covered}/${shelter?.projection?.ofSpan} elided=${shelter?.projection?.elidedBefore}+${shelter?.projection?.elidedAfter}`)
+
+// ── 4b · ⭐⭐⭐ B-D2 — `incomplete` MUST MEAN "what was retrieved is structurally incomplete" ─────────
+// ⚠️ THE DEFECT THIS SECTION EXISTS FOR, measured before it was written: an episode rendering **9 of 170
+// messages** reported `incomplete: false`, because the field only asked whether the window filled ITSELF.
+// ⇒ that is the shape of the contract satisfied while its semantics are violated — the exact failure family
+// this arc keeps finding. A 5% sample that declares itself complete is not a projection, it is a claim.
+//
+// ⭐ TWO CAUSES, ONE FACT, as ruled: `incomplete` is STRUCTURAL INCOMPLETENESS OF WHAT WAS RETRIEVED —
+//   ⓐ the window did not fill itself (a defect/capacity condition, rare)
+//   ⓑ the conversation extends beyond the window (the ordinary case, and the one that matters for Dreaming)
+// ⛔ It remains entirely distinct from `partial`, which is AUTHORIZATION and nothing else.
+const big = episodes.find((e) => (e.projection?.ofConversation ?? 0) > (e.projection?.covered ?? 0) + 2)
+check("B-D2-① · the projection declares the CONVERSATION extent, not only its own window",
+  episodes.every((e) => Number.isFinite(e.projection?.ofConversation)),
+  JSON.stringify(episodes.map((e) => `${e.projection?.covered}/${e.projection?.ofConversation}`)))
+check('B-D2-② · …and what it ELIDED on each side',
+  episodes.every((e) => Number.isFinite(e.projection?.elidedBefore) && Number.isFinite(e.projection?.elidedAfter)),
+  JSON.stringify(big?.projection ?? null))
+check('B-D2-③ · ⭐⭐⭐ a 9-of-170 view reports itself INCOMPLETE — ⛔ never `false`',
+  !!big && big.incomplete === true,
+  big ? `${big.id.slice(0, 11)} shows ${big.projection.covered} of ${big.projection.ofConversation} · incomplete=${big.incomplete}` : 'no multi-turn episode found')
+check('B-D2-④ · ⭐⭐ `incomplete` and `partial` are INDEPENDENT — a projection can be either, both, or neither',
+  episodes.some((e) => e.incomplete !== e.partial),
+  JSON.stringify(episodes.map((e) => `inc=${e.incomplete}/part=${e.partial}`)))
+
+// ── 4c · ⭐⭐ THE RENDERING — she must be able to SEE that there is more ──────────────────────────────
+// ⛔ A field she never reads changes nothing about her reasoning. Ote: *"the loss must be explicit and must
+// not be rendered as if it were ordinary conversation."*
+const block = out?.context ?? ''
+check('B-D2-⑤ · ⭐⭐⭐ the ELISION IS RENDERED — the block says turns were not shown',
+  /not shown|earlier turns|later turns/i.test(block),
+  block.split(String.fromCharCode(10)).filter((l) => /not shown|earlier turns|later turns/i.test(l)).slice(0, 2).join(' | ') || 'NO elision marker in the rendered block')
+check('B-D2-⑥ · ⭐ an ELISION reads differently from a WITHHELD gap — different epistemic states, different words',
+  !/said something here[\s\S]{0,40}not shown/i.test(block),
+  'elision and withholding must not share a sentence')
 
 // ── 5 · ⭐⭐⭐ B-D4 — A GAP MARKER MUST NEVER BE READABLE AS SPEECH ──────────────────────────────────
 // The attribution detector parses the rendered block for `X said to me:` to build its REQ_PRIOR_CONV source

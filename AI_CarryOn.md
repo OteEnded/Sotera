@@ -144,6 +144,18 @@ governance-READ decision. ⛔ Not reopened.
    programming language"` and `"schedule" ⊂ "work schedule"` are the SAME token test and OPPOSITE facts.
    ⇒ ⛔ never let a SHORTER phrase inherit a longer slot on subset alone; and ⛔ do not answer this with a
    threshold — cosine scored the same bad pair 0.9104. BOTH arms make it.
+⑯ ⭐⭐⭐ A SHAPE-SATISFYING CHECK IS NOT A SEMANTIC ONE (Ote, 09-16, after B). **The old implementation
+   could satisfy the SHAPE of the contract while violating the SEMANTIC contract** — and the instrument
+   failures this arc keeps hitting are all one family:
+     · `incomplete: false` on a view showing **9 of 170 messages** — true to its own narrow definition,
+       false to what the word MEANS.
+     · a source scan COUNTING `centreId`, inflated by a local named `centreIdx` (a name, not a use).
+     · `` written as a LITERAL BACKSPACE by a shell layer — TWICE now — so a regex matched nothing.
+     · a red-proof calling `recollect({ asked })` when the parameter is `text` ⇒ it never activated and
+       every assertion failed VACUOUSLY. ⚠ A red proof red for the WRONG reason misleads exactly as much
+       as a green one that tests nothing.
+   ⇒ ⭐ ASSERT BEHAVIOUR ACROSS THE ACTUAL SEAM — ⛔ not grep, not counts, not names — and assert the
+   instrument ENGAGED (activation / anti-vacuity) before believing a single thing it reports.
 ⑮ ⭐⭐⭐ DREAMING IS SOTERA THINKING, ⛔ NOT A BACKGROUND JOB WITH A SMALLER BRAIN (Ote, 09-16).
    ⛔ Do NOT inherit the OLS pattern "background task = smaller CPU model + small context window". Its
    objective was right (don't block the GPU) and its solution does not transfer.

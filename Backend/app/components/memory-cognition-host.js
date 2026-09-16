@@ -717,12 +717,28 @@ export function buildMemoryCognition(fastify, {
       // ⛔ It is NOT one of the four cognition axes (SOURCE/BASIS/AVAILABILITY/RETENTION): those describe what
       // the MATERIAL is; this describes how it was RENDERED. Overloading an axis with a rendering property is
       // how `partial` came to mean two things at once.
+      // ══ ⭐⭐⭐ B-D2 · AND IT DECLARES WHAT IT DID **NOT** SHOW ═══════════════════════════════════════
+      // ⚠️ THE DEFECT THIS CLOSES, measured on the live corpus BEFORE it was written: an episode rendering
+      // **9 of 170 messages** reported `incomplete: false`, because the field only asked whether the window
+      // had filled ITSELF. ⇒ the SHAPE of the contract satisfied while its SEMANTICS were violated — a 5%
+      // sample that declares itself complete is not a projection, it is a claim.
+      //
+      // ⭐ TWO CAUSES, ONE HONEST FACT (Ote: *"incomplete = structural incompleteness of what was retrieved"*):
+      //   ⓐ `covered < ofSpan`       — the window did not fill itself. A defect/capacity condition, rare.
+      //   ⓑ `elidedBefore/After > 0` — the conversation extends past the window. The ORDINARY case, and the
+      //                                one that matters: Dreaming must know there is more to move through.
+      // ⛔ Entirely distinct from `partial`, which is AUTHORIZATION and nothing else.
+      const elidedBefore = centrePos < 0 ? 0 : lo
+      const elidedAfter = centrePos < 0 ? 0 : Math.max(0, (orderedIds.length - 1) - hi)
       const projection = Object.freeze({
         window: wantIds.length ? 'centred' : 'none',
         centre: centreId,
         radius: R,
-        ofSpan: wantIds.length,      // positions the claimed window contains
-        covered: exchanges.length,   // positions actually rendered
+        ofSpan: wantIds.length,            // positions the claimed window contains
+        covered: exchanges.length,         // positions actually rendered
+        ofConversation: orderedIds.length, // ⭐ the extent this is a sample OF
+        elidedBefore,
+        elidedAfter,
       })
 
       const anyMine = exchanges.some((x) => x.who === 'me')
@@ -762,7 +778,10 @@ export function buildMemoryCognition(fastify, {
         // describes, which is exactly how `partial: false` survived on a 2-of-5 excerpt.
         // ⓘ Before the split, contiguity was STRUCTURAL and this could not arise, so the vocabulary never
         // needed the word. The split removed the guarantee and left the vocabulary that assumed it.
-        incomplete: projection.covered < projection.ofSpan,
+        // ⭐⭐ BOTH CAUSES. ⛔ Still DERIVED and still un-assignable: a field nobody can set by hand cannot
+        // disagree with what it describes — which is exactly how `incomplete: false` survived on 9 of 170.
+        incomplete: projection.covered < projection.ofSpan
+          || projection.elidedBefore > 0 || projection.elidedAfter > 0,
         // ⓘ HOW IT WAS BUILT. Observability, ⛔ not a decision input, and ⛔ NOT a fifth cognition axis: the
         // axes describe the MATERIAL; this describes the RENDERING.
         projection,
@@ -969,6 +988,18 @@ export function buildMemoryCognition(fastify, {
       push(ep.withThem
         ? `I remember talking with ${ep.who}${on}.`
         : `I remember${on ? ` — ${when} —` : ''} talking about ${about0(cues)}.`)
+      // ══ ⭐⭐ B-D2 · THE BOUNDARY IS SPOKEN, because a field she never reads changes no reasoning ═══════
+      // Ote: *"the loss must be explicit and must not be rendered as if it were ordinary conversation."*
+      // ⛔ THREE EPISTEMIC STATES, THREE DIFFERENT SENTENCES — they must never collapse into one:
+      //   WITHHELD  a door stayed shut. Something was said HERE and she may not read it.       (authorization)
+      //   ELIDED    the conversation continues beyond what she is looking at.                  (structural)
+      //   UNFILLED  she could not read part of the window she claims to have looked at.        (capacity)
+      // ⭐⭐ AND THE FORM IS CONSTRAINED BY B-D4: a marker must NEVER match the frozen attribution detector's
+      // `X said to me:` pattern, or metadata describing a gap becomes detector-visible as FABRICATED SPEECH.
+      // ⇒ every marker below is parenthesised and contains no `said to me:`.
+      if (ep.projection?.elidedBefore > 0) {
+        push(`  (${ep.projection.elidedBefore} earlier turn${ep.projection.elidedBefore === 1 ? '' : 's'} of this conversation, not shown)`)
+      }
       for (const x of ep.exchanges) {
         if (x.said) {
           // ⭐⭐⭐ §3B · A DATED SELF-REPORT IS INTRODUCED AS ONE. *"On 21 August I said: …"* is verbatim,
@@ -988,6 +1019,14 @@ export function buildMemoryCognition(fastify, {
           // said to her — the reason change A returns withheld markers rather than a filtered list.
           push(`  ${x.who === 'me' ? 'I' : x.who} said something here that I can't see.`)
         }
+      }
+      if (ep.projection?.elidedAfter > 0) {
+        push(`  (${ep.projection.elidedAfter} later turn${ep.projection.elidedAfter === 1 ? '' : 's'} of this conversation, not shown)`)
+      }
+      // ⚠️ THE CAPACITY CASE IS SAID SEPARATELY. "I did not look further" and "I looked and could not read it"
+      // are different admissions, and collapsing them would let a failed read pass as a deliberate boundary.
+      if (ep.projection && ep.projection.covered < ep.projection.ofSpan) {
+        push('  (part of what I looked at here could not be read)')
       }
       if (ep.partial) push('  I can only reach my own side of that one.')
     }

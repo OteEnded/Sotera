@@ -9626,3 +9626,45 @@ match count is inexplicably 0.
 
 Verification: unit **753/753** · `@ote/memory` **123/123** · 9 checks green · evidence baseline green before and
 after both steps · 112 slots · 8 aliases · both armed collisions intact. :8210 restarted onto the B build.
+
+---
+
+## 2026-09-16 · B-D2 — `incomplete` now means what the word means
+
+Before writing any rendering I checked whether `incomplete` could ever be true, and it could not: `covered`
+always equalled `ofSpan`, so a rendering for it would have been unfalsifiable dead code. The measurement that
+followed is the finding — **an episode rendering 9 of 170 messages reported `incomplete: false`**, because the
+field only asked whether the window had filled *itself*. That is precisely Ote's closing point from the previous
+turn: *the shape of the contract satisfied while the semantic contract is violated.* A 5% sample that declares
+itself complete is not a projection, it is a claim.
+
+⇒ the projection now declares `ofConversation`, `elidedBefore` and `elidedAfter`, and `incomplete` covers both
+ruled causes — the window unfilled (capacity, rare) **or** the conversation extending past it (structural, the
+ordinary case, and the one Dreaming needs). Still derived, still un-assignable.
+
+**Three epistemic states, three sentences, never collapsed** — and every marker is parenthesised with no
+`said to me:`, so B-D4 holds and is asserted:
+
+```
+WITHHELD  "X said something here that I can't see."              a door stayed shut      (authorization)
+ELIDED    "(N earlier turns of this conversation, not shown)"    there is more           (structural)
+UNFILLED  "(part of what I looked at here could not be read)"    a read failed           (capacity)
+```
+
+The shelter block as she now reads it: `(5 earlier turns of this conversation, not shown)` followed by the
+correction **user-attested and in order** — where the original failure showed her only the retracted opening
+statement and three of her own replies. On the 170-message conversation she is now told `(121 earlier turns…)`.
+
+⚠️ One of my own assertions went red and was **strengthened rather than relaxed**: `B2-④` encoded the narrow
+derivation and correctly failed when `incomplete` was widened to its ruled meaning.
+
+⚠️ Two more instrument failures, both recorded as carry-on rule ⑯: a red-proof that called `recollect({ asked })`
+when the parameter is `text` — so it never activated and every assertion failed *vacuously*, which misleads as
+much as a green test that tests nothing — and the `\b`-to-literal-backspace hazard a third time. The check now
+asserts the layer **activated** before believing anything it reports.
+
+Verification: unit **753/753** · 12 checks green including the evidence baseline · 112 slots · 8 aliases · both
+armed collisions intact · A1 still shadow and accumulating.
+
+⏸ Still open and deliberately uncollapsed: **A-D4** · **B-D1** (radius unchanged at ±4) · **B-D3** (lattice
+untouched) · **B-D4** scan versioning not built · the `unknown`/extractor-naming investigation.
