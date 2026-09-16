@@ -223,6 +223,31 @@ decision. ⛔ Not reopened.
    047 says minting ≠ declaring, but ALSO defines a slot as *"a slot INSTANCE of"* a question. The label
    does a question's work while carrying none of a question's guarantees. ⛔ OTE'S TO RULE.
    → `INVESTIGATION_SOTERA_ROUTING_AS_AN_ACT.md` · `test/checks/routing-act-scope-check.mjs`
+㉓ ⭐⭐⭐ `slot_id` IS THE REPLACEMENT BOUNDARY — mapped 2026-09-17. THE CHAIN:
+     slot_id → buildSlotView → rowsBySlot → matches → primary → resolveConflict → invalidate/supersede
+   ⛔ NOTHING ELSE SELECTS THE INCUMBENT. ⚠️ And the DB read is NOT slot-scoped (`findOwnLive` fetches all
+   live semantic rows) ⇒ the authority is exercised entirely in `buildSlotView`.
+   ⭐ CORPUS: **75 of 75** slotted supersessions stay inside one slot · 0 crossed · 0 one-sided.
+   ⛔⛔ MY EARLIER "77/77" WAS WRONG — `IS NOT DISTINCT FROM` counted 2 NULL/NULL pairs as "the same slot".
+   ⭐⭐⭐ MEMBERSHIP IS **NOT** ESTABLISHED BY ROUTING ALONE. `buildSlotView` has THREE mechanisms:
+     ① `row.slot_id`  ② ⭐ **BY PHRASE** — label OR LEARNED ALIAS, *"identity, not resolution… no resolver
+     judgement is needed"*  ③ an ephemeral group. ⇒ ⚠️ TEACHING AN ALIAS RETROACTIVELY CHANGES WHICH
+     PRE-EXISTING ROWS ARE CLAIMED.
+   ⭐⭐⭐ AND THE CLAIM IS MADE PERMANENT — `store.update(orphans, { slot_id: slot.id })`, the ONLY
+   post-creation `slot_id` mutation. ⛔ UNGOVERNED (outside `finalizeSlot`, so A3's ACT rule misses it) ·
+   ⛔ NOT TRANSACTIONAL (line 571 vs `create` at 659, no transaction anywhere) ⇒ **A REFUSED WRITE STILL
+   LEAVES THE ADOPTION IN PLACE.** ⚠️ Source calls it non-semantic: *"changes no ordering and teaches no
+   equivalence"* — true, ⛔ AND IT ASSERTS MEMBERSHIP, which is the authority.
+   ⭐⭐ THE GOVERNANCE INVERSION: ① SLOT EXISTENCE ⛔ ungoverned (112×) · ② QUESTION IDENTITY ✅ governed
+   (actor+occasion+ledger — has run ONCE) · ③ MEMBERSHIP ⛔ ungoverned (142×). ⇒ ONLY THE ACT THAT NEVER
+   RUNS IS GOVERNED.
+   ⚠️ THE SEVEN undeclared slots that displaced a belief: ALL `mintedBy:reconcileFact`, ALL
+   `canonical_label === evidence.firstAttribute` ⇒ IDENTITY FROM THE FIRST ATTRIBUTE STRING THAT ARRIVED,
+   and ⛔ ZERO bindings ever logged for any of them.
+   ⚠️ ⛔ CANNOT ESTABLISH how often adoption has occurred — only a row OLDER THAN ITS SLOT is provable (0),
+   and that is a LOWER BOUND. ⓘ 53 slotless live rows sit in the candidate set; 0 claimable by phrase TODAY
+   — ⚠️ one matching alias would change that.
+   → `INVESTIGATION_SOTERA_SLOT_ID_AS_AUTHORITY.md` · `test/checks/slot-authority-map.mjs`
 ```
 
 ---

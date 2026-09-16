@@ -10092,3 +10092,76 @@ right because the instrument was blind is not established.
 **Verification:** routing check green with both controls · 047 scope check green · relation census green ·
 unit **753/753** · evidence baseline green · both collisions armed · contested transition intact.
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · slot_id AS SEMANTIC AUTHORITY — mapped, and two of my own earlier claims corrected
+
+Ote: *"If slot_id determines which belief can replace which other belief, then slot_id is carrying semantic
+authority whether or not the code calls the operation 'routing'. First, let's map what authority it already
+has."* ⛔ Read-only throughout; both armed collisions left armed.
+
+**Instrument** → `test/checks/slot-authority-map.mjs`, built to the discipline from #15/#16: statement-aware
+SET-clause bounding, target-table constraints, a pinned site inventory rather than a verdict regex, positive
+and negative controls, and an explicit section for what it *cannot* establish.
+
+### ① The chain
+
+`slot_id → buildSlotView → rowsBySlot → matches → primary → resolveConflict → invalidate/supersede.`
+Nothing else selects the incumbent. And the DB read is **not** slot-scoped — `findOwnLive` fetches every live
+semantic row — so the authority is exercised entirely in `buildSlotView`.
+
+**Corpus: 75 of 75 slotted supersessions stay inside one slot; 0 crossed; 0 one-sided.**
+
+### ② Membership is NOT established by routing alone — two other paths
+
+`buildSlotView` has **three** mechanisms: explicit `slot_id`; **claim by phrase** (label *or* learned alias —
+the source calls it *"identity, not resolution: no resolver judgement is needed"*); and an ephemeral group.
+⇒ **teaching an alias retroactively changes which pre-existing rows are claimed.**
+
+And the claim is then made permanent: `store.update(orphans, { slot_id: slot.id })` — the only post-creation
+`slot_id` mutation in the system. It is **ungoverned** (outside `finalizeSlot`, so A3's ACT requirement never
+reaches it), and **not transactional** (line 571 vs `create` at 659; there is no transaction anywhere in the
+service) ⇒ **a write that is later refused still leaves the adoption in place.** The source justifies it as
+*"changes no ordering and teaches no equivalence"* — true on both counts, and it asserts **membership**,
+which is the authority.
+
+### ③ The governance inversion
+
+SLOT EXISTENCE ungoverned (112×) · QUESTION IDENTITY governed with actor, occasion and ledger (**has run
+once**) · MEMORY MEMBERSHIP ungoverned (142×). **Only the act that never runs is the governed one.**
+
+### ④ The seven
+
+All seven `mintedBy: reconcileFact`, all with `canonical_label === evidence.firstAttribute` — identity taken
+from **the first attribute string that happened to arrive** — and **zero** rows in `log_slot_bindings` for
+any of them. Defensibility of their replacements cannot be established from the record for any except
+`current goal`, where an operator set `contradicted_at` by hand; the two `work schedule` transitions are
+affirmatively not defensible.
+
+### Three instrument defects, two of them corrections to work I already delivered
+
+**#17** — `slot_id::text`, a **Postgres cast**, matched `/\bslot_id\s*:/` as a JS object key, reporting three
+read-only queries as undeclared assignment sites. A cast is not an assignment.
+
+**#18** — ⛔ my previous check asserted **"ROUTING IS IRREVERSIBLE" and it was false.** The ORM pattern
+required a bracketed array as the first argument; the real call passes the bare identifier `orphans`. The
+single most important finding here was sitting behind a regex that could not express it. The claim is now
+the narrow one the evidence supports — *no re-homing between slots* — and the inventory is pinned by site.
+
+**#19** — ⛔ my **"77/77 supersessions stay inside one slot"** was inflated: `IS NOT DISTINCT FROM` counts
+`NULL = NULL` as a match, so 2 pairs with no slot on either side were folded in. Corrected to **75/75** with
+the slotless pairs reported separately. This is the mirror of the `<>`-on-a-nullable-column rule already in
+§0-F — the NULL-safe operator is exactly as dangerous when NULL is the case you must **exclude**.
+
+Both previously-committed checks were corrected in place rather than left asserting the wrong thing.
+
+### Unchanged
+
+Replacement semantics stays separate and was not advanced: `newer string ≠ newer truth`,
+`superseded ≠ world changed`, nine-transition corpus canonical, six outcomes remain **fates** — no enum, no
+schema change, no relation field. Dreaming frozen, same two-layer blocker.
+
+**Verification:** slot-authority map green · routing check green after correction · 047 scope green ·
+relation census green · unit **753/753** · evidence baseline green · both collisions armed.
+⛔ Nothing was written.

@@ -112,8 +112,14 @@ check('⭐⭐ POSITIVE CONTROL · both re-route patterns DO fire on a genuine re
 check('⭐⭐⭐ NEGATIVE CONTROL · the BIND statement is NOT mistaken for a re-route (defect #15, pinned)',
   !REROUTE_SQL.test(CTRL_FALSEPOS) && !REROUTE_ORM.test(CTRL_FALSEPOS),
   'the governed bind act no longer reads as a slot_id re-route')
-check('⭐⭐ ROUTING IS IRREVERSIBLE — ⛔ no shipped operation re-homes a memory to a different slot',
-  sites.length === 0, sites.join(' · ') || 'no post-creation slot_id assignment in either tree')
+// ⛔⛔ CORRECTED 2026-09-17 — THIS CHECK PREVIOUSLY ASSERTED "ROUTING IS IRREVERSIBLE" AND WAS WRONG.
+// `slot-authority-map.mjs` found `store.update(orphans, { slot_id: slot.id })` in memory-v2-service: rows
+// already pulled into `matches` but carrying no slot_id are PERMANENTLY written into the slot. My ORM
+// pattern missed it because it required the first argument to be a bracketed array — `orphans` is a bare
+// identifier. ⇒ ⭐ THE CLAIM IS NOW THE NARROW ONE THE EVIDENCE SUPPORTS: no path moves a row from one
+// slot to a DIFFERENT slot; one path does fill a row's EMPTY slot after the fact.
+check('⭐⭐ NO RE-HOMING BETWEEN SLOTS — ⛔ but membership CAN be filled in after creation (adoption)',
+  sites.length === 0, `${sites.join(' · ') || 'no slot-to-slot move'} · ⚠️ see slot-authority-map §2 for the adoption path`)
 
 // ── ③ ⭐⭐⭐ WHAT DOES slot_id CONTROL DOWNSTREAM? ────────────────────────────────────────────────
 // ⭐ THE DECISIVE STRUCTURAL FACT. If slot_id only decided WHERE a row is filed, mis-routing would be
@@ -121,16 +127,25 @@ check('⭐⭐ ROUTING IS IRREVERSIBLE — ⛔ no shipped operation re-homes a me
 // which existing belief this observation competes with and may INVALIDATE.
 // ⚠️ Proven from the CORPUS, not from reading the call chain: every superseded row must share the slot of
 // the row that replaced it. If that holds with no exception, slot_id IS the competition boundary.
+// ⛔⛔ CORRECTED — the first version used `IS NOT DISTINCT FROM`, which treats NULL = NULL as a MATCH.
+// It reported "77/77 stay inside one slot" when 2 of those pairs had NO SLOT ON EITHER SIDE and evidence
+// nothing at all. ⇒ ⭐ the four cases are separated, and the claim rests only on the pairs that have a slot.
 const [xslot] = await q(`
   SELECT count(*)::int AS total,
-         count(*) FILTER (WHERE n.slot_id IS NOT DISTINCT FROM o.slot_id)::int AS same_slot
+    count(*) FILTER (WHERE n.slot_id IS NOT NULL AND o.slot_id IS NOT NULL AND n.slot_id = o.slot_id)::int AS same,
+    count(*) FILTER (WHERE n.slot_id IS NOT NULL AND o.slot_id IS NOT NULL AND n.slot_id <> o.slot_id)::int AS crossed,
+    count(*) FILTER (WHERE n.slot_id IS NULL AND o.slot_id IS NULL)::int AS neither,
+    count(*) FILTER (WHERE (n.slot_id IS NULL) <> (o.slot_id IS NULL))::int AS one_sided
   FROM ${S}."txn_memories" n JOIN ${S}."txn_memories" o ON o.id = n.supersedes_id`)
 console.log('\n③ ⭐⭐⭐ WHAT DOES slot_id ACTUALLY CONTROL?\n')
-console.log(`   supersession events in the corpus                 ${xslot.total}`)
-console.log(`   where the superseding row shares the old row's slot ${xslot.same_slot}`)
+console.log(`   supersession events in the corpus       ${xslot.total}`)
+console.log(`   both slotted · SAME slot                ${xslot.same}   ⭐ the only pairs that evidence the boundary`)
+console.log(`   both slotted · DIFFERENT slot           ${xslot.crossed}`)
+console.log(`   neither slotted                         ${xslot.neither}   ⚠️ evidences NOTHING — ⛔ excluded from the claim`)
+console.log(`   exactly one slotted                     ${xslot.one_sided}`)
 check('⭐⭐⭐ SUPERSESSION NEVER CROSSES A SLOT — ⇒ slot_id IS the competition boundary, ⛔ not a filing label',
-  xslot.total > 0 && xslot.same_slot === xslot.total,
-  `${xslot.same_slot}/${xslot.total} supersessions stay inside one slot`)
+  xslot.same > 0 && xslot.crossed === 0 && xslot.one_sided === 0,
+  `${xslot.same} same · ${xslot.crossed} crossed · ${xslot.one_sided} one-sided · ${xslot.neither} slotless (excluded)`)
 
 // ── ④ IS A SLOT WITHOUT A QUESTION SEMANTICALLY IDENTIFIED? ───────────────────────────────────────
 const [decl] = await q(`SELECT count(*)::int AS all_slots, count(question_id)::int AS declared FROM ${S}."mst_slots"`)
