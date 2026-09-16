@@ -144,10 +144,10 @@ reproduction is ever wanted again.
 # 0-C · LIVE STATE — 2026-09-15
 
 ```
-:8210 PID 19420 (Sotera — restarted 09-16 09:09 onto the Phase-3-preparation build) · :8201 PID 28072 (OLS, HIS, untouched)
-:8220 another project's, untouched · :54322 pg · migrations through 050 · writer contracts 15 (notes added 09-16) · live reflection generation = 3
+:8210 PID 12648 (Sotera — restarted 09-16 onto the D1 PHASE 3 build; mandatory writer identity LIVE) · :8201 PID 28072 (OLS, HIS, untouched)
+:8220 another project's, untouched · :54322 pg · migrations through 050 · writer contracts 16 (notes + person, 09-16) · D1 Phase 3 LIVE · live reflection generation = 3
 suite 79/83 → the 4 reds triaged: 2 were LIVE-TRAFFIC contention (pass standalone), 1 was the known D5 snapshot drift,
-1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 748/748 (09-15 17:00).
+1 was the layer-authority treatment test — FIXED by the ratified boundary change. unit 752/752 (09-16, post-flip).
 natural-trajectory replay preserved: test/results/attribution-natural-trajectory.jsonl (24 rows) · its fixture holds Ote's
 own conversation + the memory list she received, BY HIS RULING, in its own file so it can be excluded by name
 memories 160+ · axes: writer set on 129 · 44 unaxised (33 ratified unknown + 11 leaked, agent_dev only, ⛔ none of Ote's)
@@ -170,6 +170,7 @@ production reflection = GEN 3 · 40 Gen-4 + 60 three-arm runs and clones PRESERV
 UNKNOWN and UNREPAIRED · episode distiller OFF · remember_fact UNTOUCHED · R-C UNTOUCHED · D5 search snapshot UNTOUCHED ·
 BASIS rename DEFERRED · ⛔ no provenance inference or repair · ⛔ no weakening of occasion/reachability/provenance separation
 ⛔ no ranking or salience change · ⛔ no reword of ATTRIBUTION_PRINCIPLE · ⛔ no pilot-threshold edit · F3 PARKED
+✅ D1 PHASE 3 LIVE ⇒ ⛔ NO undeclared write or memory-semantic mutation · ⛔ historical rows NEVER repaired
 ⛔ NO THIRD CONSTRUCTED CORPUS (ruled 09-15) · ⛔ the detector stays ADVISORY, ⛔ NEVER a behavioural gate
 ⛔ a CANDIDATE is not a violation — only a HUMAN-CONFIRMED class is · ⛔ Mr C never classifies · ⛔ frozen evidence is not a memory store
 ⛔ no causality inferred from any live hit — presence is recorded, cause is not · ⛔ the natural-trajectory set is not enlarged
@@ -207,32 +208,29 @@ PROVENANCE   ✅ D3′ / D8 / D9 ALL RULED AND DONE 09-16. ⏸ ONLY THE PHASE-3 
              ✅ M2 canary check FIXED (his instruction): it called itself an operator writer and declared none, adding 2
                  undeclared rows PER SUITE RUN. Now declares operator + act. Count held at 15 across two further runs.
                  ⛔ Existing unaxised rows NOT repaired.
-             ✅ PHASE-3 PREPARATION APPLIED 09-16 (his 4 rulings, HIS ORDER) — `AUDIT_SOTERA_D1_PHASE3_PRE_FLIP.md`:
-                 ① `schedules/service.js` runToolAction declares `writer:'job'` + minted act (the run row is created
-                   AFTER the performer, so its id does not exist yet) — THEN retention's tool-context factory stopped
-                   accepting `extras.writer ?? null` and now refuses with `NO_WRITER`.
-                   ⚠⚠ That refusal would have been SILENT: host-service factories sit in an EMPTY catch, so a refusing
-                   factory = an absent service with nothing said. The catch now LOGS service+origin+reason.
-                   ⓘ `runtime.js:141` (`memory.v2`) deliberately LEFT as `?? null` and flagged — built eagerly for every
-                   context incl. read-only ones; its writes are covered by the store at the flip.
-                 ② MUTATIONS are authored acts ⇒ admin forget + restore declare `admin` + act `request:<request.id>`.
-                   `reflection-host.removeNote` already declares (notes + pass act, from D8).
-                 ③ lint severity UNCHANGED — `writer-not-declared` stays a DEFECT (only guard on 19 raw-SQL sites).
-                 ④ the 2 deliberately-undeclared tests were ALREADY compliant: the unit one writes to a fakeDb, W1
-                   cleans up in `finally`. ⏸ Both still need rewriting admitted→refused AT the flip.
-                 + `model-tool-claim-kind-check` now declares the chat-turn axes it was already exercising.
-             ⭐⭐⭐ VERIFIED (server restarted onto the build first, PID 19420): full suite under `SOTERA_WRITER_TRACE=1`
-                 ⇒ **62 undeclared writes, 41 sites, 12 files, ZERO leaf frames in Backend/**. `m2-rollback-check` GONE
-                 from the list (2→0). **writer-NULL held 48→48 and `writer-not-declared` held 15→15** ⇒ no test leaves
-                 a durable undeclared row. Suite 3 of 85 failed, ⛔ none from this work (2 share ONE hardcoded corpus
-                 count 8-vs-19; 1 is the fenced D5 drift; memory-lifecycle PASSED this run).
-             ⛔⛔ ONE BLOCKER, AND IT IS SEMANTIC, NOT WIRING — `chat-site.route.js:3980` `DELETE /chat/memory/v2/:id`,
-                 the person deleting THEIR OWN memory. Act kind `request` is documented as "an operator act through the
-                 ADMIN surface", which this is not. (a) use `admin` anyway · (b) ⭐ NEW writer e.g. `person` · (c) widen
-                 `request`'s meaning. ⛔ I did NOT pick — a registry addition is the same class of call D8 was. HIS.
-             ⏸ THE FLIP ITSELF (not done, needs his GO): rule the writer above → wire it → make the store refuse a write
-                 OR MUTATION with no writer → rewrite the 2 refusal tests → declare at the remaining test sites → re-run
-                 enumeration + suite → confirm zero. ⛔ Historical rows NEVER repaired.
+             ✅✅✅ **D1 PHASE 3 IS FLIPPED — MANDATORY WRITER IDENTITY IS LIVE** (09-16). `REPORT_SOTERA_D1_PHASE3_FLIPPED.md`.
+                 THE INVARIANT: a row cannot enter `txn_memories`, and a belief cannot be changed / invalidated /
+                 superseded / archived / forgotten / pinned / contradicted, unless the caller declared WHO. `NO_WRITER`,
+                 raised in `create` · semantic `update` · `markContradicted`.
+                 ⚠⚠ "MEMORY-SEMANTIC" IS A **FIELD LIST**, ⛔ NOT A METHOD, AND THAT IS LOAD-BEARING: `update()` also
+                 carries **every recall's `tier:'hot'` promotion**. Gating the METHOD would have stopped READING.
+                 Gated: invalid_at · expired_at · supersedes_id · pinned · contradicted_* · content · value · entity ·
+                 attribute · importance · confidence · kind · namespace. ⛔ NOT gated: tier · slot_embedding · embedding ·
+                 access_count · last_access · slot_id. `writer-seam-check` **W5c** pins that a recall still works.
+                 ⭐ `person` JOINED THE REGISTRY (16 writers): `admin` = root through the admin surface · `person` = the
+                 account holder on their own memory. `DELETE /chat/memory/v2/:id` declares `person` + `request:<req.id>`.
+                 The `request` act kind's doc said "through the ADMIN surface" — too narrow ⇒ CLARIFIED: it means the HTTP
+                 REQUEST AS THE OCCASION; the WRITER carries the actor. ⛔ No `act = person`.
+                 VERIFIED (server restarted onto the build; full suite under `SOTERA_WRITER_TRACE=1`):
+                   suites 3 → 19 → **3** (back to baseline) · refusals 52 → **8, ALL of them the deliberate refusal tests**
+                   · **production leaf frames: 0, before and after** · **writer-NULL 48 → 48** · lint 15 → 15 · unit 752/752.
+                 16 checks began refusing and now DECLARE. ⚠ One needed thought, not a declaration:
+                 `declaration-self-authorisation` exists to prove an OCCASION-LESS write is refused, and a blanket act
+                 erased its own subject — its axes now follow the ORIGIN (writer always, act only when there IS an occasion).
+                 W1 + memory-store-contract REWRITTEN admitted→refused. W5b attempts the mutation on a REAL row (a made-up
+                 id never reaches the gate — `forget` returns early — so the first version passed VACUOUSLY).
+                 ⛔ NO historical row repaired: the 15 are frozen residue. ⛔ Lint stays a DEFECT (the only guard on the 19
+                 raw-SQL sites the store cannot see). ⛔ `runtime.js` memory.v2's `?? null` deliberately left + flagged.
              D2/D4  the 8 historical rows + what a ratified permanent unknown looks like in the lint. Not urgent.
              D6 BASIS rename · D7 @ote/memory attribution (my earlier R-C hunks still interleaved with foreign work)
 ATTRIBUTION  ✅ D11–D14 SHIPPED · ⭐ FIRST CANDIDATE CAUGHT AND CLASSIFIED 09-16: `769f6a65` → **REQ_NOW by ote**,

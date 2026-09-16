@@ -8930,3 +8930,52 @@ registry addition is the same class of decision D8 was, so it is his.
 ⏸ **STOPPED IMMEDIATELY BEFORE THE FLIP, as instructed.** Remaining: rule that writer → wire it → make the store refuse a
 write OR MUTATION with no writer → rewrite the two refusal tests → declare at the remaining test sites → re-run enumeration
 and suite → confirm zero. ⛔ Historical rows never repaired. ⛔ D3′, attribution, R-C, D2/D4 untouched.
+
+## 2026-09-16 (+07:00) — ✅✅✅ D1 PHASE 3 FLIPPED · MANDATORY WRITER IDENTITY IS LIVE
+
+Ote authorised the flip after the pre-flip audit, with one clarification to the act contract. `REPORT_SOTERA_D1_PHASE3_FLIPPED.md`.
+
+**THE INVARIANT.** A row cannot enter `txn_memories`, and a belief cannot be changed, invalidated, superseded, archived,
+forgotten, pinned or contradicted, unless the caller declared WHO is doing it. `NO_WRITER`, raised in `create` ·
+semantic `update` · `markContradicted`.
+
+⚠️⚠️ **"Memory-semantic" had to become a FIELD LIST, not a method, and that is the load-bearing design decision.**
+`update()` carries belief changes AND bookkeeping — **every recall ends in `store.update(ids, { tier: 'hot' })`**. Gating
+the method would have refused every recall from a read-only store: **reading would have stopped working.** So the gate
+keys on the patched fields. `writer-seam-check` **W5c** exists solely to stop that regression returning.
+
+**`person` joined the registry (16 writers).** `admin` = root/operator through the admin surface; `person` = the account
+holder acting on their own memory; `DELETE /chat/memory/v2/:id` declares `person` + `request:<request.id>`. ⭐ And the act
+kind's own documentation was wrong-by-narrowness — it read *"an operator act through the ADMIN surface"*, which stopped
+being true the moment a second writer used it. Clarified per his ruling: `request` means **the HTTP request as the
+occasion identity**, and the WRITER carries the actor distinction. ⛔ No `act = person`.
+
+**VERIFIED** (server restarted onto the flipped build, PID 12648; full suite under `SOTERA_WRITER_TRACE=1`):
+
+```
+                         pre-flip    at the flip    after declaring the test callers
+suites failing            3 / 85       19 / 85              3 / 85   (baseline)
+refusals traced             —            52                    8
+  …in production            —             0                    0
+writer IS NULL             48            48                   48
+writer-not-declared        15            15                   15
+```
+
+⭐ **All 8 remaining refusals are the two deliberate refusal tests.** Nothing incidental refuses. Unit 752/752.
+
+**16 checks began refusing and now declare** the axes they were already exercising. ⚠️ One needed thought rather than a
+declaration: `declaration-self-authorisation-check` exists to prove an OCCASION-LESS write is refused, and my blanket act
+handed every store an occasion — **its four failures were its own subject being erased by the fix.** Its axes now follow
+the ORIGIN: the writer always, the act only when there IS an occasion.
+
+**The two refusal tests were rewritten admitted→refused.** W1 now proves the ABSENCE of a row rather than cleaning one up.
+⚠️ **W5b caught me passing vacuously**: attempted on a made-up id, `forget` returns early and never reaches the gate — it
+now attempts the mutation on a REAL row and asserts that row survives.
+
+**Failures as found: 3 of 85, the pre-flip baseline, none from this work** — two share ONE hardcoded corpus count
+(8 vs 19) so a single drift reports twice, and one is the fenced D5 snapshot drift.
+
+⛔ NO historical row repaired — the 15 are frozen residue. ⛔ The lint stays a DEFECT: it is the only guard on the 19
+raw-SQL sites the store cannot see. ⛔ `runtime.js` memory.v2's `?? null` deliberately left and flagged (built eagerly for
+every context, including read-only ones; its writes are now covered by the store gate itself). ⛔ Attribution, R-C, D2/D4,
+D3′ untouched; production reflection stays Gen 3; reflectMode and episodeDistillEnabled remain off.
