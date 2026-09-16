@@ -197,6 +197,32 @@ try {
   const lintP = await lintMemory(db, { userId: agent.id })
   check('W14 · ⭐⭐ the lint\'s pass-writer rule is DERIVED from the registry, so the new `notes` writer is covered — a hand-written list would have exempted it',
     fired(lintP, 'pass-writer-without-act').includes(rawNote?.id), JSON.stringify(rawNote))
+  // ⭐ W14 is now also the POSITIVE CONTROL for D4: this row has NO axes-backfill stamp, so it must still be reported.
+  // Without it, D4's exclusion could silence the rule entirely and the count would look like success.
+
+  // ══ ⭐⭐⭐ D4 · A RATIFIED HISTORICAL UNKNOWN IS NOT A DEFECT (Ote, 2026-09-16) ═════════════════════════
+  //
+  // *"axes-backfill + missing act → ratified historical unknown, not defect. New pass writer + missing act + no
+  //   ratification → defect."* A consistency correction: `writer-not-declared` already read this exact stamp.
+  // ⛔ D2 ruled the 8 rows PERMANENTLY UNKNOWN — they are not linked, repaired or erased, only no longer counted as an
+  // active defect. These assertions are read-only and run against the REAL rows, ⛔ not a fixture.
+  const ratified = await q(`SELECT m.id::text AS id, m.writer, m.act_kind::text AS act_kind, m.act_id, m.reach_kind::text AS reach_kind
+                              FROM ${S}."txn_memories" m
+                             WHERE m.writer IN ('reflection','notes','dreaming','distiller') AND m.act_kind IS NULL
+                               AND EXISTS (SELECT 1 FROM ${S}."log_memory_changes" c WHERE c.memory_id = m.id AND c.action = 'axes-backfill')
+                             ORDER BY m.created_at`)
+  const lintAll = await lintMemory(db, {})
+  const stillFired = fired(lintAll, 'pass-writer-without-act')
+  check('W18a · the corpus HAS ratified pass-writer unknowns to test against — ⛔ a vacuous control proves nothing',
+    ratified.length === 8, `${ratified.length} ratified row(s)`)
+  check('W18b · ⭐⭐⭐ a pass-writer row the BACKFILL ratified is NOT reported — an audited absence is not a defect',
+    ratified.length > 0 && ratified.every((r) => !stillFired.includes(r.id)),
+    `${stillFired.length} row(s) still reported by the rule`)
+  check('W18c · ⭐⭐ …and the UNRATIFIED fixture is STILL reported — the exclusion did not silence the rule',
+    stillFired.includes(rawNote?.id), `reported: ${stillFired.length}`)
+  check('W18d · ⛔⛔ D2 · THE EIGHT ROWS ARE UNTOUCHED — no act, no reach, not linked, not repaired',
+    ratified.every((r) => r.act_kind === null && r.act_id === null && r.reach_kind === null),
+    JSON.stringify(ratified.map((r) => ({ id: r.id.slice(0, 8), a: r.act_kind, r: r.reach_kind }))))
 
   // ══ D9(a) · THE DISTILLER'S ACT — Ote's ruling, 2026-09-16 ════════════════════════════════════════════════════════
   //

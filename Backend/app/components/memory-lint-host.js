@@ -101,7 +101,7 @@ export const LINT_RULES = Object.freeze([
   // its job, not noise. ⓘ `said-without-evidence` from the spec is computed (never stored), so its stored-side tripwire is
   // `dangling-evidence-target`: an established turn reference whose message no longer exists.
   { id: 'pass-writer-without-act', severity: 'defect',
-    what: 'a PASS-driven writer (every contract with pass:true — reflection · notes · dreaming · distiller) wrote a row with no act identity — I1/I9: a pass must be claimed before it writes' },
+    what: 'a PASS-driven writer (every contract with pass:true — reflection · notes · dreaming · distiller) wrote a row with no act identity — I1/I9: a pass must be claimed before it writes. ⓘ D4: a row the axes-backfill RATIFIED as a permanent unknown is excluded — an audited absence is not a defect' },
   { id: 'pass-writer-point-reach', severity: 'defect',
     what: 'a PASS-driven writer\'s material recorded as a single turn — I6: a pass reviews a RANGE, never a point' },
   { id: 'coverage-exceeds-reviewed', severity: 'defect',
@@ -265,10 +265,27 @@ export async function lintMemory(db, { userId = null, includeContent = false, li
   // `allowlist-drops-what-it-was-not-told` family, which this project has now recorded eighteen times.
   // ⓘ The writer names are registry constants, not user input; they are still quoted through a literal-safe map.
   const PASS_WRITERS = `(${Object.values(CONTRACTS).filter((c) => c.pass).map((c) => `'${String(c.writer).replace(/'/g, "''")}'`).join(', ')})`
+  // ══ ⭐⭐ D4 · THE SAME RATIFICATION THE WRITER AXIS ALREADY HONOURS (Ote, 2026-09-16) ══════════════════════════════
+  //
+  // ⚠️⚠️ THE INCONSISTENCY THIS CLOSES, AND NOBODY DECIDED IT. Every one of the 8 historical reflection rows carries an
+  // `axes-backfill` row in `log_memory_changes` — the audited act by which the historical pass classified it and left it
+  // unknown. `writer-not-declared` READS that stamp and stays quiet (see its own `NOT EXISTS`, below). This rule did not.
+  // ⇒ the two rules treated the identical ratification differently: the writer axis said "an audited unknown is not a
+  // leak", the act axis said "an audited unknown is a defect, for ever". The exclusion was written for one rule and
+  // never carried across.
+  //
+  // ⭐ Ote's ruling: *"a consistency correction, not a new severity or mechanism."*
+  //     axes-backfill + missing act              → ratified historical unknown, ⛔ NOT a defect
+  //     new pass writer + missing act + no stamp → DEFECT, loudly  (pinned by `writer-seam-check` W14)
+  // ⛔ The rows are NOT erased, repaired or linked — D2 ruled them permanently unknown. They stay visible in provenance
+  // and history reporting; they simply stop being counted as an ACTIVE defect nobody can ever clear.
+  // ⓘ If `log_memory_changes` is absent the clause is omitted, so the rule stays LOUD rather than silently forgiving.
   add('pass-writer-without-act', await Q(
     `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.writer${excerpt}
        FROM ${MEM} m
-      WHERE m.writer IN ${PASS_WRITERS} AND m.act_kind IS NULL ${own('m.user_id')}
+      WHERE m.writer IN ${PASS_WRITERS} AND m.act_kind IS NULL
+        ${CHG ? `AND NOT EXISTS (SELECT 1 FROM ${CHG} c WHERE c.memory_id = m.id AND c.action = 'axes-backfill')` : ''}
+        ${own('m.user_id')}
       ORDER BY m.id`, rep))
   add('pass-writer-point-reach', await Q(
     `SELECT m.id::text AS id, m.user_id::text AS owner_id, m.writer${excerpt}
