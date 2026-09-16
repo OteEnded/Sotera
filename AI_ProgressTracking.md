@@ -9048,3 +9048,39 @@ attribution-live-control. Unit **752/752**.
 ⛔ D1 Phase 3, attribution (observation-only), R-C and D3′ untouched.
 
 ⏸ **The provenance arc's decision list is now empty except D6 (BASIS rename) and D7 (@ote/memory attribution).**
+
+## 2026-09-16 (+07:00) — ⭐ D6 AND D7 MATERIAL (read-only audits, separate as instructed) · nothing implemented
+
+**D6 · the BASIS rename** — `GATE_SOTERA_D6_BASIS_RENAME_MATERIAL.md`.
+⚠️ **Three vocabularies, not the two the deferral recorded:** cognition `BASIS` (grounds of belief:
+attested-by-source/told/inferred/synthesized) · lineage `BASIS` (**presence** of material: turn/in-context/memories/…) ·
+`TEMPORAL_BASIS` (said/recorded) — plus `REFERENCE_KIND`, which was already named *around* the clash with its reason in
+its header. ⭐ **No file imports both**, so nothing is shadowed and no call site is ambiguous at runtime: the collision is
+a reader's, not the code's.
+⭐⭐ **The persisted surface is 5 JSONB values, every one `in-context`.** Cognition BASIS and TEMPORAL_BASIS are computed
+at READ time and stored nowhere; no column named `basis` exists in the schema (the evidence table deliberately says
+`credential`). ⓘ `evidence.derivedFrom` is an OBJECT, not an array — my first query missed it for that reason.
+The one coupling is one-way: `BELIEF_CEILING` hardcodes two cognition words as string literals. The boundary already has
+a test (`memory-evidence.test.mjs:113` — a reference ceiling must never be a lineage word).
+⭐ Recommend **(a): rename LINEAGE's constant only, `BASIS` → `PRESENCE`** — the word its own header already argues for
+(*"PRESENCE, NOT USAGE — and the distinction is the whole point of the name"*). ⛔ No migration, ⛔ no row touched, ⛔ not
+a semantics change. (b) renaming the VALUES would need a 5-row historical repair — the trade D2 just declined in a
+stronger case.
+
+**D7 · the `@ote/memory` tree** — `GATE_SOTERA_D7_MEMORY_ATTRIBUTION_AUDIT.md`.
+⚠️⚠️ **The inherited claim did not survive checking.** `AI_CarryOn.md` had said for several checkpoints that the tree held
+*"pre-existing foreign hunks"*. **I could not find one.** All 17 hunks across 4 files, all 3 untracked tests and both
+`.bak` files trace to this arc's themes AND to dated entries in the project log: temporal provenance · ② R-C window ·
+claimKind · write receipt + write-lane + opaque `code` · subject_person_id · tool-description corrections.
+⛔ Recorded as *"could not establish that any hunk is foreign"*, ⛔ **not** *"none is foreign"* — git authorship is
+uninformative here (13 commits, all one identity, which is the repo convention my own commits use).
+⚠️ Two of the four themes (`claimKind`, the write receipt/lane) are **already load-bearing for shipped behaviour** and
+are running from an uncommitted tree — a risk independent of attribution.
+⭐ Recommend **(d) then (a)**: he reads the §1.3 table and confirms none of it is his or another agent's, then four
+thematic commits, each carrying its own red-proof and naming the decision it implements. ⛔ I will not commit
+unilaterally — the whole reason this was deferred is a claim about someone else's work, and re-deciding that alone is
+exactly what to avoid. ⛔ The `.bak` files stay: deleting somebody's safety net to tidy a `git status` is the convenience
+this decision exists to refuse.
+
+⛔ Nothing renamed, committed, staged, reverted or cleaned. D1/D2/D3′/D4/D8/D9 closed, R-C closed, attribution
+observation-only — all untouched.
