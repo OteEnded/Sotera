@@ -51,6 +51,16 @@ export function commitToMemory(mem, obs) {
   // difference. ⭐ A missing key must never be a kind.
   if (obs.claimKind != null && String(obs.claimKind).trim() !== '') args.claimKind = obs.claimKind
   if (Array.isArray(obs.evidenceRefs) && obs.evidenceRefs.length) args.evidenceRefs = obs.evidenceRefs // 049 · the writer's citations ride the observation
+  // ⭐⭐⭐ A2 · NORMALIZATION'S OUTPUT — THE FOURTH FIELD THIS LIST WOULD HAVE DROPPED, and the first one whose
+  // loss was DEMONSTRATED at the seam before the fix rather than after. `attributeCandidate` has been produced
+  // by `normalizeObservation` since Phase 2 and arrived at the resolver as `undefined` for that entire time:
+  // a delegating spy on `resolver.resolve` saw it missing (R4-⑤), which is the proof a grep cannot give —
+  // the field is present in the normalizer AND named in the RFC, so reading the source concludes it is wired.
+  //
+  // ⛔ ADVISORY, NEVER BINDING (RFC §5): a resolver MAY use the candidate/shape as a hint and MAY override it.
+  // Carrying them here is transport, ⛔ not classification — this function still decides nothing.
+  if (obs.attributeCandidate != null) args.attributeCandidate = obs.attributeCandidate
+  if (obs.attributeShape != null) args.attributeShape = obs.attributeShape
   return mem.reconcileFact(args)
 }
 
