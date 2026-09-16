@@ -146,7 +146,16 @@ export function buildToolContext(fastify, request, extras = {}) {
   for (const [name, make] of hostServiceFactories) {
     try {
       services[name] = make({ fastify, user: request.user, extras })
-    } catch { /* service unavailable this request */ }
+    } catch (e) {
+      // ⚠️⚠️ THIS CATCH USED TO BE EMPTY, AND THAT MATTERED THE MOMENT A FACTORY STARTED REFUSING ON PURPOSE.
+      // D1 Phase-3 preparation makes the `retention` factory refuse to build without a declared writer, so that an
+      // undeclared caller cannot write unattributed. With a silent catch, that refusal became an ABSENT SERVICE and
+      // nothing said why — a silent degrade, which is the exact failure Ote's ruling was written to prevent
+      // (*"I expect this boundary to fail loudly rather than silently degrade to an unknown writer"*).
+      // ⛔ The turn is still not broken by a failing factory — that contract is unchanged. Only the silence is.
+      const why = e?.code === 'NO_WRITER' ? e.message : `factory failed: ${e?.message ?? e}`
+      try { (fastify?.log ?? logger)?.warn?.({ service: name, origin: extras?.origin ?? null, code: e?.code ?? null }, `[runtime] host service "${name}" is UNAVAILABLE this request — ${why}`) } catch { /* logging is never load-bearing */ }
+    }
   }
   // serviceInfo backs @ote/tool-service-overview: a diagnostic view of the assembled persona +
   // provider + DB counts. Built here (needs the caller + a live DB handle + the runtime).

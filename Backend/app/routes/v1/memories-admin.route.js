@@ -20,6 +20,7 @@ import { extractModel, extractEnabled } from '../../components/memory-extract-ho
 import { buildMemoryV2 } from '../../components/memory-v2-host.js'
 import { logMemoryChange, snapshot } from '../../audit/memory-log.js'
 import { getSetting } from '../../settings/index.js'
+import { WRITER, ACT_KIND } from '../../components/memory-writer-contracts.js'
 
 /** Audit label for an admin acting on someone else's memory — 'root' or 'admin:<username>', so the trail
  *  distinguishes an operator's intervention from the owner's own edit or a background job. */
@@ -105,7 +106,12 @@ export default async function memoriesAdminRoutes(fastify) {
   fastify.post('/admin/memories/:id/forget', { preHandler: systemConfig }, async (request, reply) => {
     const row = await Memories().findOne({ where: { id: request.params.id }, raw: true })
     if (!row) return reply.code(404).send({ error: 'not found' })
-    const mem = buildMemoryV2(fastify, { userId: row.user_id ?? null, persona: row.persona ?? null, actor: actorFor(request) })
+    // ⭐⭐ D1 PHASE 3, item 2 (Ote, 2026-09-16): *"Mandatory writer identity applies to memory-semantic mutations, not
+    // only inserts. Insert/update/supersede/invalidate/archive/forget operations all represent authored memory acts."*
+    // ⓘ `request` is the act kind for "an operator act through the admin surface — the request identity", and this IS
+    // that surface. Fastify's own request id is the occasion: one forget, one act, no minting needed.
+    const mem = buildMemoryV2(fastify, { userId: row.user_id ?? null, persona: row.persona ?? null, actor: actorFor(request),
+      writer: WRITER.admin, act: { kind: ACT_KIND.request, id: String(request.id) } })
     const res = await mem.forget({ id: request.params.id })
     return { ok: true, forgotten: res.forgotten, restored: res.restored ?? null }
   })
@@ -117,7 +123,9 @@ export default async function memoriesAdminRoutes(fastify) {
   fastify.post('/admin/memories/:id/restore', { preHandler: systemConfig }, async (request, reply) => {
     const row = await Memories().findOne({ where: { id: request.params.id }, raw: true })
     if (!row) return reply.code(404).send({ error: 'not found' })
-    const mem = buildMemoryV2(fastify, { userId: row.user_id ?? null, persona: row.persona ?? null, actor: actorFor(request) })
+    // ⭐ Same ruling as forget above — a restore is an authored memory act through the admin surface.
+    const mem = buildMemoryV2(fastify, { userId: row.user_id ?? null, persona: row.persona ?? null, actor: actorFor(request),
+      writer: WRITER.admin, act: { kind: ACT_KIND.request, id: String(request.id) } })
     return mem.restore({ id: request.params.id })
   })
 

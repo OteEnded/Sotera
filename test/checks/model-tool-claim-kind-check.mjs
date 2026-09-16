@@ -34,6 +34,7 @@ import { RETENTION_STATE } from '../../Backend/app/components/memory-write-recei
 import { commitToMemory } from '../../Backend/app/components/memory-pipeline-host.js'
 import { makeObservation } from '@ote/memory/cognition/memory-observation.js'
 import { declareQuestion, proposeBind, confirmBind } from '../../Backend/app/components/memory-declaration-host.js'
+import { WRITER, ACT_KIND, REACH_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
 
 const { check, done } = makeChecker('model-tool-claim-kind')
 const config = loadConfig()
@@ -92,7 +93,12 @@ try {
   /** ⭐ EXACTLY the context a chat turn builds — ⛔ the check must not model it differently. */
   const ctx = buildToolContext(fastify, {
     user: { id: me.id, username: me.username, displayName: 'agent_dev', isRoot: false, capabilities: [] },
-  }, { origin: 'zz_mtck', messageId: TURN, conversationId: convoId })
+    // ⭐ D1 Phase-3 preparation (Ote, 2026-09-16): *"test/check → declares the writer/act/reach it claims to exercise."*
+    // This check drives the REAL runtime and runs `keep`, i.e. it exercises a chat-turn write — so the EXTRAS below
+    // declare one. ⓘ Retention now refuses to build for a tool context with no writer, which is what makes that a
+    // declaration rather than decoration: remove it and the `keep` below stops finding its tool.
+  }, { origin: 'zz_mtck', messageId: TURN, conversationId: convoId,
+    writer: WRITER.chatTool, act: { kind: ACT_KIND.turn, id: TURN }, reach: { kind: REACH_KIND.turn, messageId: TURN, conversationId: convoId } })
 
   // ══ 0 · ⭐ THE TOOL REALLY ACCEPTS THE ARGUMENT — ⛔ else everything below is untestable ══════════
   const seed = await runTool('keep', { what: 'seed-value', kind: 'fact', mine: false, attribute: ATTR }, ctx)

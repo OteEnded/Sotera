@@ -557,6 +557,19 @@ export function buildRetention(fastify, {
 }
 
 let initialized = false
+/**
+ * ⭐ The tool-context writer, or a refusal — ⛔ never a silent null. Named `NO_WRITER` so the runtime's host-service
+ * catch can report it as a deliberate refusal rather than as a factory that happened to fail.
+ */
+function requireWriter(extras) {
+  const w = extras?.writer ?? null
+  if (w) return w
+  const e = new Error(`retention refuses to build with no declared writer (origin: ${extras?.origin ?? 'unknown'}) — `
+    + 'a retention service writes, and a write with no writer is unattributable')
+  e.code = 'NO_WRITER'
+  throw e
+}
+
 export function initRetention() {
   if (initialized) return
   initialized = true
@@ -566,7 +579,19 @@ export function initRetention() {
     buildRetention(f, {
       userId: user?.id ?? null,
       sourceMessageId: extras?.messageId ?? null,
-      writer: extras?.writer ?? null,
+      // ⭐⭐⭐ D1 PHASE-3 PREPARATION — THE BOUNDARY IS HARD NOW (Ote, 2026-09-16): *"make the retention-host default
+      // throw rather than silently falling back to null."*
+      //
+      // ⚠️ THIS WAS `extras?.writer ?? null` — the `coalesce-to-zero-is-a-silent-decision` shape exactly: a caller that
+      // forgot to declare got an UNKNOWN writer and a durable row, and nothing anywhere said so. Retention exists to
+      // WRITE (`keep` / `retain`), so a retention service with no writer is a service that can only produce
+      // unattributable rows. ⇒ it refuses to be built at all.
+      // ⓘ Safe as of today because the known-caller fix came FIRST, in his stated order: all four `buildToolContext`
+      // callers now declare (chat-tool · reflection · followthrough · job).
+      // ⛔ `buildRetention` itself is NOT hardened — it is called directly by checks that legitimately exercise other
+      // writers (`lesson` declares its own internally). This is the TOOL-CONTEXT boundary, which is where the silent
+      // default lived.
+      writer: requireWriter(extras),
       act: extras?.act ?? null,
       reach: extras?.reach ?? null,
       citations: extras?.citations ?? null,

@@ -14,6 +14,8 @@ import { runtime, listSkills, buildToolContext, runTool } from '../components/ru
 import { internalCallHeaders } from '../auth/index.js'
 import { ownerIdOf } from '../auth/owner.js'
 import { isRootConnectedUser } from '../auth/root-identity.js'
+import { WRITER, ACT_KIND } from '../components/memory-writer-contracts.js'
+import { randomUUID } from 'node:crypto'
 import { loadRootPrefs } from '../routes/v1/me-prefs.route.js'
 import { getSetting } from '../settings/index.js'
 import { notifyChatEvent } from '../chat/notify.js'
@@ -225,7 +227,20 @@ async function runToolAction(fastify, row) {
       isRoot: isRootConnectedUser(fastify.config, row.user_id),
       capabilities: [],
     },
-  }, { timezone, origin: 'schedule' })
+    // ⭐⭐ D1 PHASE-3 PREPARATION (Ote, 2026-09-16): *"First make the scheduled tool action explicitly declare
+    // writer: 'job'. Do the known-caller fix before making the boundary hard."*
+    //
+    // ⚠️ THIS WAS THE ONE PRODUCTION PATH THAT COULD WRITE UNATTRIBUTED. `runToolAction` runs an arbitrary tool id, so
+    // a schedule whose action is `remember_fact` / `keep` / `retain` reached the store through a context declaring no
+    // writer, and `extras.writer ?? null` turned that into a silent unknown. ⓘ Measured before the fix: 0 rows in
+    // `mst_trigger_jobs`, so no schedule had ever been configured and nothing was ever written this way.
+    // ⓘ A scheduled SKILL turn needs nothing here — it `inject`s into the real chat route and inherits `chat-tool`.
+    //
+    // ⛔ THE ACT IS MINTED, NOT LOOKED UP, AND THE REASON IS IN THE ORDER OF OPERATIONS: `store.createRun` writes the
+    // `log_trigger_job_runs` row AFTER the performer returns (it records status and duration), so the run's own id does
+    // not exist yet at this point. A minted id identifies THIS FIRING, which is what the act axis is for; using
+    // `row.id` would have been the job, so two firings would have shared one occasion.
+  }, { timezone, origin: 'schedule', writer: WRITER.job, act: { kind: ACT_KIND.job, id: randomUUID() } })
   const result = await runTool(toolId, args || {}, ctx)
   // runTool reports failures as { error } instead of throwing — surface them as run failures
   if (result && typeof result === 'object' && result.error) {
