@@ -171,6 +171,21 @@ for (const [key, [fate, note]] of Object.entries(FATE_NOTES)) {
 const unfated = rows.filter((r) => !FATE_NOTES[r.fate])
 check('⛔ every transition carries a DECLARED fate — none defaulted',
   unfated.length === 0, unfated.map((r) => r.slot).join(', ') || `all ${rows.length} declared`)
+
+// ⭐⭐ THE RED-PROOF FOR DEFECT #13, pinned at Ote's request: "the corrected instrument should remain
+// transition-keyed and should assert that no fate was inherited from another transition."
+// ⛔ A generic "every fate is declared" check would still pass if someone re-grouped BY SLOT, because the
+// fates would merely be copied. ⇒ this asserts the case that CANNOT survive slot-grouping: the two
+// `communication preference` transitions must hold DIFFERENT fates. If that ever collapses to one, the
+// instrument has silently reverted to keying on the label.
+const commPref = rows.filter((r) => r.slot === 'communication preference')
+check('⭐⭐ NO FATE IS INHERITED FROM ANOTHER TRANSITION — the two `communication preference` events differ',
+  commPref.length === 2 && commPref[0].fate !== commPref[1].fate,
+  `${commPref.length} transitions · fates: ${commPref.map((r) => r.fate).join(' vs ')}`)
+check('⭐ each fate is read from the transition\'s OWN declaration — ⛔ never from a slot-level lookup',
+  rows.every((r) => Object.prototype.hasOwnProperty.call(
+    ANALYSIS.find((a) => a.from === r.from && a.to === r.to) ?? {}, 'fate')),
+  `${rows.length} transitions, each pinned by its own (from,to)`)
 console.log('\n   ⇒ ⭐⭐ AT LEAST THREE DISTINCT FATES ARE REQUIRED by nine events — still-true-and-better,')
 console.log('     true-but-past, and false. ⛔ ONE `invalid_at` EXPRESSES ALL THREE IDENTICALLY.')
 console.log('   ⚠️ And note the axis: these group by WHAT BECOMES OF THE OLD ROW, ⛔ not by how the NEW value')

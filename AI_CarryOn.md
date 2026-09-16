@@ -186,8 +186,25 @@ decision. ⛔ Not reopened.
    ⇒ ⚠️⚠️ THE COLLISION, ⛔ WHICH IS OTE'S TO RESOLVE: A-D4 asks the RESOLVER to decide FROM SIMILARITY
    that two labels name the same property; 047 ruled that what question a slot asks may ONLY be DECLARED.
    ⛔ NOT A RULING AND NOT A RECOMMENDATION — surfaced so that deciding A-D4 cannot silently overrule 047.
-   ⚠️ It is also possible 047 was scoped to ANSWER VALIDITY and not to SLOT SAMENESS. ⛔ THE RECORD DOES
-   NOT ESTABLISH WHICH, and that reading is his.
+㉑ ⭐⭐⭐ 047 SCOPE — ✅ SETTLED FROM THE SOURCE (2026-09-17): it is **C — BOTH** identity AND validity.
+   ⛔ "A, validity only" is REFUTED. `resolveSlotQuestion` "RETURNS TWO THINGS AND KEEPS THEM APART: the
+   question IDENTITY (`slotKind` → `checkKind` — *is this the same question?*) and the declared CHECKS
+   (→ `evaluate` — *is this a valid answer?*)."
+   ⚠️⚠️ BUT ⛔ THAT DOES NOT SETTLE A-D4, because it is A DIFFERENT RELATION:
+     047      CLAIM ↔ SLOT   both sides DECLARED · EXACT match · REPLACEMENT only
+     A-D4     LABEL ↔ LABEL  INFERRED by similarity · ROUTING
+   ⭐ Exercised: `checkKind('preferred-name','preferred name')` ⇒ **DEFER**. ⛔ NO SIMILARITY CAN EVER
+   SATISFY THAT GATE, and it never reads a label, alias, embedding or value.
+   ⭐⭐⭐ THE STRUCTURAL FACT: THE RESOLVER AND THE QUESTION LAYER NEVER MEET — 0 references to
+   `question_id/slotKind/claimKind/question_key` in resolver+ontology+normalize. ⇒ routing is ungoverned
+   by 047 TODAY. ⚠️ AND THE COUNTER-ARGUMENT, STATED NOT BURIED: the gate is DOWNSTREAM of routing and
+   ASSUMES IT WAS CORRECT — a volunteering observation mis-routed into `work schedule` and declaring
+   `claimKind='work-schedule'` is gated **ALLOW**. ⇒ 047's guarantee is conditional on exactly the
+   decision A-D4 is about.
+   ⏸ ⚠️ GENUINELY AMBIGUOUS whether 047's PRINCIPLE ("never guessed by a classifier") reaches routing.
+   ⛔ NO BEHAVIOURAL PRECEDENT EXISTS: 1 question declared (the harness canary), 1 of 112 slots bound,
+   **0 non-harness rows ever pinned** ⇒ the machinery has never run on a real memory. ⛔ OTE'S TO RULE.
+   → `INVESTIGATION_SOTERA_047_SCOPE.md` · `test/checks/m2-047-scope-check.mjs`
 ```
 
 ---
@@ -256,7 +273,7 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
 ⭐⭐⭐ REPLACEMENT SEMANTICS — ⛔ THE CURRENT INVESTIGATION BLOCKER (Ote, 2026-09-17, his words)
        Question: what semantic relationship exists between successive observations that currently appear
                  as "superseded"?
-       Blocks:   ⛔ A-D4 broader-slot behaviour · ⛔ the interpretation of Slot identity / current value /
+       Blocks:   ⛔ A-D4 broader-slot behaviour (⛔ ALSO BLOCKED ON 047 SCOPE — see §0-B ㉑) · ⛔ the interpretation of Slot identity / current value /
                  history · ⛔ the future Dreaming treatment of change
        ⛔ NO IMPLEMENTATION CHANGES.
        ⭐ EVIDENCE IN (`replacement-relation-census.mjs`): ⭐⭐⭐ THE RELATION WAS NEVER RECORDED — 1 of 9

@@ -9963,3 +9963,69 @@ check asserts none defaulted.
 
 **Verification:** relation census all green · unit **753/753** · `@ote/memory` **123/123** · evidence baseline
 green · 4 candidates unreviewed · both collisions armed. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · 047 SCOPE — settled from the source: C (both), and it still does not settle A-D4
+
+Ote's single narrow deliverable: determine from the actual migration, code and tests whether
+*"Kind is the QUESTION a slot asks … declared … never inferred … never guessed by a classifier"* governs
+**A** answer validity only, **B** slot/question identity, or **C** both — explicitly warning me not to pick
+whichever reading makes A-D4 easier, and to report ambiguity as ambiguity.
+
+**Instrument** → `test/checks/m2-047-scope-check.mjs`. It does not argue the verdict; it pins the checkable
+claims the verdict rests on, exercising the pure gates rather than quoting their comments.
+
+### The verdict: **C — both.** A is refuted by the source.
+
+`resolveSlotQuestion` states the split as its contract: *"RETURNS TWO THINGS AND KEEPS THEM APART: the
+question IDENTITY (`slotKind`, consumed by `checkKind` — is this the same question?) and the declared CHECKS
+(consumed by `evaluate` — is this a valid answer?). A resolve that returned only one would make the other
+silently unenforceable."*
+
+### ⚠️ But it does not settle A-D4, because it is a different relation
+
+```
+047     CLAIM ↔ SLOT    both sides DECLARED · EXACT match · REPLACEMENT only
+A-D4    LABEL ↔ LABEL   INFERRED by similarity · ROUTING
+```
+
+Exercised: `checkKind('preferred-name', 'preferred name')` ⇒ **DEFER**. No similarity can ever satisfy that
+gate, and it never reads a label, alias, embedding or value. The gate is also scoped to UPDATE *by
+placement* — NOOP/DUPLICATE return before `create` is called.
+
+**The structural fact:** scanning `memory-slot-resolver.js`, `memory-ontology.js` and `memory-normalize.js`
+for `question_id · questionId · slotKind · claimKind · question_key` finds **none**. The resolver and the
+question layer never meet — routing is ungoverned by 047 today.
+
+**And the counter-argument, stated rather than buried:** the gate is downstream of routing and *assumes it
+was correct*. A volunteering observation mis-routed into `work schedule` by the `schedule` alias, declaring
+`claimKind='work-schedule'`, is gated **ALLOW**. So 047's guarantee is conditional on exactly the decision
+A-D4 is about — which is the strongest argument that the two cannot be cleanly separated.
+
+### Reported as ambiguous, with both readings
+
+**①** 047 does not reach it — the migration itself says *"minting a slot (addressing it) is not the same act
+as declaring what a valid answer looks like"*, `question_id IS NULL` is an explicit non-claim, 111 of 112
+slots are undeclared and write freely, and 047 calls that the ruling working.
+**②** 047 does reach it — the prose is unrestricted (*"never guessed by a classifier"*), routing by
+similarity *is* deciding which question an observation answers, and 047's own justification was that a type
+vocabulary and a text classifier both failed because each *"presupposes the question is already known"* —
+which containment and cosine also do, and A1 measured them making the same error.
+
+**Nothing in the record disambiguates**, and there is no behavioural precedent: 1 question declared (the
+harness canary), 1 of 112 slots bound, **0 non-harness rows ever pinned**. The machinery has never operated
+on a real memory. Ote's to rule.
+
+**Also done, at his request:** the relation census is now transition-keyed with a red-proof — the two
+`communication preference` transitions must hold **different** fates (`better` vs `unknown`), which
+slot-grouping cannot produce.
+
+**Instrument defect 14:** my source scan for the decisive sentence failed on a sentence that is plainly
+there — the docstring wraps mid-phrase, so the file contains `*is this\n * a valid answer?*`. The tempting
+fix was the wrong one: shortening the anchor would have made it pass *and* vacuous. It now strips comment
+markers, collapses whitespace, and still matches the whole sentence.
+
+**Verification:** 047 scope check green · relation census green · unit **753/753** · `@ote/memory`
+**123/123** · evidence baseline green · both collisions armed · the contested transition intact.
+⛔ Nothing was written.
