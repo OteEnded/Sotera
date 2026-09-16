@@ -140,6 +140,24 @@ decision. ⛔ Not reopened.
      · my own shape classifier matching a RAW label, misfiling 5 labels while judging someone else's naming.
    ⇒ ⭐ ASSERT BEHAVIOUR ACROSS THE ACTUAL SEAM — ⛔ not grep, not counts, not names — and assert the
    instrument ENGAGED (activation / anti-vacuity) before believing a single thing it reports.
+⑰ ⭐⭐⭐ AN INSTRUMENT MUST NOT ASSUME THE THING IT IS MEASURING. Building the slot-behaviour census I
+   grouped memory rows BY `canonical_label` — inside the tool investigating whether a LABEL IS AN
+   IDENTITY. Two slots share the label `communication preference`, so their histories merged and the
+   merged slot appeared to hold TWO LIVE ROWS: a violation of "one slot holds one answer" that does not
+   exist. ⇒ ⭐ key on the IDENTITY, never on the name. And in the same file an INNER JOIN silently
+   dropped every slot holding no rows — 65 slots vs 95, same corpus, same day, ⛔ one keyword apart.
+   ⇒ ⭐⭐ **STATE THE EXCLUSION LADDER.** A denominator that nobody can reconstruct is one nobody can check.
+⑱ ⭐⭐⭐ PROPERTY/SLOT ≠ OBSERVATION/PROPOSITION (Ote, 2026-09-17 — the gate before A-D4).
+   `timezone` · `current project` are PROPERTIES: one current answer, replaced when the world moves.
+   `nature of relationship` · `view of selfhood` · `metaphorical meaning of Rome` are OBSERVATIONS.
+   ⭐ **A descriptive observation is not necessarily a badly named property.** Forcing one head-final so
+   the resolver can read it may DESTROY what the observation was ⇒ the failure mode of "fixing" this is
+   LOSS, not correction. ⛔ Do NOT design the second model. ⭐ THE INVARIANT IT DOES give us:
+   **ONE SLOT HOLDS ONE ANSWER** — `occupation_and_location` is not ugly naming, it is structurally
+   unable to be right, because one value cannot independently answer two propositions.
+   ⚠️ And it is ⛔ NOT the naming axis: 43 WELL-NAMED slots have also never held a second answer.
+   ⇒ ⭐⭐ DO NOT MAKE THE RESOLVER CARRY SEMANTICS THAT BELONG SOMEWHERE ELSE.
+   → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md`
 ```
 
 ---
@@ -164,6 +182,15 @@ OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · r
               `deploy schedule` → the work-schedule slot (1.0000, NARROWER) — both from the `schedule` alias
   ⚠️ The Saturdays/Sundays contradiction is NOT live — reflection superseded it 09-16 13:40. The evidence is
      the LINEAGE (dead-but-kept + supersedes_id). ⛔ Do not describe it as a live disagreement.
+
+⭐ THE SLOT CENSUS (`node test/checks/slot-behaviour-census.mjs` — read-only, writes nothing):
+  112 slots = 16 `zz` fixtures + 30 holding NO memory row + 1 harness canary + 65 CENSUSED
+  7 of 65 ever superseded (10.8%) over 38 days · ⚠️ that 89.2% is AGE-CONFOUNDED and proves nothing alone
+  ⭐ the finding is the NUMERATOR: of the 7, ONE was a world-change (the Mira fixture) · 1 `operator` repair
+    · 4 RE-STATEMENTS (same answer, reworded) · 1 the known `work schedule` defect ⇒ ORGANIC count ZERO
+  cross-tab vs naming: READABLE 6 sup / 43 never · UNREADABLE 1 / 15 ⇒ ⛔ the boundary is NOT the label
+  value form (64 live): 20.3% are 1–3 words · 28.1% are 21+ · 50% carry a sentence terminator
+  ✅ INVARIANT HOLDS: no slot carries more than one LIVE row — "one slot holds one answer" is true today
 ```
 
 **BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) → **Phase 3 refusal** · the attribution
@@ -196,18 +223,39 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
 # 0-E · ⏸ OPEN — all Ote's, none blocking
 
 ```
-A-D4   ⭐⭐⭐ THE GATE. Durable behaviour for `broader` / `narrower` / `sibling`. ⚠️ A1's measurement made it
-       HARDER, not easier: `broader` is NOT always an error, so "broader → mint a new slot" would fragment
-       `programming_language` into a FOURTH sibling of three that already exist.
+SLOT/OBS ⭐⭐⭐ THE GATE BEFORE THE GATE (Ote, 2026-09-17): *"Before A-D4, let's understand the slot/observation
+       semantic boundary."* ⇒ A-D4 asks what it should MEAN to bind two phrasings into one slot, and that is
+       unanswerable while *what a slot is FOR* is open:
+         slot = A CURRENT ANSWER      ⇒ binding merges two questions into one answer  → must be rare + strict
+         slot = AN ACCUMULATING RECORD ⇒ binding relates two observations              → cheap + reversible
+       ⛔ Those imply OPPOSITE rulings on `broader`; deciding A-D4 first would silently pick one.
+       ⭐ Evidence is IN (`slot-behaviour-census.mjs`, read-only): in 38 days the slot's defining act —
+       replacing the answer because the world changed — fired ONCE, and that once is the Mira fixture Ote
+       authored to test it. Of 7 supersessions: 1 fixture · 1 `operator` repair · 4 RE-STATEMENTS · 1 the
+       known A defect. ⇒ in ORGANIC traffic, ZERO.
+       ⚠️ ⛔ THAT IS NOT "SLOTS ARE WRONG". 38 days is short and stability is what a property slot is FOR.
+       ⭐ The defensible claim is narrower: **we have no evidence the slot model is doing the work it was
+       built to do, and the one instrument that would tell us cannot tell a CHANGED ANSWER from a REWORDED
+       one** — `reconcilePlan` supersedes on `norm(a) !== norm(b)`, pure string inequality.
+       ⏸ ⛔ NOTHING AUTHORISED. Ote has the ruling. → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md`
+A-D4   ⭐⭐⭐ Durable behaviour for `broader` / `narrower` / `sibling`. ⛔ HELD BEHIND SLOT/OBS ABOVE.
+       ⚠️ A1's measurement made it HARDER, not easier: `broader` is NOT always an error, so "broader → mint a
+       new slot" would fragment `programming_language` into a FOURTH sibling of three that already exist.
        ⇒ A1 authority is blocked on this. Shadow is safe precisely because it cannot decide it.
 A1     shadow + ACCUMULATE. Next: read `memory.resolver.ontology_*` telemetry on real traffic.
 B-D1   the radius. MEASURED, ⛔ NOT DECIDED — unchanged at ±4. Reach to the conversation's opening statement:
        ±4=63% · ±6=83% · ±8=85% · ±12=96%. ⭐⭐ COST IS NOT THE CONSTRAINT (±12 ≈ 3.2k of ~99k tokens) ⇒ this
        is a purely COGNITIVE question: *what must she be able to move through and see?*
 B-D3   may an `incomplete` projection still claim `BASIS.attestedBySource`? ⛔ LATTICE UNTOUCHED.
-UNKNOWN the upstream naming question. Evidence is in; ⛔ no fix authorised. 4 malformed coordinations · 19
-       legitimate observations in a property-shaped slot · 0 ontology questions.
-       ⏸ The real question it raises: **what is a slot FOR**, if 19 of 23 real memories do not fit one?
+UNKNOWN ✅ INVESTIGATION COMPLETE (Ote ratified 2026-09-17). ⛔ NO FIX AUTHORISED — and ⛔ do NOT clean up
+       the analyser's own dishonest reasons either: *"Keep recording them until we finish establishing the
+       instrument contract."* 4 malformed coordinations · 19 legitimate observations in a property-shaped
+       slot · 0 ontology questions. Writers: `chat-tool` 42.3% · `reflection` 33.3% · `extractor` **3.7%**.
+       ⛔⛔ THE CAVEAT THAT MUST TRAVEL WITH ANY CITATION: `"response to thank you"` / `"response to
+       appreciation"` is ⛔ NOT evidence that better naming would fix the merge — *"It only proves that
+       better naming would allow the ontology to CONSIDER the pair. The ontology could still correctly
+       classify them as `sibling`."* ⇒ better naming buys THE QUESTION, never automatically THE MERGE.
+       ⏸ It handed us the SLOT/OBS gate above.
 DREAMING 5 decisions (`PLAN_SOTERA_DREAMING_PATH_AND_COGNITIVE_E2E.md` §6): ① WHICH Dreaming ② may it write
        ③ commission M2 or defer ④ milestone scope ⑤ D10 + prefill separate. ⭐ Recommendation: DEFER.
 NAVIGATION design-only. `inspect → follow → compare`. ⛔ Nothing below "there is more" exists or is authorised;
@@ -236,6 +284,12 @@ M2     the deferred governance-READ decision (couples to ⓔ). Not urgent.
       would have passed 100% and proved nothing. CONSTRUCT THE ATTACK before taking credit.
 ⭐⭐  A DATE IS A LOCAL FACT. `toISOString()` is UTC; `::date` is the SESSION's zone — and psql and
       Sequelize DISAGREE. Name the zone explicitly or ship an off-by-one day.
+      ⚠️ 2026-09-17: I MADE THIS EXACT MISTAKE AGAIN with the lesson already written here. `INDEX.md`
+      stamped "Generated 2026-09-16" at 01:12 local on the 17th, because SEAST is UTC+7 and every run
+      before 07:00 lost a day. ⇒ ⭐ a rule in a lessons file does not defend code; ⛔ the only defence
+      is ONE clock per artefact — and `git log --date=short` was already local, so the file disagreed
+      with itself. ⚠️ Also: a `git log` date is EMPTY for an uncommitted doc, and a blank cell reads
+      as "undated" rather than "new". Fall back to mtime and MARK IT (`⁺`) — never blend two kinds.
 ⭐⭐  ⛔ NEVER assert a GLOBAL ABSENCE — read a BASELINE inside the run and assert the DELTA.
 ⭐⭐  `col <> 'x'` IS NULL-UNSAFE AND SILENTLY GREEN ⇒ `IS DISTINCT FROM`.
 ⭐⭐  TWO fixtures under ONE entity COLLAPSE INTO ONE SLOT — separate the ENTITY, not just the label.

@@ -9785,3 +9785,54 @@ password advisory.
 **Final verification:** unit **753/753** · `@ote/memory` **123/123** · evidence baseline green · 15 checks green ·
 112 slots · 8 aliases · 22 scans with 4 unreviewed · both armed collisions intact · `:8210` and `:8201` healthy ·
 all three trees committed, Sotera pushed.
+
+---
+
+## 2026-09-17 · THE SLOT/OBSERVATION BOUNDARY — Ote's ruling recorded, and the first evidence for it
+
+Ote closed the `unknown` investigation and named the next gate: *"Before A-D4, let's understand the
+slot/observation semantic boundary."* ⛔ No fixes authorised — the tool description, the extractor prompt, the
+4 malformed coordination labels, the analyser's own dishonest reasons and every historical row are untouched.
+
+**Recorded** → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md`: the PROPERTY/SLOT vs OBSERVATION/PROPOSITION
+signal in his terms; the invariant **one slot holds one answer** (which is why `occupation_and_location` is not
+ugly naming but structurally unable to be right); the caveat that must travel with any citation — better naming
+buys *the question*, never automatically *the merge*; and the instrument-defect ledger he asked to keep growing.
+
+**New evidence** → `test/checks/slot-behaviour-census.mjs` (read-only; writes nothing, calls no model). The slot
+model's own docstring says a slot is *"the LONG-LIVED IDENTITY of a conceptual property"*, which makes it
+falsifiable: **has it ever done that?**
+
+- **The denominator is age-confounded and is reported as context only** — 7 of 65 censused slots ever superseded
+  over 38 days. A timezone does not change in 38 days; absence of change is not incapacity to change.
+- ⭐ **The finding rests on the numerator, which is not age-confounded.** Of the 7 supersessions that *did*
+  happen: **1** was a world-change (the Mira fixture Ote authored to test exactly this) · 1 was an `operator`
+  repair of an extraction error · **4 were RE-STATEMENTS** — the same answer reworded · 1 was the known
+  `work schedule` defect. ⇒ in organic traffic the count is **zero**.
+- ⭐⭐ **Why:** `reconcilePlan` supersedes on `norm(a) !== norm(b)` — pure string inequality. The system cannot
+  tell a changed answer from a reworded one, so the 10.8% is an **upper bound** on belief revision, never a
+  count of it.
+- ⭐ **The boundary is not the naming axis.** Cross-tab: 43 slots whose label *is* a well-formed property name
+  have also never held a second answer. ⇒ better naming cannot be the fix, and the resolver is not where it lives.
+- ✅ **The invariant holds today:** no slot carries more than one live row.
+
+⚠️ **The honest limit, stated in the doc:** this does **not** show the slot model is wrong. Stability is what a
+property slot is *for*. The defensible claim is narrower — *we have no evidence the slot model is doing the work
+it was built to do, and the one instrument that would tell us cannot distinguish a changed answer from a reworded
+one.* That is exactly why A-D4 waits: `slot = a current answer` and `slot = an accumulating record` imply
+**opposite** rulings on `broader`.
+
+**Two instrument defects of my own, recorded rather than hidden** (§0-B ⑰): I grouped memory rows by
+`canonical_label` inside the tool investigating whether a label is an identity — two slots share
+`communication preference`, so their histories merged and a non-existent "two live rows" violation appeared. And
+an INNER JOIN silently dropped every slot holding no rows: 65 vs 95, same corpus, same day, one keyword apart.
+The census now keys on `slot.id` and prints its full exclusion ladder.
+
+**And one lesson that did not hold:** §0-F already said *"a date is a local fact"*, and `INDEX-generate.mjs`
+still stamped "Generated 2026-09-16" at 01:12 local on the 17th — `toISOString()` is UTC, SEAST is UTC+7, and
+`git log --date=short` in the same file was already local, so the index disagreed with itself. Fixed to one
+local clock; an uncommitted doc now falls back to mtime and is **marked** `⁺` rather than shown blank.
+
+**Verification:** unit **753/753** · `@ote/memory` **123/123** · `evidence-baseline-check` green — 22 scans,
+5 candidates, **4 still unreviewed**, both armed collisions intact, 112 slots / 8 aliases, both `.bak` files
+preserved. ⛔ The census wrote nothing.
