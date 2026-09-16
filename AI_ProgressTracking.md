@@ -10029,3 +10029,66 @@ markers, collapses whitespace, and still matches the whole sentence.
 **Verification:** 047 scope check green · relation census green · unit **753/753** · `@ote/memory`
 **123/123** · evidence baseline green · both collisions armed · the contested transition intact.
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · THE ROUTING ACT — operational in its ceremony, semantic in its consequences
+
+Ote's narrow question: when the resolver chooses a Slot, is it selecting an operational destination or
+semantically asserting that the observation answers that Slot's question? With his three-act frame —
+ADDRESS / DECLARE QUESTION / ADMIT ANSWER — and the open part being whether ① and ② are independent.
+⛔ Read-only; nothing modified.
+
+**Instrument** → `test/checks/routing-act-scope-check.mjs`. Structural facts only: a column that exists or
+does not, a value that flows or does not. ⛔ No assertion rests on a comment's wording.
+
+### The answer is not one of the two options
+
+**Ceremony says operational:** `mst_slots` has **no authorship column at all** — no `writer`, `act_kind`,
+`act_id`, `occasion`, `declared_by` or `author`. What minting records is
+`evidence = {mintedBy: 'reconcileFact'}` — **a function name, not an actor**. `ensure()` is a bare
+`findOrCreate`: **no ACT is required to mint a concept.**
+
+**Consequences say semantic:** `slot_id` is declared *"the long-lived identity of the concept"*; the
+resolver's own contract is *"which conceptual slot does this observation belong to? That is
+CLASSIFICATION"*; a successful routing is **promoted to a durable alias** that steers every future write;
+and routing is **irreversible** — no shipped path assigns `txn_memories.slot_id` after creation.
+
+**The decisive fact, measured:** **77 of 77 supersessions stay inside one slot.** Routing chooses
+`slot_id` → `matches` → `primary` → what `resolveConflict` supersedes. ⇒ `slot_id` is **the competition
+boundary, not a filing label** — it decides which existing belief may be invalidated. A filing decision
+cannot destroy a belief; this one did, in the shelter case.
+
+**And the asymmetry that shows the system already knows the difference:** teaching an alias is **governed**
+(A3 refuses without an ACT — 4 refusals ledgered); minting a concept is **not**. The cheaper act is gated.
+Separately, **7 slots with `question_id IS NULL` have already invalidated a belief** — undeclared slots
+exercise replacement authority, identified by label rather than by declaration.
+
+### Reported as ambiguous, both readings given
+
+**①** independent — 047 says *"minting a slot (addressing it) is not the same act as declaring…"*, the
+schema gives questions `declared_by`/`declared_in_occasion` and slots nothing, and `question_id IS NULL` is
+an explicit non-claim. **②** not independent — 047 also defines a slot as *"a slot **instance** of"* a
+question, i.e. question + subject; and the label is doing a question's work (routing, aliasing,
+supersession) while carrying none of a question's declaration guarantees.
+
+Nothing states which reading is intended, and there is no behavioural precedent: 1 question declared (the
+harness canary), 1 of 112 slots bound, 0 non-harness rows admitted under one. **Ote's to rule.**
+
+### Two instrument defects, and the first is the most instructive yet
+
+**#15** — my re-route scan reported **two** re-route paths and **both were false**. `/UPDATE[^;]*SET[^;]*slot_id/`
+runs `[^;]*` across an entire CTE, so it matched the BIND statement where the `UPDATE` sets
+`mst_slots.question_id` and `slot_id` appears later only as a **column name in the `log_slot_bindings`
+INSERT list**. The "re-route path" it found was **the one act in this area that is fully governed**. A regex
+spanning a statement boundary is not a statement match. The scan now binds the assignment to its target
+table and carries a **positive control** (a genuine re-route is still caught) and a **negative control**
+(the BIND statement is pinned as not-a-re-route).
+
+**#16** — earlier in the same pass I asserted "no re-route path exists" from a **line-oriented grep that
+could not see a multi-line statement at all**. It reached the right answer by luck. A conclusion that is
+right because the instrument was blind is not established.
+
+**Verification:** routing check green with both controls · 047 scope check green · relation census green ·
+unit **753/753** · evidence baseline green · both collisions armed · contested transition intact.
+⛔ Nothing was written.

@@ -205,6 +205,24 @@ decision. ⛔ Not reopened.
    ⛔ NO BEHAVIOURAL PRECEDENT EXISTS: 1 question declared (the harness canary), 1 of 112 slots bound,
    **0 non-harness rows ever pinned** ⇒ the machinery has never run on a real memory. ⛔ OTE'S TO RULE.
    → `INVESTIGATION_SOTERA_047_SCOPE.md` · `test/checks/m2-047-scope-check.mjs`
+㉒ ⭐⭐⭐ THE ROUTING ACT — the system treats it as OPERATIONAL in its CEREMONY and SEMANTIC in its
+   CONSEQUENCES. ⛔ Not a hedge; both halves are structural.
+     CEREMONY   `mst_slots` has ⛔ NO authorship column AT ALL (no writer/act/occasion/declared_by) ·
+                `evidence={mintedBy:'reconcileFact'}` is A FUNCTION NAME, ⛔ not an actor ·
+                `ensure()` is a bare `findOrCreate` — ⛔ NO ACT REQUIRED TO MINT A CONCEPT.
+     CONSEQUENCE ⭐⭐⭐ 77 of 77 SUPERSESSIONS STAY INSIDE ONE SLOT ⇒ `slot_id` IS THE COMPETITION
+                BOUNDARY, ⛔ not a filing label — routing decides WHICH BELIEF MAY BE INVALIDATED ·
+                routing TEACHES a durable alias · ⛔ IRREVERSIBLE (no shipped path assigns `slot_id`
+                after creation) · resolver's own contract: *"which conceptual slot does this observation
+                BELONG TO? That is CLASSIFICATION"* · `slot_id` = *"the long-lived identity of the concept"*.
+   ⚠️⚠️ THE ASYMMETRY THAT PROVES THE SYSTEM KNOWS THE DIFFERENCE: TEACHING an alias is GOVERNED (A3
+   refuses without an ACT — 4 refusals ledgered); MINTING A CONCEPT IS NOT. ⛔ The cheaper act is gated.
+   ⚠️ 7 slots with `question_id IS NULL` HAVE ALREADY INVALIDATED A BELIEF ⇒ undeclared slots exercise
+   replacement authority, identified BY LABEL, ⛔ never by declaration.
+   ⏸ ⚠️ AMBIGUOUS whether ADDRESS and DECLARE-QUESTION are independent acts. ⛔ Reported, ⛔ not chosen —
+   047 says minting ≠ declaring, but ALSO defines a slot as *"a slot INSTANCE of"* a question. The label
+   does a question's work while carrying none of a question's guarantees. ⛔ OTE'S TO RULE.
+   → `INVESTIGATION_SOTERA_ROUTING_AS_AN_ACT.md` · `test/checks/routing-act-scope-check.mjs`
 ```
 
 ---
