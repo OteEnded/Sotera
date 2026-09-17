@@ -11562,3 +11562,26 @@ the recall/extract path still does it is unchecked.
 **Doc:** `ISSUE_SOTERA_CHAT_EMPTY_TURNS_TTFT.md` · **CarryOn §0-C** carries the summary.
 **Immediate, zero-risk:** send and don't touch the page for ~25 s; the `tools` header toggle drops 49 tool
 definitions from the prompt.
+
+### ✅ …and it resolved on its own — ⛔ nothing was restarted
+
+Ote: *"it seem to work now, you restart sotera or something? the problem happen when i attach image and
+message via my phone and i close the phone and continue chat on my pc."*
+
+⛔ **I restarted nothing.** No config edit, no Ollama touch, no code change, no DB write — the pass only
+read. ⇒ **the recovery was not a fix; the disconnecting client went away.**
+
+**His account matches the data turn by turn:** 07:30:23 user `img=1` (the phone) → 07:32:34 empty
+`client_disconnect` (phone closed) → "test" on the PC at 07:32:22 → GETs on both conversations at
+07:32:41–56 (switching chats) → 07:32:56 empty `client_disconnect` → 07:43 / 07:44 fine.
+⇒ **Two different clients disconnected for two different reasons. The server failed neither time.**
+
+⚠️ **And his image was never answered** — the 07:30:23 turn carries `img=1` and has no assistant reply at
+all. The photo sits unanswered in that conversation.
+
+⭐⭐⭐ **One measurement shifted the diagnosis:** promptTokens **16 999 → ttft 16.5 s** and **35 699 → ttft
+18.7 s**. **2.1× the tokens for 1.13× the time** ⇒ TTFT is **not** proportional to prompt size; there is a
+**fixed ~14–15 s per-turn cost**. That is the signature of something else using the GPU between turns —
+`qwen3-embedding:4b` runs for recall every turn and is loaded alongside the chat model, and the codebase
+already names that exact hazard for the distiller. ⛔ **Not confirmed — this is what to investigate on
+return.**
