@@ -22,8 +22,8 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ⑤  ✅ RULED          proposition EXISTS as a representation; ⛔ proposition EQUIVALENCE does not exist
 ⑥  ✅ PARTIAL        transition is a layer DISTINCT from row state ⛔ taxonomy NOT finalised
 ⑦  ✅ RULED          durable memory is NOT inherently slot-shaped
-⑧  ⭐ OPEN, RESHAPED     AUTHORITY under unresolved semantics — ⛔ NOT relationship selection
-                       ⏸ INVESTIGATION DELIVERED 2026-09-17 — ⛔ no ruling proposed
+⑧  ✅ RULED NARROW      ⭐ ATTRIBUTION IS NOT AUTHORIZATION — writer identity alone is insufficient
+⑧-A ⏸ INVESTIGATED     POSITIVE AUTHORITY — ⛔ no model proposed; awaiting Ote
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
@@ -844,7 +844,19 @@ decision. ⛔ Not reopened.
    as production evidence — and both point the same way: ⭐ *"removed for being REDUNDANT, not for being
    WRONG"* is the design ALREADY refusing to treat two relations as one.
 
-㊽ ⭐⭐⭐ **DECISION ⑧ — AUTHORITY UNDER UNRESOLVED SEMANTICS (opened by Ote 2026-09-17, once ① was ruled).**
+㊽ ⭐⭐⭐ **DECISION ⑧ — ✅ RULED NARROW (Ote, 2026-09-17):** *"A named writer establishes ATTRIBUTION,
+   ⛔ NOT AUTHORIZATION. Writer identity alone does not establish authority to make an incumbent cease being
+   current."* ⇒ ⛔ **NEITHER WRITER IDENTITY NOR ROUTING SIMILARITY IS SUFFICIENT AUTHORITY.**
+   ⭐⭐⭐ THREE THINGS KEPT SEPARATE, BY RULING — ⛔ never collapse them:
+      ATTRIBUTION              who PERFORMED the act
+      EPISTEMIC RESPONSIBILITY who is responsible for ESTABLISHING the relevant semantic fact
+      AUTHORITY                who is ENTITLED to cause the semantic transition
+   ⭐ THE IDENTITY RESOLVER PRECEDENT IS **ADMISSIBLE** — as evidence of an existing designed
+      REFUSAL/AUTHORITY distinction, ⛔ NOT as evidence about relationship semantics. ⇒ the §9 judgement
+      call is resolved in the investigation's favour, NARROWLY.
+   ⛔ NOT YET DEFINED: the positive authority model · vocabulary · schema · transition behaviour.
+   ⭐ THE INVESTIGATION BEHIND IT:
+   **DECISION ⑧ — AUTHORITY UNDER UNRESOLVED SEMANTICS (opened by Ote 2026-09-17, once ① was ruled).**
    `INVESTIGATION_SOTERA_08_TRANSITION_AUTHORITY.md` · `test/checks/current-holder-authority-census.mjs`
    (21 checks green, ⭐ incl. a POSITIVE CONTROL for the never-emitted scan). ⛔ INVESTIGATION ONLY — ⛔ no
    ruling proposed, ⛔ and NOT YET *"what should `resolveConflict` do?"*
@@ -891,7 +903,45 @@ decision. ⛔ Not reopened.
    ⚠️ THE ONE JUDGEMENT CALL, NAMED SO OTE CAN STRIKE IT: the Identity Resolver IS a resolver, and Ote
       fenced resolver behaviour. It is cited as an explicit DESIGNED REFUSAL to act on its own authority —
       ⛔ the opposite of inferring authority from behaviour. ⭐ If Ote reads it as inside the fence, that
-      section falls and the rest stands.
+      section falls and the rest stands. ✅ OTE RULED IT **ADMISSIBLE**, narrowly — see the ruling above.
+
+㊾ ⭐⭐⭐ **DECISION ⑧-A — POSITIVE AUTHORITY (opened by Ote 2026-09-17, on ruling ⑧).**
+   `INVESTIGATION_SOTERA_08A_POSITIVE_AUTHORITY.md` · `test/checks/positive-authority-trace.mjs` (16 green).
+   ⛔ INVESTIGATION ONLY — ⛔ NO AUTHORITY MODEL PROPOSED, ⛔ no vocabulary invented (every term is QUOTED
+   from existing source), ⛔ no schema, ⛔ no transition behaviour.
+   ⭐ THE QUESTION: *"What makes a current-holder transition AUTHORIZED rather than merely ATTRIBUTABLE?"*
+   ⭐⭐⭐ **THE AUTHORITY GRAMMAR THE SYSTEM ALREADY WROTE DOWN** — ⛔ none of this is new:
+      *"authority is a FACT the caller is not"* · *"an authority that can be satisfied by an absence is not
+      an authority"* · *"No axis is ever derived from another"* · *"an equivalence nobody can be asked
+      about"* · ⭐ *"the difference between someone editing THEIR OWN beliefs and someone editing SOMEBODY
+      ELSE'S"* (`person` ≠ `admin`).
+   ⭐⭐⭐ **AUTHORITY IS GRADED BY CHECKABILITY, ⛔ NOT BY RANK — AND IT IS ALREADY IMPLEMENTED:**
+      *"a SPAN is a checkable claim and **is checked FIRST** — attestation vouches for a turn, ⛔ NEVER for
+      words that are not in it."* ⇒ ⭐⭐ **A HUMAN'S ATTESTATION DOES NOT OVERRIDE A CHECKABLE FACT.**
+      LADDER: `span-verified` 4 · `declared-coincidence` 42 · `operator-attested` 3 · `writer-cited` 34 ·
+      `failed` 0 (⭐ a failed reference is KEPT WITH ITS REASON — I10). ⚠️ THE CHECKABLE RUNG IS THE RAREST.
+   ⭐⭐⭐ **DELEGATION WITHOUT INFERENCE — EXACTLY ONE WORKED PRECEDENT**, the declared coincidence:
+      NARROW (2 of 17 writers) · REGISTRY-HELD · ⭐ TRUE BY THE HOLDER'S **MECHANISM** (*"the extractor
+      cannot read anything but the turn it was handed… ⛔ No other writer may claim that"*) · ⭐ MEASURED
+      BEFORE GRANTING (*"4 of 37 rows"*) · REFUSED TO EVERYONE ELSE, who must `verify` instead.
+      ⭐ ATTESTATION IS GRANTED TO **EXACTLY ONE** WRITER, BY REGISTRY. ⛔ IT IS NOT A RANK.
+   ⭐⭐⭐ **HUMAN AUTHORITY IS NOT AUTOMATICALLY SUFFICIENT — ESTABLISHED TWICE, INDEPENDENTLY.** The ratified
+      BIND derivation: *"THE REAL DISCRIMINATOR IS JUDGEMENT vs TESTIMONY, ⛔ NOT WHO"* · *"STANDING IS NOT
+      THE BINDING CONSTRAINT — EVIDENCE IS"* · *"inference-shaped… forbidden REGARDLESS OF WHO PERFORMS
+      IT"*. ⇒ ⭐ **A HUMAN PERFORMING AN INFERENCE-SHAPED ACT IS STILL INFERENCE. AUTHORITY DOES NOT
+      LAUNDER AN INFERENCE.**
+   ⭐⭐ **AUTHORITY TRACKS THE ORIGIN OF THE MATERIAL, ⛔ NOT THE SENIORITY OF THE ACTOR** — *"for a
+      label-minted slot THE ACCOUNT'S IS THE NON-INFERENTIAL ONE: the label came from THEIR words."*
+   ⭐⭐ **4 OF 13 CANDIDATES CARRY AN EXERCISED AUTHORITY TODAY** — provenance/evidence · role/question
+      (propose/confirm) · operator repair (`attests: true`) · alias learning (⭐ REFUSABLE, 4 of 4 refused).
+      ⛔ **NOT ONE IS WIRED TO THE CURRENT-HOLDER TRANSITION.**
+   ⭐⭐ **EVERY ESTABLISHED-AUTHORITY SEAM HAS A LEDGER THAT CAN RECORD A REFUSAL. THE TRANSITION HAS NONE.**
+   ⭐⭐⭐ **IN 2 OF 6 ANCHOR GROUPS NO AUTHORITY APPLIES** — #8/#9 (⛔ nothing to be authorized ABOUT ⇒ the
+      correct act is ABSTENTION) and #3 (⇒ DEFER). ⚠️ ⇒ **A MODEL THAT CAN ONLY GRANT CANNOT EXPRESS THEM.**
+   ⛔ CLOSED BY EXISTING RULING, ⛔ not reopened: DECLARED QUESTION OWNERSHIP (a slot HAS NO OWNER;
+      `txn_memories.author` IS the ownership mechanism) · WRITER IDENTITY (⑧).
+   ⛔ NOT ESTABLISHED: that checkability is SUFFICIENT here — ⚠️ it is the strongest thing the system
+      grades, but ⑧ established there is **NO CHECKABLE RELATIONAL FACT** for it to grade.
 ```
 
 ---
@@ -942,6 +992,7 @@ OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · r
   state-transition-semantics · transition-event-trace · nine-transition-semantic-analysis
   incumbent-status-change-trace · invalid-at-claim-trace · memory-semantics-batch · semantic-seam-batch
   ⭐ current-holder-authority-census (⑧ — 21 checks, incl. a POSITIVE CONTROL for the never-emitted scan)
+  ⭐ positive-authority-trace (⑧-A — 16 checks; the 13 candidates × 5 dimensions, every term QUOTED)
 ```
 
 **BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) → **Phase 3 refusal** · the attribution
@@ -986,7 +1037,12 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
         ⭐ Common across them is ⛔ NOT a relationship but an OCCASION (a pair brought into contact, the
         system required to act BEFORE the relationship was established).
         ⇒ EXCLUDES interpretation 1 as a RELATIONSHIP model · ⛔ does NOT select among 2, 3, 4.
-   ⑧ ⭐ OPEN — RESHAPED BY OTE once ① was ruled. ⛔ NO LONGER "what may `resolveConflict` do?"
+   ⑧ ✅ RULED NARROW — ⭐ ATTRIBUTION IS NOT AUTHORIZATION. ⛔ Neither writer identity nor routing
+        similarity is sufficient authority. ⇒ ⑧-A ⏸ POSITIVE AUTHORITY INVESTIGATED (§0-B ㊾), ⛔ no model
+        proposed. ⭐ Headline: AUTHORITY IS GRADED BY CHECKABILITY, ⛔ NOT BY RANK — and a human performing
+        an inference-shaped act is still inference. ⚠️ AND IN 2 OF 6 ANCHOR GROUPS NO AUTHORITY APPLIES.
+      ⏸ The original framing, kept because it is what was investigated:
+        ⛔ NO LONGER "what may `resolveConflict` do?"
         *"What semantic authority must a component possess before it may cause an incumbent to cease being
         the current holder, when the relationship is (a) ESTABLISHED, (b) ABSENT, or (c) NOT ESTABLISHABLE
         from available evidence?"* ⇒ WHAT MUST BE ESTABLISHED, **AND BY WHOM**.

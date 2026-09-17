@@ -11345,3 +11345,60 @@ SET** — so it would have **PASSED if one of the four had been confirmed and on
 unreviewed, with growth reported separately — the same shape the slot/alias population checks already use.
 ⭐ **Red-proved:** adding the one already-confirmed id (`769f6a65`) to the frozen list makes it fail, so the
 assertion is not vacuous. ⛔ No candidate data was touched.
+
+---
+
+## 2026-09-17 · ⑧ RULED NARROW · ⑧-A opened and investigated
+
+### ⑧ ✅ RULED NARROW
+
+> **"A named writer establishes attribution, ⛔ not authorization. Writer identity alone does not establish
+> authority to make an incumbent cease being current."**
+> *"…neither writer identity nor routing similarity is sufficient authority for a current-holder transition."*
+
+⭐⭐⭐ **Three things kept separate, by ruling:** ATTRIBUTION (who performed) · EPISTEMIC RESPONSIBILITY (who
+must establish the semantic fact) · AUTHORITY (who is entitled to cause the transition).
+⭐ The Identity Resolver precedent is **admissible** — as evidence of a designed refusal/authority
+distinction, ⛔ not as evidence about relationship semantics. ⇒ my §9 judgement call resolved in the
+investigation's favour, narrowly.
+⛔ Positive authority model, vocabulary, schema and transition behaviour all stay undefined.
+
+### ⑧-A ⭐ POSITIVE AUTHORITY — investigated
+
+**Doc:** `INVESTIGATION_SOTERA_08A_POSITIVE_AUTHORITY.md` · **instrument:**
+`test/checks/positive-authority-trace.mjs` — **16 checks green**. 13 candidates × 5 dimensions (who knows ·
+who declares · who is authorized · what evidence establishes it · delegable without becoming inferred?).
+⛔ **No vocabulary invented — every term is quoted from existing source.**
+
+- ⭐⭐⭐ **Authority is graded by CHECKABILITY, not by rank — and it is already implemented.** *"a SPAN is a
+  checkable claim and is checked FIRST — attestation vouches for a turn, ⛔ never for words that are not in
+  it."* ⇒ **a human's attestation does not override a checkable fact.** Ladder: `span-verified` **4** ·
+  `declared-coincidence` **42** · `operator-attested` **3** · `writer-cited` **34** · `failed` **0** (kept
+  with its reason, I10). ⚠️ **The checkable rung is the rarest.**
+- ⭐⭐⭐ **Delegation without inference has exactly one worked precedent** — the declared coincidence:
+  narrow (2 of 17), registry-held, **true by the holder's mechanism**, **measured before granting**
+  (*"4 of 37 rows"*), refused to everyone else. ⭐ Attestation is granted to **one** writer, by registry —
+  ⛔ it is not a rank.
+- ⭐⭐⭐ **Human authority is not automatically sufficient — established twice, independently.** The ratified
+  BIND derivation (*"the real discriminator is JUDGEMENT vs TESTIMONY, ⛔ not WHO"* · *"standing is not the
+  binding constraint — EVIDENCE is"* · *"inference-shaped… forbidden regardless of who performs it"*) and
+  the evidence code's span-before-attestation ordering. ⇒ ⭐ **authority does not launder an inference.**
+- ⭐⭐ **Authority tracks the origin of the material, not the seniority of the actor.**
+- ⭐⭐ **4 of 13 candidates carry an exercised authority today** — provenance/evidence · role/question
+  (propose/confirm) · operator repair (`attests: true`) · alias learning (refusable, 4 of 4 refused).
+  ⛔ **Not one is wired to the current-holder transition.**
+- ⭐⭐ **Every established-authority seam has a ledger that can record a refusal. The transition has none.**
+- ⭐⭐⭐ **In 2 of 6 anchor groups no authority applies at all** — #8/#9 (nothing to be authorized *about*)
+  and #3 (undetermined). ⚠️ ⇒ **a model that can only GRANT cannot express them.**
+
+⛔ **No authority model proposed.** ⚠️ And the pass did **not** establish that checkability is *sufficient*
+here — ⑧ established there is no checkable relational fact for it to grade.
+
+```
+①②③⑤⑦ ✅ RULED · ④ ✅ NEGATIVE ONLY · ⑥ ✅ PARTIAL · ⑧ ✅ RULED NARROW
+⑧-A ⏸ INVESTIGATED, awaiting Ote · ⑨ ⏸ NAMED, NOT OPENED
+```
+
+**Verification:** unit **753/753** · evidence baseline green · canary 18 rows / 0 slots / 0 aliases ·
+047 untouched · both armed collisions intact · ⛔ **two read-only instruments added this session; nothing
+written to the database.**
