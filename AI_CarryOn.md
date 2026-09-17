@@ -29,7 +29,9 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
 A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
 ⭐⭐⭐ DESIGN IS UNLOCKED (Ote, 2026-09-17) — the read-only fence was PER-PASS, ⛔ not permanent.
-     ⛔ BUT: derive the semantic contract FIRST, then decide what code changes. ⛔ Nothing built yet.
+✅ D-1…D-6 ALL DECIDED (Ote, 2026-09-17) · ⏸ THE CONTRACT IS SPECIFIED, AWAITING REVIEW
+     ⛔⛔ IMPLEMENTATION IS **NOT AUTHORIZED** AND **NOT STARTED** — Ote: *"produce the design contract
+     first, review it, then we'll explicitly authorize the implementation pass."*
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
@@ -1197,11 +1199,63 @@ decision. ⛔ Not reopened.
    ⚠️ THE COSTS, STATED BEFORE THE OPTIONS: almost nothing would be admitted at first (1 question · 1 of
       112 slots · the pin NULL on ~every incumbent) · `claimKind` has ONE supplier · deferred pairs
       COEXIST so *current* becomes plural (⭐ which ⑦ and the 53 slotless rows already do) · ⛔ no backfill.
-   ⏸ SIX OPEN DECISIONS FOR OTE (D-1…D-6): separate act vs precondition · does the PIN become the second
-      side · is the STANDING-ROUTE real · what happens to families that can NEVER be admitted (⭐ ⑦ already
-      says *slotless ≠ deficient*, so *"they group, they never compete"* may be a FEATURE) · does DEFER
-      permit coexistence or hold the write (⚠️ A-D7: a refused write teaches nothing) · ⛔ **is 047 the
-      vehicle at all — DELIBERATELY LAST AND OPEN.**
+   ✅⭐⭐⭐ **D-1…D-6 ALL DECIDED (Ote, 2026-09-17):**
+      D-1 ✅ admission is a **SEPARATE ACT** ⛔ not a precondition hidden inside `create`
+      D-2 ✅ the **INCUMBENT PIN** is the second side ⛔ NEVER infer the incumbent's question from the slot
+      D-3 ✅ the **STANDING ROUTE STAYS NARROW** ⛔ do not generalise the Identity Resolver's authority
+      D-4 ✅ **"group but never compete" is LEGITIMATE** ⛔ never manufacture a question to make a row
+          eligible — ⭐ not every durable memory needs a current-holder slot
+      D-5 ✅ **DEFER PERMITS COEXISTENCE** ⛔ never hold or discard the observation
+      D-6 ✅ **047 IS THE Q-ROUTE VEHICLE, ADAPTED** ⛔ not declared the universal authority model
+   ⭐⭐⭐⭐ **AND THE LOCKED PRINCIPLE (Ote):** *"Grouping remains allowed to be wrong… **A CANDIDATE PAIR IS
+      NOT A COMPETING PAIR UNTIL AN INDEPENDENT WARRANT ADMITS IT.** That means the matcher can remain
+      exactly as it is."*
+
+57 ⭐⭐⭐⭐ **THE ADMISSION CONTRACT — SPECIFIED 2026-09-17. ⛔ IMPLEMENTATION NOT AUTHORIZED.**
+   `CONTRACT_SOTERA_COMPETITION_ADMISSION.md`.
+   ⭐⭐⭐ **THE WHOLE REPAIR, IN ONE SUBSTITUTION:** `matches` today = EVERYTHING IN THE BUCKET;
+      under the contract `matches` = **THE ADMITTED SUBSET**. ⭐ Everything else is machinery to compute it.
+   ⭐ **ADMISSION IS PER-PAIR** (incoming × each candidate) — derived from A-D4's pairwise finding ⇒ three
+      rows under one label with three different questions give THREE verdicts, ⛔ not one arena.
+   ⭐ INPUTS: `claimKind` (incoming, declared) · the INCUMBENT'S OWN `question_id_at_admission` → key ·
+      scope (a PRECONDITION, ⛔ not the warrant) · is-this-exclusivity-bearing.
+      ⭐ Resolving pin uuid → `question_key` is SAFE because M2-10 makes questions immutable/repoint-not-edit.
+      ⛔ This is NOT the lookup 048 forbade — 048 forbids memory→SLOT→question; the ROW'S OWN pin is
+      exactly what the column was built for.
+   ⭐⭐⭐ **THE FOUR OUTCOMES, AND THE DEFINITION THAT KEEPS THE LOCK HONEST:**
+      NOT-IN-SCOPE  no exclusivity is created (no incumbent · NOOP · DUPLICATE · identity ns)
+      ADMIT         ⭐ BOTH sides established AND EQUAL
+      ABSTAIN       ⭐ BOTH sides established AND DIFFERENT — remedy: ⛔ NONE, they were never candidates
+      DEFER         ⚠️ EITHER side NOT established — remedy: DECLARE THE QUESTION · ⭐ BOTH ROWS STAY LIVE
+      ⇒ ⭐⭐ **ABSTAIN is a POSITIVE FINDING; DEFER is an ABSENCE.** ⚠️ **THEREFORE ABSTAIN IS CURRENTLY
+      UNREACHABLE** — no incumbent carries a pin, so EVERY pair today is DEFER. ⭐ That is the contract
+      being honest: it may not claim *"#8/#9 are unrelated"*, only *"I cannot establish that they are."*
+   ⭐⭐⭐ **THE PIN PROPAGATES ⇒ NO BACKFILL IS NEEDED.** A row written with a declared claimKind receives
+      its own pin ⇒ it is an ESTABLISHED incumbent for the next write. 1st row in a family = NOT-IN-SCOPE
+      + pinned; 2nd row = a real verdict. ⇒ **the corpus becomes competition-capable FORWARD, never
+      backwards** — exactly what 047's principle requires.
+      ⚠️ **THE HONEST COST:** an existing live incumbent has no pin and can NEVER acquire one ⇒ it stays
+      live forever beside its successors and never competes, and **RECALL MAY RETURN BOTH.** ⚠️ D-4
+      licenses it in principle; ⛔ this specific user-visible form needs Ote's explicit acceptance.
+   ⭐⭐⭐ **THE DESIGN DISARMS THE CANARY BY CONSTRUCTION** — if `sotera|lesson` were ever armed, admission
+      runs FIRST, none of the 18 carries a pin ⇒ DEFER ⇒ ⛔ NO COMPETITION ⇒ ⛔ NO COLLAPSE. ⭐ Without
+      touching a single row. ⛔ It still must not be armed deliberately.
+   ⚠️ **§5 CONSEQUENCE NEEDING RATIFICATION:** under D-2 the SLOT'S BINDING STOPS GATING EXCLUSIVITY — a
+      pair competes for the question THEY BOTH DECLARE, whichever slot holds them. ⇒ `governsReplacement`
+      is **KEPT, ⛔ not removed**, answering its own narrower question (is this a valid ANSWER to the slot's
+      question). ⚠️ So a write can be ADMITTED and still REFUSED by it. Coherent — ⛔ ratify, don't discover.
+   ⭐ DEFER IS RECORDED IN A **LEDGER** (the shape `log_slot_bindings`/`log_slot_aliases` already use, both
+      of which record REFUSALS): the pair, both keys (⭐ NULL stored AS NULL), outcome, why-with-REMEDY,
+      route, writer/act/occasion. ⛔ NOT-IN-SCOPE is not recorded. ⚠️ VOLUME IS A REAL COST — measure it.
+   ⭐ THE EXCLUSIVITY ACT MUST **CITE** ITS ADMISSION — two different citations: the PIN (semantic state for
+      the NEXT admission ⇒ ⭐ it gains its FIRST PRODUCTION READER) and a LEDGER REFERENCE (the receipt).
+   ⭐ NO QUESTION ⇒ **DEFER, ALWAYS**, and per D-4 that is a LEGITIMATE RESTING STATE, ⛔ not a backlog.
+   ⭐ THE STANDING ROUTE is REGISTRY-HELD and NARROW: ⭐ ONE entry today (the Identity Resolver's ask,
+      identity namespace, a person's own name). ⛔ NOT re-plumbed. ⛔ Adding a family is a RULING, ⛔ never
+      a code change.
+   ⛔ UNCHANGED: the matcher · retrieval · winner selection · `governsReplacement` · collapse (it simply
+      never sees un-admitted rows) · every existing row · the canary stays unarmed.
+   ⏸ THREE THINGS LEFT OPEN FOR OTE: the §5 double-gate · the §6 legacy consequence · the §8 ledger volume.
 ```
 
 ---

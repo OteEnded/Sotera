@@ -11746,3 +11746,60 @@ A-D5's narrowing.
 
 ⛔ **Nothing built:** no code, schema or migration written. unit **753/753** · evidence baseline green ·
 canary 18 / 0 / 0 · 047 untouched · both armed collisions intact.
+
+---
+
+## 2026-09-17 · D-1…D-6 DECIDED · the admission contract SPECIFIED
+
+**All six decided by Ote:** admission is a **separate act** · the **incumbent pin** is the second side ·
+the **standing route stays narrow** · **"group but never compete" is legitimate** · **DEFER permits
+coexistence** · **047 is the Q-route vehicle, adapted** — ⛔ not the universal authority model.
+
+⭐⭐⭐ **And a principle locked:** *"Grouping remains allowed to be wrong… **a candidate pair is not a
+competing pair until an independent warrant admits it.** That means the matcher can remain exactly as it is."*
+
+**Doc:** `CONTRACT_SOTERA_COMPETITION_ADMISSION.md`. ⛔ **Specification only — implementation NOT authorized
+and NOT started.**
+
+### The whole repair, in one substitution
+
+```js
+const matches = rowsBySlot.get(resolution.slotId) ?? []   // today: EVERYTHING in the bucket
+const matches = admittedSubsetOf(candidates)              // contract: only ADMITTED pairs
+```
+
+### The four outcomes, and the definition that keeps the lock honest
+
+**ADMIT** both sides established and equal · **ABSTAIN** both established and different · **DEFER** either
+side not established · **NOT-IN-SCOPE** no exclusivity is created.
+
+> **ABSTAIN is a positive finding; DEFER is an absence.** ⇒ **ABSTAIN is currently unreachable** — no
+> incumbent carries a pin, so every pair today is DEFER. That is the contract being honest: it may not claim
+> *"#8/#9 are unrelated"*, only *"I cannot establish that they are."*
+
+### ⭐⭐⭐ The pin propagates ⇒ no backfill is needed
+
+A row written with a declared `claimKind` receives its own pin and becomes an **established incumbent for
+the next write**. First row in a family: NOT-IN-SCOPE + pinned. Second row: a real verdict.
+⇒ **the corpus becomes competition-capable forward, never backwards** — exactly what 047's principle
+requires, with no historical repair.
+
+⚠️ **The honest cost:** an existing live incumbent has no pin and can never acquire one, so it stays live
+beside its successors and never competes — **and recall may return both.** D-4 licenses this in principle;
+the specific user-visible form needs Ote's explicit acceptance.
+
+### ⭐⭐⭐ The design disarms the canary by construction
+
+If `sotera|lesson` were ever armed, admission runs first, none of the 18 rows carries a pin ⇒ DEFER ⇒ no
+competition ⇒ **no collapse** — without touching a single row. It still must not be armed deliberately.
+
+### Three things left open for Ote
+
+1. **§5** — under D-2 the slot's binding stops gating exclusivity; `governsReplacement` is **kept**,
+   answering its own narrower question, so a write can be **ADMITTED and still REFUSED** by it. Coherent —
+   ratify rather than discover.
+2. **§6** — the legacy-incumbent consequence above.
+3. **§8** — ledger volume: one row per evaluated pair. Measure before trusting.
+
+⛔ **Nothing built.** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
+armed collisions intact · no code, schema or migration written.
