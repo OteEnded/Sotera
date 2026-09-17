@@ -12163,3 +12163,61 @@ Reference     clean · branch master
 memories 235 · pinned 35 · canary 18 live rows, UNARMED · zz residue 0 · admission ledger 0
 047 untouched — 1 question declared, 1 of 112 slots bound
 ```
+
+---
+
+## 2026-09-17 · ⏸ COMPACTION CHECKPOINT
+
+### Resuming after the compact — read in this order
+
+1. **`AI_CarryOn` §0-A ⓪** — the arc ran **evidence → rulings → design → contract → build → ACCEPTED**,
+   and the one sentence that matters: **grouping and competition admission are two separate acts;
+   `reconcileFact`'s `matches` is the ADMITTED SUBSET, not the grouped bucket.**
+2. **§0-A's five carried-forward items** — the only open work, and ⛔ **"LEAVE THE THREE RED CHECKS ALONE"**
+   is the one a fresh session is most likely to get wrong.
+3. **`CONTRACT_SOTERA_COMPETITION_ADMISSION.md`** — the ratified contract, with §0 = A — ACCEPT.
+4. **`ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md`** — every ruling ①–⑨, ④-A, ⑧-A, A-D4, A-D5.
+5. **§0-B rules ⑱–60** — what this arc earned. **§0-F** — how its proofs lied, including the stash defect.
+
+### ⚠️ The two things most likely to be got wrong by a fresh session
+
+```
+① THE THREE RED CHECKS ARE NOT BUGS. model-tool-claim-kind · declaration-self-authorisation ·
+   declaration-transport. Their red state is a CONSEQUENCE OF THE NEW TOPOLOGY: on the DEFER path no
+   replacement is proposed, so `governsReplacement` correctly returns NOT-IN-SCOPE and there is nothing
+   to refuse. ⛔ NEVER weaken admission or M2 to green them. Their follow-up is a separate pass.
+
+② `@ote/memory` IS ITS OWN GIT REPO (PortableComponents/Packages/Memory), branch `main`, ⛔ NO REMOTE.
+   `PortableComponents` itself and `C:\data\AI_LLMv2` are NOT repos. A change to `memory-v2-service.js`
+   must be committed THERE, and a `git stash` in Sotera does NOT revert it.
+```
+
+### State at the checkpoint
+
+```
+COMMITS   @ote/memory  e45d928 (local only, no remote)
+          Sotera       f50cd9b · 5da44ef · 1763eef (+ the doc trail) — pushed to origin/main
+          Reference    de78635 … (no remote, branch master)
+TREES     all clean except Sotera's `persona.lock.json` (a RUNTIME lock; only `resolvedAt` differs)
+          and @ote/memory's two ratified `.bak` files, untracked by standing rule
+DB        migrations through 053 · log_memory_admissions 0 rows, its ABSTAIN≠DEFER CHECK proved LIVE
+          memories 235 · pinned 35 (ALL operator-slot) · canary 18 live + UNARMED · zz residue 0
+          047 untouched — 1 question, 1 of 112 slots
+TESTS     unit 753/753 · evidence baseline green · admission-controls A/B/D/E green
+          rp-d0 · enforcement · e2e-isolation · rp-t1 · rp-register all green
+          ⛔ the three red checks: 9 · 5 · 4 — KNOWN, RATIFIED, LEAVE ALONE
+OTE'S     7 unreviewed attribution candidates (the original four: cb5ea911 ed08529e 3f195763 82509ae8)
+          `node test/checks/attribution-live-check.mjs --id <uuid>` →
+          `node test/maintenance/attribution-confirm.mjs <id> <CLASS> --by ote`
+```
+
+⛔ **Standing fences all still in force** — never test on Ote's account · `:8201` is his · no historical
+repair · no provenance inference · the canary stays UNARMED · 047 not populated · A1 shadow ·
+`SEMANTIC_FIELDS` untouched · no prompt or `remember_fact` description change · `memory-contradiction.js`
+unwired · Dreaming switches unchanged · the Mira and shelter fixtures kept · the two `.bak` files untracked.
+
+### ⏸ What Ote may want next
+
+The arc-level work parked behind this: **A1 authority** (⑦'s ruling frees it) · **B-D1** the projection
+radius · **B-D3** `attestedBySource` · **Dreaming / the M-series** · **⑨** arena synthesis · and the five
+carried-forward items above.

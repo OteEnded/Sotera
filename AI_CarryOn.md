@@ -6,13 +6,42 @@
 
 # 0-A · ⏸ WHAT IS OPEN. ⛔ NOTHING IS BLOCKED.
 
-## ⓪ ⭐⭐⭐ THE CURRENT ARC — **MEMORY SEMANTIC DECISIONS**. ⛔ READ THIS FIRST.
+## ⓪ ⭐⭐⭐ THE CURRENT ARC — ✅ **THE ADMISSION BUILD IS ACCEPTED.** ⛔ READ THIS FIRST.
 
-⭐ **We are no longer building. We are RULING.** The evidence phase closed 2026-09-17. The work is a
-decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔ never an implementation.
+⭐⭐⭐ **THE ARC RAN: evidence → rulings → design → contract → build → ACCEPTED (Ote, 2026-09-17).**
+⛔ We are no longer ruling ①–⑧ and we are no longer designing the contract. **Both are closed.**
 
-> ⭐⭐⭐ **THE METHOD, RULED BY OTE:** *"Batch investigations that can share evidence/context, but ⛔ do NOT
-> batch the rulings."* ⇒ investigate broadly, **rule one decision at a time**.
+> ⭐⭐⭐⭐ **WHAT NOW EXISTS IN PRODUCTION — the one sentence a fresh session needs:**
+> ## **Grouping and competition admission are two separate acts. `reconcileFact`'s `matches` is no longer
+> ## the grouped bucket — it is the ADMITTED SUBSET.** A candidate pair is not a competing pair until an
+> ## independent warrant admits it.
+
+```
+A — ACCEPT, THE LOCKED PRINCIPLE (Ote):
+  "An undeclared question does not prevent memory formation; it prevents mutually exclusive competition."
+
+  observation → question ESTABLISHED  ⇒ admission may evaluate
+              → question ABSENT       ⇒ ⭐ the memory IS STILL WRITTEN, ⛔ with no exclusivity
+```
+
+⚠️ **THE METHOD THAT GOT US HERE, and it still applies to the next arc:** *"Batch investigations that can
+share evidence/context, but ⛔ do NOT batch the rulings."* ⇒ investigate broadly, **rule one at a time**, and
+⛔ **never let an investigation's wording decide a model** (Ote had to narrow me twice for exactly that).
+
+## ⭐⭐ WHAT IS LIVE NOW — the shipped surface
+
+```
+memory-admission-gate.js   PURE. NOT-IN-SCOPE · ADMIT · ABSTAIN · DEFER, + the receipt summary.
+                           ⭐ ABSTAIN needs BOTH sides; DEFER fires when EITHER is missing.
+migration 053              log_memory_admissions — ⭐ a CHECK makes ABSTAIN ≠ DEFER UNFORGEABLE
+reconcileFact              grouping (`candidates`) and admission (`matches`) are two steps
+question_id_at_admission   ⭐ gained its FIRST production reader (`admissionKeysFor`), BY KEY not id
+the receipt                carries an admission summary on SUCCESS — ⛔ never the refusal channel,
+                           ⛔ no incumbent ids (those stay in the ledger), ⛔ invisible to the model
+```
+
+⛔ **UNCHANGED, DELIBERATELY:** the matcher (⭐ grouping is ALLOWED to be wrong) · retrieval · the composer ·
+winner selection · `governsReplacement` · `restore` · `lesson-host` · every existing row · the canary.
 
 ```
 ①  ✅ RULED          ⛔ NO single general relationship — the kinds are INHERENTLY MULTIPLE
@@ -28,16 +57,41 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ④  ✅ RULED — the three statuses are WRITER EVIDENCE, ⛔ NOT a taxonomy
 A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
 A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
-⭐⭐⭐ DESIGN IS UNLOCKED (Ote, 2026-09-17) — the read-only fence was PER-PASS, ⛔ not permanent.
-✅ D-1…D-6 ALL DECIDED · ✅ THE CONTRACT RATIFIED AT THE SEMANTIC LEVEL (Ote, 2026-09-17)
-✅✅ **BEHAVIOUR LOCKED: A — ACCEPT** (Ote, 2026-09-17) · ✅ FINAL IMPACT PASS **CLEAN** (§0-B 60)
-     ⛔ BUILD STILL NOT AUTHORIZED — awaiting Ote's explicit go.
-     ⛔⛔ IMPLEMENTATION IS **NOT AUTHORIZED** AND **NOT STARTED** — Ote: *"produce the design contract
-     first, review it, then we'll explicitly authorize the implementation pass."*
-⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
+✅ D-1…D-6 ALL DECIDED · ✅ CONTRACT RATIFIED · ✅ **A — ACCEPT LOCKED** · ✅ **BUILD ACCEPTED 2026-09-17**
 ```
 
-> ## ⭐⭐⭐ **① IS RULED. THE PATH IS NOW ⑧ — AUTHORITY UNDER UNRESOLVED SEMANTICS.**
+> ## ✅ **EVERY DECISION ABOVE IS RULED, AND THE BUILD THAT FOLLOWED IS ACCEPTED. ⛔ NOTHING IN THIS BOARD
+> ## IS OPEN.**
+
+## ⏸ ⭐⭐⭐ THE ONLY OPEN WORK FROM THIS ARC — carried forward, ⛔ none of it started
+
+```
+① THE LEDGER TEARDOWN SWEEP  ⭐ every check that writes memory now leaves `log_memory_admissions` rows its
+                             teardown does not clean. ⛔ Ote: keep it a SEPARATE follow-up, ⛔ do not
+                             expand the accepted build for it.
+② THE THREE RED CHECKS       model-tool-claim-kind (9) · declaration-self-authorisation (5) ·
+                             declaration-transport (4).
+                             ⛔⛔ **LEAVE THEM ALONE.** Their red state is A CONSEQUENCE OF THE NEW
+                             TOPOLOGY, ⛔ not a defect — and ⛔ NEVER weaken admission or M2 to green them.
+                             ⭐ TWO are TRANSPORT/REACHABILITY instruments whose OBSERVABLE moved: their
+                             claim is UNTESTED now, ⛔ not disproven. ⭐ The third is a RULE whose substance
+                             is INTACT and MEASURED — the constructed same-occasion attack neither
+                             displaces nor earns a pin.
+③ `restore` / W6             ⛔ ratified OUT OF SCOPE. It still blocks on a raw {entity, attribute} arena
+                             (②'s P15) ⇒ ⚠️ the two seams disagree, KNOWINGLY. ⏸ A separate decision.
+                             ⚠️ AND A-ACCEPT INCREASED ITS EXPOSURE — more coexisting rows to trip over.
+④ THE LESSON-HOST D1 GAP     `lesson-host.revise()` is raw SQL mutating TWO `SEMANTIC_FIELDS` outside
+                             `store.update` ⇒ ⛔ neither admission NOR D1 Phase 3 reaches it.
+                             ⚠️ PRE-EXISTING and LATENT (0 rows). ⏸ A separate pre-existing item.
+⑤ THE EXTRACTOR VOLUME       ⭐ A — ACCEPT is in force: the extractor DEFERs and its facts COEXIST.
+                             ⭐⭐ ESTABLISHED: it has NO legitimate source of `claimKind` for VOLUNTEERED
+                             facts, and giving it one would VOID its own declared-coincidence warrant.
+                             ⏸ ELICITATION is LEGITIMATE but UNBUILT — ⛔ its own design pass, and it
+                             covers only ELICITED facts, ⛔ never volunteered ones.
+⑨ ⏸ NAMED, NOT OPENED        may an arena be SYNTHESISED for a family with no established slot semantics?
+```
+
+> ## ⭐⭐⭐ **① IS RULED, AND SO IS EVERYTHING AFTER IT.**
 
 ⭐⭐⭐ **① — ✅ RULED (Ote, 2026-09-17).** *"⛔ There is **no single general semantic relationship** that
 governs every interaction between an incoming durable observation and the incumbent it displaces."*
@@ -1419,14 +1473,20 @@ decision. ⛔ Not reopened.
 # 0-C · LIVE STATE — 2026-09-17
 
 ```
-:8210 (Sotera — on the B-D4 build, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
-:54322 pg · migrations through 052 · writer contracts 17 (+ `resolver`) · slots 112 · aliases 8 · memories 233
+:8210 (Sotera — ⭐ ON THE ACCEPTED ADMISSION BUILD, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
+:54322 pg · ⭐ migrations through **053** · writer contracts 17 (+ `resolver`) · slots 112 · aliases 8 · memories 235
 resolver: grayZoneMode='shadow' · ontologyMode='shadow'  ⇒ BOTH ACCUMULATING, ⛔ neither has authority
 unit 753/753 · @ote/memory 123/123 · alias ledger 4 rows (all `refuse`)
 ⭐ 047 QUESTION LAYER: **1 question declared** (the harness canary) · 1 of 112 slots bound · 2 bind acts,
    BOTH `ote-operator` on `canary-bind-2026-09-03-*` ⇒ ⛔ **ZERO ORGANIC PRECEDENT.**
-⛔ THE DECISION ARC IS READ-ONLY: ⛔ nothing has been implemented, migrated, repaired or armed since B-D4.
-attribution: 22 scans · 5 candidates · 4 UNREVIEWED (Ote's) · projection_version NULL on all 22 (pre-B, honest)
+⭐⭐ 053 ADMISSION LEDGER: `log_memory_admissions` — **0 rows** · 3 CHECKs · 5 indexes.
+   ⭐ `log_memory_admissions_outcome_evidence_ck` PROVED LIVE: an ABSTAIN with a NULL side is REFUSED (23514)
+⭐ rows PINNED (`question_id_at_admission`) 35 — ⛔ ALL in `build tag for this cycle`, an OPERATOR slot.
+   ⇒ ⛔ ZERO user beliefs are established incumbents ⇒ ⭐ EVERY organic pair today resolves to **DEFER**.
+⚠️ ⭐ THE ARC IS NO LONGER READ-ONLY — the admission build SHIPPED and is ACCEPTED (migration 053 applied).
+   ⛔ But NOTHING ELSE changed: no repair, no backfill, no arming, no prompt/writer change.
+attribution: 23+ scans · 5 confirmed-shape candidates · ⚠️ **7 UNREVIEWED (Ote's)** — the detector fires on
+   live traffic, so this number GROWS. `cb5ea911 ed08529e 3f195763 82509ae8` are the ORIGINAL four.
 CRONS LIVE: noticing (15m) · reflection (20m) — reflection is PROVEN LIVE (fired unprompted 09-16, wrote 3 rows)
 OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · reflectMode ('off', 0 note rows EVER)
 
@@ -1487,6 +1547,9 @@ OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · r
   incumbent-status-change-trace · invalid-at-claim-trace · memory-semantics-batch · semantic-seam-batch
   ⭐ current-holder-authority-census (⑧ — 21 checks, incl. a POSITIVE CONTROL for the never-emitted scan)
   ⭐ positive-authority-trace (⑧-A — 16 checks; the 13 candidates × 5 dimensions, every term QUOTED)
+  ⭐ displaced-status-trace (④ — 13 checks) · ⭐⭐ **admission-controls-check (A/B/D/E — THE BUILD'S OWN
+     PROOF: DEFER coexists · ADMIT competes · per-pair verdicts in ONE write · `forModel` SILENT ·
+     ⭐⭐⭐ ADMIT → REPLACEMENT_REFUSED PROVED REACHABLE via a REBIND)**
   ⭐ displaced-status-trace (④ — 13 checks; the six writers in their OWN WORDS, + a positive control)
 ```
 
@@ -1495,6 +1558,21 @@ detector + 3 corpora + **the live instrument (050)** · D6/D7/D8/D9 · **A3 (051
 B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, falsified before trusted).
 
 ---
+
+## ⭐⭐⭐⭐ THE REPO FACT THAT COST ME A WRONG CONCLUSION — ⛔ READ BEFORE ANY `git stash` HERE
+
+```
+C:\data\AI_LLMv2                    ⛔ NOT a git repo
+C:\data\AI_LLMv2\PortableComponents  ⛔ NOT a git repo
+⭐ PortableComponents\Packages\Memory  ✅ IS its own repo — branch `main`, ⛔ NO REMOTE (local only)
+   Personas\Sotera                    ✅ repo, pushed to origin/main
+   Reference                          ✅ repo, branch `master`, ⛔ no remote
+```
+
+⚠️⚠️ **I stashed `Personas/Sotera` to test "pre-change" behaviour and the `PortableComponents` stash silently
+did NOTHING** — so the service kept my edit while the host lost its port, which IS the failure mode. ⇒ I
+reported three regressions as "pre-existing". ⛔ **THEY WERE MINE.** ⭐ A change to `@ote/memory` must be
+committed IN ITS OWN REPO, and any before/after comparison must revert THAT file explicitly.
 
 # 0-D · ⛔⛔ FENCES
 
@@ -1520,8 +1598,14 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
 # 0-E · ⏸ OPEN — all Ote's, none blocking
 
 ```
-⭐⭐⭐⭐ THE CRITICAL PATH IS **① → ⑧**. Everything else below is genuinely parked.
-   ① ⏸ ⭐ ANSWER DELIVERED 2026-09-17, ⛔ AWAITING OTE'S RATIFICATION —
+✅✅✅ THE ADMISSION ARC IS CLOSED AND ITS BUILD IS ACCEPTED. ⛔ Nothing below is a blocker.
+⭐⭐⭐ THE FIVE CARRIED-FORWARD ITEMS ARE IN §0-A ⓪ — ⛔ read them there, ⛔ especially "LEAVE THE THREE
+   RED CHECKS ALONE".
+⏸ AND THE ARC-LEVEL WORK THAT WAS PARKED BEHIND IT IS NOW GENUINELY NEXT, if Ote wants it:
+   A1 AUTHORITY (⑦'s ruling frees it) · B-D1 the projection radius · B-D3 `attestedBySource` ·
+   Dreaming / the M-series · and ⑨ (arena synthesis).
+⛔ THE RULINGS BELOW ARE HISTORY, KEPT BECAUSE THEY BIND ANY FUTURE WORK — ⛔ not because they are open.
+   ① ✅ RULED 2026-09-17 —
         `DECISION_SOTERA_01_INCUMBENT_RELATIONSHIP.md`. Ote's reframe: *"when two durable observations
         interact and the incumbent ceases to be the current holder, what semantic RELATIONSHIP, IF ANY,
         must be established between them?"* ⛔ RELATIONSHIP and CONSEQUENCE held strictly apart, and
@@ -1670,6 +1754,20 @@ M2     the deferred governance-READ decision (couples to ⓔ). Not urgent.
 # 0-F · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
 
 ```
+⭐⭐⭐⭐ A BEFORE/AFTER COMPARISON IS ONLY VALID IF THE REVERT ACTUALLY REVERTED. I `git stash`-ed
+      `Personas/Sotera` to test "pre-change" behaviour; `PortableComponents` IS NOT A GIT REPO, so that
+      stash silently did NOTHING and the half that mattered stayed changed. ⇒ I reported three of MY OWN
+      regressions as "pre-existing". ⛔ VERIFY THE REVERT LANDED (diff it) before trusting the comparison —
+      a silent no-op looks exactly like a clean control. ⓘ `@ote/memory` is its OWN repo; see §0-C.
+⭐⭐⭐ A CONTROL'S FIXTURES MUST NOT COLLIDE IN THE MECHANISM UNDER TEST. My "genuinely NEW" baseline came
+      back with SIX candidates — the resolver's COSINE arm had grouped the check's own `zz_adm*` names —
+      so the baseline was itself a DEFER and the comparison was between two deferrals. ⇒ write the
+      isolated case FIRST, before any other fixture exists, and ASSERT its isolation.
+⭐⭐ AN EARLY RETURN IS A SECOND CODE PATH AND NEEDS THE SAME FIELDS. `admitCandidates`' no-candidate
+      branch omitted the summary, which would have re-created the exact NEW-vs-DEFER indistinguishability
+      the field was added to remove. ⭐ Caught only because a control asserted the ZERO case explicitly.
+⭐⭐ ASSERT ONLY WHAT YOUR CHECK OWNS. Mine asserted "the admission ledger is EMPTY" — a GLOBAL property
+      it does not own, which goes red on someone else's teardown. ⇒ scope the assertion to its own act.
 ⭐⭐⭐ MEASURE THE THING THAT EXISTS BEFORE DERIVING ITS REPLACEMENT. I wrote a detector and a second
       gate for ④; the shipped rule already solved it AND was better. Both were deleted.
 ⭐⭐⭐ A "nothing changed" assertion is the one that PASSES WHEN THE INSTRUMENT IS BROKEN ⇒ positive
