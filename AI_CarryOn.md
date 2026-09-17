@@ -58,7 +58,8 @@ winner selection · `governsReplacement` · `restore` · `lesson-host` · every 
 A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
 A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
 ✅ D-1…D-6 ALL DECIDED · ✅ CONTRACT RATIFIED · ✅ **A — ACCEPT LOCKED** · ✅ **BUILD ACCEPTED 2026-09-17**
-✅ POST-ADMISSION EVIDENCE PASS ACCEPTED · ⏸ **A-D6 — RECALL SEMANTIC CLAIM: OPEN, READ-ONLY**
+✅ POST-ADMISSION EVIDENCE PASS ACCEPTED · ✅ **A-D6 DELIVERED — recall establishes REACH + ORDER,
+   ⛔ NEVER CURRENCY; "jointly current" is a READER INFERENCE**
 ```
 
 > ## ✅ **EVERY DECISION ABOVE IS RULED, AND THE BUILD THAT FOLLOWED IS ACCEPTED.**
@@ -156,7 +157,7 @@ comes next, and **the second is the one that opened the new question.**
   on the narrower key is INFLATED by ~10×.
 ```
 
-## ⭐⭐⭐ ⏸ **A-D6 — RECALL SEMANTIC CLAIM. OPEN (Ote, 2026-09-17).** ⛔ READ-ONLY.
+## ⭐⭐⭐ ✅ **A-D6 — RECALL SEMANTIC CLAIM. DELIVERED (2026-09-17).** ⛔ READ-ONLY, nothing changed.
 
 > ## **"When two durable observations are permitted to coexist because no warrant admitted them to
 > ## competition, what semantic claim, if any, does recall establish before presenting them together?"**
@@ -175,6 +176,85 @@ comes next, and **the second is the one that opened the new question.**
    not how to reduce coexistence."*
 ⛔ KEEP SEPARATE: restore/W6 · lesson-host · the three red checks · ledger teardown · extractor/elicitation
 ```
+
+### ✅ **THE ANSWER — `INVESTIGATION_SOTERA_AD6_RECALL_SEMANTIC_CLAIM.md`**
+
+```
+⭐⭐⭐ RECALL ESTABLISHES EXACTLY TWO THINGS, AND NEITHER IS CURRENCY:
+   ① REACHABILITY UNDER A SCOPE FILTER  — live ∧ non-contradicted ∧ in your scope
+   ② A RELEVANCE ORDERING               — this row scored higher than that one FOR THIS QUERY
+
+⛔ IT NEVER ESTABLISHES: that a row is the CURRENT answer · that two rows answer the SAME question ·
+   that they answer DIFFERENT questions · that they are consistent, jointly assertable or jointly
+   current · that any of them is TRUE.
+⇒ ⭐⭐⭐ **"JOINTLY CURRENT" IS A READER INFERENCE. The system never makes that claim.**
+```
+
+⭐⭐ **THE THREE FACTS THAT CARRY THE RULING** — traced, ⛔ not assumed:
+
+```
+① ⛔ NO STAGE EVER COMPARES TWO RETURNED ROWS TO EACH OTHER — except `dedupeByValue`, and ONLY for
+  restatement. Ranking compares each row TO THE QUERY. `rrfFuse` is order-only and scale-free.
+② ⛔⛔ THE FOUR-AXIS EPISTEMIC VOCABULARY HAS **NO CURRENCY AXIS**:
+     A SOURCE · B BASIS · C AVAILABILITY · D RETENTION       — and that is the complete list.
+  ⭐ `availability: recalled` = "content in hand this turn" — a REACH claim. `remembered` is DEFINED as
+  availability. `currentStateOf` counts what she can REACH, ⛔ never which belief holds.
+  ⭐ The strongest sentence the system says about a recalled row is **"I have this on file"** — a
+  CUSTODY claim about the record, ⛔ not a truth or currency claim.
+③ ⭐ `scope: fact` NEVER REACHES THE MODEL — `emit` puts it in a separate `parts` array, deliberately:
+  *"stamping authority/scope onto them would put those keys on the wire."*
+```
+
+⭐⭐⭐ **THE FINDING — AND IT IS A CONSEQUENCE OF THE ADMISSION BUILD:**
+
+```
+Recall's ONLY currency-bearing input is `invalid_at IS NULL`, and admission WIDENED ITS EXTENSION:
+   BEFORE  live ≈ "never displaced"  ⊇ "won the competition it was in"
+   AFTER   a DEFER leaves BOTH rows live and marks NEITHER
+   ⇒ ⭐⭐ THE LIVE SET NOW MIXES *survived a competition* WITH *was never admitted to one*,
+     and ⛔ recall cannot tell them apart — the verdict is in the LEDGER, ⛔ not on the rows.
+⚠️ This does NOT make recall wrong — it never claimed currency. ⭐ What changed is WHAT A READER MAY
+   INFER from the same output, and ⛔ no reader was told.
+⭐⭐ AND RULING ④ ALREADY FORBIDS IT: *"`invalid_at` is NOT a proposition-truth state."*
+   ⇒ a reader inferring currency from liveness makes PRECISELY the inference ④ forbids.
+```
+
+⭐⭐ **THE TWO CASES, AND WHY THE PAIR IS THE PROOF:**
+
+```
+⭐ THE 17 LESSONS   — MEASURED, and ⛔ NOT counterfactual: all 17 pass `visibleWhere` and are
+  recallable TODAY. dedupeByValue keeps 17 of 17. The composer shows 6.
+  ⇒ ⭐ admission did NOT create this case — it PROTECTS it.
+⭐ THE timezone PAIR — same slot, both unpinned ⇒ DEFER ⇒ both live. dedupe keeps 2 of 2
+  (token-sets 6 vs 1). Confidences 0.85 and 0.6 are BOTH DROPPED on the passive path.
+  ⇒ the model would see two bullets, same apparent fact, no dates, no confidences.
+⛔ NO STAGE MALFUNCTIONED IN EITHER CASE. Grouping was right, admission was right, dedupe was right.
+
+⭐⭐⭐ AND THE OUTPUT SHAPE IS **IDENTICAL** IN BOTH — one reads as an INVENTORY, the other as a
+  CONTRADICTION. ⇒ the sharpest possible evidence that the claim lives in THE READER, ⛔ not the act.
+```
+
+⚠️ **WHAT THE MODEL ACTUALLY SEES on the every-turn path — this is the COMPLETE string:**
+
+```
+Relevant things you recall (ranked by relevance to the current message; may be from earlier
+conversations — use only if pertinent):
+- <content>
+- <content>
+```
+⛔ No ids · no dates · no entity/attribute · no confidence · no count · ⛔ NO STATEMENT OF CURRENCY.
+⚠️⭐ AND THE SYSTEM KNOWS HOW TO DISCLAIM — the conversation-evidence block says *"EVIDENCE to consider
+or verify, **not established facts**"*. ⇒ recall's hedge is about RELEVANCE, ⛔ never epistemics.
+
+⏸ **THE NEXT SEMANTIC QUESTION THE EVIDENCE WARRANTS — ⛔ not opened, Ote's call:**
+
+> **Is "which question does this observation answer?" a property RECALL is entitled to READ — or is it,
+> like exclusivity, something that must be ESTABLISHED before any consumer may rely on it?**
+
+⚠️⛔ **AND THE TRAP TRANSFERS**: letting recall infer question-identity from the slot, the label or
+value-similarity would be EXACTLY the vacuity admission refused on the write side, rebuilt on the read
+side. ⭐ Expect the prohibition to carry over.
+
 
 
 > ## ⭐⭐⭐ **① IS RULED, AND SO IS EVERYTHING AFTER IT.**

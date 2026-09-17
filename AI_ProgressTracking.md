@@ -12310,3 +12310,91 @@ by reframing this as "too many live rows"** — the write-side decision stands.
 **what the recall ACT establishes ≠ what a READER may infer from its output.**
 
 **DOC:** `INVESTIGATION_SOTERA_POST_ADMISSION_CORPUS.md`
+
+
+---
+
+## 2026-09-17 · ✅ A-D6 — THE RECALL SEMANTIC CLAIM · DELIVERED
+
+⛔ Read-only: no code, migration, schema, test change, DB write, restart or fix. ⛔ `recall()` was never
+called — it reinforces `access_count`, which is a write; the pure stages were reconstructed instead.
+⛔ A — ACCEPT not reopened.
+
+### ✅ THE ANSWER
+
+```
+RECALL ESTABLISHES TWO THINGS, AND NEITHER IS CURRENCY:
+  ① reachability under a scope filter   ② a relevance ordering for THIS QUERY
+⇒ "jointly current" is a READER INFERENCE. ⛔ The system never makes that claim.
+```
+
+### ⭐ THE CALL GRAPH — three consumers, ONE core
+
+```
+PASSIVE   route:1418 recall() → retrieve() → candidates/visibleWhere → embed → dense ⊕ lexical →
+          rankMemories → rrfFuse → dedupeByValue → slice(6) → view → .map(m=>m.content) → emit('recall')
+COGNITION cognition-host:313 svc.search() → THE SAME retrieve() → four axes → "I have this on file: …"
+TOOL      recall_memory → pipeline:294 search() → full `view` (entity, attribute, confidence, `when`)
+```
+
+### ⭐⭐ WHAT EACH STAGE ESTABLISHES
+
+```
+visibleWhere    ⭐ REAL: live ∧ non-contradicted ∧ in scope        ⛔ not "current", not "true"
+dense/lexical   ⭐ a distance / an overlap TO THE QUERY            ⛔ nothing BETWEEN rows
+rrfFuse         ⭐ an ORDER over ids, scale-free                   ⛔ no magnitude, no threshold
+rankMemories    ⭐ a sort key (relevance+importance+recency)       ⛔ nothing about truth or currency
+dedupeByValue   ⭐ same entity ∧ IDENTICAL TOKEN-SET ⇒ restatement ⛔ `false` ≠ "established distinct"
+slice(limit)    ⭐ a budget                                        ⛔ nothing
+.map(.content)  ⛔⛔ PURE LOSS — when, confidence, entity, attribute, id ALL DIE HERE
+emit('recall')  ⭐ a RELEVANCE hedge                               ⛔ no epistemic claim
+```
+
+⛔⛔ **NO STAGE EVER COMPARES TWO RETURNED ROWS TO EACH OTHER** — except dedupe, only for restatement.
+
+### ⭐⭐⭐ THE FINDING — admission widened recall's one currency input
+
+```
+`invalid_at IS NULL` is the ONLY currency-bearing predicate on the path.
+  BEFORE  ≈ "never displaced" ⊇ "won the competition it was in"
+  AFTER   a DEFER leaves BOTH rows live and marks NEITHER
+⇒ the live set now MIXES *survived a competition* with *was never admitted to one*, and recall
+  cannot tell them apart — the verdict is in the LEDGER, ⛔ not on the rows, and recall never reads it.
+⚠️ Recall did not become wrong (it never claimed currency). What changed is WHAT A READER MAY INFER.
+⭐⭐ Ruling ④ already forbids it: *"`invalid_at` is NOT a proposition-truth state."*
+```
+
+### ⭐⭐ THE STRUCTURAL PROOF — there is no currency axis
+
+`memory-cognition-axes.js`, the complete list: **A SOURCE · B BASIS · C AVAILABILITY · D RETENTION**.
+⛔ Not one asks whether a proposition is the current answer. `availability: recalled` = *"content in hand
+this turn"* (REACH). `remembered` is DEFINED as availability. `currentStateOf` counts what she can REACH.
+⭐ The strongest sentence about a recalled row is **"I have this on file"** — a CUSTODY claim.
+⭐ And `scope: fact` never reaches the wire — `emit` puts it in a separate `parts` array, deliberately.
+
+### ⭐ THE TWO CASES — and the pair IS the proof
+
+```
+17 LESSONS   MEASURED, live TODAY: 17 pass visibleWhere · dedupe keeps 17/17 · composer shows 6
+             ⇒ admission did NOT create this case, it PROTECTS it
+timezone     same slot · both unpinned ⇒ DEFER ⇒ both live · dedupe keeps 2/2 (token-sets 6 vs 1)
+             confidences 0.85 and 0.6 BOTH DROPPED on the passive path
+⛔ NO STAGE MALFUNCTIONED IN EITHER CASE.
+⭐⭐⭐ THE OUTPUT SHAPE IS IDENTICAL — one reads as an INVENTORY, the other as a CONTRADICTION.
+```
+
+### ⏸ THE NEXT SEMANTIC QUESTION (⛔ not opened)
+
+> **Is "which question does this observation answer?" a property RECALL is entitled to READ — or is it,
+> like exclusivity, something that must be ESTABLISHED before any consumer may rely on it?**
+
+⚠️⛔ The vacuity trap transfers: inferring question-identity from the slot, the label or value-similarity
+would be exactly what admission refused on the write side, rebuilt on the read side.
+
+### ⏸ REMAINING UNKNOWN, AND IT IS THE BIG ONE
+
+⛔ **What the model actually does with two contradictory-looking bullets has NEVER BEEN OBSERVED** — the
+coexistence case has never reached a live turn, and I did not create one. ⚠️ There is precedent that
+framing conflicts are won by the OTHER channel (`memory-cognition-projection.js:14`).
+
+**DOC:** `INVESTIGATION_SOTERA_AD6_RECALL_SEMANTIC_CLAIM.md`
