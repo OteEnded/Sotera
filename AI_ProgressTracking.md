@@ -10353,3 +10353,67 @@ Added to `evidence-baseline-check.mjs` §8, failing in **both** directions: if t
 consequence census green · membership census green · slot-authority map green · routing green · 047 scope
 green · relation census green · unit **753/753** · both original collisions armed · canary unarmed.
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · THE COMPETITION PREDICATES — one claims what a memory says; the most destructive claims nothing
+
+Ote: *"Can two genuinely different propositions satisfy the predicate? Can two propositions that should
+compete fail to satisfy it? Once membership exists, exactly what operations become possible solely because
+of that membership?"* — with the standing warning that **"duplicate" is a code branch, not an established
+fact.** ⛔ Read-only; the canary stays unarmed; `SEMANTIC_FIELDS` untouched.
+
+**Instrument** → `test/checks/competition-predicate-trace.mjs`.
+
+### ⭐ P15 — a second membership predicate, and it needs no slot
+
+The previous census missed it. `forget`/`revive` key on **the same dual key as `buildSlotView`**:
+`slotKey = row.slot_id ? {slotId} : {entity, attribute}`. So `reviveSuperseded` returns null if any live
+co-member exists — **a veto** — and `restore` brings a row back **superseded** rather than live.
+
+⇒ **17 of the 18 lessons already share one `findLiveInSlot` key, today, with no slot in existence.** The
+canary's status is therefore two-part: **unarmed for reconcile** (no slot ⇒ no `matches`) and **already live
+for forget/revive**. ⛔ P15 destroys nothing — it withholds restoration. A veto, not an invalidation, and
+the distinction is kept because overstating it would be the same error the warning is about.
+
+### Can the predicate be wrong?
+
+**False positive — confirmed.** The canary (18 distinct propositions, one key) and the shipped
+`work schedule` defect.
+
+**False negative — not established.** 0 groups split across slots. Reported as *not established*, never as
+*none exists*: the instrument tests structural proxies and cannot judge "should compete" semantically.
+
+⚠️ And the one identical-value pair is **not** a false negative: `location = Bangkok` and
+`timezone = Bangkok` are different questions with the same answer string, correctly in different slots.
+
+**The mirror, and it indicts P13 rather than membership:** the canary shows *one membership ≠ one
+proposition*; Bangkok shows *one value ≠ one proposition*. ⇒ **P13 is a proposition test only conditional on
+membership being right.** Where membership is wrong it compares answers to different questions — exactly
+what `work schedule` did.
+
+### What membership alone unlocks
+
+**Two operations require membership and nothing else, and both act on a row whose content was never read:**
+collapse as an extra (P14 — invalidates) and veto a revival (P15 — withholds, no slot needed). Verified
+purely: `matches = [X, Y]`, incoming `"X"` → `duplicate`, `collapse = [Y]`; **"Y" was never compared to
+anything.**
+
+### The answer, with its limits
+
+On the evidence the third layer is an **operational grouping**: of eleven predicates, one (P13) claims
+anything about what a memory says; the most destructive (P14) claims **nothing at all** — it is the
+*absence* of a predicate, "not newest"; and the one selecting the arena (P11) is a **guess**.
+
+⛔ But that is a description of the present implementation, **not** a finding that the grouping is
+illegitimate — and the false-negative direction was not established. Ote's to rule.
+
+**Near-miss #21:** I almost reported the duplicate-label slots as a false negative. Two slots named
+`user | communication preference` and two named `user | current activity` exist — but they differ by
+`user_id`: **different people**, correctly separated by P3. A "duplicate" at the label level was correct
+behaviour at the scope level — the same trap as calling an uncompared row a duplicate, one layer over.
+Caught by reading the rows instead of the group-by count.
+
+**Verification:** predicate trace green · competition census green · evidence baseline green including the
+canary guard · unit **753/753** · both original collisions armed · canary unarmed for reconcile.
+⛔ Nothing was written.

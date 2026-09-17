@@ -322,6 +322,29 @@ decision. ⛔ Not reopened.
    ⭐ THE CANARY IS NOW PERMANENTLY GUARDED — `evidence-baseline-check.mjs` §8 fails BOTH ways: if the
    18 rows are DESTROYED, and if the key becomes ARMED (a slot or alias under `sotera | lesson`).
    → `INVESTIGATION_SOTERA_COMPETITION_MEMBERSHIP.md` · `test/checks/competition-membership-census.mjs`
+㉘ ⭐⭐⭐ P15 — A **SECOND** MEMBERSHIP PREDICATE, AND IT NEEDS NO SLOT (found 2026-09-17; the previous
+   census MISSED it). `forget`/`revive` key on the SAME dual key as `buildSlotView`:
+     `slotKey = row.slot_id ? {slotId} : {entity, attribute}`
+     `reviveSuperseded: if (findLiveInSlot(slotKey).length > 0) return null`   ⇒ ⭐ A VETO
+     `restore: holder = findLiveInSlot(...)` ⇒ the restored row returns SUPERSEDED, ⛔ not live
+   ⇒ ⭐⭐⭐ **17 LESSONS ALREADY SHARE ONE `findLiveInSlot` KEY — TODAY, WITH NO SLOT.** ⇒ THE CANARY'S
+   STATUS IS TWO-PART: ⛔ UNARMED for reconcile (no slot ⇒ no `matches`) · ⚠️ ALREADY LIVE for
+   forget/revive. ⛔ P15 DESTROYS NOTHING — it WITHHOLDS RESTORATION. A veto, ⛔ not an invalidation.
+㉙ ⭐⭐⭐ CAN MEMBERSHIP BE WRONG? FALSE POSITIVE ✅ CONFIRMED (the canary · the shipped `work schedule`
+   defect). FALSE NEGATIVE ⚠️ **NOT ESTABLISHED** — 0 groups split across slots; ⛔ reported as
+   not-established, ⛔ NEVER as "none exists" (the instrument tests structural proxies only).
+   ⭐⭐ THE MIRROR: `location = Bangkok` and `timezone = Bangkok` — ONE VALUE, TWO PROPOSITIONS, correctly
+   in different slots. ⇒ canary says ONE MEMBERSHIP ≠ ONE PROPOSITION; Bangkok says ONE VALUE ≠ ONE
+   PROPOSITION. ⇒ ⛔ **P13 IS A PROPOSITION TEST ONLY *CONDITIONAL ON MEMBERSHIP BEING RIGHT*** — where
+   membership is wrong it compares ANSWERS TO DIFFERENT QUESTIONS, which is what `work schedule` did.
+   ⭐⭐⭐ MEMBERSHIP ALONE UNLOCKS TWO OPERATIONS, BOTH ACTING ON A ROW WHOSE CONTENT WAS NEVER READ:
+   ⛔ COLLAPSE AS AN EXTRA (P14 — invalidates) · ⚠️ VETO A REVIVAL (P15 — withholds, no slot needed).
+   ⇒ ⭐ ON THE EVIDENCE THE THIRD LAYER IS AN **OPERATIONAL GROUPING**: 1 of 11 predicates claims anything
+   about what a memory SAYS · the most destructive one (P14) claims NOTHING (it is the ABSENCE of a
+   predicate — "not newest") · the one selecting the arena (P11) is a GUESS.
+   ⛔ BUT THAT IS A DESCRIPTION OF THE IMPLEMENTATION, ⛔ NOT a finding that the grouping is ILLEGITIMATE,
+   and the false-negative direction was NOT established. ⛔ OTE'S TO RULE.
+   → `INVESTIGATION_SOTERA_COMPETITION_PREDICATES.md` · `test/checks/competition-predicate-trace.mjs`
 ```
 
 ---
