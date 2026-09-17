@@ -11867,3 +11867,52 @@ suite proves nothing.
 positive control. Items 2 and 3 are **corrections to the contract**, not to the design.
 
 ⛔ **Nothing built.** unit **753/753** · baseline green · canary 18 / 0 / 0 · 047 untouched.
+
+---
+
+## 2026-09-17 · five positions resolved · ⛔ the extractor's `claimKind` has no legitimate source
+
+**Ote resolved all five.** Consolidation **NOT-IN-SCOPE** (contract's NOT-IN-SCOPE tightened) · `restore`
+**out of scope for this build**, the two seams disagreeing **knowingly** · the lesson D1 gap recorded as a
+**separate pre-existing issue** · **two** positive controls required for done — a DEFER control *and* an
+**ADMIT** control, because *"today's corpus would otherwise make it possible to 'prove' the implementation
+with nothing but universal DEFER."*
+⭐ The contract also now carries the **vacuity-trap prohibition**.
+
+### ⛔⛔ The extractor pass — and it rules out the option Ote chose
+
+**Doc:** `DESIGN_SOTERA_EXTRACTOR_CLAIMKIND_SOURCE.md`. The extractor prompt and the `remember_fact` tool
+description were **read only, not touched**.
+
+**Its entire input:** one turn of text, `sourceMessageId`, scope, a `source` label, `assertionGate`'s
+asserted text, and its writer contract. Output: `{entity, attribute, value, importance}` plus a verified
+provenance class. **No question appears in its inputs or its outputs.**
+
+Every candidate rejected: the turn text (contains the *answer*, not the question) · the attribute (③) · the
+LLM's judgement (M2-10 — *never guessed by a classifier*) · A2's advisory output · the slot's binding (D-2) ·
+the incumbent's pin (the vacuity trap).
+
+> ## ⭐⭐⭐ **The boundedness that earns its warrant is what denies it the question.** Its one delegated grant
+> ## is legitimate *because* *"the extractor cannot read anything but the turn it was handed."* The only
+> ## non-inferential home for a question is the **preceding assistant turn**, which is outside its reach by
+> ## contract — and reaching it would widen `turn` to `range` (the reflection contract), so the declared
+> ## coincidence would stop being true by mechanism and **the grant would lapse.**
+>
+> ## **You cannot give the extractor question identity without destroying the warrant it already has.**
+
+⭐ **One genuine route exists — elicitation.** The provenance vocabulary already names it: *"elicited — we
+ASKED and they answered… shaped by our question."* When the system asks, the question is established by the
+system, which knows what it asked. Bounded, checkable, answerable, and **declared before the answer exists**.
+⚠️ But `PROVENANCE.elicited` is set in exactly **one** site (the Identity Resolver), no fact-elicitation path
+exists, the ask records *that* one was asked and **never which declared question** — and most extracted facts
+are **volunteered**, so it does not solve the volume problem.
+
+> ## **For volunteered facts the extractor has no legitimate source. Absent remains absent; DEFER remains
+> ## correct. M2-10 / M2-11 stay locked.**
+
+⇒ ⚠️ **Ote's option 1 is not available** — not by preference, by structure, exactly as his own instruction
+anticipated. The extractor-volume question returns to him with one option eliminated: **accept** · **stage** ·
+or **build elicitation** as a complement (never a replacement for choosing between the other two).
+⭐ And the prompt must **not** change — asking it for a question key *is* the classifier M2-10 forbids.
+
+⛔ **Build not authorized.** unit **753/753** · baseline green · canary 18 / 0 / 0 · 047 untouched.

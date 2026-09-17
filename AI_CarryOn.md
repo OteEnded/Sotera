@@ -30,7 +30,8 @@ A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is es
 A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
 ⭐⭐⭐ DESIGN IS UNLOCKED (Ote, 2026-09-17) — the read-only fence was PER-PASS, ⛔ not permanent.
 ✅ D-1…D-6 ALL DECIDED · ✅ THE CONTRACT RATIFIED AT THE SEMANTIC LEVEL (Ote, 2026-09-17)
-⛔⛔ THE IMPLEMENTATION-IMPACT REVIEW CAME BACK **NOT CLEAN** — 5 ITEMS NEED A POSITION (§0-B 58)
+✅ ALL 5 POSITIONS RESOLVED (Ote, 2026-09-17) — ⚠️ **EXCEPT the extractor, which came BACK to him**
+     because the trace RULED OUT his chosen option (§0-B 59). ⛔ BUILD STILL NOT AUTHORIZED.
      ⛔⛔ IMPLEMENTATION IS **NOT AUTHORIZED** AND **NOT STARTED** — Ote: *"produce the design contract
      first, review it, then we'll explicitly authorize the implementation pass."*
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
@@ -1313,6 +1314,55 @@ decision. ⛔ Not reopened.
       100%-DEFER suite proves nothing (RP-D0's own lesson).
    ⏸ **THE FIVE THINGS NEEDED BEFORE BUILD:** ① the extractor ② consolidation ③ `restore` ④ the lesson D1
       gap ⑤ the DEFER positive control. ⭐ ② and ③ are CORRECTIONS TO THE CONTRACT, ⛔ not to the design.
+   ✅⭐ **ALL FIVE RESOLVED (Ote, 2026-09-17), AND THE CONTRACT IS UPDATED:**
+      ② CONSOLIDATION ✅ **NOT-IN-SCOPE** — NOT-IN-SCOPE is TIGHTENED to *"admission applies where two
+        **INDEPENDENTLY-AUTHORED** observations are made mutually exclusive; ⛔ it does NOT apply where the
+        successor is **CONSTRUCTED FROM** the incumbent."* ⇒ version lineage, ⛔ not competition.
+      ③ `restore`/W6 ✅ **OUT OF SCOPE FOR THIS BUILD** — unchanged. ⚠️ The two seams WILL disagree,
+        **KNOWINGLY** — ⛔ not silently. ⏸ A separate future decision.
+      ④ THE LESSON D1 GAP ✅ **SEPARATE PRE-EXISTING ISSUE** — recorded, ⛔ NOT folded into this build.
+      ⑤ CONTROLS ✅ **TWO ARE REQUIRED FOR DONE:** ⭐ a DEFER control (both rows live, NEITHER invalidated
+        or superseded) **AND** ⭐⭐ an **ADMIT** control (a genuinely TWO-SIDED same-question pair CAN enter
+        competition). ⚠️ Ote: *"today's corpus would otherwise make it possible to **'prove' the
+        implementation with nothing but universal DEFER**."* ⭐ RP-D0's lesson, one layer up.
+      ⛔⛔ AND THE CONTRACT NOW CARRIES **THE VACUITY-TRAP PROHIBITION**: the incoming's question may NEVER
+        be derived from the incumbent's pin NOR from the resolved slot — either makes `K_in === K_inc`
+        trivially true ⇒ **the gate would ALWAYS ADMIT and prove nothing.**
+
+59 ⭐⭐⭐⭐ **THE EXTRACTOR'S `claimKind` — ⛔ NO LEGITIMATE SOURCE FOR VOLUNTEERED FACTS.**
+   `DESIGN_SOTERA_EXTRACTOR_CLAIMKIND_SOURCE.md`. ⛔ The extractor prompt and the `remember_fact` tool
+   description were READ ONLY, ⛔ not touched (standing constraint).
+   ⭐ ITS **ENTIRE** INPUT: **ONE TURN** of text · `sourceMessageId` · scope · a `source` label ·
+      `assertionGate`'s asserted text · its writer contract. Output: `{entity, attribute, value,
+      importance}` + a VERIFIED provenance class. ⛔ **NO question appears in its inputs OR its outputs**
+      — the prompt says *"Extract DURABLE facts about the USER from **the message below**"*.
+   ⛔ EVERY CANDIDATE TESTED AND REJECTED: the TURN TEXT (⛔ contains the ANSWER, not the QUESTION) ·
+      the ATTRIBUTE (⛔ ③) · the LLM's JUDGEMENT (⛔ M2-10 — *never guessed by a classifier*) ·
+      A2's `attributeCandidate`/`Shape` (⛔ advisory by ruling) · the SLOT's binding (⛔ D-2) ·
+      the INCUMBENT'S PIN (⛔⛔ the VACUITY TRAP).
+   ⭐⭐⭐ **THE STRUCTURAL RESULT — THE BOUNDEDNESS THAT EARNS ITS WARRANT IS WHAT DENIES IT THE QUESTION.**
+      Its ONE delegated grant is legitimate *because* *"the extractor **cannot read anything but the turn
+      it was handed**"*. ⚠️ The only non-inferential home for a question is **THE PRECEDING ASSISTANT
+      TURN** — and that is OUTSIDE its reach BY CONTRACT. ⇒ ⭐ **giving it the question would widen its
+      reach from `turn` to `range` (the REFLECTION contract) and the declared coincidence would no longer
+      be TRUE BY MECHANISM ⇒ THE GRANT WOULD LAPSE.** ⛔ **You cannot give the extractor question identity
+      without destroying the one warrant it already has.**
+   ⭐⭐ **THE ONE GENUINE ROUTE — ELICITATION**, and the provenance vocabulary ALREADY names it:
+      *"**elicited** — we ASKED and they answered… shaped by **our question**"*. ⭐ When the system ASKS,
+      the question is established BY THE SYSTEM, WHICH KNOWS WHAT IT ASKED — ⛔ no inference.
+      ✅ Bounded · checkable · answerable · ⭐ DECLARED BEFORE THE ANSWER EXISTS, so it cannot be fitted to it.
+      ⚠️ ⛔ BUT: `PROVENANCE.elicited` is set in **EXACTLY ONE SITE** (the Identity Resolver's
+      `adopted-after-ask`), the extractor NEVER sets it, ⛔ no fact-elicitation path exists, and even the
+      identity ask records THAT one was asked, ⛔ **never WHICH declared question.**
+      ⛔ AND MOST EXTRACTED FACTS ARE **VOLUNTEERED**, not elicited ⇒ ⛔ it does NOT solve the volume problem.
+   ⭐⭐⭐ **THE ANSWER: for VOLUNTEERED facts the extractor has NO legitimate source. ABSENT REMAINS ABSENT;
+      DEFER REMAINS CORRECT. M2-10/M2-11 STAY LOCKED.** ⇒ ⚠️ **Ote's chosen option 1 (*"let it declare"*)
+      IS NOT AVAILABLE** — ⛔ not by preference, by structure, exactly as his own instruction anticipated.
+   ⏸ ⇒ THE EXTRACTOR-VOLUME QUESTION RETURNS TO OTE with one option ELIMINATED: ⚠️ ACCEPT (facts stop
+      converging; recall surfaces several answers where it surfaced one) · ⚠️ STAGE (the seam stays open
+      where it fires most) · ⭐ **BUILD ELICITATION** — legitimate, bounded, checkable, ⛔ a COMPLEMENT
+      covering only elicited facts, ⛔ **never a replacement for choosing between the other two.**
+   ⭐ AND THE PROMPT MUST **NOT** CHANGE — asking it for a question key IS the classifier M2-10 forbids.
 ```
 
 ---
