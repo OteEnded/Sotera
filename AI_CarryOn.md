@@ -26,7 +26,8 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ⑧-A ✅ RULED NARROW    ⭐ bounded · checkable · answerable · REFUSAL PRESERVED
 ④-A ✅ RULED NARROW    ⭐ ONE claim, and its subject is THE SYSTEM
 ④  ✅ RULED — the three statuses are WRITER EVIDENCE, ⛔ NOT a taxonomy
-A-D4 ⏸ INVESTIGATED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
+A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
+A-D5 ⏸ INVESTIGATED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
@@ -1099,6 +1100,58 @@ decision. ⛔ Not reopened.
    ⛔ NOT ESTABLISHED: what should replace any of it · that an ADJUDICATED verdict IS sufficient (⚠️ only
       that the system ranks it above a binding) · ⛔ that retrieval grouping is useless (it asserts
       nothing and is untouched) · ⛔ anything about winner selection.
+   ✅ A-D4 DELIVERED AND ACCEPTED (Ote, 2026-09-17) — ⛔ **NOT turned into a design decision.**
+   ⚠️⚠️ **ONE WORDING NARROWED BY RULING — ⛔ DO NOT REPEAT THE ORIGINAL.** The investigation said 047 was
+      *"the ONLY thing that could license exclusivity"*. ⛔ That decides the positive authority model
+      through investigation wording. ⭐ THE RULING: **"No currently observed mechanism establishes a
+      warrant for current-state exclusivity. 047 provides an established CANDIDATE FORM for such a
+      warrant, ⛔ but no positive exclusivity-authority model has yet been chosen."**
+
+55 ⭐⭐⭐ **A-D5 — THE EXCLUSIVITY WARRANT (opened by Ote 2026-09-17). ⛔ READ-ONLY, ⛔ NO CODE.**
+   `INVESTIGATION_SOTERA_AD5_EXCLUSIVITY_WARRANT.md`. ⛔ No assumption that the answer is 047, an LLM
+   verdict, provenance or anything else. ⛔ Winner selection still out of scope.
+   ⭐⭐⭐ **THE STRUCTURAL TEST THAT DID THE SORTING: EXCLUSIVITY IS IRREDUCIBLY A CLAIM ABOUT A *PAIR*, AND
+      ALMOST EVERY MECHANISM IN THIS SYSTEM PRODUCES A *UNARY* CLAIM** — provenance (one observation ← one
+      turn) · attestation (one turn exists) · `markContradicted` (one proposition) · writer/act/occasion
+      (one act) · entity scope (whose). ⭐ A3's adjudication is BINARY ⛔ but between **PHRASINGS**, not
+      observations. ⇒ ⭐ ONLY TWO CANDIDATES SURVIVE.
+   ⭐ (a) **`governsReplacement` — M2 AS THE REPLACEMENT AUTHORITY. It MEETS ⑧-A ON EVERY AXIS:**
+      BOUNDED — scope is ONLY `UPDATE`; *"collapse is never gated is guaranteed by **PLACEMENT**, ⛔ not by
+        a conditional"* ⇒ ⭐⭐ TRUE BY MECHANISM, ⛔ not a flag anyone can clear.
+      CHECKABLE — **PURE** (no store, IO, config, model) · *"EXACT MATCH ONLY… no 'close enough': every one
+        of those is an inference about what the question means"*.
+      DECLARED BOTH SIDES — `slotKind` is the bound question's KEY; `claimKind` comes from the caller that
+        knows ⇒ ⭐ ③'s STANDARD MET.
+      ANSWERABLE — the refusal names the REMEDY and the PAIR. REFUSAL PRESERVED — ⭐ *"a refusal leaves the
+        world as it found it"*. FAILS CLOSED — absent `claimKind` on a governed slot ⇒ REFUSE.
+      ⭐⭐⭐ **AND ABSTENTION ≠ DEFER IS ALREADY THE RATIFIED DESIGN HERE** — `NOT-IN-SCOPE`/`ALLOW`/`REFUSE`,
+        Ote's own *"don't let the implementation accidentally turn 'not in scope' into DEFER"*; and
+        `checkKind` names the third state with its SEPARATE REMEDY (*"an admission that the question was
+        never declared"* ⇒ declare it, vs. decide about the claim).
+      ⛔ **LIMITS — DECISIVE:** its ENTIRE REACH IS ONE OPERATOR SLOT. 1 question · 1 of 112 slots bound ·
+        **35 admission pins and 66 gateable replacements, ALL in `build tag for this cycle`** ⇒ ⛔ ZERO USER
+        BELIEFS EVER GATED. ⭐ It is ⛔ not theoretical — it has run 66 times.
+      ⭐⭐⭐ **AND IT AUTHORIZES THE *REPLACEMENT*, ⛔ NOT THE *MEMBERSHIP*** — ③ established the gate is
+        DOWNSTREAM of routing and ASSUMES it. ⚠️ Two-sided: it WOULD have refused #8/#9 **if the claim
+        declared its own question** — ⛔ but only because the CLAIM declared it, ⛔ never because the gate
+        examined the arena. ⚠️ `claimKind` has ONE supplier (`keep`/`remember_fact`, 2026-09-04); every
+        other writer would REFUSE on a governed slot — ⭐ correct and fail-closed, ⛔ and it means
+        governance is NOT broadly adoptable today.
+   ⭐ (b) **THE IDENTITY RESOLVER'S ASK — the ONLY OBSERVATION-TO-OBSERVATION authorization.** The specific
+      PAIR put to the one answerable party. BOUNDED · ANSWERABLE (*"they are the only authority on their
+      own name"*) · REFUSAL PRESERVED (`declined` ≠ `deferred`, abstention the DEFAULT) · FAILS CLOSED.
+      ⚠️ CHECKABLE ONLY IN PART — ⭐ *that* it occurred is checkable; ⛔ *that it was right* is TESTIMONY.
+      ⛔ Scoped to ONE attribute family; ⛔ whether that standing generalises is NOT ESTABLISHED.
+   ⭐⭐ **ENFORCEMENT IS NOT WARRANT** — one-live-row convergence · `findLiveInSlot` · the collapse of
+      extras all **PRESUPPOSE** exclusivity and enforce it. ⭐ Enforcing exclusivity over an unwarranted
+      set is A-D4's finding from the other side.
+   ⭐⭐⭐ **THE ANSWER: A-D5 FINDS A WARRANT FOR THE EXCLUSIVITY *ACT*. IT FINDS NONE FOR THE EXCLUSIVITY
+      *SET*.** Both mechanisms operate on a pair ALREADY BROUGHT TOGETHER BY SOMETHING ELSE. ⇒ A-D4's gap
+      is NARROWER than it appeared (a well-formed warrant FORM exists and demonstrably works) and
+      ⛔ UNCHANGED IN SUBSTANCE.
+   ⛔ NOT ESTABLISHED: that 047 IS the answer (⛔ and per A-D4's narrowing it must not be chosen by
+      wording) · that an aux-LLM adjudication is or is not sufficient (⚠️ NOT TESTED) · that the Identity
+      Resolver's standing generalises · that `claimKind` should be required of every writer.
 ```
 
 ---
@@ -1257,7 +1310,14 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
    ⭐⭐⭐⭐ THE LOCKED CONVERGENCE (§0-B 53) — ⛔ CITE THIS, it now does most of the work:
         **An act with no established warrant establishes NOTHING beyond whatever its own already-established
         disposition constitutes; an act WITH a warrant establishes ONLY what that warrant covers.**
-   A-D4 ⏸ INVESTIGATED (§0-B 54) — ⭐ ONLY `entity` establishes anything (IDENTITY, derived by the runtime),
+   A-D5 ⏸ INVESTIGATED (§0-B 55) — ⭐⭐⭐ **A WARRANT EXISTS FOR THE EXCLUSIVITY *ACT*; ⛔ NONE FOR THE
+        EXCLUSIVITY *SET*.** `governsReplacement` meets ⑧-A on every axis (⭐ true by PLACEMENT, PURE, exact
+        match, both sides DECLARED, fails closed, refusal leaves the world as it found it) — ⛔ but its
+        entire reach is ONE OPERATOR SLOT (35 pins · 66 gateable replacements, all `build tag for this
+        cycle`; ZERO user beliefs) and it authorizes the REPLACEMENT, ⛔ not the MEMBERSHIP.
+        ⭐ The Identity Resolver's ask is the only OBSERVATION-TO-OBSERVATION authorization; ⛔ one family.
+        ⭐⭐ ENFORCEMENT ≠ WARRANT. ⭐ ABSTENTION ≠ DEFER is already the ratified design at that seam.
+   A-D4 ✅ DELIVERED (§0-B 54) — ⭐ ONLY `entity` establishes anything (IDENTITY, derived by the runtime),
         and it establishes WHOSE, ⛔ never WHICH QUESTION. ⭐⭐⭐ **CURRENT-STATE EXCLUSIVITY IS ESTABLISHED BY
         NO STEP — and exclusivity is the only thing competition does.** ⇒ admission does not need a relation
         to GROUP; it needs one for the grouping to be EXCLUSIVE. ⭐ ABSTENTION exists at admission

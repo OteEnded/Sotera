@@ -11643,3 +11643,53 @@ retrieval grouping is useless · anything about winner selection.
 
 **Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
 armed collisions intact · ⛔ **no code written; nothing written to the database.**
+
+---
+
+## 2026-09-17 · A-D4 accepted (with a wording narrowed) · A-D5 investigated
+
+### A-D4 ✅ DELIVERED AND ACCEPTED — ⛔ not turned into a design decision
+
+⚠️⚠️ **And Ote narrowed one of my wordings, correctly.** The investigation said 047 was *"the only thing
+that could license exclusivity."* ⛔ That decides the positive authority model through investigation
+wording. The ruling:
+
+> **No currently observed mechanism establishes a warrant for current-state exclusivity. 047 provides an
+> established candidate form for such a warrant, ⛔ but no positive exclusivity-authority model has yet been
+> chosen.**
+
+### A-D5 ⭐ THE EXCLUSIVITY WARRANT — investigated
+
+**Doc:** `INVESTIGATION_SOTERA_AD5_EXCLUSIVITY_WARRANT.md`. ⛔ Read-only, no code, no instrument created.
+
+⭐⭐⭐ **The structural test did the sorting: exclusivity is irreducibly a claim about a PAIR, and almost
+every mechanism in this system produces a UNARY claim** — provenance, attestation, `markContradicted`,
+writer/act/occasion, entity scope. A3's adjudication is binary but between **phrasings**. ⇒ only two survive.
+
+**(a) `governsReplacement` — M2 as the replacement authority. It meets ⑧-A on every axis:** bounded (scope
+is only `UPDATE`, and *"collapse is never gated is guaranteed by PLACEMENT, not by a conditional"* ⇒ true by
+mechanism) · checkable (PURE, exact match only) · declared on both sides ⇒ ③'s standard met · answerable
+(names the remedy and the pair) · refusal preserved (*"a refusal leaves the world as it found it"*) · fails
+closed.
+⭐⭐⭐ **And ABSTENTION ≠ DEFER is already the ratified design there** — `NOT-IN-SCOPE` is explicitly not a
+DEFER, in Ote's own earlier wording.
+⛔ **Limits:** its entire reach is **one operator slot** — 1 question, 1 of 112 slots, **35 pins and 66
+gateable replacements all in `build tag for this cycle`**, zero user beliefs. And it authorizes the
+**replacement**, not the **membership**: ③ established it is downstream of routing and assumes it.
+
+**(b) the Identity Resolver's ask** — the only observation-to-observation authorization; the pair put to the
+one answerable party, default no, fails closed. ⚠️ Checkable *that* it happened, not *that it was right*;
+scoped to one attribute family.
+
+⭐⭐ **Enforcement is not warrant** — one-live-row convergence and `findLiveInSlot` presuppose exclusivity
+and enforce it.
+
+> ## ⭐⭐⭐ **A-D5 finds a warrant for the exclusivity ACT. It finds none for the exclusivity SET.**
+> Both mechanisms operate on a pair already brought together by something else.
+
+⇒ A-D4's gap is **narrower** than it appeared and **unchanged in substance**.
+⛔ **Not established:** that 047 is the answer · that an aux-LLM adjudication is or is not sufficient (not
+tested) · that the Identity Resolver's standing generalises.
+
+**Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched (still 1
+question, 1 of 112 bound) · both armed collisions intact · ⛔ **no code written; nothing written to the DB.**
