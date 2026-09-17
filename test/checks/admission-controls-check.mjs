@@ -31,6 +31,7 @@ import {
 } from '../../Backend/app/components/memory-declaration-host.js'
 import { admitPair, ADMISSION } from '../../Backend/app/components/memory-admission-gate.js'
 import { createSequelizeMemoryStore } from '../../Backend/app/components/memory-store-sequelize-host.js'
+import { settleWrite, forModel } from '../../Backend/app/components/memory-write-receipt.js'
 import { WRITER as W, ACT_KIND as AK } from '../../Backend/app/components/memory-writer-contracts.js'
 
 const { check, done } = makeChecker()
@@ -49,6 +50,7 @@ const t = Date.now()
 const MADE = []
 const SLOTS = []
 const QKEY = `zz_admq${t}`
+const KEY2 = `zz_admq2${t}`
 let userId = null
 let slotId = null
 
@@ -76,6 +78,24 @@ try {
     admitPair({ exclusivityBearing: true, incumbentQuestionKey: 'a' }).outcome,
     admitPair({ exclusivityBearing: true }).outcome,
   ].every((o) => o === ADMISSION.defer), 'all three are DEFER')
+
+  // ══ 0b · ⭐⭐ THE GENUINE-NEW BASELINE, WRITTEN FIRST AND FOR A MEASURED REASON ═══════════════════
+  //
+  // ⚠️⚠️ THIS WRITE MUST HAPPEN BEFORE ANY OTHER `zz_` ROW EXISTS. The first draft wrote it beside Control D
+  // and it came back with **6 candidates**: the resolver's COSINE arm grouped it with this check's own
+  // earlier fixtures, whose names differ only in one word and a shared timestamp. ⛔ So the "genuinely new"
+  // baseline was itself a DEFER, and the comparison it anchors would have been meaningless.
+  // ⭐ It is also a live demonstration of the thing the contract preserves: GROUPING IS PROMISCUOUS AND IS
+  // ALLOWED TO BE — it simply may no longer decide competition.
+  const dAttr = `zz_admdelta${t}`
+  const memD = buildMemoryV2(fastify, {
+    userId, writer: W.operator, act: { kind: AK.operator, id: `zz_admission_controlD_${t}` },
+  })
+  const dNew = await memD.reconcileFact({ entity: 'user', attribute: dAttr, value: 'only one', source: 'zz_adm' })
+  MADE.push(dNew.id)
+  check('0b · ⭐ THE BASELINE IS A GENUINE NEW — nothing comparable existed, so `evaluated` is 0. ⛔ Without '
+    + 'this the comparison in Control D would be between two deferrals',
+  dNew.admission?.evaluated === 0, `evaluated=${dNew.admission?.evaluated}`)
 
   // ══ 1 · ⭐⭐⭐ CONTROL A — AN UNDECLARED VOLUNTEERED FACT COEXISTS, AND COMPETES WITH NOTHING ═══════
   //
@@ -224,6 +244,96 @@ try {
     + 'is the fully-declared form of the same defect', admitPair({
     exclusivityBearing: true, incomingQuestionKey: 'volunteer-schedule', incumbentQuestionKey: 'work-schedule',
   }).outcome === ADMISSION.abstain, 'ABSTAIN')
+  // ══ 4 · ⭐⭐⭐ CONTROL D — DEFER IS VISIBLE TO THE DEVELOPER, AND SILENT TO THE MODEL ══════════════
+  //
+  // ⛔ BEFORE THE SUMMARY EXISTED, a DEFER and a genuinely NEW write were BYTE-IDENTICAL to the caller.
+  // ⭐ This control asserts BOTH halves: the developer can now tell them apart, and the MODEL still cannot
+  // — because "declare the question" is a remedy she cannot act on at 1 declared question, and Ote ruled
+  // the model is told what happened, ⛔ never a repair it does not possess.
+  // ⚠️ `dNew` was written FIRST, at the top of the run — see the hoist above and why it was necessary.
+  const dDef = await memD.reconcileFact({ entity: 'user', attribute: dAttr, value: 'a second, different one', source: 'zz_adm' })
+  MADE.push(dDef.id)
+
+  check('4 · ⭐ THE ROW IS PERSISTED — A — ACCEPT: an undeclared question never prevents formation',
+    dDef.ok === true && !!dDef.id, `ok=${dDef.ok} id=${dDef.id ? 'present' : 'MISSING'}`)
+  check('4a · ⭐⭐⭐ THE GENUINELY-NEW WRITE AND THE DEFERRED ONE ARE NOW DISTINGUISHABLE — `evaluated` is '
+    + 'the field that separates them. ⛔ Before this they were byte-identical',
+  dNew.admission?.evaluated === 0 && dDef.admission?.evaluated > 0,
+  `new.evaluated=${dNew.admission?.evaluated} deferred.evaluated=${dDef.admission?.evaluated}`)
+  check('4b · ⭐⭐ …and the summary says competition was DEFERRED, ⛔ not admitted or abstained',
+    dDef.admission?.deferred > 0 && dDef.admission?.admitted === 0 && dDef.admission?.abstained === 0,
+    JSON.stringify(dDef.admission))
+  check('4c · ⭐⭐ THE CALLER CAN READ *WHY* — the remedy rides the receipt, ⛔ not only the ledger',
+    typeof dDef.admission?.why === 'string' && dDef.admission.why.length > 20,
+    String(dDef.admission?.why).slice(0, 78))
+  check('4d · ⭐ …and a genuine NEW carries NO `why` — its presence MEANS something',
+    dNew.admission?.why === null, `new.why=${dNew.admission?.why}`)
+  check('4e · ⛔⛔ NO INCUMBENT IDS IN THE RECEIPT — ruled: receipt = what happened to THIS WRITE; the '
+    + 'ledger = which pairs were evaluated', !JSON.stringify(dDef.admission ?? {}).includes(dNew.id),
+  `keys=${Object.keys(dDef.admission ?? {}).join(',')}`)
+
+  const dRows = await Q(`SELECT id::text, (invalid_at IS NOT NULL) AS dead, supersedes_id::text AS sup
+    FROM "${schema}"."txn_memories" WHERE id IN (:a,:b)`, { a: dNew.id, b: dDef.id })
+  check('4f · ⭐⭐ NO COMPETITION AND NO REPLACEMENT ACT — the incumbent is live and nothing supersedes',
+    dRows.every((r) => !r.dead && !r.sup), dRows.map((r) => `${r.dead ? 'DEAD' : 'live'}/${r.sup ?? '-'}`).join(' · '))
+
+  // ⭐ THE RECEIPT PATH, exercised for real — `settleWrite` on the actual return value.
+  const recNew = await settleWrite(Promise.resolve({ ok: true, result: dNew }))
+  const recDef = await settleWrite(Promise.resolve({ ok: true, result: dDef }))
+  check('4g · ⭐⭐ NO REFUSAL STATE AND NO CODE — a DEFER is a QUALIFIER ON A SUCCESS, ⛔ never the refusal '
+    + 'channel (`refused` means NO ROW)', recDef.state === 'persisted' && recDef.ok === true && recDef.code === null,
+  `state=${recDef.state} ok=${recDef.ok} code=${recDef.code}`)
+  const normM = (m) => JSON.stringify({ ...m, id: m.id ? 'ID' : m.id })
+  check('4h · ⭐⭐⭐ THE NEGATIVE HALF — `forModel` IS BYTE-IDENTICAL for a DEFER and a plain NEW write. '
+    + '⛔ The model is NOT handed a remedy it cannot act on', normM(forModel(recNew)) === normM(forModel(recDef)),
+  `new=${normM(forModel(recNew))} defer=${normM(forModel(recDef))}`)
+  check('4i · ⭐ …and `forModel` carries no admission key at all',
+    !('admission' in forModel(recDef)), Object.keys(forModel(recDef)).join(','))
+
+  // ══ 5 · ⭐⭐⭐ CONTROL E — ADMIT → M2 `REPLACEMENT_REFUSED`, THE DOUBLE GATE, PROVED REACHABLE ══════
+  //
+  // ⭐⭐ Ote ratified "ADMITTED → REPLACEMENT_REFUSED remains a valid outcome" and NOTHING had ever shown
+  // it reachable. ⛔ It cannot be reached by an ordinary write: admission and M2 would read the same key.
+  // ⇒ it needs a REBIND — the slot points somewhere new while the incumbent's PIN still records where it
+  // was admitted.
+  //
+  //     admission:  incoming KEY  vs  incumbent's PIN (KEY)   ⇒ ⭐ ADMIT — a replacement IS proposed
+  //     M2:         slotKind KEY2 vs  claimKind KEY           ⇒ ⭐ REFUSE — M2's own semantics, untouched
+  const d2 = await declareQuestion({
+    query, schema, questionKey: KEY2, asks: 'a DIFFERENT zz question?', checks: ['nonempty'],
+    declaredBy: 'admission-control', occasion: `zz_adm_declare2_${t}`,
+  })
+  const p2 = await proposeBind({
+    query, schema, slotId, questionId: d2.question.id, declaredIntent: 'rebind',
+    expectedQuestionId: d.question.id, actor: 'admission-control', occasion: `zz_adm_propose2_${t}`,
+    reason: 'control E — point the slot at a different question while the pin remembers the old one',
+  })
+  check('5 · the REBIND was accepted AS a rebind, ⛔ not as a first-bind', p2.act === 'rebind', `act=${p2.act}`)
+  await confirmBind({ query, schema, proposalId: p2.proposal.id, actor: 'admission-control', occasion: `zz_adm_confirm2_${t}`, reason: 'control E' })
+
+  const [liveBefore] = await Q(`SELECT count(*)::int AS n FROM "${schema}"."txn_memories"
+    WHERE attribute = :a AND invalid_at IS NULL AND expired_at IS NULL`, { a: ATTR_B })
+  let refusal = null
+  try {
+    await memB.reconcileFact({ entity: 'user', attribute: ATTR_B, value: 'crimson', source: 'zz_adm', claimKind: QKEY })
+    refusal = { code: null, reason: null, why: 'NOT REFUSED — the write went through' }
+  } catch (e) { refusal = { code: e?.code ?? null, reason: e?.reason ?? null, why: e?.message ?? null } }
+
+  check('5a · ⭐⭐⭐ M2 REFUSED THE REPLACEMENT, AND IT WAS REACHED *THROUGH* AN ADMIT — the double gate is '
+    + 'not theoretical. ⛔ This is the first evidence it is reachable at all',
+  refusal.code === 'REPLACEMENT_REFUSED', `code=${refusal.code} · ${String(refusal.why).slice(0, 66)}`)
+  check('5b · ⭐⭐ …and it is M2 own refusal, naming the KIND MISMATCH — ⛔ not an admission verdict',
+    refusal.reason === 'governed-slot-kind-mismatch', `reason=${refusal.reason}`)
+  const [liveAfter] = await Q(`SELECT count(*)::int AS n FROM "${schema}"."txn_memories"
+    WHERE attribute = :a AND invalid_at IS NULL AND expired_at IS NULL`, { a: ATTR_B })
+  check('5c · ⭐⭐ NO ROW WAS WRITTEN AND THE INCUMBENT IS UNTOUCHED — M2 ratified trade, intact: '
+    + 'a refusal leaves the world as it found it', liveAfter.n === liveBefore.n,
+  `live before=${liveBefore.n} after=${liveAfter.n}`)
+  const recRef = await settleWrite(Promise.resolve({ ok: false, code: refusal.code, error: refusal.why }))
+  check('5d · ⭐ …and the MODEL is told the approved GOVERNED sentence, ⛔ not the generic one',
+    forModel(recRef).state === 'refused' && /governed/i.test(forModel(recRef).why ?? ''),
+    JSON.stringify(forModel(recRef)))
+
 } finally {
   // ══ ⭐ TEARDOWN — and it is ASSERTED, ⛔ never trusted ═══════════════════════════════════════════
   // ⚠️ `IN (:i)`, ⛔ NOT `ANY(:i::uuid[])` — Sequelize `replacements` expands an array into a COMMA LIST,

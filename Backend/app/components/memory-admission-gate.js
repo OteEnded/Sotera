@@ -156,7 +156,10 @@ export function admitCandidates({
   const rows = Array.isArray(candidates) ? candidates.filter(Boolean) : []
   // ⭐ No incumbent, or a family this contract does not govern ⇒ NOT-IN-SCOPE for every pair, and ⛔ nothing
   // is recorded: a gate that did not apply has no verdict to account for.
-  if (!inScope || !rows.length) return { admitted: [], verdicts: [] }
+  // ⭐ `summary` is returned HERE TOO, and that is load-bearing: `evaluated: 0` is what tells a caller
+  // *"nothing comparable was found"* as opposed to *"some were found and declined"*. ⛔ Omitting it
+  // would make a genuine NEW indistinguishable from a DEFER again — the very defect this closes.
+  if (!inScope || !rows.length) return { admitted: [], verdicts: [], summary: summariseAdmission([]) }
 
   const verdicts = []
   const admitted = []
@@ -177,5 +180,42 @@ export function admitCandidates({
     })
     if (v.outcome === ADMISSION.admit) admitted.push(row)
   }
-  return { admitted, verdicts }
+  return { admitted, verdicts, summary: summariseAdmission(verdicts) }
+}
+
+/**
+ * ⭐⭐⭐ THE RECEIPT SUMMARY — what happened to THIS WRITE, ⛔ not which pairs were evaluated.
+ *
+ * ── ⛔⛔ NO INCUMBENT IDS. RULED BY OTE, 2026-09-17 ──────────────────────────────────────────────────
+ *     *"receipt = what happened to this write · ledger = which pairs were evaluated and why"*
+ * ⇒ the per-pair detail lives in `log_memory_admissions` and ONLY there. Putting ids here would make the
+ * receipt a second, thinner copy of the ledger — two accounting layers that can disagree.
+ *
+ * ── ⭐ WHY `evaluated` IS THE LOAD-BEARING FIELD ───────────────────────────────────────────────────
+ * Before this existed, a DEFER and a genuinely NEW write were BYTE-IDENTICAL to the caller: both returned
+ * `action: 'add'` with no `supersedes`. ⭐ `evaluated: 0` means *nothing comparable was found*;
+ * `evaluated: 3, deferred: 3` means *three were found and competition was declined*. ⛔ That difference is
+ * the entire point of this object.
+ *
+ * ⚠️ AND THERE IS DELIBERATELY NO SINGLE `outcome` FIELD. One write can legitimately produce SEVERAL
+ * verdicts — Control B proves an ADMIT and a DEFER in the same write — so naming one would be the
+ * collapse this arc has refused at every layer.
+ *
+ * ⛔ THIS IS DEVELOPER/OPERATOR ACCOUNTABILITY. It never reaches the model: `forModel` is a constructed
+ * allowlist carrying `ok`/`state`/`id` only, and Ote ruled the model is told *what happened*, never a
+ * remedy it does not possess — *"declare the question"* is unactionable at 1 declared question.
+ */
+export function summariseAdmission(verdicts = []) {
+  const list = Array.isArray(verdicts) ? verdicts : []
+  const count = (o) => list.filter((v) => v?.outcome === o).length
+  const deferred = count(ADMISSION.defer)
+  return {
+    evaluated: list.length,
+    admitted: count(ADMISSION.admit),
+    deferred,
+    abstained: count(ADMISSION.abstain),
+    // ⭐ THE REMEDY, carried verbatim from the first deferred verdict — a refusal a reader cannot act on
+    // is noise. ⛔ null when nothing was deferred, so its presence MEANS something.
+    why: deferred ? (list.find((v) => v?.outcome === ADMISSION.defer)?.why ?? null) : null,
+  }
 }
