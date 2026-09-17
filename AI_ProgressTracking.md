@@ -12398,3 +12398,78 @@ coexistence case has never reached a live turn, and I did not create one. ⚠️
 framing conflicts are won by the OTHER channel (`memory-cognition-projection.js:14`).
 
 **DOC:** `INVESTIGATION_SOTERA_AD6_RECALL_SEMANTIC_CLAIM.md`
+
+
+---
+
+## 2026-09-17 · ✅ THE MEMORY → RECALL → COGNITIVE CONTEXT → SOTERA SEMANTIC CONTRACT
+
+⛔ Read-only pass, no implementation. No code, migration, schema, test change, DB write, restart or
+prompt change. ⛔ A — ACCEPT not reopened. ⛔ No ontology and no relationship taxonomy proposed.
+
+### ✅ EXECUTIVE FINDING
+
+```
+THE SCHEMA IS SUFFICIENT — ⛔ no migration needed, ⛔ none proposed.
+  `question_id_at_admission` (048) and `log_memory_admissions` (053, BOTH ids indexed) already store
+  every semantic fact the write side establishes.
+⇒ THE GAP IS (a) A PROJECTION GAP — `view()` has no field to carry it — and (b) AN UNMADE RULING.
+  (a) is bounded engineering. (b) is Ote's.
+
+AND THE READ PATH IS SEMANTICALLY WEAKER THAN THE WRITE PATH:
+  ⛔ no `grouping ⇒ semantic relation` shortcut exists. It merely EXPOSES RECORDS.
+  ⇒ a repair would ADD a warrant, ⛔ never remove an inference.
+```
+
+### ⭐⭐ MEASURED — the question-identity census
+
+`question_id_at_admission` has **exactly two production consumers, both write-path**. ⛔ No read-path
+component references the pin, the ledger or `claimKind` for ANY of: filter, rank, dedupe, suppress, merge,
+group, select, label, prioritize, discard. ⛔ And `view()` cannot carry them.
+
+⛔ REJECTED as sources of question identity (each classified independently): slot_id · slotKind · entity ·
+attribute · aliases · lexical · cosine · claimedBy · ephemeral arenas · provenance · source turns ·
+cognitive metadata · projection metadata. ⭐ The 17-row `sotera|lesson` bucket is the live counterexample
+to `attribute`: one key, **17 different questions**.
+
+### ⚠️⭐⭐⭐ THE BEHAVIOURAL OBSERVATION — MEASURED (6 conditions × 2 runs)
+
+Production `composeRuntimeTail` + production `qwen3.6:35b`. ⛔ No DB write, no server call, no restart.
+⚠️ Fidelity limit stated: a REDUCED system context.
+
+```
+⇒ THE RELATION BETWEEN COEXISTING ROWS IS DECIDED BY SURFACE PLAUSIBILITY, IN THE MODEL, AT READ TIME.
+  D mutually exclusive   → ⭐ FLAGGED unprompted, asked which is current
+  C unresolved pair      → ⛔⛔ "your favourite programming languages are Rust AND Go" — a DEFER pair
+                             asserted as a CONFIDENT CONJUNCTION, no hedge, both runs
+  B restatements (REAL)  → merged — ⚠️ she inferred it; `dedupeByValue` had MISSED it (token-sets 6 vs 1)
+⚠️ CASE F WITHDRAWN: selfhood/ownHistory/scopeFacts are ALL TRUE in production and absent from my
+  harness ⇒ it measured MY CONTEXT, not Sotera. UNKNOWN.
+```
+
+### ⭐⭐⭐ A RULED READ-TIME ADMISSION DOCTRINE ALREADY EXISTS — on the EVIDENCE channel
+
+Ote, 2026-09-02 (`conversation-search.js:272`): *"index/corpus may rank → current admission decides
+whether something is actually admissible evidence → audit/provenance provides authority."*
+Plus: ***"A reversible boundary must be evaluated at READ TIME, every time."***
+
+⚠️ The asymmetry: conversation evidence has the WEAKER epistemic status and the MORE metadata
+(title · role · date) plus an admission step; durable memory has the stronger implied status, NO metadata
+and NO admission step. ⛔ A durable memory cannot appear in the evidence channel — different corpus.
+
+### ⚠️ COMPATIBILITY IS THE ONE UNREPRESENTED RELATION — ⛔ AND MUST NOT BE ADDED
+
+① ① ruled no single general relationship ② the only evidence we need it is that the MODEL INVENTED IT
+③ Ote's own fence against a taxonomy of convenience.
+
+### ✅ ALL 22 CLOSED RULINGS RE-CHECKED — ⛔ NO CONFLICT. Three are STRENGTHENED by measurement.
+
+### ⏸ THE NEXT DECISION — ⛔ NOT TAKEN
+
+> **Is a read consumer entitled to the admission verdict that already exists for a pair — and does
+> reading it license any downstream difference in presentation?**
+
+⭐ Open in BOTH directions. *"No"* is coherent and would make the finding *"already semantically
+sufficient."* ⛔ I did not assume otherwise.
+
+**DOC:** `INVESTIGATION_SOTERA_RECALL_COGNITIVE_CONTEXT_SEMANTICS.md`

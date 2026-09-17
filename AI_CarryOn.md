@@ -255,6 +255,68 @@ or verify, **not established facts**"*. ⇒ recall's hedge is about RELEVANCE, �
 value-similarity would be EXACTLY the vacuity admission refused on the write side, rebuilt on the read
 side. ⭐ Expect the prohibition to carry over.
 
+## ⭐⭐⭐ ✅ **THE RECALL → COGNITIVE CONTEXT → SOTERA SEMANTIC CONTRACT — DELIVERED (2026-09-17).**
+
+`INVESTIGATION_SOTERA_RECALL_COGNITIVE_CONTEXT_SEMANTICS.md`. ⛔ Read-only, nothing changed.
+
+```
+✅ THE SCHEMA IS SUFFICIENT. ⛔ NO MIGRATION IS NEEDED, and ⛔ none is proposed.
+   Every fact the write side establishes is ALREADY STORED and ALREADY INDEXED:
+     `question_id_at_admission` (048)  ·  `log_memory_admissions` (053, both ids indexed)
+   ⇒ ⭐⭐⭐ THE GAP IS A **PROJECTION** GAP + AN **UNMADE RULING**, ⛔ not a schema gap.
+
+⭐⭐⭐ AND THE READ PATH IS SEMANTICALLY **WEAKER** THAN THE WRITE PATH — ✅ GOOD NEWS:
+   ⛔ NO `grouping ⇒ semantic relation` shortcut exists on the read side. It merely EXPOSES RECORDS.
+   ⇒ a repair would ADD a warrant, ⛔ NEVER remove an inference. ⛔ There is nothing here to un-build.
+```
+
+⭐⭐ **MEASURED — `question_id_at_admission` HAS EXACTLY TWO PRODUCTION CONSUMERS, BOTH WRITE-PATH**
+(the writer and `admissionKeysFor`). ⛔ **No read-path component references it, the ledger, or `claimKind`
+— not to filter, rank, dedupe, suppress, merge, group, select, label, prioritize or discard.**
+⛔ And `view()` has **no field** to carry any of it ⇒ the pin cannot reach the model even via `recall_memory`.
+
+⚠️⭐⭐⭐ **THE BEHAVIOURAL OBSERVATION — the one thing A-D6 left unobserved. MEASURED**, 6 conditions
+× 2 runs through the PRODUCTION composer + PRODUCTION `qwen3.6:35b`. ⛔ No DB write, no server call, no restart.
+
+```
+⇒ THE RELATION BETWEEN TWO COEXISTING ROWS IS DECIDED BY THE **SURFACE PLAUSIBILITY OF THE TWO
+  STRINGS**, IN THE MODEL, AT READ TIME. ⛔ Not by the system, ⛔ not by anything established.
+
+✅ D mutually exclusive (remote vs on-site)  → ⭐ FLAGGED UNPROMPTED and asked which is current
+⛔⛔ C unresolved same question (Rust vs Go) → ⛔ **"your favourite programming languages are Rust AND
+   Go"** — an unresolved DEFER pair ASSERTED AS A CONFIDENT CONJUNCTION, no hedge, BOTH runs.
+✅ B restatements (REAL timezone rows)       → merged correctly — ⚠️ but SHE inferred it; dedupe MISSED it
+```
+⚠️ **CASE F WITHDRAWN AS EVIDENCE** — `selfhood`/`ownHistory`/`scopeFacts` are ALL TRUE in production and
+were ABSENT from my reduced harness. ⇒ it measured MY CONTEXT, ⛔ not Sotera. **UNKNOWN.**
+
+⭐⭐⭐ **A RULED READ-TIME ADMISSION DOCTRINE ALREADY EXISTS — on the EVIDENCE channel, ⛔ not memory.**
+Ote, 2026-09-02 (`conversation-search.js:272`): *"index/corpus may rank → current admission decides whether
+something is actually admissible evidence → audit/provenance provides authority."*
+⭐ Plus its representability rule: ***"A reversible boundary must be evaluated at READ TIME, every time."***
+
+```
+⚠️ THE ASYMMETRY, MEASURED:
+  CONVERSATION EVIDENCE  weaker status ("not established facts") · ⭐ MORE metadata (title · role · DATE)
+                         · ⭐ a ruled read-time admission step
+  DURABLE MEMORY RECALL  stronger implied status (a bare list)   · ⛔ NO metadata at all
+                         · ⛔ NO admission step
+⛔ A durable memory CANNOT appear in the evidence channel — it queries txn_messages, ⛔ never txn_memories.
+```
+
+⚠️ **COMPATIBILITY IS THE ONE RELATION WITH NO REPRESENTATION ANYWHERE** — and ⛔⛔ **DO NOT ADD IT.**
+① ① ruled no single general relationship governs these pairs ② the only evidence we need it is that
+THE MODEL INVENTED IT ③ Ote: *"Do not create a universal relationship taxonomy just to make the output
+easier to describe."*
+
+⏸ **THE NEXT DECISION — ⛔ NOT TAKEN, it is Ote's, and it is open in BOTH directions:**
+
+> **Is a read consumer ENTITLED to the admission verdict that already exists for a pair — and does
+> reading it license any downstream difference in presentation?**
+
+⭐ *"No — a DEFER is a write-side act and confers nothing on a reader"* is a COHERENT answer, and it would
+make the finding *"the system is already semantically sufficient."* ⛔ I did not assume otherwise.
+
 
 
 > ## ⭐⭐⭐ **① IS RULED, AND SO IS EVERYTHING AFTER IT.**
