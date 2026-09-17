@@ -11267,3 +11267,81 @@ is ④'s and open) · ⛔ **does not select among 2, 3 and 4** · ⛔ no names, 
 **Verification:** unit **753/753** · evidence baseline green including the canary guard · canary 18 rows /
 0 slots / 0 aliases · both armed collisions intact · 4 attribution candidates still unreviewed ·
 ⛔ **no code written, no instrument added, nothing written to the database.**
+
+---
+
+## 2026-09-17 · ① RULED by Ote · ⑧ RESHAPED, OPENED and INVESTIGATED
+
+### ① ✅ RULED
+
+> **"There is no single general semantic relationship that governs every interaction between an incoming
+> durable observation and the incumbent it displaces."**
+
+⛔ **Ote's fence, narrower than the investigation:** the ruling does not establish the number, names,
+taxonomy or representation of relationship kinds — ⛔⛔ **nor that no higher-level family of distinct relation
+kinds could exist.** ⚠️ That last clause **narrows §5.1** of the investigation: ⭐ *none was established, ⛔ not
+that none could exist.*
+✅ **Preserved by ruling:** *"no relationship"* and *"relationship cannot be established"* remain **distinct
+outcomes** · the commonality is an **occasion / epistemic situation**, ⛔ not a relationship.
+⛔ **Relationship taxonomy NOT opened.**
+
+### ⑧ ⭐ RESHAPED BY OTE, AND INVESTIGATED
+
+⛔ No longer *"what may `resolveConflict` do?"* — ⭐ **authority under unresolved semantics**: *"what semantic
+authority must a component possess before it may cause an incumbent to cease being the current holder, when
+the relationship is (a) established, (b) absent, or (c) not establishable?"*
+⛔ **Evidence fence:** `invalid_at` · `supersedes_id` · `slot_id` · row state · reversibility · recency ·
+resolver behaviour are ⛔ not admissible as evidence of semantic authority.
+
+**Doc:** `INVESTIGATION_SOTERA_08_TRANSITION_AUTHORITY.md` · **instrument:**
+`test/checks/current-holder-authority-census.mjs` — **21 checks green**, ⭐ including a **positive control**
+so the never-emitted scan cannot be vacuous.
+
+**What it established:**
+
+- ⭐⭐⭐ **The system already has an authority doctrine** — *"authorship is a DECISION the caller is entitled to
+  make; **authority is a FACT the caller is not**"* · *"an authority that can be satisfied by an absence is
+  not an authority"* — derived, never claimed, failing closed. ⛔ **Never applied to this act.**
+- ⭐⭐ **The transition is the least-governed semantic act in the system**: a declared writer, nothing else.
+  The *propositional* act beside it demands **named evidence**.
+- ⭐⭐⭐ **The only recorded warrant is a routing similarity score** — 412 of 412, **0** non-measure — which
+  ③ has already disqualified.
+- ⭐⭐⭐ **And it is blind, not weak:** #8/#9, where **no relationship exists**, carry `lexical` **1.000** —
+  identical to Mira. ⚠️ A confidence bar cannot separate them.
+- ⭐⭐ **K1–K4 are unrecordable at this seam**; `log_slot_aliases` records exactly that distinction one seam over.
+- ⭐⭐⭐ **An answer already exists in shipped code for one family** — the Identity Resolver, with `declined`
+  and `deferred` already distinct, abstention as the default, failing closed, holding a commit five minutes.
+- ⭐⭐⭐ **K1–K4 were established in ZERO of the nine.** ⭐ #6 alone carried a named human — and is the only
+  one the machinery did not perform.
+- ⭐⭐ **Naming the writer makes an act attributable, ⛔ not authorized.** ⇒ ② gave the consumer the
+  **epistemic** burden, ⛔ not authority.
+
+⛔ **No ruling proposed. No interpretations listed. No design.** ⚠️ One judgement call named for Ote to
+strike: the Identity Resolver is a resolver, and resolver behaviour is fenced — it is cited as a *designed
+refusal to act on its own authority*, the opposite of inferring authority from behaviour.
+
+```
+①  ✅ RULED   ②  ✅ RULED   ③  ✅ RULED BROAD   ④  ✅ NEGATIVE ONLY   ⑤  ✅ RULED
+⑥  ✅ PARTIAL  ⑦  ✅ RULED   ⑧  ⏸ INVESTIGATED, awaiting Ote   ⑨  ⏸ NAMED, NOT OPENED
+```
+
+**Verification:** unit **753/753** · evidence baseline green including the canary guard · canary 18 rows /
+0 slots / 0 aliases · 047 one declared question · both armed collisions intact · 4 attribution candidates
+still unreviewed · ⛔ **one read-only instrument added; nothing written to the database.**
+
+### ⚠️ AND A GUARD DEFECT THE RUN CAUGHT — #25
+
+The evidence baseline went red on *"the 4 unreviewed candidates are still unreviewed"*. ⭐ **Not caused by
+this session.** The attribution detector fired on live `ote` traffic on `:8210` (model `ollama/qwen3.6:35b`,
+a real Thai conversation) and produced **3 new candidates** — `aa71e212` · `8b12efb5` · `3e8cd4a3` — while
+the pass was running. ⭐ **Ote now has 7 awaiting classification, not 4.**
+
+⛔ **But the real defect is the other direction.** The guard asserted `length === 4` — a **COUNT over a NAMED
+SET** — so it would have **PASSED if one of the four had been confirmed and one new candidate had appeared.**
+
+> ## ⭐⭐⭐ The guard could pass while the thing it protects was destroyed.
+
+⇒ repaired to **name the four** (`cb5ea911` · `ed08529e` · `3f195763` · `82509ae8`) and assert each is still
+unreviewed, with growth reported separately — the same shape the slot/alias population checks already use.
+⭐ **Red-proved:** adding the one already-confirmed id (`769f6a65`) to the frozen list makes it fail, so the
+assertion is not vacuous. ⛔ No candidate data was touched.

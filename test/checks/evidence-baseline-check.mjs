@@ -124,9 +124,23 @@ check('attribution candidates not deleted', Number(attr.candidates) >= 5, `${att
 check('no candidate confirmed by anyone but Ote', Number(attr.confirmed) === 1, `${attr.confirmed} confirmed — 769f6a65 REQ_NOW by ote`)
 check('no frozen evidence pruned', Number(attr.pruned) === 0, `${attr.pruned} pruned`)
 // ⭐ The four that are HIS to classify must still be UNCLASSIFIED — D13 makes him the confirmer.
+//
+// ⚠️⚠️ DEFECT #25, 2026-09-17: this guard asserted `length === 4` — a COUNT over a NAMED SET. The detector is
+// advisory and runs on live traffic, so the set GROWS legitimately (it did: `aa71e212`, `8b12efb5`, both from
+// a real `ote` conversation). ⛔ But the worse half is the other direction: a COUNT would have PASSED if one
+// of the four had been confirmed and one new candidate had appeared. ⇒ ⭐ THE GUARD COULD PASS WHILE THE
+// THING IT PROTECTS WAS DESTROYED. Now it NAMES them, and reports growth the way the population checks do.
+const FROZEN_UNREVIEWED = ['cb5ea911', 'ed08529e', '3f195763', '82509ae8']
 const unreviewed = await q(`SELECT id::text AS id FROM ${S}."log_attribution_candidates" WHERE classification IS NULL ORDER BY created_at`)
-check('the 4 unreviewed candidates are still unreviewed', unreviewed.length === 4,
-  `${unreviewed.length} awaiting Ote: ${unreviewed.map((r) => short(r.id)).join(' ')}`)
+const stillOpen = new Set(unreviewed.map((r) => short(r.id)))
+const missing = FROZEN_UNREVIEWED.filter((id) => !stillOpen.has(id))
+check('⭐ THE FOUR CANDIDATES THAT ARE OTE\'S TO CLASSIFY ARE ALL STILL UNREVIEWED — ⛔ named, never counted',
+  missing.length === 0,
+  missing.length ? `⛔ NO LONGER UNREVIEWED: ${missing.join(' ')}` : `all 4 present: ${FROZEN_UNREVIEWED.join(' ')}`)
+const grown = unreviewed.length - FROZEN_UNREVIEWED.length
+check('unreviewed population has not SHRUNK below the frozen four — growth is the detector working',
+  unreviewed.length >= FROZEN_UNREVIEWED.length,
+  `${unreviewed.length} awaiting Ote${grown > 0 ? ` (⭐ ${grown} NEW since the baseline: ${[...stillOpen].filter((i) => !FROZEN_UNREVIEWED.includes(i)).join(' ')})` : ''}`)
 
 // ── 6 · THE `.bak` FILES — somebody's safety net; ⛔ deleting them to tidy a `git status` is the refused convenience ──
 const BAK = [

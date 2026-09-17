@@ -15,21 +15,42 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 > batch the rulings."* ⇒ investigate broadly, **rule one decision at a time**.
 
 ```
-①  ⏸ ANSWER DELIVERED 2026-09-17, ⛔ NOT RULED — ⭐ INHERENTLY MULTIPLE, ⛔ not one relationship
+①  ✅ RULED          ⛔ NO single general relationship — the kinds are INHERENTLY MULTIPLE
 ②  ✅ RULED          membership is NOT one semantic relation; each consumer establishes its own
 ③  ✅ RULED BROAD    observation→question follows 047's DECLARED-ONLY authority
 ④  ✅ NEGATIVE ONLY  `invalid_at` is NOT a proposition-truth state ⛔ positive definition DELIBERATELY OPEN
 ⑤  ✅ RULED          proposition EXISTS as a representation; ⛔ proposition EQUIVALENCE does not exist
 ⑥  ✅ PARTIAL        transition is a layer DISTINCT from row state ⛔ taxonomy NOT finalised
 ⑦  ✅ RULED          durable memory is NOT inherently slot-shaped
-⑧  ⏸ NAMED, NOT OPENED   what may `resolveConflict` do? ⚠️ BLOCKED ON ①
+⑧  ⭐ OPEN, RESHAPED     AUTHORITY under unresolved semantics — ⛔ NOT relationship selection
+                       ⏸ INVESTIGATION DELIVERED 2026-09-17 — ⛔ no ruling proposed
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
-> ## ⭐⭐⭐ **THE CRITICAL PATH IS ① → ⑧.** ⑤ and ⑦ removed the ambiguity around them; ④ deliberately did not.
+> ## ⭐⭐⭐ **① IS RULED. THE PATH IS NOW ⑧ — AUTHORITY UNDER UNRESOLVED SEMANTICS.**
 
-⭐⭐⭐ **①'s ANSWER — `DECISION_SOTERA_01_INCUMBENT_RELATIONSHIP.md`, ⛔ delivered, ⛔ NOT ratified.** Under
-Ote's reframe (RELATIONSHIP incoming→incumbent held strictly apart from CONSEQUENCE incumbent→role, ⛔ the
+⭐⭐⭐ **① — ✅ RULED (Ote, 2026-09-17).** *"⛔ There is **no single general semantic relationship** that
+governs every interaction between an incoming durable observation and the incumbent it displaces."*
+
+```
+⛔ THE RULING DOES NOT ESTABLISH — Ote's fence, and it is NARROWER than the investigation:
+   ⛔ the NUMBER of kinds · ⛔ their NAMES · ⛔ a TAXONOMY · ⛔ any REPRESENTATION
+   ⛔⛔ AND NOT that no HIGHER-LEVEL FAMILY of distinct relation kinds could exist
+   ⚠️ ⇒ this NARROWS §5.1 of the investigation ("no relation, no supertype … holds across all
+      nine"). ⭐ THE RULING IS: **none was ESTABLISHED — ⛔ not that none COULD exist.**
+      ⛔ Never cite the investigation's wording as the stronger claim.
+
+✅ PRESERVED BY RULING:
+   ⭐ "NO RELATIONSHIP" and "RELATIONSHIP CANNOT BE ESTABLISHED from available evidence"
+     remain DISTINCT OUTCOMES.
+   ⭐ The commonality at the seam is an OCCASION / EPISTEMIC SITUATION — ⛔ NOT a semantic
+     relationship. Ote: *"useful without pretending that occasion is a relationship."*
+
+⛔ RELATIONSHIP TAXONOMY IS **NOT OPENED.**
+```
+
+⭐ **THE INVESTIGATION BEHIND IT — `DECISION_SOTERA_01_INCUMBENT_RELATIONSHIP.md`.** Under Ote's reframe
+(RELATIONSHIP incoming→incumbent held strictly apart from CONSEQUENCE incumbent→role, ⛔ the
 second **not admitted as evidence** for the first):
 
 ```
@@ -822,6 +843,55 @@ decision. ⛔ Not reopened.
    ⛔ The two never-fired mechanisms were used ONLY as latent machinery constraining interpretation, ⛔ never
    as production evidence — and both point the same way: ⭐ *"removed for being REDUNDANT, not for being
    WRONG"* is the design ALREADY refusing to treat two relations as one.
+
+㊽ ⭐⭐⭐ **DECISION ⑧ — AUTHORITY UNDER UNRESOLVED SEMANTICS (opened by Ote 2026-09-17, once ① was ruled).**
+   `INVESTIGATION_SOTERA_08_TRANSITION_AUTHORITY.md` · `test/checks/current-holder-authority-census.mjs`
+   (21 checks green, ⭐ incl. a POSITIVE CONTROL for the never-emitted scan). ⛔ INVESTIGATION ONLY — ⛔ no
+   ruling proposed, ⛔ and NOT YET *"what should `resolveConflict` do?"*
+   ⭐ THE QUESTION: *"what semantic authority must a component possess before it may cause an incumbent to
+   cease being the current holder, when the relationship is (a) ESTABLISHED, (b) ABSENT, or (c) NOT
+   ESTABLISHABLE from available evidence?"* ⇒ **what must be established, AND BY WHOM.**
+   ⛔⛔ OTE'S EVIDENCE FENCE — ⛔ NOT admissible AS EVIDENCE OF SEMANTIC AUTHORITY:
+      `invalid_at` · `supersedes_id` · `slot_id` · row state · reversibility · recency · resolver behaviour
+   ⭐ THE FIVE CONDITIONS, HELD APART: K1 they ARE related · K2 WHAT the relation is · K3 NO relation
+      exists · K4 UNABLE to establish it · K5 AUTHORITY to act despite any of them.
+   ⭐⭐⭐ **THE SYSTEM ALREADY HAS AN AUTHORITY DOCTRINE** — *"authorship is a DECISION the caller is
+      entitled to make; **authority is a FACT the caller is not**"* · *"⛔ An authority that can be
+      satisfied by an absence is not an authority"* · DERIVED, NEVER CLAIMED, FAILING CLOSED.
+      ⛔ AND IT HAS NEVER BEEN APPLIED TO THIS ACT.
+   ⭐⭐ **THE TRANSITION IS THE LEAST-GOVERNED SEMANTIC ACT IN THE SYSTEM** — a declared writer, nothing
+      else. 047 bind: declared actor + intent + propose/confirm. A3 alias: `declared` + REFUSES (4 of 4).
+      030 contradiction: ⭐ NAMED EVIDENCE (*"a contradiction that cannot name its opponent is a feeling"*).
+      ⇒ ⭐ the system demands EVIDENCE before recording *"somebody said this is wrong"*, and demands
+        NOTHING BUT A NAME before making an incumbent stop being current.
+   ⭐⭐⭐ **THE ONLY RECORDED WARRANT IS A ROUTING SIMILARITY SCORE** — 412 of 412 audit rows, **0** whose
+      reason is not a measurement, `actor=system` on 409. ⚠️ AND ③ ALREADY DISQUALIFIED ROUTING as a way to
+      establish observation→question. ⇒ the only warrant on record is one the rulings have already voided.
+   ⭐⭐⭐ **AND IT IS BLIND, ⛔ NOT WEAK:** #8 and #9 — ⛔ WHERE NO RELATIONSHIP EXISTS — carry `lexical`
+      **1.000**, ⭐ IDENTICAL TO MIRA. ⇒ ⚠️ A CONFIDENCE BAR CANNOT SEPARATE THEM, at any threshold.
+   ⭐⭐ **K1–K4 ARE UNRECORDABLE AT THIS SEAM** — `log_memory_changes` has no `relation`/`declared` column
+      and no refusal outcome. ⛔ `log_slot_aliases` HAS BOTH and refuses on them — one seam over.
+   ⭐⭐⭐ **AN ANSWER ALREADY EXISTS IN SHIPPED CODE, FOR ONE FAMILY** — the Identity Resolver:
+      *"the ONE CASE IT MUST NOT DECIDE ALONE"* · *"DEFER, never to assume"* · *"ASKING IS NOT ADOPTING —
+      a broken ask must land where 'no answer' lands, never where 'yes' does"* · *"they are the only
+      authority on their own name"*. ⭐ `declined` and `deferred` ARE ALREADY DISTINCT ⇒ the K3/K4
+      separation, built before the question was asked. ⭐ ABSTENTION IS THE DEFAULT; it FAILS CLOSED; it
+      will HOLD A COMMIT FIVE MINUTES for a human.
+   ⭐ `CONFLICT.DEFER` and `CONFLICT.ASK` were DECLARED IN PHASE 4 AND HAVE NEVER FIRED — ⭐ measured
+      against a POSITIVE CONTROL (`CONFLICT.IGNORE` IS emitted, by Dreaming). ⚠️ LATENT, ⛔ not evidence.
+   ⭐⭐⭐ **K1–K4 WERE ESTABLISHED IN ZERO OF THE NINE.** The entire precondition satisfied was: A WRITER WAS
+      NAMED. ⭐ #6 ALONE carried a named human (`writer=operator`) and met the system's ONE justification
+      requirement — and ⛔ is the only one the machinery did not perform.
+   ⭐⭐ **NAMING THE WRITER MAKES AN ACT ATTRIBUTABLE, ⛔ NOT AUTHORIZED.** Two requirements; only the
+      first is enforced here. ⇒ ⭐ AND ② GAVE THE CONSUMER THE **EPISTEMIC** BURDEN — ⛔ NOT AUTHORITY.
+      Who must KNOW and who may ACT are two questions, and ⑧ is the second.
+   ⛔ NOT ESTABLISHED: what the authority SHOULD be · that a human must be involved (#6 and the Identity
+      Resolver are EXISTENCE PROOFS that a non-component authority is possible, ⛔ not that it is required) ·
+      that any writer is wrong · ⚠️ the FALSE-NEGATIVE direction, still.
+   ⚠️ THE ONE JUDGEMENT CALL, NAMED SO OTE CAN STRIKE IT: the Identity Resolver IS a resolver, and Ote
+      fenced resolver behaviour. It is cited as an explicit DESIGNED REFUSAL to act on its own authority —
+      ⛔ the opposite of inferring authority from behaviour. ⭐ If Ote reads it as inside the fence, that
+      section falls and the rest stands.
 ```
 
 ---
@@ -871,6 +941,7 @@ OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · r
   competition-membership-census · competition-predicate-trace · competition-unit-trace
   state-transition-semantics · transition-event-trace · nine-transition-semantic-analysis
   incumbent-status-change-trace · invalid-at-claim-trace · memory-semantics-batch · semantic-seam-batch
+  ⭐ current-holder-authority-census (⑧ — 21 checks, incl. a POSITIVE CONTROL for the never-emitted scan)
 ```
 
 **BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) → **Phase 3 refusal** · the attribution
@@ -915,10 +986,13 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
         ⭐ Common across them is ⛔ NOT a relationship but an OCCASION (a pair brought into contact, the
         system required to act BEFORE the relationship was established).
         ⇒ EXCLUDES interpretation 1 as a RELATIONSHIP model · ⛔ does NOT select among 2, 3, 4.
-   ⑧ ⏸ NAMED, NOT OPENED — what may `resolveConflict` do, when **BOTH** its branches rest on inferences
-        ruling ⑤ forbids? ⚠️ BLOCKED ON ①. ⭐ ①'s answer NARROWS it, ⛔ does not open it: the relations have
-        DIFFERENT RELATA and `resolveConflict` holds only `value`, a relatum in NONE of them ⇒ the question
-        becomes *"what may a component do when it cannot establish the relation, and is not positioned to?"*
+   ⑧ ⭐ OPEN — RESHAPED BY OTE once ① was ruled. ⛔ NO LONGER "what may `resolveConflict` do?"
+        *"What semantic authority must a component possess before it may cause an incumbent to cease being
+        the current holder, when the relationship is (a) ESTABLISHED, (b) ABSENT, or (c) NOT ESTABLISHABLE
+        from available evidence?"* ⇒ WHAT MUST BE ESTABLISHED, **AND BY WHOM**.
+        ⏸ INVESTIGATION DELIVERED 2026-09-17 (§0-B ㊽) — ⛔ NO RULING PROPOSED, ⛔ no interpretations listed.
+        ⛔⛔ FENCE: `invalid_at` · `supersedes_id` · `slot_id` · row state · reversibility · recency ·
+        resolver behaviour are ⛔ NOT admissible as evidence of semantic authority.
    ⑨ ⏸ NAMED, NOT OPENED — may an arena be SYNTHESISED for a family with no established slot semantics?
         ⚠️ ⑦ and ② both bear on it; ⛔ NEITHER ANSWERS IT.
    ⏸ ALSO STILL OPEN: ④'s POSITIVE definition (deliberately) · ⑥'s TAXONOMY (deliberately).
