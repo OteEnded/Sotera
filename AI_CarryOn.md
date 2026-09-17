@@ -24,7 +24,8 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ⑦  ✅ RULED          durable memory is NOT inherently slot-shaped
 ⑧  ✅ RULED NARROW      ⭐ ATTRIBUTION IS NOT AUTHORIZATION — writer identity alone is insufficient
 ⑧-A ✅ RULED NARROW    ⭐ bounded · checkable · answerable · REFUSAL PRESERVED
-④-A ⏸ INVESTIGATED    ⭐ ONE claim, and its subject is THE SYSTEM — ⛔ awaiting Ote
+④-A ✅ RULED NARROW    ⭐ ONE claim, and its subject is THE SYSTEM
+④  ⏸ REFRAMED+INVESTIGATED ⭐ 3 statuses · 3 empties · ⛔ ZERO proposition-truth claims
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
@@ -996,6 +997,55 @@ decision. ⛔ Not reopened.
       present is a real thing for a memory system to have; the finding is about WHAT IT ESTABLISHES ·
       ⛔ ④'s positive definition (⚠️ constrained — a single positive meaning would have to be
       CONSEQUENCE-ONLY by construction — ⛔ but not settled) · ⛔ what the act SHOULD establish.
+   ✅⭐⭐ **④-A RULED NARROW (Ote, 2026-09-17):** *"A current-holder transition establishes a claim about
+      THE SYSTEM'S OWN DISPOSITION: the system has adopted a new disposition regarding which observation
+      it will present as current. The transition itself establishes NOTHING about the incoming observation,
+      incumbent observation, world, question/role, or relationship."* ⚠️ *"It MAY PRESUPPOSE that the
+      observations answer the same question, and its resulting state MAY BE READ AS IMPLYING that a
+      relationship was found, ⛔ but NEITHER IS ESTABLISHED by the transition."*
+   ⛔ `establishes`/`presupposes`/`implies` are ANALYTICAL TERMS ONLY, ⛔ NOT proposed vocabulary.
+   ⚠️⚠️ **PHRASING CORRECTED BY RULING:** say ⭐ **"the ESTABLISHED SEMANTIC CONTENT is consequence-side"**
+      — ⛔ **NEVER** *"the act is entirely consequence-side"*, which would ERASE the presupposition and the
+      interpretation residue the investigation itself identified.
+
+52 ⭐⭐⭐ **DECISION ④ — REFRAMED BY OTE AND INVESTIGATED (2026-09-17). ⛔ DO NOT START FROM THE FIELD.**
+   `INVESTIGATION_SOTERA_04_DISPLACED_STATUS.md` · `test/checks/displaced-status-trace.mjs` (13 green).
+   ⭐ THE REFRAME: *"When a system disposition causes an observation to cease being the current holder,
+   what semantic STATUS, if any, does that DISPLACED OBSERVATION acquire?"*
+   ⛔⛔ FENCE: ⛔ do NOT infer meaning from the fact that they all write the same field · ⛔ the COLUMN NAME,
+      ROW STATE, **REVERSIBILITY** and EXISTING CONSUMERS are ⛔ not admissible as evidence of meaning.
+      ⚠️ REVERSIBILITY WAS THE DECISIVE EVIDENCE OF THE EARLIER ④ PASS ⇒ this one is REBUILT WITHOUT IT.
+   ⭐ ④-A SETS THE BASELINE ⇒ the question is only WHAT EACH WRITER **ADDS** beyond the disposition.
+      W1 SUPERSEDE      ⛔ NOTHING — its call site says nothing about the displaced observation; ⑧ showed
+                        its only warrant is a LABEL score. ⭐ Mira is a W1 case, still TRUE OF THE PAST.
+                        ⚠️ AND IT DOES NOT ESTABLISH *historical* EITHER — #1/#2/#5 are SIMULTANEOUS.
+      W2 COLLAPSE       ⛔ NOTHING — ⭐ and it DISCLAIMS a truth claim: *"removed for being REDUNDANT, not
+                        for being WRONG."* ⚠️ LATENT, 0 rows ⇒ DECLARED INTENT, ⛔ not corpus semantics.
+      W3 IDENTITY       ⭐ *"the answer to WHAT DID SHE USED TO CALL ME?"* ⇒ THE NAME IS NO LONGER IN USE.
+                        ⭐ Warrant: THE PERSON'S OWN DECLARATION. ⇒ ⭐ RENAMED ≠ FALSE.
+      W4 CONSOLIDATION  ⭐ ITS CONTENT WAS USED to compose a successor (*"consolidation, NOT
+                        reinterpretation"*). ⭐ The source calls the members ***STILL-TRUE*** ⇒ ABSORBED ≠
+                        FALSE. ⛔ AND IT DOES **NOT** ESTABLISH THAT NOTHING WAS LOST.
+      W5 LESSON REVISE  ⭐ WHATEVER THE ACTOR DECLARED — `supersedes · refines · coexists_with · qualifies`;
+                        ⭐ THREE OF THE FOUR ARE NOT TRUTH CLAIMS AT ALL. ⚠️ LATENT, 0 rows.
+      W6 RESTORE-BLOCK  ⛔ NOTHING about the observation — *"un-archived, NOT BELIEVED"*, caused by
+                        OCCUPANCY. ⭐ The source REFUSES to collapse the two outcomes.
+   ⭐⭐⭐ **ZERO OF SIX ESTABLISH A CLAIM ABOUT PROPOSITION TRUTH** — ⭐ measured against a POSITIVE CONTROL
+      (`markContradicted` DOES make one and refuses without named evidence) ⇒ an absence that is a FINDING.
+      ⭐⭐ AND THE NEGATIVE RULING IS INDEPENDENTLY REPRODUCED — ⛔ without reversibility or the dimension
+      signatures ⇒ ⭐ IT IS NOT AN ARTIFACT OF THE EARLIER METHOD.
+   ⭐⭐ THE THREE POSITIVE STATUSES HAVE **DIFFERENT SUBJECTS** — a NAME's use · a RECORD's content · a
+      DECLARED relation ⇒ ⛔ NOT one meaning wearing three hats.
+   ⭐⭐⭐ **THE CONVERGENCE WITH ⑧-A — THE FINDING, ⛔ NOT A COINCIDENCE:** the three writers that ESTABLISH
+      something are EXACTLY the three with a warrant ⑧-A would accept — W3·W5 A DECLARATION BY AN
+      AUTHORITY · W4 TRUE BY THE ACT'S OWN MECHANISM. W1·W2·W6 have none. ⇒ ⭐ **A WRITER WITH NO WARRANT
+      ESTABLISHES NOTHING; A WRITER WITH ONE ESTABLISHES EXACTLY WHAT ITS WARRANT COVERS.**
+      ⚠️ AND W1 PERFORMED 8 OF THE 9 ANCHORS.
+   ⭐ THE SEVEN DISTINCTIONS ARE ALL REAL. ⚠️ THE SURPRISE: **CURRENT vs HISTORICAL** — displacement
+      establishes ⛔ NEITHER side. A displaced observation is ⛔ NOT thereby "the past".
+   ⛔ NOT ESTABLISHED: any positive definition of the FIELD (⭐ the reframe asked about the OBSERVATION'S
+      STATUS, and that is what is answered) · that W1/W2/W6 are WRONG · that W2/W5's statements are CORPUS
+      FACTS (⚠️ both latent) · ⛔ that W4's absorption is LOSSLESS.
 ```
 
 ---
@@ -1047,6 +1097,7 @@ OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · r
   incumbent-status-change-trace · invalid-at-claim-trace · memory-semantics-batch · semantic-seam-batch
   ⭐ current-holder-authority-census (⑧ — 21 checks, incl. a POSITIVE CONTROL for the never-emitted scan)
   ⭐ positive-authority-trace (⑧-A — 16 checks; the 13 candidates × 5 dimensions, every term QUOTED)
+  ⭐ displaced-status-trace (④ — 13 checks; the six writers in their OWN WORDS, + a positive control)
 ```
 
 **BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) → **Phase 3 refusal** · the attribution
@@ -1100,10 +1151,16 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
         examined mechanisms, ⛔ NOT a universal law.
    ㊿ ⭐⭐ ABSTENTION ≠ DEFER — LOCKED. #8/#9 = nothing to authorize ⇒ ABSTAIN · #3 = the record does not
         establish what to act on ⇒ DEFER. ⛔ NEVER collapse them.
-   ④-A ⏸ INVESTIGATED (§0-B 51) — ⭐ THE TRANSITION ESTABLISHES **ONE** CLAIM AND ITS SUBJECT IS THE
+   ④-A ✅ RULED NARROW (§0-B 51) — ⭐ THE TRANSITION ESTABLISHES **ONE** CLAIM AND ITS SUBJECT IS THE
         SYSTEM: *"the system has adopted a new disposition about which of these it will present."*
         ⛔ About the incoming, the incumbent, the world, the question and the relation — NOTHING.
-        ⭐⭐ Five OBJECT-side targets empty; the one CONSEQUENCE-side target is the only non-empty one.
+        ⚠️⚠️ SAY "the ESTABLISHED SEMANTIC CONTENT is consequence-side" — ⛔ NEVER "the act is entirely
+        consequence-side", which erases the PRESUPPOSITION and the INTERPRETATION RESIDUE.
+   ④  ⏸ REFRAMED + INVESTIGATED (§0-B 52) — ⛔ NOT started from the field. ⭐ THREE writers establish a
+        positive status (W3 a name's use · W4 a record's content was used · W5 a declared relation),
+        THREE establish nothing (W1 · W2 · W6), and ⭐⭐⭐ **ZERO of six establish a proposition-truth
+        claim** — measured against a positive control. ⭐⭐ The three that establish are EXACTLY the three
+        with a warrant ⑧-A would accept.
       ⏸ The original framing, kept because it is what was investigated:
         ⛔ NO LONGER "what may `resolveConflict` do?"
         *"What semantic authority must a component possess before it may cause an incumbent to cease being

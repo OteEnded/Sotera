@@ -11461,3 +11461,68 @@ constrained to consequence-only, ⛔ not settled) · what the act *should* estab
 
 **Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
 armed collisions intact · ⛔ **no code written this pass; nothing written to the database.**
+
+---
+
+## 2026-09-17 · ④-A RULED NARROW · ④ reframed and investigated
+
+### ④-A ✅ RULED NARROW
+
+> **A current-holder transition establishes a claim about the system's own disposition: the system has
+> adopted a new disposition regarding which observation it will present as current. The transition itself
+> establishes nothing about the incoming observation, incumbent observation, world, question/role, or
+> relationship between the observations.**
+> ⚠️ *"It may PRESUPPOSE that the observations answer the same question, and its resulting state may be READ
+> AS IMPLYING that a relationship was found, ⛔ but neither is established by the transition."*
+
+⛔ `establishes` / `presupposes` / `implies` are **analytical terms only**.
+⚠️⚠️ **Phrasing corrected by Ote, and he was right:** say **"the established semantic content is
+consequence-side"** — ⛔ never *"the act is entirely consequence-side"*, which would erase the presupposition
+and interpretation residue the same investigation had just identified.
+
+### ④ ⭐ REFRAMED — ⛔ not started from the field
+
+**Doc:** `INVESTIGATION_SOTERA_04_DISPLACED_STATUS.md` · **instrument:**
+`test/checks/displaced-status-trace.mjs` — **13 checks green**, with a **positive control**.
+⛔ **Fence:** the column name, row state, **reversibility** and existing consumers are not admissible as
+evidence of meaning. ⚠️ **Reversibility was the decisive evidence of the earlier ④ pass**, so this one was
+rebuilt without it.
+
+```
+⭐ ESTABLISH a positive status                 W3 · W4 · W5
+⛔ ESTABLISH nothing beyond ④-A's disposition  W1 · W2 · W6
+⭐⭐⭐ ESTABLISH a PROPOSITION-TRUTH claim       ⛔ NONE — 0 of 6
+```
+
+- **W1 supersede** — nothing. ⭐ Mira is a W1 case, still true of the past. ⚠️ And it does not establish
+  *historical* either: #1/#2/#5 displaced observations are **simultaneous**, not past.
+- **W2 collapse** — nothing, and it **disclaims** a truth claim: *"removed for being redundant, not for
+  being wrong."* ⚠️ Latent.
+- **W3 identity rename** — ⭐ **the name is no longer in use**, warranted by the person's own declaration.
+- **W4 consolidation** — ⭐ **its content was used** to compose a successor; the source calls the members
+  *still-true*. ⛔ Not "losslessly absorbed".
+- **W5 lesson revise** — ⭐ **whatever the actor declared**; three of its four relations are not truth
+  claims. ⚠️ Latent.
+- **W6 restore-while-blocked** — nothing: *"un-archived, not believed"*, caused by occupancy, and the
+  source refuses to collapse the two outcomes.
+
+⭐⭐ **The three positive statuses have different subjects** — a name's use, a record's content, a declared
+relation. Not one meaning wearing three hats.
+
+> ## ⭐⭐⭐ **The convergence with ⑧-A, and it is the finding:** the three writers that establish something are
+> ## **exactly** the three with a warrant ⑧-A would accept. **A writer with no warrant establishes nothing; a
+> ## writer with one establishes exactly what its warrant covers.** ⚠️ And W1 performed 8 of the 9 anchors.
+
+⭐ **The negative ruling is independently reproduced** — from the writers' own words, without reversibility
+or the dimension signatures, against a positive control. ⇒ it is not an artifact of the earlier method.
+
+⚠️ **The surprise:** *current vs historical.* Displacement establishes **neither** side — a displaced
+observation is not thereby "the past".
+
+```
+①②③⑤⑦ ✅ RULED · ⑥ ✅ PARTIAL · ⑧ ✅ · ⑧-A ✅ · ④-A ✅ — all narrow
+④ ⏸ INVESTIGATED (reframed), awaiting Ote · ⑨ ⏸ NAMED, NOT OPENED
+```
+
+**Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
+armed collisions intact · ⛔ **one read-only instrument added; nothing written to the database.**
