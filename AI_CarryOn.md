@@ -377,8 +377,13 @@ decision. ⛔ Not reopened.
    it literally records *"the moment we decided not to make it live."*
    ⭐⭐ AND THE DESIGN ALREADY KNOWS THE DISTINCTION — `markContradicted`: *"⛔ It does NOT set
    `invalid_at`. 'Somebody said this is wrong' and 'this was replaced' are two [different things]."*
-   ⇒ ⛔ **`invalid_at` MEANS REPLACED.** It is the MODEL DOCSTRING ("expired IN THE WORLD") that
-   OVERREACHES, ⛔ not the writers. `contradicted_at` = the ONE truth-shaped state, used on 3 of 233.
+   ⚠️ ⛔ AND DO **NOT** SAY "`invalid_at` MEANS REPLACED" (Ote corrected me 2026-09-17) — ⛔ TOO BROAD, and
+   asserting it REPEATS THE VERY ERROR THIS ARC AVOIDS: collapsing several different transitions into one
+   meaning because they share a column. ✅ SAY INSTEAD: **"EVERY CURRENT WRITER OF `invalid_at` IS MAKING A
+   NON-WORLD-TRUTH CLAIM ABOUT THE MEMORY'S OR OBSERVATION'S STATUS, ROLE, OR HISTORY."** ⇒ what IS
+   established is the NEGATIVE: *"the proposition became false"* is ⛔ NOT a valid common reading.
+   It is the MODEL DOCSTRING ("expired IN THE WORLD") that OVERREACHES, ⛔ not the writers.
+   `contradicted_at` = the ONE truth-shaped state, used on 3 of 233.
    ⚠️ `supersedes_id` HAS TWO INCOMPATIBLE CONVENTIONS: the FACT path points BACK ("the row I replaced"),
    the LESSON path sets it on the PRIOR row pointing FORWARD ("the row that replaced me"). Corpus: 77
    backward · **0 forward** ⇒ ⛔ THE COLLISION IS **LATENT, NOT MANIFEST**. ⚠️ Know it before reading the
@@ -392,6 +397,27 @@ decision. ⛔ Not reopened.
    ⭐ THE MIRA COUNTER-EXAMPLE STANDS: the displaced row was NEVER FALSE — she DID train in Chiang Mai.
    ⛔ NOTHING RE-CLASSIFIED · ⛔ NO RELATION VOCABULARY INTRODUCED · ⛔ the nine keep their recorded fates.
    → `INVESTIGATION_SOTERA_STATE_TRANSITION_SEMANTICS.md` · `test/checks/state-transition-semantics.mjs`
+㉜ ⭐⭐⭐ THE SIX `invalid_at` WRITERS ARE **SIX DIFFERENT EVENTS** (traced 2026-09-17). ⭐ ROLE CHANGES IN
+   ALL SIX · ⛔ THE PROPOSITION CHANGES IN NONE. ⚠️ W2 (collapse) is the ONLY one asserting anything
+   propositional — *"duplicate"* — and it VERIFIES NOTHING.
+     W1 supersede          ROLE                      ⛔ doesn't establish the old is false, or same-question
+     W2 collapse           ROLE + a ? PROPOSITION    ⛔⛔ doesn't establish they ARE duplicates (P14)
+     W3 identity rename    OBSERVATION + ROLE        *"what she used to call me"* — ⛔ not "wrong"
+     W4 consolidation      OBS + ROLE + STORAGE      members ABSORBED, ⛔ not doubted
+     W5 lesson revise      OBS + ROLE                ⭐ THE ONLY WRITER WHOSE RELATION IS **DECLARED** BY AN
+                                                     ACTOR (she picks 1 of 4) — ⚠️ and it has never run
+     W6 restore-blocked    ROLE + STORAGE            ⭐⭐ MOVES THEM IN **OPPOSITE DIRECTIONS IN ONE PATCH**
+                                                     — un-archives (storage) while marking invalid (role)
+   ⭐⭐⭐ THE CLEANEST PROOF, AND IT NEEDS NO DOCSTRING: `reviveSuperseded` does
+   `update([prior.id], {invalid_at: null})` — FIRED WHEN **THE ROW THAT DISPLACED IT IS FORGOTTEN**.
+   ⇒ **A TRUTH CLAIM CANNOT BE UNDONE BY DELETING A DIFFERENT ROW. A ROLE VACANCY CAN.** The field's own
+   REVERSIBILITY and its TRIGGER settle what it tracks.
+   ⇒ ⚠️ SIX EVENTS, ONE FIELD, ⛔ NO WAY TO TELL THEM APART AFTER THE FACT — the nine-transition finding
+   again, now traced to the WRITERS rather than the READERS. ⛔ NO VOCABULARY PROPOSED.
+   ⭐ KEEP AS EXAMPLES: `supersedes_id` = IMPLEMENTATION CONVENTION ≠ ESTABLISHED CORPUS SEMANTICS
+   (fact=backward, lesson=FORWARD, 0/77 forward ⇒ LATENT, ⛔ not defective) · `expired_at` = a STORAGE
+   event and a BELIEF event sharing one column without being the same act.
+   → `INVESTIGATION_SOTERA_TRANSITION_EVENTS.md` · `test/checks/transition-event-trace.mjs`
 ```
 
 ---

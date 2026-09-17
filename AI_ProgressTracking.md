@@ -10545,3 +10545,63 @@ writers, sites and counts are mechanical.
 **Verification:** state-semantics trace green · unit trace green · predicate trace green · evidence baseline
 green including the canary guard · unit **753/753** · canary intact (18 rows, 0 slots) with both boundaries
 surviving. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · TRANSITIONS AS EVENTS — six writers, six events, one field
+
+Ote: *"When a transition happens, what event has actually occurred, and which parts of that event are
+currently being compressed into the same row fields?"* ⛔ Read-only; no vocabulary created; the four
+dimensions (PROPOSITION / OBSERVATION / ROLE / STORAGE) are analytical only, **not proposed schema**.
+
+**Doc** → `Reference/docs/INVESTIGATION_SOTERA_TRANSITION_EVENTS.md`
+**Check** → `test/checks/transition-event-trace.mjs`
+
+### First, his correction, applied in both places
+
+I had written *"`invalid_at` means REPLACED."* ⛔ Too broad — asserting it would repeat the exact error this
+arc exists to avoid: collapsing several different transitions into one meaning because they share a column.
+Corrected in `INVESTIGATION_SOTERA_STATE_TRANSITION_SEMANTICS.md` §2 and `AI_CarryOn` §0-B ㉛ to:
+**"Every current writer of `invalid_at` is making a non-world-truth claim about the memory's or
+observation's status, role, or history."** The established result is the **negative**.
+
+### The six writers, traced as events
+
+**ROLE changes in all six. The PROPOSITION changes in none.** W2 (collapse) is the only one asserting
+anything propositional — *"duplicate"* — and it verifies nothing.
+
+And they are **not one event**: W4 also moves storage; W3/W4/W5 also write observation history; and **W6
+moves storage and role in opposite directions in a single patch** — un-archiving the row while marking it
+invalid.
+
+⭐ **W5 is the only writer whose relation is DECLARED by an actor** rather than derived — she picks one of
+four — and it is the one that has never run.
+
+### The cleanest proof, and it needs no docstring
+
+`reviveSuperseded` does `update([prior.id], { invalid_at: null, tier: 'warm' })`, **fired when the row that
+displaced it is forgotten.**
+
+⇒ **A truth claim about a proposition cannot be undone by deleting a different row. A role vacancy can.**
+The field's own reversibility, and the trigger that reverses it, settle what it tracks — without reading a
+single declaration.
+
+### What is compressed
+
+`invalid_at` carries, indistinguishably: a replacement of the current answer · an asserted-but-unverified
+redundancy · a rename kept deliberately as history · an earlier version of a summary · a change in her own
+understanding · **a refusal to return a row to the live role.** Six events, one field, no way to tell them
+apart after the fact — the nine-transition finding again, now traced to the **writers** rather than the
+readers. ⛔ No vocabulary proposed for any of them.
+
+### Kept as examples, per his ruling
+
+`supersedes_id` — **implementation convention ≠ established corpus semantics** (fact path backward, lesson
+path forward, 0 of 77 forward rows) ⇒ **latent, not defective**. `expired_at` — a storage-lifecycle event
+and a belief event sharing one column without being the same semantic act.
+
+**The Mira anchor stands:** the old observation became **non-current without becoming false**.
+
+**Verification:** transition-event trace green · state-semantics green · unit trace green · predicate trace
+green · evidence baseline green including the canary guard · unit **753/753** · canary intact (18 rows,
+0 slots). ⛔ Nothing was written.
