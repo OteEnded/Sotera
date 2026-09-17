@@ -514,6 +514,31 @@ decision. ⛔ Not reopened.
    THE ROWS LATER REPORT, and **THE ROW STATE DESCRIBES A CHANGE THAT NEVER HAPPENED.**
    ⏸ ⛔ AWAITING OTE'S RULING ON ①. ⛔ ② NOT OPENED · ③–⑦ FROZEN.
    → `ANALYSIS_SOTERA_INCUMBENT_STATUS_CHANGES.md` · `test/checks/incumbent-status-change-trace.mjs`
+㊲ ⭐⭐⭐ DECISION ② OPENED (Ote, 2026-09-17) — *"Is membership merely an INDEX used after semantic identity
+   has already been established, or is membership itself MAKING A SEMANTIC CLAIM?"*
+   ⇒ ⭐⭐⭐ THE ANSWER IS **NEITHER, UNIFORMLY**. Ordered by the STRENGTH each consumer requires of the
+   SAME key, while ⛔ THE EVIDENCE BEHIND IT NEVER CHANGES:
+     M2 ADMISSION  needs NOTHING — it SCOPES, then asks its OWN declared question   ⇒ read as an INDEX
+     REVIVE        "this arena has a holder"                                        ⇒ a ROLE claim
+     REPLACE       "these answer the same question"                                 ⇒ a QUESTION claim
+     COLLAPSE      "these are the same proposition"                                 ⇒ a PROPOSITION claim
+   ⇒ ⭐⭐ MEMBERSHIP IS AN **INDEX** WHERE THE CONSUMER SUPPLIES ITS OWN EVIDENCE (M2), AND A **CLAIM**
+   WHERE IT SUPPLIES NONE (collapse). ⛔ THAT IS NOT A PROPERTY OF MEMBERSHIP — IT IS A PROPERTY OF EACH
+   CONSUMER. ⇒ ⭐⭐⭐ **"COMPETITION MEMBERSHIP" IS NOT ONE SEMANTIC CONCEPT — IT IS ONE OPERATIONAL KEY
+   BEARING FOUR DIFFERENT LOADS, AND ONLY ONE CONSUMER PAYS FOR WHAT IT TAKES.**
+   ⭐ ONLY M2 SUPPLIES ITS OWN EVIDENCE — and it is the ONLY consumer that PERSISTS ITS REASON.
+   ⭐ ONLY COLLAPSE SUPPLIES NONE — and it makes the STRONGEST claim.
+   ⛔ NO TWO CONSUMERS REQUIRE THE SAME RELATION. ⚠️ REPLACE and REVIVE share a SHAPE (designated holder)
+   but ⛔ NOT a relation: "same question" vs "the role is occupied".
+   ⭐ IF MEMBERSHIP IS **WRONG**: replace + collapse DESTROY · revive WITHHOLDS · M2 mislabels but REFUSES
+   NO WRITE · forget unaffected. IF **MISSING**: safe for replace/collapse/M2 · ⛔ IMPOSSIBLE for revive.
+   ⭐⭐⭐ ABSTENTION IS ASYMMETRIC — the INCOMING may be unplaced (`slotId: null` ⇒ NEW), ⛔ an EXISTING
+   live row NEVER is: `buildSlotView` synthesises an EPHEMERAL arena keyed `entity|attribute`.
+   ⇒ ⚠️ **53 of 118 live candidates sit in an arena nobody established** — permanently potential
+   competitors, ⛔ including rows no resolver ever examined. ⚠️ Read against ①: arena assignment CAN cause
+   a false incumbent-status change, and for existing rows THE ASSIGNMENT IS MANDATORY.
+   ⏸ ⛔ AWAITING OTE. ⛔ ③–⑦ FROZEN · ⛔ canary untouched · ⛔ both armed collisions STILL ARMED.
+   → `INVESTIGATION_SOTERA_COMPETITION_SEMANTIC_BOUNDARY.md` · `test/checks/competition-consumer-trace.mjs`
 ```
 
 ---

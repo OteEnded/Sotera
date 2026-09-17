@@ -10827,3 +10827,61 @@ and field states are mechanical.
 
 **Verification:** trace green · evidence baseline green including the canary guard · unit **753/753** ·
 canary intact (18 rows, 0 slots) · both armed collisions intact. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · DECISION ② OPENED — competition membership, per consumer
+
+Ote: *"Is membership merely an index used after semantic identity has already been established, or is
+membership itself making a semantic claim? Don't assume either answer."* ⛔ Read-only; no implementation,
+vocabulary, schema, A1 authority, 047 change, canary activation or repair of the armed collisions.
+① carried forward as constraints, deliberately unresolved.
+
+**Doc** → `Reference/docs/INVESTIGATION_SOTERA_COMPETITION_SEMANTIC_BOUNDARY.md`
+**Check** → `test/checks/competition-consumer-trace.mjs`
+
+### The answer: neither, uniformly
+
+Ordered by the strength each consumer requires of the **same** key, while the evidence behind it never
+changes:
+
+| consumer | needs the key to mean | read as |
+|---|---|---|
+| M2 admission | nothing — it scopes, then asks its own declared question | an **index** |
+| revive | "this arena has a holder" | a **role** claim |
+| replace | "these answer the same question" | a **question-identity** claim |
+| collapse | "these are the same proposition" | a **proposition** claim |
+
+**Membership behaves as an index where the consumer supplies its own evidence (M2), and as a claim where it
+supplies none (collapse). That is not a property of membership — it is a property of each consumer.**
+
+⇒ **"Competition membership" is not one semantic concept. It is one operational key bearing four different
+loads, and only one consumer pays for what it takes.**
+
+⭐ Only **M2** supplies its own evidence — and it is the only consumer that **persists its reason**.
+⭐ Only **collapse** supplies none — and it makes the **strongest** claim.
+⛔ **No two consumers require the same relation.** Replace and revive share a *shape* (designated holder)
+but not a relation: *"same question"* vs *"the role is occupied"*.
+
+### If membership is wrong / missing
+
+**Wrong:** replace and collapse **destroy** · revive **withholds** · M2 mislabels but **refuses no write** ·
+forget unaffected. **Missing:** safe for replace, collapse and M2 · ⛔ **impossible** for revive.
+
+### ⭐ Abstention is asymmetric
+
+The **incoming** observation may be left unplaced — the resolver returns `{ slotId: null }` on a miss ⇒
+`matches` empty ⇒ NEW. An **existing** live row never is: `buildSlotView` synthesises an **ephemeral arena**
+keyed `entity|attribute` for every slotless row.
+
+**53 of 118 live candidates sit in an arena nobody established** — permanently potential competitors,
+including rows no resolver ever examined. ⚠️ Read against ①: arena assignment *can* cause a false
+incumbent-status change, and for existing rows **the assignment is mandatory**.
+
+### Preserved
+
+`same membership ≠ same proposition` (canary: 18 rows, 0 slots) · `same proposition ≠ same retrieval object`
+(retrieval never consults `slot_id`) · **both armed collisions still armed** as observational fixtures.
+
+**Verification:** consumer trace green · evidence baseline green including the canary guard · unit
+**753/753**. ⛔ Nothing was written.
