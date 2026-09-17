@@ -58,10 +58,11 @@ winner selection · `governsReplacement` · `restore` · `lesson-host` · every 
 A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
 A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
 ✅ D-1…D-6 ALL DECIDED · ✅ CONTRACT RATIFIED · ✅ **A — ACCEPT LOCKED** · ✅ **BUILD ACCEPTED 2026-09-17**
+✅ POST-ADMISSION EVIDENCE PASS ACCEPTED · ⏸ **A-D6 — RECALL SEMANTIC CLAIM: OPEN, READ-ONLY**
 ```
 
-> ## ✅ **EVERY DECISION ABOVE IS RULED, AND THE BUILD THAT FOLLOWED IS ACCEPTED. ⛔ NOTHING IN THIS BOARD
-> ## IS OPEN.**
+> ## ✅ **EVERY DECISION ABOVE IS RULED, AND THE BUILD THAT FOLLOWED IS ACCEPTED.**
+> ## ⏸ **ONE THING IS OPEN, AND IT IS NEW: A-D6, THE RECALL SEMANTIC CLAIM — see below.**
 
 ## ⏸ ⭐⭐⭐ THE ONLY OPEN WORK FROM THIS ARC — carried forward, ⛔ none of it started
 
@@ -82,7 +83,12 @@ A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE fo
                              ⚠️ AND A-ACCEPT INCREASED ITS EXPOSURE — more coexisting rows to trip over.
 ④ THE LESSON-HOST D1 GAP     `lesson-host.revise()` is raw SQL mutating TWO `SEMANTIC_FIELDS` outside
                              `store.update` ⇒ ⛔ neither admission NOR D1 Phase 3 reaches it.
-                             ⚠️ PRE-EXISTING and LATENT (0 rows). ⏸ A separate pre-existing item.
+                             ⚠️⭐ **AND IT ALSO SETS `invalid_at` BY RAW SQL** (lesson-host:326) — MEASURED
+                             2026-09-17. ⇒ ⛔ it can end a live row with NO admission decision, and the
+                             `sotera|lesson` bucket is **the corpus's ONLY multi-row bucket: 17 live,
+                             17 distinct, 0 slots, 0 pins.** ⚠️ "LATENT (0 rows)" was about the
+                             `SEMANTIC_FIELDS` half ONLY — ⛔ do not carry it over to this half.
+                             ⏸ Still a separate pre-existing item. ⛔ NOT opened, ⛔ NOT fixed.
 ⑤ THE EXTRACTOR VOLUME       ⭐ A — ACCEPT is in force: the extractor DEFERs and its facts COEXIST.
                              ⭐⭐ ESTABLISHED: it has NO legitimate source of `claimKind` for VOLUNTEERED
                              facts, and giving it one would VOID its own declared-coincidence warrant.
@@ -90,6 +96,86 @@ A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE fo
                              covers only ELICITED facts, ⛔ never volunteered ones.
 ⑨ ⏸ NAMED, NOT OPENED        may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
+
+## ⭐⭐⭐ THE POST-ADMISSION EVIDENCE PASS — ✅ ACCEPTED (Ote, 2026-09-17) · ⛔ READ-ONLY, nothing changed
+
+`INVESTIGATION_SOTERA_POST_ADMISSION_CORPUS.md`. ⛔ No code, no write, no restart. Two results decide what
+comes next, and **the second is the one that opened the new question.**
+
+```
+⛔⛔ ① THERE IS NO POST-ADMISSION ORGANIC CORPUS. NOT ONE ROW.
+   :8210 started 2026-09-16 18:05:48 · e45d928 committed 2026-09-17 22:08:30 ⇒ ~28 h LATER
+   rows written since the build: 0 · ledger: 0
+   ⇒ ⭐ the ledger's 0 is an ABSENCE OF POPULATION, ⛔ NOT an outcome distribution.
+   ⇒ ⭐ EVERY 74/77 NUMBER IS COUNTERFACTUAL REPLAY EVIDENCE. ⛔ Never cite one as observed behaviour.
+      Ote: *"all 74/77 replay numbers remain explicitly counterfactual/replay evidence. Keep that
+      distinction."*
+
+⭐⭐⭐ ② THE RECALL SIDE IS THE STRONGER FINDING — and it is MEASURED, not replayed:
+   the 74 would-coexist pairs run through the PRODUCTION `sameValueMeaning`:
+       dedupeByValue would suppress   0 of 74      ⭐ ZERO
+       both survive as live answers  74 of 74      ⭐ 100 %
+   ⚠️ the concrete case: `timezone` = "User's timezone is Bangkok (Asia/Bangkok)" vs "Bangkok"
+      ⇒ ⛔ the SAME APPARENT FACT, both returned as current.
+   ⚠️ the concrete population: `sotera|lesson` — 17 live · 17 distinct · 0 slots · 0 pins
+```
+
+⭐ **ALSO ESTABLISHED, and each is a fact a fresh session will otherwise get wrong:**
+
+```
+✅ `reconcileFact` CANNOT produce an un-admitted supersession — TRACED, ⛔ not assumed:
+   matches = admitted ⊆ candidates → supersedes = primary.id ∈ matches → collapse ⊆ matches
+   ⇒ every invalidable id comes from `matches`. ⭐ THERE IS NO SECOND DOOR.
+⛔ ABSTAIN is STRUCTURALLY UNREACHABLE — 1 declared question key exists in the whole corpus.
+⛔ ADMIT → M2 REFUSE is ORGANICALLY unreachable — it needs a REBIND, and `log_slot_bindings` holds
+   2 events, BOTH first-bind. ⓘ Control E had to construct one.
+⚠️ `claimKind` IS NEVER PERSISTED (store:1189 destructures it out). It survives ONLY as the pin, and
+   ONLY on ADMIT. ⇒ ⛔ for a DEFER/ABSTAIN the LEDGER IS THE ONLY RECORD of what the incoming declared.
+   ⚠️ `recordAdmission`'s comment (*"the admitting question is ALSO pinned on the row"*) is TRUE for
+   ADMIT and FALSE for DEFER/ABSTAIN. ⛔ Nothing semantic is lost; the comment reads wider than it is.
+⚠️⭐ 8 of 9 `createMemoryV2Service` CALL SITES OMIT `admitCompetition` — only `memory-v2-host.js:112`
+   passes it. Two of the eight are OPERATOR instruments: `bind-canary-4-update.mjs` and
+   `bind-canary-5-refusal.mjs`. ⇒ ⚠️ run today, **the canary update would no longer supersede**
+   (`admitted = []` ⇒ NEW, not UPDATE). ⛔ NOT touched — flagged because they are instruments, not tests.
+⛔ `collapse` and `revive` HAVE NEVER FIRED IN PRODUCTION — 0 audit events in the corpus's whole life.
+⚠️ 413 of 428 audited supersede victims NO LONGER EXIST ⇒ the audit table CANNOT extend the replay.
+   ⭐ The 77 `supersedes_id` pairs are the COMPLETE replayable set.
+99.2 % of the eligible live population is UNPINNED · all 35 pins sit in ONE operator slot · 1 is live
+⛔ NO SLOT ANYWHERE HOLDS TWO LIVE ROWS ⇒ ⭐ A — ACCEPT's coexistence has NOT YET MATERIALISED AT ALL.
+```
+
+⚠️⭐ **AND TWO MEASUREMENT ERRORS I MADE, BOTH CAUGHT AND CORRECTED — they are the traps here:**
+
+```
+① I measured PID 13676 on **:8201** and called it Sotera. ⛔ **:8201 IS OLS — OTE'S.** Sotera is **:8210**.
+  ⭐ Re-probed by `/api/health` and re-read. The conclusion survived ONLY because `rows_since_build = 0`
+  never depended on which process was running. ⇒ ⛔ VERIFY THE SERVICE, never the port number alone.
+② I grouped candidate buckets on `(entity, attribute)` and got ELEVEN multi-row buckets.
+  ⭐ The REAL candidacy scope is **(persona, user_id, entity, attribute)** — `findOwnLive` is
+  `WHERE persona = P AND user_id = U`. On the real key there is **ONE**. ⇒ ⛔ any future volume estimate
+  on the narrower key is INFLATED by ~10×.
+```
+
+## ⭐⭐⭐ ⏸ **A-D6 — RECALL SEMANTIC CLAIM. OPEN (Ote, 2026-09-17).** ⛔ READ-ONLY.
+
+> ## **"When two durable observations are permitted to coexist because no warrant admitted them to
+> ## competition, what semantic claim, if any, does recall establish before presenting them together?"**
+
+```
+⛔⛔ DO NOT ASSUME that returning multiple rows means the system has ASSERTED they are jointly current.
+   ⭐ Establish it FROM THE IMPLEMENTATION AND EXECUTION PATH.
+
+⭐⭐⭐ THE DISCIPLINE, and it is the SAME ONE displacement and admission used:
+        what the RECALL ACT establishes   ≠   what a READER may INFER from its output
+
+⛔ NO fix · ⛔ NO field · ⛔ NO threshold · ⛔ NO ranking change · ⛔ NO dedupe change
+⛔ NO recall-limit change · ⛔ NO context-format change
+⛔⛔ AND ⛔ DO NOT REOPEN A — ACCEPT by reframing this as "too many live rows".
+   Ote: *"The write-side decision stands. We are asking what the read operation itself establishes,
+   not how to reduce coexistence."*
+⛔ KEEP SEPARATE: restore/W6 · lesson-host · the three red checks · ledger teardown · extractor/elicitation
+```
+
 
 > ## ⭐⭐⭐ **① IS RULED, AND SO IS EVERYTHING AFTER IT.**
 
@@ -1473,13 +1559,19 @@ decision. ⛔ Not reopened.
 # 0-C · LIVE STATE — 2026-09-17
 
 ```
-:8210 (Sotera — ⭐ ON THE ACCEPTED ADMISSION BUILD, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
+:8210 (Sotera, PID 29644, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
+⚠️⛔⛔ **:8210 IS *NOT* RUNNING THE ADMISSION BUILD.** MEASURED 2026-09-17: the process started
+   **2026-09-16 18:05:48**, and `@ote/memory` `e45d928` was committed **2026-09-17 22:08:30** — ⭐ ~28 h LATER.
+   ⇒ ⛔ the code on disk is accepted; ⛔ **the code in memory is the OLD topology.** ⓘ Ote's call, not mine.
 :54322 pg · ⭐ migrations through **053** · writer contracts 17 (+ `resolver`) · slots 112 · aliases 8 · memories 235
 resolver: grayZoneMode='shadow' · ontologyMode='shadow'  ⇒ BOTH ACCUMULATING, ⛔ neither has authority
 unit 753/753 · @ote/memory 123/123 · alias ledger 4 rows (all `refuse`)
 ⭐ 047 QUESTION LAYER: **1 question declared** (the harness canary) · 1 of 112 slots bound · 2 bind acts,
    BOTH `ote-operator` on `canary-bind-2026-09-03-*` ⇒ ⛔ **ZERO ORGANIC PRECEDENT.**
 ⭐⭐ 053 ADMISSION LEDGER: `log_memory_admissions` — **0 rows** · 3 CHECKs · 5 indexes.
+   ⛔⛔ **0 ROWS IS *NOT* AN OUTCOME DISTRIBUTION.** ⭐ MEASURED: **0 memory rows have been written since the
+   build commit**, and the runtime predates it ⇒ ⛔ **the gate has never run outside the control suite.**
+   ⛔ Never report `{ADMIT:0, DEFER:0}` from this table as behaviour. It is an ABSENCE OF POPULATION.
    ⭐ `log_memory_admissions_outcome_evidence_ck` PROVED LIVE: an ABSTAIN with a NULL side is REFUSED (23514)
 ⭐ rows PINNED (`question_id_at_admission`) 35 — ⛔ ALL in `build tag for this cycle`, an OPERATOR slot.
    ⇒ ⛔ ZERO user beliefs are established incumbents ⇒ ⭐ EVERY organic pair today resolves to **DEFER**.
@@ -1583,7 +1675,9 @@ committed IN ITS OWN REPO, and any before/after comparison must revert THAT file
    violation until OTE confirms · ⛔ do not touch the 22 scans or the 4 unreviewed candidates.
 ⛔ A1 has NO AUTHORITY and is STRUCTURALLY BLOCKED ON A-D4 — "not the same slot" falls through to MINT NEW,
    so authority-while-A-D4-is-open would decide `broader → new slot` BY DEFAULT.
-⛔ The two ARMED collisions and the 8 existing aliases stay EXACTLY as they are. A-D6: audited unknown.
+⛔ The two ARMED collisions and the 8 existing aliases stay EXACTLY as they are. ⚠️ The trailing
+   "A-D6: audited unknown" here is a STALE PLACEHOLDER predating 2026-09-17 — ⛔ it is NOT the A-D6 in
+   §0-A (the RECALL SEMANTIC CLAIM). ⓘ Left in place because its original referent is unknown.
 ⛔ Dreaming: no switch change · `dryRun` untouched · no M1 change · M2 reasoner not commissioned.
 ⛔ `memory-contradiction.js` stays UNWIRED — its rule needs the memory to exist when the correction was made,
    and in the shelter case the row was written 2.8s AFTER the correction. ⇒ wiring it would NOT have helped.

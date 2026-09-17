@@ -12221,3 +12221,92 @@ unwired · Dreaming switches unchanged · the Mira and shelter fixtures kept · 
 The arc-level work parked behind this: **A1 authority** (⑦'s ruling frees it) · **B-D1** the projection
 radius · **B-D3** `attestedBySource` · **Dreaming / the M-series** · **⑨** arena synthesis · and the five
 carried-forward items above.
+
+
+---
+
+## 2026-09-17 · ✅ THE POST-ADMISSION CORPUS PASS — ACCEPTED · ⏸ A-D6 OPENED
+
+**Ote's question:** *"After enforcing grouping → admission → competition, what durable memory states and
+behaviors actually change?"* ⛔ Read-only: no code, migration, schema, test change, DB write, restart or fix.
+
+**Instruments:** 4 census scripts + 1 replay, **session scratchpad only** — ⛔ nothing added to the repo.
+⭐ All of them import the **production** `admitPair` / `sameValueMeaning` / `dedupeByValue` rather than
+re-implementing them, so the replay measures the shipped gate and not a model of it.
+
+### ⭐⭐⭐ THE TWO RESULTS THAT DECIDED WHAT COMES NEXT
+
+```
+① ⛔ THERE IS NO POST-ADMISSION ORGANIC CORPUS
+  :8210 (Sotera, PID 29644) started 2026-09-16 18:05:48
+  e45d928 committed              2026-09-17 22:08:30    ⇒ ⭐ ~28 h LATER
+  memory rows written since the build: 0 · ledger: 0
+  ⇒ the ledger's 0 is an ABSENCE OF POPULATION, ⛔ NOT an outcome distribution
+  ⇒ ⭐ ALL 74/77 REPLAY NUMBERS ARE COUNTERFACTUAL. Ote ruled: *"Keep that distinction."*
+
+② ⭐⭐⭐ THE RECALL SIDE — and this one is MEASURED, not replayed
+  74 would-coexist pairs through the PRODUCTION `sameValueMeaning`:
+      dedupeByValue would suppress  0 / 74      both survive as live answers  74 / 74
+  the case: `timezone` = "User's timezone is Bangkok (Asia/Bangkok)"  vs  "Bangkok"
+  the population: `sotera|lesson` — 17 live · 17 distinct · 0 slots · 0 pins
+```
+
+### ⭐ THE REPLAY, IN FULL
+
+| reading | ADMIT | ABSTAIN | DEFER |
+|---|---:|---:|---:|
+| R1 contract-faithful (`claimKind` unrecorded ⇒ incoming side unestablished) | 0 | 0 | **77** |
+| R2 most-generous proxy (incoming's own pin = its declaration) | **3** | 0 | **74** |
+
+⚠️ R2's 3 ADMITs are **not independent evidence** — two pins in one slot with no rebind are necessarily
+equal, so that reading partly reconstructs the vacuity the gate's header forbids. ⇒ it is a **ceiling**.
+
+### ✅ AND THE INVARIANT, TRACED RATHER THAN ASSUMED
+
+`matches = admitted ⊆ candidates` → `supersedes = primary.id ∈ matches` → `collapse ⊆ matches` →
+`stale = [supersedes, …collapse]`. ⭐ **Every invalidable id comes from `matches`. There is no second door.**
+
+### ⚠️ FOUR PATHS CAN STILL END A LIVE ROW WITH NO ADMISSION DECISION
+
+`restore`/W6 · `lesson-host.revise()` — **your known open seams, found in the measurement, ⛔ not reopened**.
+`setIdentity` (15 rows) · `consolidate` (0 rows) — **contract-conforming NOT-IN-SCOPE, ⛔ not gaps**.
+
+⭐⭐ The lesson-host note moved: `revise()` **also sets `invalid_at` by raw SQL**, and `sotera|lesson` is
+the corpus's only multi-row bucket at 17 live. ⚠️ *"latent (0 rows)"* was about the `SEMANTIC_FIELDS`
+half only. ⛔ Still not opened, still not fixed.
+
+### ⚠️⭐ TWO MEASUREMENT ERRORS I MADE AND CORRECTED — the traps in this area
+
+```
+① measured PID 13676 on :8201 and called it Sotera. ⛔ :8201 IS OLS — OTE'S. Sotera is :8210.
+  Re-probed via /api/health. ⭐ The conclusion survived ONLY because `rows_since_build = 0` never
+  depended on which process was running. ⇒ VERIFY THE SERVICE, ⛔ never the port number alone.
+② grouped buckets on (entity, attribute) → ELEVEN multi-row buckets. The REAL candidacy scope is
+  (persona, user_id, entity, attribute). On the real key there is ONE. ⇒ the narrow key inflates ~10×.
+```
+
+### ⭐ OTHER FINDINGS WORTH CARRYING
+
+```
+⚠️ `claimKind` IS NEVER PERSISTED (store:1189) ⇒ for DEFER/ABSTAIN the LEDGER is the ONLY record of the
+   incoming declaration. `recordAdmission`'s "also pinned on the row" is TRUE for ADMIT, FALSE otherwise.
+⚠️ 8 of 9 `createMemoryV2Service` sites omit `admitCompetition` — incl. TWO OPERATOR SCRIPTS
+   (`bind-canary-4-update.mjs`, `bind-canary-5-refusal.mjs`). Run today the canary update would NOT
+   supersede. ⛔ Not touched.
+⛔ `collapse` and `revive` have NEVER fired in production · 413/428 audit victims no longer exist
+⛔ ABSTAIN structurally unreachable (1 declared key) · ADMIT→M2 REFUSE organically unreachable (no rebind)
+99.2 % of the eligible live population unpinned · NO SLOT HOLDS TWO LIVE ROWS ⇒ coexistence has not
+   yet materialised AT ALL.
+```
+
+### ⏸ A-D6 — OPENED BY OTE
+
+> **"When two durable observations are permitted to coexist because no warrant admitted them to
+> competition, what semantic claim, if any, does recall establish before presenting them together?"**
+
+⛔ Read-only. ⛔ No fix/field/threshold/ranking/dedupe/limit/format change. ⛔ **Do not reopen A — ACCEPT
+by reframing this as "too many live rows"** — the write-side decision stands.
+⭐ The discipline is the one displacement and admission used:
+**what the recall ACT establishes ≠ what a READER may infer from its output.**
+
+**DOC:** `INVESTIGATION_SOTERA_POST_ADMISSION_CORPUS.md`
