@@ -10481,3 +10481,67 @@ offered to be overruled; the predicates, shapes-as-implemented and exposures are
 **Verification:** unit trace green · predicate trace green · evidence baseline green including the canary
 guard · unit **753/753** · both original collisions armed · canary unchanged (18 rows, 0 slots).
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · STATE-TRANSITION SEMANTICS — what the system is actually claiming
+
+Ote: *"When the system changes a row's state, what fact about the world — or about the memory system — is
+it actually claiming?"* with the trap named up front: *"I don't want this investigation to accidentally turn
+implementation states into semantic relations."* ⛔ Read-only; nothing re-classified; no vocabulary
+introduced; canary untouched.
+
+**Wording corrected and adopted:** not *"membership is an authorization boundary for state transitions"* but
+**"in the current implementation, membership is an input that authorizes or vetoes certain state
+transitions"** — keeping the observation apart from whether it should have that authority. Kept unchanged:
+*"P13 is a proposition test conditional on correct membership"*, and for collapse, **required relation =
+pairwise equivalence · supplied relation = set membership**.
+
+### `invalid_at` has six writers, and not one claims the proposition became false
+
+supersede · collapse · identity rename · consolidation · lesson revise · **restore-while-blocked**.
+
+**The decisive one:** `restore` on an occupied slot sets `invalid_at = row.invalid_at ?? now()`. A row
+forgotten while *live* therefore gets `invalid_at` set to **the restore timestamp** — nothing about the
+world changed at that moment. It literally records *"the moment we decided not to make it live."*
+
+**And the design already knows the distinction.** `markContradicted`: *"It does NOT set `invalid_at`.
+'Somebody said this is wrong' and 'this was replaced' are two [different things]."*
+
+⇒ **`invalid_at` means REPLACED.** It is the model **docstring** — *"expired in the world"* — that
+overreaches, not the writers. That is the fair statement: the design isn't confused; one docstring claims
+more than every writer delivers.
+
+### `supersedes_id` carries two incompatible conventions
+
+The fact path points **back** ("the row I replaced"); `lesson-host.revise` sets it on the **prior** row
+pointing **forward** ("the row that replaced me"). Corpus: **77 backward, 0 forward** ⇒ the collision is
+**latent, not manifest** — reported as such, not as a defect, but worth knowing before anything reads the
+chain generically.
+
+### `expired_at` holds two different acts
+
+A deliberate archive (`forget`) and **absorption into a card** (consolidation). Only the first matches the
+declared meaning — a summariser folding evidence into a card hasn't stopped believing it, it has relocated
+it.
+
+### The sort, against Ote's four categories
+
+TRUTH OF THE PROPOSITION → `contradicted_at` **only**, 3 of 233 rows · CURRENT ROLE → `invalid_at`, all six
+writers · OBSERVATION HISTORY → `supersedes_id` · STORAGE LIFECYCLE → `expired_at` (partly), `tier`, and
+**`valid_at` despite its name** (177 of 211 within 2s of `created_at`).
+
+⇒ **There is no state that says "this proposition is no longer true" and is actually used.** `invalid_at` is
+doing role-bookkeeping under a truth-shaped name, and the one truth-shaped state that exists is used three
+times.
+
+**The Mira counter-example stands:** the displaced row was never false — she *did* train as a paramedic in
+Chiang Mai. It stopped being the current answer; `invalid_at` claims the stronger thing.
+
+**Not established:** that any state is *wrong* — each writer is coherent in its own terms. The mismatch is
+between the writers and one docstring. The category column is a reading of each call site's own words; the
+writers, sites and counts are mechanical.
+
+**Verification:** state-semantics trace green · unit trace green · predicate trace green · evidence baseline
+green including the canary guard · unit **753/753** · canary intact (18 rows, 0 slots) with both boundaries
+surviving. ⛔ Nothing was written.

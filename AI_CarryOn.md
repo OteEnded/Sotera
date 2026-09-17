@@ -367,6 +367,31 @@ decision. ⛔ Not reopened.
    preference` ×2 and `user|current activity` ×2 are separated by `user_id`: DIFFERENT PEOPLE, and P3 is
    right. ⛔ SCOPE IS NOT ANOTHER LABEL DIMENSION — the owner is part of what the question is ABOUT.
    → `INVESTIGATION_SOTERA_COMPETITION_UNIT.md` · `test/checks/competition-unit-trace.mjs`
+㉛ ⭐⭐⭐ WHAT A STATE CHANGE ACTUALLY CLAIMS (2026-09-17). ⛔ WORDING, CORRECTED BY OTE: ⛔ NOT "membership
+   is an authorization boundary"; ✅ **"IN THE CURRENT IMPLEMENTATION, membership is an INPUT that
+   AUTHORIZES OR VETOES certain state transitions."** ⇒ keeps the observation apart from whether it SHOULD.
+   ⭐⭐⭐ `invalid_at` HAS **SIX** WRITERS AND ⛔ NOT ONE CLAIMS THE PROPOSITION BECAME FALSE:
+     supersede · collapse · identity rename · consolidation · lesson revise · ⭐ RESTORE-WHILE-BLOCKED.
+   ⭐ THE DECISIVE ONE: `restore` on an occupied slot sets `invalid_at = row.invalid_at ?? now()` ⇒ a row
+   FORGOTTEN WHILE LIVE gets `invalid_at` = THE RESTORE TIMESTAMP. ⛔ Nothing about the world changed —
+   it literally records *"the moment we decided not to make it live."*
+   ⭐⭐ AND THE DESIGN ALREADY KNOWS THE DISTINCTION — `markContradicted`: *"⛔ It does NOT set
+   `invalid_at`. 'Somebody said this is wrong' and 'this was replaced' are two [different things]."*
+   ⇒ ⛔ **`invalid_at` MEANS REPLACED.** It is the MODEL DOCSTRING ("expired IN THE WORLD") that
+   OVERREACHES, ⛔ not the writers. `contradicted_at` = the ONE truth-shaped state, used on 3 of 233.
+   ⚠️ `supersedes_id` HAS TWO INCOMPATIBLE CONVENTIONS: the FACT path points BACK ("the row I replaced"),
+   the LESSON path sets it on the PRIOR row pointing FORWARD ("the row that replaced me"). Corpus: 77
+   backward · **0 forward** ⇒ ⛔ THE COLLISION IS **LATENT, NOT MANIFEST**. ⚠️ Know it before reading the
+   chain generically.
+   ⚠️ `expired_at` = TWO ACTS IN ONE COLUMN: a DELIBERATE archive (`forget`) and ABSORPTION into a card
+   (consolidation). ⛔ Only the first matches the declared meaning.
+   ⭐ THE SORT: TRUTH OF THE PROPOSITION → `contradicted_at` ONLY (3/233) · CURRENT ROLE → `invalid_at`,
+   all six writers · OBSERVATION HISTORY → `supersedes_id` · STORAGE → `expired_at` (partly), `tier`,
+   ⛔ and `valid_at` despite its name (177/211 within 2s of `created_at`).
+   ⇒ ⭐⭐⭐ THERE IS NO STATE THAT SAYS *"this proposition is no longer true"* AND IS ACTUALLY USED.
+   ⭐ THE MIRA COUNTER-EXAMPLE STANDS: the displaced row was NEVER FALSE — she DID train in Chiang Mai.
+   ⛔ NOTHING RE-CLASSIFIED · ⛔ NO RELATION VOCABULARY INTRODUCED · ⛔ the nine keep their recorded fates.
+   → `INVESTIGATION_SOTERA_STATE_TRANSITION_SEMANTICS.md` · `test/checks/state-transition-semantics.mjs`
 ```
 
 ---
