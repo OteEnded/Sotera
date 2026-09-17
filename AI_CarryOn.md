@@ -15,7 +15,7 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 > batch the rulings."* ⇒ investigate broadly, **rule one decision at a time**.
 
 ```
-①  ⏸ UNRESOLVED     what semantic occurrence, IF ANY, happens when an incumbent stops being current?
+①  ⏸ ANSWER DELIVERED 2026-09-17, ⛔ NOT RULED — ⭐ INHERENTLY MULTIPLE, ⛔ not one relationship
 ②  ✅ RULED          membership is NOT one semantic relation; each consumer establishes its own
 ③  ✅ RULED BROAD    observation→question follows 047's DECLARED-ONLY authority
 ④  ✅ NEGATIVE ONLY  `invalid_at` is NOT a proposition-truth state ⛔ positive definition DELIBERATELY OPEN
@@ -27,6 +27,27 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ```
 
 > ## ⭐⭐⭐ **THE CRITICAL PATH IS ① → ⑧.** ⑤ and ⑦ removed the ambiguity around them; ④ deliberately did not.
+
+⭐⭐⭐ **①'s ANSWER — `DECISION_SOTERA_01_INCUMBENT_RELATIONSHIP.md`, ⛔ delivered, ⛔ NOT ratified.** Under
+Ote's reframe (RELATIONSHIP incoming→incumbent held strictly apart from CONSEQUENCE incumbent→role, ⛔ the
+second **not admitted as evidence** for the first):
+
+```
+⭐ THERE IS NO SINGLE GENERAL RELATIONSHIP — the kinds are INHERENTLY MULTIPLE,
+  ⛔ not because the cases varied but because THE RELATA DIFFER:
+  observation×observation · world-state×world-state · record×ITS-OWN-SOURCE ·
+  sub-proposition×sub-proposition · ⛔ and in #8/#9 NO PAIR AT ALL.
+  ⛔ A relation's attributes cannot vary its own domain.
+
+⭐ THREE OUTCOMES MUST STAY DISTINGUISHABLE — today all three produce ONE row state:
+  ✅ a relation holds · ⛔ NO relation exists (#8 #9) · ⚠️ the record CANNOT ESTABLISH one (#3)
+
+⭐ WHAT IS COMMON IS NOT A RELATIONSHIP — it is an OCCASION: a pair was brought into
+  contact and the system was required to act BEFORE the relationship was established.
+
+⇒ EXCLUDES interpretation 1 as a RELATIONSHIP model (⚠️ it may still fit the CONSEQUENCE
+  dimension — that is ④'s, and open) · ⛔ does NOT select among 2, 3 and 4.
+```
 
 ⭐ **THE FULL RULINGS AND THEIR EVIDENCE:** `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` (read first) ·
 `SYNTHESIS_SOTERA_MEMORY_BOUNDARIES.md` (the six boundaries) · the rules in §0-B ⑱–㊻.
@@ -763,6 +784,44 @@ decision. ⛔ Not reopened.
    ⏸ NEXT DECISIONS EXPOSED, ⛔ NAMED ONLY: **⑧** what may `resolveConflict` do (blocked on ①) ·
    **⑨** may an arena be SYNTHESISED for a family with no established slot semantics (⑦+② don't answer it).
    ⇒ ⭐⭐⭐ **THE CRITICAL PATH IS NOW ① → ⑧.**
+
+㊼ ⭐⭐⭐ **DECISION ①, ANSWERED (2026-09-17) — ⛔ DELIVERED, NOT RULED.**
+   `DECISION_SOTERA_01_INCUMBENT_RELATIONSHIP.md`. Ote's reframe + his method rule for the whole pass:
+   ⭐⭐ **TWO DIMENSIONS, HELD APART — and the second is ⛔ NOT EVIDENCE FOR THE FIRST:**
+      RELATIONSHIP  incoming observation → incumbent observation
+      CONSEQUENCE   incumbent → new role / row state
+   ⚠️ THIS IS EXPENSIVE AND THAT IS THE POINT: **most of what the arc measured is CONSEQUENCE-side**
+   (`invalid_at` · `supersedes_id` · reversibility · `slot_id` · row state · the audit verbs). ⛔ Under the
+   rule NONE of them may testify about what held BETWEEN the two.
+   ⭐ `supersedes_id` keeps exactly ONE relationship-side function: it records **WHICH PAIR**. ⛔ PAIRING IS
+   NOT A RELATION — it is a precondition of one.
+   ⭐⭐⭐ **THE ANSWER: INHERENTLY MULTIPLE — because THE RELATA DIFFER**, ⛔ NOT because the cases varied
+   (variety alone is consistent with one relation carrying attributes):
+      #1 #2 #5  observation × observation          (same proposition, differently informative)
+      #7 Mira   world-at-t₁ × world-at-t₂          (the records are only witnesses)
+      #6 repair incumbent × ITS OWN SOURCE TURN    ⭐ the incoming is barely a relatum
+      #4 family sub-proposition × sub-proposition  ⛔ a level that does not exist
+      #3        ⚠️ UNDETERMINED · #8 #9 ⛔ NO PAIR AT ALL
+   ⛔ **A relation's attributes cannot vary its own domain.** ⇒ interpretation 1 is EXCLUDED **as a
+   RELATIONSHIP model** (⚠️ it may still fit the CONSEQUENCE dimension — that is ④'s, and OPEN).
+   ⛔ AND IT DOES NOT SELECT AMONG 2, 3, 4 — all three are compatible with multiplicity; they differ only in
+   WHERE the multiplicity is placed (② in the events · ③ pushed out into separate propositional acts ·
+   ④ entirely into the observations, with no transition at all).
+   ⭐⭐ **THREE OUTCOMES MUST STAY DISTINGUISHABLE — ⛔ today all three produce ONE row state:**
+      ✅ a relation holds · ⛔ NO relation exists (#8 #9) · ⚠️ the record CANNOT ESTABLISH one (#3)
+   ⛔ Collapsing "no relation" into "cannot establish a relation" repeats, ONE LAYER DOWN, exactly the loss
+   ③ ruled against ("not declared" ≠ "incorrectly inferred").
+   ⭐⭐⭐ **WHAT IS COMMON IS ⛔ NOT A RELATIONSHIP — IT IS AN OCCASION:** *a pair of durable observations was
+   brought into contact by the system, and the system was required to act BEFORE the relationship between
+   them had been established.* ⭐ True of all nine INCLUDING the two where no relationship existed — which is
+   precisely why it is the common thing and the relation is not.
+   ⚠️ CONSEQUENCE-SIDE, RECORDED SEPARATELY SO IT IS NOT READ INTO THE ANSWER: in **8 of 9** something true
+   at the seam was not preserved, and ⭐ **what was not preserved differs every time**. The exception is #6 —
+   ⭐ the one the competition machinery did not perform.
+   ⛔ NO NAMES · NO VOCABULARY · NO SCHEMA · NO TAXONOMY · NO COUNT OF KINDS (⑥ left that open).
+   ⛔ The two never-fired mechanisms were used ONLY as latent machinery constraining interpretation, ⛔ never
+   as production evidence — and both point the same way: ⭐ *"removed for being REDUNDANT, not for being
+   WRONG"* is the design ALREADY refusing to treat two relations as one.
 ```
 
 ---
@@ -845,12 +904,21 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
 
 ```
 ⭐⭐⭐⭐ THE CRITICAL PATH IS **① → ⑧**. Everything else below is genuinely parked.
-   ① ⏸ *"When the competition machinery causes one observation to cease being the current holder, WHAT
-        SEMANTIC OCCURRENCE, **IF ANY**, has actually happened?"* ⭐ "IF ANY" IS LOAD-BEARING — for the two
-        mis-routings the answer is NONE. ⛔ 6 interpretations on the table (4 in the ADR + ⑤ "not a natural
-        kind" + ⑥ "the locus is the ARENA"). ⛔ NONE SELECTED.
+   ① ⏸ ⭐ ANSWER DELIVERED 2026-09-17, ⛔ AWAITING OTE'S RATIFICATION —
+        `DECISION_SOTERA_01_INCUMBENT_RELATIONSHIP.md`. Ote's reframe: *"when two durable observations
+        interact and the incumbent ceases to be the current holder, what semantic RELATIONSHIP, IF ANY,
+        must be established between them?"* ⛔ RELATIONSHIP and CONSEQUENCE held strictly apart, and
+        ⛔ the consequence is NOT admitted as evidence for the relationship.
+        ⇒ ⭐ **INHERENTLY MULTIPLE — because THE RELATA DIFFER**, ⛔ not because the cases varied.
+        ⭐ "IF ANY" IS LOAD-BEARING TWICE: #8/#9 = ⛔ NO relation exists · #3 = ⚠️ the record CANNOT
+        ESTABLISH one — ⛔ and those are NOT the same outcome.
+        ⭐ Common across them is ⛔ NOT a relationship but an OCCASION (a pair brought into contact, the
+        system required to act BEFORE the relationship was established).
+        ⇒ EXCLUDES interpretation 1 as a RELATIONSHIP model · ⛔ does NOT select among 2, 3, 4.
    ⑧ ⏸ NAMED, NOT OPENED — what may `resolveConflict` do, when **BOTH** its branches rest on inferences
-        ruling ⑤ forbids? ⚠️ BLOCKED ON ①.
+        ruling ⑤ forbids? ⚠️ BLOCKED ON ①. ⭐ ①'s answer NARROWS it, ⛔ does not open it: the relations have
+        DIFFERENT RELATA and `resolveConflict` holds only `value`, a relatum in NONE of them ⇒ the question
+        becomes *"what may a component do when it cannot establish the relation, and is not positioned to?"*
    ⑨ ⏸ NAMED, NOT OPENED — may an arena be SYNTHESISED for a family with no established slot semantics?
         ⚠️ ⑦ and ② both bear on it; ⛔ NEITHER ANSWERS IT.
    ⏸ ALSO STILL OPEN: ④'s POSITIVE definition (deliberately) · ⑥'s TAXONOMY (deliberately).

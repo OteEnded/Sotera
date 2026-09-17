@@ -11228,3 +11228,42 @@ read-only, and the database is byte-for-byte as Ote left it.
 Read `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` first — it carries the rulings, the per-decision state, and
 §"What the rulings expose". Then `AI_CarryOn` §0-A ⓪ for the board, and §0-B ⑱–㊻ for the rules this arc
 earned. The next move is Ote's ruling on **①**.
+
+---
+
+## 2026-09-17 · ① ANSWERED — ⛔ delivered, ⛔ not ruled
+
+Ote reopened ① as a **focused decision pass**, not another investigation, and supplied the reframe and the
+method rule that made it answerable:
+
+> *"When two durable observations interact and the incumbent ceases to be the current holder, what semantic
+> relationship, **if any**, must be established between them?"*
+
+⭐⭐ **Two dimensions held strictly apart — RELATIONSHIP (incoming→incumbent) vs CONSEQUENCE
+(incumbent→role/row state) — and ⛔ the second not admitted as evidence for the first.** That exclusion is
+expensive: `invalid_at`, `supersedes_id`, reversibility, `slot_id`, row state and the audit verbs are all
+consequence-side, so ⛔ none of them may testify about what held *between* the two.
+
+**The answer:** ⭐ **there is no single general relationship; the kinds are inherently multiple — because the
+relata differ**, ⛔ not because the cases varied. observation×observation · world-state×world-state ·
+record×its-own-source · sub-proposition×sub-proposition · ⛔ and in #8/#9 **no pair at all**. A relation's
+attributes cannot vary its own domain.
+
+⭐ **Three outcomes must stay distinguishable, and today all three produce one row state:** a relation holds ·
+⛔ no relation exists (#8 #9) · ⚠️ the record cannot establish one (#3).
+⭐ **What is common is not a relationship but an occasion.**
+
+⇒ **excludes interpretation 1 as a relationship model** (⚠️ it may still fit the consequence dimension, which
+is ④'s and open) · ⛔ **does not select among 2, 3 and 4** · ⛔ no names, no schema, no taxonomy, no count.
+
+**Doc:** `DECISION_SOTERA_01_INCUMBENT_RELATIONSHIP.md`. ADR ① updated · `AI_CarryOn` §0-A board, §0-B ㊼ and
+§0-E updated. ⑧ **narrowed, not opened** — `resolveConflict` holds only `value`, a relatum in none of them.
+
+```
+①  ⏸ ANSWER DELIVERED, ⛔ NOT RULED   ②  ✅ RULED   ③  ✅ RULED BROAD   ④  ✅ NEGATIVE ONLY
+⑤  ✅ RULED   ⑥  ✅ PARTIAL   ⑦  ✅ RULED   ⑧ ⑨  ⏸ NAMED, NOT OPENED
+```
+
+**Verification:** unit **753/753** · evidence baseline green including the canary guard · canary 18 rows /
+0 slots / 0 aliases · both armed collisions intact · 4 attribution candidates still unreviewed ·
+⛔ **no code written, no instrument added, nothing written to the database.**
