@@ -11526,3 +11526,39 @@ observation is not thereby "the past".
 
 **Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
 armed collisions intact · ⛔ **one read-only instrument added; nothing written to the database.**
+
+---
+
+## 2026-09-17 · ⚠️ LIVE ISSUE PARKED — chat "(no response)" · ⛔ nothing changed
+
+Ote: *"every chat say no respond now"*. **Diagnosed, documented, and deliberately parked so the decision
+arc could continue.** ⛔ No config edit · no restart · no Ollama touched · no code modified · no DB write.
+
+**The server and model are healthy** — :8210 200, ollama up, `qwen3.6:35b` 25.7 GB in VRAM, direct
+generation normal in 2.7 s, and his own 07:17 / 07:19 replies succeeded on the same connection.
+
+**The system recorded its own cause.** Both empty turns carry `empty_turn_cause = client_disconnect` — a
+real client socket close (`reply.raw.on('close')`), not a server timeout — and the request log shows his
+browser switching between the two conversations in that exact window.
+
+⚠️ **And the UI could not tell him.** 043 correctly rules a disconnect carries `error = NULL`, but the chat
+UI has no branch for `empty_turn_cause`, so it shows *"(no response — the model returned nothing)"* — false.
+
+⭐⭐⭐ **Root cause: a ~20 s time-to-first-token.** ttft 17.4–22.8 s on the last 8 successful replies, of which
+16–20 s is prompt evaluation of 29 k–34 k tokens. Twenty seconds of blank screen → it looks dead → he
+clicks away → the click kills it. A self-sustaining loop.
+
+⭐⭐⭐ **And Ollama's cache is NOT the problem — measured:** same 12 023-token prompt, cold **3.71 s**,
+identical repeat **0.07 s**, different tail sharing the prefix **0.34 s**. ⇒ Sotera pays 18 s for what
+Ollama would give in 0.3 s ⇒ **the prefix is rebuilt every turn.** Proof: promptTokens go **down**
+(33873 → 32701) between consecutive turns although history only grows.
+
+⛔ **The precise reason the prefix changes is NOT identified.** Top candidate: aux-model interference — and
+the codebase already names that exact hazard (`memory-distill-host.js`: *"GPU-placed aux model evicts the
+chat model (~29s reload on the user's next turn)"*, which is why the distiller runs `numGpu: 0`). Whether
+the recall/extract path still does it is unchecked.
+⛔ **Not** the Context Composer (explicitly cache-aware) and **not** `numCtx` (stable per model).
+
+**Doc:** `ISSUE_SOTERA_CHAT_EMPTY_TURNS_TTFT.md` · **CarryOn §0-C** carries the summary.
+**Immediate, zero-risk:** send and don't touch the page for ~25 s; the `tools` header toggle drops 49 tool
+definitions from the prompt.

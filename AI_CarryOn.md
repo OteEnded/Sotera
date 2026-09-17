@@ -1089,6 +1089,32 @@ OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · r
   ⭐ It carries TWO boundaries at once: `membership ≠ proposition` AND `value ≠ proposition`.
   ⚠️ UNARMED for the reconcile path · ⚠️ ALREADY LIVE for forget/revive (P15's phrase fallback needs no slot).
 
+⚠️⚠️ **OPEN LIVE ISSUE (2026-09-17) — `ISSUE_SOTERA_CHAT_EMPTY_TURNS_TTFT.md`. ⛔ NOTHING CHANGED.**
+   Ote: *"every chat say no respond now"*. ⭐ **THE SERVER AND MODEL ARE HEALTHY** — :8210 200, ollama up,
+   `qwen3.6:35b` 25.7GB in VRAM, direct generation fine in 2.7s, and his own 07:17/07:19 replies succeeded.
+   ⭐⭐ THE SYSTEM RECORDED ITS OWN CAUSE (043): both empty turns carry `empty_turn_cause=client_disconnect`
+      — `reply.raw.on('close')`, a REAL client socket close, ⛔ not a server timeout. The request log shows
+      his browser switching between the two conversations in exactly that window.
+   ⚠️ AND THE UI COULD NOT SAY SO — 043 rules a disconnect carries `error=NULL` (correct), but the chat UI
+      has ⛔ NO BRANCH for `empty_turn_cause` ⇒ it shows *"(no response — the model returned nothing)"*,
+      which is FALSE. ⭐ The system diagnosed itself and had no way to tell him.
+   ⭐⭐⭐ **THE ROOT CAUSE IS A ~20s TIME-TO-FIRST-TOKEN**: last 8 successful replies ttft 17.4–22.8s, of
+      which promptEval is 16–20s on 29k–34k prompt tokens. ⇒ 20s of blank screen ⇒ he clicks away ⇒ the
+      click kills it. A SELF-SUSTAINING LOOP.
+   ⭐⭐⭐ **AND OLLAMA'S CACHE IS NOT THE PROBLEM — MEASURED**: same 12 023-token prompt → cold 3.71s ·
+      identical repeat **0.07s** · different tail sharing the prefix **0.34s**. ⇒ Sotera pays 18s for what
+      Ollama would give in 0.3s ⇒ **THE PREFIX IS REBUILT EVERY TURN.**
+      ⭐ PROOF: promptTokens go **DOWN** between consecutive turns (33873 → 32701) although history only
+      grows. A shrinking prompt = a changed prefix = a TOTAL cache miss.
+   ⛔ THE PRECISE CAUSE IS **NOT** IDENTIFIED. ⭐ Top candidate: AUX-MODEL INTERFERENCE — and the codebase
+      ALREADY NAMES THIS HAZARD (`memory-distill-host.js`: *"GPU-placed aux model evicts the chat model
+      (~29s reload on the user's next turn)"*, which is why the distiller runs `numGpu: 0`). ⚠️ Whether
+      the recall/extract path still does it is UNCHECKED.
+   ⛔ NOT THE CAUSE: the Context Composer (explicitly cache-aware, appends per-turn content AFTER history)
+      · `numCtx` (stable per model) · the model (healthy).
+   ⏸ IMMEDIATE, ZERO-RISK: send and DON'T TOUCH THE PAGE for ~25s · the `tools` header toggle drops 49
+     tool definitions from the prompt.
+
 ⭐ THE DECISION-ARC INSTRUMENTS — all READ-ONLY, all green, ⛔ none writes:
   slot-behaviour-census · replacement-semantics-census · replacement-relation-census · m2-047-scope-check
   routing-act-scope-check · slot-authority-map · membership-semantics-census · membership-consequence-census
