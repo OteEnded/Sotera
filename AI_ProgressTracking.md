@@ -10293,3 +10293,63 @@ field I got wrong is the same field the production rule gets wrong, which is how
 **Verification:** consequence census green · membership census green · slot-authority map green · routing
 check green · 047 scope green · relation census green · unit **753/753** · evidence baseline green · both
 collisions armed · `sotera | lesson` still unarmed. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · COMPETITION MEMBERSHIP — 14 predicates, and only one tests what a memory says
+
+Ote: *"Trace `resolveConflict` and the construction of `matches` and establish the exact predicates that
+make two memories compete."* ⛔ Read-only. The `sotera | lesson` collision stays unarmed — and is now
+permanently guarded.
+
+**Wording adopted, per his ruling:** never *"Slot membership is semantic."* Instead — **"Slot membership is
+classified as placement/index state, but it currently controls replacement competition."** D1's
+classification is internally consistent; the tension is that placement state controls a semantic
+consequence. `SEMANTIC_FIELDS` was **not** modified, because *semantic consequence* and *semantic object*
+are not logically identical — and that is precisely the open question.
+
+**Instrument** → `test/checks/competition-membership-census.mjs`.
+
+### The chain: 14 predicates, one of which tests content
+
+P2 live-only (current-state exclusivity) · P7 `slot_id` (storage grouping, by D1's classification) ·
+P8 `entity|attribute == label` (**label** equivalence, not proposition) · P9 alias phrase (learned, A3-governed)
+· P11 `resolution.slotId` (identity claim by similarity — selects the arena) · **P12 `matches[0]`, newest-first
+— recency, not semantics** · P13 `norm(primary.value) === norm(value)` — **proposition equivalence, and it
+runs exactly once** · **P14 `matches.slice(1)` → extras — no predicate at all: membership alone.**
+
+**`content` never appears.** What a memory actually says plays no part in whether it is replaced.
+
+### P14, demonstrated purely (plans computed and discarded)
+
+```
+matches = [X, Y, Z]   incoming "X"  → duplicate · collapse=[Y, Z]   ⚠️ invalidated uncompared
+matches = [W, X]      incoming "X"  → UPDATE superseding W          ⚠️ the matching row loses, for not being newest
+```
+
+⇒ **competition membership alone is sufficient for invalidation.** The source calls the extras *"duplicates
+that slipped in"* — so they are **assumed** duplicates by construction, and membership is what makes a row an
+extra. Membership does not establish duplication.
+
+**Live exposure:** 19 of 118 candidates carry an empty `value` with populated `content`, so P13 compares
+`''` against `''` for them.
+
+### The three layers, now evidence-backed
+
+QUESTION (047 — declared on 1 of 112 slots) · PROPOSITION (`content`, never read by the rule) ·
+COMPETITION MEMBERSHIP (P7–P11, and it is what acts). Demonstrated: *same membership ≠ same proposition*
+and *same proposition ≠ same retrieval object*.
+
+⇒ **A-D4 reframed:** not *"what labels are similar enough?"* but **"what justifies competition
+membership?"** — recorded as blocker ② in its place.
+
+### The canary is now permanent
+
+Added to `evidence-baseline-check.mjs` §8, failing in **both** directions: if the 18 rows are **destroyed**
+(deleted, or their distinctness lost), and if the key becomes **armed** (a slot or alias appearing under
+`sotera | lesson`). Nothing was armed, created, moved, declared or repaired to build it.
+
+**Verification:** competition census green · evidence baseline green **including the new canary guard** ·
+consequence census green · membership census green · slot-authority map green · routing green · 047 scope
+green · relation census green · unit **753/753** · both original collisions armed · canary unarmed.
+⛔ Nothing was written.

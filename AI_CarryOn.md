@@ -297,6 +297,31 @@ decision. ⛔ Not reopened.
    ⛔ COLLISION LEFT UNARMED + UNTESTED · ⛔ NO AUDIT ROW ADDED — *"first we need to know what semantic
    event we would be recording."*
    → `INVESTIGATION_SOTERA_MEMBERSHIP_CONSEQUENCES.md` · `test/checks/membership-consequence-census.mjs`
+㉖ ⭐⭐⭐ THE WORDING, RULED BY OTE 2026-09-17 — ⛔ NEVER SAY "Slot membership is semantic." SAY:
+   **"Slot membership is classified as PLACEMENT/INDEX STATE, but it currently CONTROLS REPLACEMENT
+   COMPETITION."** ⭐ D1's classification is INTERNALLY CONSISTENT; the tension is that placement state
+   controls a semantic consequence. ⛔ DO NOT MODIFY `SEMANTIC_FIELDS` — *"semantic consequence"* and
+   *"semantic object"* are ⛔ NOT logically identical, and that is the open question.
+㉗ ⭐⭐⭐ WHAT MAKES TWO MEMORIES COMPETE — 14 predicates, and ⭐ ONLY ONE TESTS WHAT A MEMORY SAYS.
+     P2  LIVE only                      CURRENT-STATE EXCLUSIVITY
+     P7  `row.slot_id`                  ⚠️ STORAGE GROUPING (D1 calls it placement)
+     P8  entity|attribute == label      ⛔ LABEL equivalence, ⛔ NOT proposition
+     P9  entity|alias.phrase            LEARNED equivalence (A3-governed)
+     P11 `resolution.slotId`            IDENTITY CLAIM BY SIMILARITY — selects the ARENA
+     P12 `matches[0]` newest-first      ⚠️⚠️ RECENCY, ⛔ NOT SEMANTICS — decides WHO gets tested
+     P13 `norm(primary.value)===norm(v)` ⭐ PROPOSITION EQUIVALENCE — ⛔ RUNS EXACTLY ONCE
+     P14 `matches.slice(1)` → extras    ⛔⛔ NONE — **MEMBERSHIP ALONE** ⇒ COLLAPSED UNCONDITIONALLY
+   ⛔ `content` NEVER APPEARS ⇒ ⭐ WHAT A MEMORY SAYS PLAYS NO PART IN WHETHER IT IS REPLACED.
+   ⭐⭐ PROVEN PURELY (plans computed + DISCARDED): matches=[X,Y,Z], incoming "X" ⇒ duplicate, collapse
+   [Y,Z] — ⚠️ TWO DISTINCT PROPOSITIONS INVALIDATED UNCOMPARED. And matches=[W,X] incoming "X" ⇒ UPDATE
+   superseding W ⇒ ⚠️ THE ROW WHOSE VALUE MATCHES IS SUPERSEDED BECAUSE IT IS NOT NEWEST.
+   ⚠️ 19 of 118 live candidates have EMPTY `value` with populated `content` ⇒ compared as '' vs ''.
+   ⭐⭐⭐ THE THREE LAYERS, NOW EVIDENCE-BACKED — QUESTION (047, 1 of 112) · PROPOSITION (`content`,
+   unread) · COMPETITION MEMBERSHIP (P7–P11, and it is what ACTS). ⇒ **A-D4 IS NOT "what labels are
+   similar enough?" IT IS: WHAT JUSTIFIES COMPETITION MEMBERSHIP?**
+   ⭐ THE CANARY IS NOW PERMANENTLY GUARDED — `evidence-baseline-check.mjs` §8 fails BOTH ways: if the
+   18 rows are DESTROYED, and if the key becomes ARMED (a slot or alias under `sotera | lesson`).
+   → `INVESTIGATION_SOTERA_COMPETITION_MEMBERSHIP.md` · `test/checks/competition-membership-census.mjs`
 ```
 
 ---
@@ -406,7 +431,7 @@ SLOT/OBS ⭐⭐⭐ THE GATE BEFORE THE GATE (Ote, 2026-09-17): *"Before A-D4, le
            TRUNCATION; the full value inverted it.
        → `CONTEXT_SOTERA_SLOT_VS_OBSERVATION_BOUNDARY.md` · `INVESTIGATION_SOTERA_REPLACEMENT_SEMANTICS.md`
 A-D4   ⭐⭐⭐ Durable behaviour for `broader` / `narrower` / `sibling`. ⛔ OPEN · BLOCKED ON THREE THINGS
-       (Ote, 2026-09-17): ① REPLACEMENT SEMANTICS · ② MEMBERSHIP SEMANTICS · ③ the unresolved
+       (Ote, 2026-09-17): ① REPLACEMENT SEMANTICS · ② COMPETITION-MEMBERSHIP SEMANTICS · ③ the unresolved
        relationship between ROUTING and 047. ⛔ HELD BEHIND SLOT/OBS ABOVE.
        ⚠️ A1's measurement made it HARDER, not easier: `broader` is NOT always an error, so "broader → mint a
        new slot" would fragment `programming_language` into a FOURTH sibling of three that already exist.

@@ -142,5 +142,37 @@ console.log(`\nPOPULATION (reported, not frozen): ${pop.slots} slots · ${pop.al
 check('slot population has not SHRUNK below the baseline', Number(pop.slots) >= 112, `${pop.slots} (baseline 112) — growth is expected; a drop means deletion`)
 check('alias population has not SHRUNK below the baseline', Number(pop.aliases) >= 8, `${pop.aliases} (baseline 8)`)
 
+// ── 8 · ⭐⭐⭐ THE `sotera | lesson` CANARY — PRESERVED BY RULING (Ote, 2026-09-17) ────────────────────
+//
+// *"I also want the 18-lesson case preserved as a permanent canary. It is too valuable to lose."*
+//
+// ⭐ WHAT IT DEMONSTRATES, and why it must survive: 18 memories with 18 DISTINCT propositions share ONE
+// membership key (`sotera | lesson`), and every one of them keeps its text in `content` while leaving
+// `value` NULL. The conflict rule reads `value`. ⇒ if a slot were ever minted under that key they would
+// become ONE competition set in which all 18 read as the SAME ANSWER, and `resolveConflict` would keep one.
+//
+// ⛔⛔ IT IS DELIBERATELY UNARMED AND MUST STAY THAT WAY: ⛔ no alias, ⛔ no slot, ⛔ no row movement,
+// ⛔ no question declaration, ⛔ no repair, ⛔ no change to the lesson system.
+// ⇒ this guard fails in BOTH directions — if the evidence is destroyed, AND if it becomes armed.
+const canary = await q(`SELECT id::text, content, value FROM ${S}."txn_memories"
+  WHERE invalid_at IS NULL AND expired_at IS NULL AND slot_id IS NULL
+    AND lower(entity) = 'sotera' AND lower(attribute) = 'lesson'`)
+const canaryDistinct = new Set(canary.map((r) => String(r.content).trim().toLowerCase())).size
+const canarySlot = await one(`SELECT count(*) AS n FROM ${S}."mst_slots"
+  WHERE lower(entity) = 'sotera' AND lower(canonical_label) = 'lesson'`)
+const canaryAlias = await one(`SELECT count(*) AS n FROM ${S}."mst_slots" s WHERE lower(s.entity) = 'sotera'
+  AND EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(s.aliases,'[]'::jsonb)) a
+              WHERE lower(a->>'phrase') = 'lesson')`)
+console.log(`\nTHE sotera|lesson CANARY: ${canary.length} rows · ${canaryDistinct} distinct propositions · slot=${canarySlot.n} · alias=${canaryAlias.n}`)
+check('⭐⭐ CANARY INTACT — the 18 lesson rows are still live and still distinct propositions',
+  canary.length >= 18 && canaryDistinct === canary.length,
+  `${canary.length} rows · ${canaryDistinct} distinct (baseline 2026-09-17: 18 · 18)`)
+check('⭐⭐ CANARY SHAPE INTACT — their `value` is still empty, which is what the conflict rule would read',
+  canary.every((r) => r.value == null || !String(r.value).trim()),
+  `${canary.filter((r) => r.value == null || !String(r.value).trim()).length}/${canary.length} carry no value`)
+check('⛔⛔ CANARY STILL UNARMED — ⛔ no slot and no alias under `sotera | lesson`',
+  Number(canarySlot.n) === 0 && Number(canaryAlias.n) === 0,
+  `slots=${canarySlot.n} · aliases=${canaryAlias.n} — ⛔ arming this would put 18 propositions in one competition set`)
+
 await pg.end()
 done()
