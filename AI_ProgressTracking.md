@@ -12473,3 +12473,79 @@ and NO admission step. ⛔ A durable memory cannot appear in the evidence channe
 sufficient."* ⛔ I did not assume otherwise.
 
 **DOC:** `INVESTIGATION_SOTERA_RECALL_COGNITIVE_CONTEXT_SEMANTICS.md`
+
+
+---
+
+## 2026-09-17 · ✅ THE READ-SIDE ADMISSION PROJECTION — RULED, BUILT, VERIFIED
+
+**Ote's ruling:** a consumer MAY read an existing admission verdict as a factual record of what the system
+established during the admission act — and ⛔ reading it authorizes NO presentation decision.
+
+### ⭐ WHAT SHIPPED
+
+```
+NEW  Backend/app/components/memory-admission-read.js          PURE, four states, no interpretation
+NEW  test/checks/admission-read-projection-check.mjs          controls A-G + H, 25 checks
+MOD  Backend/app/components/memory-store-sequelize-host.js    admissionFactsFor(ids) — pairwise, directional
+MOD  Backend/app/components/memory-v2-host.js                 wires the projection
+MOD  @ote/memory cognition/memory-v2-service.js               admissionFacts port on recall() ONLY
+⛔ NO MIGRATION — the schema was already sufficient (048's pin + 053's ledger, both indexed).
+```
+
+### ⛔⛔ THE CONTRACT IMPLEMENTED
+
+```
+FOUR STATES, ⛔ never collapsed:  NO-RECORDED-VERDICT · ADMIT · ABSTAIN · DEFER
+  ⚠⛔ NO-RECORDED-VERDICT ≠ DEFER — DEFER means an evaluation HAPPENED and failed to establish the
+     warrant; an absent row means NO SUCH EVALUATION IS RECORDED.
+PAIRWISE · DIRECTIONAL · scoped · fails to empty (⇒ NO-RECORDED-VERDICT, ⛔ never DEFER)
+⛔ THE ABSENCE OF ANY compatible/conflict/contradiction/current HELPER **IS** THE CONTRACT
+```
+
+### ⭐ THE NARROWING, AND IT IS ASSERTED
+
+`recall()` carries it — the passive path's route reduces every hit to `.content`, so it rides the
+DEVELOPER half alone (control H1, on the route's real source). ⛔ `search()` does NOT carry it, because
+`search()` feeds `recall_memory` and reaches the model (control H2).
+
+### ⭐⭐ RED-PROOFS — the controls are not vacuous
+
+```
+absence → DEFER                 ⇒ control A goes RED    ✅
+a `verdictToCompatibility` helper ⇒ controls 0 + 0b RED ✅
+both restored, ALL 25 GREEN again
+```
+
+### ⚠️⭐ A CORRECTION TO THE RECORD — THE RED CHECKS ARE **FIVE**, NOT THREE
+
+`m2-rollback` and `m2-bind-eligibility` also fail. ⭐ **PROVED PRE-EXISTING**: with ALL FOUR changed files
+reverted — including the service in `Packages/Memory`, *verified* reverted, the trap from last time —
+both still fail identically. ⇒ ⛔ NOT my regressions.
+
+```
+m2-rollback         ⭐ the SAME admission topology as the known three ("an UPDATE with no claim kind is
+                      REFUSED" — on the DEFER path nothing is proposed, so nothing is refused).
+                    ⚠️ NON-IDEMPOTENT: each run leaves 4 live `zz_rb_*` rows in the build-tag canary.
+                      ⭐ My 3 runs' residue (12 rows) removed; canary back to 67 / 1 live / 35 pinned.
+m2-bind-eligibility ⛔ NOT admission. CORPUS DRIFT: the Mira slot `9ed7d99c user/youngest sister` hit
+                      2 writes and became bind-eligible. ⚠️ That is the PRESERVED evidence fixture.
+                    ⚠️ And the check COUNTS instead of NAMING — defect #25's shape, again.
+⛔ NEITHER FIXED — outside this mission, and Ote's rule is to keep separate items separate.
+```
+
+### ✅ VERIFICATION
+
+```
+unit 753/753 · @ote/memory 123/123 · admission-read-projection 25/25
+admission-controls · evidence-baseline · rp-d0 · e2e-isolation · enforcement · rp-t1 · rp-register
+· m2-047-scope   ALL GREEN
+ledger 0 rows · canary restored · ⛔ no service restarted · ⛔ no migration
+```
+
+### ⏸⛔ STOPPED AT THE ARCHITECTURAL BOUNDARY
+
+⛔ **NO model-facing representation was built.** *"Whether ADMIT/DEFER/ABSTAIN authorizes a particular
+presentation behavior"* is on Ote's own stop-condition list. ⏸ That is the next decision.
+
+**COMMITS:** Sotera `f090b04` + `2e8ef9b` · @ote/memory `c93cbe9` (⛔ local only, that repo has no remote)
