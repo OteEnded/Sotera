@@ -29,7 +29,8 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
 A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
 ⭐⭐⭐ DESIGN IS UNLOCKED (Ote, 2026-09-17) — the read-only fence was PER-PASS, ⛔ not permanent.
-✅ D-1…D-6 ALL DECIDED (Ote, 2026-09-17) · ⏸ THE CONTRACT IS SPECIFIED, AWAITING REVIEW
+✅ D-1…D-6 ALL DECIDED · ✅ THE CONTRACT RATIFIED AT THE SEMANTIC LEVEL (Ote, 2026-09-17)
+⛔⛔ THE IMPLEMENTATION-IMPACT REVIEW CAME BACK **NOT CLEAN** — 5 ITEMS NEED A POSITION (§0-B 58)
      ⛔⛔ IMPLEMENTATION IS **NOT AUTHORIZED** AND **NOT STARTED** — Ote: *"produce the design contract
      first, review it, then we'll explicitly authorize the implementation pass."*
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
@@ -1255,7 +1256,63 @@ decision. ⛔ Not reopened.
       a code change.
    ⛔ UNCHANGED: the matcher · retrieval · winner selection · `governsReplacement` · collapse (it simply
       never sees un-admitted rows) · every existing row · the canary stays unarmed.
-   ⏸ THREE THINGS LEFT OPEN FOR OTE: the §5 double-gate · the §6 legacy consequence · the §8 ledger volume.
+   ✅⭐ **ALL THREE RATIFIED (Ote, 2026-09-17):** the DOUBLE GATE — *ADMITTED → REPLACEMENT_REFUSED* is
+      coherent and ⛔ must NOT be read as evidence that admission was wrong · the LEGACY CONSEQUENCE —
+      accepted explicitly, ⛔ **forward-only, no invented historical declarations** · LEDGER VOLUME —
+      ⭐ MEASURE FIRST (candidate-set size · pairs per write · worst case · growth rate · repeats ·
+      storage), ⛔ invent no threshold.
+
+58 ⛔⛔⛔ **THE IMPLEMENTATION-IMPACT REVIEW — ⛔ NOT CLEAN. BUILD IS *NOT* AUTHORIZED.**
+   `REVIEW_SOTERA_ADMISSION_IMPLEMENTATION_IMPACT.md`. ⭐ The contract is SOUND; ⛔ it does not REACH three
+   paths that create exclusivity, and one path changes MORE than the contract implied.
+   ⭐ THE WRITE-PATH CENSUS (traced in source): `keep`/`remember_fact` ✅ reachable and ⭐ **THE ONLY PATH
+      THAT SUPPLIES `claimKind`** · extractor + followthrough ✅ reachable ⚠️ but declare NOTHING ·
+      reflection ✅ **safe — it writes EPISODIC notes, not facts** · episodic ✅ **NOT-IN-SCOPE BY
+      CONSTRUCTION — *"no supersede"* by design** · ingest ✅ **NO LIVE WRITER** (the 34 doc rows came
+      from a maintenance seed; `WRITER.ingest` appears only in a check) · forget ✅ CLEARS `invalid_at`.
+   ⛔⛔ **FINDING 4 — THE BIG ONE: THE EXTRACTOR STOPS SUPERSEDING.** Only the model's tools supply
+      `claimKind`, so EVERY extractor write DEFERs ⇒ **update-not-append effectively STOPS for the
+      HIGHEST-VOLUME fact writer on day one**, and ⛔ **THIS ONE DOES NOT HEAL FORWARD** (unlike the legacy
+      incumbent). ⇒ 3 options, ⛔ none chosen: ACCEPT (D-4 licenses it; ⚠️ her facts stop converging and
+      recall surfaces several answers where it surfaced one) · STAGE (enforce only where the incoming
+      declares; ⚠️ leaves the seam open where it fires most) · LET THE EXTRACTOR DECLARE (⛔ a separate
+      decision — M2-10 forbids INFERRING the question).
+   ⛔ **FINDING 1 — CONSOLIDATION creates exclusivity and the contract does not reach it.** `commitCard`
+      writes `supersedes_id` + invalidates the prior, ⛔ never touching `reconcileFact`, and it is
+      invisible to `governsReplacement` (cards carry NO `slot_id`). ⭐⭐ BUT ④ ALREADY GAVE W4 ITS OWN
+      WARRANT — *"its content was USED to compose a successor"* ⇒ TRUE BY THE ACT'S OWN CONSTRUCTION.
+      ⇒ ⭐⭐ **"SUPERSEDES" IS NOT "COMPETES"**: a card's successor is BUILT FROM its predecessor — a
+      version lineage, ⛔ not two independent observations contending. ⭐ PROPOSED (⛔ needs ratification):
+      tighten NOT-IN-SCOPE to *"admission applies where two INDEPENDENTLY-AUTHORED observations are made
+      mutually exclusive; ⛔ it does NOT apply where the successor is CONSTRUCTED FROM the incumbent."*
+      ⚠️ **LEFT UNFIXED, A LITERAL IMPLEMENTATION WOULD MAKE CARDS DEFER AND CARD EVOLUTION WOULD STOP.**
+   ⛔ **FINDING 2 — THE LESSON PATH BYPASSES THE STORE.** `lesson-host.revise()` is a RAW
+      `UPDATE … SET invalid_at, supersedes_id` ⇒ ⛔ admission cannot reach it — ⚠️⚠️ **AND NEITHER DOES D1
+      PHASE 3**, because `requireWriter` lives in `store.update` and this mutates TWO SEMANTIC_FIELDS
+      outside it. ⚠️ PRE-EXISTING and LATENT (0 rows); ⛔ the contract neither creates nor widens it.
+      ⭐ PROPOSED: lessons OUT OF SCOPE (D-4 licenses it) + record the D1 gap as a SEPARATE pre-existing
+      item, ⛔ not folded into this build.
+   ⛔ **FINDING 3 — `restore` (W6) BLOCKS ON A RAW ARENA THE CONTRACT NEVER WARRANTED** — `findLiveInSlot`
+      falls back to `{entity, attribute}` WITH NO SLOT (②'s P15). ⇒ ⚠️ `reconcileFact` would stop competing
+      on unwarranted arenas while `restore` keeps REFUSING on exactly such an arena — **the two seams would
+      disagree.** ⭐ PROPOSED: explicitly OUT OF SCOPE (it defends the one-live-row invariant rather than
+      asserting a relation) OR a later decision — ⛔ NOT SILENTLY EITHER WAY.
+   ⭐ **FAILURE SEMANTICS RESOLVE CLEANLY:** the VERDICT is PURE and in-process ⇒ ⛔ cannot fail on IO; the
+      LEDGER is an INSERT and can. ⭐⭐ **A LOST LEDGER ROW DOES NOT LOSE THE WARRANT** — the admitting
+      question is ALSO pinned on the row ⇒ the receipt is RECONSTRUCTIBLE ⇒ the ledger may fail to a LOUD
+      LOG without failing the write (the precedent the pin and `recordRefusal` already set).
+      ⛔ THE VERDICT MUST NEVER FAIL OPEN — unresolvable keys ⇒ **DEFER**, safe by construction.
+      ⚠️ PRE-EXISTING non-atomicity (`create` then `update(prior)`) is NAMED, ⛔ not worsened and ⛔ not
+      closed. ⭐ NO NEW RACE — commits ride the SERIAL lane; identity is deliberately OFF it and uses the
+      STANDING route with its own convergence.
+   ⚠️ INVARIANT DELTAS: ONE-LIVE-ROW-PER-SLOT is **weakened BY DESIGN** (D-5, ratified) · UPDATE-NOT-APPEND
+      is **suspended wherever admission DEFERs**. ✅ Everything else preserved, incl. A-D7, absent-stays-
+      absent, the axes, collapse-never-gated, and ⭐ an armed canary becomes HARMLESS.
+   ⚠️ TEST SURFACE: suites asserting a supersede on an UNDECLARED pair will legitimately change. ⭐ AND A
+      NEW POSITIVE CONTROL IS REQUIRED — *"a DEFER wrote both rows and invalidated neither"* — because a
+      100%-DEFER suite proves nothing (RP-D0's own lesson).
+   ⏸ **THE FIVE THINGS NEEDED BEFORE BUILD:** ① the extractor ② consolidation ③ `restore` ④ the lesson D1
+      gap ⑤ the DEFER positive control. ⭐ ② and ③ are CORRECTIONS TO THE CONTRACT, ⛔ not to the design.
 ```
 
 ---

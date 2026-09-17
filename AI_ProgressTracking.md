@@ -11803,3 +11803,67 @@ competition ⇒ **no collapse** — without touching a single row. It still must
 
 ⛔ **Nothing built.** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
 armed collisions intact · no code, schema or migration written.
+
+---
+
+## 2026-09-17 · contract RATIFIED · ⛔ implementation-impact review came back NOT CLEAN
+
+**Ote ratified all three open points:** the double gate (ADMITTED → REPLACEMENT_REFUSED is coherent, and a
+refusal is **not** evidence that admission was wrong) · the legacy-incumbent consequence, **forward-only,
+no invented historical declarations** · ledger volume, **measure first, invent no threshold**.
+
+**Doc:** `REVIEW_SOTERA_ADMISSION_IMPLEMENTATION_IMPACT.md`. ⛔ **Build not authorized.**
+
+> ## ⛔ **VERDICT: NOT CLEAN.** The contract is sound, but it does not reach three paths that create
+> ## exclusivity, and one path changes more than the contract implied. **Five items need a position.**
+
+**Safe by construction, confirmed in source:** reflection writes **episodic notes, not facts** · episodic
+**never supersedes** by design · **ingest has no live writer** (the 34 doc rows came from a maintenance
+seed) · forget **clears** `invalid_at`.
+
+### ⛔⛔ Finding 4 — the big one: the extractor stops superseding
+
+Only `keep`/`remember_fact` supply `claimKind`, so **every extractor write DEFERs** ⇒ update-not-append
+effectively stops for the **highest-volume fact writer** on day one — **and this one does not heal forward.**
+Three options, none chosen: accept · stage · let the extractor declare (a separate decision; M2-10 forbids
+inferring the question).
+
+### ⛔ Finding 1 — consolidation creates exclusivity and the contract misses it
+
+`commitCard` writes `supersedes_id` and invalidates the prior, never touching `reconcileFact`, and is
+invisible to `governsReplacement` (cards carry no `slot_id`). But ④ already gave W4 its own warrant —
+*"its content was used to compose a successor"* — **true by the act's own construction**.
+⇒ **"Supersedes" is not "competes."** Proposed: tighten NOT-IN-SCOPE to *"admission applies where two
+independently-authored observations are made mutually exclusive; it does not apply where the successor is
+constructed from the incumbent."* ⚠️ **Left unfixed, card evolution would stop.**
+
+### ⛔ Finding 2 — the lesson path bypasses the store
+
+`lesson-host.revise()` is raw SQL setting `invalid_at` and `supersedes_id`, so admission cannot reach it —
+**and neither does D1 Phase 3**, whose `requireWriter` lives in `store.update`. Pre-existing and latent
+(0 rows); the contract neither creates nor widens it. Proposed: lessons out of scope, D1 gap recorded
+separately.
+
+### ⛔ Finding 3 — `restore` blocks on a raw arena
+
+`findLiveInSlot` falls back to `{entity, attribute}` with no slot (②'s P15). ⇒ `reconcileFact` would stop
+competing on unwarranted arenas while `restore` keeps refusing on one. Proposed: explicitly out of scope, or
+a later decision — **not silently either way.**
+
+### ⭐ Failure semantics resolve cleanly
+
+The verdict is pure and in-process; the ledger can fail. **A lost ledger row does not lose the warrant** —
+the admitting question is also pinned on the row, so the receipt is reconstructible. The verdict must never
+fail open: unresolvable keys ⇒ DEFER. Pre-existing non-atomicity named, not worsened. No new race.
+
+⚠️ **Invariant deltas:** one-live-row-per-slot **weakened by design** (D-5) · update-not-append **suspended
+wherever admission DEFERs**. Everything else preserved, and an armed canary becomes harmless.
+
+⚠️ **Test surface:** suites asserting a supersede on an undeclared pair will legitimately change, and a **new
+positive control** is required — *"a DEFER wrote both rows and invalidated neither"* — because a 100%-DEFER
+suite proves nothing.
+
+**Five items before build:** the extractor · consolidation · `restore` · the lesson D1 gap · the DEFER
+positive control. Items 2 and 3 are **corrections to the contract**, not to the design.
+
+⛔ **Nothing built.** unit **753/753** · baseline green · canary 18 / 0 / 0 · 047 untouched.
