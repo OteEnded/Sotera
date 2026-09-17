@@ -573,6 +573,92 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       return txn_memories.findAll({ where: { id: ids }, raw: true })
     },
 
+    // ══ ⭐⭐⭐ 053 · THE ADMISSION PORTS (A-D4/A-D5, A — ACCEPT) ════════════════════════════════════════
+    //
+    // ⭐⭐ `admissionKeysFor` IS THE FIRST PRODUCTION READER `question_id_at_admission` HAS EVER HAD.
+    // 048 wrote the pin and nothing read it — the `declared-axis-needs-a-mandatory-seam` shape, for a year.
+    // It is the INCUMBENT'S OWN answer to *"which question was I admitted under?"*, and it is the second
+    // side of a two-sided warrant.
+    //
+    // ⛔⛔ IT RESOLVES THE ROW'S OWN PIN AND NOTHING ELSE. It does NOT follow memory → slot → question:
+    // 048 forbids that, because a later lookup lands on whatever the slot points at NOW, which is exactly
+    // the misreading the pin exists to prevent. ⭐ Resolving the pin's own uuid is safe for the opposite
+    // reason — M2-10 makes a question immutable and repoint-not-edit, so the row that id names never
+    // changes its key.
+    //
+    // ⭐ BY KEY, ⛔ NOT BY ID, and the difference is load-bearing: a repoint mints a NEW question row with a
+    // new id for the same key. Comparing ids would silently stop competition after any rebind; the KEY is
+    // the question's identity, the id is a version of its definition.
+    //
+    // ⓘ Absent pins cost NOTHING: with no pinned candidates this issues no query at all, which is today's
+    // entire corpus.
+    async admissionKeysFor(rows = []) {
+      const byPin = new Map()
+      const pins = [...new Set((rows || []).map((r) => r?.question_id_at_admission).filter(Boolean))]
+      if (!pins.length) return byPin // ⭐ every side NOT ESTABLISHED — the honest answer, and free
+      try {
+        const { schema: sch } = txn_memories.getTableName()
+        if (!sch) return byPin
+        const found = await txn_memories.sequelize.query(
+          `SELECT id::text AS id, question_key FROM "${sch}"."mst_slot_questions" WHERE id = ANY($1::uuid[])`,
+          { bind: [pins], type: 'SELECT' },
+        )
+        const keyById = new Map(found.map((q) => [q.id, q.question_key]))
+        for (const r of rows || []) {
+          const k = r?.question_id_at_admission ? keyById.get(String(r.question_id_at_admission)) : null
+          if (k) byPin.set(r.id, k)
+        }
+      } catch (e) {
+        // ⛔⛔ FAILS CLOSED, AND THIS IS THE ONE FAILURE MODE THAT MATTERS. An unresolvable pin must read as
+        // NOT ESTABLISHED ⇒ DEFER ⇒ no competition. ⭐ The safe state by construction: a lookup that broke
+        // must never be able to authorize a displacement.
+        const msg = `[memory] could not resolve an admitting question — every side reads NOT ESTABLISHED: ${e?.message}`
+        if (log?.warn) log.warn({ err: e?.message }, msg); else console.warn(msg)
+        return new Map()
+      }
+      return byPin
+    },
+
+    // ⭐ THE RECEIPT. Called AFTER the memory operation resolves (A-D7: a refused write teaches nothing),
+    // so a throw upstream records no verdict.
+    //
+    // ⚠️ IT MUST NOT FAIL THE WRITE, and the reason is specific rather than lenient: the admitting question
+    // is ALSO pinned on the row, so a lost ledger row LOSES NO WARRANT — the receipt is reconstructible.
+    // ⭐ Same precedent the pin itself sets: *"a pin is a RECORD, never a permission — failing to compute
+    // one must not fail a write."* ⛔ The VERDICT, by contrast, is pure and in-process and cannot fail here.
+    async recordAdmission(verdicts = [], { incomingId = null } = {}) {
+      const rows = (verdicts || []).filter((v) => v && v.outcome && v.outcome !== 'NOT-IN-SCOPE')
+      if (!rows.length) return 0
+      try {
+        const { schema: sch } = txn_memories.getTableName()
+        if (!sch) return 0
+        // ⭐ THE ACT AND OCCASION ARE THIS STORE'S OWN, ⛔ not a caller's argument — the same reason
+        // `slotGovernanceFor` states: what a model asks for cannot change which occasion it is judged in.
+        let n = 0
+        for (const v of rows) {
+          await txn_memories.sequelize.query(
+            `INSERT INTO "${sch}"."log_memory_admissions"
+               (incoming_id, incumbent_id, incoming_question_key, incumbent_question_key,
+                outcome, why, route, writer, act_kind, act_id, occasion, persona, user_id)
+             VALUES ($1, $2, $3, $4, $5, $6, 'q-route', $7, $8, $9, $10, $11, $12)`,
+            {
+              bind: [incomingId ?? null, v.incumbentId, v.incomingQuestionKey ?? null,
+                v.incumbentQuestionKey ?? null, v.outcome, v.why, WRITER ?? null,
+                ACT?.kind ?? null, ACT?.id ?? null, OCCASION ?? null, P, U],
+              type: 'INSERT',
+            },
+          )
+          n += 1
+        }
+        return n
+      } catch (e) {
+        const msg = `[memory] the admission ledger write failed — the WARRANT IS UNAFFECTED (the admitting `
+          + `question is pinned on the row); only the receipt is missing: ${e?.message}`
+        if (log?.warn) log.warn({ err: e?.message }, msg); else console.warn(msg)
+        return 0
+      }
+    },
+
     async findLiveInSlot({ slotId = null, entity = null, attribute = null } = {}) {
       // Prefer the slot's real identity; fall back to (entity, attribute) for rows written before the
       // Slot store existed. Rows, not a count: reviveSuperseded asks "is it empty?", restore must name

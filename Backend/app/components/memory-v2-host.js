@@ -11,6 +11,7 @@ import { logMemoryChange, snapshot } from '../audit/memory-log.js'
 import { makeEmbedder } from './memory-embed-host.js'
 import { rowsBySlotIndex } from '@ote/memory/cognition/memory-slot-resolver.js'
 import { buildSlotResolver } from './memory-resolver-host.js'
+import { admitCandidates } from './memory-admission-gate.js'
 
 // Until Personas are first-class (Milestone B) the chat site runs one default persona → null.
 // null persona + null user = the platform/root scope; a real user id scopes per-(persona, user).
@@ -92,8 +93,25 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
     ...(entry?.before ? { before: snapshot(entry.before) } : {}),
   })
 
+  // ══ ⭐⭐⭐ THE ADMISSION PORT (A-D4/A-D5 · A — ACCEPT) ══════════════════════════════════════════════
+  //
+  // ⭐ THE HOST HALF resolves the INCUMBENT'S OWN pin to a question key; the VERDICT is decided by the PURE
+  // gate. ⛔ The lookup is the only IO, and it fails CLOSED (`admissionKeysFor` returns an empty map), so a
+  // broken lookup reads as NOT ESTABLISHED ⇒ DEFER ⇒ nothing competes.
+  //
+  // ⛔⛔ THE VACUITY TRAP, GUARDED BY CONSTRUCTION AND VISIBLE AT THIS SEAM: `incomingQuestionKey` comes
+  // from `claimKind` — the caller's own declaration — and `incumbentKeyById` comes from the ROWS' pins.
+  // ⛔ NEITHER IS DERIVED FROM THE OTHER, and neither comes from the resolved slot. Deriving the incoming's
+  // side from the incumbent's would make the comparison trivially true and the gate would ALWAYS ADMIT.
+  const admitCompetition = async ({ candidates = [], claimKind = null } = {}) => admitCandidates({
+    candidates,
+    incomingQuestionKey: claimKind,                        // ⭐ the CLAIM's own declaration. ⛔ never a row.
+    incumbentKeyById: await store.admissionKeysFor(candidates), // ⭐ each ROW's own pin. ⛔ never the slot.
+  })
+
   return createMemoryV2Service({
     store, slotStore, auditLog,
     embed, persona, userId, sourceMessageId, log, self, slotResolver, actor,
+    admitCompetition,
   })
 }
