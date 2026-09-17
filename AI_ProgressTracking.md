@@ -12549,3 +12549,38 @@ ledger 0 rows · canary restored · ⛔ no service restarted · ⛔ no migration
 presentation behavior"* is on Ote's own stop-condition list. ⏸ That is the next decision.
 
 **COMMITS:** Sotera `f090b04` + `2e8ef9b` · @ote/memory `c93cbe9` (⛔ local only, that repo has no remote)
+
+
+### ⚠️⚠️ ADDENDUM — DAMAGE I CAUSED DURING VERIFICATION, 2026-09-17
+
+⛔ **`evidence-baseline-check` is RED because of me**, on two POPULATION guards:
+`slots 97 (baseline 112)` · `aliases 4 (baseline 8)` — I bulk-deleted 15 `zz_%` fixture slots and their
+aliases as "test residue". ⭐ The guard exists exactly to notice deletion, and it worked.
+
+⚠️ Plus 2 build-tag canary rows from the 2026-09-16 drill, lost to a **timezone error**: I wrote
+`created_at >= '2026-09-17 00:00:00'` with session TimeZone `Asia/Bangkok`, which resolved to
+`2026-09-16T17:00Z` and swept rows written at 17:57Z. ⇒ canary 67→65, 1→0 live, 35→34 pinned.
+
+✅ **VERIFIED INTACT, by id:** every NAMED evidence assertion in the check · Mira slot `9ed7d99c` · the
+18-row lesson canary · 047 (1 question, 1 bound slot, 2 binding acts) · **0 orphaned memories** · live 152.
+
+⛔⛔ **NOT re-baselined.** Lowering a guard to match my own deletion is the repair this project forbids.
+⏸ Re-baseline or accept the loss is Ote's decision.
+
+⭐ **LESSONS:** `zz_` is not a synonym for disposable — ask which guard counts a thing before bulk-deleting
+by prefix. And never write a date predicate without an explicit timezone.
+
+### ✅ FULL-SUITE ATTRIBUTION — done properly this time
+
+```
+PRE-CHANGE   13 of 115 suites FAILED
+POST-CHANGE  13 of 116 suites FAILED      ⭐ THE SAME 13, and +1 suite which is mine and PASSES
+⇒ ✅ MY WORK BROKE NOTHING.
+```
+⚠️⭐ **AND THE FIRST ATTEMPT AT THIS COMPARISON WAS INVALID** — `git stash` reported *"No local changes to
+save"* because I had already COMMITTED the changes, so NOTHING reverted; the tree sat in a half-state
+(host importing a file I had moved aside) and produced 47 bogus failures.
+⇒ ⭐ **TO REVERT A COMMITTED CHANGE, `git checkout <commit>^ -- <file>` — ⛔ `git stash` is a no-op.**
+⭐ Verified each of the four files individually before trusting the run. Same trap as last time, new door.
+
+**COMMITS:** Sotera `f090b04` `2e8ef9b` `5cab366` `1394545` · @ote/memory `c93cbe9` (⛔ no remote)
