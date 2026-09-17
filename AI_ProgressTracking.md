@@ -12674,3 +12674,70 @@ code regression from the read-projection implementation   → NONE ESTABLISHED
                                                              (13 of 115 pre ≡ 13 of 116 post, +1 mine, passing)
 database / test-corpus damage during cleanup              → CONFIRMED, and IRRECOVERABLE
 ```
+
+
+---
+
+## 2026-09-17 · ✅ MISSION CLOSED — **EVIDENCE-RECOVERY INCIDENT.** ⛔ Not extended into an investigation.
+
+Ote's ruling: *"No re-baseline. No heap archaeology. No synthetic recovery. Close the recovery loop."*
+
+### ✅ ACTIONS TAKEN TO CLOSE
+```
+✅ AUTOVACUUM RE-ENABLED on txn_memories · mst_slots · log_slot_aliases · log_memory_changes
+   (`RESET (autovacuum_enabled, toast.autovacuum_enabled)` → reloptions `(default)`, verified)
+✅ `_forensic/damaged-state-2026-09-17.dump` KEPT EXACTLY AS IS
+⛔ pageinspect NOT installed · ⛔ no heap recovery · ⛔ nothing synthesized
+⛔ baseline NOT re-baselined · ⛔ m2-rollback NOT re-run · ⛔ 047 canary NOT mutated
+⛔ persona.lock.json and test/results/self-history-queries.jsonl LEFT AS THEY ARE
+⛔ @ote/memory `c93cbe9` stays LOCAL-ONLY
+```
+
+### ⭐⭐⭐ THE THREE FACTS, RECORDED SEPARATELY — Ote's explicit requirement
+
+```
+① READ-PROJECTION IMPLEMENTATION
+   → NO REGRESSION ESTABLISHED
+     (13 of 115 suites failed pre-change ≡ 13 of 116 post-change; the +1 suite is mine and PASSES)
+
+② DATABASE / TEST-CORPUS CLEANUP
+   → DESTRUCTIVE MUTATION CONFIRMED
+   → EXACT RECOVERY IMPOSSIBLE
+   → NO SYNTHETIC RESTORATION PERFORMED
+
+③ ORGANIC CORPUS
+   → NO ORGANIC ROW AFFECTED BY THE CLEANUP PREDICATES
+   ⛔ established from THE ACTUAL DELETE STATEMENTS, ⛔ not merely from aggregate counts:
+     every deleted row matched `zz_%` in attribute/source/value, or a `zz_rb_*` act, or sat in the
+     047 canary slot. organic LIVE = 152, exactly the session-start census. 0 orphaned memories.
+     0 dangling supersedes pointers. The canary chain is one unbroken chain.
+```
+
+### ⛔ PERMANENTLY LOST — IDs recorded as evidence, ⛔ NEVER to be recreated
+```
+15 mst_slots  canonical_label LIKE 'zz_%'   — IDs UNIDENTIFIABLE, held NO memories
+ 4 alias JSONB entries that lived on them
+ 2 canary rows:
+     1d92d546-a8ce-4856-8799-3d187eedfdd1  CANARY-RESTORED-453270  live + PINNED
+     68ed2f39-9e99-4635-8e65-d26183b127d9  CANARY-ROLLBACK-453270  invalid
+⚠️ The ids are evidence of WHAT was lost; they are ⛔ NOT enough to reconstruct the records.
+```
+
+### ⛔ PRESERVED DISCREPANCIES — now part of the audit history, ⛔ not defects to tidy
+```
+evidence-baseline   slots 97 / 112  ·  aliases 4 / 8     RED, and correctly so
+047 canary          67 → 65 rows · 1 → 0 live · 35 → 34 pinned
+m2-rollback         last valid measurement: FAILED pre-change, FAILED post-change, identically.
+                    ⛔ No new run is worth damaging the canary for.
+```
+
+### ✅ STANDING AFTER CLOSURE
+```
+read-admission projection  STANDS — admission-read-projection 25/25 · admission-controls green
+unit 753/753 · @ote/memory 123/123 · ledger 0 · no migration
+:8210 PID 15300 (accepted admission build, left running so organic admission can begin naturally)
+:8201 PID 13676 (OLS, untouched)
+```
+
+> ## ⭐⭐ **THE NEXT MISSION STARTS FROM THE HONEST STATE WE HAVE NOW** — ⛔ not from a pretence that the
+> ## missing evidence never existed.

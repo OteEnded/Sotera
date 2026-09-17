@@ -405,6 +405,24 @@ to `2026-09-16T17:00Z` and swept rows written at 17:57Z the previous evening. �
 ⭐⭐ **THE LESSON, and it generalises:** *`zz_` IS NOT A DISPOSAL CONTRACT.* The fixture slots were counted
 by a guard that exists precisely to notice deletion.
 
+## ⛔⛔ **TWO OPERATIONAL LESSONS, RULED BY OTE 2026-09-17 — ⛔ they change NO semantic model**
+
+```
+① FIXTURE-LOOKING DATA IS NOT DISPOSABLE MERELY BECAUSE ITS NAME MATCHES A TEST CONVENTION.
+  Destructive cleanup requires an EXPLICIT AFFECTED-ID INSPECTION and a PRESERVATION BOUNDARY.
+  ⛔ `zz_` is not a disposal contract.
+
+② NEVER PERFORM A DESTRUCTIVE DATE PREDICATE against a production/test EVIDENCE CORPUS without
+  explicitly RESOLVING THE DATABASE TIMEZONE and INSPECTING THE EXACT AFFECTED IDS first.
+  ⓘ Session TimeZone here is **Asia/Bangkok** ⇒ `created_at >= '2026-09-17 00:00:00'` means
+  **2026-09-16T17:00Z**, which is what swept two rows written the previous evening.
+```
+
+⭐⭐ **THE INCIDENT SHAPE, preserved as a PROCESS lesson rather than a database one:**
+```
+fixture naming → assumed disposable → bulk destructive cleanup → evidence guard catches population loss
+```
+
 ## ⛔⛔ **THE MANDATORY WORKFLOW FOR ANY DESTRUCTIVE DB OPERATION (Ote, 2026-09-17). NO EXCEPTIONS.**
 
 ```
@@ -442,12 +460,38 @@ Every recovery avenue was tried and each is closed:
                           NOT their alias-ledger rows, every run) — ⛔ they do not isolate my 15.
 ```
 
-> ## ⏸⭐⭐ **THERE IS ONE PERISHABLE WINDOW LEFT, AND IT IS OTE'S TO TAKE.** The deleted tuples are still
-> ## PHYSICALLY ON DISK as dead tuples. ⭐ I have **DISABLED AUTOVACUUM** on `txn_memories`, `mst_slots`,
-> ## `log_slot_aliases` and `log_memory_changes` to stop them being reclaimed.
-> ## ⇒ a **SUPERUSER** (`postgres`) could `CREATE EXTENSION pageinspect` and attempt raw heap recovery.
-> ## ⚠️ **AND AUTOVACUUM MUST BE RE-ENABLED AFTERWARDS** or those tables will bloat:
-> ## `ALTER TABLE … RESET (autovacuum_enabled, toast.autovacuum_enabled)`
+## ✅⛔ **RULED CLOSED BY OTE, 2026-09-17 — ⛔ NO HEAP ARCHAEOLOGY.**
+
+> Ote: *"I don't want us turning physical tuple remnants into reconstructed semantic records when we
+> don't possess the complete original row state."*
+
+```
+⛔ pageinspect NOT installed · ⛔ no raw heap recovery · ⛔ no synthetic slots/aliases/canary rows
+⛔ baseline NOT re-baselined  · ⛔ m2-rollback NOT re-run · ⛔ 047 canary NOT mutated
+✅ AUTOVACUUM RE-ENABLED on all four tables (RESET → `(default)`), verified.
+✅ `_forensic/damaged-state-2026-09-17.dump` KEPT EXACTLY AS IT IS.
+```
+
+> ## ⭐⭐ **THE LOSS IS IRRECOVERABLE AT THE APPLICATION-EVIDENCE LEVEL, AND THAT IS THE CORRECT
+> ## CONCLUSION.** ⛔ It is now part of the audit history, ⛔ not a defect to be tidied away.
+
+## ⭐⭐⭐ THE TWO LOST CANARY IDS — RECORDED PERMANENTLY, ⛔ **NEVER RECREATED**
+
+```
+1d92d546-a8ce-4856-8799-3d187eedfdd1   CANARY-RESTORED-453270   live + PINNED
+68ed2f39-9e99-4635-8e65-d26183b127d9   CANARY-ROLLBACK-453270   invalid
+```
+⚠️ **Their identifiers are EVIDENCE OF WHAT WAS LOST. They are ⛔ NOT sufficient information to
+reconstruct the records** — content, embedding, importance, confidence, entity, attribute,
+source_message_id and the pin are all unrecoverable. ⇒ recreating them would be FABRICATION.
+
+## ⛔ THE PRESERVED DISCREPANCY — ⛔ do not "fix" these numbers
+```
+evidence-baseline   slots 97 / 112   ·   aliases 4 / 8     ← RED, and correctly so
+047 canary          67 → 65 rows · 1 → 0 live · 35 → 34 pinned
+```
+⭐ Ote: *"The fact that the original slot count contained volatile fixture residue does not invalidate the
+guard. It correctly detected that something in the guarded population was deleted."*
 
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
