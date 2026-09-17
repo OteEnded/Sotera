@@ -10669,3 +10669,54 @@ so duplicate labels are never treated as automatically suspicious.
 vocabulary · no `invalid_at` reinterpretation · no Dreaming change · `SEMANTIC_FIELDS` untouched · canary
 untouched and guarded. **unit 753/753 · evidence baseline green · both armed collisions intact.**
 ⛔ Nothing was written to the database.
+
+---
+
+## 2026-09-17 · ✅ EVIDENCE PHASE CLOSED — and the seven decisions opened
+
+Ote: *"I think we should mark this investigation CLOSED as an evidence phase … We've earned the right to
+design now."* ⛔ Design, **not implementation**. All freezes held; nothing written to the database.
+
+**Doc** → `Reference/docs/ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md`
+
+### First, his second wording correction
+
+I had written that recovery *"means carrying forward what's already known"* — which **overclaims
+recoverability**. Corrected in the synthesis §3.1 and `AI_CarryOn` §0-B ㉝ to his phrasing:
+
+> **"The next design should carry forward the semantic information already established at the seam, rather
+> than requiring later components to reconstruct it from artifacts."**
+
+What is established: the information **exists at the seam and is discarded**, and surviving source material
+**often** makes reconstruction possible (9 of 9 turns reachable). What is **not** established: that every
+discarded runtime distinction is recoverable later.
+
+### The ADR
+
+Seven decisions in his dependency order, each as
+`question → evidence we have → constraints → interpretations → would require → unresolved choice`.
+⛔ No preferred answer, no scoring, no ranking, and no implementation proposal hidden inside an
+interpretation — "would require" is written as **a state of the world**, not a mechanism.
+
+① replacement semantics · ② competition membership · ③ routing ↔ 047 · ④ the positive meaning of
+`invalid_at` (⏸ **held open on purpose** — deciding it first would foreclose ① and ②) · ⑤ non-slot-shaped
+durable memory · ⑥ B-D1 / B-D3 · ⑦ A1 authority (⏸ **last by construction**, blocked on ①②③, not because it
+matters least).
+
+Each decision states plainly where the evidence **constrains but does not select** — ① rules out *"the
+proposition became false"* without choosing among four readings; ③'s source supports two readings equally
+and has **no behavioural precedent** to disambiguate; ⑤ shows durable memory is *not currently treated as one
+kind of thing* without saying whether it should be.
+
+### The six anchors are now evidence boundaries, not implementation opinions
+
+*"The old observation became non-current without becoming false"* (Mira) · membership ≠ proposition · value ≠
+proposition · `supersedes_id` **latent, not defective** · `expired_at` storage-vs-belief ambiguity ·
+`user_id` scope is semantically meaningful, so **a duplicate label is never automatically suspicious**.
+They are citable as evidence in any of the seven.
+
+### Tree frozen at the close
+
+unit **753/753** · evidence baseline green · canary intact (18 rows, 0 slots) · both original armed
+collisions intact · A1 shadow · A-D4 open · 047 untouched · `SEMANTIC_FIELDS` untouched · Dreaming frozen ·
+no historical repair · no relation vocabulary · no `invalid_at` reinterpretation.

@@ -434,11 +434,33 @@ decision. ⛔ Not reopened.
      ⑥ who is accountable?                     ⚠️ the ROW has a writer; membership + transition DO NOT
    ⇒ ⭐⭐⭐ **EVERY ONE IS ANSWERABLE AT THE MOMENT THE TRANSITION RUNS. NONE IS PRESERVED.**
    ⇒ ⭐ THE RECURRING FAILURE ACROSS THE WHOLE ARC IS ⛔ NOT IGNORANCE — **IT IS DISCARD.** The system
-   computes the semantics and persists only the artifact. ⇒ ⭐ A HOPEFUL SHAPE: recovering it means
-   CARRYING FORWARD WHAT IS ALREADY KNOWN AT THE SEAM, ⛔ not inferring anything new.
+   computes the semantics and persists only the artifact.
+   ⚠️ ⛔ AND DO NOT SAY "recovering it means carrying forward what is already known" (Ote corrected me
+   2026-09-17) — ⛔ THAT OVERCLAIMS RECOVERABILITY. Established: the information EXISTS AT THE SEAM AND IS
+   DISCARDED, and surviving source material OFTEN makes reconstruction possible (9/9 turns reachable).
+   ⛔ NOT established: that EVERY discarded runtime distinction is recoverable later. ✅ SAY INSTEAD:
+   **"The next design should CARRY FORWARD the semantic information already established at the seam,
+   rather than requiring later components to RECONSTRUCT it from artifacts."**
    ⛔ THE SYNTHESIS PROPOSES **NO** COLUMN, TABLE, FIELD, ENUM OR VOCABULARY — "what must be answerable" is
    stated as A QUESTION THAT MUST HAVE AN ANSWER AT THE SEAM, ⛔ not a place to store one.
    ⏸ 7 DECISIONS REMAIN GENUINELY OPEN (synthesis §4) + the FALSE-NEGATIVE direction still unmeasured.
+㉞ ✅⛔ **THE EVIDENCE PHASE IS CLOSED (Ote, 2026-09-17). THE NEXT PHASE IS SEMANTIC DECISIONS, ⛔ NOT CODE.**
+   → `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` — 7 decisions IN DEPENDENCY ORDER, each as
+   `question → evidence → constraints → interpretations → would require → unresolved choice`.
+   ⛔ NO PREFERRED ANSWER · ⛔ NO SCORING · ⛔ NO IMPLEMENTATION HIDDEN INSIDE AN INTERPRETATION.
+     ① REPLACEMENT SEMANTICS   what does each kind of transition MEAN?
+     ② COMPETITION MEMBERSHIP  what justifies putting two observations in one arena?
+     ③ ROUTING ↔ 047           does "never inferred" reach ROUTING, or only declaration/admission?
+     ④ `invalid_at` POSITIVE   ⏸ HELD OPEN ON PURPOSE — deciding it first would FORECLOSE ① and ②
+     ⑤ NON-SLOT-SHAPED MEMORY  what are the 53, architecturally?
+     ⑥ B-D1 (radius) / B-D3 (may `incomplete` claim `attestedBySource`?)
+     ⑦ A1 AUTHORITY            ⏸ LAST BY CONSTRUCTION — blocked on ①②③, ⛔ not because it matters least
+   ⭐ THE SIX ANCHORS ARE NOW **EVIDENCE BOUNDARIES, ⛔ NOT IMPLEMENTATION OPINIONS** — cite them in any
+   decision: ① Mira *"non-current without becoming false"* · ② membership ≠ proposition · ③ value ≠
+   proposition · ④ `supersedes_id` LATENT not defective · ⑤ `expired_at` storage-vs-belief · ⑥ `user_id`
+   scope IS semantically meaningful (⛔ a duplicate label is NEVER automatically suspicious).
+   ⛔ TREE FROZEN AT THE CLOSE: 753/753 · evidence baseline green · canary 18 rows / 0 slots · both armed
+   collisions intact · ⛔ nothing written to the database.
 ```
 
 ---
