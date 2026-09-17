@@ -461,6 +461,33 @@ decision. ⛔ Not reopened.
    scope IS semantically meaningful (⛔ a duplicate label is NEVER automatically suspicious).
    ⛔ TREE FROZEN AT THE CLOSE: 753/753 · evidence baseline green · canary 18 rows / 0 slots · both armed
    collisions intact · ⛔ nothing written to the database.
+㉟ ⭐⭐⭐ DECISION ① ANALYSIS (2026-09-17) — ⛔ ANALYSIS, NOT A SOLUTION. The nine, one level down.
+   ⭐⭐⭐ WHAT THE SEAM KNEW: **EVERY ONE OF THE NINE WAS `lexical 1.000`** — one arm, one confidence,
+   ⚠️ INCLUDING BOTH DEFECTS. ⇒ ⛔ THE NUMBER IS A TRUE STATEMENT ABOUT THE PHRASE AND A FALSE STATEMENT
+   ABOUT THE QUESTION. Confidence carries NO information about correctness here — ⇒ ⛔ no threshold could
+   have separated them, and that is now settled for this corpus.
+   ⭐⭐ THE DISCARDED DISTINCTION: THE **MATCHED PHRASE**. Both defects matched an ALIAS, ⛔ not the label
+   (`"schedule"` · `"volunteer_schedule_and_location"` → `work schedule`) — and it survives ONLY inside a
+   FREE-TEXT `reason`. ⚠️⛔ BUT IT IS **A SIGNAL, NOT A TEST**: two CORRECT transitions also matched an
+   alias (`"preference"` → `"communication preference"`).
+   ⚠️ 8 of 9 carry a supersede audit row. ⭐ THE EXCEPTION IS `current goal` — THE ONE WHOSE REASON *IS* IN
+   THE RECORD (`contradicted_at`, set by a HUMAN). ⇒ the audited path records everything EXCEPT the reason.
+   ⭐ ACROSS ALL NINE: `OBSERVATION +` and `ROLE ✎` — ⛔ `PROPOSITION ✎` IN ONLY TWO (#4 partly, #6 the
+   repudiation). ⇒ in SEVEN of nine, ⛔ NOTHING ABOUT WHAT IS TRUE CHANGED.
+   ⭐⭐⭐ THE ADR'S FOUR INTERPRETATIONS ARE **NOT EXHAUSTIVE**. Sorting by WHAT OCCURRED:
+     1 a replacement in any ordinary sense (Mira) · 1 a repudiation (current goal) · **4 re-statements where
+     NOTHING WAS REPLACED** · 1 a partial change inside a coordinated value · **2 ARTIFACTS OF A ROUTING
+     FAILURE** ⇒ ⭐ AT MOST **1 OF 9** IS A REPLACEMENT.
+   ⇒ TWO READINGS EXPOSED BY THE EVIDENCE, ⛔ ADDED TO THE MATRIX, ⛔ NOT RECOMMENDED:
+     ⑤ **"REPLACEMENT" IS NOT A NATURAL KIND** — the word is THE MECHANISM'S NAME FOR ITS OWN ACTION, ⛔ not
+       a description of what occurred. Asking *"what does a replacement mean?"* PRESUPPOSES THE CATEGORY.
+     ⑥ **THE LOCUS MAY BE THE ARENA, ⛔ NOT EITHER ROW** — in #8/#9 NEITHER ROW CHANGED; what changed is
+       WHICH ARENA the incoming was placed in. ⓘ Would also explain why `invalid_at` is reversible by an
+       event on a DIFFERENT row.
+   ⭐ THE GUARDRAIL HOLDS, and #7 sharpens it FROM THE OTHER SIDE: ⛔ **NO STATE CAN SAY "TRUE, BUT NO
+   LONGER CURRENT."** Not that `invalid_at` says too much — that NOTHING says the right thing.
+   ⏸ ⛔ AWAITING OTE'S READING. ⛔ ② NOT OPENED · ③–⑦ FROZEN · ⛔ no implementation between decisions.
+   → `ANALYSIS_SOTERA_NINE_TRANSITIONS_SEMANTIC.md` · `test/checks/nine-transition-semantic-analysis.mjs`
 ```
 
 ---

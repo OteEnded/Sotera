@@ -10720,3 +10720,61 @@ They are citable as evidence in any of the seven.
 unit **753/753** · evidence baseline green · canary intact (18 rows, 0 slots) · both original armed
 collisions intact · A1 shadow · A-D4 open · 047 untouched · `SEMANTIC_FIELDS` untouched · Dreaming frozen ·
 no historical repair · no relation vocabulary · no `invalid_at` reinterpretation.
+
+---
+
+## 2026-09-17 · DECISION ① — the nine transitions, one level down
+
+Ote: *"What is the thing that actually changes when a replacement occurs? … I want the semantic ontology of
+the transition first … whether the four interpretations in the ADR are actually exhaustive."* ⛔ Analysis,
+**not a solution**. Nothing changed; ②–⑦ frozen.
+
+**Doc** → `Reference/docs/ANALYSIS_SOTERA_NINE_TRANSITIONS_SEMANTIC.md`
+**Check** → `test/checks/nine-transition-semantic-analysis.mjs`
+
+### What the seam knew — new evidence from the audit `reason`
+
+**Every one of the nine was `lexical 1.000`.** One arm, one confidence, **including both defects.** ⇒ the
+number is a true statement about the **phrase** and a false statement about the **question**. Confidence
+carries no information about correctness here, which settles for this corpus that no threshold could have
+separated them.
+
+**The distinction that was present and discarded: the matched phrase.** Both defects matched an **alias**,
+not the label — `"schedule"` and `"volunteer_schedule_and_location"` → `work schedule` — and that fact
+survives only inside a free-text `reason` string. ⚠️ **But it is a signal, not a test:** two *correct*
+transitions also matched an alias (`"preference"` → `"communication preference"`).
+
+**8 of 9 carry a supersede audit row.** The exception is `current goal` — **the one transition whose reason
+*is* in the record** (`contradicted_at`, set by a human operator). The audited path records everything
+except the reason.
+
+### The nine, by dimension
+
+**`OBSERVATION +` and `ROLE ✎` in all nine.** **`PROPOSITION ✎` in only two** — #4 partly, inside a
+coordinated value, and #6 the repudiation. In seven of nine, **nothing about what is true changed.**
+
+### ⭐ The four ADR interpretations are NOT exhaustive
+
+Sorting by what actually occurred: **1** a replacement in any ordinary sense (Mira) · **1** a repudiation ·
+**4 re-statements where nothing was replaced** · **1** a partial change inside a coordinated value ·
+**2 artifacts of a routing failure**. ⇒ **at most 1 of 9 is a replacement.**
+
+All four interpretations presuppose that "replacement" is a category. Two readings the evidence exposes,
+added to the matrix and **not recommended**:
+
+**⑤ "Replacement" is not a natural kind** — the word is the *mechanism's name for its own action*, not a
+description of what occurred. Asking *"what does a replacement mean?"* presupposes the category.
+
+**⑥ The locus may be the arena, not either row** — in #8/#9 neither row changed; what changed is which arena
+the incoming was placed in. Would also explain why `invalid_at` is reversible by an event on a *different*
+row.
+
+### The guardrail holds — and #7 sharpens it from the other side
+
+*"The old observation became non-current without becoming false."* The instrument asserts the world-change
+transition altered **role** and not the proposition. And the discarded distinction there is that the
+incumbent **is still true** ⇒ **no state can say "true, but no longer current."** Not that `invalid_at` says
+too much — that nothing says the right thing.
+
+**Verification:** analysis green · evidence baseline green including the canary guard · unit **753/753** ·
+canary intact (18 rows, 0 slots) · both armed collisions intact. ⛔ Nothing was written.
