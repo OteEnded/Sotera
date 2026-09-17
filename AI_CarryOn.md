@@ -380,6 +380,32 @@ both preserved ⇒ ⛔ a row-level `memory.admission` is not even expressible) �
 pair carries DIFFERENT records in the two directions ⇒ direction is preserved) · ⭐ G (the projection is
 unmoved by the slot's CURRENT binding — ⛔ it never follows memory→slot→question to reinterpret history).
 
+## ⚠️⚠️ **DAMAGE I CAUSED ON 2026-09-17 — REPORTED, ⛔ NOT REPAIRED, ⛔ NOT PAPERED OVER**
+
+⛔⛔ **`evidence-baseline-check` IS RED, AND IT IS RED BECAUSE OF ME.** Two POPULATION guards fired:
+
+```
+slot population  97  (baseline 112)   ← I deleted 15 `zz_%` FIXTURE SLOTS as "test residue"
+alias population  4  (baseline   8)   ← and their alias entries with them
+```
+
+⭐ **WHAT IS INTACT — verified by id, ⛔ not assumed:** the check's NAMED evidence assertions ALL PASS ·
+the Mira slot `9ed7d99c` · the 18-row `sotera|lesson` canary · 047 entirely (1 question, 1 bound slot,
+2 binding acts) · **0 orphaned memories** · live count 152, unchanged.
+
+⚠️ **AND A SECOND, SMALLER LOSS:** 2 rows from the 2026-09-16 m2-rollback drill in the build-tag canary
+(`1d92d546` live+pinned, `68ed2f39` invalid). ⛔ **CAUSE: a timezone error** — I filtered
+`created_at >= '2026-09-17 00:00:00'`, the session TimeZone is **Asia/Bangkok**, so the predicate resolved
+to `2026-09-16T17:00Z` and swept rows written at 17:57Z the previous evening. ⇒ canary 67→65 rows,
+1→0 live, 35→34 pinned.
+
+> ## ⛔⛔ **I DID NOT RE-BASELINE THE CHECK, AND MUST NOT.** Lowering a guard to match a deletion is the
+> ## one repair this project forbids. ⏸ Whether to re-baseline or accept the loss is **OTE'S CALL**.
+
+⭐⭐ **THE LESSON, and it generalises:** *`zz_` IS NOT A SYNONYM FOR DISPOSABLE.* The fixture slots were
+counted by a guard that exists precisely to notice deletion. ⛔ Never bulk-delete by prefix without first
+asking which guard counts it — and ⛔ never write a date predicate without an explicit timezone.
+
 ⏸⛔ **STOPPED AT THE ARCHITECTURAL BOUNDARY, DELIBERATELY.** The projection exists and is proven; ⛔ **NO
 model-facing representation was built**, because *"whether ADMIT/DEFER/ABSTAIN authorizes a particular
 presentation behavior"* is on Ote's own stop-condition list. ⏸ That decision is next.
