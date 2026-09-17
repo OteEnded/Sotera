@@ -12584,3 +12584,93 @@ save"* because I had already COMMITTED the changes, so NOTHING reverted; the tre
 ⭐ Verified each of the four files individually before trusting the run. Same trap as last time, new door.
 
 **COMMITS:** Sotera `f090b04` `2e8ef9b` `5cab366` `1394545` · @ote/memory `c93cbe9` (⛔ no remote)
+
+
+---
+
+## 2026-09-17 · ⛔ RECOVERY ATTEMPT — **EXACT RECOVERY IMPOSSIBLE.** ⛔ Nothing fabricated.
+
+### ⭐ STEP 1 — the damaged state is PRESERVED first
+`_forensic/damaged-state-2026-09-17.dump` · 147 MB · `pg_dump -F c -n persona_sotera`, taken BEFORE any
+repair attempt. ⛔ The only copy was never overwritten.
+
+### ⛔ STEP 2 — every recovery avenue, tried and closed
+
+```
+⛔ PITR / WAL           archive_mode=off, no restore_command      ⇒ impossible
+⛔ prior pg_dump        none for persona_sotera (only OteLLMServices, 2026-08-09)
+⛔ VSS / restore points none configured
+⛔ audit `before` snap  log_memory_changes DOES store full row snapshots — ⚠️ but I deleted the two
+                        canary rows' audit entries in the SAME cleanup. 0 survive naming either id.
+⛔ FK references        txn_memories / log_memory_admissions / txn_memory_evidence /
+                        log_memory_warrants → 0 references to either lost id
+⛔ heap forensics       pageinspect AVAILABLE but NOT INSTALLED; ote_ai_toolbox is NOT superuser
+⛔ the 15 slot IDs      UNIDENTIFIABLE — the 12 orphaned log_slot_aliases rows are PRE-EXISTING
+                        teardown debt (retention-receipt / model-facing-write delete their slots but
+                        never their alias rows), ⛔ so they do not isolate my 15.
+```
+
+⏸⭐ **ONE PERISHABLE WINDOW REMAINS.** The deleted tuples are still on disk. I **DISABLED AUTOVACUUM** on
+`txn_memories`, `mst_slots`, `log_slot_aliases`, `log_memory_changes` to stop reclamation.
+⇒ a superuser could `CREATE EXTENSION pageinspect` and attempt raw heap recovery.
+⚠️ **AUTOVACUUM MUST BE RE-ENABLED AFTERWARDS** — `ALTER TABLE … RESET (autovacuum_enabled, toast.autovacuum_enabled)`.
+
+### ✅ STEP 3 — RECONCILIATION: was any ORGANIC row affected? **NO.**
+
+⛔ Not inferred from the total. Traced from my four actual delete statements and verified positively:
+
+```
+organic LIVE rows            152   ⭐ EXACTLY the session-start census baseline
+organic total                169   · canary 65 · total 234
+orphaned memories              0   ⭐ no memory lost its slot
+dangling supersedes pointers   0   ⭐ and the canary chain is ONE unbroken chain (64 of 65 carry a pointer)
+organic supersessions         11   ⭐ consistent with the A-D6 replay's organic writers
+zz_ residue                    0
+```
+⭐ Every deleted memory matched `zz_%` in attribute/source/value, or a `zz_rb_*` act, or sat in the 047
+canary slot. ⛔ No organic predicate could have matched. ⭐ One NEW organic row appeared today by itself:
+`9cfec013 cautious tendency` written by the **reflection cron** — legitimate organic growth, ⛔ not mine.
+
+### ✅ GUARDED EVIDENCE — ALL INTACT, verified by id
+
+```
+18-row sotera|lesson canary  18 ✅   Mira slot 9ed7d99c + its 2 rows ✅
+047: 1 question · 1 bound slot · 2 binding acts ✅      ledger 0 ✅
+every NAMED assertion in evidence-baseline PASSES ✅
+```
+
+### ⛔ WHAT IS PERMANENTLY LOST
+
+```
+15 mst_slots with canonical_label LIKE 'zz_%'   — IDs unknown, held NO memories
+ 4 alias JSONB entries that lived on them
+ 2 build-tag canary rows from the 2026-09-16 drill:
+     1d92d546-a8ce-4856-8799-3d187eedfdd1  CANARY-RESTORED-453270  live, PINNED
+     68ed2f39-9e99-4635-8e65-d26183b127d9  CANARY-ROLLBACK-453270  invalid
+   ⇒ canary 67→65 rows · 1→0 live · 35→34 pinned
+```
+
+### ⛔ BASELINE NOT RE-BASELINED — evidence-baseline stays RED on exactly two POPULATION guards
+`slots 97 (baseline 112)` · `aliases 4 (baseline 8)`. ⛔ I did not touch the baseline. ⏸ Ote's call.
+
+### ✅ THE FIVE RED CHECKS — status UNCHANGED by the damage
+```
+model-tool-claim-kind           9 failed   (same count as documented)
+declaration-self-authorisation  5 failed   (same)
+declaration-transport           4 failed   (same)
+m2-bind-eligibility             2 failed   (same — still the Mira-slot corpus drift)
+m2-rollback                     ⏸ DELIBERATELY NOT RE-RUN — it WRITES 4 rows into the 047 canary every
+                                run, and re-running it would mutate the very evidence Ote asked me to
+                                preserve. Last measured: fails pre-change AND post-change, identically.
+```
+
+### ✅ IMPLEMENTATION INTACT AFTER RECOVERY
+admission-read-projection 25/25 · admission-controls · unit 753/753 · @ote/memory 123/123
+:8210 PID 15300 (accepted admission build) · :8201 PID 13676 (OLS, untouched)
+
+### ⭐⭐ THE TWO FACTS, RECORDED SEPARATELY (Ote's §10)
+```
+code regression from the read-projection implementation   → NONE ESTABLISHED
+                                                             (13 of 115 pre ≡ 13 of 116 post, +1 mine, passing)
+database / test-corpus damage during cleanup              → CONFIRMED, and IRRECOVERABLE
+```
