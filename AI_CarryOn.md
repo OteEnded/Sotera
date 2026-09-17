@@ -402,9 +402,55 @@ to `2026-09-16T17:00Z` and swept rows written at 17:57Z the previous evening. �
 > ## ⛔⛔ **I DID NOT RE-BASELINE THE CHECK, AND MUST NOT.** Lowering a guard to match a deletion is the
 > ## one repair this project forbids. ⏸ Whether to re-baseline or accept the loss is **OTE'S CALL**.
 
-⭐⭐ **THE LESSON, and it generalises:** *`zz_` IS NOT A SYNONYM FOR DISPOSABLE.* The fixture slots were
-counted by a guard that exists precisely to notice deletion. ⛔ Never bulk-delete by prefix without first
-asking which guard counts it — and ⛔ never write a date predicate without an explicit timezone.
+⭐⭐ **THE LESSON, and it generalises:** *`zz_` IS NOT A DISPOSAL CONTRACT.* The fixture slots were counted
+by a guard that exists precisely to notice deletion.
+
+## ⛔⛔ **THE MANDATORY WORKFLOW FOR ANY DESTRUCTIVE DB OPERATION (Ote, 2026-09-17). NO EXCEPTIONS.**
+
+```
+    SELECT the affected IDs
+            ↓
+    INSPECT the count AND the boundaries
+            ↓
+    EXPLICIT TIMEZONE on every date predicate   (TIMESTAMPTZ '…+00', ⛔ never a bare string)
+            ↓
+    SNAPSHOT / BACKUP
+            ↓
+    DELETE
+            ↓
+    VERIFY the exact IDs
+
+⛔⛔ NOT:   guess a naming convention → bulk delete
+```
+
+## ⛔⛔ **EXACT RECOVERY IS IMPOSSIBLE — ESTABLISHED, 2026-09-17. ⛔ NOTHING WAS FABRICATED.**
+
+Every recovery avenue was tried and each is closed:
+
+```
+⛔ PITR / WAL replay      `archive_mode = off`, no `restore_command` ⇒ no point-in-time recovery
+⛔ prior pg_dump          none exists for `persona_sotera` (the only backup found is OteLLMServices, August)
+⛔ VSS / restore points   none configured on this box
+⛔ audit `before` snapshot log_memory_changes DOES carry full row snapshots — ⚠️ but I deleted the two
+                          canary rows' audit entries in the SAME cleanup. 0 rows survive naming them.
+⛔ other FK references    txn_memories / log_memory_admissions / txn_memory_evidence / log_memory_warrants
+                          → 0 references to either lost id
+⛔ heap forensics         `pageinspect` IS AVAILABLE but NOT INSTALLED, and `ote_ai_toolbox` is NOT
+                          superuser ⇒ permission denied. ⏸ A SUPERUSER COULD STILL TRY — see below.
+⛔ the 15 slot IDs        UNIDENTIFIABLE. The 12 orphaned `log_slot_aliases` rows are PRE-EXISTING
+                          teardown debt (retention-receipt / model-facing-write delete their slots but
+                          NOT their alias-ledger rows, every run) — ⛔ they do not isolate my 15.
+```
+
+> ## ⏸⭐⭐ **THERE IS ONE PERISHABLE WINDOW LEFT, AND IT IS OTE'S TO TAKE.** The deleted tuples are still
+> ## PHYSICALLY ON DISK as dead tuples. ⭐ I have **DISABLED AUTOVACUUM** on `txn_memories`, `mst_slots`,
+> ## `log_slot_aliases` and `log_memory_changes` to stop them being reclaimed.
+> ## ⇒ a **SUPERUSER** (`postgres`) could `CREATE EXTENSION pageinspect` and attempt raw heap recovery.
+> ## ⚠️ **AND AUTOVACUUM MUST BE RE-ENABLED AFTERWARDS** or those tables will bloat:
+> ## `ALTER TABLE … RESET (autovacuum_enabled, toast.autovacuum_enabled)`
+
+⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
+so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
 ⏸⛔ **STOPPED AT THE ARCHITECTURAL BOUNDARY, DELIBERATELY.** The projection exists and is proven; ⛔ **NO
 model-facing representation was built**, because *"whether ADMIT/DEFER/ABSTAIN authorizes a particular
