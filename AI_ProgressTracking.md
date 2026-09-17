@@ -11693,3 +11693,56 @@ tested) · that the Identity Resolver's standing generalises.
 
 **Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched (still 1
 question, 1 of 112 bound) · both armed collisions intact · ⛔ **no code written; nothing written to the DB.**
+
+---
+
+## 2026-09-17 · ⭐ DESIGN UNLOCKED — the competition lifecycle contract derived
+
+Ote: *"the fence was for the A-D4/A-D5 investigation passes… you are free to propose and, **once we agree on
+the semantics**, modify schema, code, logic, prompts."* ⇒ ⛔ **the contract is derived first. Nothing built.**
+
+**Doc:** `DESIGN_SOTERA_COMPETITION_LIFECYCLE_CONTRACT.md`.
+
+**The seam:** `similarity → grouping → competition → exclusivity`, with nothing authorizing the
+grouping→competition transition. Acts ① and ② are conflated.
+
+⭐⭐ **On "don't make the matcher smarter" — the derivation agrees, for a stronger reason than 0.856:**
+**the matcher is not broken at its own job; it is broken at a job it was never given.** A perfect matcher
+would still answer *"are these alike?"* when the question is *"may these compete?"* ⇒ the repair is not
+accuracy, it is to stop grouping carrying an unearned consequence. Grouping may keep every signal it has.
+
+⭐⭐⭐ **The derivation that does the work, from ①:** there is no universal incoming/incumbent relationship,
+so **admission cannot be derived from the relation between the two observations.** It must rest on something
+same-for-both and independent of their relation. Exactly two survive — **(a) both established as answering
+the same question**, and **(b) a party with standing authorizes this pair.** Neither needs to know the
+relation, which is *why* they survive ①. A derivation, not a preference for 047.
+
+### ⭐⭐⭐ The answer to Ote's 047 question: as it stands, 047 is **half a warrant**
+
+`governsReplacement({slotKind, claimKind})` compares the **incoming claim against the slot**. It never asks
+what question the **incumbent** answers — that is assumed to be the slot's, and the incumbent reached the
+slot through exactly the routing A-D4 found unwarranted. **Membership is a two-sided fact; the gate checks
+one side.** That is why A-D5 came out *"a warrant for the ACT, none for the SET"* — not because 047 is weak,
+but because **a set is not a slot.**
+
+⭐⭐⭐ **And the missing side already exists, unread:** `question_id_at_admission` is written at
+`memory-store-sequelize-host.js:1191` and **read by nothing in production**. 048 built it as the row's own
+answer to *"which question?"*, pinned at admission and *"never looked up later."* ⇒ two-sided admission
+needs **no new fact** — it needs the gate to compare against the incumbent's pin.
+⚠️ But its NULL means *"no kind gate was applied"*, **not** *"no question"* ⇒ a two-sided rule must read NULL
+as **not established** and DEFER. That is the cost in full.
+
+⭐⭐ **DEFER belongs at this boundary.** Four outcomes: NOT-IN-SCOPE · ADMIT · ABSTAIN (no warrant *can*
+exist — #8/#9) · DEFER (the record cannot establish one — #3; remedy = declare the question).
+**ABSTAIN and DEFER may share the same immediate behaviour and must still be different states** — they
+differ in record and remedy. The lock costs a state, not a code path.
+
+**Costs stated before the options:** almost nothing would be admitted at first · `claimKind` has one
+supplier · deferred pairs coexist so *current* becomes plural (which ⑦ and the 53 slotless rows already do) ·
+no backfill is possible.
+
+**Six open decisions (D-1…D-6)**, with **"is 047 the vehicle at all?"** deliberately last and open, per
+A-D5's narrowing.
+
+⛔ **Nothing built:** no code, schema or migration written. unit **753/753** · evidence baseline green ·
+canary 18 / 0 / 0 · 047 untouched · both armed collisions intact.

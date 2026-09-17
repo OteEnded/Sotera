@@ -27,7 +27,9 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ④-A ✅ RULED NARROW    ⭐ ONE claim, and its subject is THE SYSTEM
 ④  ✅ RULED — the three statuses are WRITER EVIDENCE, ⛔ NOT a taxonomy
 A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
-A-D5 ⏸ INVESTIGATED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
+A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
+⭐⭐⭐ DESIGN IS UNLOCKED (Ote, 2026-09-17) — the read-only fence was PER-PASS, ⛔ not permanent.
+     ⛔ BUT: derive the semantic contract FIRST, then decide what code changes. ⛔ Nothing built yet.
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
@@ -1152,6 +1154,54 @@ decision. ⛔ Not reopened.
    ⛔ NOT ESTABLISHED: that 047 IS the answer (⛔ and per A-D4's narrowing it must not be chosen by
       wording) · that an aux-LLM adjudication is or is not sufficient (⚠️ NOT TESTED) · that the Identity
       Resolver's standing generalises · that `claimKind` should be required of every writer.
+
+56 ⭐⭐⭐⭐ **DESIGN UNLOCKED — THE COMPETITION LIFECYCLE CONTRACT (Ote, 2026-09-17).**
+   `DESIGN_SOTERA_COMPETITION_LIFECYCLE_CONTRACT.md`. ⭐ Ote: *"the fence was for the A-D4/A-D5
+   investigation passes… you are free to propose and, ONCE WE AGREE ON THE SEMANTICS, modify schema, code,
+   logic, prompts."* ⛔ ⇒ DERIVE THE CONTRACT FIRST. ⛔ NOTHING IS BUILT.
+   ⭐⭐⭐ **THE SEAM:** `similarity → grouping → competition → exclusivity`, with ⛔ NOTHING authorizing the
+      grouping→competition transition. A-D4/A-D5 showed acts ① and ② are CONFLATED.
+   ⭐⭐ **⛔ DO NOT FIX THIS BY MAKING THE MATCHER SMARTER** (Ote) — ⭐ and the derivation agrees for a
+      STRONGER reason than 0.856: **THE MATCHER IS NOT BROKEN AT ITS OWN JOB. IT IS BROKEN AT A JOB IT WAS
+      NEVER GIVEN.** A perfect matcher still answers *"are these alike?"* when the question is *"may these
+      compete?"* ⇒ the repair is ⛔ NOT accuracy; it is to stop grouping carrying an unearned consequence.
+   ⭐ THE FOUR ACTS: ① GROUPING (claims nothing, needs nothing — ⭐ **R1: no consequence beyond
+      retrievability**) · ② ADMISSION (⭐⭐⭐ **THE MISSING ACT** — claims EXCLUSIVITY, needs a warrant) ·
+      ③ EXCLUSIVITY ACT (④-A: a system disposition — ⭐ **R2: it must CITE its admission**) · ④ WINNER
+      SELECTION (⛔ out of scope).
+   ⭐⭐⭐ **THE DERIVATION THAT DOES THE WORK — FROM ①:** there is no universal incoming/incumbent
+      relationship ⇒ ⛔ **ADMISSION CANNOT BE DERIVED FROM THE RELATION BETWEEN THE TWO OBSERVATIONS.**
+      ⇒ it must rest on something SAME FOR BOTH and INDEPENDENT of their relation. Exactly two survive:
+      (a) THE Q-ROUTE — both are established as answering THE SAME QUESTION (exclusivity then follows from
+          *one question, one current answer*)
+      (b) THE STANDING-ROUTE — a party with standing authorizes THIS PAIR (the Identity Resolver's ask)
+      ⭐ NEITHER needs to know the relation — ⛔ which is WHY they survive ①. That is a DERIVATION, ⛔ not a
+      preference for 047.
+   ⭐⭐⭐ **AND THE ANSWER TO OTE'S 047 QUESTION: AS IT STANDS 047 IS *HALF A WARRANT*.**
+      `governsReplacement({slotKind, claimKind})` compares the INCOMING claim against THE SLOT. ⛔ It NEVER
+      asks what question the INCUMBENT answers — that is ASSUMED to be the slot's, and the incumbent got
+      there through EXACTLY the routing A-D4 found unwarranted. ⇒ **membership is a TWO-SIDED fact and the
+      gate checks ONE side.** ⭐ That is why A-D5 came out *"a warrant for the ACT, none for the SET"* —
+      ⛔ not because 047 is weak, but because **a set is not a slot.**
+   ⭐⭐⭐ **THE MISSING SIDE ALREADY EXISTS AND NOTHING READS IT:** `question_id_at_admission` — written at
+      `memory-store-sequelize-host.js:1191`, ⛔ **READ BY NOTHING in production** (migrations and checks
+      only). 048 built it as the row's OWN answer to *"which question?"*, pinned at admission and
+      *"never looked up later."* ⇒ two-sided admission needs ⛔ NO NEW FACT — it needs the gate to compare
+      against the INCUMBENT'S PIN instead of the slot's current binding.
+      ⚠️ ⛔ BUT ITS NULL MEANS *"no kind gate was applied"*, ⛔ **NOT** *"no question"* ⇒ a two-sided rule
+      must read NULL as NOT ESTABLISHED and DEFER. That is the cost, in full.
+   ⭐⭐ **DEFER BELONGS AT THIS BOUNDARY — four outcomes:** NOT-IN-SCOPE · ADMIT · ABSTAIN (⛔ no warrant
+      CAN exist — #8/#9) · DEFER (⚠️ the record cannot establish one — #3, remedy = DECLARE THE QUESTION).
+      ⭐ **ABSTAIN and DEFER may share the same IMMEDIATE BEHAVIOUR (no competition) and must still be
+      DIFFERENT STATES** — they differ in RECORD and REMEDY. ⇒ the lock costs a state, ⛔ not a code path.
+   ⚠️ THE COSTS, STATED BEFORE THE OPTIONS: almost nothing would be admitted at first (1 question · 1 of
+      112 slots · the pin NULL on ~every incumbent) · `claimKind` has ONE supplier · deferred pairs
+      COEXIST so *current* becomes plural (⭐ which ⑦ and the 53 slotless rows already do) · ⛔ no backfill.
+   ⏸ SIX OPEN DECISIONS FOR OTE (D-1…D-6): separate act vs precondition · does the PIN become the second
+      side · is the STANDING-ROUTE real · what happens to families that can NEVER be admitted (⭐ ⑦ already
+      says *slotless ≠ deficient*, so *"they group, they never compete"* may be a FEATURE) · does DEFER
+      permit coexistence or hold the write (⚠️ A-D7: a refused write teaches nothing) · ⛔ **is 047 the
+      vehicle at all — DELIBERATELY LAST AND OPEN.**
 ```
 
 ---
