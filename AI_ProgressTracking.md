@@ -10942,3 +10942,55 @@ bears on two readings.
 
 **Verification:** routing trace green · evidence baseline green · unit **753/753** · 047 untouched (1
 question) · canary intact (18 rows, 0 slots) · both armed collisions armed. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · ③ RULED BROAD, and ④ OPENED — `invalid_at` has no common claim
+
+**③ is ruled: BROAD** (recorded in `AI_CarryOn` §0-B ㊵ as a ruling):
+
+> *"Routing an observation to a question is deciding which question that observation answers, therefore the
+> 047 'declared, never inferred, never defaulted' principle applies to that relationship."*
+
+⇒ **a storage/routing key cannot manufacture semantic question identity.** The architecture is semantically
+backwards at this seam — currently `observation → infer slot → declared question → admission`, where the
+required meaning is `observation → question` with declared authority. ⛔ How to implement is not ruled, and
+⛔ it is **not** ruled that every observation must carry a question: `claimKind` already establishes that
+absence can legitimately mean *"the writer did not declare which question this answers."*
+⇒ **"not declared" and "incorrectly inferred" must remain distinguishable.**
+
+### ④ opened
+
+**Doc** → `Reference/docs/INVESTIGATION_SOTERA_INVALID_AT_CLAIM.md`
+**Check** → `test/checks/invalid-at-claim-trace.mjs`
+
+**The answer: there is no common semantic claim.** 5 distinct dimension signatures across 6 writers. The
+only shared content is *"this row no longer holds a role"* — a fact about the system's arrangement, not a
+claim about the memory. Everything the six *disagree* about is the semantics.
+
+**The decisive proof is the system's own reversal rules.** 4 of 6 are reversible by the ordinary
+un-supersede path. **W2 collapse is deliberately irreversible, and the source names the distinction it is
+drawing:** *"they were removed for being **redundant**, not for being **wrong**."* W5 lesson is irreversible
+**accidentally** — the forward-pointing `supersedes_id` leaves the revival path nothing to follow (latent,
+0 rows).
+
+⇒ **the system already treats these as different claims; it simply stores them identically. The distinction
+lives in the reversal rule, not in the field.**
+
+**What ③ adds:** **W1 and W2 set `invalid_at` on the strength of an undeclared question relation** — exactly
+what ③ says may not be inferred. The other four make no question claim at all; W5 never even enters the slot
+layer. ⇒ `invalid_at` is not even uniform about *whether a question is involved*.
+
+Three statements, stored identically: *"true but no longer current"* (W1) · *"redundant, not wrong"* (W2) ·
+*"something else holds the arena"* (W6).
+
+⛔ **No positive definition proposed.** ④ stays open until ① is settled, per the ADR; this pass establishes
+only that a single positive definition **is not available from the writers as they stand**.
+
+**Instrument defect #22 — #14 recurring in a new file.** Two whole-sentence anchors failed on sentences
+plainly present: the normaliser collapsed whitespace but left the **`//` marker inside the phrase** where
+the comment wrapped mid-sentence. The tempting fix — shortening the anchor — would have made it pass *and*
+vacuous. Now strips line-leading `//` and `*` before collapsing, anchors still whole sentences.
+
+**Verification:** claim trace green · evidence baseline green · unit **753/753** · 047 untouched (1
+question) · canary intact (18 rows, 0 slots) · both armed collisions armed. ⛔ Nothing was written.

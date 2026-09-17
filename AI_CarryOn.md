@@ -573,8 +573,47 @@ decision. ⛔ Not reopened.
    ⛔⛔ **ZERO ORGANIC PRECEDENT**: 0 bind acts · 0 pinned rows outside the harness canary. Every artifact of
    the declared question layer was made BY AN OPERATOR, ON A TEST FIXTURE, ON ONE DAY (`canary-bind-
    2026-09-03-*`). ⇒ ⛔ THERE IS NO PRODUCTION BEHAVIOUR FROM WHICH TO READ AN INTENT.
-   ⏸ ⛔ NARROW / BROAD / SPLIT ARE **NOT RANKED** — each has a supports/strains note in the doc. OTE RULES.
    → `INVESTIGATION_SOTERA_ROUTING_AUTHORITY.md` · `test/checks/routing-authority-trace.mjs`
+㊵ ✅⭐⭐⭐ **DECISION ③ IS RULED: BROAD** (Ote, 2026-09-17).
+   > **"Routing an observation to a question is DECIDING WHICH QUESTION THAT OBSERVATION ANSWERS, therefore
+   > the 047 'declared, never inferred, never defaulted' principle APPLIES TO THAT RELATIONSHIP."**
+   ⭐ THE REASON IS ⛔ NOT "047 sounds like it should apply" — it is that ROUTING IS NOT CHOOSING A STORAGE
+   ADDRESS: it DETERMINES THE QUESTION under which the observation later participates in ADMISSION and
+   REPLACEMENT. And ② already ruled membership carries no semantic authority. ⇒ therefore:
+     inferred (observation → slot)  +  declared (slot → question)  ⛔ ≠  authoritative (observation → question)
+   ⭐⭐⭐ **A STORAGE/ROUTING KEY CANNOT MANUFACTURE SEMANTIC QUESTION IDENTITY.**
+   ⚠️ THE ARCHITECTURE IS SEMANTICALLY BACKWARDS AT THIS SEAM:
+     CURRENT   observation → infer slot → declared question → admission
+     REQUIRED  observation ──────────────→ question, with DECLARED AUTHORITY
+   ⛔ HOW to implement that is NOT ruled. ⛔ AND IT IS **NOT** RULED THAT EVERY OBSERVATION MUST CARRY A
+   QUESTION — `claimKind` already establishes that ABSENCE CAN LEGITIMATELY MEAN *"the writer did not
+   declare which question this answers."*
+   ⇒ ⭐⭐ **"NOT DECLARED" AND "INCORRECTLY INFERRED" MUST REMAIN DISTINGUISHABLE.**
+㊶ ⭐⭐⭐ DECISION ④ ANALYSIS — *"What claim, if any, is a writer making when it sets `invalid_at`?"*
+   ⇒ ⭐⭐⭐ **THERE IS NO COMMON SEMANTIC CLAIM.** 5 distinct dimension signatures across 6 writers.
+   ⭐ The ONLY shared content is *"this row no longer holds a role"* — ⛔ a fact about THE SYSTEM'S
+   ARRANGEMENT, ⛔ NOT a claim about the memory. ⚠️ Everything the six DISAGREE about is the semantics.
+   ⭐⭐⭐ THE DECISIVE PROOF — **THE SYSTEM'S OWN REVERSAL RULES ALREADY SEPARATE THEM**:
+     4 of 6 reversible by the ordinary un-supersede path (W1 supersede · W3 rename · W4 card · W6 restore)
+     ⛔ W2 COLLAPSE — DELIBERATELY IRREVERSIBLE, and the source NAMES THE DISTINCTION IT IS DRAWING:
+        *"they were removed for being **REDUNDANT**, not for being **WRONG**."*
+     ⚠️ W5 LESSON — irreversible ACCIDENTALLY: the FORWARD `supersedes_id` leaves the revival path nothing
+        to follow. ⛔ LATENT (0 rows).
+   ⇒ ⭐⭐ **THE SYSTEM ALREADY TREATS THESE AS DIFFERENT CLAIMS — IT SIMPLY STORES THEM IDENTICALLY.**
+   ⭐ THE DISTINCTION LIVES IN THE REVERSAL RULE, ⛔ NOT IN THE FIELD.
+   ⭐⭐ WHAT ③ ADDS: **W1 AND W2 SET `invalid_at` ON THE STRENGTH OF AN UNDECLARED QUESTION RELATION** —
+   exactly what ③ says may not be inferred. ⚠️ The other four make NO question claim at all (W5 never even
+   enters the slot layer). ⇒ ⛔ `invalid_at` IS NOT EVEN UNIFORM ABOUT WHETHER A QUESTION IS INVOLVED.
+   ⭐ THREE STATEMENTS, STORED IDENTICALLY: W1 *"true but no longer current"* · W2 *"redundant, not wrong"* ·
+   W6 *"something else holds the arena"*.
+   ⛔ NO POSITIVE DEFINITION PROPOSED — ④ stays open until ① is settled, per the ADR. This pass establishes
+   ONLY that a single positive definition IS NOT AVAILABLE from the writers as they stand.
+   → `INVESTIGATION_SOTERA_INVALID_AT_CLAIM.md` · `test/checks/invalid-at-claim-trace.mjs`
+㊷ ⚠️ INSTRUMENT DEFECT #22 — **#14 RECURRING IN A NEW FILE.** Two whole-sentence source anchors FAILED on
+   sentences plainly present: the normaliser collapsed whitespace but left the **`//` COMMENT MARKER INSIDE
+   THE PHRASE** where the comment wrapped mid-sentence. ⛔ THE TEMPTING FIX — SHORTENING THE ANCHOR — WOULD
+   HAVE MADE IT PASS **AND** VACUOUS. ⇒ ⭐ STRIP LINE-LEADING `//` AND `*` **BEFORE** COLLAPSING, and keep
+   the anchor a WHOLE SENTENCE. ⚠️ Same family as #17 (a Postgres `::` cast read as an object-key colon).
 ```
 
 ---
