@@ -10417,3 +10417,67 @@ Caught by reading the rows instead of the group-by count.
 **Verification:** predicate trace green · competition census green · evidence baseline green including the
 canary guard · unit **753/753** · both original collisions armed · canary unarmed for reconcile.
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · THE SEMANTIC UNIT OF COMPETITION — there isn't one
+
+Ote: *"For each operation that consumes membership, establish what kind of relationship it actually
+requires … Don't assume there must be one universal 'competition' concept."* ⛔ Read-only; canary untouched;
+`SEMANTIC_FIELDS` untouched.
+
+**Instrument** → `test/checks/competition-unit-trace.mjs`, producing
+`operation → relation required → semantic claim → evidence source → current predicate → gap`.
+
+### The answer: at least three relation shapes, one key
+
+```
+DESIGNATED HOLDER                 reconcile/replace · revive/restore
+PAIRWISE                          collapse
+CLAIM ↔ QUESTION                  M2 admission gating   (not a memory-to-memory relation at all)
+NONE                              forget
+```
+
+**Collapse and revive fire on the same test and need opposite things.** Collapse needs the other member to
+be **the same proposition** (sameness); revive needs it to **occupy a role** (occupancy). A row that is *not*
+the same proposition should not be collapsed; a row that *is* should not block a revival.
+
+**Collapse is the worst-matched pair:** it requires *pairwise proposition equivalence* and is authorized by
+*bare set membership* — **the strongest relation required, the weakest evidence supplied.**
+
+**Forget is the only operation whose requirement and implementation agree**, because it requires nothing —
+`forget({id})` consults no membership. Membership enters only through its consequence, `reviveSuperseded`.
+
+### And the gaps are not the same gap
+
+collapse → an **evidence** gap · revive → a **precision** gap (right shape, wrong scope) · replace → a
+**proxy** gap (recency stands in for role) · M2 → an **inherited** gap (correct on an arena it didn't pick) ·
+forget → **none**. ⇒ there is no single fix shape either, which is the practical reason the question
+mattered.
+
+### Consequence for the work-schedule incident
+
+**P13 cannot be evaluated in isolation** — its correctness is conditional on the upstream membership claim.
+⇒ the incident was **not fundamentally a P13 failure**: P13 faithfully compared two values *after the wrong
+arena had already been selected.*
+
+### Exposure today
+
+**P14 dormant** — 0 slots hold more than one live row. ⚠️ And note why: *"one slot holds one answer"*
+currently holds, so **the invariant, not a predicate, is what protects it.** **P15 active** — one key, 17
+rows, and it is the canary.
+
+### Boundary case kept, at Ote's request
+
+`user | communication preference` ×2 and `user | current activity` ×2 are separated by **`user_id`** —
+different people, and P3 is right. **Scope is not merely another label dimension:** the owner is part of
+what the question is *about*, so identical labels under different owners are different questions. Kept
+because I nearly filed it as a false negative from a `GROUP BY` count.
+
+**Still not established:** the false-negative direction. We have demonstrated over-inclusion only and have
+no semantic ground truth with which to measure under-inclusion. The relation-required column is a judgement,
+offered to be overruled; the predicates, shapes-as-implemented and exposures are not.
+
+**Verification:** unit trace green · predicate trace green · evidence baseline green including the canary
+guard · unit **753/753** · both original collisions armed · canary unchanged (18 rows, 0 slots).
+⛔ Nothing was written.

@@ -345,6 +345,28 @@ decision. ⛔ Not reopened.
    ⛔ BUT THAT IS A DESCRIPTION OF THE IMPLEMENTATION, ⛔ NOT a finding that the grouping is ILLEGITIMATE,
    and the false-negative direction was NOT established. ⛔ OTE'S TO RULE.
    → `INVESTIGATION_SOTERA_COMPETITION_PREDICATES.md` · `test/checks/competition-predicate-trace.mjs`
+㉚ ⭐⭐⭐ MEMBERSHIP IS AN **AUTHORIZATION BOUNDARY FOR STATE TRANSITIONS** (Ote, 2026-09-17), ⛔ not merely
+   a comparison set. P14 INVALIDATES on membership alone · P15 VETOES A RESTORATION on membership alone ·
+   ⛔ NEITHER establishes that the member represents the same proposition.
+   ⭐⭐⭐ AND THERE IS NO SINGLE COMPETITION CONCEPT — ⭐ AT LEAST THREE RELATION SHAPES, ONE KEY:
+     DESIGNATED HOLDER   reconcile/replace · revive/restore
+     PAIRWISE            collapse
+     CLAIM↔QUESTION      M2 admission gating   (⛔ not a memory-to-memory relation at all)
+     NONE                forget  (⭐ the ONLY operation whose requirement and code agree)
+   ⚠️⚠️ COLLAPSE AND REVIVE FIRE ON THE SAME TEST AND NEED **OPPOSITE** THINGS: collapse needs the other
+   member to be THE SAME PROPOSITION (sameness); revive needs it to OCCUPY A ROLE (occupancy).
+   ⭐⭐⭐ COLLAPSE IS THE WORST-MATCHED PAIR — it requires PAIRWISE PROPOSITION EQUIVALENCE and is
+   authorized by BARE SET MEMBERSHIP. THE STRONGEST RELATION REQUIRED, THE WEAKEST EVIDENCE SUPPLIED.
+   ⇒ ⛔ AND THERE IS NO SINGLE FIX SHAPE: collapse has an EVIDENCE gap · revive a PRECISION gap ·
+   replace a PROXY gap (recency stands in for role) · M2 an INHERITED gap · forget NO gap.
+   ⭐⭐ P13 CANNOT BE EVALUATED IN ISOLATION ⇒ **THE `work schedule` INCIDENT WAS NOT A P13 FAILURE** —
+   P13 faithfully compared two values AFTER THE WRONG ARENA HAD ALREADY BEEN SELECTED.
+   ⭐ EXPOSURE TODAY: P14 ⛔ DORMANT (0 slots hold >1 live row — ⚠️ THE INVARIANT, NOT A PREDICATE, IS
+   WHAT PROTECTS IT) · P15 ⚠️ ACTIVE, and its ONLY live grouping is the canary (17 rows).
+   ⭐ BOUNDARY CASE TO KEEP: duplicate LABELS are ⛔ NOT automatically suspicious — `user|communication
+   preference` ×2 and `user|current activity` ×2 are separated by `user_id`: DIFFERENT PEOPLE, and P3 is
+   right. ⛔ SCOPE IS NOT ANOTHER LABEL DIMENSION — the owner is part of what the question is ABOUT.
+   → `INVESTIGATION_SOTERA_COMPETITION_UNIT.md` · `test/checks/competition-unit-trace.mjs`
 ```
 
 ---
