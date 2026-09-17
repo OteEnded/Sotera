@@ -6,6 +6,55 @@
 
 # 0-A · ⏸ WHAT IS OPEN. ⛔ NOTHING IS BLOCKED.
 
+## ⓪ ⭐⭐⭐ THE CURRENT ARC — **MEMORY SEMANTIC DECISIONS**. ⛔ READ THIS FIRST.
+
+⭐ **We are no longer building. We are RULING.** The evidence phase closed 2026-09-17. The work is a
+decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔ never an implementation.
+
+> ⭐⭐⭐ **THE METHOD, RULED BY OTE:** *"Batch investigations that can share evidence/context, but ⛔ do NOT
+> batch the rulings."* ⇒ investigate broadly, **rule one decision at a time**.
+
+```
+①  ⏸ UNRESOLVED     what semantic occurrence, IF ANY, happens when an incumbent stops being current?
+②  ✅ RULED          membership is NOT one semantic relation; each consumer establishes its own
+③  ✅ RULED BROAD    observation→question follows 047's DECLARED-ONLY authority
+④  ✅ NEGATIVE ONLY  `invalid_at` is NOT a proposition-truth state ⛔ positive definition DELIBERATELY OPEN
+⑤  ✅ RULED          proposition EXISTS as a representation; ⛔ proposition EQUIVALENCE does not exist
+⑥  ✅ PARTIAL        transition is a layer DISTINCT from row state ⛔ taxonomy NOT finalised
+⑦  ✅ RULED          durable memory is NOT inherently slot-shaped
+⑧  ⏸ NAMED, NOT OPENED   what may `resolveConflict` do? ⚠️ BLOCKED ON ①
+⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
+```
+
+> ## ⭐⭐⭐ **THE CRITICAL PATH IS ① → ⑧.** ⑤ and ⑦ removed the ambiguity around them; ④ deliberately did not.
+
+⭐ **THE FULL RULINGS AND THEIR EVIDENCE:** `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` (read first) ·
+`SYNTHESIS_SOTERA_MEMORY_BOUNDARIES.md` (the six boundaries) · the rules in §0-B ⑱–㊻.
+
+⚠️ **THE SIX EXPOSED CONSEQUENCES (§0-B ㊻)** — E1 **both branches of `resolveConflict` rest on inferences
+⑤ forbids** · E2 collapse has **no available justification at all** (⚠️ latent, never fired) · E3 the
+ephemeral arena **contradicts ⑦** · E4 ③'s absent-vs-wrong nuance **not held** · E5 `attribute` is
+**load-bearing for ⑤ and forbidden by ③** · E6 the `invalid_at` docstring is **known-wrong by ruling**
+(⛔ flagged, ⛔ not changed).
+
+⭐⭐ **THE ANCHORS — evidence boundaries, ⛔ not implementation opinions. Cite them; ⛔ never weaken them:**
+
+```
+① ⭐ "The old observation became non-current without becoming false."   (Mira — the guardrail)
+② membership ≠ proposition        (the 18-row `sotera|lesson` canary)
+③ value ≠ proposition             (`location = Bangkok` vs `timezone = Bangkok`)
+④ `supersedes_id` = LATENT, ⛔ not defective   (implementation convention ≠ corpus semantics)
+⑤ `expired_at` = storage-vs-belief ambiguity in one column
+⑥ `user_id` scope IS semantically meaningful ⇒ ⛔ a duplicate label is NEVER automatically suspicious
+```
+
+⛔ **STANDING FENCES FOR THIS ARC:** read-only · no implementation · no schema/migration · no historical
+repair · **no canary activation** · 047 untouched · A1 shadow · **both collisions stay armed** ·
+`SEMANTIC_FIELDS` untouched · no Dreaming change · no relation vocabulary · ⛔ no `invalid_at`
+reinterpretation.
+
+---
+
 ## ⓐ ✅ CLOSED ARCS — ruled, shipped, ⛔ not to be reopened
 
 **PROVENANCE (D1–D9)** — every decision ruled. The invariant, in Ote's exact words:
@@ -721,10 +770,13 @@ decision. ⛔ Not reopened.
 # 0-C · LIVE STATE — 2026-09-17
 
 ```
-:8210 PID 29644 (Sotera — on the B-D4 build) · :8201 (OLS, HIS, untouched, healthy)
-:54322 pg · migrations through 052 · writer contracts 17 (+ `resolver`) · slots 112 · aliases 8 · memories 231
+:8210 (Sotera — on the B-D4 build, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
+:54322 pg · migrations through 052 · writer contracts 17 (+ `resolver`) · slots 112 · aliases 8 · memories 233
 resolver: grayZoneMode='shadow' · ontologyMode='shadow'  ⇒ BOTH ACCUMULATING, ⛔ neither has authority
 unit 753/753 · @ote/memory 123/123 · alias ledger 4 rows (all `refuse`)
+⭐ 047 QUESTION LAYER: **1 question declared** (the harness canary) · 1 of 112 slots bound · 2 bind acts,
+   BOTH `ote-operator` on `canary-bind-2026-09-03-*` ⇒ ⛔ **ZERO ORGANIC PRECEDENT.**
+⛔ THE DECISION ARC IS READ-ONLY: ⛔ nothing has been implemented, migrated, repaired or armed since B-D4.
 attribution: 22 scans · 5 candidates · 4 UNREVIEWED (Ote's) · projection_version NULL on all 22 (pre-B, honest)
 CRONS LIVE: noticing (15m) · reflection (20m) — reflection is PROVEN LIVE (fired unprompted 09-16, wrote 3 rows)
 OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · reflectMode ('off', 0 note rows EVER)
@@ -747,6 +799,19 @@ OFF: dreamingEnabled (unset) · consolidateEnabled · episodeDistillEnabled · r
   cross-tab vs naming: READABLE 6 sup / 43 never · UNREADABLE 1 / 15 ⇒ ⛔ the boundary is NOT the label
   value form (64 live): 20.3% are 1–3 words · 28.1% are 21+ · 50% carry a sentence terminator
   ✅ INVARIANT HOLDS: no slot carries more than one LIVE row — "one slot holds one answer" is true today
+
+⭐⭐⭐ THE CANARY — `sotera | lesson`, 18 rows / 18 DISTINCT propositions / 18 NULL values / ⛔ 0 slots.
+  ⛔⛔ PRESERVED BY RULING AND GUARDED in `evidence-baseline-check.mjs` §8, which FAILS BOTH WAYS:
+     if the evidence is DESTROYED, and if the key becomes ARMED (a slot OR an alias under that key).
+  ⭐ It carries TWO boundaries at once: `membership ≠ proposition` AND `value ≠ proposition`.
+  ⚠️ UNARMED for the reconcile path · ⚠️ ALREADY LIVE for forget/revive (P15's phrase fallback needs no slot).
+
+⭐ THE DECISION-ARC INSTRUMENTS — all READ-ONLY, all green, ⛔ none writes:
+  slot-behaviour-census · replacement-semantics-census · replacement-relation-census · m2-047-scope-check
+  routing-act-scope-check · slot-authority-map · membership-semantics-census · membership-consequence-census
+  competition-membership-census · competition-predicate-trace · competition-unit-trace
+  state-transition-semantics · transition-event-trace · nine-transition-semantic-analysis
+  incumbent-status-change-trace · invalid-at-claim-trace · memory-semantics-batch · semantic-seam-batch
 ```
 
 **BUILT THIS ARC:** the four provenance axes + audited backfill · D1(b) → **Phase 3 refusal** · the attribution
@@ -779,7 +844,25 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
 # 0-E · ⏸ OPEN — all Ote's, none blocking
 
 ```
-⭐⭐⭐ REPLACEMENT SEMANTICS — ⛔ THE CURRENT INVESTIGATION BLOCKER (Ote, 2026-09-17, his words)
+⭐⭐⭐⭐ THE CRITICAL PATH IS **① → ⑧**. Everything else below is genuinely parked.
+   ① ⏸ *"When the competition machinery causes one observation to cease being the current holder, WHAT
+        SEMANTIC OCCURRENCE, **IF ANY**, has actually happened?"* ⭐ "IF ANY" IS LOAD-BEARING — for the two
+        mis-routings the answer is NONE. ⛔ 6 interpretations on the table (4 in the ADR + ⑤ "not a natural
+        kind" + ⑥ "the locus is the ARENA"). ⛔ NONE SELECTED.
+   ⑧ ⏸ NAMED, NOT OPENED — what may `resolveConflict` do, when **BOTH** its branches rest on inferences
+        ruling ⑤ forbids? ⚠️ BLOCKED ON ①.
+   ⑨ ⏸ NAMED, NOT OPENED — may an arena be SYNTHESISED for a family with no established slot semantics?
+        ⚠️ ⑦ and ② both bear on it; ⛔ NEITHER ANSWERS IT.
+   ⏸ ALSO STILL OPEN: ④'s POSITIVE definition (deliberately) · ⑥'s TAXONOMY (deliberately).
+   ⛔ THE FALSE-NEGATIVE DIRECTION REMAINS **NOT ESTABLISHED** — over-inclusion is demonstrated;
+     under-inclusion has no ground truth to measure against. ⛔ Never report it as "none exists".
+   → `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` §"What the rulings expose"
+
+⏸ PARKED BY THE DECISION ARC (all of these wait on ① → ⑧):
+   A-D4 · A1 authority · B-D1 (radius) · B-D3 (may `incomplete` claim `attestedBySource`?) · Dreaming/M-series
+
+⭐⭐⭐ REPLACEMENT SEMANTICS — ⛔ SUPERSEDED AS "the current blocker" by the ① → ⑧ path above, but the
+       framing below is still the correct statement of the question (Ote, 2026-09-17, his words)
        Question: what semantic relationship exists between successive observations that currently appear
                  as "superseded"?
        Blocks:   ⛔ A-D4 broader-slot behaviour (⛔ ALSO BLOCKED ON 047 SCOPE — see §0-B ㉑) · ⛔ the interpretation of Slot identity / current value /

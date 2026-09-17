@@ -11182,3 +11182,49 @@ answer it.
 
 **Verification:** evidence baseline green · unit **753/753** · canary 18 rows / 0 slots · 047 one question ·
 both collisions armed. ⛔ Nothing written to the database; no code touched.
+
+---
+
+## 2026-09-17 · COMPACTION CHECKPOINT — the semantic decision arc
+
+`AI_CarryOn.md` §0-A / §0-C / §0-E updated inline. **§0-F and all 1,035 lines of history below it verified
+byte-identical** by comparison against a snapshot taken before the edits, not assumed (§0-B ⑫).
+
+### What §0 now carries for a fresh session
+
+**§0-A gained ⓪ — THE CURRENT ARC, at the very top**, because the previous §0-A still led with the A/B
+build arc and a fresh session would have mis-read what we are doing. It states plainly: *we are no longer
+building, we are ruling*; the method (**batch the investigations, never batch the rulings**); the full
+①–⑨ board; the six exposed consequences E1–E6; the six anchors; and the standing read-only fences.
+
+⭐ **The critical path is recorded as ① → ⑧.**
+
+**§0-C** corrected `memories 231 → 233`, dropped a stale PID, and gained three things: the 047 question
+layer's real state (**1 question, 1 of 112 slots, 2 bind acts both `ote-operator` on canary occasions ⇒ zero
+organic precedent**), the canary's full description with its two boundaries and its both-ways guard, and the
+list of all **18 read-only decision-arc instruments**.
+
+**§0-E** now leads with ① → ⑧ and ⑨, marks ④'s positive definition and ⑥'s taxonomy as *deliberately* open,
+keeps the false-negative direction as **not established** (never "none exists"), and lists what is parked
+behind the arc: A-D4 · A1 authority · B-D1 · B-D3 · Dreaming.
+
+### The state being frozen
+
+```
+①  ⏸ UNRESOLVED   ②  ✅ RULED   ③  ✅ RULED BROAD   ④  ✅ NEGATIVE ONLY
+⑤  ✅ RULED        ⑥  ✅ PARTIAL  ⑦  ✅ RULED        ⑧ ⑨  ⏸ NAMED, NOT OPENED
+```
+
+**Verification:** unit **753/753** · `@ote/memory` **123/123** · evidence baseline green **including the
+canary guard** · canary 18 rows / 0 slots / 0 aliases · 047 one declared question · both armed collisions
+intact · 4 attribution candidates still unreviewed · `:8210` and `:8201` both 200 · all three trees
+committed, Sotera and Reference pushed.
+
+⛔ **Nothing has been implemented, migrated, repaired or armed since B-D4.** The entire decision arc is
+read-only, and the database is byte-for-byte as Ote left it.
+
+### Resuming after the compact
+
+Read `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` first — it carries the rulings, the per-decision state, and
+§"What the rulings expose". Then `AI_CarryOn` §0-A ⓪ for the board, and §0-B ⑱–㊻ for the rules this arc
+earned. The next move is Ote's ruling on **①**.
