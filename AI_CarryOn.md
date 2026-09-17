@@ -71,8 +71,19 @@ A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE fo
 ① THE LEDGER TEARDOWN SWEEP  ⭐ every check that writes memory now leaves `log_memory_admissions` rows its
                              teardown does not clean. ⛔ Ote: keep it a SEPARATE follow-up, ⛔ do not
                              expand the accepted build for it.
-② THE THREE RED CHECKS       model-tool-claim-kind (9) · declaration-self-authorisation (5) ·
-                             declaration-transport (4).
+② THE RED CHECKS — ⚠️ **FIVE, NOT THREE** (corrected 2026-09-17)
+                             model-tool-claim-kind (9) · declaration-self-authorisation (5) ·
+                             declaration-transport (4) · ⚠️ **m2-rollback** · ⚠️ **m2-bind-eligibility**
+                             ⭐ PROVED PRE-EXISTING: with all four read-projection files REVERTED (incl.
+                             the service in its own repo, verified) BOTH still fail identically.
+                             ⭐ m2-rollback = the SAME admission topology (*"an UPDATE with no claim kind
+                               is REFUSED"* — on the DEFER path nothing is refused).
+                             ⭐ m2-bind-eligibility = ⛔ NOT admission. **CORPUS DRIFT**: the Mira slot
+                               `9ed7d99c user/youngest sister` reached 2 writes and became bind-eligible.
+                               ⚠️ It is the PRESERVED evidence fixture ⇒ expected drift in Ote's own data.
+                               ⚠️ And the check COUNTS instead of NAMING — defect #25's shape again.
+                             ⚠️ m2-rollback is NON-IDEMPOTENT: every run leaves 4 live `zz_rb_*` rows in
+                             the build-tag canary. ⭐ 3 runs' residue removed; canary back to 67/1 live/35.
                              ⛔⛔ **LEAVE THEM ALONE.** Their red state is A CONSEQUENCE OF THE NEW
                              TOPOLOGY, ⛔ not a defect — and ⛔ NEVER weaken admission or M2 to green them.
                              ⭐ TWO are TRANSPORT/REACHABILITY instruments whose OBSERVABLE moved: their
@@ -316,6 +327,62 @@ easier to describe."*
 
 ⭐ *"No — a DEFER is a write-side act and confers nothing on a reader"* is a COHERENT answer, and it would
 make the finding *"the system is already semantically sufficient."* ⛔ I did not assume otherwise.
+
+## ⭐⭐⭐ ✅ **RULED, AND BUILT — THE READ-SIDE ADMISSION PROJECTION (Ote, 2026-09-17). SHIPPED.**
+
+```
+⭐ RULING 1 · A downstream consumer MAY READ an existing admission verdict as a FACTUAL RECORD of what
+  the memory system established during the admission act.
+  ⛔ It is a fact about the SYSTEM'S OWN DECISION — ⛔ not a new fact about the world, ⛔ not a universal
+  semantic relationship between the two observations.
+
+⛔⛔ RULING 2 · READING THE VERDICT AUTHORIZES NO PRESENTATION DECISION.
+  ⛔ ADMIT   ≠ present together · ≠ merge · ≠ both current · ≠ both true · ≠ compatible
+  ⛔ DEFER   ≠ conflict · ≠ hide one · ≠ present as alternatives · ≠ unrelated · ≠ either is false
+  ⛔ ABSTAIN ≠ contradiction · ≠ unrelated
+  ⭐ DEFER REMAINS COEXISTENCE. ⛔ Nothing here changes A — ACCEPT.
+
+⭐⭐ THE FOUR LAYERS, AND EACH DOES **NOT** IMPLY THE NEXT:
+  ① RETRIEVAL  "these records were selected for this query"
+  ② ADMISSION HISTORY "this pair was / was not admitted, and why"
+  ③ PRESENTATION "these records are shown to the model together"
+  ④ MODEL INTERPRETATION "therefore they mean X in relation to one another"
+```
+
+⭐⭐ **WHAT SHIPPED — 3 files, 1 new check, ⛔ NO migration (the schema was already sufficient):**
+
+```
+memory-admission-read.js   ⭐ PURE. FOUR states: NO-RECORDED-VERDICT · ADMIT · ABSTAIN · DEFER
+                           ⛔⛔ AND THE ABSENCE OF ANY compatible/conflict/contradiction/current HELPER
+                              IS THE CONTRACT — asserted over the real export surface AND over the
+                              source with comments stripped (so the file's own prohibitions can't
+                              make the control vacuous).
+store.admissionFactsFor()  ⭐ reads the ledger PAIRWISE + DIRECTIONALLY, scoped like every other read.
+                           ⚠️ fails to an EMPTY LIST ⇒ reads as NO-RECORDED-VERDICT, ⛔ never as DEFER.
+recall().admission         ⭐ THE NARROWEST REAL CONSUMER. ⛔ NOT `search()`, ⛔ NOT `view()`.
+```
+
+⛔⛔ **AND WHY `recall()` AND NOT `search()` — the narrowing is REAL, and control H2 asserts it:**
+`search()` feeds `recall_memory` and **reaches the model**; `recall()` feeds the passive path, whose route
+reduces every hit to `.content` (⭐ asserted on the route's real source, control H1) ⇒ a DEVELOPER/OPERATOR
+channel that **structurally cannot leak**. ⭐ Same two-audience split the write-side receipt already uses.
+
+⚠️⛔ **THE LOAD-BEARING DISTINCTION, AND IT IS THE EASIEST THING TO BREAK:**
+```
+NO-RECORDED-VERDICT ≠ DEFER
+  DEFER  = an evaluation HAPPENED and could not establish the warrant
+  ABSENT = NO SUCH EVALUATION IS RECORDED
+⇒ ⭐ RED-PROVED: making absence return DEFER fails control A. ⭐ Adding a compatibility helper fails 0 + 0b.
+```
+
+⭐ **CONTROLS A–G + H all green (25 checks)**, incl. ⭐ E (one memory in two pairs with DIFFERENT outcomes,
+both preserved ⇒ ⛔ a row-level `memory.admission` is not even expressible) · ⭐ E2 (the same unordered
+pair carries DIFFERENT records in the two directions ⇒ direction is preserved) · ⭐ G (the projection is
+unmoved by the slot's CURRENT binding — ⛔ it never follows memory→slot→question to reinterpret history).
+
+⏸⛔ **STOPPED AT THE ARCHITECTURAL BOUNDARY, DELIBERATELY.** The projection exists and is proven; ⛔ **NO
+model-facing representation was built**, because *"whether ADMIT/DEFER/ABSTAIN authorizes a particular
+presentation behavior"* is on Ote's own stop-condition list. ⏸ That decision is next.
 
 
 
