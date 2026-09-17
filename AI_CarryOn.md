@@ -676,6 +676,44 @@ decision. ⛔ Not reopened.
    THROWN AWAY.
    ⚠️ INSTRUMENT NOTE #23: the check caught MY OWN ARITHMETIC — I wrote "six of eight" and asserted
    `missing.length === 2`; three do not exist. ⭐ A declared count that the assertion can falsify.
+㊺ ✅⭐⭐⭐ **FOUR RULINGS RECORDED (Ote, 2026-09-17)** → `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md`.
+   ⑤ ✅ **RULED** — *"A proposition is a distinct semantic object represented today by the constructed
+     `content` sentence, BUT PROPOSITION IDENTITY/EQUIVALENCE DOES NOT EXIST AS A SEMANTIC OPERATION."*
+     ✅ proposition EXISTS as a representation · ⛔ proposition EQUIVALENCE does not exist ·
+     ⚠️ `norm(value)` is ONLY the current competition proxy ·
+     ⛔⛔ **SAME VALUE MUST NOT BE TREATED AS SAME PROPOSITION** ·
+     ⛔⛔ **DIFFERENT VALUE MUST NOT BE TREATED AS DIFFERENT PROPOSITION**
+     ⭐ THE 4 COUNTEREXAMPLES PRESERVED. ⛔ Proposition representation NOT redesigned.
+   ⑦ ✅ **RULED** — *"DURABLE MEMORY IS NOT INHERENTLY SLOT-SHAPED. Slot participation currently follows
+     WRITER/CODE PATH, ⛔ not an established semantic property of memory."*
+     ⛔ slotless ≠ deficient · ⛔ not a universal invariant · ⭐ question/slot/competition apply ONLY where
+     their requirements are ESTABLISHED · ⛔ the lesson + project-decision exclusions are NOT semantic
+     decisions. ⛔ ROUTING NOT CHANGED.
+   ④ ✅ **NEGATIVE RULING ONLY** — *"`invalid_at` IS NOT A PROPOSITION-TRUTH STATE."* ⛔ NO positive
+     replacement definition; ⏸ THE POSITIVE DEFINITION STAYS OPEN. ⭐ Mira remains the anchor for *"true
+     but no longer current."* ⭐ AND: reversibility is STRUCTURAL through `supersedes_id`, ⛔ not determined
+     by event semantics.
+   ⑥ ✅ **PARTIAL** — *"TRANSITION IS A SEMANTIC/EVENT LAYER DISTINCT FROM ROW STATE."* Different events
+     produce the SAME row-state field; RECOVERABILITY is a SEPARATE STRUCTURAL PROPERTY set by pointers.
+     ⛔ TAXONOMY NOT FINALISED — the five evidenced events remain EVIDENCE; collapse + lesson-revise have
+     NOT fired organically.
+㊻ ⭐⭐⭐ **WHAT THE RULINGS EXPOSE** (⛔ observations, ⛔ not rulings) — ADR §"What the rulings expose":
+   E1 ⭐⭐⭐ **BOTH BRANCHES OF `resolveConflict` REST ON INFERENCES ⑤ FORBIDS** — noop assumes *same value
+      ⇒ same proposition*; update assumes *different value ⇒ different proposition*. ⛔ NOT ONE BRANCH — BOTH.
+   E2 ⭐⭐ **COLLAPSE NOW HAS NO AVAILABLE JUSTIFICATION AT ALL** — ② says membership establishes nothing,
+      ⑤ says proposition equivalence does not exist, and collapse REQUIRES pairwise equivalence.
+      ⚠️ LATENT — collapse has never fired organically.
+   E3 ⭐⭐ **THE EPHEMERAL ARENA CONTRADICTS ⑦** — `buildSlotView` synthesises an arena for EVERY slotless
+      live row (53 of 118) and P15 does the same with no slot ⇒ competition semantics applied where ⑦ says
+      they do not apply, ⛔ BY CONSTRUCTION, with ⛔ NO ABSTENTION for an existing row.
+   E4 ⚠️ ③'s NUANCE STILL NOT HELD — absent vs wrong `claimKind` both REFUSE.
+   E5 ⚠️ **`attribute` IS LOAD-BEARING FOR ⑤ AND FORBIDDEN BY ③** — the proposition is built from it; it
+      may not carry question identity. ⛔ UNRESOLVED.
+   E6 ⚠️ THE `invalid_at` DOCSTRING IS NOW KNOWN-WRONG BY RULING (*"expired IN THE WORLD"*). ⛔ FLAGGED,
+      ⛔ NOT CHANGED.
+   ⏸ NEXT DECISIONS EXPOSED, ⛔ NAMED ONLY: **⑧** what may `resolveConflict` do (blocked on ①) ·
+   **⑨** may an arena be SYNTHESISED for a family with no established slot semantics (⑦+② don't answer it).
+   ⇒ ⭐⭐⭐ **THE CRITICAL PATH IS NOW ① → ⑧.**
 ```
 
 ---

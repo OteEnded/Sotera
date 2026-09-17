@@ -11116,3 +11116,69 @@ reversed at two edges, and the one input that could invert it (`claimKind`) arri
 
 **Verification:** seam batch green · evidence baseline green · unit **753/753** · canary 18 rows / 0 slots ·
 047 one question · both collisions armed. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · FOUR RULINGS RECORDED — ⑤ ⑦ ruled, ④ negative-only, ⑥ partial
+
+⛔ Documentation only. No code, schema, migrations, historical repair, canary activation, A1 authority change
+or behavioural change. Evidence baseline and canary unchanged.
+
+**Updated** → `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` (rulings + per-decision state + a new
+§"What the rulings expose") · `AI_CarryOn` §0-B ㊺㊻ · a ruling banner on
+`INVESTIGATION_SOTERA_BATCH_4567.md`.
+
+### The rulings, as recorded
+
+**⑤ RULED** — *a proposition is a distinct semantic object represented today by the constructed `content`
+sentence, but proposition identity/equivalence does not exist as a semantic operation.* ⇒ proposition
+**exists** as a representation; equivalence **does not**; `norm(value)` is **only** the current competition
+proxy; **same value must not be treated as same proposition**; **different value must not be treated as
+different proposition**. The four corpus counterexamples are preserved; representation not redesigned.
+
+**⑦ RULED** — *durable memory is not inherently slot-shaped; slot participation follows writer/code path,
+not an established semantic property.* ⇒ slotless ≠ deficient; not a universal invariant;
+question/slot/competition apply **only where their requirements are established**; the lesson and
+project-decision exclusions are **not** semantic decisions. Routing unchanged.
+
+**④ NEGATIVE RULING ONLY** — *`invalid_at` is not a proposition-truth state.* The positive definition stays
+**open**. Mira remains the anchor for *"true but no longer current."* Reversibility remains **structural**
+through `supersedes_id`, not determined by event semantics.
+
+**⑥ PARTIAL** — *transition is a semantic/event layer distinct from row state.* Different events produce the
+same row-state field; recoverability is a separate structural property set by pointers. **Taxonomy not
+finalised** — the five evidenced events remain evidence; collapse and lesson-revise have not fired
+organically.
+
+### ⭐ What the rulings expose (observations, not rulings)
+
+**E1** — ⭐⭐⭐ **both branches of `resolveConflict` rest on inferences ⑤ forbids.** The noop branch assumes
+*same value ⇒ same proposition*; the update branch assumes *different value ⇒ different proposition*. Not
+one branch — both.
+
+**E2** — **collapse now has no available justification at all.** ② says membership establishes nothing, ⑤
+says proposition equivalence does not exist, and collapse requires pairwise equivalence. ⚠️ Latent: collapse
+has never fired organically.
+
+**E3** — **the ephemeral arena contradicts ⑦.** `buildSlotView` synthesises an arena for every slotless live
+row (53 of 118) and P15 does the same with no slot ⇒ competition semantics are applied where ⑦ says they do
+not apply, by construction, with no abstention available for an existing row.
+
+**E4** — ③'s nuance still not held: absent vs wrong `claimKind` both REFUSE.
+
+**E5** — **`attribute` is load-bearing for ⑤ and forbidden by ③.** The proposition is built from it; it may
+not carry question identity. Unresolved.
+
+**E6** — the `invalid_at` docstring (*"expired in the world"*) is now **known-wrong by ruling**. Flagged,
+**not changed**.
+
+### Next decisions exposed — named only, not opened
+
+**⑧** what may `resolveConflict` do, given E1 — **blocked on ①**.
+**⑨** may an arena be **synthesised** for a family with no established slot semantics — ⑦ and ② do not
+answer it.
+
+⇒ ⭐ **the critical path is now ① → ⑧.**
+
+**Verification:** evidence baseline green · unit **753/753** · canary 18 rows / 0 slots · 047 one question ·
+both collisions armed. ⛔ Nothing written to the database; no code touched.
