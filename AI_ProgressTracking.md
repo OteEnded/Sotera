@@ -11964,3 +11964,52 @@ manufacture an unsupported 'current answer.'"* **Elicitation stays a separate fu
 elicitation.
 
 ⛔ **Build still not authorized.** unit **753/753** · baseline green · canary 18 / 0 / 0 · 047 untouched.
+
+---
+
+## 2026-09-17 · the build, and the collision it exposed — ⏸ build NOT accepted
+
+**Built and committed** (`1763eef`): the pure admission gate, migration **053**, the `reconcileFact`
+grouping→admission split, `question_id_at_admission`'s first production reader, and both required controls.
+
+⭐ **What works:** both controls pass · per-pair admission proved in a single write (an unpinned row sharing
+the bucket DEFERRED while the established one was displaced) · 053 proves its own CHECK refuses an ABSTAIN
+with a missing side and accepts a DEFER with one · shelter/work-schedule blocked at its strongest signal ·
+ledger volume **measured** — 7 DEFER rows from two control writes · ledger back to 0.
+
+⚠️ **My own defects, found and fixed:** `ANY(:i::uuid[])` in a teardown (Sequelize expands arrays as a comma
+list) · fixture names that grouped with each other at ≥0.7 and made ledger counts meaningless · a control
+asserting *"the ledger is empty"*, a global property it doesn't own.
+
+⚠️⚠️ **And a correction I had to make:** I first reported the three failing checks as pre-existing. **Wrong.**
+`PortableComponents` is not a git repo, so my `git stash` there silently did nothing — the service kept the
+split while the host lost the port, which *is* the failure mode. Redone by reverting the service by hand:
+**they pass pre-change and fail post-change. They are genuine regressions from the build.**
+
+### ⭐⭐⭐ The semantic pass Ote asked for — `ANALYSIS_SOTERA_REPLACEMENT_REFUSED_COLLISION.md`
+
+**Ote's own diagram already answers his question:** the DEFER branch never reaches the replacement
+authority. **All three failing checks are on the DEFER/ABSTAIN side** — they assert a `REPLACEMENT_REFUSED`
+on a path his diagram routes around the authority entirely.
+
+- **`governsReplacement` is not bypassed.** `!isUpdate ⇒ NOT-IN-SCOPE` is its own specified answer:
+  *"nothing is being replaced. ⛔ Not a DEFER; the gate has no business here."*
+- **Its subject is split** — the *replacement* by intent (*"may this write REPLACE…"*), the *whole write* by
+  effect (the throw precedes `txn_memories.create`). And the module named the trade: *"a refusal leaves the
+  world as it found it. That is the correct trade, and it is a trade."* **Ote's proposal reverses it.**
+- **On the DEFER branch there is no replacement to refuse** — recording one would record the refusal of an
+  act nobody attempted, the shape 053's own constraint rejects. **On the ADMIT branch his reading is
+  coherent and already reachable.**
+- **Self-authorisation is explicitly and ratifiedly replacement-scoped** — *"IT REFUSES ONLY A REPLACEMENT…
+  a self-authorised NEW write is left to legacy — it simply never earns a pin."* ⭐ And **measured**: the
+  constructed same-occasion attack neither displaces nor earns a pin. **Its substance is intact.**
+- **Two of the three checks are instruments, not contracts** — transport and reachability proofs that used
+  the refusal as their *observable*. Their signal moved.
+- ⚠️ **One real loss:** the caller no longer receives an actionable error; the remedy now lives in a ledger
+  row the caller does not see.
+
+> ## ⏸ **It reduces to one sentence:** when an undeclared claim reaches a **governed** slot, should the
+> ## system **write it and let it coexist, recording a DEFER** — or **refuse the write, as M2 does today**?
+> (a) is A — ACCEPT applied consistently. (b) is M2's ratified trade. They cannot both hold.
+
+⛔ **M2, the three checks and admission behaviour: untouched. Build not accepted.**
