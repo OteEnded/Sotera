@@ -10994,3 +10994,70 @@ vacuous. Now strips line-leading `//` and `*` before collapsing, anchors still w
 
 **Verification:** claim trace green · evidence baseline green · unit **753/753** · 047 untouched (1
 question) · canary intact (18 rows, 0 slots) · both armed collisions armed. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · BATCH ④⑤⑥⑦ — four investigations, zero rulings
+
+Method change from Ote: **batch investigations that share evidence, never batch the rulings.** ⛔ Read-only;
+no implementation, schema, historical repair or canary activation; 047 untouched; A1 shadow; both collisions
+armed. ①②③ binding and not revisited.
+
+**Doc** → `Reference/docs/INVESTIGATION_SOTERA_BATCH_4567.md`
+**Check** → `test/checks/memory-semantics-batch.mjs`
+
+### ④ Reversibility is structural, not semantic
+
+81 dead rows · 77 pointed at by a `supersedes_id` · **4 pointed at by nothing ⇒ structurally unreachable.**
+`reviveSuperseded` can only reach a row via `supersedes_id`, so **a row is recoverable iff something
+happened to point at it** — a *different field*, set by some writers and not others. Two writers that mean
+different things get the same reversibility; one writer can produce both outcomes in a single act.
+
+⚠️ **And the audit disagrees with the row state**: `user|location` carries a `supersede` audit while nothing
+points at it. ⛔ The record does not explain it, and I did not invent a story — two of the four are operator
+maintenance acts on identity rows and one is a `retention-check` fixture.
+
+### ⑤ The proposition **is** in the row — constructed at write time
+
+147 of 147 live semantic rows carry `content`; **content === value on zero**; `value` is **nested inside**
+`content` on 83, in the shape `"<entity>'s <attribute>: <value>"`.
+
+⇒ **two fields, two consumers: retrieval returns `content`; the conflict rule reads `value`.** What she
+recalls and what competes are different strings on the same row.
+
+⚠️⚠️ And the constructed proposition is built from **`attribute`** — exactly the label ③ ruled cannot carry
+question identity. **The proposition inherits that defect.** 42 rows have a proposition and no value.
+Mira's `content` is still **tenseless**, so *"true but no longer current"* remains unstatable. The corpus
+holds a counterexample in each direction: Bangkok (same value, two propositions) and the 18 lessons (18
+propositions, same empty value).
+
+### ⑥ Five event kinds evidenced; two have never fired
+
+re-statement 4 · world change 1 · operator repair 1 · **mis-routing 2** · partial-coordinated 1 ·
+⛔ **collapse 0** (zero `collapse` audit rows ever) · ⛔ **lesson revise 0**.
+
+⚠️ The two that never fired are the one with the **strongest** claim (collapse asserts equivalence) and the
+only **actor-declared** one (lesson revise).
+
+### ⑦ Slot participation follows the writer's code path
+
+5 families route (all completely), 8 do not. `lesson-host` and `ingest` never call `reconcileFact`.
+**It cuts both ways:** a `project-decision` arguably *has* a current answer and is excluded; a `lesson`
+arguably *does not need* one and is excluded by the same accident. ⛔ **Neither exclusion was a semantic
+decision.** Slotless is treated as an empirical shape, not a deficiency.
+
+### The dependency edges — tested, not assumed
+
+**Two of five fail and one is inverted.** `observation→proposition` ✅ · `proposition→question` ⛔ (it runs
+through `attribute`) · **`question→membership` ⛔ REVERSED — membership is chosen first and the question is
+reached *through* the slot** · `membership→transition` ⚠️ holds too strongly · `transition→row-state`
+⚠️ holds but lossily.
+
+⇒ **the pipeline is not a pipeline.**
+
+The doc also carries the full cross-matrix (Observation | Proposition | Question | Membership | Transition |
+Row State × what exists / who declares / may be inferred / persisted / reversible / evidence at the seam /
+what the implementation does / what is discarded) and the cross-investigation dependencies.
+
+**Verification:** batch check green · evidence baseline green · unit **753/753** · canary 18 rows / 0 slots ·
+047 one question · both collisions armed. ⛔ Nothing was written.

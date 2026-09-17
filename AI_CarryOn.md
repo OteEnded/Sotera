@@ -614,6 +614,39 @@ decision. ⛔ Not reopened.
    THE PHRASE** where the comment wrapped mid-sentence. ⛔ THE TEMPTING FIX — SHORTENING THE ANCHOR — WOULD
    HAVE MADE IT PASS **AND** VACUOUS. ⇒ ⭐ STRIP LINE-LEADING `//` AND `*` **BEFORE** COLLAPSING, and keep
    the anchor a WHOLE SENTENCE. ⚠️ Same family as #17 (a Postgres `::` cast read as an object-key colon).
+㊸ ⭐⭐⭐ **METHOD CHANGE (Ote, 2026-09-17): BATCH THE INVESTIGATIONS, ⛔ NEVER BATCH THE RULINGS.**
+   ⇒ ④⑤⑥⑦ investigated together → `INVESTIGATION_SOTERA_BATCH_4567.md` ·
+   `test/checks/memory-semantics-batch.mjs`. ⛔ FOUR RULINGS STILL OUTSTANDING, to be made SEPARATELY.
+   ④ ⭐⭐⭐ **REVERSIBILITY IS STRUCTURAL, ⛔ NOT SEMANTIC.** 81 dead rows · 77 pointed at by a
+     `supersedes_id` · **4 POINTED AT BY NOTHING ⇒ STRUCTURALLY UNREACHABLE.** `reviveSuperseded` can only
+     reach a row VIA `supersedes_id` ⇒ ⭐ A ROW IS RECOVERABLE IFF SOMETHING HAPPENED TO POINT AT IT — a
+     DIFFERENT FIELD. ⇒ ⚠️ two writers meaning different things get the SAME reversibility; ONE writer can
+     produce BOTH outcomes in one act. ⚠️ AND THE AUDIT DISAGREES WITH THE ROW STATE on `user|location`
+     (audit says `supersede`, nothing points at it) — ⛔ THE RECORD DOES NOT EXPLAIN IT; no story invented.
+   ⑤ ⭐⭐⭐ **THE PROPOSITION *IS* IN THE ROW — CONSTRUCTED AT WRITE TIME INTO `content`** from
+     `(entity + attribute + value)`: 147/147 live semantic rows have `content`, **0 have content===value**,
+     83 have `value` NESTED INSIDE `content` (`"<entity>'s <attribute>: <value>"`).
+     ⇒ ⭐⭐ **TWO FIELDS, TWO CONSUMERS: RETRIEVAL RETURNS `content`; THE CONFLICT RULE READS `value`.**
+     ⇒ WHAT SHE RECALLS AND WHAT COMPETES ARE DIFFERENT STRINGS ON THE SAME ROW.
+     ⚠️⚠️ AND THE CONSTRUCTED PROPOSITION IS BUILT FROM `attribute` — ⛔ EXACTLY THE LABEL ③ RULED CANNOT
+     CARRY QUESTION IDENTITY ⇒ **THE PROPOSITION INHERITS THAT DEFECT.** ⚠️ 42 rows have a proposition and
+     NO value ⇒ invisible to the conflict rule. ⚠️ Mira's `content` is STILL TENSELESS ⇒ "true but not
+     current" remains unstatable. ⭐ Counterexample in BOTH directions: Bangkok (same value, 2 propositions)
+     and the 18 lessons (18 propositions, same empty value).
+   ⑥ ⭐ **FIVE EVENT KINDS EVIDENCED; TWO HAVE NEVER FIRED.** re-statement 4 · world change 1 · operator
+     repair 1 · **MIS-ROUTING 2** · partial-coordinated 1 · ⛔ COLLAPSE **0** (zero `collapse` audit rows
+     EVER) · ⛔ LESSON REVISE **0**. ⇒ ⚠️ THE TWO THAT NEVER FIRED ARE THE ONE WITH THE STRONGEST CLAIM
+     (collapse asserts equivalence) AND THE ONLY ACTOR-DECLARED ONE (lesson revise).
+   ⑦ ⭐⭐⭐ **SLOT PARTICIPATION IS ALL-OR-NOTHING PER FAMILY AND TRACKS THE WRITER'S CODE PATH, ⛔ NOT THE
+     NATURE OF THE MEMORY.** 5 families route (ALL completely), 8 do not. `lesson-host` and `ingest` never
+     call `reconcileFact`. ⚠️ CUTS BOTH WAYS: a `project-decision` arguably HAS a current answer and is
+     excluded; a `lesson` arguably does NOT need one and is excluded BY THE SAME ACCIDENT.
+     ⛔ **NEITHER EXCLUSION WAS A SEMANTIC DECISION.**
+   ⭐⭐⭐ THE DEPENDENCY EDGES, **TESTED ⛔ NOT ASSUMED** — 2 of 5 FAIL AND 1 IS **INVERTED**:
+     observation→proposition ✅ · proposition→question ⛔ (runs through `attribute`) ·
+     **question→membership ⛔ REVERSED — membership is chosen FIRST, the question is reached THROUGH the
+     slot** · membership→transition ⚠️ holds TOO STRONGLY · transition→row-state ⚠️ holds but LOSSILY.
+   ⇒ ⭐ **THE PIPELINE IS NOT A PIPELINE.**
 ```
 
 ---
