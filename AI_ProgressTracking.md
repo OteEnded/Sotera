@@ -10228,3 +10228,68 @@ reinterpretation, no historical repair). Dreaming frozen, same two-layer blocker
 **Verification:** membership census green · slot-authority map green · routing check green · 047 scope green
 · relation census green · unit **753/753** · evidence baseline green · both collisions armed.
 ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · MEMBERSHIP CONSEQUENCE CENSUS — what slot_id actually means
+
+Ote: *"If we changed only `slot_id`, what semantic behaviour changes elsewhere? That gives us the actual
+meaning of membership much better than the column name does."* ⛔ Read-only. The `sotera | lesson` collision
+left explicitly unarmed and untested — no alias, no slot split, no row movement, no question declaration.
+
+**Instrument** → `test/checks/membership-consequence-census.mjs`.
+
+### The answer: C — replacement competition, and almost nothing else
+
+**Affects:** replacement (`buildSlotView → matches → primary → resolveConflict → supersede/collapse`),
+forget/revive (`findLiveInSlot`), M2 governance and bind eligibility, plus lint/admin/maintenance.
+
+**Does not reach any cognitive surface.** Zero `slot_id` references in `reflection-host`,
+`reflection-lifecycle-host`, `context-composer`, `memory-cognition-host`, `retention-host`, `dreaming-host`,
+`dreaming-candidate-host`, or the retrieval path. ⇒ **what Sotera recalls does not depend on which slot a row
+is in.** (Stated as an absence claim from reference counts — an argument in aggregate, not a proof.)
+
+⇒ **not A** (the docstring calls it *"the long-lived identity of the concept"*, but nothing downstream reads
+it as an identity); **not D** (retrieval never consults it); **B is an effect** of the competition rule
+rather than an implementation of it. A naming hazard also surfaced: `dreaming-candidate-host` returns
+`slot: {attribute, value}` — a different thing wearing the same word.
+
+### ⭐ The system has already classified membership — as NOT semantic
+
+D1 Phase 3's `SEMANTIC_FIELDS` **excludes `slot_id` explicitly**: *"deliberately NOT here … they are
+placement and index state."* ⇒ **the orphan adoption is not an oversight, it is a classification** — it
+patches only `slot_id`, so `isSemantic` is false and no writer is required.
+
+**The tension, in the system's own words:** the one gate built to enforce *"every memory-semantic state
+mutation requires a declared writer"* calls **placement** the field that decides **which belief is
+destroyed**. That reframes the problem — it was never a forgotten gate; the system holds a position on what
+membership is, and the consequence trace measures that position to be wrong.
+
+⚠️ Labelled as a **source claim**: `isSemantic` is internal and `update()` returns early on an empty id list
+*before* the gate, so there is no zero-write behavioural probe. Two independent anchors used instead.
+
+### ⭐⭐⭐ same Slot ≠ same proposition — measured
+
+18 live rows share `sotera | lesson`: **18 distinct `content`, 18 NULL `value`.** And that gap is the
+mechanism — `resolveConflict` compares `norm(value)`, which is `''` on all eighteen, so **the system would
+see 18 identical answers where there are 18 different lessons.** The pure plan (computed and **discarded**):
+`update`, supersedes 1, collapse 17 ⇒ all 18 invalidated.
+
+Both halves true at once: a Slot is **not** a proposition identity, **and** sharing one makes rows mutually
+exclusive. ⇒ the question now sitting under A-D4: **what makes multiple memories legitimate members of one
+Slot?**
+
+### Deliberately not done
+
+No audit action added — per Ote: *"first we need to know what semantic event we would actually be recording.
+Otherwise we'd just create an accountable record of an operation whose meaning is still undefined."* No ACT,
+no transaction, adoption path not moved into `finalizeSlot`. 047 untouched. Replacement semantics untouched.
+Dreaming frozen.
+
+**Instrument defect 20:** I read `value` on rows that keep their text in `content`, and reported *"1 distinct
+value of 18"* — technically true, completely misleading. The correction made the finding **stronger**: the
+field I got wrong is the same field the production rule gets wrong, which is how the real mechanism surfaced.
+
+**Verification:** consequence census green · membership census green · slot-authority map green · routing
+check green · 047 scope green · relation census green · unit **753/753** · evidence baseline green · both
+collisions armed · `sotera | lesson` still unarmed. ⛔ Nothing was written.

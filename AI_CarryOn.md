@@ -273,6 +273,30 @@ decision. ⛔ Not reopened.
    ⛔⛔ THE ADOPTION PATH IS NOT REPAIRED — not moved into `finalizeSlot`, no ACT, no transaction, no audit.
    *"First establish WHAT IS A SLOT MEMBERSHIP CLAIM. Only then decide who is authorized to make it."*
    → `INVESTIGATION_SOTERA_MEMBERSHIP_SEMANTICS.md` · `test/checks/membership-semantics-census.mjs`
+㉕ ⭐⭐⭐ WHAT MEMBERSHIP MEANS — traced 2026-09-17 by CONSEQUENCE, ⛔ not by the column name.
+   ⭐ IF ONLY `slot_id` CHANGED: which belief may be DISPLACED · what a forget REVIVES · whether M2 can
+   GATE. ⛔ AND NOTHING ELSE. ZERO references to `slot_id` in reflection-host · reflection-lifecycle ·
+   context-composer · memory-cognition-host · retention-host · dreaming-host · dreaming-candidate-host ·
+   and the RETRIEVAL path. ⇒ ⭐⭐ WHAT SHE RECALLS DOES NOT DEPEND ON WHICH SLOT A ROW IS IN.
+   ⇒ ⭐⭐⭐ MEMBERSHIP IS **C · REPLACEMENT COMPETITION GROUPING**. ⛔ NOT A (conceptual identity — the
+   docstring says so, ⛔ nothing downstream READS it as one) · ⛔ NOT D (retrieval never consults it) ·
+   ⚠️ B is an EFFECT of the competition rule, ⛔ not an implementation.
+   ⚠️ NAMING HAZARD: `dreaming-candidate-host` returns `slot:{attribute,value}` — ⛔ A DIFFERENT "SLOT".
+   ⭐⭐⭐ AND THE SYSTEM HAS ALREADY CLASSIFIED MEMBERSHIP — AS **NOT SEMANTIC**. D1 Phase 3's
+   `SEMANTIC_FIELDS` EXCLUDES `slot_id` explicitly: *"deliberately NOT here … they are PLACEMENT AND INDEX
+   STATE."* ⇒ ⛔ THE ORPHAN ADOPTION IS NOT AN OVERSIGHT, IT IS A CLASSIFICATION — it patches ONLY
+   `slot_id`, so `isSemantic` is false and no writer is required.
+   ⚠️⚠️ THE TENSION IN THE SYSTEM'S OWN WORDS: the one gate built to enforce *"every memory-SEMANTIC state
+   mutation requires a declared writer"* calls PLACEMENT the field that decides WHICH BELIEF IS DESTROYED.
+   ⭐⭐⭐ SAME SLOT ≠ SAME PROPOSITION — MEASURED. 18 live `sotera|lesson` rows: **18 distinct CONTENT,
+   18 NULL `value`**. ⚠️ AND THAT GAP IS THE MECHANISM — `resolveConflict` compares `norm(value)`, `''` on
+   all 18 ⇒ IT WOULD SEE 18 IDENTICAL ANSWERS WHERE THERE ARE 18 DIFFERENT LESSONS. The PURE plan
+   (computed + DISCARDED): `update` · supersedes 1 · collapse 17 ⇒ all 18 invalidated.
+   ⇒ ⭐ BOTH HALVES TRUE: a Slot is ⛔ NOT a proposition identity, AND sharing one makes rows MUTUALLY
+   EXCLUSIVE. ⇒ THE QUESTION UNDER A-D4: **what makes multiple memories legitimate members of one Slot?**
+   ⛔ COLLISION LEFT UNARMED + UNTESTED · ⛔ NO AUDIT ROW ADDED — *"first we need to know what semantic
+   event we would be recording."*
+   → `INVESTIGATION_SOTERA_MEMBERSHIP_CONSEQUENCES.md` · `test/checks/membership-consequence-census.mjs`
 ```
 
 ---
