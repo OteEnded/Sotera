@@ -659,6 +659,61 @@ export function createSequelizeMemoryStore({ db, persona = null, userId = null, 
       }
     },
 
+    // ⭐⭐⭐ THE READ SIDE OF THE LEDGER — *"what admission facts are RECORDED concerning these memories?"*
+    //
+    // ⭐ Ote's ruling, 2026-09-17: *"A downstream consumer may READ an existing admission verdict as a
+    // factual record of what the memory system established during the admission act."* ⛔ And nothing more:
+    // the verdict is a fact about the SYSTEM'S OWN DECISION, ⛔ not a fact about the world.
+    //
+    // ⛔⛔ THIS METHOD ANSWERS ONE QUESTION AND REFUSES THE ADJACENT ONES. It does not say whether two
+    // memories are compatible, contradictory, jointly current or jointly presentable — see
+    // `memory-admission-read.js`, where the ABSENCE of those helpers is the contract.
+    //
+    // ⭐⭐ DIRECTION IS PRESERVED. The ledger records `incoming_id → incumbent_id`; the rows come back
+    // carrying both, in order. ⛔ The caller is never handed a symmetric `A ↔ B`, because the ACT was not.
+    //
+    // ⛔ SCOPED like every other read here — persona + user. A ledger row is as scoped as the memories it
+    // names, and the store owns scope (memory-store-port.js). ⛔ The caller never says `persona`.
+    //
+    // ⚠️ FAILS TO AN EMPTY LIST, AND THAT IS SAFE **ONLY BECAUSE OF HOW THE CALLER READS IT**: an empty
+    // projection yields `NO-RECORDED-VERDICT`, which claims nothing. ⛔ It must NEVER be read as DEFER —
+    // that would manufacture an evaluation that did not happen. ⓘ The pure module enforces the distinction.
+    async admissionFactsFor(ids = []) {
+      const list = [...new Set((ids || []).filter(Boolean).map(String))]
+      if (list.length < 2) return [] // ⭐ a pair needs two; ⛔ no query, and no claim
+      try {
+        const { schema: sch } = txn_memories.getTableName()
+        if (!sch) return []
+        // ⭐ BIND, ⛔ not `replacements`: Sequelize expands an array into a comma list, so `ANY(:x::uuid[])`
+        // is a syntax error. ⓘ Same proven shape as `admissionKeysFor` directly above.
+        const rows = await txn_memories.sequelize.query(
+          `SELECT incoming_id::text   AS incoming_id,
+                  incumbent_id::text  AS incumbent_id,
+                  incoming_question_key, incumbent_question_key,
+                  outcome, why, route, created_at
+             FROM "${sch}"."log_memory_admissions"
+            WHERE incoming_id = ANY($1::uuid[]) AND incumbent_id = ANY($1::uuid[])
+              AND persona IS NOT DISTINCT FROM $2 AND user_id IS NOT DISTINCT FROM $3
+            ORDER BY created_at ASC`,
+          { bind: [list, P ?? null, U ?? null], type: 'SELECT' },
+        )
+        return rows.map((r) => ({
+          incomingId: r.incoming_id,
+          incumbentId: r.incumbent_id,
+          incomingQuestionKey: r.incoming_question_key ?? null,
+          incumbentQuestionKey: r.incumbent_question_key ?? null,
+          outcome: r.outcome,
+          why: r.why ?? null,
+          route: r.route ?? null,
+          recordedAt: r.created_at ?? null,
+        }))
+      } catch (e) {
+        const msg = `[memory] could not read the admission ledger — every pair reads as NO-RECORDED-VERDICT: ${e?.message}`
+        if (log?.warn) log.warn({ err: e?.message }, msg); else console.warn(msg)
+        return []
+      }
+    },
+
     async findLiveInSlot({ slotId = null, entity = null, attribute = null } = {}) {
       // Prefer the slot's real identity; fall back to (entity, attribute) for rows written before the
       // Slot store existed. Rows, not a count: reviveSuperseded asks "is it empty?", restore must name

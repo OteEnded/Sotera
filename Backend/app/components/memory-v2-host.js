@@ -12,6 +12,7 @@ import { makeEmbedder } from './memory-embed-host.js'
 import { rowsBySlotIndex } from '@ote/memory/cognition/memory-slot-resolver.js'
 import { buildSlotResolver } from './memory-resolver-host.js'
 import { admitCandidates } from './memory-admission-gate.js'
+import { projectAdmissionFacts } from './memory-admission-read.js'
 
 // Until Personas are first-class (Milestone B) the chat site runs one default persona → null.
 // null persona + null user = the platform/root scope; a real user id scopes per-(persona, user).
@@ -109,9 +110,19 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
     incumbentKeyById: await store.admissionKeysFor(candidates), // ⭐ each ROW's own pin. ⛔ never the slot.
   })
 
+  // ⭐⭐⭐ THE READ-SIDE PROJECTION (ruled 2026-09-17) — the HOST owns the ledger, the PURE module owns
+  // the semantics, and ⛔ neither of them owns a presentation policy.
+  //
+  // ⛔⛔ THE FOUR STATES STAY FOUR. `projectAdmissionFacts` reports only pairs it actually has on record;
+  // a pair with no row is answered by `verdictBetween` as **NO-RECORDED-VERDICT**, which is ⛔ NOT a DEFER.
+  // ⚠️ A DEFER means an evaluation HAPPENED and could not establish the warrant. An absent row means no
+  // such evaluation is recorded. ⛔ Collapsing them would manufacture an act that never occurred.
+  const admissionFacts = async ({ ids = [] } = {}) =>
+    projectAdmissionFacts(await store.admissionFactsFor(ids), ids)
+
   return createMemoryV2Service({
     store, slotStore, auditLog,
     embed, persona, userId, sourceMessageId, log, self, slotResolver, actor,
-    admitCompetition,
+    admitCompetition, admissionFacts,
   })
 }
