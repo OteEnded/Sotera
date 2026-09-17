@@ -12061,3 +12061,49 @@ statements, summarising verdicts already in scope. ⚠️ One sub-question left 
 incumbent ids it deferred against, or leave that to the ledger.
 
 ⏸ **Build still not accepted.** unit **753/753** · baseline green · ledger clean · 047 untouched.
+
+---
+
+## 2026-09-17 · DEFER accountability shipped · Controls D and E · ⭐ the double gate proved reachable
+
+**Committed** `5da44ef`. ⛔ No change to M2, admission semantics, `settleWrite`, `forModel`,
+`retention-host`, the extractor or the transport checks.
+
+**The summary rides the SUCCESSFUL receipt** — `ok:true`, id present, `state:'persisted'` — ⛔ never the
+refusal channel. `evaluated: 0` means *nothing comparable was found*; `evaluated: n, deferred: n` means
+*n were found and competition was declined*. ⛔ **No incumbent ids** (receipt = what happened to this write;
+ledger = which pairs were evaluated) and ⛔ **no single `outcome` field**, because one write can legitimately
+produce several verdicts.
+
+**Control D** proves both halves: the developer can tell a DEFER from a NEW, and **`forModel` is
+byte-identical** for the two — the model is not handed a remedy it cannot act on.
+
+⭐⭐⭐ **Control E proves `ADMIT → REPLACEMENT_REFUSED` is genuinely reachable**, via a **rebind**: the slot
+points at a second question while the incumbent's pin still records the first, so admission ADMITs and M2
+refuses (`governed-slot-kind-mismatch`), no row is written, the incumbent is untouched, and the model gets
+the approved **governed** sentence. **This is the first evidence the ratified double gate exists in the
+running system.**
+
+⚠️ **Two fixture defects the controls found in themselves:** the genuine-NEW baseline had to be hoisted
+before any other `zz_` row existed, because the resolver's **cosine arm grouped this check's own fixtures**
+— a live demonstration that grouping is promiscuous and allowed to be; and `admitCandidates`' no-candidate
+early return omitted the summary, which would have reintroduced the exact indistinguishability this closes.
+
+### Verification
+
+```
+Controls A/B/D/E        ✅ ALL CHECKS PASSED (admission-controls-check)
+unit                    ✅ 753/753
+evidence baseline       ✅ green   ·  canary 18 rows, unarmed
+053 constraint          ✅ proved LIVE — an ABSTAIN with a NULL side is REFUSED (23514)
+admission ledger        ✅ 0 rows   ·  zz residue 0
+declaration rp-d0 / enforcement / e2e-isolation / rp-t1 / rp-register   ✅ all green
+shelter/work-schedule   ✅ blocked at lexical 1.000 (DEFER) and when declared (ABSTAIN)
+forModel                ✅ silent about DEFER — byte-identical to a plain NEW write
+047                     ✅ untouched — 1 question, 1 of 112 slots
+⛔ model-tool-claim-kind 9 · self-authorisation 5 · transport 4 — STILL RED, unchanged, KNOWN
+```
+
+⚠️ **One follow-up, not in scope:** every check that writes memory now leaves admission ledger rows its
+teardown does not clean. I removed 16 provably-dangling rows (both sides deleted). **Check teardowns need a
+ledger sweep** — a small, separate pass.
