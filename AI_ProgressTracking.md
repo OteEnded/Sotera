@@ -11585,3 +11585,61 @@ all. The photo sits unanswered in that conversation.
 `qwen3-embedding:4b` runs for recall every turn and is loaded alongside the chat model, and the codebase
 already names that exact hazard for the distiller. ⛔ **Not confirmed — this is what to investigate on
 return.**
+
+---
+
+## 2026-09-17 · ④ RULED · the convergence LOCKED · A-D4 investigated
+
+### ④ ✅ RULED
+
+> **The three positive statuses in W3 / W4 / W5 are evidence about those individual writers, ⛔ not a
+> proposed taxonomy.** ⛔ Not to become a universal status vocabulary.
+
+### ⭐⭐⭐⭐ THE CROSS-DECISION CONVERGENCE — ✅ LOCKED
+
+> **An act with no established warrant establishes nothing beyond whatever its own already-established
+> disposition constitutes; an act with a warrant establishes only what that warrant covers.**
+
+⛔ **A semantic constraint, ⛔ not an implementation shortcut.**
+
+### A-D4 ⭐ COMPETITION ADMISSION — investigated
+
+**Doc:** `INVESTIGATION_SOTERA_AD4_COMPETITION_ADMISSION.md`. ⛔ Read-only and **no code**.
+⛔ `resolveConflict`'s winner selection deliberately **not** investigated.
+
+The production path against Ote's seven categories:
+
+```
+S1 entity          ⭐ IDENTITY — ESTABLISHED, derived by the runtime ⇒ true by its mechanism.
+                     ⚠️ Establishes WHOSE, ⛔ never WHICH QUESTION.
+S2 attribute       ⛔ routing/convenience      S3 alias/lexical  ⛔ "a BINDING, not a verdict"
+S4 claimedBy       ⛔ claims identity from a normalised string — ⭐ #4 refutes it (ONE label, THREE questions)
+S5 slot_id         ⛔ storage/index, D1's own classification
+S6 ephemeral       ⛔ synthesised for every slotless live row
+S7 matches/primary ⛔ the incumbent is THE NEWEST
+S8 cosine ≥ 0.85   ⛔ the file records a genuinely DIFFERENT pair at 0.856 ⇒ it BINDS
+```
+
+> ## ⭐⭐⭐ **The column empty all the way down is CURRENT-STATE EXCLUSIVITY — and that is the only thing
+> ## competition does.**
+
+⭐⭐⭐ **The asymmetry:** the same 0.7 lexical hit is **too weak to teach an alias** and **strong enough to
+displace a belief.** The system already holds *"strong enough to route, not strong enough to assert"* — and
+does not hold it at competition. ⚠️ An alias is permanent, so which consequence is graver is not settled.
+
+⭐⭐ **Abstention already exists at admission** (`unknown` ⇒ no slot ⇒ no competition). ⛔ **DEFER does not** —
+#3 was admitted at full strength.
+
+> ## ⭐⭐⭐ **The answer: admission does not require an established relation in order to GROUP. It requires one
+> ## for the grouping to be EXCLUSIVE.**
+> Consistent with ②, not a softening: ② ruled membership *establishes* no relation; it did not rule that
+> membership has no *effect*.
+
+⭐ **#8/#9 are the proof that competition can be formed with no semantic fact at all.** Mira is the right
+answer through **the same mechanism as the wrong ones**.
+
+⛔ **Not established:** what should replace any of it · that an adjudicated verdict *is* sufficient · that
+retrieval grouping is useless · anything about winner selection.
+
+**Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
+armed collisions intact · ⛔ **no code written; nothing written to the database.**

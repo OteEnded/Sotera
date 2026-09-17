@@ -25,7 +25,8 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ⑧  ✅ RULED NARROW      ⭐ ATTRIBUTION IS NOT AUTHORIZATION — writer identity alone is insufficient
 ⑧-A ✅ RULED NARROW    ⭐ bounded · checkable · answerable · REFUSAL PRESERVED
 ④-A ✅ RULED NARROW    ⭐ ONE claim, and its subject is THE SYSTEM
-④  ⏸ REFRAMED+INVESTIGATED ⭐ 3 statuses · 3 empties · ⛔ ZERO proposition-truth claims
+④  ✅ RULED — the three statuses are WRITER EVIDENCE, ⛔ NOT a taxonomy
+A-D4 ⏸ INVESTIGATED — ⭐ only `entity` establishes anything; EXCLUSIVITY is established by NOTHING
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
@@ -1046,6 +1047,58 @@ decision. ⛔ Not reopened.
    ⛔ NOT ESTABLISHED: any positive definition of the FIELD (⭐ the reframe asked about the OBSERVATION'S
       STATUS, and that is what is answered) · that W1/W2/W6 are WRONG · that W2/W5's statements are CORPUS
       FACTS (⚠️ both latent) · ⛔ that W4's absorption is LOSSLESS.
+   ✅⭐⭐ **④ RULED (Ote, 2026-09-17):** *"The three positive statuses in W3/W4/W5 are evidence about those
+      INDIVIDUAL WRITERS, ⛔ not a proposed taxonomy. ⛔ Do not turn them into a new universal status
+      vocabulary."*
+
+53 ⭐⭐⭐⭐ **THE CROSS-DECISION CONVERGENCE — ✅ LOCKED BY RULING (Ote, 2026-09-17). ⛔ CITE THIS.**
+   > **An act with no established warrant establishes NOTHING beyond whatever its own already-established
+   > disposition constitutes; an act WITH a warrant establishes ONLY what that warrant covers.**
+   ⛔ **THIS MUST REMAIN A SEMANTIC CONSTRAINT, ⛔ NOT AN IMPLEMENTATION SHORTCUT.**
+
+54 ⭐⭐⭐ **A-D4 — COMPETITION ADMISSION (opened by Ote 2026-09-17). ⛔ READ-ONLY, ⛔ NO CODE.**
+   `INVESTIGATION_SOTERA_AD4_COMPETITION_ADMISSION.md`. ⛔ `resolveConflict`'s WINNER SELECTION is
+   deliberately NOT investigated — this is the boundary BEFORE it.
+   ⭐ THE QUESTION: *"What semantic fact, IF ANY, must be established before two durable observations may
+   legitimately COMPETE for the same current-holder disposition?"*
+   ⭐ THE PATH, against Ote's seven categories:
+      S1 `entity`      ⭐ **IDENTITY — THE ONLY STEP THAT ESTABLISHES ANYTHING.** Derived by the RUNTIME
+                       (*"the model's label is advisory only"*) ⇒ TRUE BY ITS MECHANISM, a ⑧-A warrant
+                       form. ⚠️ It establishes **WHOSE**, ⛔ NEVER **WHICH QUESTION**.
+      S2 `attribute`   ⛔ routing/convenience — ⑤ makes it essential to the PROPOSITION, ③ forbids it
+                       carrying QUESTION IDENTITY (E5's tension, still unresolved).
+      S3 alias/lexical ⛔ nothing — ⭐⭐⭐ **A3 ALREADY CALLS IT *"a BINDING, not a verdict"* AND REFUSES TO
+                       LET IT TEACH.**
+      S4 `claimedBy`   ⛔ nothing — ⚠️ its own comment says *"This is IDENTITY, not resolution"*, which is
+                       EXACTLY ③'s forbidden inference. ⭐⭐ **#4 REFUTES IT FROM THE CORPUS: ONE exact
+                       label COORDINATING THREE QUESTIONS.** ⇒ exact string identity ≠ question identity.
+      S5 `slot_id`     ⛔ storage/index — D1's OWN classification (why orphan adoption needs no writer).
+      S6 EPHEMERAL     ⛔ nothing — synthesised per (owner, attribute) for EVERY slotless live row (E3/⑦).
+      S7 matches/prim. ⛔ nothing — membership is "EVERYTHING IN THE BUCKET"; the incumbent is THE NEWEST.
+      S8 cosine ≥0.85  ⛔ nothing — ⚠️ the file records a genuinely **DIFFERENT** pair at **0.856**, and the
+                       test is `bestCos >= threshold` ⇒ **IT BINDS**. ⓘ no live override in `mst_settings`.
+   ⭐⭐⭐ **THE COLUMN THAT IS EMPTY ALL THE WAY DOWN IS *CURRENT-STATE EXCLUSIVITY* — ⛔ AND THAT IS THE
+      ONLY THING COMPETITION DOES.**
+   ⭐⭐⭐ **THE ASYMMETRY:** the same 0.7 lexical hit is **TOO WEAK TO TEACH AN ALIAS** and **STRONG ENOUGH
+      TO DISPLACE A BELIEF.** The system already holds *"strong enough to route, not strong enough to
+      assert"* — ⛔ and does NOT hold it at competition. ⚠️ Fairly: an alias is PERMANENT; which
+      consequence is graver is ⛔ NOT settled.
+   ⭐⭐ **ABSTENTION ALREADY EXISTS AT ADMISSION** — `relation:'unknown'` ⇒ `slotId:null` ⇒ `matches=[]` ⇒
+      ⭐ NO COMPETITION FORMED. ⛔ **DEFER DOES NOT.** #3 (undetermined) was admitted AT FULL STRENGTH.
+   ⭐⭐⭐ **THE ANSWER: admission does NOT require an established relation in order to GROUP. It requires one
+      in order for the grouping to be EXCLUSIVE — and EXCLUSIVITY IS THE ONLY THING COMPETITION DOES.**
+      ⭐ Consistent with ②, ⛔ not a softening: ② ruled membership ESTABLISHES no relation; ⛔ it did not
+      rule membership has no EFFECT. ⇒ the admission act has NO WARRANT ⇒ establishes nothing — ⚠️ yet it
+      CONSTITUTES an exclusivity no member's evidence supports.
+   ⭐ THE CASES: shelter/work-schedule + `schedule`→work-schedule ⛔ illegitimate (string equivalence, AT
+      THE CEILING) · Bangkok location/timezone ⭐ correct, ⚠️ ONLY because the LABELS differ · Mira ⚠️ right
+      answer, **SAME MECHANISM AS THE WRONG ONES** · 18 `sotera|lesson` ⚠️ never routed; S6 would form ONE
+      arena over 18 distinct propositions · 53 slotless ⛔ arenas with nothing established · re-statements
+      ⚠️ correct grouping, ⛔ and ⑤ forbids establishing they are one proposition · **#8/#9 ⭐⭐⭐ THE PROOF
+      THAT COMPETITION CAN BE FORMED WITH NO SEMANTIC FACT AT ALL** · #3 ⛔ admitted although undetermined.
+   ⛔ NOT ESTABLISHED: what should replace any of it · that an ADJUDICATED verdict IS sufficient (⚠️ only
+      that the system ranks it above a binding) · ⛔ that retrieval grouping is useless (it asserts
+      nothing and is untouched) · ⛔ anything about winner selection.
 ```
 
 ---
@@ -1180,7 +1233,8 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
         ⛔ About the incoming, the incumbent, the world, the question and the relation — NOTHING.
         ⚠️⚠️ SAY "the ESTABLISHED SEMANTIC CONTENT is consequence-side" — ⛔ NEVER "the act is entirely
         consequence-side", which erases the PRESUPPOSITION and the INTERPRETATION RESIDUE.
-   ④  ⏸ REFRAMED + INVESTIGATED (§0-B 52) — ⛔ NOT started from the field. ⭐ THREE writers establish a
+   ④  ✅ RULED (§0-B 52) — ⛔ the three statuses are evidence about W3/W4/W5 INDIVIDUALLY, ⛔ NOT a
+        taxonomy, ⛔ and NOT to become a universal status vocabulary. ⛔ NOT started from the field. ⭐ THREE writers establish a
         positive status (W3 a name's use · W4 a record's content was used · W5 a declared relation),
         THREE establish nothing (W1 · W2 · W6), and ⭐⭐⭐ **ZERO of six establish a proposition-truth
         claim** — measured against a positive control. ⭐⭐ The three that establish are EXACTLY the three
@@ -1199,6 +1253,15 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
    ⛔ THE FALSE-NEGATIVE DIRECTION REMAINS **NOT ESTABLISHED** — over-inclusion is demonstrated;
      under-inclusion has no ground truth to measure against. ⛔ Never report it as "none exists".
    → `ADR_SOTERA_MEMORY_SEMANTIC_DECISIONS.md` §"What the rulings expose"
+
+   ⭐⭐⭐⭐ THE LOCKED CONVERGENCE (§0-B 53) — ⛔ CITE THIS, it now does most of the work:
+        **An act with no established warrant establishes NOTHING beyond whatever its own already-established
+        disposition constitutes; an act WITH a warrant establishes ONLY what that warrant covers.**
+   A-D4 ⏸ INVESTIGATED (§0-B 54) — ⭐ ONLY `entity` establishes anything (IDENTITY, derived by the runtime),
+        and it establishes WHOSE, ⛔ never WHICH QUESTION. ⭐⭐⭐ **CURRENT-STATE EXCLUSIVITY IS ESTABLISHED BY
+        NO STEP — and exclusivity is the only thing competition does.** ⇒ admission does not need a relation
+        to GROUP; it needs one for the grouping to be EXCLUSIVE. ⭐ ABSTENTION exists at admission
+        (`unknown` ⇒ no competition); ⛔ DEFER does not.
 
 ⏸ PARKED BY THE DECISION ARC (all of these wait on ① → ⑧):
    A-D4 · A1 authority · B-D1 (radius) · B-D3 (may `incomplete` claim `attestedBySource`?) · Dreaming/M-series
