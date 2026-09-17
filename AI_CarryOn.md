@@ -539,6 +539,42 @@ decision. ⛔ Not reopened.
    a false incumbent-status change, and for existing rows THE ASSIGNMENT IS MANDATORY.
    ⏸ ⛔ AWAITING OTE. ⛔ ③–⑦ FROZEN · ⛔ canary untouched · ⛔ both armed collisions STILL ARMED.
    → `INVESTIGATION_SOTERA_COMPETITION_SEMANTIC_BOUNDARY.md` · `test/checks/competition-consumer-trace.mjs`
+㊳ ✅⭐⭐⭐ **DECISION ② IS RULED (Ote, 2026-09-17).** ⛔ NOT a finding — A RULING, and it binds everything after.
+   > **"Competition membership is not a single semantic concept. An operational arena/key may be used to
+   > NARROW CANDIDATES, but membership in that arena does not, by itself, establish ANY particular semantic
+   > relationship between the observations within it. THE CONSUMER MUST ESTABLISH WHATEVER RELATIONSHIP IT
+   > NEEDS FOR ITS OWN OPERATION."**
+   ⛔ MEMBERSHIP DOES NOT ESTABLISH: same proposition · same question · role occupancy · equivalence.
+   ✅ MEMBERSHIP MAY STILL BE A USEFUL INDEX / SCOPING MECHANISM.
+   ⇒ ⭐ **P14 IS ESPECIALLY PROBLEMATIC — collapse currently treats membership AS IF it were proposition
+   equivalence.** ⇒ ⭐ AND REPLACE CANNOT TREAT MEMBERSHIP AS PROOF OF QUESTION IDENTITY.
+   ⭐⭐⭐ THE NEW CONSTRAINT, CARRIED FORWARD (his words):
+   > **"Being REACHABLE BY an arena key must not be confused with HAVING BEEN SEMANTICALLY ESTABLISHED as a
+   > member of that arena."**
+   ⚠️ Made concrete by the asymmetric abstention: an EXISTING row can become a potential competitor WITHOUT
+   EVER HAVING UNDERGONE A SEMANTIC ROUTING DECISION — **53 of 118**. ⛔ Not to be solved yet; carried.
+㊴ ⭐⭐⭐ DECISION ③ OPENED — *"If membership carries no semantic authority, WHERE DOES THE SYSTEM OBTAIN THE
+   AUTHORITY to say an observation belongs to a particular question?"*
+   ⇒ ⭐⭐⭐ **IT DOES NOT OBTAIN IT. IT COMPOSES IT.**
+     `(observation → slot)` ⚠️ INFERRED, UNGOVERNED   ∘   `(slot → question)` ⭐ DECLARED, GOVERNED
+   ⇒ **THE OBSERVATION↔QUESTION RELATION IS NEVER DIRECTLY ESTABLISHED.** The composition INHERITS THE
+   WEAKER LINK, and ⛔ THE COMPOSITION ITSELF IS NEVER DECLARED, NEVER CHECKED, NEVER RECORDED AS ONE.
+   ⚠️ THE ROUTING DECISION (resolver, step 3) HAPPENS **BEFORE** THE QUESTION LAYER IS REACHED (step 6) —
+   and step 6 reaches it THROUGH THE SLOT STEP 3 CHOSE.
+   ⭐⭐ `claimKind` IS THE ONE DECLARED OBSERVATION→QUESTION CHANNEL, and it ALREADY CARRIES 047'S
+   DISCIPLINE VERBATIM: *"WHICH DECLARED QUESTION THIS CLAIM ANSWERS … its absence is an ANSWER rather than
+   a gap … ⛔⛔ NEVER INFERRED AND NEVER DEFAULTED."* ⛔ **AND IT IS PURE TRANSPORT — STRIPPED AT
+   `store.create` (`claimKind: _ck, ...persistable`), ZERO `%claim%` COLUMNS.** ⇒ ⭐ EVEN WHEN A WRITER
+   DOES SAY, **THE SAYING DOES NOT SURVIVE.**
+   ⭐⭐⭐ **NOTHING IN THE SYSTEM EVER CHECKS AN OBSERVATION AGAINST A QUESTION.** `checkKind` asks whether
+   TWO DECLARATIONS AGREE (and the writer is agreeing about a slot IT DID NOT CHOOSE); the declared
+   `checks` test only the ANSWER'S FORM (nonempty · single-line · no-trailing-ellipsis · is-iso-date).
+   ⛔ THERE IS **NO ACT** ESTABLISHING observation → slot. Minting is `findOrCreate`.
+   ⛔⛔ **ZERO ORGANIC PRECEDENT**: 0 bind acts · 0 pinned rows outside the harness canary. Every artifact of
+   the declared question layer was made BY AN OPERATOR, ON A TEST FIXTURE, ON ONE DAY (`canary-bind-
+   2026-09-03-*`). ⇒ ⛔ THERE IS NO PRODUCTION BEHAVIOUR FROM WHICH TO READ AN INTENT.
+   ⏸ ⛔ NARROW / BROAD / SPLIT ARE **NOT RANKED** — each has a supports/strains note in the doc. OTE RULES.
+   → `INVESTIGATION_SOTERA_ROUTING_AUTHORITY.md` · `test/checks/routing-authority-trace.mjs`
 ```
 
 ---

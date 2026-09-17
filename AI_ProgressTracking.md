@@ -10885,3 +10885,60 @@ incumbent-status change, and for existing rows **the assignment is mandatory**.
 
 **Verification:** consumer trace green · evidence baseline green including the canary guard · unit
 **753/753**. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · ② RULED, and ③ OPENED — routing authority
+
+**② is ruled** (Ote's words, recorded in `AI_CarryOn` §0-B ㊳ as a ruling, not a finding):
+
+> *"Competition membership is not a single semantic concept. An operational arena/key may be used to narrow
+> candidates, but membership in that arena does not, by itself, establish any particular semantic
+> relationship between the observations within it. The consumer must establish whatever relationship it
+> needs for its own operation."*
+
+⇒ membership establishes **neither** same proposition, same question, role occupancy **nor** equivalence;
+it may still be a useful index. **P14 is especially problematic** — collapse treats membership as if it were
+proposition equivalence — and **replace cannot treat membership as proof of question identity.**
+
+New constraint carried forward: **"Being *reachable by* an arena key must not be confused with *having been
+semantically established* as a member of that arena."** Made concrete by the asymmetric abstention: an
+existing row can become a potential competitor without ever having undergone a semantic routing decision —
+**53 of 118**.
+
+### ③ opened
+
+**Doc** → `Reference/docs/INVESTIGATION_SOTERA_ROUTING_AUTHORITY.md`
+**Check** → `test/checks/routing-authority-trace.mjs`
+
+**The answer to "where does the authority come from": it doesn't. It is composed.**
+
+```
+(observation → slot)  ∘  (slot → question)
+ INFERRED, ungoverned     DECLARED, governed
+```
+
+The observation↔question relation is **never directly established**. The composition **inherits the weaker
+link**, and the composition itself is never declared, checked or recorded as one. And the routing decision
+happens **before** the question layer is reached — which then reaches it *through the slot routing chose*.
+
+**`claimKind` is the one declared observation→question channel**, and it already carries 047's discipline
+verbatim: *"which declared question this claim answers … its absence is an ANSWER rather than a gap …
+never inferred and never defaulted."* ⛔ **And it is pure transport** — stripped at `store.create`, zero
+`%claim%` columns. **Even when a writer does say, the saying does not survive.**
+
+**Nothing in the system ever checks an observation against a question.** `checkKind` asks whether two
+declarations agree — and the writer is agreeing about a slot it did not choose. The declared `checks` test
+only the answer's *form*.
+
+**Zero organic precedent:** 0 bind acts and 0 pinned rows outside the harness canary. Every artifact of the
+declared question layer was made by an operator, on a test fixture, on one day. ⇒ there is no production
+behaviour from which to read an intent.
+
+**Narrow / broad / split are not ranked** — each carries a supports/strains note. ⭐ Worth flagging for the
+ruling: `claimKind` supports **broad** (047's discipline is already applied to the observation→question
+link) *and* **split** (its "absence is an answer" shape already models proposal-vs-absence). The same field
+bears on two readings.
+
+**Verification:** routing trace green · evidence baseline green · unit **753/753** · 047 untouched (1
+question) · canary intact (18 rows, 0 slots) · both armed collisions armed. ⛔ Nothing was written.
