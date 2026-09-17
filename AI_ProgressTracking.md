@@ -12107,3 +12107,59 @@ forModel                ✅ silent about DEFER — byte-identical to a plain NEW
 ⚠️ **One follow-up, not in scope:** every check that writes memory now leaves admission ledger rows its
 teardown does not clean. I removed 16 provably-dangling rows (both sides deleted). **Check teardowns need a
 ledger sweep** — a small, separate pass.
+
+---
+
+## 2026-09-17 · ✅ ADMISSION BUILD ACCEPTED — handoff point
+
+**Accepted by Ote.** ⛔ The ledger-teardown sweep stays a **separate follow-up**; the three red checks
+(`model-tool-claim-kind` · `declaration-self-authorisation` · `declaration-transport`) are **left alone** —
+their red state is a consequence of the new topology and needs its own pass, ⛔ never a weakening of
+admission or M2.
+
+### ⚠️⚠️ ONE THING THE HANDOFF CHECK CAUGHT — and it mattered
+
+`PortableComponents` is **not** a git repo, but **`PortableComponents/Packages/Memory` IS its own repo**.
+⇒ `cognition/memory-v2-service.js` — **the core of this build** — was still **uncommitted** when the build
+was accepted. ⭐ Now committed as **`e45d928`**. ⛔ That repo has **no remote**, so it is local-only.
+ⓘ This is the same structural fact that invalidated my earlier "pre-change" stash comparison.
+
+### THE COMMITS
+
+```
+@ote/memory   (PortableComponents/Packages/Memory — ⛔ NO REMOTE, local only)
+  e45d928  memory - grouping and competition admission become two acts
+
+Sotera        (pushed to origin/main)
+  5da44ef  OteEnded[feat]: the admission summary on the receipt, and Controls D and E
+  1763eef  the admission model under A-ACCEPT — pure gate, ledger (053), reconcileFact split
+  f50cd9b · 12b6fa6 · a0d95f6 · abb2d28 · f281f5b · ec523ba   (the decision/doc trail)
+
+Reference     (⛔ no remote; branch `master`)
+  de78635 · 1980e69 · 3f4ca53 · e2f4a37 · 61e6d79 · bdb7b2e   (contract, reviews, analyses)
+```
+
+### MIGRATION 053
+
+```
+table log_memory_admissions   ✅ exists · 0 rows · 5 indexes
+CHECK constraints             3 — incl. log_memory_admissions_outcome_evidence_ck
+                              ✅ proved LIVE: an ABSTAIN with a NULL side is REFUSED (SQLSTATE 23514)
+```
+
+### WORKING TREES
+
+```
+Sotera        clean except `Backend/app/components/persona.lock.json` — ⭐ a RUNTIME lock file whose only
+              diff is `resolvedAt` timestamps. ⛔ Deliberately not committed.
+              main == origin/main
+@ote/memory   clean except the two ratified `.bak` files, which stay UNTRACKED by standing rule
+Reference     clean · branch master
+```
+
+### DATABASE
+
+```
+memories 235 · pinned 35 · canary 18 live rows, UNARMED · zz residue 0 · admission ledger 0
+047 untouched — 1 question declared, 1 of 112 slots bound
+```
