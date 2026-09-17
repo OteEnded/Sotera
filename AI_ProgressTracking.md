@@ -11061,3 +11061,58 @@ what the implementation does / what is discarded) and the cross-investigation de
 
 **Verification:** batch check green · evidence baseline green · unit **753/753** · canary 18 rows / 0 slots ·
 047 one question · both collisions armed. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · BATCH · THE THREE SEAMS — attribute · observation→question · proposition equivalence
+
+Batch-investigation-first workflow retained. ⛔ Evidence only; **no rulings requested or made.** Read-only;
+no implementation, schema, historical repair or canary activation; 047 untouched; A1 shadow; both collisions
+armed. ①②③ binding and not reopened.
+
+**Doc** → `Reference/docs/INVESTIGATION_SOTERA_BATCH_SEAMS.md`
+**Check** → `test/checks/semantic-seam-batch.mjs`
+
+### 1 · `attribute` is one field with **eight** production roles
+
+the proposition shown on recall · the vector-index input · the routing similarity key · the membership claim
+key · the ephemeral arena identity · the slot identity seed · the revival arena key · the Dreaming
+recurrence key — **and it is a `SEMANTIC_FIELD`.**
+
+⇒ changing it would change **what she recalls, how it ranks, what competes, what revives and what Dreaming
+counts as recurrence — all at once**, with no way to change one without the others. And ③ ruled it cannot
+carry question identity, yet it is the **slot's identity seed**.
+
+### 2 · The inversion, timed
+
+**`claimKind` exists at t0, before slot selection at t1 — and is not passed to the resolver.** The call is
+`resolve({owner, attribute, attributeCandidate?, attributeShape?}, {slots, rowsBySlot})`. ⇒ **the blocker is
+an interface boundary, not missing information** — `claimKind` is a live local three lines above the call.
+
+⚠️⚠️ **And ③'s nuance is not currently held.** On a governed slot, `claimKind` **absent** and `claimKind`
+**wrong** both give `checkKind` = DEFER and gate = **REFUSE**. They differ **only in the `why` string** —
+distinguishable in the log, not in the behaviour. (An **undeclared slot** does differ: NOT-IN-SCOPE.)
+
+### 3 · The eight "sames" — five exist
+
+value · entity · attribute · question · slot exist. ⛔ **content, proposition and observation do not.**
+
+⇒ **`norm(value)` is substituted for proposition equivalence**, and the corpus falsifies it in both
+directions: Bangkok (not sufficient) · the 18 lessons (not necessary) · work-schedule ×2 (not about the
+question) · Mira (not about truth). **`content` is never compared at all.**
+
+### 4–5 · The matrix, and the sharpest column
+
+**Can it be wrong without detection?** observation ⚠️yes · proposition ⛔yes · **question ⭐NO — it is
+ledgered** · membership ⛔yes · competition ⛔yes · transition ⛔yes · row state ⛔yes.
+
+⇒ **exactly one concept can be wrong detectably, and it is the empty one** (1 of 112 slots, 0 organic).
+
+**Production execution order is `membership → slot → proposition → question`** — the conceptual order
+reversed at two edges, and the one input that could invert it (`claimKind`) arrives first and is thrown away.
+
+**Instrument note #23:** the check caught my own arithmetic — I wrote "six of eight" and asserted
+`missing.length === 2`; three do not exist. A declared count the assertion could falsify, and did.
+
+**Verification:** seam batch green · evidence baseline green · unit **753/753** · canary 18 rows / 0 slots ·
+047 one question · both collisions armed. ⛔ Nothing was written.

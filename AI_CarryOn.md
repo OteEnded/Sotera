@@ -647,6 +647,35 @@ decision. ⛔ Not reopened.
      **question→membership ⛔ REVERSED — membership is chosen FIRST, the question is reached THROUGH the
      slot** · membership→transition ⚠️ holds TOO STRONGLY · transition→row-state ⚠️ holds but LOSSILY.
    ⇒ ⭐ **THE PIPELINE IS NOT A PIPELINE.**
+㊹ ⭐⭐⭐ BATCH · THE THREE SEAMS (2026-09-17) → `INVESTIGATION_SOTERA_BATCH_SEAMS.md` ·
+   `test/checks/semantic-seam-batch.mjs`. ⛔ EVIDENCE ONLY — no rulings requested or made.
+   ⭐⭐⭐ **`attribute` IS ONE FIELD WITH EIGHT PRODUCTION ROLES**: the PROPOSITION shown on recall ·
+   the VECTOR INDEX input · the ROUTING similarity key · the MEMBERSHIP claim key · the EPHEMERAL ARENA
+   identity · the SLOT IDENTITY seed · the REVIVAL ARENA key · the DREAMING RECURRENCE key. AND it is a
+   `SEMANTIC_FIELD`. ⇒ ⚠️ CHANGING IT CHANGES WHAT SHE RECALLS, HOW IT RANKS, WHAT COMPETES, WHAT REVIVES
+   AND WHAT DREAMING COUNTS AS RECURRENCE — ⛔ ALL AT ONCE. ⚠️ AND ③ RULED IT CANNOT CARRY QUESTION
+   IDENTITY, ⛔ YET IT IS THE SLOT'S IDENTITY SEED.
+   ⭐⭐⭐ **`claimKind` EXISTS AT t0, BEFORE SLOT SELECTION AT t1 — AND IS NOT PASSED TO THE RESOLVER.**
+   `resolve({owner, attribute, attributeCandidate?, attributeShape?}, {slots, rowsBySlot})` ⇒ ⭐⭐ **THE
+   BLOCKER IS AN INTERFACE BOUNDARY, ⛔ NOT MISSING INFORMATION** — it is a live local 3 lines above.
+   ⚠️⚠️ AND ③'s NUANCE IS **NOT CURRENTLY HELD**: on a GOVERNED slot, `claimKind` ABSENT and `claimKind`
+   WRONG both give checkKind=DEFER and gate=**REFUSE**. ⇒ ⛔ "NOT DECLARED" AND "SAID SOMETHING ELSE" ARE
+   DISTINGUISHABLE **ONLY IN THE `why` STRING**, ⛔ NOT IN THE BEHAVIOUR. (slot UNDECLARED → NOT-IN-SCOPE,
+   which IS a distinct scope.)
+   ⭐⭐ THE EIGHT "SAMES" — **5 of 8 EXIST**: value · entity · attribute · question · slot.
+   ⛔ **CONTENT, PROPOSITION AND OBSERVATION DO NOT.** ⇒ ⭐⭐⭐ `norm(value)` IS SUBSTITUTED FOR PROPOSITION
+   EQUIVALENCE, and the corpus falsifies it IN BOTH DIRECTIONS: Bangkok (⛔ not sufficient) · the 18 lessons
+   (⛔ not necessary) · work-schedule ×2 (⛔ not about the question) · Mira (⚠️ not about truth).
+   ⭐ `content` IS NEVER COMPARED — the proposition plays no part in ANY equivalence.
+   ⭐⭐⭐ THE MATRIX'S SHARPEST COLUMN — **CAN IT BE WRONG WITHOUT DETECTION?** observation ⚠️YES ·
+   proposition ⛔YES · **question ⭐NO (it is LEDGERED)** · membership ⛔YES · competition ⛔YES ·
+   transition ⛔YES · row state ⛔YES. ⇒ ⭐ **EXACTLY ONE CONCEPT CAN BE WRONG DETECTABLY, AND IT IS THE
+   EMPTY ONE.**
+   ⭐⭐⭐ PRODUCTION EXECUTION ORDER IS **membership → slot → proposition → question** — the conceptual
+   order REVERSED AT TWO EDGES, and the one input that could invert it (`claimKind`) ARRIVES FIRST AND IS
+   THROWN AWAY.
+   ⚠️ INSTRUMENT NOTE #23: the check caught MY OWN ARITHMETIC — I wrote "six of eight" and asserted
+   `missing.length === 2`; three do not exist. ⭐ A declared count that the assertion can falsify.
 ```
 
 ---
