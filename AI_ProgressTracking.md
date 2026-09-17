@@ -12013,3 +12013,51 @@ on a path his diagram routes around the authority entirely.
 > (a) is A — ACCEPT applied consistently. (b) is M2's ratified trade. They cannot both hold.
 
 ⛔ **M2, the three checks and admission behaviour: untouched. Build not accepted.**
+
+---
+
+## 2026-09-17 · DEFER caller-feedback analysis — ⭐ a clean path exists, ⛔ not applied
+
+**Doc:** `ANALYSIS_SOTERA_DEFER_CALLER_FEEDBACK.md`. ⛔ No code changed; M2, the checks, admission,
+`settleWrite` and `forModel` all untouched.
+
+**1 · What `reconcileFact` returns on DEFER:** `{ ok:true, action:'add', id, supersedes:null, collapsed:0 }`
+⇒ ⛔⛔ **a DEFERRED write and a genuinely NEW write are byte-identical to the caller** — the same defect
+class `memory-write-receipt.js` was built to end (*"a KEPT fact and a REFUSED one BYTE-IDENTICALLY"*), one
+layer over. `admission.verdicts` is already in scope at both return sites and used only for the ledger.
+
+**2 · Where `REPLACEMENT_REFUSED` comes from:** store throws → `pipeline.ingest` catches and carries `code`
+as a **value** → `settleWrite` → `{state:'refused', code}` → `forModel` maps it to an approved sentence.
+⭐ Two audiences, already separated by ruling: *"Tell the model what happened, not how to repair a
+capability it does not possess."*
+
+**3 · Can DEFER be exposed without touching M2?** ✅ **Yes, and the channel is already wired:**
+`settleWrite` returns `result: settled` on success · `retention-host` already forwards `result` ·
+`forModel` is a **constructed allowlist**. ⇒ a field on `reconcileFact`'s return reaches every developer
+consumer and **no model consumer**, with zero changes elsewhere.
+⚠️ **It must ride on `persisted`, never the refusal channel** — `refused` means `ok:false` and **no id**,
+and a DEFER has a row. ⇒ **DEFER is a qualifier on a success, not a state.**
+
+**4 · Consumers, verified at their call sites:** extractor reads `.action` only · the model tool goes
+through `forModel`'s allowlist · `keep()` forwards `result` and branches only on
+`ok===false && Array.isArray(allowed)`. **All three safe.**
+
+**5 · Without preventing formation:** trivially — the field is assembled at the existing return statements,
+**after** the row is created. No branch, no throw, no new failure mode.
+
+**6 · ⭐⭐⭐ The model should be told nothing.** With **1 declared question and 1 of 112 slots bound**,
+*"declare the question"* is a remedy she cannot act on — the exact shape that produced *9 attempts at a
+withheld tool across 3 days*. ⇒ the gap is a **developer/operator** gap, and the fix belongs on the
+developer half only. **And the silence must be asserted, not assumed.**
+
+**7 · Tests:** Control D (DEFER — written · no competition · no replacement · no M2 refusal · the caller can
+read why · ⭐ and `forModel` byte-identical to a plain NEW) and **Control E (ADMIT + M2 refusal**, built via
+a **rebind**: pin to K, rebind the slot to K2, write with K ⇒ ADMIT then REFUSE).
+⭐⭐⭐ **Control E would be the first evidence that `ADMITTED → REPLACEMENT_REFUSED` is reachable at all** —
+the outcome Ote ratified and nothing has ever demonstrated.
+
+**The minimal change, specified and NOT applied:** one field at `reconcileFact`'s two existing return
+statements, summarising verdicts already in scope. ⚠️ One sub-question left open: whether it should name the
+incumbent ids it deferred against, or leave that to the ledger.
+
+⏸ **Build still not accepted.** unit **753/753** · baseline green · ledger clean · 047 untouched.
