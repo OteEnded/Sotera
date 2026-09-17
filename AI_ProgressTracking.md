@@ -10605,3 +10605,67 @@ and a belief event sharing one column without being the same semantic act.
 **Verification:** transition-event trace green · state-semantics green · unit trace green · predicate trace
 green · evidence baseline green including the canary guard · unit **753/753** · canary intact (18 rows,
 0 slots). ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · SYNTHESIS — the six boundaries, and the shape of the whole arc
+
+Ote: *"One synthesis document that puts the findings together … What information must exist at each boundary
+so that a legitimate state transition can be justified without reconstructing semantics from an
+implementation artifact?"* ⛔ No proposed schema, no vocabulary, no code. All freezes held.
+
+**Doc** → `Reference/docs/SYNTHESIS_SOTERA_MEMORY_BOUNDARIES.md` — ⭐ the one to read first.
+
+### His framing is the synthesis
+
+```
+① BEFORE the transition   different RELATIONSHIPS compressed into MEMBERSHIP
+② AFTER  the transition   different EVENTS compressed into ROW STATE
+```
+
+Two compression points on either side of the act — far more interesting than either finding alone.
+
+### The chain, boundary by boundary
+
+`OBSERVATION → PROPOSITION → QUESTION → MEMBERSHIP → TRANSITION EVENT → ROW STATE`, each with what the
+system knows, infers, declares, merely groups, loses, and leaves open.
+
+Two contrasts carry the document. **OBSERVATION is the healthiest boundary** — D1 Phase 3 made provenance
+declared and refusable, and it holds. **QUESTION (047) is the only boundary built to the standard the rest
+of the system needs — and it is empty** (1 question, 1 of 112 slots, 0 real rows).
+
+### The answer
+
+Six questions must be answerable for a transition to be justified: which question is at stake · does this
+observation answer it · what does the incumbent assert · what relation does the incoming bear to it · what
+is happening to the incumbent and why · who is accountable. Today: guessed · **not asked** · read from a
+field empty on 19 of 118 · string inequality for one row only · compressed into `invalid_at` · the row has a
+writer but the membership and the transition do not.
+
+⭐⭐⭐ **Every one of those six is answerable at the moment the transition runs. None is preserved.**
+
+⇒ **the recurring failure across the whole arc is not ignorance — it is discard.** The system computes the
+semantics and persists only the artifact. That is why the same phrase kept arriving from four independent
+directions: *unclassified, not lossy*. And it is a hopeful shape: recovering it means **carrying forward
+what is already known at the seam**, not inferring anything new.
+
+⛔ The synthesis proposes **no** column, table, field, enum or relation vocabulary. "What must be
+answerable" is deliberately stated as a question that must have an answer at the seam, not a place to store
+one.
+
+### Recorded as open
+
+Seven decisions (§4), each with why evidence alone cannot settle it — plus the **false-negative direction**,
+still unmeasured and still reported as *not established*, never *none exists*.
+
+### Anchors carried forward
+
+**"The old observation became non-current without becoming false."** (Mira — depends on no questionable
+implementation interpretation, which is why it is the anchor.) The canary's two boundaries. `supersedes_id`
+**latent, not defective**. `expired_at` as storage-vs-belief in one column. And the `user_id` boundary case,
+so duplicate labels are never treated as automatically suspicious.
+
+**State held exactly:** A1 shadow · A-D4 open · 047 untouched · no historical repair · no relation
+vocabulary · no `invalid_at` reinterpretation · no Dreaming change · `SEMANTIC_FIELDS` untouched · canary
+untouched and guarded. **unit 753/753 · evidence baseline green · both armed collisions intact.**
+⛔ Nothing was written to the database.

@@ -418,6 +418,27 @@ decision. ⛔ Not reopened.
    (fact=backward, lesson=FORWARD, 0/77 forward ⇒ LATENT, ⛔ not defective) · `expired_at` = a STORAGE
    event and a BELIEF event sharing one column without being the same act.
    → `INVESTIGATION_SOTERA_TRANSITION_EVENTS.md` · `test/checks/transition-event-trace.mjs`
+㉝ ⭐⭐⭐ THE SYNTHESIS — ⭐ READ THIS ONE FIRST: `SYNTHESIS_SOTERA_MEMORY_BOUNDARIES.md`.
+   ⭐⭐⭐ TWO COMPRESSION POINTS, ON EITHER SIDE OF THE ACT (Ote's framing):
+     ① BEFORE the transition — different RELATIONSHIPS compressed into MEMBERSHIP
+     ② AFTER  the transition — different EVENTS compressed into ROW STATE
+   THE CHAIN: OBSERVATION → PROPOSITION → QUESTION → MEMBERSHIP → TRANSITION EVENT → ROW STATE.
+   ⭐ HEALTHIEST BOUNDARY: **OBSERVATION** — D1 Phase 3 made provenance DECLARED AND REFUSABLE, and it holds.
+   ⭐⭐ THE ONLY BOUNDARY BUILT TO THE STANDARD THE REST NEEDS IS **QUESTION** (047) — ⚠️ AND IT IS EMPTY.
+   ⭐⭐⭐ SIX QUESTIONS MUST BE ANSWERABLE FOR A TRANSITION TO BE JUSTIFIED:
+     ① which question is at stake?            ⚠️ guessed · declared on 1 of 112
+     ② does this observation answer it?        ⛔ NOT ASKED — membership substitutes
+     ③ what does the incumbent assert?         ⚠️ read from `value`, EMPTY on 19 of 118
+     ④ what relation does the incoming bear?   ⚠️ string inequality, FOR ONE ROW ONLY
+     ⑤ what is happening to the incumbent, why? ⛔ compressed into `invalid_at`
+     ⑥ who is accountable?                     ⚠️ the ROW has a writer; membership + transition DO NOT
+   ⇒ ⭐⭐⭐ **EVERY ONE IS ANSWERABLE AT THE MOMENT THE TRANSITION RUNS. NONE IS PRESERVED.**
+   ⇒ ⭐ THE RECURRING FAILURE ACROSS THE WHOLE ARC IS ⛔ NOT IGNORANCE — **IT IS DISCARD.** The system
+   computes the semantics and persists only the artifact. ⇒ ⭐ A HOPEFUL SHAPE: recovering it means
+   CARRYING FORWARD WHAT IS ALREADY KNOWN AT THE SEAM, ⛔ not inferring anything new.
+   ⛔ THE SYNTHESIS PROPOSES **NO** COLUMN, TABLE, FIELD, ENUM OR VOCABULARY — "what must be answerable" is
+   stated as A QUESTION THAT MUST HAVE AN ANSWER AT THE SEAM, ⛔ not a place to store one.
+   ⏸ 7 DECISIONS REMAIN GENUINELY OPEN (synthesis §4) + the FALSE-NEGATIVE direction still unmeasured.
 ```
 
 ---
