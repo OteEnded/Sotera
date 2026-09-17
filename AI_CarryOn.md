@@ -488,6 +488,32 @@ decision. ⛔ Not reopened.
    LONGER CURRENT."** Not that `invalid_at` says too much — that NOTHING says the right thing.
    ⏸ ⛔ AWAITING OTE'S READING. ⛔ ② NOT OPENED · ③–⑦ FROZEN · ⛔ no implementation between decisions.
    → `ANALYSIS_SOTERA_NINE_TRANSITIONS_SEMANTIC.md` · `test/checks/nine-transition-semantic-analysis.mjs`
+㊱ ⭐⭐⭐ DECISION ① FINAL PASS — reframed BY OTE: ⛔ NOT "replacement events" but **NINE CHANGES OF
+   INCUMBENT STATUS**. ⇒ ⭐ his reframed question: *"When the competition machinery causes one observation
+   to cease being the current holder, WHAT SEMANTIC OCCURRENCE, **IF ANY**, has actually happened?"*
+   ⭐ **"IF ANY" IS LOAD-BEARING** — in #8/#9 the answer is **NONE**.
+   ⭐⭐⭐ THE CAUSAL SORT — **PROPOSITION-LEVEL SEMANTICS CAUSED 1 OF 9**:
+     3  OBSERVATION-LEVEL (a new observation of an UNCHANGED proposition)   #1 #2 #5
+     2  ⭐ ARENA MEMBERSHIP ALONE — ⛔ NEITHER ROW CHANGED IN ANY WAY        #8 #9
+     1  ⚠️ UNDETERMINED (left contested)                                    #3
+     1  PROPOSITION-LEVEL + QUESTION IDENTITY                               #4
+     1  OBSERVATION-LEVEL + EXTERNAL JUDGEMENT                              #6
+     1  ⭐ PROPOSITION-LEVEL — THE ONLY ONE                                  #7
+   ⇒ ⚠️ THE COMPETITION MACHINERY FIRES PREDOMINANTLY ON EVENTS THAT ARE NOT ABOUT WHAT IS TRUE.
+   ⭐⭐⭐ AND ⛔ ONE OF THE NINE WAS NOT THE COMPETITION MACHINERY: #6 is `writer=operator`,
+   `act_id=reconcile:rome-2026-09-02`, ⛔ ZERO supersede audit rows. ⇒ the framing is true of **EIGHT**.
+   ⇒ ⭐ THE PATTERN: **THE ONLY CASE THAT PRESERVED ITS SEMANTIC FACT IS THE ONLY ONE THE MACHINERY DID NOT
+   PERFORM.** ⛔ An observation about these nine, ⛔ NOT a law.
+   ⭐⭐ #4, LOCALISED: the change is REAL and it is **INSIDE THE VALUE** (Claude: Builder/BROTHER →
+   UNCLE/Builder). ⇒ **THE GRANULARITY OF THE CHANGE IS THE SUB-PROPOSITION; THE GRANULARITY OF THE
+   MECHANISM IS THE WHOLE VALUE** — ⛔ no level exists at which to say so. ⚠️ And QUESTION IDENTITY is
+   UPSTREAM: the three share one arena ONLY because ONE LABEL NAMED THEM.
+   ⭐⭐⭐ #8/#9, LOCALISED: ⛔ **NO SEMANTIC CHANGE OCCURRED AT ALL.** Both propositions true before and
+   after; neither observation changed. The ONLY event is THE ARENA PLACEMENT (via the `schedule` and
+   `volunteer_schedule_and_location` aliases). ⇒ ⭐ THE ARENA ASSIGNMENT IS CAUSALLY UPSTREAM OF EVERYTHING
+   THE ROWS LATER REPORT, and **THE ROW STATE DESCRIBES A CHANGE THAT NEVER HAPPENED.**
+   ⏸ ⛔ AWAITING OTE'S RULING ON ①. ⛔ ② NOT OPENED · ③–⑦ FROZEN.
+   → `ANALYSIS_SOTERA_INCUMBENT_STATUS_CHANGES.md` · `test/checks/incumbent-status-change-trace.mjs`
 ```
 
 ---

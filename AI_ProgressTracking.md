@@ -10778,3 +10778,52 @@ too much — that nothing says the right thing.
 
 **Verification:** analysis green · evidence baseline green including the canary guard · unit **753/753** ·
 canary intact (18 rows, 0 slots) · both armed collisions intact. ⛔ Nothing was written.
+
+---
+
+## 2026-09-17 · DECISION ① FINAL PASS — nine changes of incumbent status
+
+Ote's reframe, adopted: **not** "replacement events" but *"nine instances where the competition machinery
+changed the status of an incumbent"* — with his reframed question, *"what semantic occurrence, **if any**,
+has actually happened?"* ⛔ Read-only, not a design; ②–⑦ frozen.
+
+**Doc** → `Reference/docs/ANALYSIS_SOTERA_INCUMBENT_STATUS_CHANGES.md`
+**Check** → `test/checks/incumbent-status-change-trace.mjs`
+
+### The causal sort — proposition-level semantics caused **1 of 9**
+
+3 observation-level (a new observation of an unchanged proposition) · **2 arena membership alone, with
+neither row changing in any way** · 1 undetermined (left contested) · 1 proposition-level + question
+identity · 1 observation-level + external judgement · **1 proposition-level, the only one**.
+
+⇒ **the competition machinery fires predominantly on events that are not about what is true.**
+
+### And one of the nine was not the competition machinery
+
+**#6** is `writer=operator`, `act_id=reconcile:rome-2026-09-02`, with **zero** supersede audit rows — a
+named human act. The framing is true of **eight**. And the pattern: **the only case that preserved its
+semantic fact is the only one the machinery did not perform.** (Stated about these nine, not as a law.)
+
+### The three Ote asked to be precise about
+
+**#4** — the change is real and it is **inside the value** (Claude: `Builder/BROTHER` → `UNCLE/Builder`;
+Ote restated, Hermes elaborated). ⇒ **the granularity of the change is the sub-proposition; the granularity
+of the mechanism is the whole value**, and no level exists at which to say so. **Question identity is
+upstream**: the three share one arena only because one label named them.
+
+**#8 / #9** — ⛔ **no semantic change occurred at all.** Both propositions were true before and remain true;
+neither observation changed. The only event is the **arena placement**, via the `schedule` and
+`volunteer_schedule_and_location` aliases. ⇒ **the arena assignment is causally upstream of everything the
+rows later report, and the row state describes a change that never happened.**
+
+**#7** localises the gap from the other side: nothing can say *"true, but no longer current."*
+
+### Not done
+
+No interpretation selected — ⑤ and ⑥ remain possibilities, not answers. No event model, replacement model or
+vocabulary proposed. #3 left **contested**, with the uncertainty itself recorded as the thing the record
+failed to preserve. The causal-locus column is a declared reading; the values, writers, act ids, audit rows
+and field states are mechanical.
+
+**Verification:** trace green · evidence baseline green including the canary guard · unit **753/753** ·
+canary intact (18 rows, 0 slots) · both armed collisions intact. ⛔ Nothing was written.
