@@ -11916,3 +11916,51 @@ or **build elicitation** as a complement (never a replacement for choosing betwe
 ⭐ And the prompt must **not** change — asking it for a question key *is* the classifier M2-10 forbids.
 
 ⛔ **Build not authorized.** unit **753/753** · baseline green · canary 18 / 0 / 0 · 047 untouched.
+
+---
+
+## 2026-09-17 · ✅ A — ACCEPT locked · final impact pass **CLEAN**
+
+> ## ⭐⭐⭐⭐ *"An undeclared question does not prevent memory formation; it prevents mutually exclusive
+> ## competition."*
+
+**STAGE rejected**, reason recorded: it would preserve the exact legacy seam we're removing, on the
+highest-volume path. **The consequence accepted explicitly:** *"I'd rather expose that coexistence than
+manufacture an unsupported 'current answer.'"* **Elicitation stays a separate future capability.**
+
+**Docs:** `CONTRACT_…_ADMISSION.md` §0 (updated first) · `REVIEW_SOTERA_ADMISSION_IMPACT_FINAL.md`.
+
+### The seven answers
+
+1. **Extractor DEFER writes** — grouping runs, `claimKind` absent ⇒ DEFER ⇒ `matches = []` ⇒ `plan = NEW` ⇒
+   `stale = []` ⇒ **nothing invalidated**. The fact is fully formed — writer, act, reach, provenance,
+   evidence, slot, embedding — it simply never acquires exclusivity. And **it gets no pin**, so undeclared
+   stays undeclared going forward.
+2. **What creates competition** — an exhaustive census of every production write of `invalid_at` /
+   `supersedes_id`. ⭐ **The substitution provably covers `reconcileFact`**: `plan.supersedes ∈ matches`,
+   `plan.collapse ⊆ matches`, `stale = [supersedes, …collapse]` ⇒ an un-admitted invalidation becomes
+   **structurally impossible**, with no second guard. *"Collapse is never gated"* still holds — its **input**
+   narrows; no gate is added.
+3. **Remaining legacy routes** — ⚠️ **two, both ratified out of scope**: `restore`/W6 (**live**) and
+   `lesson revise` (latent, 0 rows). Everything else is closed.
+4. ⚠️ **New finding the first pass missed:** `restore`'s arena falls back to `{entity, attribute}`, so it
+   applies to exactly the slotless families ACCEPT will now fill with coexisting rows. **ACCEPT increases
+   `restore`'s exposure.** Doesn't change the ruling; strengthens the case for the separate decision.
+5. **Retrieval** — ⭐⭐ recall **already** suppresses restated values (`rank whole set → dedupeByValue →
+   then slice`, so a suppressed row costs no slot), and `sameValueMeaning` is strict token-set equality with
+   a negation guard. ⇒ same-value restatements stay **invisible**; differing values both surface — the
+   intended change. ⚠️ Two costs: recall slots are finite, and `dedupeByValue` rests on *same value ⇒ same
+   thing*, the inference ⑤ forbids — a presentation decision that claims nothing durable, so it doesn't
+   violate ⑤'s competition ruling, **but ACCEPT puts more weight on it.** Recorded, not fixed.
+6. **The two controls** — and Control B must **construct** both sides, because today's corpus has none and a
+   test that merely looks for one passes vacuously.
+7. ⭐⭐⭐ **Shelter/work-schedule cannot recur, in either state.** Grouping still matches at lexical 1.000 —
+   the alias is untouched — but the extractor declares nothing ⇒ DEFER ⇒ the incumbent is not touched. And
+   if both sides were declared they declare *different* questions ⇒ ABSTAIN. **Lexical/alias/cosine can no
+   longer reach a displacement at all.** The one residual route is both writers declaring the same *wrong*
+   key — a **declaration** error: attributable, ledgered, refusable.
+
+⭐ **ACCEPT makes the build smaller than the first pass assumed** — no writer changes, no prompt changes, no
+elicitation.
+
+⛔ **Build still not authorized.** unit **753/753** · baseline green · canary 18 / 0 / 0 · 047 untouched.

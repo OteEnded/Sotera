@@ -30,8 +30,8 @@ A-D4 ✅ DELIVERED — ⭐ only `entity` establishes anything; EXCLUSIVITY is es
 A-D5 ⏸ DELIVERED — ⭐ a warrant exists for the exclusivity ACT, ⛔ NONE for the exclusivity SET
 ⭐⭐⭐ DESIGN IS UNLOCKED (Ote, 2026-09-17) — the read-only fence was PER-PASS, ⛔ not permanent.
 ✅ D-1…D-6 ALL DECIDED · ✅ THE CONTRACT RATIFIED AT THE SEMANTIC LEVEL (Ote, 2026-09-17)
-✅ ALL 5 POSITIONS RESOLVED (Ote, 2026-09-17) — ⚠️ **EXCEPT the extractor, which came BACK to him**
-     because the trace RULED OUT his chosen option (§0-B 59). ⛔ BUILD STILL NOT AUTHORIZED.
+✅✅ **BEHAVIOUR LOCKED: A — ACCEPT** (Ote, 2026-09-17) · ✅ FINAL IMPACT PASS **CLEAN** (§0-B 60)
+     ⛔ BUILD STILL NOT AUTHORIZED — awaiting Ote's explicit go.
      ⛔⛔ IMPLEMENTATION IS **NOT AUTHORIZED** AND **NOT STARTED** — Ote: *"produce the design contract
      first, review it, then we'll explicitly authorize the implementation pass."*
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
@@ -1363,6 +1363,55 @@ decision. ⛔ Not reopened.
       where it fires most) · ⭐ **BUILD ELICITATION** — legitimate, bounded, checkable, ⛔ a COMPLEMENT
       covering only elicited facts, ⛔ **never a replacement for choosing between the other two.**
    ⭐ AND THE PROMPT MUST **NOT** CHANGE — asking it for a question key IS the classifier M2-10 forbids.
+
+60 ⭐⭐⭐⭐ **A — ACCEPT. THE BEHAVIOUR IS LOCKED (Ote, 2026-09-17), AND THE FINAL IMPACT PASS IS CLEAN.**
+   `CONTRACT_SOTERA_COMPETITION_ADMISSION.md` §0 · `REVIEW_SOTERA_ADMISSION_IMPACT_FINAL.md`.
+   ⭐⭐⭐⭐ **THE PRINCIPLE:** *"An undeclared question does not prevent memory formation; it prevents
+      MUTUALLY EXCLUSIVE COMPETITION."* ⇒ observation → question established ⇒ admission may evaluate;
+      question absent ⇒ ⭐ MEMORY IS STILL WRITTEN, ⛔ with no exclusivity and no competition.
+   ⛔ STAGE WAS REJECTED, and the reason is recorded: it *"would knowingly preserve the exact legacy seam
+      we're trying to remove — the highest-volume extractor path would continue allowing
+      grouping/similarity to become competition without an independent warrant."*
+   ⭐ THE CONSEQUENCE IS ACCEPTED EXPLICITLY: *"I'd rather expose that coexistence than manufacture an
+      unsupported 'current answer.'"*
+   ⏸ ELICITATION stays a SEPARATE FUTURE CAPABILITY — ⛔ NOT part of this build without its own pass.
+   ① EXTRACTOR DEFER WRITES: grouping runs; `claimKind` absent ⇒ DEFER ⇒ ⭐ **matches = []** ⇒ plan = NEW
+      ⇒ `stale = []` ⇒ ⛔ NOTHING invalidated, the prior row stays live. ⭐ The fact is FULLY FORMED (writer,
+      act, reach, provenance, evidence, slot, embedding) — ⛔ it just never acquires exclusivity.
+      ⚠️ AND IT RECEIVES NO PIN ⇒ **undeclared stays undeclared, FORWARD.**
+   ② ⭐⭐⭐ **THE SUBSTITUTION PROVABLY COVERS `reconcileFact` — BOTH SITES:**
+      `plan.supersedes ∈ matches` · `plan.collapse ⊆ matches` · `stale = [supersedes, …collapse]`
+      ⇒ **every row it can invalidate comes from `matches`** ⇒ replacing `matches` with the admitted subset
+      makes an un-admitted invalidation **STRUCTURALLY IMPOSSIBLE**. ⛔ No second guard; none added.
+      ⭐ PRECISION: *"collapse is never gated"* STILL HOLDS — its **INPUT** narrows, ⛔ no gate is placed.
+   ③ ⚠️ **TWO PATHS CAN STILL DISPLACE AN UNDECLARED OBSERVATION — both ratified out of scope:**
+      `restore`/W6 (⚠️ **LIVE**) and `lesson revise` (⛔ latent, 0 rows). ⭐ EVERYTHING ELSE IS CLOSED —
+      the census over production writes of `invalid_at`/`supersedes_id` is EXHAUSTIVE.
+   ④ ⚠️⭐ **NEW FINDING THE FIRST PASS MISSED:** `restore`'s arena falls back to `{entity, attribute}` ⇒ it
+      applies to EXACTLY the slotless families that ACCEPT will now fill with coexisting rows.
+      ⇒ **ACCEPT INCREASES `restore`'s EXPOSURE.** ⛔ Does not change the ruling; ⏸ strengthens the case for
+      the separate decision.
+   ⑤ RETRIEVAL: ⭐⭐ **RECALL ALREADY SUPPRESSES RESTATED VALUES** — `rank the WHOLE set → dedupeByValue →
+      THEN slice`, so a suppressed row costs NO recall slot. `sameValueMeaning` is STRICT (token-set
+      EQUALITY + a negation guard). ⇒ SAME-VALUE restatements are **invisible — recall looks as it does
+      today**; ⚠️ DIFFERING values BOTH surface — ⭐ which is exactly the intended change.
+      ⚠️ TWO COSTS: recall slots are finite (limit 8) so fewer DISTINCT facts fit as coexistence grows ·
+      ⚠️⭐ `dedupeByValue` rests on *same value ⇒ same thing*, **THE INFERENCE ⑤ FORBIDS** — it is a
+      PRESENTATION decision claiming nothing durable, ⛔ so it does not violate ⑤'s COMPETITION ruling,
+      ⚠️ but **ACCEPT PUTS MORE WEIGHT ON IT.** ⛔ Recorded, ⛔ not fixed here.
+      ⭐ THE COMPOSER IS UNTOUCHED — it reasons about slots/competition/currency not at all.
+   ⑥ ⭐⭐ **THE TWO CONTROLS, AND CONTROL B MUST *CONSTRUCT* BOTH SIDES** (today's corpus has none, so a
+      test that merely LOOKS for one passes vacuously): A = both rows live, neither invalidated, no
+      supersede/collapse audit, a DEFER ledger row, ⭐ and NO pin. B = declare `zz_q` → bind → R1 WITH
+      claimKind ⇒ **ASSERT R1's PIN IS NOT NULL (the first side, PROVED)** → R2 same key ⇒ ADMIT, R1
+      invalidated, R2.supersedes_id = R1, ADMIT ledger row, R2 pinned, ⭐ teardown ASSERTED.
+   ⑦ ⭐⭐⭐ **SHELTER/WORK-SCHEDULE CANNOT RECUR — IN EITHER STATE.** Grouping STILL matches at lexical
+      1.000 (⛔ the alias is untouched) — but the extractor declares nothing ⇒ DEFER ⇒ matches = [] ⇒
+      ⭐⭐ THE INCUMBENT IS NOT TOUCHED. And if BOTH sides were declared, they declare DIFFERENT questions
+      ⇒ ⭐ ABSTAIN ⇒ no competition. ⇒ **lexical/alias/cosine can no longer reach a displacement AT ALL.**
+      ⚠️ THE ONE RESIDUAL ROUTE: both writers declaring the SAME WRONG key — ⭐ a DECLARATION error, ⛔ not
+      an inference error: attributable, ledgered, refusable, remediable by rebinding.
+   ⭐ **ACCEPT MAKES THE BUILD SMALLER:** ⛔ NO writer changes · ⛔ NO prompt changes · ⛔ NO elicitation.
 ```
 
 ---
