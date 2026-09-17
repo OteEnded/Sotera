@@ -11402,3 +11402,62 @@ here — ⑧ established there is no checkable relational fact for it to grade.
 **Verification:** unit **753/753** · evidence baseline green · canary 18 rows / 0 slots / 0 aliases ·
 047 untouched · both armed collisions intact · ⛔ **two read-only instruments added this session; nothing
 written to the database.**
+
+---
+
+## 2026-09-17 · ⑧-A RULED NARROW · ④-A investigated (⛔ no code)
+
+### ⑧-A ✅ RULED NARROW
+
+> **Authority is distinct from attribution and epistemic responsibility.**
+> *"Existing authority mechanisms establish authority through **bounded, checkable, answerable facts** and
+> **preserve refusal** where authority is not established. Delegation is legitimate only where the relevant
+> fact is **true by the holder's mechanism**, the grant is **narrow and registry-held**, and the delegation
+> is **refused outside its established boundary**."*
+
+⭐⭐⭐ **AND A DISTINCTION LOCKED: ABSTENTION ≠ DEFER.** #8/#9 — ⛔ nothing to authorize ⇒ **abstain**.
+#3 — the record does not establish what to act upon ⇒ **DEFER**, the existing system's own term.
+⛔ They must never collapse into one state.
+
+⚠️ **Narrowed by Ote, and I had over-stated it:** *"authority tracks origin of material"* is a finding of
+the **examined BIND and evidence mechanisms**, ⛔ **not a universal authority law.** The ⑧-A document said it
+more strongly than the ruling allows; both the doc and the CarryOn now carry the narrowing, and the doc
+points readers at the ruling instead of its own wording.
+
+### ④-A ⭐ THE SEMANTIC CONTENT OF A TRANSITION — investigated
+
+**Doc:** `INVESTIGATION_SOTERA_04A_TRANSITION_CLAIM.md`. ⛔ **Read-only and NO CODE** — Ote scoped it as
+analysis on the established base. ⛔ No instrument, no new evidence.
+⛔ **Fence:** `invalid_at` · `supersedes_id` · row state · slot membership · reversibility · resolver
+behaviour ⛔ not admissible as evidence of semantic meaning.
+
+⭐ **The test: INVARIANCE** — *an act that does not vary with X cannot be establishing X.*
+
+```
+T1 INCOMING    ⛔ NOTHING  (#2 is STRICTLY LESS INFORMATIVE; #5 less complete; #8/#9 answer another question)
+T2 INCUMBENT   ⛔ NOTHING  ⭐⭐ #6 proves the rule: that claim came from a DIFFERENT ACT, ACTOR, and EVIDENCE
+T3 WORLD       ⛔ NOTHING  ⭐ the strongest negative — the act in #7 and in #1 is THE SAME ACT
+T4 QUESTION    ⛔ NOTHING ESTABLISHED; ⚠️ one thing PRESUPPOSED, unchecked, and FALSE in #8/#9 and #4
+T5 CURRENCY    ⭐ THE ONE NON-EMPTY TARGET — and its subject is THE SYSTEM
+T6 RELATION    ⛔ NOTHING ESTABLISHED; ⚠️ something IMPLIED — an interpretation risk
+```
+
+> ## ⭐⭐⭐ **The transition establishes exactly one semantic claim, and its subject is the system: that the
+> ## system has adopted a new disposition about which observation it will present.**
+
+⭐⭐ **Five object-side targets empty; the one consequence-side target is the only non-empty one.** ⇒ **the
+act is entirely consequence-side** — Ote's separation of RELATIONSHIP from CONSEQUENCE is not merely a
+method, it is the shape of the thing.
+⭐⭐ **And the corollary his fence made visible:** every excluded artifact is a record of the *disposition* —
+they were never evidence of meaning, because the disposition is the only thing the act ever had to record.
+
+⛔ **Not established:** that the act is meaningless or should not exist · ④'s positive definition (⚠️
+constrained to consequence-only, ⛔ not settled) · what the act *should* establish.
+
+```
+①②③⑤⑦ ✅ RULED · ④ ✅ NEGATIVE ONLY · ⑥ ✅ PARTIAL · ⑧ ✅ RULED NARROW · ⑧-A ✅ RULED NARROW
+④-A ⏸ INVESTIGATED, awaiting Ote · ⑨ ⏸ NAMED, NOT OPENED
+```
+
+**Verification:** unit **753/753** · evidence baseline green · canary 18 / 0 / 0 · 047 untouched · both
+armed collisions intact · ⛔ **no code written this pass; nothing written to the database.**

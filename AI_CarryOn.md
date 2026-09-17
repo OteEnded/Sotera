@@ -23,7 +23,8 @@ decision sequence, and the deliverable of each pass is **evidence for Ote**, ⛔
 ⑥  ✅ PARTIAL        transition is a layer DISTINCT from row state ⛔ taxonomy NOT finalised
 ⑦  ✅ RULED          durable memory is NOT inherently slot-shaped
 ⑧  ✅ RULED NARROW      ⭐ ATTRIBUTION IS NOT AUTHORIZATION — writer identity alone is insufficient
-⑧-A ⏸ INVESTIGATED     POSITIVE AUTHORITY — ⛔ no model proposed; awaiting Ote
+⑧-A ✅ RULED NARROW    ⭐ bounded · checkable · answerable · REFUSAL PRESERVED
+④-A ⏸ INVESTIGATED    ⭐ ONE claim, and its subject is THE SYSTEM — ⛔ awaiting Ote
 ⑨  ⏸ NAMED, NOT OPENED   may an arena be SYNTHESISED for a family with no established slot semantics?
 ```
 
@@ -942,6 +943,59 @@ decision. ⛔ Not reopened.
       `txn_memories.author` IS the ownership mechanism) · WRITER IDENTITY (⑧).
    ⛔ NOT ESTABLISHED: that checkability is SUFFICIENT here — ⚠️ it is the strongest thing the system
       grades, but ⑧ established there is **NO CHECKABLE RELATIONAL FACT** for it to grade.
+   ✅⭐⭐ **⑧-A RULED NARROW (Ote, 2026-09-17):** *"Authority is distinct from attribution and epistemic
+      responsibility."* ⭐ *"Existing authority mechanisms establish authority through **BOUNDED, CHECKABLE,
+      ANSWERABLE FACTS** and **PRESERVE REFUSAL** where authority is not established. Delegation is
+      legitimate ONLY where the relevant fact is **true by the holder's MECHANISM**, the grant is **NARROW
+      and REGISTRY-HELD**, and the delegation is **REFUSED OUTSIDE ITS ESTABLISHED BOUNDARY**."*
+   ⚠️⚠️ **NARROWED BY OTE — ⛔ DO NOT GENERALIZE:** *"authority tracks origin of material"* is a finding of
+      the **examined BIND and evidence mechanisms**, ⛔ **NOT yet a universal authority law.** The ⑧-A doc
+      states it more strongly than the ruling permits ⇒ ⛔ CITE THE RULING, not the document.
+
+㊿ ⭐⭐⭐ **ABSTENTION ≠ DEFER — LOCKED BY RULING (Ote, 2026-09-17). ⛔ THESE MUST NEVER COLLAPSE.**
+      ABSTENTION  the NULL cases (#8 #9) — ⛔ THERE IS NOTHING TO AUTHORIZE. The correct semantic
+                  outcome is TO NOT ACT AT ALL.
+      DEFER       the UNDETERMINED case (#3) — the record does not establish WHAT SHOULD BE ACTED UPON.
+                  ⭐ `DEFER` is THE EXISTING SYSTEM'S OWN TERM for that condition (Phase 4 vocabulary).
+   ⇒ ⭐ this is ①'s *"no relation exists"* vs *"the record cannot establish one"*, carried down to the
+     ACT layer. ⛔ A model that can only GRANT can express neither.
+
+51 ⭐⭐⭐ **DECISION ④-A — THE SEMANTIC CONTENT OF A TRANSITION (opened by Ote 2026-09-17).**
+   `INVESTIGATION_SOTERA_04A_TRANSITION_CLAIM.md`. ⛔ **READ-ONLY AND NO CODE** — Ote scoped it as analysis
+   on the established evidence base. ⛔ No instrument, no new evidence, no vocabulary, no schema.
+   ⭐ THE QUESTION: *"When an incumbent ceases to be the current holder, what semantic claim — IF ANY —
+   has actually been ESTABLISHED by that act?"* — across SIX targets.
+   ⛔⛔ FENCE: `invalid_at` · `supersedes_id` · row state · slot membership · reversibility · resolver
+      behaviour are ⛔ NOT admissible as evidence of SEMANTIC MEANING.
+   ⭐ THE TEST — **INVARIANCE**: *an act that does not vary with X cannot be establishing X.*
+   ⭐ THREE MODES (⛔ ordinary logical terms, ⛔ NOT proposed vocabulary): ESTABLISHES · PRESUPPOSES · IMPLIES.
+      T1 INCOMING    ⛔ NOTHING — not true (unchecked) · not better (#2 is STRICTLY LESS INFORMATIVE,
+                     #5 less complete) · not the answer (#8/#9). ⭐ All it carries came from THE WRITE.
+      T2 INCUMBENT   ⛔ NOTHING. ⭐⭐ #6 PROVES THE RULE RATHER THAN BREAKING IT: the one claim ever made
+                     about an incumbent came from a DIFFERENT ACT, a DIFFERENT ACTOR, with NAMED EVIDENCE.
+      T3 WORLD       ⛔ NOTHING — ⭐ THE STRONGEST NEGATIVE, by invariance: the act in #7 (the world
+                     changed) and in #1 (a rewording) is THE SAME ACT. And it fired in #8/#9, where
+                     NOTHING changed at all.
+      T4 QUESTION    ⛔ NOTHING ESTABLISHED; ⚠️ ONE THING **PRESUPPOSED** and never checked — ③ ruled that
+                     relation may only be DECLARED. ⚠️ #8/#9 show it FALSE; #4 shows it false a second way.
+                     ⭐ A PRESUPPOSITION IS NOT A CLAIM.
+      T5 CURRENCY    ⭐ **THE ONE NON-EMPTY TARGET** — and CONSEQUENCE-side, established BY FIAT:
+                     ⭐⭐⭐ *"the system has adopted a new DISPOSITION about which of these it will present."*
+                     ⭐ ITS SUBJECT IS **THE SYSTEM** — ⛔ not either observation, the world, or the relation.
+                     ⚠️ And ⑧ established it is adopted WITHOUT A WARRANT.
+      T6 RELATION    ⛔ NOTHING ESTABLISHED; ⚠️ SOMETHING **IMPLIED** — ⭐ the residue IS READ AS a
+                     relationship and cannot hold ①'s *none exists* vs *cannot be established* distinction.
+                     ⛔ An INTERPRETATION RISK, ⛔ not a claim of the act.
+   ⭐⭐⭐ **THE SHAPE OF THE RESULT: five OBJECT-side targets ALL EMPTY; the one CONSEQUENCE-side target is
+      the only non-empty one.** ⇒ ⭐⭐ THE ACT IS ENTIRELY CONSEQUENCE-SIDE — Ote's separation of
+      RELATIONSHIP from CONSEQUENCE is ⛔ not merely a method, ⭐ IT IS THE SHAPE OF THE THING.
+   ⭐⭐ AND THE COROLLARY HIS FENCE MADE VISIBLE: every excluded artifact is a record of the DISPOSITION ⇒
+      ⛔ they were never evidence of meaning, because THE DISPOSITION IS THE ONLY THING THE ACT EVER HAD
+      TO RECORD. ⭐ The fence isolated the entire semantic content on the first pass.
+   ⛔ NOT ESTABLISHED: that the act is MEANINGLESS or should not exist — ⭐ a disposition about what to
+      present is a real thing for a memory system to have; the finding is about WHAT IT ESTABLISHES ·
+      ⛔ ④'s positive definition (⚠️ constrained — a single positive meaning would have to be
+      CONSEQUENCE-ONLY by construction — ⛔ but not settled) · ⛔ what the act SHOULD establish.
 ```
 
 ---
@@ -1038,9 +1092,18 @@ B-D4 (052)** · the **evidence-baseline guardrail** (destruction-detecting, fals
         system required to act BEFORE the relationship was established).
         ⇒ EXCLUDES interpretation 1 as a RELATIONSHIP model · ⛔ does NOT select among 2, 3, 4.
    ⑧ ✅ RULED NARROW — ⭐ ATTRIBUTION IS NOT AUTHORIZATION. ⛔ Neither writer identity nor routing
-        similarity is sufficient authority. ⇒ ⑧-A ⏸ POSITIVE AUTHORITY INVESTIGATED (§0-B ㊾), ⛔ no model
-        proposed. ⭐ Headline: AUTHORITY IS GRADED BY CHECKABILITY, ⛔ NOT BY RANK — and a human performing
-        an inference-shaped act is still inference. ⚠️ AND IN 2 OF 6 ANCHOR GROUPS NO AUTHORITY APPLIES.
+        similarity is sufficient authority.
+   ⑧-A ✅ RULED NARROW — authority is established through BOUNDED, CHECKABLE, ANSWERABLE facts, and
+        REFUSAL IS PRESERVED where it is not established. Delegation is legitimate ONLY where the fact is
+        true by the holder's MECHANISM, the grant is NARROW and REGISTRY-HELD, and it is REFUSED OUTSIDE
+        ITS BOUNDARY. (§0-B ㊾) ⚠️ ⛔ "authority tracks origin of material" is NARROWED — a finding of the
+        examined mechanisms, ⛔ NOT a universal law.
+   ㊿ ⭐⭐ ABSTENTION ≠ DEFER — LOCKED. #8/#9 = nothing to authorize ⇒ ABSTAIN · #3 = the record does not
+        establish what to act on ⇒ DEFER. ⛔ NEVER collapse them.
+   ④-A ⏸ INVESTIGATED (§0-B 51) — ⭐ THE TRANSITION ESTABLISHES **ONE** CLAIM AND ITS SUBJECT IS THE
+        SYSTEM: *"the system has adopted a new disposition about which of these it will present."*
+        ⛔ About the incoming, the incumbent, the world, the question and the relation — NOTHING.
+        ⭐⭐ Five OBJECT-side targets empty; the one CONSEQUENCE-side target is the only non-empty one.
       ⏸ The original framing, kept because it is what was investigated:
         ⛔ NO LONGER "what may `resolveConflict` do?"
         *"What semantic authority must a component possess before it may cause an incumbent to cease being
