@@ -496,6 +496,51 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐ **DUAL-CHANNEL FRAMING — 2026-09-18.** ⛔ Observation only, ZERO writes, no restart.
+
+`INVESTIGATION_SOTERA_DUAL_CHANNEL_FRAMING.md`
+
+> ## ⛔⛔ **THE SYSTEM CANNOT REPRESENT THAT THE TWO PRESENTATIONS ARE THE SAME OBSERVATION.**
+> ## Neither channel carries an id into the prompt, and NO code compares the two channels' contents.
+
+```
+✅ "the same observation is presented twice"                 POSSIBLE, and STRUCTURALLY LIVE
+⛔ "the second presentation changes the semantic force"      NO MECHANISM EXISTS
+⚠️ the only cross-channel relation is ADJACENCY — ⛔ and adjacency is not a mechanism.
+```
+
+⭐⭐⭐ **AND IT HAPPENED NATURALLY TODAY — OBSERVED in `cognition-debug.log` (Ote's OWN chat, ⛔ I created
+none of it):** all FOUR organic turns show `"activated": true`, and at **01:13** the block carried a
+**STORED SEMANTIC MEMORY** (`basis=told`, `retention=given`) while passive recall ran on the same text.
+⛔ UNKNOWN whether it was the SAME ROW — no id survives to check, and ⭐ that unanswerability IS the finding.
+
+```
+⭐ BOTH channels gated on the same thing: a non-empty user turn.
+  ⚠️ COGNITION additionally needs a CUE and has FIVE deactivation gates (no-cue · illegal promotion ·
+    derived-cues-only · illegal current-state · vocabulary leak ⇒ the WHOLE block is withheld).
+⭐⭐ PLACEMENT ASYMMETRY — and it is DURABILITY, ⛔ NOT semantic precedence:
+    cognition → `part()` → the HARD system message  → ⛔ NEVER trimmed
+    recall    → `emit()` → the ADAPTIVE runtime tail → ✅ budgeted, CAN be dropped
+⛔ NO precedence rule · ⛔ NO cross-channel dedup · ⛔ NO mutual awareness · ⛔ nothing spans them.
+⛔ `noteRetrieved` records passive-recall and recall_memory — ⛔ NEVER cognition items.
+⛔ NO IDS in either channel. Provenance survives ONLY in cognition, and ONLY as PROSE.
+```
+
+⚠️⭐ **CORRECTION TO MY OWN EARLIER CITATION — made before anything was built on it.** The
+`memory-cognition-projection.js:14` precedent is **COGNITION BLOCK vs TOOL RESULT**, about **ACCESS
+VOCABULARY** — ⛔ NOT cognition vs passive recall, and ⛔ NOT one row appearing twice. The tool's framing
+won *in a case where the two frames CONTRADICTED each other about access*. ⛔ It says nothing about this
+channel pair. **UNKNOWN.**
+
+⚠️ **ONE OBSERVATION OUTSIDE THE SEMANTIC QUESTION** (⛔ not a proposal, ⛔ not this boundary): the cue
+extractor took **"good"** from *"good morning น้อง"* and the block opened *"Right now I can reach three
+conversations of mine where good came up"* — three conversations of verbatim excerpts, into the message
+that is NEVER trimmed. ⇒ a CUE-QUALITY / CONTEXT-COST observation.
+
+⏸ **THE NEXT GENUINE BOUNDARY — stated, ⛔ not pursued:**
+> **The system cannot tell whether it has shown the model ONE observation or TWO.**
+⭐ A REPRESENTABILITY fact, ⛔ not a defect claim — the same shape as every earlier boundary in this arc.
+
 ## ✅⭐⭐ **PRESENTATION / ASSERTION BOUNDARY — CLEAN. 2026-09-18.** ⛔ Observation only, ZERO writes.
 
 `INVESTIGATION_SOTERA_PRESENTATION_ASSERTION_BOUNDARY.md`

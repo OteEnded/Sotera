@@ -13256,3 +13256,53 @@ for the recall bullets. ⛔ Nothing proposed, nothing touched.
 `embed()`, which writes, and this pass wrote nothing.
 
 **DOC:** `INVESTIGATION_SOTERA_PRESENTATION_ASSERTION_BOUNDARY.md` · ⛔ zero writes · ⛔ no restart needed
+
+
+---
+
+## 2026-09-18 · ✅ DUAL-CHANNEL FRAMING — observation only, ZERO writes, no restart
+
+**Ote:** *"When one observation reaches the model through two channels with different epistemic framing,
+what — if anything — does the system establish about that observation?"*
+
+### ⛔⛔ THE ANSWER: NOTHING — and the reason is stronger than "no mechanism does it"
+**The system cannot REPRESENT that the two presentations are the same observation.** No id reaches the
+prompt in either channel, and no code compares the two channels' contents.
+
+```
+✅ presented twice                  POSSIBLE and structurally live
+⛔ second changes semantic force    NO MECHANISM
+⚠️ only cross-channel relation      ADJACENCY — and adjacency is not a mechanism
+```
+
+### ⭐⭐⭐ IT HAPPENED NATURALLY TODAY — OBSERVED in cognition-debug.log
+All FOUR organic turns: `"activated": true`. At **01:13** the cognition block carried a **stored semantic
+memory** (`basis=told`, `retention=given`) while passive recall ran on the same text.
+⛔ UNKNOWN whether it was the same row — no id survives to check. ⭐ That unanswerability is the finding.
+ⓘ This was Ote's own chat; ⛔ no traffic was generated.
+
+### ⭐ STRUCTURE
+```
+both gated on a non-empty user turn; cognition ALSO needs a CUE + has 5 deactivation gates
+PLACEMENT: cognition → HARD system message (NEVER trimmed) · recall → ADAPTIVE tail (budgeted)
+  ⇒ the asymmetry is DURABILITY, ⛔ not semantic precedence
+⛔ no precedence rule · no cross-channel dedup · no mutual awareness
+⛔ noteRetrieved records passive-recall + recall_memory, NEVER cognition items
+⛔ no ids in either channel; provenance survives only in cognition, only as prose
+```
+
+### ⚠️ CORRECTION TO MY OWN CITATION
+`memory-cognition-projection.js:14` is **cognition block vs TOOL RESULT**, about **access vocabulary** —
+⛔ not cognition vs passive recall, ⛔ not one row appearing twice. The tool's framing won in a case where
+the frames CONTRADICTED about access. ⛔ It says nothing about this pair. UNKNOWN.
+
+### ⚠️ OUT-OF-SCOPE OBSERVATION (⛔ no proposal)
+The cue extractor took "good" from "good morning น้อง" ⇒ the block opened with "three conversations …
+where good came up" and three sets of verbatim excerpts, into the never-trimmed message.
+A cue-quality / context-cost observation, ⛔ not a semantic-relation one.
+
+### ⏸ NEXT GENUINE BOUNDARY — stated, not pursued
+> **The system cannot tell whether it has shown the model one observation or two.**
+A representability fact, ⛔ not a defect claim.
+
+**DOC:** `INVESTIGATION_SOTERA_DUAL_CHANNEL_FRAMING.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no traffic
