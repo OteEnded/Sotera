@@ -13078,3 +13078,51 @@ synthesis have rested on?"*. Ending suppression makes that trace strictly more h
 the ruling travels is separate.
 
 **DOC:** `INVESTIGATION_SOTERA_SUPPRESSION_DOWNSTREAM.md` · ⛔ zero writes · ⛔ predicate preserved
+
+
+---
+
+## 2026-09-18 · ✅ SHIPPED — Ⓒ IMPLEMENTED. Unestablished containment ⇒ no suppression.
+
+### ⭐⭐⭐ EXACT BEFORE / AFTER
+```
+BEFORE  search(null) → 43 rows · user|timezone|"Bangkok"  ⛔ silently withheld by dedupeByValue
+AFTER   search(null) → 44 rows · user|timezone|"Bangkok"  ✅ present
+⇒ exactly ONE row restored corpus-wide. Caps verified 1/1 · 3/3 · 6/6 — the LIMIT is unchanged.
+```
+
+### ⭐ THE DIFF (3 files; functional part ~6 lines)
+```
+memory-rank.js        ⛔ LOGIC UNCHANGED — reclassification header only:
+                      "a HEURISTIC informational-containment detector, NOT an established relation"
+memory-v2-service.js  + `valueSuppressionHeuristic = false`; both call sites gated
+value-suppression-off.test.mjs    NEW · 9 tests · fake store · ZERO DB
+recall-preserves-both-check.mjs   NEW · the REAL Bangkok pair · ZERO DB WRITES
+```
+⚠️ The heuristic is RETAINED and still works on opt-in (flag true ⇒ 1 row; default ⇒ 2). RED-PROVED:
+forcing it on makes timezone MISSING and the trace drops 44 → 43.
+
+### ✅ VERIFICATION
+```
+@ote/memory 132/132 (+9)  ·  Sotera unit 753/753  ·  full suite 13 of 117 — the SAME 13
+recall-preserves-both  ALL CHECKS PASSED  ·  admission-read-projection unaffected
+```
+⚠️ TWO SUITE DELTAS, ATTRIBUTED, ⛔ NEITHER MINE:
+- `competition-unit-trace` FAIL→PASS — asserts "no slot holds more than one live row" and runs
+  alphabetically BEFORE m2-rollback ⇒ its result tracks leftover canary residue from previous runs.
+  An ordering artifact of the suite's non-idempotency.
+- `evidence-baseline` FAIL — the known cleanup damage (slots 97/112, aliases 4/8), ruled to stay red.
+
+⛔ NO CLEANUP PERFORMED: m2-rollback left canary rows (total 67, live 2); the suite left ledger rows (45).
+
+### ⛔ UNTOUCHED, as ruled
+write-time `DEDUP_THRESHOLD` · admission · question pins · replacement · provenance · composer ·
+cognition · shadow adjudicators · schema · migrations.
+
+### ⏸ RECORDED AS ARCHITECTURAL KNOWLEDGE
+⭐ **No consumer structurally requires the recall set to contain distinct facts.**
+⚠️ **OLS / EAP carry their own `memory-rank.js` copies** — confirmed twice that every `@ote/memory`
+importer is under `Personas/Sotera`. ⛔ This ruling is Sotera-specific; ⛔ do not propagate without a
+separate ruling.
+
+**COMMITS:** Sotera `a50bb5f` · @ote/memory `719bcb3` (⛔ local only, no remote)

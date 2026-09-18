@@ -496,6 +496,59 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐⭐ ✅ **SHIPPED — Ⓒ IMPLEMENTED (2026-09-18).** `valueSuppressionHeuristic` defaults **OFF**.
+
+```
+BEFORE  search(null) returned 43 rows · user|timezone|"Bangkok"  ⛔ SILENTLY WITHHELD
+AFTER   search(null) returns  44 rows · user|timezone|"Bangkok"  ✅ PRESENT
+⇒ ⭐ exactly ONE row restored, corpus-wide. ⛔ No other behaviour changed.
+```
+
+⭐⭐ **THE DIFF IS 3 FILES, and the functional part is ~6 LINES:**
+```
+memory-rank.js        ⛔ LOGIC UNCHANGED — a reclassification header only:
+                      ⭐ "A HEURISTIC INFORMATIONAL-CONTAINMENT DETECTOR, ⛔ NOT an established
+                        semantic relation · ⛔ NOT proposition identity · ⛔ NOT question identity"
+memory-v2-service.js  + `valueSuppressionHeuristic = false` on the factory
+                      · both call sites gated on it (no-query branch + the inline query-branch copy)
+value-suppression-off.test.mjs   NEW — 9 tests, fake store, ⛔ ZERO DB
+recall-preserves-both-check.mjs  NEW — the REAL Bangkok pair, ⛔ ZERO DB WRITES
+```
+
+⚠️⭐ **THE HEURISTIC IS RETAINED, NOT DELETED** — and the tests PROVE it still works on opt-in
+(`valueSuppressionHeuristic: true` ⇒ 1 row; default ⇒ 2 rows). ⛔ A mechanism that merely broke would not
+be preserved, it would be abandoned.
+
+⭐⭐ **RED-PROVED**: forcing the flag back on makes `timezone` MISSING and drops the retrieval trace from
+44 to 43. ⇒ ⛔ the invariant is not vacuous.
+
+⭐ **AND THE LIMIT IS UNCHANGED** — caps verified at 1/1 · 3/3 · 6/6. Both branches were already
+limit-capped ⇒ this changes WHICH observation fills a slot, ⛔ never HOW MANY are returned.
+⇒ ⛔ NO context-budget problem, and ⛔ no presentation change was needed.
+
+```
+✅ VERIFIED  @ote/memory 132/132 (+9 new) · Sotera unit 753/753 · full suite 13 of 117 — the SAME 13
+⚠️ TWO SUITE DELTAS, BOTH ATTRIBUTED, ⛔ NEITHER MINE:
+   competition-unit-trace  FAIL → PASS — it asserts "no slot holds more than one live row" and runs
+     ALPHABETICALLY BEFORE m2-rollback. Its result is a function of leftover canary residue from
+     PREVIOUS runs ⇒ an ORDERING ARTIFACT of the suite's non-idempotency.
+   evidence-baseline       FAIL — ⭐ the KNOWN cleanup damage (slots 97/112 · aliases 4/8), ruled to STAY RED.
+⛔ NOT CLEANED UP: m2-rollback left canary rows (total 67, live 2) and the suite left ledger rows (45).
+   ⛔ No destructive cleanup was performed — the standing rule after the incident.
+```
+
+⛔ **UNTOUCHED, as ruled:** write-time `DEDUP_THRESHOLD` (a different mechanism) · admission · question
+pins · replacement · provenance · composer · cognition · shadow adjudicators · schema · migrations.
+
+⏸ **AND RECORDED AS ARCHITECTURAL KNOWLEDGE:**
+```
+⭐ NO CONSUMER STRUCTURALLY REQUIRES THE RECALL SET TO CONTAIN DISTINCT FACTS.
+  The "`limit` DISTINCT facts" guarantee was comment-level only; nothing consumed it.
+⚠️ OLS / EnterpriseAgentPlatform carry their OWN `memory-rank.js` copies and their own tests.
+  ⭐ CONFIRMED TWICE: every `@ote/memory` importer is under `Personas/Sotera`; OLS imports `./memory-rank.js`.
+  ⛔ THIS RULING IS SOTERA-SPECIFIC. ⛔ DO NOT PROPAGATE without a separate investigation/ruling.
+```
+
 ## ⭐⭐⭐ ✅ **RULED Ⓒ — MEMORY PRESERVES BOTH (Ote, 2026-09-18).** ⛔ Not "delete dedupe".
 
 ```
