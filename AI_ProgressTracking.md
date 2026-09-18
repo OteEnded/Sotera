@@ -13031,3 +13031,50 @@ memory layer cannot establish it · Ⓓ establish nothing and stop asserting (co
 the one suppressed WRONGLY).
 
 **DOC:** `INVESTIGATION_SOTERA_SUPPRESSION_ESTABLISHMENT.md` · ⛔ zero writes · ⛔ predicate preserved
+
+
+---
+
+## 2026-09-18 · ✅ RULED Ⓒ MEMORY PRESERVES BOTH · ✅ DOWNSTREAM-DEPENDENCY TRACE
+
+### ⭐⭐⭐ THE RULING
+Unestablished *"A carries B's information"* → **no suppression** → preserve both.
+⛔ Ⓐ REJECTED (label-axis machinery: A1/gray-zone/A3 — a neighbouring relation on LABELS, and
+"label equivalence ≈ same-question-like judgement" is unresolved) ⇒ ⛔ do not activate shadow mode,
+⛔ do not turn on the adjudicator, ⛔ do not promote aliases as a workaround.
+⛔ Not Ⓑ either — ⛔ no attribute-aware equality (it would choose a new theory without establishing it).
+⏸ ⛔ Cognition is NOT ruled to synthesise — that is new construction, a separate future decision.
+⭐ And the predicate is ⛔ NOT "wrong" absolutely: it is an UNESTABLISHED HEURISTIC for an act whose truth
+may genuinely hold for some pairs, but whose APPLICABILITY the memory system cannot establish.
+
+### ⭐⭐ THE DEPENDENCY SURFACE IS TINY, AND THE BUDGET FEAR IS UNFOUNDED
+```
+⭐ TWO consumers, both inside retrieve(). ⛔ `duplicateOf` consumed by NOBODY.
+⭐⭐⭐ BOTH BRANCHES LIMIT-CAPPED ⇒ ending suppression CANNOT increase the row count.
+   ⛔ NO context-budget problem. It changes WHICH row fills a slot, ⛔ not how many.
+⭐ No consumer keys by value/content — every Map is id- or person-keyed.
+⭐ MEASURED: exactly ONE pair in the live corpus is affected — the wrongly-suppressed one.
+⚠️ DISTINCT MECHANISM, untouched: write-time DEDUP_THRESHOLD 0.95 / 0.80-for-notes (cosine, episodic,
+   reinforces, durable). ⛔ Different time, signal, row kind and effect.
+```
+
+### ⚠️ TWO HIDDEN ASSUMPTIONS FOUND — exactly what the trace was for
+```
+① "recall returns `limit` DISTINCT facts" — the stated reason suppression is INLINE.
+  ⇒ asserted in a COMMENT, relied on structurally by NOTHING. A quality property, ⛔ not a contract.
+② ⭐⭐⭐ THE COMPOSER ALREADY DESIGNED A 'redundant' (dedup) DROP STAGE — with its own reason and full
+  accounting — AND NEVER BUILT IT (context-composer.js:741). ⇒ the architecture already put
+  redundancy-dropping at the COMPOSER, the same boundary Ⓒ draws.
+  ⛔⛔ NOT a proposal — that is presentation behaviour, and presentation stays CLOSED.
+```
+
+### ⭐ ONE CONSUMER IMPROVES
+`noteRetrieved` records the post-suppression set ⇒ a hidden row is missing from *"what could this
+synthesis have rested on?"*. Ending suppression makes that trace strictly more honest by its own standard.
+
+### ⏸ OPEN
+① the predicate's new role (⛔ not deleted, ⛔ not attribute-aware) · ② whether anything replaces the
+"distinct facts" quality (presentation, closed) · ③ the OLS/EAP copies carry their own tests — whether
+the ruling travels is separate.
+
+**DOC:** `INVESTIGATION_SOTERA_SUPPRESSION_DOWNSTREAM.md` · ⛔ zero writes · ⛔ predicate preserved

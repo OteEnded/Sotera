@@ -496,6 +496,61 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐⭐ ✅ **RULED Ⓒ — MEMORY PRESERVES BOTH (Ote, 2026-09-18).** ⛔ Not "delete dedupe".
+
+```
+⛔⛔ THE MEMORY LAYER MUST NOT CONSTRUCT AN INFORMATIONAL-CONTAINMENT RELATION because values look alike.
+   UNESTABLISHED "A carries B's information"  →  NO SUPPRESSION  →  PRESERVE BOTH.
+
+⛔ REJECTED Ⓐ (label-axis machinery): A1 / gray-zone / A3 establish a NEIGHBOURING relation on property
+  LABELS, and "label equivalence ≈ same-question-like judgement" is UNRESOLVED.
+  ⇒ ⛔ DO NOT activate shadow mode · ⛔ DO NOT turn on the adjudicator · ⛔ DO NOT promote aliases as a workaround.
+⛔ NOT Ⓑ either: ⛔ do NOT add attribute-aware equality — that would choose a NEW semantic theory without
+  establishing why it is correct.
+⏸ ⛔ COGNITION IS **NOT** RULED TO SYNTHESISE. "memory cannot establish it" ≠ "cognition should."
+  ⭐ That would be NEW CONSTRUCTION — cognition has no containment relation either. ⏸ Separate future design.
+
+⭐⭐ AND THE PRECISE STATEMENT — ⛔ the predicate is NOT "wrong" absolutely:
+  *The current predicate is an UNESTABLISHED HEURISTIC for a semantic act whose truth MAY HOLD for some
+   pairs (the originating `formatting preference` / `communication style` case), but whose APPLICABILITY
+   cannot currently be established by the memory system.* ⇒ it cannot tell that class from Bangkok.
+```
+
+## ⭐⭐ ✅ **DOWNSTREAM-DEPENDENCY TRACE — DELIVERED.** `INVESTIGATION_SOTERA_SUPPRESSION_DOWNSTREAM.md`
+
+```
+⭐ THE PREDICATE HAS EXACTLY **TWO** CONSUMERS, both inside `retrieve()`. ⛔ Nothing else calls it.
+⭐ `duplicateOf` — the contract's "auditable: which fact absorbed it" — IS CONSUMED BY NOBODY.
+⭐⭐⭐ BOTH BRANCHES ARE **LIMIT-CAPPED** ⇒ ending suppression CANNOT increase the rows returned.
+   ⛔⛔ THERE IS NO CONTEXT-BUDGET PROBLEM. It changes WHICH row fills a slot, ⛔ not how many.
+⭐ NO consumer keys by value/content — every Map is id- or person-keyed ⇒ ⛔ no uniqueness assumption.
+⭐ MEASURED EFFECT ON THE LIVE CORPUS: **exactly ONE pair** — and it is the wrongly-suppressed one.
+⚠️ SEPARATE MECHANISM, ⛔ untouched by the ruling: write-time `DEDUP_THRESHOLD` 0.95 (0.80 for notes) —
+   embedding cosine, episodic/notes, reinforces a row, DURABLE. ⛔ Different time/signal/kind/effect.
+```
+
+⚠️ **TWO HIDDEN ASSUMPTIONS EXPOSED — the thing Ote wanted found before "fixing" Bangkok:**
+```
+① THE "`limit` DISTINCT facts" GUARANTEE — the stated reason the suppression is INLINE:
+  *"A restated value skips its slot and the loop keeps going, so recall returns `limit` DISTINCT facts."*
+  ⇒ ⭐ asserted in a COMMENT and relied on STRUCTURALLY BY NOTHING. ⛔ A quality property, ⛔ not a contract.
+  ⚠️ Recorded so no future layer inherits it silently.
+② ⭐⭐⭐ THE COMPOSER ALREADY DESIGNED A REDUNDANCY-DROP STAGE AND NEVER BUILT IT — `context-composer.js:741`:
+  *"future stages slot in HERE, before budgeting — each stamping its own drop reason: 'redundant' (dedup),
+   'diversity', 'lower-utility'. Today the only reason is 'budget'."*
+  ⇒ ⭐ the architecture ALREADY placed redundancy-dropping at the COMPOSER with a named reason and full
+  accounting (`droppedByReason`/`droppedBySection`) — the same boundary Ⓒ draws.
+  ⛔⛔ NOT A PROPOSAL — that would be a PRESENTATION behaviour, and presentation stays CLOSED.
+```
+
+⭐ **AND ONE CONSUMER IMPROVES:** `noteRetrieved` records the POST-suppression set, so a hidden row is
+absent from *"what could this synthesis have rested on?"*. ⇒ ending suppression makes the trace strictly
+more honest **by its own stated standard**.
+
+⏸ **STILL OPEN, ⛔ not decided:** ① what becomes of the predicate (⛔ not deleted, ⛔ not attribute-aware —
+its new role is undecided) · ② whether anything replaces the "distinct facts" quality (⛔ presentation) ·
+③ the OLS/EAP copies of `memory-rank.js` carry their own tests — ⏸ whether the ruling travels is separate.
+
 ## ⭐⭐⭐ ✅ **RULED: SUPPRESSION IS A SEMANTIC ACT (Ote, 2026-09-18).** ⛔ And ③ does NOT mean "same question".
 
 ```
