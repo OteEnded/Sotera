@@ -13786,3 +13786,54 @@ restart (`cd Backend && npm start`). Restart is permitted by §0-D — this was 
 permission one.
 
 **COMMITS:** @ote/memory `ff12c3b` (⛔ LOCAL ONLY — that repo has no remote) · Sotera: below.
+
+
+---
+
+## 2026-09-18 · ✅ DREAMING v0 — THE LOOP MEASURED END TO END. ⛔⛔ IT DOES NOT CLOSE.
+
+**Ote:** *"the smallest real loop that allows Sotera to reflect on past experience without being prompted
+and produce durable learning that can affect a later conversation. Build it. Measure it. Then investigate
+only what actually breaks."*
+
+### ⭐⭐⭐ THE LOOP WAS ALREADY BUILT
+`memory.reflectionEnabled` is TRUE and gates a 20-minute cron calling `reflectAllQuiet(maxConvos 3)`, which
+selects quiet+changed conversations, reflects with her own chat model, and offers exactly two write doors
+(`retain` / `decline_to_remember`). ⇒ nothing needed constructing except THE INSTRUMENT.
+
+### MEASURED, HOP BY HOP (`test/checks/dreaming-v0-loop-check.mjs`, zero writes)
+```
+trigger armed        YES                     fired unprompted   22 cron acts, newest today 09:00
+selection bounded    22/22 (4..71 messages)  completed          22/22, 0 failed, 0 blocked
+kept something       8/22                    durable            live 8/8, embedded 8/8
+ELIGIBLE             6/6 clear minRelevance 0.15 (best .682, avg .506)
+CLOSED THE LOOP      0/8 EVER RECALLED   <-- THE BREAK
+```
+
+### THE BREAK: ELIGIBLE BUT NEVER COMPETITIVE
+Not the gate, not the embedding, not the room, not liveness. They clear the gate and lose every slot,
+competing against ~61 rows for 6.
+```
+age-controlled:  reflection 3/20 (15%)  vs  other writers 5/6 (83%)
+similarity order matches recall order exactly:
+  A unprompted reflection avg-best .506 -> 0 recalled
+  B other reflection      avg-best .599 -> 3 recalled
+  C other writers         avg-best .736 -> 5 recalled
+```
+Reflection-written learning is semantically diffuse - about relationships and interpretations, not the
+entities and values people ask about - so it ranks below slot facts.
+
+### STOPPED: THE FIX IS FENCED
+0-D forbids a ranking/salience change. Closing the hop needs ranking/salience (fenced), a separate
+retrieval lane for persona-authored learning (beyond minimum), or the reflection writer declaring
+`importance` (all 8 land NULL = neutral 5 while other writers average ~8 - but choosing a value is itself
+a salience decision). Not picked. Ote's call.
+
+### MY OWN DEFECT, CAUGHT ONLY BY THE RED PROOF
+`makeChecker` is `check(name, ok, detail)`; I called `check(ok, name, detail)`, so every assertion
+evaluated a non-empty string and all 11 passed unconditionally. I would have reported a verified loop on
+an instrument that could not fail. Fixed at all 11 sites; two red proofs now fire.
+H6 is PINNED at CLOSURE_BASELINE = 0 - red there means the loop CLOSED, which is good news.
+
+**DOC/CHECK:** `test/checks/dreaming-v0-loop-check.mjs` · ⛔ zero writes · ⛔ no recall issued (it would
+inflate the access_count this reads) · ⛔ no traffic · ⛔ nothing in the fenced list was touched

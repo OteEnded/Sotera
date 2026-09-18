@@ -539,6 +539,65 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐⭐ **DREAMING v0 — MEASURED 2026-09-18. ⛔⛔ THE LOOP RUNS AND DOES NOT CLOSE.**
+
+`test/checks/dreaming-v0-loop-check.mjs` · ⛔ ZERO writes, ⛔ no traffic, ⛔ no recall issued.
+
+> ## ⭐⭐⭐ **THE v0 LOOP WAS ALREADY BUILT AND ALREADY RUNS UNPROMPTED.** ⛔ Nothing needed constructing
+> ## except **the instrument** — so that *"the loop works"* is a NUMBER, ⛔ not an opinion.
+
+```
+completed conversation → dream trigger → selection → reflection → candidate → decision → durable memory
+  ✅ memory.reflectionEnabled = TRUE → a 20-min cron → reflectAllQuiet(maxConvos 3)
+  ✅ quiet+changed per conversation → her OWN chat model → two write doors: `retain` / `decline_to_remember`
+```
+
+```
+⭐ MEASURED, HOP BY HOP, ON THE REAL CORPUS
+   trigger armed ......... YES
+   fired UNPROMPTED ...... 22 cron acts (⛔ manual 100 / legacy 81 do NOT count), newest TODAY 09:00
+   selection bounded ..... 22/22 name a conversation AND a window (4..71 messages)
+   completed ............. 22/22 · failed 0 · blocked 0
+   kept something ........ 8/22   ⓘ non-retention is a REAL outcome, ⛔ not a failure
+   durable + recallable .. live 8/8 · embedded 8/8
+   ELIGIBLE .............. 6/6 clear minRelevance 0.15 against a REAL later user turn (best .682, avg .506)
+   ⛔⛔ CLOSED THE LOOP ... **0 / 8 EVER RECALLED**
+```
+
+## ⛔⛔ THE BREAK, LOCALISED — **ELIGIBLE BUT NEVER COMPETITIVE**
+
+⛔ It is **NOT** the relevance gate (6/6 clear it) · ⛔ **NOT** a missing embedding (8/8 embedded) ·
+⛔ **NOT** the room (they sit in the busiest room) · ⛔ **NOT** liveness (8/8 live).
+⭐ They clear the gate and then **lose every slot**, competing against ~61 rows for **6**.
+
+```
+⭐ AGE-CONTROLLED CONTROL GROUP (same window · same kind · same embedder · different writers):
+     reflection      3/20   15%          ← and the UNPROMPTED subset is 0/8
+     other writers   5/6    83%
+⭐ AND THE SIMILARITY ORDER MATCHES THE RECALL ORDER EXACTLY:
+     A unprompted reflection  avg-best .506  → 0 recalled
+     B other reflection       avg-best .599  → 3 recalled
+     C other writers          avg-best .736  → 5 recalled
+⇒ reflection-written learning is SEMANTICALLY DIFFUSE — it is about relationships and interpretations,
+  ⛔ not the entities and values people ask about — so it ranks below slot facts and never reaches top-6.
+```
+
+## ⏸⛔ **STOPPED HERE — THE FIX COLLIDES WITH A STANDING FENCE.** ⭐ OTE'S DECISION, ⛔ not an implementation detail.
+§0-D says **⛔ no ranking/salience change**. Closing this hop needs one of: ① ranking/salience (⛔ fenced) ·
+② a separate retrieval lane for persona-authored learning (⛔ beyond "minimum") · ③ the reflection writer
+declaring `importance` (⚠️ all 8 land **NULL** ⇒ neutral 5, while other writers average ~8 — but choosing a
+value IS a salience decision). ⛔ I did not pick one.
+
+## ⚠️⚠️ A DEFECT OF MY OWN, CAUGHT ONLY BY THE RED PROOF — RECORDED BECAUSE IT ALMOST SHIPPED
+`makeChecker` is **`check(name, ok, detail)`** — ⛔ I called it `check(ok, name, detail)`. Every assertion
+was evaluating a NON-EMPTY STRING ⇒ **all 11 passed unconditionally** and printed *"ok true"*.
+⇒ ⭐⭐ I would have reported a *"measured, verified"* loop on an instrument that **could not fail**.
+⛔ Caught ONLY because I red-proved the baseline. ✅ Fixed at all 11 call sites; ✅ TWO red proofs now fire
+(H6 baseline 0→1 ⇒ FAIL · H4 `kept>0`→`kept>999` ⇒ FAIL). ⭐ `a-passing-test-can-test-nothing`, again.
+
+⭐ **H6 IS PINNED, ⛔ NOT ASSERTED-TRUE.** `CLOSURE_BASELINE = 0`. ⭐ **RED THERE MEANS THE LOOP CLOSED** —
+good news, update the baseline. ⛔ It must never be relaxed to make a run quiet.
+
 ## ✅⭐⭐⭐⭐ **THE DECLINE GUARD — SHIPPED 2026-09-18. ✅ RULED BY OTE, ✅ BUILT, ✅ RED-PROVED.**
 
 > ## ⭐⭐ **THE GUARANTEE MOVED TO THE SELECTION STAGE.** ⛔ Not a fourth `withoutDecisions` call site.
