@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { apiGet } from '../../lib/api'
 import RefreshButton from '../../components/RefreshButton'
 import { ui } from './ui'
@@ -85,6 +85,99 @@ function outcomeOf(r: Run): { label: string; tone: 'plain' | 'ok' | 'warn' | 'da
   if (r.wroteMemoryId) return { label: 'kept something', tone: 'ok' }
   return { label: 'kept nothing', tone: 'plain' }
 }
+
+/**
+ * ⭐⭐ THE RUN DETAIL, RENDERED **INLINE UNDER ITS OWN ROW**.
+ *
+ * ⚠⚠ IT USED TO RENDER BELOW THE WHOLE TABLE, AND THAT WAS A REAL BUG, REPORTED BY OTE: *"what's this
+ * button do? i clicked and it did nothing"*. With 40 runs listed, clicking the FIRST row opened a panel
+ * roughly forty rows further down — off-screen, so the chevron looked dead.
+ * ⭐ A ▸ ON A ROW PROMISES THE ROW EXPANDS. Anything else is the affordance lying about where the
+ * answer will appear.
+ */
+function RunDetail({ detail, detailErr }: { detail: Detail | null; detailErr: string }) {
+  return (
+    <div className="rounded-[10px] border border-line bg-panel p-3 flex flex-col gap-3">
+      <div className="rounded-[10px] border border-line bg-panel p-3 flex flex-col gap-3">
+        {detailErr && <div className="text-danger text-[13px]">{detailErr}</div>}
+        {!detail && !detailErr && <div className="text-muted text-[13px]">Loading run…</div>}
+        {detail && (
+          <>
+            {/* ── the run's own identity: what ran, on what, with which instrument ── */}
+            <div className="flex flex-wrap gap-4">
+              <Stat label="model" value={<span className="font-normal">{detail.run.model ?? '—'}</span>} />
+              <Stat label="prompt gen" value={detail.run.promptGeneration ?? '—'} title="bumped whenever the prompt text changes" />
+              <Stat label="tool gen" value={detail.run.toolGeneration ?? '—'} />
+              <Stat label="messages" value={detail.run.messagesConsidered ?? '—'} title={`rolling ${detail.run.fromRollingId ?? '?'}–${detail.run.upToRollingId ?? '?'}`} />
+              <Stat label="duration" value={secs(detail.run.durationMs)} />
+              <Stat label="started" value={<span className="font-normal">{clock(detail.run.startedAt)}</span>} />
+            </div>
+
+            {/* ── the lifecycle, in order ── */}
+            <div className="flex flex-col gap-1.5">
+              <div className="text-[11px] uppercase tracking-[0.05em] text-muted">What happened</div>
+              {detail.toolCalls.length === 0 && detail.decisions.length === 0 && (
+                <div className="text-[13px] text-muted">
+                  She read it and reached for nothing. That is a complete answer, not a failure.
+                </div>
+              )}
+              {detail.toolCalls.map((c) => (
+                <div key={c.id} className="flex flex-wrap items-center gap-2 text-[12px]">
+                  <span className="text-muted tabular-nums">{clock(c.at)}</span>
+                  <Chip tone={c.ok ? 'ok' : 'danger'}>{c.tool}</Chip>
+                  <span className="text-muted">{c.argKeys.join(', ') || 'no arguments'}</span>
+                  <span className="text-muted tabular-nums">{secs(c.durationMs)}</span>
+                  {c.error && <span className="text-danger">{c.error}</span>}
+                </div>
+              ))}
+              {detail.decisions.map((d) => (
+                <div key={d.id} className="flex flex-wrap items-start gap-2 text-[12px]">
+                  <span className="text-muted tabular-nums">{clock(d.at)}</span>
+                  <Chip tone={d.state === 'persisted' ? 'ok' : d.state === 'refused' ? 'warn' : 'plain'}>{d.state ?? 'decision'}</Chip>
+                  {d.kind && <span className="text-muted">{d.kind}{d.mine === false ? ' · about them' : d.mine === true ? ' · hers' : ''}</span>}
+                  {d.why && <span className="text-muted flex-1 min-w-[220px]">{d.why}</span>}
+                </div>
+              ))}
+              {/* ⚠️ THE JOIN IS HEURISTIC AND SAYS SO. */}
+              {(detail.toolCalls.length > 0 || detail.decisions.length > 0) && !detail.decisionsExact && (
+                <div className="text-[11px] text-muted italic">
+                  Matched to this run by conversation and time, not by a stored link — so a step from an
+                  overlapping run could appear here.
+                </div>
+              )}
+            </div>
+
+            {/* ── what she actually wrote, if anything ── */}
+            {detail.memory && (
+              <div className="flex flex-col gap-1">
+                <div className="text-[11px] uppercase tracking-[0.05em] text-muted">What she kept</div>
+                <div className="flex flex-wrap items-center gap-2 text-[12px]">
+                  <Chip tone="ok">importance {detail.memory.importance ?? '—'}</Chip>
+                  <Chip tone="plain">{detail.memory.author ?? '—'}</Chip>
+                  <Chip tone="plain">{detail.memory.kind ?? '—'}</Chip>
+                  {detail.memory.live ? <Chip tone="ok">live</Chip> : <Chip tone="warn">archived</Chip>}
+                  <span className="text-muted">recalled {detail.memory.accessCount ?? 0}×</span>
+                </div>
+                <div className="text-[13px] whitespace-pre-wrap">{detail.memory.content}</div>
+              </div>
+            )}
+
+            {/* ── her reflection, in her own words ── */}
+            <details>
+              <summary className="text-[11px] uppercase tracking-[0.05em] text-muted cursor-pointer">
+                What she thought ({detail.run.textChars ?? 0} chars)
+              </summary>
+              <div className="mt-1.5 text-[13px] whitespace-pre-wrap text-muted max-h-[360px] overflow-y-auto">
+                {detail.run.text || '—'}
+              </div>
+            </details>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 
 export default function DreamRunsPanel() {
   const [open, setOpen] = useState(false)
@@ -177,7 +270,8 @@ export default function DreamRunsPanel() {
                   const o = outcomeOf(r)
                   const isOpen = selected === r.id
                   return (
-                    <tr key={r.id} className={isOpen ? 'bg-[var(--code-bg)]' : undefined}>
+                    <Fragment key={r.id}>
+                    <tr className={isOpen ? 'bg-[var(--code-bg)]' : undefined}>
                       <td className={`${ui.td} ${border}`}>
                         <button className="gw-btn adm-btn-sm mr-1.5" onClick={() => void openRun(r.id)} aria-expanded={isOpen}>{isOpen ? '▾' : '▸'}</button>
                         <span className="text-[12px] text-muted">{when(r.completedAt ?? r.requestedAt)}</span>
@@ -196,90 +290,22 @@ export default function DreamRunsPanel() {
                           : <span className="text-muted">—</span>}
                       </td>
                     </tr>
+                    {isOpen && (
+                      <tr>
+                        <td className={`${ui.td} ${border} p-0`} colSpan={6}>
+                          <div className="px-3 pb-3">
+                            <RunDetail detail={detail} detailErr={detailErr} />
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   )
                 })}
               </tbody>
             </table>
           </div>
 
-          {selected && (
-            <div className="rounded-[10px] border border-line bg-panel p-3 flex flex-col gap-3">
-              {detailErr && <div className="text-danger text-[13px]">{detailErr}</div>}
-              {!detail && !detailErr && <div className="text-muted text-[13px]">Loading run…</div>}
-              {detail && (
-                <>
-                  {/* ── the run's own identity: what ran, on what, with which instrument ── */}
-                  <div className="flex flex-wrap gap-4">
-                    <Stat label="model" value={<span className="font-normal">{detail.run.model ?? '—'}</span>} />
-                    <Stat label="prompt gen" value={detail.run.promptGeneration ?? '—'} title="bumped whenever the prompt text changes" />
-                    <Stat label="tool gen" value={detail.run.toolGeneration ?? '—'} />
-                    <Stat label="messages" value={detail.run.messagesConsidered ?? '—'} title={`rolling ${detail.run.fromRollingId ?? '?'}–${detail.run.upToRollingId ?? '?'}`} />
-                    <Stat label="duration" value={secs(detail.run.durationMs)} />
-                    <Stat label="started" value={<span className="font-normal">{clock(detail.run.startedAt)}</span>} />
-                  </div>
-
-                  {/* ── the lifecycle, in order ── */}
-                  <div className="flex flex-col gap-1.5">
-                    <div className="text-[11px] uppercase tracking-[0.05em] text-muted">What happened</div>
-                    {detail.toolCalls.length === 0 && detail.decisions.length === 0 && (
-                      <div className="text-[13px] text-muted">
-                        She read it and reached for nothing. That is a complete answer, not a failure.
-                      </div>
-                    )}
-                    {detail.toolCalls.map((c) => (
-                      <div key={c.id} className="flex flex-wrap items-center gap-2 text-[12px]">
-                        <span className="text-muted tabular-nums">{clock(c.at)}</span>
-                        <Chip tone={c.ok ? 'ok' : 'danger'}>{c.tool}</Chip>
-                        <span className="text-muted">{c.argKeys.join(', ') || 'no arguments'}</span>
-                        <span className="text-muted tabular-nums">{secs(c.durationMs)}</span>
-                        {c.error && <span className="text-danger">{c.error}</span>}
-                      </div>
-                    ))}
-                    {detail.decisions.map((d) => (
-                      <div key={d.id} className="flex flex-wrap items-start gap-2 text-[12px]">
-                        <span className="text-muted tabular-nums">{clock(d.at)}</span>
-                        <Chip tone={d.state === 'persisted' ? 'ok' : d.state === 'refused' ? 'warn' : 'plain'}>{d.state ?? 'decision'}</Chip>
-                        {d.kind && <span className="text-muted">{d.kind}{d.mine === false ? ' · about them' : d.mine === true ? ' · hers' : ''}</span>}
-                        {d.why && <span className="text-muted flex-1 min-w-[220px]">{d.why}</span>}
-                      </div>
-                    ))}
-                    {/* ⚠️ THE JOIN IS HEURISTIC AND SAYS SO. */}
-                    {(detail.toolCalls.length > 0 || detail.decisions.length > 0) && !detail.decisionsExact && (
-                      <div className="text-[11px] text-muted italic">
-                        Matched to this run by conversation and time, not by a stored link — so a step from an
-                        overlapping run could appear here.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── what she actually wrote, if anything ── */}
-                  {detail.memory && (
-                    <div className="flex flex-col gap-1">
-                      <div className="text-[11px] uppercase tracking-[0.05em] text-muted">What she kept</div>
-                      <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                        <Chip tone="ok">importance {detail.memory.importance ?? '—'}</Chip>
-                        <Chip tone="plain">{detail.memory.author ?? '—'}</Chip>
-                        <Chip tone="plain">{detail.memory.kind ?? '—'}</Chip>
-                        {detail.memory.live ? <Chip tone="ok">live</Chip> : <Chip tone="warn">archived</Chip>}
-                        <span className="text-muted">recalled {detail.memory.accessCount ?? 0}×</span>
-                      </div>
-                      <div className="text-[13px] whitespace-pre-wrap">{detail.memory.content}</div>
-                    </div>
-                  )}
-
-                  {/* ── her reflection, in her own words ── */}
-                  <details>
-                    <summary className="text-[11px] uppercase tracking-[0.05em] text-muted cursor-pointer">
-                      What she thought ({detail.run.textChars ?? 0} chars)
-                    </summary>
-                    <div className="mt-1.5 text-[13px] whitespace-pre-wrap text-muted max-h-[360px] overflow-y-auto">
-                      {detail.run.text || '—'}
-                    </div>
-                  </details>
-                </>
-              )}
-            </div>
-          )}
         </div>
       )}
     </section>
