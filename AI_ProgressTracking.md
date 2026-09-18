@@ -12933,3 +12933,58 @@ structurally excluded ✅ · signal ⛔ · door ⛔ · in-turn ⛔ ⇒ **1 of 4*
 ⏸ Omission or assertion is Ote's. ⛔ Symmetry with admission is NOT an argument. ⛔ Presentation stays closed.
 
 **DOC:** `INVESTIGATION_SUPPRESSION_DOCTRINE_SCOPE.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no restart
+
+
+---
+
+## 2026-09-18 · ✅ WHAT SUPPRESSION CLAIMS — the narrow question, answered from the primary source
+
+**Ote:** *"A present · B eligible → B disappears → what has the system established by doing that?"*
+
+One targeted read was needed — the complete originating rationale block, `memory-rank.js:100-129`,
+previously read only in fragments. ⛔ No further investigation required.
+
+### ⭐⭐⭐ THE ANSWER: **"A CARRIES B's INFORMATION"**
+⛔ Not *"B was merely omitted"* · ⛔ not *"same question"* — the design explicitly DENIES same-property.
+
+```
+THE ORIGINATING CASE, measured 2026-08-06, IS ITSELF A TWO-DIFFERENT-ATTRIBUTES CASE:
+  "formatting preference" = "bullet points"                      imp 5
+  "communication style"   = "prefers bullet points in responses"  imp 7
+  slot-label cosine 0.6947 · VALUE cosine 0.8536 · threshold 0.85
+verbatim: "nor should it be, because [they] are genuinely different properties. The duplication only
+exists at the VALUE level, and NOTHING in the pipeline ever compares values across two different slots.
+That is the gap."
+⇒ OMITTING `attribute` IS THE EXPLICIT PURPOSE — it exists to suppress across slots the resolver
+  CORRECTLY refuses to merge.
+```
+
+### ⚠️ THE CONTRACT IS INTERNALLY INCONSISTENT HERE — reported, ⛔ not resolved
+TESTS: *"ONE FACT"*, *"absorbed"* ↔ RATIONALE: *"genuinely different properties"* with duplicated VALUES.
+⇒ the ambiguity is exactly what keeps ① and ③ both defensible. INFERRED (flagged): *"fact"* is probably
+being used loosely for *"piece of information"* — ⛔ but the record does not say so.
+
+### ⭐⭐⭐ WHY IT SUCCEEDS ON `bullet points` AND FAILS ON `Bangkok`
+**The predicate treats the VALUE as the whole information content of the row.**
+```
+bullet points  VALUE self-describing  ⇒ attribute is a filing label   ⇒ assertion HOLDS
+Bangkok        VALUE is an ANSWER, ATTRIBUTE carries the other half ⇒ assertion FAILS
+⇒ real precondition: "THE VALUE IS SELF-DESCRIBING" — ⛔ nothing in the predicate tests it.
+```
+
+### ⭐ SUPPRESSION PRESUPPOSES AGREEMENT
+*"Opposite polarity is never a duplicate: that is a conflict … which can supersede WITH AN AUDIT TRAIL.
+Suppression is for agreement only."* ⇒ ⛔ not budget vocabulary. ⚠️ The conflict path got an audit trail;
+the agreement path did not.
+
+### ⇒ IT IS A SEMANTIC ASSERTION PROBLEM — ⛔ AND THAT DOES NOT SELECT ③
+Establishing that the operation MAKES an assertion ≠ establishing that the assertion REQUIRES
+establishment before it may be acted on. ⏸ Ote's ruling.
+
+> **The operation asserts A carries B's information, across properties it acknowledges are different, on
+> the sole evidence that the values share a token set. May the system make that assertion without
+> establishing it — and if so, under what accountability?**
+
+⚠️ ③ would NOT reduce to "add `attribute`": the precondition is self-describing VALUE, ⛔ not same-question.
+
+**DOC:** `ANSWER_SOTERA_WHAT_SUPPRESSION_CLAIMS.md` · ⛔ zero writes · ⛔ no code · ⛔ presentation closed

@@ -496,6 +496,58 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐⭐ ✅ **WHAT SUPPRESSION CLAIMS — ANSWERED 2026-09-18.** `ANSWER_SOTERA_WHAT_SUPPRESSION_CLAIMS.md`
+
+> Ote's narrow question: *"A present · B eligible → B disappears → what has the system ESTABLISHED?"*
+
+> ## ⭐⭐⭐ **THE SYSTEM ESTABLISHES: "A CARRIES B's INFORMATION."**
+> ⛔ NOT *"B was merely omitted"* · ⛔ NOT *"A and B answer the same question"*
+
+⭐⭐⭐ **THE ORIGINATING CASE IS ITSELF A TWO-DIFFERENT-ATTRIBUTES CASE, AND THE AUTHOR SAYS SO** —
+`memory-rank.js:100-129`, measured on the live store 2026-08-06:
+```
+slot "formatting preference"  value "bullet points"                       imp 5
+slot "communication style"    value "prefers bullet points in responses"  imp 7
+slot-label cosine 0.6947 · value cosine 0.8536 · slotSemThreshold 0.85
+```
+> *"the resolver did NOT malfunction … **nor should it be, because 'formatting preference' and
+> 'communication style' are genuinely different properties**. The duplication only exists at the VALUE
+> level, and **NOTHING in the pipeline ever compares values across two different slots. That is the gap.**"*
+
+⇒ ⭐⭐ **OMITTING `attribute` IS THE EXPLICIT PURPOSE**, ⛔ not an oversight and ⛔ not merely an implicit
+theory of fact-identity. The mechanism exists to suppress ACROSS slots the resolver CORRECTLY refuses to merge.
+
+⚠️ **AND THE CONTRACT IS INTERNALLY INCONSISTENT ON EXACTLY THIS POINT** — reported, ⛔ not resolved:
+the TESTS say *"ONE FACT"* / *"absorbed"*; the RATIONALE says *"genuinely different properties"* whose
+VALUES duplicate. ⇒ ⭐ that ambiguity is what makes ① and ③ both defensible.
+
+⭐⭐⭐ **WHY IT WORKS ON `bullet points` AND FAILS ON `Bangkok`** — one sentence:
+**the predicate treats the VALUE as the whole information content of the row.**
+```
+bullet points  the VALUE is SELF-DESCRIBING ⇒ the attribute is a filing label ⇒ A does carry B. HOLDS.
+Bangkok        the VALUE is an ANSWER and the ATTRIBUTE carries the other half ⇒ A does NOT carry B. FAILS.
+⇒ the real precondition is "THE VALUE IS SELF-DESCRIBING" — ⛔ and nothing in the predicate tests it.
+  (the FILLER list — prefers/style/format/response/always — is evidence they had self-describing
+   preference sentences in mind.)
+```
+
+⭐ **AND SUPPRESSION PRESUPPOSES AGREEMENT** — verbatim: *"Opposite polarity is never a duplicate: that is
+a conflict, and conflicts belong to `memory-conflict.js`, which can supersede **with an audit trail**.
+**Suppression is for agreement only.**"* ⇒ ⛔ that is not the vocabulary of a context budget; a budget does
+not care whether two rows agree. ⚠️ And the CONFLICT path got an audit trail; the AGREEMENT path did not.
+
+⇒ ⭐⭐ **THIS IS A SEMANTIC ASSERTION PROBLEM, NOT ONLY AN ACCOUNTABLE-WITHHOLDING PROBLEM.**
+⛔⛔ **AND THAT DOES NOT SELECT ③.** Establishing that the operation MAKES an assertion is a different
+question from whether that assertion REQUIRES ESTABLISHMENT before it may be acted on. ⏸ Ote's ruling.
+
+⏸ **THE RULING QUESTION, FINAL FORM:**
+> **The operation asserts that A carries B's information, across properties it acknowledges are different,
+> on the sole evidence that the two values share a token set. Is that an assertion the system may make
+> without establishing it — and if so, under what accountability?**
+
+⚠️ ③ WOULD NOT REDUCE TO "add `attribute`" — the real precondition is SELF-DESCRIBING VALUE, ⛔ not
+same-question. ⇒ ⛔ it is not a restatement of the write-side ruling.
+
 ## ⭐⭐⭐ ✅ **SUPPRESSION-DOCTRINE SCOPE — DELIVERED 2026-09-18.** ⛔ Read-only, ZERO DB writes.
 
 `INVESTIGATION_SUPPRESSION_DOCTRINE_SCOPE.md`
