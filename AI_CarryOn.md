@@ -539,6 +539,109 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐ **THE MINIMUM SEMANTIC CONTRACT — 2026-09-18.** ⛔ Derivation only, ZERO writes.
+
+`CONTRACT_SOTERA_BOUNDARY_SEMANTICS.md`
+
+> ## ⭐⭐⭐ **THE GOVERNING RULE WAS ALREADY WRITTEN DOWN** — `memory-cognition-vocabulary.js`:
+> ## ⛔⛔ **"THE INFORMATION MUST SURVIVE; THE VOCABULARY MUST NOT."**
+> ⇒ ⛔ A FIELD is not the unit of this contract. **INFORMATION** is. A field may be dropped **iff** its
+> information reaches the consumer another way — and **must** be dropped if only its vocabulary would.
+
+⭐⭐ **THE ASYMMETRY THAT DECIDES ALMOST EVERYTHING — the lattice has a SAFE DIRECTION.** Promotion is
+illegal without a warrant; ✅ **demotion is always legal.** ⇒ a loss causing **UNDER-claiming** cannot make
+cognition *incorrect*, only less able to say true things. A loss causing **OVER-claiming** is a correctness
+failure. ⛔ They are NOT the same severity, and every finding below is classified by which it is.
+
+```
+THE TEST APPLIED: a field is REQUIRED only if a NAMED consumer would otherwise
+  ① make a statement that is FALSE · ② be unable to make one that is TRUE · ③ lose a GUARD.
+⛔ Everything else is marked SAFELY OMITTED however useful it looks. THREE fields were.
+```
+
+## ⭐ THE FOUR BOUNDARIES, ON ONE LINE EACH
+
+```
+① view()→cognition   REQUIRED id · content · entity · attribute · kind · confidence(ordering only)
+② retrieval→passive  REQUIRED content · kind · id   ⭐ ALREADY 3-FIELD — the map runs AFTER all three
+③ cognition→model    REQUIRED source · basis · retention · availability · subject+provenance · when
+④ passive→model      REQUIRED content
+```
+
+## ⭐⭐⭐ THE THREE RESULTS THAT CHANGED MY MIND WHILE DERIVING IT
+
+**① `author` IS AN EXPRESSIVENESS PROBLEM, ⛔ NOT A CORRECTNESS ONE.** The `told` branch renders the NEUTRAL
+fallback *"I have this on file"* — ⛔ it asserts nothing about being told. And `told` vs `inferred` are BOTH
+non-top BASIS values, while `given` is BELOW `retained` ⇒ the collapse is a **demotion on both axes** and
+`combineBasis` cannot turn it into an illegal promotion.
+> ⇒ the question is ⛔ NOT *"is cognition wrong?"* (it is not) but ⭐ *"can she say true things about her
+> own authorship?"* — and **she cannot.** ⓘ MEASURED: 142 told/given · **0** inferred/retained over 515
+> logged turns · and the population is real — **53 persona-authored rows, 52 live** (51 semantic + 1 identity).
+
+**② THE PASSIVE ONE-FIELD SHAPE IS NOT THE WORST BOUNDARY.** ✅ It is LATTICE-SAFE (it asserts availability
+and selection, ⛔ never basis/retention/currency/completeness) and ✅ **it never renders an absence** — the
+block is OMITTED when empty ⇒ ⛔ it cannot produce the flat-*"No."* failure. **Silence is not a claim of absence.**
+⭐⭐ AND IT IS COMPLETE **BY CONSTRUCTION** FOR MOST ROWS: `reconcileFact` builds
+`` content = `${owner}'s ${attribute}: ${value}` `` with the comment *"readable sentence → embedded + **shown
+on recall**"* ⇒ entity+attribute already ride INSIDE the content. **MEASURED 75/128** — every `reconcileFact`
+writer 75/75 (extractor 26 · chat-tool 26 · reflection 13 · identity 7 · operator 3); ⛔ ingest 0/34, lesson
+0/9, null 0/9, decline 0/1.
+> ⚠️⭐ **SO ITS REAL WEAKNESS IS NOT THE NARROWNESS — it is that the adequacy rests on a FORMATTING
+> CONVENTION nothing asserts.** One string template, ⛔ no test pins it, ⛔ a writer opts out silently.
+ⓘ AND IT RE-READS THE BANGKOK PAIR: both rows ARE canonical ⇒ ⛔ the attribute is NOT lost for them.
+
+**③ ⛔⛔ THE ONE OVER-CLAIMING FAILURE IS WHERE NOBODY WAS LOOKING — the DECISION-RECORD GUARD is missing
+on the PASSIVE path.**
+```
+TOOL       memory-pipeline-host.js:179   partitionMemoryRead()   ✅ filtered
+COGNITION  memory-cognition-host.js:361  isDeclineRecord()       ✅ filtered
+PASSIVE    chat-site.route.js:1420       buildMemoryV2().recall  ⛔ NEITHER — it never goes through
+                                          buildMemoryToolService, and the package's recall() has no filter.
+```
+ⓘ OBSERVED read-only: the one decline row is `sotera|declined`, semantic, room, **live, not contradicted**
+⇒ it satisfies `visibleWhere` and is **REACHABLE**. ⛔ I report REACHABILITY, ⛔ not occurrence — whether it
+has ever been returned depends on query similarity and was not measured. ⛔ Stated as an UNMET CONTRACT
+REQUIREMENT, ⛔ not as a bug to fix in this pass.
+
+## ⚠️ TWO MORE FINDINGS, BOTH ON THE SAFE SIDE
+
+⚠️ **`when` IS A SECOND INSTANCE OF THE SAME FAMILY AS `author`** — DERIVED FROM SOURCE, structurally
+certain, ⛔ NOT runtime-measured: `view()` projects `when:{date,basis}` and ⛔ NO `created_at`/`createdAt`,
+while `activateSemantic` reads `m.created_at ?? m.createdAt ?? null` ⇒ **always null**. ⇒ in `fuse()`,
+`recency = it.when ? … : 0.2` ⇒ **recency ordering is INERT across stored memories.** ✅ The RENDERED output
+is unaffected (the stored-memory branch prints no date) ⇒ ordering only, ⛔ no false statement.
+⚠️ **AND THE INSTRUMENT CANNOT SEE IT:** `cognition-debug.log` records a REDUCED item shape carrying
+neither `source` nor `when`.
+
+⚠️ **THE `owner` DEPENDENCY IS MASKED, AND THAT MATTERS MORE THAN THE ANSWER.** ⛔ NO consumer's OUTPUT
+currently differs — all 51 live persona-authored *semantic* rows are `scope='room'`, and `visibleWhere`
+reaches `(user_id=U) OR persona_global`, so they only return in their own room ⇒ `fromHere` ⇒ sayable
+**even if stamped correctly**; the one persona-global persona-authored row is the `identity` row, broadcast
+BY DESIGN. ⛔⛔ **I am NOT reporting an exposure, and there is none.** ⚠️ But correctness is held by a
+SECOND, INDEPENDENT mechanism (room scoping), ⛔ not by the boundary — widen the arm and the masking
+disappears SILENTLY. ⇒ `owner` is required for the boundary to be **self-sufficient**, ⛔ not to fix a defect.
+
+## ✅ WHAT IS LOAD-BEARING AND MUST **NOT** BE WIDENED
+
+⭐⭐ **`id` IS REQUIRED ON THE WAY IN AND PROHIBITED ON THE WAY OUT.** `fuse()` dedupes BY IDENTITY
+(*"⛔⛔ MERGES ITEMS, NEVER STATES"*) ⇒ id must REACH cognition; `render()` forbids ids ⇒ it must not LEAVE.
+⇒ ⭐ **a field's classification is PER DIRECTION**, and boundary ③'s loss **IS** its contract.
+
+## ⛔ WHERE IT MUST STAY UNKNOWN — ⛔ not filled by intuition
+
+```
+⛔ THE LARGEST ONE: what a MODEL INFERS from an undated, unattributed bullet. ⚠️ An EMPIRICAL question
+  about a READER ⇒ the standing discipline separates it from what the ACT establishes. ⛔ Measure, don't reason.
+⛔ whether view() SHOULD carry `author` · whether the cross-project cost R4 names is worth paying
+⛔ whether the decline guard belongs in the PACKAGE's recall() or in the ROUTE (a genuine seam question)
+⛔ whether admission status may ever be rendered — ⭐ RESERVED TO OTE, untouched
+```
+
+⭐ **THE ANSWER TO WHAT WAS ASKED:** *correctness* needs strikingly little — `content`, `kind`, `id`, and the
+`entity`/`attribute` **guard key**. ⛔ Every other current loss costs **EXPRESSIVENESS**, not correctness —
+with **ONE** exception, the decline guard, which is the only omission pointing at OVER-claiming.
+⛔ **Whether the boundaries should change is NOT decided here.**
+
 ## ✅⭐⭐⭐ **INTENT PROVENANCE — 2026-09-18.** ⛔ Observation only, ZERO writes, no restart.
 
 `INVESTIGATION_SOTERA_INTENT_PROVENANCE.md`

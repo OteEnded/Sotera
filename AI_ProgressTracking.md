@@ -13496,3 +13496,66 @@ structured passive shape · whether the other field losses were ever noticed.
 
 **DOC:** `INVESTIGATION_SOTERA_INTENT_PROVENANCE.md` · ⛔ zero writes · ⛔ no restart · ⛔ no traffic ·
 ⛔ no cleanup · ⛔ OteLLMServices read-only, :8201 untouched · ⛔ neither UNKNOWN resolved
+
+
+---
+
+## 2026-09-18 · ✅ THE MINIMUM SEMANTIC CONTRACT — derivation only, ZERO writes
+
+**Ote:** *"What semantic information does each downstream consumer actually NEED to preserve across each
+boundary?"* ⛔ *"Not what fields happen to exist today, and not what we think would be convenient."*
+
+### ⭐⭐⭐ THE GOVERNING RULE WAS ALREADY WRITTEN DOWN
+`memory-cognition-vocabulary.js`: **"THE INFORMATION MUST SURVIVE; THE VOCABULARY MUST NOT."**
+⇒ a FIELD is not the unit of the contract — INFORMATION is. A field may be dropped iff its information
+reaches the consumer another way, and must be dropped if only its vocabulary would survive.
+
+### ⭐⭐ THE LATTICE HAS A SAFE DIRECTION, AND IT DECIDES THE SEVERITIES
+Promotion is illegal without a warrant; demotion is always legal. ⇒ a loss causing UNDER-claiming cannot
+make cognition incorrect. A loss causing OVER-claiming is a correctness failure.
+
+### THE CONTRACT, CONDENSED
+```
+① view()→cognition   REQ id · content · entity · attribute · kind · confidence(ordering)
+② retrieval→passive  REQ content · kind · id        ⭐ already 3-field; the map runs AFTER all three
+③ cognition→model    REQ source · basis · retention · availability · subject+provenance · when
+④ passive→model      REQ content
+SAFELY OMITTED (derived, not assumed): importance · pinned · sourceMessageId · score/relevance ·
+  supportedBy · and subject_person_id, which is CORRECTLY absent (R4 resolves it host-side on purpose).
+```
+
+### THE THREE RESULTS THAT CHANGED MY MIND
+**① `author` is EXPRESSIVENESS, not correctness.** `told` renders the neutral fallback *"I have this on
+file"*; `told`/`inferred` are both non-top BASIS values and `given` is below `retained` ⇒ demotion on both
+axes, and combineBasis cannot promote it. Measured 142 told/given · 0 inferred/retained over 515 turns;
+53 persona-authored rows exist, 52 live. ⇒ she cannot say *"I decided to keep this"* or *"I worked this out"*.
+
+**② The passive one-field shape is LATTICE-SAFE and often COMPLETE BY CONSTRUCTION.** It asserts
+availability + selection only, and is omitted entirely when empty ⇒ it never renders an absence.
+`reconcileFact` builds content as `owner's attribute: value` — *"readable sentence → shown on recall"*.
+MEASURED 75/128 canonical; every reconcileFact writer 75/75, ingest 0/34 · lesson 0/9 · null 0/9 · decline 0/1.
+⇒ its real weakness is that the adequacy rests on a FORMATTING CONVENTION nothing asserts.
+ⓘ Both Bangkok rows are canonical ⇒ the attribute is NOT lost for that pair.
+
+**③ The one OVER-claiming failure: no decision-record guard on the PASSIVE path.** Tool path filters
+(partitionMemoryRead), cognition filters (isDeclineRecord), passive does neither — it uses
+buildMemoryV2().recall, not buildMemoryToolService, and the package's recall() has no filter. The one
+decline row is live, not contradicted, room-scoped ⇒ REACHABLE. Reporting reachability, not occurrence.
+
+### TWO MORE, BOTH SAFE-SIDE
+`when` is a second instance of the author family — view() projects `when:{date,basis}`, activateSemantic
+reads `m.created_at ?? m.createdAt` ⇒ always null ⇒ recency ordering inert across stored memories; rendered
+output unaffected. DERIVED FROM SOURCE, not runtime-measured: the debug log carries neither field.
+The `owner` dependency is MASKED by room scoping — no output differs today, and there is no exposure, but
+the correctness is held by a second independent mechanism rather than by the boundary.
+
+### ✅ LOAD-BEARING AND NOT TO BE WIDENED
+`id` is REQUIRED inbound (fuse dedupes by identity) and PROHIBITED outbound (render forbids ids).
+⇒ classification is PER DIRECTION, and boundary ③'s loss IS its contract.
+
+### ⛔ STAYS UNKNOWN
+What a model infers from a bare bullet (empirical, about a READER — measure, don't reason) · whether view()
+should carry author · where the decline guard belongs (package vs route) · admission status (Ote's).
+
+**DOC:** `CONTRACT_SOTERA_BOUNDARY_SEMANTICS.md` · ⛔ read-only SELECTs · ⛔ no restart · ⛔ no traffic ·
+⛔ no cleanup · ⛔ no implementation · ⛔ no recommendation on what to change
