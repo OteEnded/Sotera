@@ -539,6 +539,100 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐ **THE DECISION-RECORD OWNER — 2026-09-18.** ⛔ Intent/contract only, no implementation, no DB writes.
+
+`INVESTIGATION_SOTERA_DECISION_RECORD_OWNER.md`
+
+> ## ⭐⭐⭐ **THE TREATMENT IS ESTABLISHED AND UNIVERSAL; THE OWNER IS ESTABLISHED AND LOCAL;**
+> ## **⛔⛔ AND THE TWO DO NOT MEET ON THE PASSIVE PATH.**
+
+```
+SEMANTIC CATEGORY          ✅ ESTABLISHED  an ACT of memory formation, NEGATIVE POLARITY — the
+                                           counterpart of `retain`; an event in her cognitive history
+IDENTITY RULE              ✅ ESTABLISHED  two literal fields, ⭐ DECLARED NEVER INFERRED, reason stated
+`decline` = REPRESENTATION ✅ ESTABLISHED  chosen because the structure could ALREADY express it
+   …its generalisation     ⛔ UNKNOWN      one member, two strings, no enum, ⛔ no design
+INTENDED TREATMENT         ✅ ESTABLISHED  **COMPLETE EXCLUSION** from anything that reads back as memory
+   …transformation         ⛔ NOT INTENDED none exists or was proposed
+   …context-gated          ✅ ESTABLISHED  **AUDIT ONLY**, *"never for her conversational context"*
+   …the audit door         ⛔ NEVER BUILT  `describeDecision` has ⛔ NO production caller
+OWNER — AS RULED           ✅ ESTABLISHED  the CONSUMER/READER layer; ⛔ explicitly NOT storage
+OWNER — AS ENFORCEABLE     ⛔⛔ CONTESTED   the consumer layer CANNOT hold it for `recall()`
+WAS PASSIVE CONSIDERED?    ⛔ UNKNOWN       three consumers enumerated; it is absent; ⛔ nothing says why
+```
+
+## ⭐⭐ ① WHAT IT IS — **AN ACT, NOT A KIND OF MEMORY.** Ote, at the tool's ratification:
+> *"**her own memory formation can include a deliberate refusal to retain something**."*
+> `reflection-lifecycle.js:104`: *"⭐ **RETENTION AND NON-RETENTION ARE BOTH ACTIONS**… Without it,
+> *'I don't want to keep this'* has no way to be anything but silence."*
+⭐ And it is **HER act**: `decline_to_remember` is a MODEL-FACING write tool — one of exactly two in the
+generation-2 reflection surface, `['retain', 'decline_to_remember']`. ⇒ the two outcomes of a retention
+occasion are **siblings**, and a decline is the NEGATIVE one, ⛔ not the absence of one.
+
+⭐ **AND `decline` IS THE REPRESENTATION, ⛔ NOT THE CATEGORY.** RFC: *"the existing structure can already
+express the distinction… a new table would not have fixed either reader, and adding one would have hidden
+the actual defect behind a migration."* ⓘ `DECLINE_KINDS` is a CLOSED 2-value vocabulary local to
+lesson-host, ⛔ unexported, ⛔ not an enum; `describeDecision` hard-codes `decision:'declined'`.
+⚠️ **VOCABULARY COLLISION TO KEEP APART:** the ADR's `declined`/`deferred` is the **Identity Resolver's
+adoption gate** (K3/K4) — ⛔ a different axis, same word. ⛔ Do not let a future pass unify them.
+
+## ⭐⭐⭐ ② THE EXCLUSION FROM **RECALL** WAS EXPLICITLY INTENDED — in writing, three times
+```
+A_DECISION_IS_NOT_A_MEMORY  *"no memory read returns it, **NO RECALL INJECTS IT**, and it counts toward
+                            nothing about what she remembers."*
+the IS NOT table            lists *"**injectable into recall**"* as a prohibited property
+Ote's ruling                *"keep it durable, but it is NOT a memory… **fix the consumers/semantics**,
+                            rather than changing the underlying representation."*
+```
+⇒ ⛔ NOT transformation (none exists or was proposed) · ✅ audit-only exposure (`describeDecision`:
+*"for an AUDIT surface — **never for her conversational context**"*).
+
+⚠️ **AND A SECOND PART IS UNMET, DIFFERENT FROM THE PASSIVE GAP.** Against the four-part withholding
+standard: structural exclusion ⚠️ (tool ✅ / passive ⛔) · visible signal ✅ (`withheldDecisions`) ·
+**a deliberate door ⛔ ABSENT** · in-turn surfacing ⛔ n/a. ⭐ **Corrections got all four**
+(`recall_corrections` + `corrections-host.js`); **decisions got two.** ⇒ the passive path is a CONTAINMENT
+gap; the absent door is an ACCESS gap. ⓘ Recorded, ⛔ not proposed.
+
+## ⛔⛔ ③ WHY THE OWNER IS **CONTESTED**
+
+✅ **RULED:** *"the failure is entirely in consumers"* (RFC) · *"both are reader fixes"* · *"only the
+CONSUMERS are fixed"* (the commit). ⇒ **storage does NOT own it**, and the reasoning is on the record.
+⚠️ **BUT THE ENUMERATION WAS THREE:** the tool service (search/list/listArchived) · cognition's arm · the
+reflection reader. ⛔ **`recall()` — the passive read — is ABSENT.**
+
+⭐⭐⭐ **THE ARTEFACT THAT SHOWS IT EXACTLY** — `memory-decision-record.test.mjs:126`:
+> `test('⭐ consumer · the memory TOOL SERVICE filters decisions out of **EVERY READ**')` — and then three
+> assertions naming `search`, `list`, `listArchived`. ⚠️ **The TITLE claims a universal; the ASSERTIONS
+> enumerate three strings**, and it asserts PRESENCE, ⛔ never the ABSENCE of an unfiltered read ⇒ it cannot
+> go red when a fourth appears. ⓘ `allowlist-drops-what-it-was-not-told` + `a-passing-test-can-test-nothing`.
+
+⭐⭐ **AND THE BELT-AND-BRACES LANDED ON THE COVERED PATH.** At the fix commit `0480321`: cognition called
+`buildMemoryToolService().search()` — **already filtered** — and added a SECOND `isDeclineRecord` filter;
+the passive route already called `buildMemoryV2().recall()` and got **nothing**. ⇒ ⛔ the gap was present on
+DAY ONE; ⛔ nothing regressed later.
+
+```
+⛔⛔ AND THE RULED OWNER **CANNOT** HOLD IT FOR `recall()` — two structural reasons, from current code:
+ ① RECALL REINFORCES BEFORE IT RETURNS ⇒ a wrapper filtering the OUTPUT acts AFTER access_count++,
+   last_access and tier→'hot' are written ⇒ a row that *"no recall injects"* would still be REINFORCED
+   BY RECALL, and the audit trail would record the decision being recalled.
+ ② RECALL IS LIMIT-CAPPED AND THE WRAPPER FILTERS AFTER THE CAP ⇒ limit 6 silently returns 5 — the exact
+   error Ⓒ already named: *"SUPPRESS INSIDE THE LOOP, NOT AFTER IT."*
+⇒ for the THREE enumerated reads consumer-level filtering is correct and sufficient; ⛔ for `recall()` it
+  is the WRONG LAYER — selection-stage, or nothing.
+```
+⭐⭐ **AND THAT IS ⛔ NOT A CONTRADICTION OF THE RULING** — a distinction Ote drew himself is load-bearing:
+his constraint was *"rather than changing the underlying **REPRESENTATION** just to make the count look
+right."* A selection-stage exclusion changes the **read predicate**, ⛔ not the representation — the row
+stays durable, attributable, timestamped and auditable. ⇒ *"fix the consumers"* DESCRIBED what that fix
+did; *"don't change the representation"* is the BINDING rule, and it is ⛔ not engaged. ⏸ Resolving the
+owner is **Ote's**, and this pass does not.
+
+⛔ **WAS THE PASSIVE PATH CONSIDERED AND EXCLUDED? UNKNOWN.** No statement anywhere names `recall()` in
+connection with decision records. ⚠️ And the one reading that would excuse it **does not survive**:
+*"cognition covers recall"* is false — cognition's arm calls `search()`, ⛔ not `recall()`, and did so at
+that very commit. ⇒ the same shape as `author`: universal intent, closed enumeration, ⛔ no record either way.
+
 ## ✅⭐⭐⭐ **DID A DECLINE RECORD EVER CROSS? — 2026-09-18. ✅✅ CLOSED BY OTE — OUTCOME ②, STRUCTURAL
 NO-OCCURRENCE.** ⛔ Read-only, no traffic, no implementation.
 

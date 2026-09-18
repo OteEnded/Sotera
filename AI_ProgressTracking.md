@@ -13666,3 +13666,62 @@ into 'fix hybrid recall'… that's a separate architectural question with potent
 consequences."* ⇒ recorded, fenced, ⛔ NOT investigated.
 
 **BASELINE FOR WHATEVER COMES NEXT:** exposure none · contract unmet · pattern named · fence in place.
+
+
+---
+
+## 2026-09-18 · ✅ THE SEMANTIC OWNER OF THE PASSIVE DECISION-RECORD BOUNDARY — intent/contract only
+
+**Ote:** *"Before touching embedding or lexical recall, I want to establish what the passive path is
+actually supposed to guarantee."* ⛔ No implementation · ⛔ no tsvector · ⛔ no lexical repair · ⛔ no
+embeddings · ⛔ no guard · ⛔ no schema change. The exposure/contract/fence result is UNCHANGED throughout.
+
+### ⭐⭐⭐ THE ONE SENTENCE
+**The treatment is established and universal; the owner is established and local; and the two do not meet
+on the passive path.**
+
+### THE VERDICTS
+```
+SEMANTIC CATEGORY          ✅ ESTABLISHED  an ACT of memory formation, negative polarity; counterpart of
+                                           `retain`; an event in her cognitive history
+IDENTITY RULE              ✅ ESTABLISHED  two literal fields, DECLARED never inferred, reason stated
+`decline` = REPRESENTATION ✅ ESTABLISHED  · its generalisation ⛔ UNKNOWN (one member, two strings)
+INTENDED TREATMENT         ✅ ESTABLISHED  COMPLETE EXCLUSION — "no memory read returns it, no recall
+                                           injects it"; ⛔ no transformation; audit-only exposure
+   the audit door          ⛔ NEVER BUILT  describeDecision has no production caller
+OWNER — AS RULED           ✅ ESTABLISHED  the CONSUMER/READER layer; explicitly NOT storage
+OWNER — AS ENFORCEABLE     ⛔⛔ CONTESTED   the consumer layer cannot hold it for recall()
+WAS PASSIVE CONSIDERED?    ⛔ UNKNOWN       three consumers enumerated; absent; nothing says why
+```
+
+### ① WHAT IT IS
+An ACT, not a kind of memory. Ote at the tool's ratification: *"her own memory formation can include a
+deliberate refusal to retain something."* `decline_to_remember` is a MODEL-FACING write tool, one of two in
+the generation-2 reflection surface — so retention and non-retention are siblings.
+`decline` is the REPRESENTATION (entity='sotera', attribute='declined'), chosen because the structure could
+already express it; no generalisation was ever designed.
+⚠️ Vocabulary collision: the ADR's declined/deferred is the Identity Resolver's adoption gate — different
+axis, same word. Do not unify.
+
+### ② THE EXCLUSION FROM RECALL WAS EXPLICITLY INTENDED
+Three contemporaneous statements, all 2026-08-23: A_DECISION_IS_NOT_A_MEMORY (*"no recall injects it"*),
+the IS NOT table (*"injectable into recall"* listed as prohibited), and Ote's ruling.
+⚠️ A SECOND part is unmet and it is a different failure: against the four-part withholding standard,
+decisions have structural exclusion (tool only), a visible signal, ⛔ NO deliberate door, ⛔ no in-turn
+surfacing. Corrections got all four; decisions got two.
+
+### ③ WHY THE OWNER IS CONTESTED
+Ruled: the consumer/reader layer, explicitly not storage, with reasoning. But the enumeration was THREE
+(tool service · cognition's arm · the reflection reader) and `recall()` is absent. The test at
+memory-decision-record.test.mjs:126 is titled *"every read"* and asserts three named strings — presence,
+never the absence of an unfiltered read. And the belt-and-braces landed on the already-covered path:
+cognition calls search() (filtered) and adds a second filter, while the passive route calls recall() and
+gets nothing. The gap was present on day one.
+**And the ruled owner cannot hold it for recall():** reinforcement runs before the wrapper (so the row would
+be recalled-and-reinforced), and the limit precedes the filter (so limit 6 returns 5).
+⭐ That is not a contradiction of the ruling — Ote's binding constraint was against changing the
+REPRESENTATION; a selection-stage exclusion changes the read predicate and leaves the row durable.
+⏸ Resolving the owner is Ote's; this pass does not.
+
+**DOC:** `INVESTIGATION_SOTERA_DECISION_RECORD_OWNER.md` · ⛔ no DB writes · ⛔ no implementation ·
+⛔ fence unchanged and not relied upon
