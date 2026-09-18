@@ -12988,3 +12988,46 @@ establishment before it may be acted on. ⏸ Ote's ruling.
 ⚠️ ③ would NOT reduce to "add `attribute`": the precondition is self-describing VALUE, ⛔ not same-question.
 
 **DOC:** `ANSWER_SOTERA_WHAT_SUPPRESSION_CLAIMS.md` · ⛔ zero writes · ⛔ no code · ⛔ presentation closed
+
+
+---
+
+## 2026-09-18 · ✅ RULED: SUPPRESSION IS A SEMANTIC ACT · ✅ ESTABLISHMENT CENSUS DELIVERED
+
+### ⭐⭐⭐ OTE'S RULING
+The system may not silently assert **"A carries B's information"** because two values share a token set.
+⛔ NOT "same question" · ⛔ NOT "same proposition" — ③ with the refinement that the write-side ontology
+must NOT be imported. ADMISSION: *may A and B COMPETE?* · SUPPRESSION: *may A STAND IN FOR B?*
+⇒ different relations, ⛔ never collapsed. The existing predicate is an UNESTABLISHED SEMANTIC HEURISTIC.
+⛔ Do not add `attribute` (it would silently redefine the contract) · ⛔ do not delete dedupe.
+⭐ Ordering: **semantic establishment → authorized suppression → accountable withholding.**
+⛔ Accountability is NOT the warrant.
+
+### ⛔ THE ANSWER: NO EXISTING WARRANT — BUT A RATIFIED ARCHITECTURE THAT NEVER FIRED
+
+```
+A3 alias teaching   "a cheap-arm hit may BIND, but it may not TEACH" — the ONE complete authority model:
+                    bounded (24) · recorded WITH refusals · answerable (occasion required) · reversible
+                    ⛔⛔ MEASURED: 12 rows, 12/12 REFUSE, 12/12 lexical ⇒ NOT ONE adjudicated verdict EVER
+gray-zone           already asks "would ONE answer fill BOTH labels?" · DIFFERENT = sibling properties
+                    ⇒ INFERRED it would refuse Bangkok, allow bullet-points. ⛔ SHADOW. ⛔ Not measured.
+A1 ontology         ratified vocabulary same/broader/narrower/sibling/different/unknown; only `same` binds
+                    "timezone" vs "location" → different head → DIFFERENT. ⛔ SHADOW, decides nothing.
+consolidation       ⭐ "Facts (semantic) are deliberately NOT consolidated — they stay atomic."
+                    ⇒ the one legitimate absorb-operation is FORBIDDEN on this row type. 0 cards.
+human attestation   ⛔ a `declared` column exists and NO code path sets it.
+```
+
+### ⭐⭐⭐ THE AXIS PROBLEM
+Everything that exists works on the **LABEL** axis ("would one answer fill both labels?"). The relation
+Ote ruled on lives on the **CONTENT** axis ("does this value carry that value's information?"), where
+**nothing exists**. Label-equivalence ⇒ containment is SUFFICIENT but NOT NECESSARY ⇒ a label-axis
+warrant is sound but incomplete, and errs toward preserving rows. ⚠️⛔ But it may be "same question" by
+another name — UNKNOWN, flagged as a real risk rather than resolved.
+
+### ⏸ FOUR ROUTES — ⛔ none recommended
+Ⓐ use the existing label-axis machinery · Ⓑ build content-axis machinery (nothing exists) · Ⓒ accept the
+memory layer cannot establish it · Ⓓ establish nothing and stop asserting (cost today: 1 pair, and it is
+the one suppressed WRONGLY).
+
+**DOC:** `INVESTIGATION_SOTERA_SUPPRESSION_ESTABLISHMENT.md` · ⛔ zero writes · ⛔ predicate preserved

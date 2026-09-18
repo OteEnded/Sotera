@@ -496,6 +496,75 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐⭐ ✅ **RULED: SUPPRESSION IS A SEMANTIC ACT (Ote, 2026-09-18).** ⛔ And ③ does NOT mean "same question".
+
+```
+⛔⛔ THE SYSTEM MAY NOT SILENTLY ASSERT "A CARRIES B's INFORMATION" merely because two values share
+   a token set. That is a SEMANTIC RELATION between two observations.
+
+⭐⭐ THE THREE-LAYER BOUNDARY, RECORDED:
+   GROUPING      A and B may be EXAMINED together.      ⛔ no semantic relation established
+   SUPPRESSION   "A carries B's information."           ⭐ relation ASSERTED ⇒ ESTABLISHMENT REQUIRED
+   PRESENTATION  how an established suppression is surfaced.  ⏸ SEPARATE, still closed
+
+⛔⛔ THE ESTABLISHED RELATION IS **"A carries B's information"** —
+   ⛔ NOT "A and B answer the same question"  (the source EXPLICITLY denies this)
+   ⛔ NOT "A and B are the same proposition"  (the record is INCONSISTENT about it)
+⇒ ⛔ DO NOT import the write-side ontology. ADMISSION asks *may A and B COMPETE as mutually exclusive
+  holders?*; SUPPRESSION asks *may A STAND IN FOR B?* — ⛔ different relations, ⛔ never collapsed.
+
+⛔ THE `?` MAY NOT BE FILLED BY: token equality · value cosine · same entity · same polarity · attribute
+  omission · importance · ranking · recency · slot membership · question identity inherited from elsewhere.
+⇒ ⭐ THE EXISTING PREDICATE IS AN **UNESTABLISHED SEMANTIC HEURISTIC**.
+
+⛔ DO NOT "FIX" IT: ⛔ do NOT add `attribute` to sameValueMeaning (that would SILENTLY REDEFINE the
+  contract, since the mechanism was DELIBERATELY built to work across attributes) · ⛔ do NOT delete dedupe.
+⭐ ORDERING: semantic establishment → authorized suppression → accountable withholding.
+  ⛔ ACCOUNTABILITY IS NOT THE WARRANT. A count saying "one was withheld" CANNOT establish the relation.
+```
+
+## ⭐⭐⭐ ✅ **ESTABLISHMENT CENSUS — DELIVERED 2026-09-18.** `INVESTIGATION_SOTERA_SUPPRESSION_ESTABLISHMENT.md`
+
+```
+⛔ NO EXISTING WARRANT establishes "A carries B's information". Not one mechanism.
+⭐ BUT A RATIFIED ESTABLISHMENT ARCHITECTURE EXISTS AND HAS NEVER FIRED.
+```
+
+⭐⭐⭐ **A3 — the one complete authority model** (`memory-slot-store-host.js:112`): *"Only an adjudicated
+`same` verdict may teach/promote an alias. **A cheap-arm hit may BIND, but it may not TEACH.**"*
+⭐ bounded (MAX_ALIASES 24) · recorded INCLUDING REFUSALS · answerable (refused if no occasion declared —
+*"an equivalence nobody can be asked about must not become permanent"*) · reversible (`memoryId`) · 3 refusals.
+⛔⛔ **MEASURED: `log_slot_aliases` = 12 rows, 12/12 `refuse`, 12/12 `lexical`, 12/12 `declared:false`.
+⇒ NOT ONE ADJUDICATED VERDICT HAS EVER BEEN RECORDED.**
+
+⭐⭐ **THE GRAY ZONE ALREADY ASKS THE RIGHT QUESTION** — *"if the person gave ONE answer, would it fill
+BOTH labels?"* · DIFFERENT examples are SIBLING PROPERTIES ("employer"/"job title").
+⇒ ⭐ INFERRED (⛔ not measured — that is a model call): it would refuse Bangkok and allow bullet-points.
+⛔ `grayZoneMode: 'shadow'`. ⭐ A1 gives a ratified vocabulary (`same/broader/narrower/sibling/different/
+unknown`, *only `same` may bind*) — "timezone" vs "location" → different head → **DIFFERENT**. ⛔ Also shadow.
+
+⭐⭐⭐ **CONSOLIDATION — THE ONE LEGITIMATE ABSORB-OPERATION — IS FORBIDDEN HERE:**
+*"**Facts (semantic) are deliberately NOT consolidated — they stay atomic (reconcile owns them).**"*
+⇒ ⭐ the project has already ruled semantic facts ATOMIC, and dedupe is absorption applied to exactly
+that row type. ⚠️ DERIVED — consolidation's rule is about a DURABLE summary row, so ⛔ it does not
+automatically transfer. ⓘ 0 cards in the corpus.
+
+⛔ **HUMAN-ATTESTED EQUIVALENCE DOES NOT EXIST** — there is a `declared` column and ⛔ NO code path sets it.
+
+⭐⭐⭐ **THE AXIS PROBLEM — the finding most likely to mislead us:**
+```
+LABEL AXIS    "would ONE ANSWER fill BOTH labels?"   A1 · gray-zone · A3   ← everything that exists
+CONTENT AXIS  "does THIS value carry THAT value's information?"           ← ⛔ NOTHING exists here
+label-equivalence ⇒ containment  ✅ SUFFICIENT      containment ⇒ label-equivalence  ⛔ NOT NECESSARY
+⇒ ⭐ a label-axis warrant is SOUND BUT INCOMPLETE, and errs toward PRESERVING rows (the safe direction)
+⚠️⛔ BUT IT MAY BE "same question" BY ANOTHER NAME — UNKNOWN, and flagged as a real risk.
+```
+
+⏸ **FOUR ROUTES, ⛔ NONE RECOMMENDED:** Ⓐ use the existing label-axis machinery · Ⓑ build content-axis
+machinery (nothing exists) · Ⓒ accept the memory layer cannot establish it (memory preserves both;
+cognition synthesises) · Ⓓ establish nothing and stop asserting (measured cost today: **1 pair, and it is
+the one being suppressed WRONGLY**).
+
 ## ⭐⭐⭐ ✅ **WHAT SUPPRESSION CLAIMS — ANSWERED 2026-09-18.** `ANSWER_SOTERA_WHAT_SUPPRESSION_CLAIMS.md`
 
 > Ote's narrow question: *"A present · B eligible → B disappears → what has the system ESTABLISHED?"*
