@@ -493,13 +493,23 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
   const toolsRefused = []
   let blocked = false
   let text = ''
-  // ⛔ NOT A RECORD FIELD ANY MORE — migration 017 dropped the `finish` column on Ote's instruction
-  // (*"remove finish from the ratified reflection schema"*). This variable survives as an OPERATOR signal
-  // only: a clipped reflection is a lifecycle failure, and those stay in scope, but it reaches a log line
-  // and never `log_conversation_revisits`. ⛔ If it starts wanting to be a column again, that is an argument to make,
-  // not a field to grow.
+  // ⚠️ 017 dropped the old `finish` column on Ote's instruction (*"remove finish from the ratified
+  // reflection schema"*), and for two generations this variable was an OPERATOR SIGNAL ONLY.
+  // ⭐⭐ 054 MAKES IT A COLUMN AGAIN — and the argument was made rather than the field grown. It is
+  // persisted as a **PAIR**: `termination_observed` (what we call the ending) beside `termination_source`
+  // (who says so). ⛔ `finish` was one unqualified string and that is exactly what 017 was right to
+  // remove; a value that states its own authority is a different object.
   let clipped = null
+  let clippedSource = null
   let rounds = 0
+  // ⭐ THE RUNTIME NUMBERS. ⛔ Measured from what the provider reported, never estimated from the text.
+  // `last*` is the FINAL round — the one that produced the text and the one `clipped` is derived from, so
+  // the persisted trio agrees with itself. `completionTotal` is the whole pass, which is the cost
+  // question and a genuinely different number the moment she calls a tool.
+  let lastPromptTokens = null
+  let lastCompletionTokens = null
+  let completionTotal = null
+  let modelCalls = 0
 
   // ── THE LOOP. Bounded, and every round is her turn — nothing here nudges her to use a tool. ────────
   // ⛔ NO "you may use your tools" MESSAGE. Ote: *"tools available but not required."* The definitions are
@@ -530,10 +540,19 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     // `res.done_reason` was always undefined (measured: null on all three of the first live rows, which is
     // how the inertness was found at all). Hitting the completion cap exactly is the signal.
     const used = res?.usage?.completionTokens ?? null
+    // ⭐⭐⭐ 054 · SAY WHERE THE WORD CAME FROM. Ote: *"don't label the derived value as provider fact."*
+    // ⛔ `native` is UNREACHABLE TODAY and that is deliberate — `chat()` drops `done_reason`, so this
+    // branch is the seam that starts telling the truth the day someone threads it through, and until
+    // then the absence of `provider` in the column is the honest record that we never had their word.
+    const native = res?.message?.done_reason ?? null
     return {
       message: res?.message ?? {},
-      doneReason: res?.message?.done_reason
-        ?? (used == null ? null : (used >= maxTokens ? 'length' : 'stop')),
+      doneReason: native ?? (used == null ? null : (used >= maxTokens ? 'length' : 'stop')),
+      doneReasonSource: native ? 'provider' : (used == null ? null : 'derived'),
+      // ⛔ PASSED THROUGH, NOT RE-DERIVED. An injected `turn` (the test seam) reports neither, and the
+      // columns stay NULL rather than carrying a number this pass never measured.
+      promptTokens: res?.usage?.promptTokens ?? null,
+      completionTokens: used,
     }
   })
 
@@ -599,7 +618,16 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       })
       .filter((c) => typeof c.name === 'string' && c.name.trim())
     const said = String(msg.content || '')
-    clipped = res?.doneReason ?? clipped
+    // ⭐ THE FINAL ROUND WINS for the `last*` pair, because that is the round the text and the
+    // termination both come from. ⛔ A null does not overwrite — an injected turn that reports nothing
+    // must not erase what a real round measured.
+    modelCalls++
+    if (res?.promptTokens != null) lastPromptTokens = res.promptTokens
+    if (res?.completionTokens != null) {
+      lastCompletionTokens = res.completionTokens
+      completionTotal = (completionTotal ?? 0) + res.completionTokens
+    }
+    if (res?.doneReason != null) { clipped = res.doneReason; clippedSource = res.doneReasonSource ?? 'derived' }
     if (said.trim()) text = text ? `${text}\n\n${said}` : said
     if (!calls.length) break
     if (rounds === maxRounds) {
@@ -607,6 +635,10 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       // having finished, which is the same corruption a clipped answer would be. ⓘ It is no longer written
       // to the row (017) — an operator sees it, the population does not carry it.
       clipped = 'tool-round-cap'
+      // ⭐⭐ `loop`, ⛔ NOT `derived`. The round cap is not a model event at all — she did not stop,
+      // WE stopped her — and a column that filed it under our arithmetic would hide the difference
+      // between "the instrument ran out" and "the persona finished".
+      clippedSource = 'loop'
       break
     }
     rounds++
@@ -671,6 +703,11 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
     `UPDATE "${schema}"."log_conversation_revisits"
         SET text = $2, wrote_memory_id = $3, tools_used = $4::text[], blocked_by_disclosure = $5,
             model = $6, messages_considered = $7, tools_refused = $8::text[],
+            -- ⭐⭐ 054 · THE RUNTIME, RECORDED WITH THE OCCASION. ⛔ These change nothing about what she
+            -- was shown or what she thought: they are the values this pass already held, written down.
+            num_ctx = $9, max_tokens = $10, prompt_tokens = $11, completion_tokens = $12,
+            completion_tokens_total = $13, rounds = $14,
+            termination_observed = $15, termination_source = $16,
             outcome = CASE WHEN $5 THEN 'blocked' ELSE 'completed' END, completed_at = now()
       WHERE id = $1::uuid
      RETURNING id::text AS id, rolling_id`,
@@ -678,7 +715,15 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
       // ⚠️ `bind`, NOT `replacements`. Sequelize expands an array in `replacements` into a comma-separated
       // list, which turns a text[] parameter into a syntax error — the `log_tool_calls` insert had to move
       // for exactly this.
-      bind: [claim.id, text, written[0] ?? null, toolsUsed, blocked, modelId, considered, toolsRefused],
+      bind: [claim.id, text, written[0] ?? null, toolsUsed, blocked, modelId, considered, toolsRefused,
+        // ⛔ `numCtx`/`maxTokens` are what this pass REQUESTED, not what the provider confirmed — the
+        // column comments say so, because a requested window read as a measured one is the same class of
+        // error as a derived stop reason read as a provider fact.
+        numCtx, maxTokens, lastPromptTokens, lastCompletionTokens, completionTotal, modelCalls || null,
+        // ⭐ THE PAIR MOVES TOGETHER. 054's CHECK refuses one without the other, so a classification can
+        // never be stored without the authority that qualifies it.
+        clipped && clippedSource ? clipped : null,
+        clipped && clippedSource ? clippedSource : null],
       type: seq.QueryTypes.SELECT,
     })
   if (!row) {

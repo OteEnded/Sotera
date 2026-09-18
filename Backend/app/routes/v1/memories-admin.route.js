@@ -261,6 +261,11 @@ export default async function memoriesAdminRoutes(fastify) {
               r.prompt_generation, r.tool_generation, r.dispatch_generation, r.code_mtime,
               r.from_rolling_id, r.up_to_rolling_id, r.messages_considered,
               r.tools_used, r.tools_refused, coalesce(length(r.text), 0) AS text_chars,
+              -- ⭐ 054 · ON THE LIST, ⛔ not only in the detail. *"How often does she hit the output
+              -- ceiling?"* is a question about the POPULATION, and a number you must open 40 rows to
+              -- read cannot answer it.
+              r.num_ctx, r.max_tokens, r.prompt_tokens, r.completion_tokens,
+              r.completion_tokens_total, r.rounds, r.termination_observed, r.termination_source,
               r.wrote_memory_id::text AS wrote_memory_id,
               c.title AS conversation_title, u.username AS room_username, u.display_name AS room_display,
               m.importance, m.author, m.writer, m.kind, m.entity, m.attribute,
@@ -310,6 +315,16 @@ export default async function memoriesAdminRoutes(fastify) {
         toolsUsed: r.tools_used ?? [],
         toolsRefused: r.tools_refused ?? [],
         textChars: Number(r.text_chars ?? 0),
+        runtime: {
+          numCtx: r.num_ctx, maxTokens: r.max_tokens,
+          promptTokens: r.prompt_tokens, completionTokens: r.completion_tokens,
+          completionTokensTotal: r.completion_tokens_total, rounds: r.rounds,
+          // ⛔ THE PAIR, ALWAYS TOGETHER — a consumer handed only the word would print our arithmetic
+          // as though the provider had said it.
+          termination: r.termination_observed, terminationSource: r.termination_source,
+          hitCeiling: r.termination_observed === 'length' ? true
+            : (r.termination_observed == null ? null : false),
+        },
         wroteMemoryId: r.wrote_memory_id,
         memory: r.wrote_memory_id ? {
           id: r.wrote_memory_id, importance: r.importance, author: r.author, writer: r.writer,
@@ -341,21 +356,38 @@ export default async function memoriesAdminRoutes(fastify) {
     // which is the worst failure an inspector can have: it looks exactly like she did nothing.
     // ⭐ AND BOTH SIDE TABLES CARRY `conversation_id`, so the match is conversation + window — ⛔ never a
     // bare time range that would sweep in another conversation's dream running in the same seconds.
+    // ⭐⭐⭐ 054 · CORRELATED, ⛔ NO LONGER GUESSED. Two EXACT arms and one fallback, in that order:
+    //   ① `revisit_id`  the typed column, populated from the declared act since 054
+    //   ② `act_kind='revisit' AND act_id`  ⭐ which HISTORY already carries — measured 62/62 rows populated
+    //      and 62/62 resolving to a real run, so the 62 pre-054 decisions become exact too, ⛔ with no
+    //      row rewritten. This arm is why no backfill was needed.
+    //   ③ the conversation+window fallback, kept ONLY for rows that carry neither (6 rows, act_kind NULL).
+    // ⚠️ The window can still over-match by design — which is exactly why `exact` is reported per row
+    // below rather than assumed for the set.
     const decisions = await dreamQ(
       `SELECT * FROM "${S}"."log_retention_decisions"
         WHERE revisit_id = :rid
-           OR (conversation_id = :conv
+           OR (act_kind = 'revisit' AND act_id = :ridText)
+           OR (revisit_id IS NULL AND act_id IS NULL
+               AND conversation_id = :conv
                AND created_at BETWEEN :from::timestamptz - interval '2 seconds'
                                   AND :to::timestamptz   + interval '2 seconds')
         ORDER BY created_at ASC`,
-      { rid: run.id, conv: run.conversation_id, from: run.created_at, to: run.completed_at ?? run.created_at })
+      { rid: run.id, ridText: String(run.id), conv: run.conversation_id,
+        from: run.created_at, to: run.completed_at ?? run.created_at })
+    // ⭐ 054 gave this table a `revisit_id`. ⚠️ ⛔ THERE IS NO HISTORICAL ARM HERE, and that asymmetry
+    // is real rather than an oversight: `log_tool_calls` never had an act pair, so every call logged
+    // before 054 can ONLY be matched by origin + conversation + time. ⭐ The fallback therefore stays,
+    // and `exact` on each row says which mechanism found it.
     const calls = await dreamQ(
       `SELECT * FROM "${S}"."log_tool_calls"
-        WHERE origin = 'reflection' AND conversation_id = :conv
-          AND created_at BETWEEN :from::timestamptz - interval '2 seconds'
-                             AND :to::timestamptz   + interval '2 seconds'
+        WHERE revisit_id = :rid
+           OR (revisit_id IS NULL AND origin = 'reflection' AND conversation_id = :conv
+               AND created_at BETWEEN :from::timestamptz - interval '2 seconds'
+                                  AND :to::timestamptz   + interval '2 seconds')
         ORDER BY created_at ASC`,
-      { conv: run.conversation_id, from: run.created_at, to: run.completed_at ?? run.created_at })
+      { rid: run.id, conv: run.conversation_id,
+        from: run.created_at, to: run.completed_at ?? run.created_at })
     const mem = run.wrote_memory_id
       ? await fastify.db.txn_memories.findByPk(run.wrote_memory_id, { raw: true }) : null
     return {
@@ -376,18 +408,38 @@ export default async function memoriesAdminRoutes(fastify) {
         conversationArchived: src?.archived_at != null,
         roomUsername: src?.room_username ?? null,
         roomDisplay: src?.room_display ?? null,
+        // ⭐⭐ 054 · THE RUNTIME, AS RECORDED. `numCtx`/`maxTokens` are what the pass REQUESTED; the
+        // adapter clamps numCtx to the model's trained max, so ⛔ this is not a measurement of the window
+        // the runner actually opened.
+        runtime: {
+          numCtx: run.num_ctx, maxTokens: run.max_tokens,
+          promptTokens: run.prompt_tokens, completionTokens: run.completion_tokens,
+          completionTokensTotal: run.completion_tokens_total, rounds: run.rounds,
+          // ⭐⭐⭐ THE PAIR SHIPS TOGETHER OR NOT AT ALL. Ote: *"don't label the derived value as
+          // provider fact."* A UI handed only the word would print "length" as though ollama said it.
+          termination: run.termination_observed,
+          terminationSource: run.termination_source,
+          // ⛔ The ceiling question, answered from the pair rather than from the word alone.
+          hitCeiling: run.termination_observed === 'length' ? true
+            : (run.termination_observed == null ? null : false),
+        },
       },
       decisions: decisions.map((d) => ({
         id: d.id, at: d.created_at, state: d.state, why: d.why, kind: d.kind, mine: d.mine,
         about: d.about, attribute: d.attribute, distinction: d.distinction,
         memoryId: d.memory_id, store: d.store, source: d.source,
         linkedByForeignKey: d.revisit_id === run.id,
+        // ⭐ WHICH MECHANISM FOUND THIS ROW. ⛔ A panel that renders a time-matched row and a correlated
+        // row identically is asserting a link it does not have.
+        via: d.revisit_id === run.id ? 'revisit_id'
+          : (d.act_kind === 'revisit' && String(d.act_id) === String(run.id) ? 'act' : 'time-window'),
       })),
       toolCalls: calls.map((c) => ({
         id: c.id, at: c.created_at, tool: c.tool, ok: c.ok, durationMs: c.duration_ms,
         // ⛔ ARG KEYS AND BYTE COUNTS ONLY — ⛔ never values, ⛔ never results. That stance is
         // `log_tool_calls`'s own, taken before this endpoint existed; surfacing more would overturn it.
         argKeys: c.arg_keys ?? [], argBytes: c.arg_bytes, error: c.error,
+        via: c.revisit_id === run.id ? 'revisit_id' : 'time-window',
       })),
       memory: mem ? {
         id: mem.id, importance: mem.importance, author: mem.author, writer: mem.writer, kind: mem.kind,
@@ -397,8 +449,14 @@ export default async function memoriesAdminRoutes(fastify) {
         excerpt: String(mem.content ?? '').slice(0, 160),
       } : null,
       // ⚠️ SAID OUT LOUD so the UI can say it too.
-      decisionsExact: decisions.length > 0 && decisions.every((d) => d.revisit_id === run.id),
-      note: 'decisions and tool calls are matched by conversation + time window; revisit_id is not populated on the live path',
+      // ⚠️ STILL SAID OUT LOUD, and it is now usually TRUE rather than always false.
+      decisionsExact: decisions.length > 0
+        && decisions.every((d) => d.revisit_id === run.id
+          || (d.act_kind === 'revisit' && String(d.act_id) === String(run.id))),
+      toolCallsExact: calls.length > 0 && calls.every((c) => c.revisit_id === run.id),
+      note: 'decisions correlate by revisit_id (since 054) or by the declared act (all history); '
+        + 'tool calls correlate by revisit_id from 054 onward and fall back to conversation + time window '
+        + 'for calls logged before it. Each row carries `via` naming which mechanism found it.',
     }
   })
 

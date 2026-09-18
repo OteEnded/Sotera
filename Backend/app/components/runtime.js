@@ -189,6 +189,13 @@ export function buildToolContext(fastify, request, extras = {}) {
       timezone: extras.timezone ?? null,
       origin: extras.origin ?? null,
       conversationId: extras.conversationId ?? null,
+      // ⭐⭐ 054 · THE DREAM RUN THIS CALL WAS MADE INSIDE. Ote: *"If log_tool_calls.revisit_id needs a
+      // schema change, do that rather than relying on origin='reflection' + timestamp."* The reflection
+      // host already declares `act: { kind: 'revisit', id: claim.id }`; this is the same declaration
+      // reaching the audit row instead of stopping at the memory service.
+      // ⛔ READ FROM THE DECLARED ACT, never from `origin === 'reflection'` — origin says WHICH LANE,
+      // and a lane is not an occasion: two passes in the same lane share it and neither is identified.
+      revisitId: extras.act?.kind === 'revisit' && extras.act?.id != null ? String(extras.act.id) : null,
     },
     config: fastify.config,
   })
@@ -207,11 +214,15 @@ export function buildToolContext(fastify, request, extras = {}) {
   // ⛔ The better fix is in the SDK, and it is deliberately NOT made here: `OteAIComponentSDK` is a
   // shared `file:` dependency and OteLLMServices resolves the same directory, so widening its caller
   // contract is a cross-project change and Ote's call.
+  // ⚠️ `revisitId` IS RE-ATTACHED HERE TOO, and for the SAME reason the four above are: the SDK's
+  // three-field allowlist drops everything it was not told about, so a field added to the literal above
+  // and not here is silently null in every audit row. That is the sixth instance of this family.
   Object.assign(ctx.caller, {
     username: request.user?.username ?? null,
     isRoot: request.user?.isRoot === true,
     origin: extras.origin ?? null,
     conversationId: extras.conversationId ?? null,
+    revisitId: extras.act?.kind === 'revisit' && extras.act?.id != null ? String(extras.act.id) : null,
   })
   return ctx
 }

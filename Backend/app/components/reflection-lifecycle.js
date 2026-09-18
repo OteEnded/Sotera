@@ -182,6 +182,50 @@ export const REFLECTION_TOOL_GENERATION = 2
  * Ote: *"Do not mix them into the primary P1 population automatically."*
  */
 export const TRIGGER_SOURCES = Object.freeze(['cron', 'manual', 'check', 'legacy'])
+
+/**
+ * ⭐⭐⭐ THE DREAM RUN RECORD'S LIFETIME — AN EXPLICIT DECISION, ⛔ NOT AN ACCIDENTAL PROPERTY.
+ *
+ * Ote, 2026-09-18: *"log_conversation_revisits currently has no pruning, so we should not accidentally
+ * make a permanent operational transcript simply because the existing table happens to be unpruned. I
+ * want the lifetime to be an explicit decision."*
+ *
+ * ⓘ MEASURED THE DAY THIS WAS RULED: 207 rows over 30 days · 568 kB total · avg text 1,187 chars ·
+ * max 10,923 · ≈ 7 runs/day. Even at the full 72-tick cadence with every tick producing a run, that is
+ * ≈ 26 MB/year. ⭐ The affordability is a MEASUREMENT, not an assumption — which is what makes the
+ * ruling below a decision rather than a hope.
+ *
+ * ⭐ THE ROW IS PERMANENT, AND `keep: 'forever'` IS THE DECISION, not the absence of one.
+ *   A pruned run record makes *"she never dreamed about this conversation"* and *"we deleted it"*
+ *   IDENTICAL. That collapse is the one this store refuses at every other ledger — 051's refusals, 053's
+ *   DEFER rows, 038's receipts — and a Dreaming history that can silently shrink cannot answer *"how
+ *   often does reflection produce durable memory?"* for any window older than the retention period.
+ *
+ * ⭐ THE TEXT IS PART OF THE ROW, ⛔ NOT AN ATTACHMENT TO IT.
+ *   `pruneEvidence` (attribution D12) nulls BULK while keeping the row, and that precedent is real — but
+ *   it applies to frozen copies of someone else's conversation, ⛔ not to a persona's own words about her
+ *   own experience. At 1.2 kB a reflection is not bulk, and "what did she actually conclude" is the
+ *   question the record exists to answer.
+ *
+ * ⚠️ THE ONE THING THAT VOIDS THIS RULING: a future column that carries a PAYLOAD — a transcript, a
+ *   tool result, an embedding, a frozen prompt. Growth here is linear in SCALARS by construction (054
+ *   added eight, all integers and two short enums). If that stops being true the ruling must be
+ *   RE-TAKEN, ⛔ never quietly stretched to cover something it was not measured against.
+ *
+ * ⛔ NOT ENFORCED BY PROSE ALONE: `test/checks/dreaming-observability-check.mjs` fails if any source
+ * file learns to DELETE from this table, so the permanence is a property a check defends.
+ */
+export const REVISIT_RECORD_LIFETIME = Object.freeze({
+  table: 'log_conversation_revisits',
+  keep: 'forever',
+  prune: null,
+  // ⭐ The reason travels WITH the ruling. A constant that says only `'forever'` teaches a later reader
+  // nothing about when they are allowed to change it.
+  because: 'a pruned run record makes "she never dreamed about this" and "we deleted it" identical',
+  voidedBy: 'any column on this table that carries a payload rather than a scalar',
+  ruledOn: '2026-09-18',
+  measuredAt: Object.freeze({ rows: 207, days: 30, totalBytes: 568 * 1024, avgTextChars: 1187 }),
+})
 /**
  * ⛔ AND WHAT IS DELIBERATELY WITHHELD, because an unattended pass should not be able to do it:
  *   forget_memory · retract_own_practice · restore_memory · pin_memory   destructive or curatorial —

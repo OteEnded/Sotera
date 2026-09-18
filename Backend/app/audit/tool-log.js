@@ -68,8 +68,8 @@ export async function recordToolCall(fastify, event) {
   // maps a JS array onto text[] natively.
   await seq.query(
     `INSERT INTO "${schema}"."log_tool_calls"
-       (tool, origin, user_id, username, is_root, conversation_id, ok, is_read_only, duration_ms, arg_keys, arg_bytes, error)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+       (tool, origin, user_id, username, is_root, conversation_id, ok, is_read_only, duration_ms, arg_keys, arg_bytes, error, revisit_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
     {
       bind: [
         String(event?.name ?? 'unknown').slice(0, MAX_TOOL),
@@ -87,6 +87,10 @@ export async function recordToolCall(fastify, event) {
         keys,
         bytes,
         event?.error ? String(event.error).slice(0, MAX_ERROR) : null,
+        // ⭐ 054 · THE DREAM RUN. ⛔ Declared by the call site and passed through untouched — this file
+        // does not know what a reflection is and must not learn. A caller that did not say records NULL,
+        // which is the same stance `origin` takes two lines up and for the same reason.
+        caller.revisitId ?? null,
       ],
       type: seq.QueryTypes.INSERT,
     },

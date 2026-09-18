@@ -14079,3 +14079,94 @@ endpoints verified AS ROOT, list + detail: room=Claude/agent_dev · conv="Knowin
 
 **Commits since the second checkpoint:** `2beb893` raw SQL · `78b4244` inline expand · `06a9177` source.
 **HEAD:** Sotera `06a9177` (pushed) · Reference `9e05c85` · @ote/memory `ff12c3b` (⛔ LOCAL ONLY).
+
+
+---
+
+# ⭐⭐⭐ 2026-09-18 (fourth) · MIGRATION 054 — DREAMING RUN OBSERVABILITY
+
+ⓘ Ote: *"Okay. I think we have enough investigation now. Let's move to implementation and then let the
+system accumulate real Dreaming observations."* ⛔ No cognitive variable changed.
+
+## ⭐⭐ WHAT THE DATA ALREADY KNEW — MEASURED BEFORE WRITING A LINE
+```
+log_retention_decisions.revisit_id   NULL on 62/62 rows          ← the gap Ote named
+log_retention_decisions.act_kind/id  POPULATED on 62/62 rows     ⭐ and 62/62 act_ids RESOLVE
+⇒ THE CORRELATION WAS NEVER ABSENT. It was recorded under the GENERIC act pair (049) and nothing
+  taught a reader that act_kind='revisit' ⇒ act_id IS a revisit id.
+⇒ ⛔ NO BACKFILL WAS NEEDED OR DONE. The inspector reads the act pair as a second EXACT arm, so all 62
+  historical decisions became exactly correlated with ⛔ zero rows rewritten.
+⚠️ log_tool_calls had NO act pair and NO revisit column ⇒ that one genuinely needed the schema change,
+  and pre-054 tool calls can still only be matched by origin + conversation + time. The asymmetry is
+  real and each row now carries `via` naming which mechanism found it.
+```
+
+## SHIPPED
+```
+054_dreaming_run_observability.sql
+  A  log_tool_calls.revisit_id (NEW) + 3 partial indexes    ⛔ NO foreign keys (051/053's rule)
+  B  num_ctx · max_tokens · prompt_tokens · completion_tokens · completion_tokens_total · rounds
+     · termination_observed · termination_source
+runtime.js          ctx.caller.revisitId, from the DECLARED act — ⛔ never from origin==='reflection'
+                    ⚠️ re-attached after createRuntimeContext: the SDK's 3-field allowlist drops the rest.
+                    That is the SIXTH instance of this family in this codebase.
+tool-log.js         binds caller.revisitId · ⛔ still arg KEYS + byte counts only
+retention-host.js   revisit_id beside act_kind/act_id, from the same declaration
+reflection-host     usage + termination captured per round; FINAL round persisted beside a SUMMED total
+reflection-lifecycle.js   REVISIT_RECORD_LIFETIME
+memories-admin      exact joins + `via` per row + runtime on BOTH endpoints
+DreamRunsPanel      an Output column on the list · a runtime block in the detail · per-row `matched by time`
+```
+
+## ⭐⭐⭐ WHY `termination_observed` + `termination_source` AND NOT `stop_reason`
+```
+chat() returns {message, usage, model, provider} and DROPS the provider's done_reason.
+⇒ 'length'/'stop' is OUR ARITHMETIC (completionTokens >= maxTokens), ⛔ not the provider's word.
+⇒ the word travels WITH its authority:  derived (us) · provider (UNREACHABLE today, on purpose)
+   · loop (our own round cap, which is not a model event at all)
+ⓘ 017 dropped `finish` because it was ONE UNQUALIFIED STRING. This is not that column returning.
+```
+
+## ⭐ THE LIFETIME, RULED RATHER THAN INHERITED
+```
+MEASURED: 207 rows / 30 days · 568 kB · avg text 1,187 chars · ≈ 7 runs/day · ≈ 26 MB/year at full cadence
+RULING:   keep 'forever'. A pruned run record makes "she never dreamed about this" and "we deleted it"
+          IDENTICAL — the collapse this store refuses at 038/051/053.
+VOIDED BY: any column on this table that carries a PAYLOAD rather than a scalar.
+⛔ Not prose only: REVISIT_RECORD_LIFETIME is a constant, and E4/E5 fail if anything learns to DELETE.
+```
+
+## ⚠⚠ TWO DEFECTS I WROTE TODAY, BOTH CAUGHT BY PROOFS RATHER THAN BY READING
+```
+① THE CHECK CONSTRAINT WAS VACUOUS.  (a IS NULL AND b IS NULL) OR (a IN (…) AND b IN (…))
+   against a='length', b=NULL evaluates to NULL — and ⭐ A CHECK ACCEPTS NULL. The guard against an
+   unqualified termination accepted exactly the row it was written to refuse.
+   ⇒ caught by C3, a negative proof that tried the bad UPDATE inside a rolled-back transaction.
+② THE SOURCE SCAN COULD NOT FIND ANYTHING.  execSync shells through cmd.exe, where `^` is the escape
+   character; `[^\n]` reached git as a broken regex, git exited non-zero, and the catch read that as
+   "no matches". E4 and E5 were GREEN while proving nothing.
+   ⇒ caught by E4a, a POSITIVE CONTROL that must find a known hit. ⭐ It is now permanent.
+ⓘ And E4's first honest failure was CORRECT: migration 027 really does DELETE FROM this table — in a
+   `DO $$` self-test tearing down its own fixtures. ⛔ I named it in an allowlist rather than narrowing
+   the pattern until it went green.
+```
+
+## VERIFIED
+```
+dreaming-observability-check   30/30   (new)
+dreaming-autonomous-retention  17/17
+unit 757/757 · @ote/memory 152/152 · tsc -b clean · frontend rebuilt
+⭐⭐ VERIFIED AS ROOT THROUGH THE LIVE HTTP SURFACE — both endpoints 200, and with a POST-054 fixture:
+   out=2400/2400 hitCeiling=true end=length(derived) total=4800 rounds=2
+   remember_fact:REFUSED[revisit_id]  retain:ok[revisit_id]  persisted[revisit_id]
+   decisionsExact=true  toolCallsExact=true   · fixture rows remaining after cleanup: 0
+⛔ NOT verified by me: the browser render — there is no Playwright in this repo.
+```
+
+## ⏸ STILL OPEN, AND STILL OTE'S
+```
+• whether log_usage takes a row per reflection model call            (NOT done — outside 054's scope)
+• run_events — ⛔ explicitly NOT built; revisit only if timestamp ordering proves insufficient
+• memory.reflectModel vs reflectionModel naming                       (recorded, deliberately unfixed)
+• 16,384 reflection context vs 143,360 measured-safe — a SELECTION question, ⛔ not a knob
+```

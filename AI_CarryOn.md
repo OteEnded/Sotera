@@ -20,8 +20,15 @@
      ⭐ it now reads: SOURCE (room · conversation · exact rolling slice) → model/generations → the
        LIFECYCLE IN ORDER (tool calls · the refusal · the retry) → what she kept → what she thought
      ⚠️ 3 bugs of mine shipped and were caught by OTE, not by me — see trap ⑤
+   ⑤ ⭐⭐ **MIGRATION 054 · DREAMING RUN OBSERVABILITY** — the record is now JOINABLE and MEASURABLE
+     correlation  log_tool_calls.revisit_id (NEW) · log_retention_decisions.revisit_id (existed, unwritten)
+     runtime      num_ctx · max_tokens · prompt/completion tokens · completion_total · rounds
+                  · termination_observed + termination_source  ⭐ A PAIR, never the word alone
+     lifetime     REVISIT_RECORD_LIFETIME = keep 'forever' — ⭐ A DECISION, not an unpruned accident
+     ⛔ NO run_events table · ⛔ no payloads · ⛔ no historical rewrite · ⛔ nothing cognitive changed
 ⏸ HOLDING: reflectionMaxTokens 2400 · ⛔ no 4096 · ⛔ no context/selector change
 ⛔ NEXT EXPERIMENT MUST COME FROM GENUINELY NEW CONVERSATION THROUGH THE NORMAL CRON PATH.
+⭐ AND IT CAN NOW BE READ FROM THE DATABASE instead of reconstructed run by run.
 ```
 
 ⚠️⭐ **THE FOUR THINGS A FRESH SESSION WILL GET WRONG ABOUT DREAMING:**
@@ -41,6 +48,16 @@
   500 on open — then a second bug where the row-expand rendered below a 40-row table. ⇒ *"don't use
   root"* protects HIS DATA; ⛔ it was never a reason to ship a surface unopened. **Reading is not
   writing.** ⓘ Memory `never-test-on-his-account` amended.
+⑥ ⭐⭐⭐ **A `CHECK` CONSTRAINT ACCEPTS `NULL`, NOT ONLY `TRUE`.** 054's termination pair was first
+  written as `(a IS NULL AND b IS NULL) OR (a IN (…) AND b IN (…))`. Against `a='length', b=NULL` that is
+  `FALSE OR (TRUE AND NULL)` = **NULL**, and the database accepted the exact row the constraint existed to
+  refuse. ⇒ write `(a IS NULL) = (b IS NULL) AND (a IS NULL OR a IN (…)) AND …`. ⛔ Caught ONLY by a
+  negative proof that tried to insert the bad row — ⛔ reading it found nothing wrong.
+⑦ ⚠️ **`execSync` SHELLS THROUGH `cmd.exe` ON WINDOWS**, where `^` is the ESCAPE CHARACTER. A
+  `git grep -E "…[^\n]*…"` reached git as a broken regex, git exited non-zero, and the `catch` read that
+  as *"no matches"* — **a broken grep and a clean repo are the same green line.** ⛔ Single quotes are
+  not stripped either, so a quoted pathspec matches no file. ⇒ always give a source scan a POSITIVE
+  CONTROL that must find a known hit.
 ```
 
 

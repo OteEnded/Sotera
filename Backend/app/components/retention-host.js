@@ -538,9 +538,9 @@ export function buildRetention(fastify, {
         await seq.query(
           `INSERT INTO "${schema}"."log_retention_decisions"
              (content, kind, mine, about, attribute, distinction, state, why, memory_id, store,
-              user_id, conversation_id, source, act_kind, act_id)
+              user_id, conversation_id, source, act_kind, act_id, revisit_id)
            VALUES (:content, :kind, :mine, :about, :attribute, :distinction, :state, :why, :memoryId, :store,
-                   :userId, :conversationId, :source, :actKind, :actId)`,
+                   :userId, :conversationId, :source, :actKind, :actId, :revisitId)`,
           {
             replacements: {
               content: String(decision.content ?? '').slice(0, 8000),
@@ -550,9 +550,17 @@ export function buildRetention(fastify, {
               attribute: decision.attribute ?? null,
               distinction: decision.distinction ?? null,
               state: receipt.state,
-              // ⭐ 049 · the decision carries the ACT it was taken in (a reflection pass, a turn) — `revisit_id` was never populated
+              // ⭐ 049 · the decision carries the ACT it was taken in (a reflection pass, a turn).
               actKind: act?.kind ?? null,
               actId: act?.id == null ? null : String(act.id),
+              // ⭐⭐ 054 · AND NOW THE TYPED COLUMN TOO. Ote: *"the ownership refusal and successful retry
+              // happened five seconds apart, but both retention rows currently have revisit_id = NULL,
+              // forcing us to reconstruct the relationship from timestamps."*
+              // ⓘ MEASURED BEFORE WRITING THIS: act_kind/act_id were populated on 62/62 rows and all 62
+              // act_ids resolved to a real revisit — so the link was never missing, only untyped. ⛔ The 62
+              // historical rows are NOT rewritten; they answer through the act pair, which is indexed.
+              // ⛔ DERIVED FROM THE DECLARED ACT AND NOTHING ELSE — not from `source`, not from a timestamp.
+              revisitId: act?.kind === 'revisit' && act?.id != null ? String(act.id) : null,
               why: receipt.why ? String(receipt.why).slice(0, 2000) : null,
               // ⭐⭐ THE RECEIPT CONTRACT, HELD HERE TOO: an id may accompany `persisted` and nothing else.
               // ⛔ 038's CHECK enforces it in the database as well — two guards, because this is the third
