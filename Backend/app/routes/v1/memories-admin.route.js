@@ -228,6 +228,150 @@ export default async function memoriesAdminRoutes(fastify) {
    * The durable half is what makes multi-week questions answerable with ZERO snapshots: `slots.aliases` records
    * {phrase, by, confidence, at} per learned alias, so promotion history is reconstructable after any restart.
    */
+  // ══ ⭐⭐⭐ DREAM RUNS — READ HOW SHE DREAMS. Root-only, READ-ONLY, and ⛔ NOT memory. ═══════
+  //
+  // Ote, 2026-09-18: *"add interface for root's console/memories to see log, so i can also read how sotera
+  // run dreaming/reflaction"* · *"Keep run observability separate from memory."*
+  //
+  // ⛔⛔ THIS IS OBSERVABILITY, ⛔ NOT COGNITION. Every table below is `log_*`; ⛔ none is read by recall,
+  // cognition or the composer, and this endpoint adds no path from one to the other. It answers *"what did
+  // the Dreaming subsystem DO?"* — ⛔ never *"what does Sotera know?"*.
+  //
+  // ⭐ IT IS A JOIN, ⛔ NOT A NEW LOG. The record already exists across four tables with the correlation id
+  // missing — see `INVESTIGATION_SOTERA_DREAMING_RUN_OBSERVABILITY.md`:
+  //     log_conversation_revisits  the RUN       ← the spine
+  //     log_retention_decisions    the DECISION  ⚠️ `revisit_id` is NULL on the live path
+  //     log_tool_calls             the ACTION    ⚠️ same — only `origin='reflection'` + time
+  //     txn_memories               the OUTCOME   ✅ exact, via `wrote_memory_id`
+  // ⛔ NO SCHEMA CHANGE WAS MADE FOR THIS. The inexact links are LABELLED in the payload rather than
+  // presented as fact, so the UI cannot imply a certainty the data does not have.
+  fastify.get('/admin/memories/dreams', { preHandler: systemConfig }, async (request) => {
+    const { limit, trigger, conversationId } = request.query || {}
+    const cap = Math.min(Math.max(Number(limit) || 40, 1), 200)
+    const where = {}
+    if (trigger) where.trigger_source = trigger
+    if (conversationId) where.conversation_id = conversationId
+    const runs = await fastify.db.log_conversation_revisits.findAll({
+      where, order: [['rolling_id', 'DESC']], limit: cap, raw: true,
+    })
+    // ⭐ ONE query for the memories, ⛔ not one per run — an inspector that costs N+1 is opened once.
+    const memIds = runs.map((r) => r.wrote_memory_id).filter(Boolean)
+    const mems = memIds.length
+      ? await fastify.db.txn_memories.findAll({
+        where: { id: memIds },
+        raw: true,
+        attributes: ['id', 'importance', 'author', 'writer', 'kind', 'entity', 'attribute', 'content', 'invalid_at', 'access_count', 'last_access'],
+      })
+      : []
+    const memById = new Map(mems.map((m) => [String(m.id), m]))
+    return {
+      runs: runs.map((r) => {
+        const m = r.wrote_memory_id ? memById.get(String(r.wrote_memory_id)) ?? null : null
+        return {
+          id: r.id,
+          rollingId: r.rolling_id,
+          conversationId: r.conversation_id,
+          trigger: r.trigger_source,
+          requestedAt: r.requested_at,
+          startedAt: r.started_at,
+          completedAt: r.completed_at,
+          // ⭐ DERIVED, ⛔ not stored — two timestamps are the honest source for a duration.
+          // ⚠️ MEASURED 2026-09-18: `started_at` is populated on 67 LEGACY runs and on ZERO cron or manual
+          // ones, while `completed_at` is set on all 207. ⇒ anchoring a duration on `started_at` yields
+          // null for every run anyone will actually look at. `created_at` is the row's insert, which is
+          // the run's start in practice. ⭐ `durationFrom` says WHICH anchor was used — ⛔ a duration whose
+          // origin is unstated is a number nobody can check.
+          durationMs: r.completed_at
+            ? new Date(r.completed_at).getTime() - new Date(r.started_at ?? r.created_at).getTime() : null,
+          durationFrom: r.started_at ? 'started_at' : 'created_at',
+          outcome: r.outcome,
+          reason: r.reason,
+          failure: r.failure,
+          blockedByDisclosure: r.blocked_by_disclosure,
+          model: r.model,
+          promptGeneration: r.prompt_generation,
+          toolGeneration: r.tool_generation,
+          dispatchGeneration: r.dispatch_generation,
+          codeMtime: r.code_mtime,
+          fromRollingId: r.from_rolling_id,
+          upToRollingId: r.up_to_rolling_id,
+          messagesConsidered: r.messages_considered,
+          toolsUsed: r.tools_used ?? [],
+          toolsRefused: r.tools_refused ?? [],
+          textChars: r.text ? String(r.text).length : 0,
+          wroteMemoryId: r.wrote_memory_id,
+          memory: m ? {
+            id: m.id, importance: m.importance, author: m.author, writer: m.writer, kind: m.kind,
+            entity: m.entity, attribute: m.attribute, live: m.invalid_at == null,
+            accessCount: m.access_count, lastAccess: m.last_access,
+            excerpt: String(m.content ?? '').slice(0, 160),
+          } : null,
+        }
+      }),
+      shown: runs.length,
+    }
+  })
+
+  // ONE run, with everything tie-able to it. ⭐ The full reflection text lives HERE, ⛔ never in the list —
+  // a list that ships every transcript is a list nobody can load.
+  fastify.get('/admin/memories/dreams/:id', { preHandler: systemConfig }, async (request, reply) => {
+    const run = await fastify.db.log_conversation_revisits.findByPk(request.params.id, { raw: true })
+    if (!run) return reply.code(404).send({ error: 'not_found' })
+    // ⚠️ THE HONEST WINDOW. `revisit_id` is unpopulated on the live path, so decisions and tool calls are
+    // matched by conversation + this run's own time span (+2s for the async write lane). ⛔ A HEURISTIC, and
+    // the response says so, so no reader mistakes it for a foreign key.
+    // ⚠⚠ THE ANCHOR IS `created_at`, ⛔ NOT `started_at`. Measured: `started_at` is set on 67 legacy runs
+    // and on ZERO cron/manual ones — a window opened on it collapses to nothing and the lifecycle renders
+    // EMPTY, which is the worst possible failure for an inspector: it looks like she did nothing.
+    // ⭐ `created_at` (row insert ≈ run start) and `completed_at` (set on all 207) are the reliable pair.
+    const from = new Date(new Date(run.created_at).getTime() - 2000)
+    const to = new Date(new Date(run.completed_at ?? run.created_at).getTime() + 2000)
+    const span = { [Op.gte]: from, [Op.lte]: to }
+    // ⭐ AND BOTH SIDE TABLES CARRY `conversation_id` — so the match is conversation + window, ⛔ never a
+    // bare time range that would sweep in another conversation's dream running in the same seconds.
+    const [decisions, calls] = await Promise.all([
+      fastify.db.log_retention_decisions.findAll({
+        where: { [Op.or]: [{ revisit_id: run.id }, { conversation_id: run.conversation_id, created_at: span }] },
+        order: [['created_at', 'ASC']], raw: true,
+      }),
+      fastify.db.log_tool_calls.findAll({
+        where: { origin: 'reflection', conversation_id: run.conversation_id, created_at: span },
+        order: [['created_at', 'ASC']], raw: true,
+      }),
+    ])
+    const mem = run.wrote_memory_id
+      ? await fastify.db.txn_memories.findByPk(run.wrote_memory_id, { raw: true }) : null
+    return {
+      run: {
+        ...run,
+        durationMs: run.completed_at
+          ? new Date(run.completed_at).getTime() - new Date(run.started_at ?? run.created_at).getTime() : null,
+        durationFrom: run.started_at ? 'started_at' : 'created_at',
+      },
+      decisions: decisions.map((d) => ({
+        id: d.id, at: d.created_at, state: d.state, why: d.why, kind: d.kind, mine: d.mine,
+        about: d.about, attribute: d.attribute, distinction: d.distinction,
+        memoryId: d.memory_id, store: d.store, source: d.source,
+        linkedByForeignKey: d.revisit_id === run.id,
+      })),
+      toolCalls: calls.map((c) => ({
+        id: c.id, at: c.created_at, tool: c.tool, ok: c.ok, durationMs: c.duration_ms,
+        // ⛔ ARG KEYS AND BYTE COUNTS ONLY — ⛔ never values, ⛔ never results. That stance is
+        // `log_tool_calls`'s own, taken before this endpoint existed; surfacing more would overturn it.
+        argKeys: c.arg_keys ?? [], argBytes: c.arg_bytes, error: c.error,
+      })),
+      memory: mem ? {
+        id: mem.id, importance: mem.importance, author: mem.author, writer: mem.writer, kind: mem.kind,
+        entity: mem.entity, attribute: mem.attribute, content: mem.content, scope: mem.scope,
+        live: mem.invalid_at == null, embedded: mem.embedding_hv != null,
+        accessCount: mem.access_count, lastAccess: mem.last_access, createdAt: mem.created_at,
+      } : null,
+      // ⚠️ SAID OUT LOUD so the UI can say it too.
+      decisionsExact: decisions.length > 0 && decisions.every((d) => d.revisit_id === run.id),
+      note: 'decisions and tool calls are matched by conversation + time window; revisit_id is not populated on the live path',
+    }
+  })
+
   fastify.get('/admin/memories/health', { preHandler: systemConfig }, async () => {
     const cfg = fastify.config
     const resolver = resolverSnapshot()

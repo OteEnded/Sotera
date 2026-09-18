@@ -4,6 +4,7 @@ import { copyToClipboard } from '../../lib/clipboard'
 import ConfirmModal from '../../components/ConfirmModal'
 import RefreshButton from '../../components/RefreshButton'
 import MemoryHealthPanel from './MemoryHealthPanel'
+import DreamRunsPanel from './DreamRunsPanel'
 import { cell, ui } from './ui'
 
 // Persona Memory v2 inspector — see and manage what the persona remembers (RFC_PERSONA_MEMORY).
@@ -92,6 +93,10 @@ export default function MemoriesPage() {
       {/* Health first: the observe phase's KPIs were reachable only by running scripts, which made
           "observe for weeks" depend on someone being at a terminal. */}
       <MemoryHealthPanel />
+
+      {/* Dreaming next: health answers "is the system well?", this answers "what did she actually do?".
+          Run history, ⛔ not memory — nothing in it is reachable by recall. */}
+      <DreamRunsPanel />
 
       {summary && (
         <div className="memories-summary mb-3 flex flex-wrap gap-2 text-[12px]">
