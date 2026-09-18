@@ -539,6 +539,99 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐⭐⭐ **DREAMING v0 — THE LOOP CLOSED, 2026-09-18 14:33.** ⭐ THE FIRST AUTONOMOUS RETENTION.
+
+> ## ⭐⭐⭐ **real conversation → autonomous reflection → autonomous `retain` → DURABLE MEMORY.**
+> ## `1c854162` · **importance 7** · author=persona · writer=reflection · act=revisit · live · embedded.
+
+```
+[manual] act b570105d · conv 147f4ceb · 8 msgs (6 context + 2 new) · 21s
+         tools=["retain"] · memory=YES · clipped=stop · output 161 tokens
+MEMORY   entity=user · attribute='communication pattern known as the "permission tell"'
+         kind=semantic · scope=room · live · embedded · access_count=0
+```
+
+## ⚠️⚠️ **⛔ THE BUDGET CHANGE IS *NOT* CREDITED — OTE'S RULING, AND THE EVIDENCE AGREES.**
+> Ote, 2026-09-18: *"Since that run completed the retention action in only 161 output tokens with
+> clipped=stop, we do not have evidence that increasing 1600→2400 caused the success. The two Gen-7 runs
+> differed in material/behavior, and n=1 each is insufficient to attribute causality."*
+
+```
+14:27  gen7 · budget 1600 → output hit 1600 (clipped=LENGTH) → DECIDED ("Let's execute") but never emitted
+       ⚠️ burned the budget on a DIGRESSION — *"A conversation you had with Claude"* against an
+          `assistant:` voice that is HERS; she reasoned at length about whose transcript it was.
+14:33  gen7 · budget 2400 → output  161 (7%, clipped=stop)    → DECIDED and EMITTED `retain`
+       ⭐ 161 tokens would have fitted the OLD 1600 ceiling FOUR TIMES OVER.
+⇒ ⛔ the ceiling was NOT binding on the successful run. ⛔ Do not bank 2400 as "the fix".
+⭐ WHAT *IS* ESTABLISHED: the permission-asking is GONE. Both gen-7 runs DECIDED; both gen-3 runs asked
+  *"Would you like me to store these?"*. ⛔ Attribution between "the clause" and "the material" is n=1 each.
+```
+
+⏸ **HOLDING AT 2400 BY RULING.** *"Leave the system exactly as it is for now. No 4096 change yet… I want to
+observe the current 2400 configuration on real Dreaming before introducing another variable."*
+
+## ⭐ THE CONTRACT CHANGE THAT PRECEDED IT (ruled by Ote)
+*"Autonomous Dreaming owns its own ordinary memory-retention decisions."*
+```
+reflection-lifecycle.js  + THE_RETENTION_OWNERSHIP, appended in buildReflectionTurnPrompt
+                         + REFLECTION_GENERATION 3 → 7 (gen 7 registered; transport IDENTICAL to gen 3,
+                           so ONE variable moves against the control)
+⛔ Ote's ratified question UNTOUCHED byte for byte · ⛔ no tool named · ⛔ no quota · ⛔ no new door
+⭐ CARVE-OUT IN THE TEXT: *"What you are and the principles you work by are not yours alone to change;
+  those stay with Ote."* ⇒ L2 / identity / policy remain human-governed.
+⭐⭐ THE CAUSE WAS IN THE QUESTION: *"tell me what and why"* addresses a LISTENER ⇒ asked to report to
+  someone, she reported and waited. The clause REMOVES THE LISTENER; ⛔ it does not push a tool.
+✅ dreaming-autonomous-retention-check — 17 assertions, RED-PROVED, deterministic (no GPU)
+✅ three pins updated HONESTLY — the gen-arms pipeline now REFUSES loudly (*"gen 3 is the HISTORICAL
+  control — re-base before running"*), ⛔ it was not retargeted to stay green.
+```
+
+## ⭐⭐⭐ THE RUNTIME FACTS, VERIFIED 2026-09-18 — ⛔ measured, not assumed
+```
+MODEL      reflection resolves cfg('reflectionModel') → ABSENT → chat.defaultModel = ollama/qwen3.6:35b
+           Q4_K_M (⚠️ quantized, ⛔ not full precision) · 36.0B MoE · confirmed by the run's own `model` field
+GPU        size 23.0GB · size_vram 23.0GB ⇒ FULLY RESIDENT, ⛔ zero CPU spill
+CONTEXT    reflection runs at 16,384 (reflectionNumCtx default) · model trained 262,144
+           ⭐ OUR MEASURED OPTIMUM for this model = 143,360 (providers.ollamaCtxOptimized, 24.2GB,
+             fitsFull=false, 8 loads, 2026-08-09) ⇒ reflection uses 11.4% of the measured-safe window
+PROMPT     the reflection prompt is ~1.6K tokens (that conversation = 6,130 chars ≈ 1,533)
+OUTPUT CAP providers/ollama/index.js:63 — `options.max_tokens → o.num_predict` ⇒ OUTPUT-ONLY
+           done_reason 'length' = "num_predict/output cap hit" (the file's own comment)
+⇒ the 1600 clip was the OUTPUT CEILING, ⛔ NOT context: ~3.2K of 16,384 in play, ~13K still free.
+⚠️ REFLECTION CALLS DO NOT REACH `log_usage` — exact reflection token counts are UNAVAILABLE.
+   ⛔ The 19–20K prompt_tokens rows there are CHAT turns (full system prompt + cognition + history).
+```
+
+⏸ **THE LAST HOP IS STILL OPEN:** `access_count = 0`. Whether this memory comes BACK is a real later
+turn's job. ⛔ No recall was called. ⛔ H6 UNCHANGED at 0/8 — correctly: the loop check counts
+`trigger_source='cron'` only and this was a **MANUAL** act. ⛔ The baseline was not rewritten.
+
+## ⚠️⭐ **A CONFIGURATION ISSUE, RECORDED SEPARATELY — ⛔ DO NOT FIX INSIDE A DREAMING EXPERIMENT.**
+> Ote: *"record separately the config naming discrepancy… but don't fix it in this Dreaming experiment."*
+
+```
+config.json       "memory": { "reflectModel": "ollama/qwen3.5:9b" }
+the code reads    cfg(config, 'reflectionModel')          ← reflectION, not reflect
+⇒ THE KEY NEVER MATCHES. The setting has NO EFFECT on this lane; reflection silently falls through to
+  `chat.defaultModel`. ⓘ The 9b IS loaded but sits at size_vram 0 (CPU) — nothing uses it here.
+⚠️ A SILENT FALL-THROUGH, ⛔ not an error: the operator's declared choice is discarded without a word.
+⛔ UNFIXED BY RULING · ⛔ do not touch it while a Dreaming variable is in flight — changing the MODEL would
+  change the instrument. ⓘ Whether 35b-vs-9b is the RIGHT reflection model is a separate decision.
+```
+
+## ⏸⭐⭐ **A FUTURE ARCHITECTURE ITEM, OPENED BY OTE — ⛔ not started.**
+> *"Once the loop is proven stable, I want us to investigate giving Dreaming substantially more relevant
+> conversational material, rather than treating 16K as an implicit ceiling when the model/runtime has a
+> much larger measured capability."*
+
+```
+⭐ THE HEADROOM IS MEASURED, ⛔ not theoretical: 16,384 in use vs 143,360 measured-safe — 8.75×.
+⚠️ AND 16K IS AN *IMPLICIT* CEILING: it is `reflectionNumCtx`'s DEFAULT, ⛔ not a decision anyone recorded.
+⛔ PRECONDITION: *"once the loop is proven stable"* — ⛔ the loop has closed ONCE, manually. ⛔ Not yet.
+⚠️ AND IT IS NOT A KNOB-TURN: more material changes WHAT SHE REFLECTS ON, which is a selection question
+  (the transcript slice, the unreviewed range, the backlog lane), ⛔ not a context-size question.
+```
+
 ## ✅⭐⭐⭐⭐ **THE OCCASION IMPORTANCE — SHIPPED 2026-09-18.** ⭐ Ote's ruling: **use 7.**
 
 > ## ⭐⭐ **A MISSING DECLARATION, SUPPLIED.** ⛔ NOT a scorer change, ⛔ not a salience claim about content.

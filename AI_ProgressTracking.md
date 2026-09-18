@@ -13906,3 +13906,60 @@ through the SAME `retain()` path by 11 real-DB assertions (red-proved), ⛔ but 
 
 **STATE:** 236 memories (delta 0) · no act rows written · decline row still `access_count 0 / last_access NULL`
 · H6 untouched at 0/8 · temp script removed · ⛔ no recall called.
+
+
+---
+
+## 2026-09-18 · ✅⭐ DREAMING v0 — THE LOOP CLOSED. FIRST AUTONOMOUS RETENTION.
+
+**real conversation → autonomous reflection → autonomous `retain` → durable memory**
+```
+act b570105d [manual] · conv 147f4ceb · 8 msgs · 21s · tools=["retain"] · clipped=stop · 161 output tokens
+memory 1c854162 · importance=7 · author=persona · writer=reflection · act_kind=revisit · kind=semantic
+               · entity=user · attribute='communication pattern…"permission tell"' · live · embedded
+               · access_count=0
+```
+
+### ⛔ THE BUDGET CHANGE IS NOT CREDITED (Ote's ruling, and the evidence agrees)
+161 tokens = 7% of 2400, clipped=stop — it would have fitted the old 1600 ceiling four times over.
+The two gen-7 runs differed in material AND ceiling; n=1 each. Do not bank 2400 as the fix.
+What IS established: the permission-asking is gone — both gen-7 runs DECIDED; both gen-3 runs asked.
+HOLDING AT 2400 by ruling; no 4096; observe real Dreaming before introducing another variable.
+
+### THE CONTRACT CHANGE
+`THE_RETENTION_OWNERSHIP` appended in buildReflectionTurnPrompt; REFLECTION_GENERATION 3 → 7, gen 7
+registered with transport identical to the gen-3 control. His ratified question untouched byte for byte;
+no tool named, no quota, no new door; carve-out in the text (identity/principles stay with Ote).
+Cause located: "tell me what and why" addresses a LISTENER; the clause removes the listener.
+Tests: dreaming-autonomous-retention-check, 17 assertions, red-proved, deterministic via the injectable
+turn seam. Three pins updated honestly; the gen-arms pipeline refuses loudly rather than being retargeted.
+
+### RUNTIME FACTS, VERIFIED (measured, not assumed)
+```
+model     ollama/qwen3.6:35b (Q4_K_M, 36B MoE) — cfg('reflectionModel') absent → chat.defaultModel
+GPU       23.0GB size / 23.0GB vram ⇒ fully resident, zero spill
+context   reflection 16,384 · trained 262,144 · OUR MEASURED OPTIMUM 143,360 ⇒ 11.4% in use
+prompt    ~1.6K tokens (conversation 6,130 chars ≈ 1,533)
+cap       max_tokens → num_predict = OUTPUT ONLY; done_reason 'length' = the output cap
+⇒ the 1600 clip was the output ceiling, not context (~3.2K of 16,384 used, ~13K free)
+⚠️ reflection calls do NOT reach log_usage — exact reflection token counts unavailable; the 19-20K
+   prompt_tokens rows there are CHAT turns.
+```
+
+### CONFIGURATION ISSUE — RECORDED, NOT FIXED (by ruling)
+config.json sets `memory.reflectModel = ollama/qwen3.5:9b`, but the code reads `reflectionModel`.
+The key never matches, so the setting has no effect and reflection falls through to chat.defaultModel.
+A silent fall-through rather than an error: the operator's declared choice is discarded without a word.
+Not to be fixed while a Dreaming variable is in flight — changing the model would change the instrument.
+
+### FUTURE ARCHITECTURE ITEM — OPENED, NOT STARTED
+Give Dreaming substantially more relevant conversational material rather than treating 16K as an implicit
+ceiling: 16,384 in use against 143,360 measured-safe is 8.75x of headroom, and 16K is only
+reflectionNumCtx's DEFAULT, not a recorded decision. Precondition is Ote's: "once the loop is proven
+stable" — it has closed once, manually. And it is not a knob-turn: more material changes WHAT she
+reflects on, which is a selection question, not a context-size one.
+
+### STATE
+reflectionMaxTokens 2400 lives in Backend/config.json, which is GITIGNORED — this entry is its record.
+H6 unchanged at 0/8 (cron-only; this was manual) — baseline NOT rewritten. access_count=0: whether the
+memory comes back is a later real turn's job; no recall was called.

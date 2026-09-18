@@ -13,15 +13,22 @@ const slice = [
   { id: '33333333-3333-4333-8333-333333333333', role: 'user', content: 'And   I drink   genmaicha.', rolling_id: 12 },
 ]
 
-test('G · the live generation is still 3, and the spec table knows exactly what 3 and 4 change', () => {
-  assert.equal(REFLECTION_GENERATION, 3)
+// ⚠️ PRODUCTION MOVED 3 → 7 on 2026-09-18 (the retention-ownership clause). ⭐ GEN 7'S TRANSPORT IS
+// IDENTICAL TO GEN 3 — unnumbered, no citation fields — so everything this test says about 3 vs 4 is
+// unchanged; only which generation is LIVE moved. ⓘ Gen 3 is now the HISTORICAL control.
+test('G · the live generation is 7, and the spec table knows exactly what 3, 4 and 7 change', () => {
+  assert.equal(REFLECTION_GENERATION, 7)
+  // ⭐ 7 carries the ownership clause and NOTHING else — same transport as the gen-3 control, so one
+  // variable moves and a retention-rate difference is attributable to the clause alone.
+  assert.deepEqual(generationSpec(7), { numbered: false, citations: false })
+  assert.deepEqual(generationSpec(7), generationSpec(3))
   assert.deepEqual(generationSpec(3), { numbered: false, citations: false })
   assert.deepEqual(generationSpec(4), { numbered: true, citations: true })
   // 5 and 6 decompose 4 — each moves exactly ONE of its two halves
   assert.deepEqual(generationSpec(5), { numbered: true, citations: false })
   assert.deepEqual(generationSpec(6), { numbered: false, citations: true })
   assert.notDeepEqual(generationSpec(5), generationSpec(6))
-  assert.throws(() => generationSpec(7), /generation/)
+  assert.throws(() => generationSpec(8), /generation/)   // ⚠️ was 7 until 7 was declared
   assert.throws(() => generationSpec('4'), /generation/)
 })
 

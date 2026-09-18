@@ -51,7 +51,15 @@ initRetention(); initLesson(); initOwnMemory(); initToolLog(fastify, attachToolA
 if (typeof initCorrections === 'function') initCorrections()
 const { reflectOnConversation } = await import('../../Backend/app/components/reflection-lifecycle-host.js')
 const { REFLECTION_GENERATION, generationSpec } = await import('../../Backend/app/components/reflection-lifecycle.js')
-if (REFLECTION_GENERATION !== 3) { console.error('⛔ the live generation is not 3 — the control presumes Gen 3 is production'); process.exit(2) }
+// ⚠️⚠️ STALE PREMISE SINCE 2026-09-18. These arms measure 4/5/6 against a GEN 3 control that WAS
+// production. Production is now GEN 7 (gen 3 + the retention-ownership clause), so "the control" and
+// "what runs live" are no longer the same instrument. ⛔ The comparison is not invalid — it is
+// UN-REBASED, and re-basing it is a decision, ⛔ not an edit. ⇒ refuse, and say which it is.
+if (REFLECTION_GENERATION !== 3) {
+  console.error(`⛔ the live generation is ${REFLECTION_GENERATION}, not 3 — these arms presume Gen 3 is production.`)
+  console.error('  Gen 3 is now the HISTORICAL control. Re-base the arms against the live generation before running.')
+  process.exit(2)
+}
 if (config?.memory?.reflectionEnabled !== true) { console.error('⛔ memory.reflectionEnabled is not true'); process.exit(2) }
 for (const a of ARMS) generationSpec(a.generation)   // ⛔ fail here, not 40 passes in, if a generation is undeclared
 

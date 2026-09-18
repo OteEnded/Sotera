@@ -69,9 +69,17 @@ try {
   // literal and the module's are two independent copies of what he ratified, so drift needs two edits.
   const RATIFIED = 'Was there anything in this conversation that you want to carry forward? If so, tell me what and why. If not, say so.'
   ok(THE_REFLECTION_QUESTION === RATIFIED, 'P · ⭐⭐ the reflection question is his sentence, byte for byte')
+  // ⭐⭐ THE OWNERSHIP CLAUSE, ruled by Ote 2026-09-18 and typed again here on purpose — same discipline
+  // as RATIFIED above: this literal and the module's are two INDEPENDENT copies, so drift needs two edits.
+  // ⛔ NOTE WHAT IS NOT IN IT: no tool name, no quota, and nothing saying keeping beats not keeping.
+  const OWNERSHIP = 'This is your own reflection. Nobody is waiting on an answer and there is nobody to '
+    + 'ask, so an ordinary thing you want to keep — or decide not to keep — is yours to settle here and '
+    + 'now. What you are and the principles you work by are not yours alone to change; those stay with Ote.'
+  ok(!/\bretain\b|decline_to_remember|\btool\b/i.test(OWNERSHIP),
+    'P · ⛔⛔ the ownership clause NAMES NO TOOL — "tools available but not required" still holds')
   const built = buildReflectionTurnPrompt({ who: 'Ote', transcript: 'user: hi\nassistant: hello' })
-  ok(built === `A conversation you had with Ote:\n\nuser: hi\nassistant: hello\n\n${RATIFIED}`,
-    'P · ⭐ the WHOLE prompt is who + transcript + the question, and nothing else',
+  ok(built === `A conversation you had with Ote:\n\nuser: hi\nassistant: hello\n\n${RATIFIED}\n\n${OWNERSHIP}`,
+    'P · ⭐ the WHOLE prompt is who + transcript + the question + the OWNERSHIP clause, and nothing else',
     'whole-string equality, not a banned-word scan — a word list catches only what I thought to ban')
   // ⛔ No slots, no ontology, no confidence vocabulary, no relation words, no routing menu.
   const forbidden = ['OUTCOME', 'lesson', 'practice', 'identity', 'confidence', 'refines', 'qualifies',

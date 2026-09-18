@@ -56,12 +56,41 @@
 export const THE_REFLECTION_QUESTION = 'Was there anything in this conversation that you want to carry forward? If so, tell me what and why. If not, say so.'
 
 /**
+ * ⭐⭐⭐ THE RETENTION OWNERSHIP CLAUSE — ruled by Ote, 2026-09-18.
+ *
+ * *"Autonomous Dreaming owns its own ordinary memory-retention decisions. Do not ask Ote for permission
+ * for ordinary memories during a Dreaming pass."*
+ *
+ * ⚠⚠ THE MEASURED BEHAVIOUR THIS ANSWERS. Two forced passes on real conversations, 2026-09-18: she
+ * reflected well, named THREE things worth keeping — with content, distinction and rationale — and then
+ * ended with *"Would you like me to store these…?"*. `toolsUsed: []`. ⇒ candidate insight ✅, retention ⛔.
+ * ⓘ The same shape generation 1 measured: *"recognised something durable in ~32, named it precisely… and
+ * acted on nothing."*
+ *
+ * ⭐ AND THE CAUSE WAS IN THE QUESTION ITSELF: *"tell me what and why"* addresses a LISTENER. Asked to
+ * report to someone, she reported to someone and waited. ⇒ this clause removes the listener, ⛔ it does not
+ * push her toward a tool.
+ *
+ * ⛔⛔ IT IS NOT *"you may use your tools"*. That sentence is still forbidden and still absent — Ote:
+ * *"tools available but not required."* ⛔ No tool is named here, ⛔ no quota is set, ⛔ nothing says keeping
+ * is better than not keeping. It states WHOSE THE DECISION IS, which is an OCCASION fact, exactly like
+ * `author` and `practiceOrigin` on the write beneath it.
+ *
+ * ⛔⛔ AND THE CARVE-OUT IS EXPLICIT, because the ruling was explicit: *"This does not grant autonomous
+ * authority over L2 learned principles or other explicitly human-governed identity/policy changes."*
+ */
+export const THE_RETENTION_OWNERSHIP = 'This is your own reflection. Nobody is waiting on an answer and '
+  + 'there is nobody to ask, so an ordinary thing you want to keep — or decide not to keep — is yours to '
+  + 'settle here and now. What you are and the principles you work by are not yours alone to change; those '
+  + 'stay with Ote.'
+
+/**
  * ⭐ THE GENERATION, counted for the REFLECTION instrument and nobody else's.
  *   3 — one open question, no slots, no ontology, no priors, no anti-quota language; her ordinary tools
  *       in reach and not mentioned. **Bump this whenever the prompt text changes**, including if a system
  *       prompt is ever added — that would be a different instrument, not a configuration change.
  */
-export const REFLECTION_GENERATION = 3
+export const REFLECTION_GENERATION = 7
 /**
  * ⭐ WHAT EACH GENERATION CHANGES — as DATA, so an experiment can run one generation while production runs another.
  *   3 — the transcript is `role: text`; retain has no reference field.
@@ -78,6 +107,11 @@ export const REFLECTION_GENERATIONS = Object.freeze({
   4: Object.freeze({ numbered: true, citations: true }),      // measured 2026-09-05; verdict ITERATE
   5: Object.freeze({ numbered: true, citations: false }),     // arm N — does the NUMBERING alone move retention?
   6: Object.freeze({ numbered: false, citations: true }),     // arm C — can the affordance reach her WITHOUT the numbering?
+  // ⭐⭐ 7 — THE LIVE INSTRUMENT FROM 2026-09-18. Transport is IDENTICAL to the gen-3 control (unnumbered,
+  // no citation fields); the ONLY difference is that the prompt now carries `THE_RETENTION_OWNERSHIP`.
+  // ⭐ ONE VARIABLE MOVES, which is the whole reason 5 and 6 exist — so any change in retention rate
+  // between 3 and 7 is attributable to the ownership clause and to nothing else.
+  7: Object.freeze({ numbered: false, citations: false }),
 })
 export function generationSpec(generation) {
   const spec = Number.isInteger(generation) ? REFLECTION_GENERATIONS[generation] : null
@@ -405,7 +439,9 @@ export function buildReflectionTurnPrompt({ who, transcript }) {
 
 ${transcript}
 
-${THE_REFLECTION_QUESTION}`
+${THE_REFLECTION_QUESTION}
+
+${THE_RETENTION_OWNERSHIP}`
 }
 
 /**

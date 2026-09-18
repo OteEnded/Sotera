@@ -74,7 +74,10 @@ const rowFor = async (cid) => one(`SELECT m.id::text AS id, m.writer, m.act_kind
 const ledgerFor = async (cid) => one(`SELECT id::text AS id, prompt_generation, outcome, wrote_memory_id::text AS wrote FROM ${S}."log_conversation_revisits" WHERE conversation_id = $1::uuid ORDER BY created_at DESC LIMIT 1`, [cid])
 
 try {
-  check('P0 · the live generation constant is still 3 — ⛔ this check never changes what production runs', REFLECTION_GENERATION === 3)
+  // ⚠️ PRODUCTION MOVED TO 7 on 2026-09-18 (the retention-ownership clause). The INTENT of this pin is
+  // unchanged — *this check never changes what production runs* — only the value it guards.
+  // ⓘ Gen 3 remains the HISTORICAL control these fixtures were written against; ⛔ it is no longer live.
+  check('P0 · the live generation constant is 7 — ⛔ this check never changes what production runs', REFLECTION_GENERATION === 7)
 
   // ══ C1 · a good citation: ordinal 3 (the account holder's line) + a verbatim quote ═══════════════════════════════
   const f1 = await fixture('C1 cite line 3')
@@ -146,13 +149,19 @@ try {
   })
   const row4 = await rowFor(f4.cid)
   const prov4 = row4 ? (await provenanceFor(db, [row4.id], { tz: 'Asia/Bangkok' })).get(row4.id) : null
-  check('C4a · ⭐⭐⭐ with no generation argument the lane runs Generation 3: transcript UNnumbered, retain WITHOUT from/quote',
+  // ⚠️ The default is GEN 7 since 2026-09-18, ⛔ no longer 3 — but gen 7's TRANSPORT is identical to
+  // gen 3 (unnumbered, no citation fields), which is exactly what this assertion tests.
+  check('C4a · ⭐⭐⭐ with no generation argument the lane runs the GEN-3 TRANSPORT: transcript UNnumbered, retain WITHOUT from/quote',
     r4?.ok === true && /(^|\n)user: zz_gen4 I keep a small cactus/.test(offer4?.prompt ?? '') && !/\[1\]/.test(offer4?.prompt ?? '')
       && !retainDef(offer4?.tools)?.parameters?.properties?.from && !retainDef(offer4?.tools)?.parameters?.properties?.quote)
   check('C4b · and its row is exactly today\'s: reflection · revisit · range · ZERO references · not established',
     row4?.writer === 'reflection' && row4?.act_kind === 'revisit' && prov4?.references.length === 0 && prov4?.established === false, row4 ? '' : `no row; tool results: ${LAST_TOOL_RESULTS.join(' | ')}`)
   const led4 = await ledgerFor(f4.cid)
-  check('C6b · its ledger row carries prompt_generation 3 — the two arms are separable by construction', led4?.prompt_generation === 3)
+  // ⭐ ASSERT AGAINST THE CONSTANT, ⛔ not a literal. The point is that the default arm records whatever
+  // is LIVE while the gen-4 arm records 4, so the two stay separable — a hard-coded 3 made that claim
+  // stale the moment production moved.
+  check(`C6b · its ledger row carries prompt_generation ${REFLECTION_GENERATION} (the LIVE one) — the two arms are separable by construction`,
+    led4?.prompt_generation === REFLECTION_GENERATION, `ledger=${led4?.prompt_generation}`)
 
   // ══ C7 · a retain WITHOUT from under Generation 4 ⇒ same as Generation 3 (no reference, not established) ══════════
   const f7 = await fixture('C7 gen 4 without citation')
