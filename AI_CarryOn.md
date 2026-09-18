@@ -496,6 +496,50 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅✅✅ **Ⓒ CLOSED / SHIPPED — ACCEPTED BY OTE, 2026-09-18. THIS BOUNDARY IS LOCKED.**
+
+> ## ⭐⭐⭐ **THE RULING, IN ITS NARROWEST CORRECT FORM — read this before touching `memory-rank.js`:**
+>
+> ## **An UNESTABLISHED containment heuristic cannot SILENTLY become a semantic suppression decision.**
+
+⛔⛔ **DO NOT REINTERPRET THIS AS "THE HEURISTIC IS USELESS."** Ote, on accepting:
+*"The ruling is narrower: an unestablished containment heuristic cannot silently become a semantic
+suppression decision."*
+
+```
+✅ WHAT IS RULED            an unestablished heuristic may not silently suppress
+⛔ WHAT IS **NOT** RULED     ⛔ that the heuristic is wrong · ⛔ that its hypothesis is false ·
+                            ⛔ that informational containment never holds · ⛔ that it should be deleted
+⭐ ITS CLASSIFICATION        a HEURISTIC INFORMATIONAL-CONTAINMENT DETECTOR — ⛔ NOT an established
+                            semantic relation · ⛔ NOT proposition identity · ⛔ NOT question identity
+ⓘ The originating pair (`formatting preference` / `communication style`) MAY genuinely satisfy the
+  assertion. ⭐ The defect is that the system cannot tell that class from Bangkok.
+```
+
+✅ **WHAT IS CLOSED** — Sotera recall no longer suppresses on value similarity · the heuristic stays
+intact and opt-in · Bangkok restored in default recall · same-attribute restatements available · different
+attributes sharing a value available · limits unchanged · `noteRetrieved` reflects the returned set ·
+admission projection untouched · write-time `DEDUP_THRESHOLD` untouched · ⛔ no new relation, ontology,
+authority model, adjudicator, composer stage or semantic mechanism · ⛔ OLS/EAP untouched.
+
+⭐⭐ **THE ARCHITECTURAL KNOWLEDGE, RECORDED BY RULING:**
+
+> ## **NO CONSUMER STRUCTURALLY REQUIRES THE RECALL SET TO CONTAIN DISTINCT FACTS.**
+> ## The old *"`limit` DISTINCT facts"* guarantee was **comment-level, ⛔ not an enforced downstream
+> ## contract.** ⇒ ⛔ no future layer may claim to inherit it.
+
+⛔ **AND THE RESIDUE STAYS** — accepted under the standing incident rule: ⛔ do NOT clean the canary rows
+(total 67, live 2) · ⛔ do NOT clean the ledger rows (45) · ⛔ do NOT repair or re-baseline the known
+`evidence-baseline` damage (slots 97/112 · aliases 4/8). ⭐ It is audit history.
+
+⏸ **STILL OPEN BEHIND THIS BOUNDARY, ⛔ untouched by the closure:**
+```
+⏸ what may Sotera ASSERT about two coexisting rows            (the PRESENTATION question)
+⏸ whether an admission verdict authorizes any presentation behaviour
+⏸ whether informational containment is establishable ANYWHERE  (memory ✖ · cognition = new construction)
+⏸ the composer's designed-but-unbuilt `'redundant'` drop stage  ⛔ NOT a proposal
+```
+
 ## ⭐⭐⭐ ✅ **SHIPPED — Ⓒ IMPLEMENTED (2026-09-18).** `valueSuppressionHeuristic` defaults **OFF**.
 
 ```

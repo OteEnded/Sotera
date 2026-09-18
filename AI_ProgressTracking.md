@@ -13126,3 +13126,45 @@ importer is under `Personas/Sotera`. ⛔ This ruling is Sotera-specific; ⛔ do 
 separate ruling.
 
 **COMMITS:** Sotera `a50bb5f` · @ote/memory `719bcb3` (⛔ local only, no remote)
+
+
+---
+
+## 2026-09-18 · ✅✅✅ Ⓒ CLOSED / SHIPPED — ACCEPTED. THE BOUNDARY IS LOCKED.
+
+### ⭐⭐⭐ THE RULING, IN ITS NARROWEST CORRECT FORM
+> **An UNESTABLISHED containment heuristic cannot SILENTLY become a semantic suppression decision.**
+
+⛔⛔ **NOT "the heuristic is useless."** Ote, on accepting: *"The ruling is narrower: an unestablished
+containment heuristic cannot silently become a semantic suppression decision."*
+
+```
+✅ RULED        an unestablished heuristic may not silently suppress
+⛔ NOT RULED    ⛔ the heuristic is wrong · ⛔ its hypothesis is false · ⛔ containment never holds ·
+               ⛔ it should be deleted
+⭐ CLASSIFIED   a heuristic informational-containment detector — ⛔ not an established semantic relation,
+               ⛔ not proposition identity, ⛔ not question identity
+ⓘ The originating pair may genuinely satisfy the assertion; the defect is that the system cannot tell
+  that class from Bangkok.
+```
+
+### ✅ ACCEPTED AS CLOSED
+Sotera recall no longer suppresses on value similarity · heuristic intact and opt-in · Bangkok restored ·
+same-attribute restatements available · different attributes sharing a value available · limits unchanged ·
+`noteRetrieved` reflects the returned set · admission projection untouched · write-time `DEDUP_THRESHOLD`
+untouched · ⛔ no new relation/ontology/authority/adjudicator/composer stage · ⛔ OLS/EAP untouched.
+⭐ The red-proof (44 → 43, timezone removed) is the accepted evidence.
+
+### ⭐⭐ ARCHITECTURAL KNOWLEDGE, RECORDED BY RULING
+> **No consumer structurally requires the recall set to contain distinct facts.** The old
+> *"`limit` DISTINCT facts"* guarantee was comment-level, ⛔ not an enforced downstream contract.
+
+### ⛔ RESIDUE PRESERVED BY RULING
+⛔ canary rows (total 67, live 2) · ⛔ ledger rows (45) · ⛔ the `evidence-baseline` damage
+(slots 97/112, aliases 4/8) — ⛔ no cleanup, no repair, no re-baseline. It is audit history.
+
+### ⏸ STILL OPEN BEHIND THE BOUNDARY
+the PRESENTATION question · whether an admission verdict authorizes presentation behaviour · whether
+containment is establishable anywhere · the composer's unbuilt `'redundant'` stage (⛔ not a proposal).
+
+**COMMITS:** Sotera `a50bb5f` `4aa02c5` · @ote/memory `719bcb3` (⛔ local only)
