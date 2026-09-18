@@ -151,6 +151,11 @@ try {
     `reflection ${ctl.refl_hit}/${ctl.refl_n} (${pct(ctl.refl_hit, ctl.refl_n)}%) `
     + `vs other writers ${ctl.other_hit}/${ctl.other_n} (${pct(ctl.other_hit, ctl.other_n)}%)`)
 
+  // ⭐ THE SIX MEASURED GAPS TO RANK 6 (bounded retrieval experiment, 2026-09-18 — each row given its BEST
+  // real later user turn, scored with retrieve()'s own formula). ⛔ DECLARED, not recomputed: recomputing
+  // would make this line depend on pgvector timing and on a corpus that keeps moving.
+  const GAPS = [1.433, 0.395, 1.142, 0.219, 1.028, 0.716]
+
   // ── THE VERDICT LINE ─────────────────────────────────────────────────────────────────────────────
   console.log('')
   console.log('  ⭐ DREAMING v0 · THE LOOP, HOP BY HOP')
@@ -163,11 +168,24 @@ try {
   console.log(`     ELIGIBLE .............. ${eligible}/${scored.length} clear minRelevance ${GATE} (best ${bestOf}, avg ${avgOf})`)
   console.log(`     ⛔ CLOSED THE LOOP .... ${closed}/${kept} ever recalled`)
   console.log('')
-  console.log(closed === 0
-    ? '  ⛔⛔ v0 BREAKS AT THE LAST HOP: the learning is ELIGIBLE BUT NEVER COMPETITIVE — it clears the\n'
-      + '     gate and still never reaches the returned set. ⛔ A ranking/salience change is FENCED (§0-D),\n'
-      + '     so this is Ote\'s decision, not an implementation detail.'
-    : '  ⭐ v0 CLOSES: unprompted reflection has produced durable learning that came back later.')
+  // ⭐⭐ THE COUNTERFACTUAL, so the reach of the 2026-09-18 change is visible on every run.
+  // ⛔ IT IS NOT RETROACTIVE: `retain()` now stamps the occasion's importance 7, but the rows above were
+  // written when the lane declared NOTHING, and §0-D forbids historical row repair. ⇒ they keep
+  // `importance = NULL`, and this line says what the SAME rows would have scored had the stamp existed.
+  const DELTA = 2 * (7 / 10) - 2 * (5 / 10) // the importance term at 7 vs the scorer's `?? 5` default
+  const gapsClosed = GAPS.filter((g) => g <= DELTA).length
+  console.log(`  ⓘ COUNTERFACTUAL at importance 7: +${DELTA.toFixed(1)} on the importance term closes `
+    + `${gapsClosed} of ${GAPS.length} measured gaps to rank 6  [${GAPS.map((g) => g.toFixed(3)).join(' ')}]`)
+  console.log('')
+  if (closed === 0) {
+    console.log('  ⏸ THE LOOP HAS NOT CLOSED YET, AND THAT IS THE EXPECTED POSITION.')
+    console.log('     The responsible mechanism was MEASURED (importance — 69% of the gap to rank 6) and')
+    console.log('     SUPPLIED on 2026-09-18: retain() now stamps the occasion importance, 7.')
+    console.log('     ⛔ It is NOT retroactive — closure waits on a NEW unprompted retention.')
+    console.log('     ⛔ Do NOT tune the constant upward to force this number.')
+  } else {
+    console.log('  ⭐ v0 CLOSES: unprompted reflection produced durable learning that came back later.')
+  }
 } finally {
   await done()
   await seq.close()

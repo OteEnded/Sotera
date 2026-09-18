@@ -11,6 +11,7 @@
 //
 // ⛔ Runs as agent_dev. Every fixture is removed at the end.
 
+import { readFileSync } from 'node:fs'
 import { makeChecker, devPg, devSchema } from '../harness.mjs'
 import { WRITER as ZZ_WRITER, ACT_KIND as ZZ_ACT_KIND } from '../../Backend/app/components/memory-writer-contracts.js'
 
@@ -208,6 +209,77 @@ try {
     await pg.query(`insert into ${S}.log_retention_decisions (content, state, memory_id) values ($1,'persisted',gen_random_uuid())`, [`${MARK}redproof`])
   } catch { bit3 = true }
   check('D3 · ⭐⭐ the DATABASE refuses `persisted` with no store — an id from two tables must say which', bit3)
+  // ══ ⭐⭐⭐ E · THE OCCASION-LEVEL IMPORTANCE OF A REFLECTION RETENTION (Ote, 2026-09-18) ═══════
+  //
+  // ⛔⛔ WHAT THIS IS AND IS NOT. Ote: *"the occasion-level default importance for a memory deliberately
+  // retained from Sotera's own reflection — **not** a claim that every reflection conclusion is
+  // intrinsically '7 important'."* ⇒ it describes THE OCCASION, ⛔ never the content.
+  //
+  // ⚠️ THE DEFECT IT CLOSES: `retain()` → `keep()` carried no importance at all, so every reflection
+  // retention landed NULL and took the scorer's `?? 5` — a standing penalty in a corpus whose DECLARED
+  // values run 6..10. Measured: **69% of the gap to rank 6** was the importance term.
+  const { REFLECTION_RETENTION_IMPORTANCE } = await import('../../Backend/app/components/retention-host.js')
+  const impOf = async (id) => (await one(`select importance from ${S}.txn_memories where id=$1`, [id]))?.importance ?? null
+  const src = (f) => readFileSync(new URL(`../../Backend/app/components/${f}`, import.meta.url), 'utf8')
+
+  // E1 · THE SLOT DOOR
+  const e1 = await retain({ content: `${MARK}prefers short answers late at night`, kind: 'fact', mine: true, attribute: `${MARK}pace` })
+  check('E1 · ⭐⭐⭐ a reflection retention lands importance 7 — ⛔ no longer NULL',
+    e1?.memoryId ? await impOf(e1.memoryId) === 7 : false, `state=${e1?.state} importance=${e1?.memoryId ? await impOf(e1.memoryId) : 'no row'}`)
+
+  // E2 · THE NOTE DOOR — ⛔ one door stamped and one left bare would be invisible
+  const e2 = await retain({ content: `${MARK}the arc went quiet for a week and then moved fast`, kind: 'note', mine: true })
+  check('E2 · ⭐⭐ the NOTE door carries it too — ⛔ both write paths or neither',
+    e2?.memoryId ? await impOf(e2.memoryId) === 7 : false, `state=${e2?.state} importance=${e2?.memoryId ? await impOf(e2.memoryId) : 'no row'}`)
+
+  // E3 · ⭐⭐⭐ IT COMES FROM THE OCCASION, ⛔ NOT FROM THE CONTENT. Two retentions with nothing in common
+  // — different kind, different door, different text, different length — get the SAME value. ⛔ A
+  // content-derived score could not do that.
+  const sameValue = e1?.memoryId && e2?.memoryId && (await impOf(e1.memoryId)) === (await impOf(e2.memoryId))
+  check('E3 · ⭐⭐⭐ OCCASION, ⛔ NOT CONTENT — two unrelated retentions on two different doors get the SAME value',
+    sameValue && (await impOf(e1.memoryId)) === REFLECTION_RETENTION_IMPORTANCE,
+    `constant=${REFLECTION_RETENTION_IMPORTANCE} e1=${await impOf(e1.memoryId)} e2=${await impOf(e2.memoryId)}`)
+  check('E3b · ⭐⭐ …and it is stamped BESIDE `practiceOrigin`, the field already declared from the occasion',
+    /practiceOrigin: 'reflection', evidenceRefs,[\s\S]{0,400}?importance: REFLECTION_RETENTION_IMPORTANCE/.test(src('retention-host.js')),
+    'the two occasion facts must travel together, on the one call that knows the occasion')
+
+  // E4 · ⛔ ORDINARY WRITERS ARE UNCHANGED — ABSENT STAYS ABSENT
+  const rh = src('retention-host.js')
+  check('E4 · ⛔⛔ `keep()` DEFAULTS TO null and both doors spread CONDITIONALLY ⇒ a caller that declares none is byte-identical',
+    /evidenceRefs = \[\], importance = null \} = \{\}\)/.test(rh)
+      && (rh.match(/\.\.\.\(importance != null \? \{ importance \} : \{\}\)/g) ?? []).length === 2,
+    `signature default + ${(rh.match(/\.\.\.\(importance != null \? \{ importance \} : \{\}\)/g) ?? []).length}/2 conditional spreads`)
+  const others = await q(`select count(*)::int as n from ${S}.txn_memories
+     where invalid_at is null and writer is not null and writer <> 'reflection' and importance is not null`)
+  check('E4b · ⭐ …and every other writer still carries ITS OWN declared importance — ⛔ nothing was overwritten',
+    Number(others[0].n) > 0, `${others[0].n} non-reflection rows with their own importance`)
+
+  // E5 · ⛔ DECLINE RECORDS ARE UNAFFECTED — a decision is not a memory, and it never passes through keep()
+  const lh = src('lesson-host.js')
+  check('E5 · ⛔⛔ the DECLINE writer is untouched — its own raw INSERT, its own importance 2, ⛔ never keep()',
+    /'sotera', 'declined', 2,/.test(lh) && !/keep\(/.test(lh.slice(lh.indexOf('async function decline'), lh.indexOf('async function decline') + 2000)),
+    'the decline path must not acquire an occasion importance it never asked for')
+  const dec = await one(`select importance from ${S}.txn_memories where entity='sotera' and attribute='declined' limit 1`)
+  check('E5b · ⭐ …and the live decline row still reads importance 2', Number(dec?.importance) === 2, `importance=${dec?.importance}`)
+
+  // E6 · ⛔⛔ THE SCORER, THE GLOBAL DEFAULT, THE GATE AND THE LANE ARE ALL UNTOUCHED
+  const rank = readFileSync(new URL('../../../../PortableComponents/Packages/Memory/cognition/memory-rank.js', import.meta.url), 'utf8')
+  check('E6 · ⛔⛔ THE SCORER IS UNCHANGED — same weights, same `?? 5` default, same decay',
+    /relevance: 3, importance: 2, recency: 0\.5/.test(rank)
+      && /m\.importance \?\? 5/.test(rank)
+      && /decayPerHour = 0\.995/.test(rank),
+    'this change supplies a MISSING DECLARATION; ⛔ it does not reinterpret another writer’s')
+  const svc = readFileSync(new URL('../../../../PortableComponents/Packages/Memory/cognition/memory-v2-service.js', import.meta.url), 'utf8')
+  check('E6b · ⛔ the retrieval lane and its gate are unchanged — ⛔ no new lane, ⛔ no threshold move',
+    /minRelevance = 0\.15/.test(svc) && /r\.pinned \|\| lexSet\.has\(id\) \|\| r\.relevance >= minRelevance/.test(svc),
+    'retrieve() still admits on exactly the three grounds it always did')
+
+  // E7 · ⛔ SHE CANNOT SET IT — the same protection `practiceOrigin` already has
+  check('E7 · ⛔⛔ NOTHING THE MODEL EMITS CAN REACH IT — `importance` is never bound from a caller-supplied field',
+    !/importance\s*[:=]\s*(opts|args|d\.|decision\.|input\.)/.test(rh)
+      && !/importance/.test(rh.slice(rh.indexOf('async function retain('), rh.indexOf('async function retain(') + 900)),
+    '`retain()` must not take it as a parameter — it is an OCCASION fact, like practiceOrigin')
+
 } catch (e) {
   check('the check ran to completion', false, e?.stack ?? String(e))
 } finally {

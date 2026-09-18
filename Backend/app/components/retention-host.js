@@ -65,6 +65,27 @@ export const KINDS = Object.freeze({ fact: 'fact', note: 'note', practice: 'prac
  * ⚠️ `false` IS AN ANSWER AND MUST SURVIVE. `!mine` would collapse `false` and `undefined` into one
  * branch and re-introduce the silent default through the back door, so the test is on the TYPE.
  */
+// ⭐⭐⭐ THE OCCASION-LEVEL IMPORTANCE OF A REFLECTION RETENTION (Ote, 2026-09-18).
+//
+// ⛔⛔ READ THIS AS WHAT IT IS. Ote: *"Treat it as the occasion-level default importance for a memory
+// deliberately retained from Sotera's own reflection — **not** as a claim that every reflection conclusion
+// is intrinsically '7 important'."* ⇒ it describes THE OCCASION (she stopped, reconsidered, and chose to
+// carry this forward), ⛔ never the content.
+//
+// ⚠️ THE DEFECT IT CLOSES, MEASURED 2026-09-18. `retain()` → `keep()` carried NO importance at all, so every
+// reflection retention landed `importance = NULL` and the scorer's `?? 5` applied — in a corpus whose
+// DECLARED values run 6..10 (ingest 9.0 · identity 9.0 · chat-tool 8.1 · extractor 6.3). ⇒ "neutral 5" was a
+// standing ~0.57 penalty on the only lane that declared nothing. Replaying the real scorer over the six
+// eligible unprompted-reflection memories: **69% of the gap to rank 6 was the importance term**, and two
+// of the six were MORE RELEVANT than the row that beat them and still lost.
+//
+// ⭐ IT IS STAMPED FROM THE OCCASION, beside `author` and `practiceOrigin`, which are declared the same way
+// and for the same reason — *"the occasion is hers, so the author is hers."*
+// ⛔ IT IS NOT A SCORER CHANGE: the global `?? 5` default, the weights, the gate and the retrieval lane are
+// all untouched. This supplies a MISSING DECLARATION; it does not reinterpret anyone else's.
+// ⓘ One constant, one call site ⇒ reversible by deleting one argument.
+export const REFLECTION_RETENTION_IMPORTANCE = 7
+
 export function authorFor(mine) {
   if (mine === true) return 'persona'
   if (mine === false) return 'account'
@@ -190,7 +211,7 @@ export function buildRetention(fastify, {
    * meant — the same class of act as guessing `mine`, which it refuses on the line above for the same
    * reason. ⓘ A wrong kind is refused by the gate; an invented one cannot become an admission.
    */
-  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false, practiceOrigin = 'instructed', claimKind = null, evidenceRefs = [] } = {}) {
+  async function keep({ what, kind, about = null, mine, attribute = null, everywhere = false, practiceOrigin = 'instructed', claimKind = null, evidenceRefs = [], importance = null } = {}) {
     const content = String(what ?? '').trim()
     if (!content) return { ok: false, refused: 'nothing_to_keep', why: 'There is no content to keep — say what you want kept.' }
 
@@ -333,6 +354,9 @@ export function buildRetention(fastify, {
         ...(claimKind != null && String(claimKind).trim() !== '' ? { claimKind: String(claimKind).trim() } : {}),
         // 049 · her citations (Generation 4) ride to the store, which verifies them; absent ⇒ nothing is written
         ...(Array.isArray(evidenceRefs) && evidenceRefs.length ? { evidenceRefs } : {}),
+        // ⭐ THE OCCASION'S IMPORTANCE. ⛔ ABSENT STAYS ABSENT — a caller that declares none writes NULL
+        // exactly as before, so every non-reflection writer is byte-identical.
+        ...(importance != null ? { importance } : {}),
       }))
       return {
         ok: out?.ok !== false, state: out?.state ?? null, kind, author, via: 'remember_fact',
@@ -350,7 +374,10 @@ export function buildRetention(fastify, {
     // through `author` and through nothing else.
     // ⭐ The note path carries the SAME receipt and gets the SAME treatment — ⛔ one door fixed and one
     // left optimistic would be worse than neither, because the difference would be invisible.
-    const out = await resolveReceipt(await mem.rememberAsync({ content, kind: 'semantic', ...(Array.isArray(evidenceRefs) && evidenceRefs.length ? { evidenceRefs } : {}) }))
+    const out = await resolveReceipt(await mem.rememberAsync({ content, kind: 'semantic',
+      ...(Array.isArray(evidenceRefs) && evidenceRefs.length ? { evidenceRefs } : {}),
+      // ⭐ …and the note door gets it too. ⛔ One door stamped and one left bare would be invisible.
+      ...(importance != null ? { importance } : {}) }))
     return {
       ok: out?.ok !== false, state: out?.state ?? null, kind, author, via: 'remember',
       why: out?.why ?? null, code: out?.code ?? null, memoryId: out?.memoryId ?? null, result: out,
@@ -423,7 +450,10 @@ export function buildRetention(fastify, {
       // answered *"this person told you about your practice directly"* about her own conclusion.
       // ⛔ It changes no ownership: a practice is hers however she came by it. Ote: *"Keep this as a
       // vocabulary/provenance change, not a change to retention ownership."*
-      out = await keep({ what: content, kind, about, mine, attribute: slot, practiceOrigin: 'reflection', evidenceRefs })
+      out = await keep({ what: content, kind, about, mine, attribute: slot, practiceOrigin: 'reflection', evidenceRefs,
+        // ⭐⭐ STAMPED FROM THE RETENTION OCCASION, beside `practiceOrigin` on the line above and for the
+        // same reason: this was reached in a REFLECTION. ⛔ It says nothing about the content.
+        importance: REFLECTION_RETENTION_IMPORTANCE })
     } catch (e) {
       // ⭐ A store gate threw — a REFUSAL with a class, not a bug. It is already recorded in
       // `log_memory_refusals` by the store; here it becomes a receipt.

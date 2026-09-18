@@ -13837,3 +13837,30 @@ H6 is PINNED at CLOSURE_BASELINE = 0 - red there means the loop CLOSED, which is
 
 **DOC/CHECK:** `test/checks/dreaming-v0-loop-check.mjs` · ⛔ zero writes · ⛔ no recall issued (it would
 inflate the access_count this reads) · ⛔ no traffic · ⛔ nothing in the fenced list was touched
+
+
+---
+
+## 2026-09-18 · ✅ THE OCCASION IMPORTANCE — SHIPPED (Ote: use 7)
+
+`retain()` now stamps `REFLECTION_RETENTION_IMPORTANCE = 7` from the retention occasion, beside the
+`author` and `practiceOrigin` it already stamps the same way. `keep()` gained `importance = null` and both
+write doors spread it conditionally, so any caller that declares none is byte-identical.
+
+NOT changed: the scorer, the global `?? 5`, the weights, the 0.995 decay, the 0.15 gate, the retrieval
+lane, the schema, the writer, the package, or retain semantics beyond the missing field. One constant, one
+call site, reversible by deleting one argument.
+
+### TESTS — group E in reflection-retain-check: 11 assertions, real DB writes, zero model calls
+importance 7 on both doors (behavioural) · occasion-not-content (two unrelated retentions, two doors, same
+value) · other writers byte-identical (110 rows keep their own) · decline writer untouched (own INSERT,
+importance 2, never keep()) · scorer/gate/lane unchanged · nothing the model emits can reach it.
+RED-PROVED: removing the stamp turns E1/E2/E3/E3b red while E4-E7 stay green. unit 757/757, zero residue.
+
+### H6 RE-RUN: STILL 0/8 — THE EXPECTED POSITION
+Not retroactive; the 8 existing rows were written when the lane declared nothing, and 0-D forbids
+historical row repair. Closure waits on a new unprompted retention.
+COUNTERFACTUAL (now printed every run): +0.4 closes **2 of 6** measured gaps
+[1.433 0.395 1.142 0.219 1.028 0.716].
+CORRECTION to my earlier "3/6" — that was reachable-at-<=10; at 7 it is 2 of 6. Four remain outside,
+reported rather than tuned away.

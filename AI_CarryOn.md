@@ -539,6 +539,52 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐⭐ **THE OCCASION IMPORTANCE — SHIPPED 2026-09-18.** ⭐ Ote's ruling: **use 7.**
+
+> ## ⭐⭐ **A MISSING DECLARATION, SUPPLIED.** ⛔ NOT a scorer change, ⛔ not a salience claim about content.
+
+**Ote:** *"the occasion-level default importance for a memory deliberately retained from Sotera's own
+reflection — ⛔ **not** a claim that every reflection conclusion is intrinsically '7 important'."*
+
+```
+retention-host.js   + export const REFLECTION_RETENTION_IMPORTANCE = 7
+                    + keep({ …, importance = null })        ⛔ ABSENT ⇒ BYTE-IDENTICAL
+                    + both write doors spread it CONDITIONALLY (slot door + note door)
+                    + retain() stamps it FROM THE OCCASION, on the same call as practiceOrigin:'reflection'
+⛔ NO package change · ⛔ no scorer · ⛔ no global `?? 5` · ⛔ no weights · ⛔ no gate · ⛔ no retrieval lane
+⛔ no schema · ⛔ no writer change · ⛔ no retain semantics beyond the missing field.
+ⓘ ONE constant, ONE call site ⇒ reversible by deleting one argument.
+```
+
+⭐⭐ **WHY IT IS AN OCCASION FACT.** It sits beside `practiceOrigin`, which the file already documents as
+*"AN OCCASION FACT, ⛔ NOT A PARAMETER SHE CAN SET"* — and E7 asserts the same protection holds: ⛔ nothing
+the model emits can reach `importance`, and `retain()` does not take it as a parameter.
+
+```
+✅ reflection-retain-check group E — 11 assertions, REAL DB writes, existing teardown, ZERO model calls
+   E1/E2  importance = 7 on BOTH doors (slot + note)          ✅ behavioural, ⛔ not a source scan
+   E3     OCCASION ⛔ NOT CONTENT — two unrelated retentions, two doors, SAME value = the constant
+   E4     keep() defaults null + 2/2 conditional spreads ⇒ other writers byte-identical (110 rows intact)
+   E5     the DECLINE writer untouched — own raw INSERT, own importance 2, ⛔ never keep()
+   E6     the SCORER is unchanged — same weights, same `?? 5`, same 0.995 decay, same 0.15 gate, same lane
+   E7     ⛔ nothing the model emits can reach it
+✅ RED-PROVED: removing the stamp turns E1 · E2 · E3 · E3b red; E4-E7 correctly stay green.
+✅ unit 757/757 · ✅ zero residue (zz_retain_ = 0, decisions = 0)
+```
+
+## ⏸ **H6 RE-RUN: STILL 0/8 — AND THAT IS THE EXPECTED POSITION, ⛔ NOT A FAILURE.**
+The change is ⛔ **NOT RETROACTIVE**: the 8 existing rows were written when the lane declared nothing, and
+§0-D forbids historical row repair. ⇒ closure waits on a **NEW unprompted retention**.
+
+```
+ⓘ COUNTERFACTUAL, now printed by the check on every run:
+   +0.4 on the importance term (7 vs the scorer's ?? 5) closes **2 of the 6** measured gaps to rank 6
+   gaps [1.433 0.395 1.142 0.219 1.028 0.716]
+⚠️ CORRECTION TO MY OWN EARLIER NUMBER: I reported "3/6" — that was 3 rows reachable at importance <= 10.
+   ⭐ AT THE CHOSEN VALUE 7 IT IS **2 of 6**. Four remain outside top-6.
+⛔ Ote: *"If some remain outside top-6, report that outcome rather than tuning 7 upward to force closure."*
+```
+
 ## ✅⭐⭐⭐⭐ **DREAMING v0 — MEASURED 2026-09-18. ⛔⛔ THE LOOP RUNS AND DOES NOT CLOSE.**
 
 `test/checks/dreaming-v0-loop-check.mjs` · ⛔ ZERO writes, ⛔ no traffic, ⛔ no recall issued.
