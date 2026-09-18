@@ -262,11 +262,16 @@ export default async function memoriesAdminRoutes(fastify) {
               r.from_rolling_id, r.up_to_rolling_id, r.messages_considered,
               r.tools_used, r.tools_refused, coalesce(length(r.text), 0) AS text_chars,
               r.wrote_memory_id::text AS wrote_memory_id,
+              c.title AS conversation_title, u.username AS room_username, u.display_name AS room_display,
               m.importance, m.author, m.writer, m.kind, m.entity, m.attribute,
               (m.invalid_at IS NULL) AS mem_live, m.access_count, m.last_access,
               left(m.content, 160) AS mem_excerpt
          FROM "${S}"."log_conversation_revisits" r
          LEFT JOIN "${S}"."txn_memories" m ON m.id = r.wrote_memory_id
+         -- \u2b50 THE SOURCE. Ote: *"which room this from, which converstaion this from"* \u2014 a run that
+         -- cannot say WHAT IT READ is not auditable, and the ids alone are not an answer a person reads.
+         LEFT JOIN "${S}"."txn_conversations" c ON c.id = r.conversation_id
+         LEFT JOIN "${S}"."mst_users" u ON u.id = r.user_id
         WHERE (:trigger::text IS NULL OR r.trigger_source = :trigger)
           AND (:conv::uuid IS NULL OR r.conversation_id = :conv)
         ORDER BY r.rolling_id DESC
@@ -277,6 +282,9 @@ export default async function memoriesAdminRoutes(fastify) {
         id: r.id,
         rollingId: r.rolling_id,
         conversationId: r.conversation_id,
+        conversationTitle: r.conversation_title,
+        roomUsername: r.room_username,
+        roomDisplay: r.room_display,
         trigger: r.trigger_source,
         requestedAt: r.requested_at,
         startedAt: r.started_at,
@@ -320,6 +328,14 @@ export default async function memoriesAdminRoutes(fastify) {
     const [run] = await dreamQ(
       `SELECT * FROM "${S}"."log_conversation_revisits" WHERE id = :id`, { id: request.params.id })
     if (!run) return reply.code(404).send({ error: 'not_found' })
+    // \u2b50 THE SOURCE, RESOLVED TO NAMES. An id is a fact; a title and a username are an ANSWER.
+    const [src] = await dreamQ(
+      `SELECT c.title AS conversation_title, c.archived_at, u.username AS room_username,
+              u.display_name AS room_display
+         FROM "${S}"."log_conversation_revisits" r
+         LEFT JOIN "${S}"."txn_conversations" c ON c.id = r.conversation_id
+         LEFT JOIN "${S}"."mst_users" u ON u.id = r.user_id
+        WHERE r.id = :id`, { id: run.id })
     // ⚠⚠ THE WINDOW IS ANCHORED ON `created_at`/`completed_at` — the only pair that is reliably written.
     // A window opened on `started_at` collapses on every cron/manual run and the lifecycle renders EMPTY,
     // which is the worst failure an inspector can have: it looks exactly like she did nothing.
@@ -355,6 +371,11 @@ export default async function memoriesAdminRoutes(fastify) {
         fromRollingId: run.from_rolling_id,
         upToRollingId: run.up_to_rolling_id,
         startedAt: run.started_at,
+        conversationId: run.conversation_id,
+        conversationTitle: src?.conversation_title ?? null,
+        conversationArchived: src?.archived_at != null,
+        roomUsername: src?.room_username ?? null,
+        roomDisplay: src?.room_display ?? null,
       },
       decisions: decisions.map((d) => ({
         id: d.id, at: d.created_at, state: d.state, why: d.why, kind: d.kind, mine: d.mine,

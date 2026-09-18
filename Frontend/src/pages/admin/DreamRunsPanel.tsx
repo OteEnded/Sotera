@@ -27,6 +27,8 @@ type RunMemory = {
 }
 type Run = {
   id: string; rollingId: number; conversationId: string | null; trigger: string | null
+  conversationTitle?: string | null; roomUsername?: string | null; roomDisplay?: string | null
+  conversationArchived?: boolean
   requestedAt: string | null; startedAt: string | null; completedAt: string | null; durationMs: number | null
   outcome: string | null; reason: string | null; failure: string | null; blockedByDisclosure: boolean | null
   model: string | null; promptGeneration: number | null; toolGeneration: number | null
@@ -103,6 +105,22 @@ function RunDetail({ detail, detailErr }: { detail: Detail | null; detailErr: st
         {!detail && !detailErr && <div className="text-muted text-[13px]">Loading run…</div>}
         {detail && (
           <>
+            {/* ⭐⭐ SOURCE FIRST. Ote: *"which room this from, which converstaion this from"* — before any
+                statistic, say WHAT SHE READ. The rolling range is the exact slice, so a reader can go and
+                look at the same messages she did. */}
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[10px] uppercase tracking-[0.05em] text-muted">Source</span>
+              <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                <Chip tone="plain">room: {detail.run.roomDisplay || detail.run.roomUsername || 'unknown'}</Chip>
+                <span className="font-semibold">{detail.run.conversationTitle ?? 'untitled'}</span>
+                {detail.run.conversationArchived && <Chip tone="warn">archived</Chip>}
+                <span className="text-muted text-[11px] tabular-nums">
+                  messages {detail.run.fromRollingId ?? '?'}–{detail.run.upToRollingId ?? '?'}
+                </span>
+                <code className="text-[11px] text-muted">{detail.run.conversationId ?? '—'}</code>
+              </div>
+            </div>
+
             {/* ── the run's own identity: what ran, on what, with which instrument ── */}
             <div className="flex flex-wrap gap-4">
               <Stat label="model" value={<span className="font-normal">{detail.run.model ?? '—'}</span>} />
@@ -275,6 +293,13 @@ export default function DreamRunsPanel() {
                       <td className={`${ui.td} ${border}`}>
                         <button className="gw-btn adm-btn-sm mr-1.5" onClick={() => void openRun(r.id)} aria-expanded={isOpen}>{isOpen ? '▾' : '▸'}</button>
                         <span className="text-[12px] text-muted">{when(r.completedAt ?? r.requestedAt)}</span>
+                        {/* ⭐ WHAT SHE READ, NAMED. A run identified only by a timestamp cannot be traced
+                            back to its conversation without a second query by hand. */}
+                        <div className="text-[11px] text-muted truncate pl-[30px]"
+                          title={`${r.conversationTitle ?? 'untitled'} · ${r.conversationId ?? ''}`}>
+                          {r.roomUsername ? <span className="opacity-70">{r.roomUsername} · </span> : null}
+                          {r.conversationTitle ?? 'untitled'}
+                        </div>
                       </td>
                       <td className={`${ui.td} ${border}`}>
                         <Chip tone={r.trigger === 'cron' ? 'accent' : 'plain'}>{r.trigger ?? '—'}</Chip>
