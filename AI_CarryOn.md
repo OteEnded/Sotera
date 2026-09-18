@@ -539,6 +539,102 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐ **INTENT PROVENANCE — 2026-09-18.** ⛔ Observation only, ZERO writes, no restart.
+
+`INVESTIGATION_SOTERA_INTENT_PROVENANCE.md`
+
+> ## ⭐⭐⭐ **NEITHER BOUNDARY WAS CREATED AS A BOUNDARY.** Both came into being LATER, when something
+> ## richer was substituted BEHIND an expression that was already correct for what it originally projected.
+
+```
+Ⓐ `author`        ⚠️ a GAP BETWEEN TWO DELIBERATE DECISIONS that were each about SOMETHING ELSE
+Ⓑ passive 13→1   ✅ INHERITED SHAPE — established fully, it is the old "MEMORY BULLETS" design
+⇒ ⛔ they are DIFFERENT KINDS OF THING ⇒ ⛔ do not rule on them together; an argument that resolves
+  one carries NO authority over the other.
+```
+
+## Ⓐ `author` — ⛔ INTENT NOT RECOVERABLE, and the record points AWAY from a deliberate omission
+
+```
+⭐ view() BORN 2026-07-22 (384bb42, OLS) · `author` COLUMN 2026-08-20 (mig 015) ⇒ 29 DAYS APART
+  ⇒ view()'s omission CANNOT have been a decision about the column — there was nothing to omit.
+⭐ view() HAS NEVER CARRIED `author` — pickaxe over ALL THREE repos, whole history: ZERO hits.
+⭐ AND THE CONSUMER WAS NEVER FED A WIDER SHAPE: at 51e5424 (2026-08-21, the branch's BIRTH)
+  `activateSemantic` ALREADY read `svc.search()` ⇒ `m.author` has been undefined from its FIRST LINE.
+  ⛔ No regression · ⛔ no earlier working state · ⛔ it never fired once.
+```
+
+⭐ **THE TWO REAL DECISIONS — and neither is the one we need:**
+① mig 015: *"the column is written and NOT YET READ"* ⇒ ⚠️ its SCOPE is **VISIBILITY** (*"would, if read,
+make a memory visible from every room"*), and `memory-author-check` **Z** asserts only on `visibleWhere`.
+⛔ Projecting `author` in view() widens no read ⇒ this decision does NOT cover the projection.
+② R4 (62cbb61, 2026-08-23) — the ONLY recorded statement about widening view(): *"widening it would be a
+**cross-project behaviour change**."* ⇒ ⭐ a TRANSPORT/COMPATIBILITY reason, ⛔ NOT a semantic boundary.
+⚠️ That comment TRANSCRIBES view()'s field list verbatim — `author` is absent from it and unmentioned,
+while `m.author` is branched on TWO LINES BELOW in the same function. Both were looked at; neither seen.
+
+⚠️ **AND CONTEMPORANEOUS EVIDENCE POINTS THE OTHER WAY TOO:** `ownerOf`'s JSDoc DECLARES `author` an input
+(`OWNER.unknown` *"FAILS CLOSED"*), and `memory-cognition-check` states *"anything marked retained must be
+persona-authored, **which the layer READS rather than decides**"* — above an assertion over an ALWAYS-EMPTY
+set. ⛔ And NO test or fixture has EVER exercised the persona branch (every `author:'persona'` in the tree
+is a WRITER-construction parameter).
+
+⭐⭐ **WERE `author` / BASIS / RETENTION EVER DELIBERATELY SEPARATED? ⛔ THE OPPOSITE.** The axes file
+separates the FOUR AXES (*"four orthogonal questions"*) and ties RETENTION **to** author in the same
+breath — `retained: // she chose to keep it (author = persona…)`. ⇒ the three were deliberately **COUPLED**.
+
+## Ⓑ passive 13→1 — ✅ **INTENT FULLY ESTABLISHED. IT IS THE MEMORY-BULLETS DESIGN.**
+
+```
+2026-06-19  7d99b56  OLS   PINNED MEMORIES   mems.map((m) => `- ${m.content}`).join('\n')
+                           ⭐ `user_memories` has FOUR columns — *"A single fact/instruction"*
+                           ⇒ the map projected 100% OF THE ROW. ⛔ NOTHING WAS LOST. Nothing to lose.
+2026-07-22  384bb42  OLS   MEMORY v2 RECALL  recall.memories.map((m) => `- ${m.content}`)…
+                           ⭐⭐ THE SAME EXPRESSION, CHARACTER FOR CHARACTER — against a 22-COLUMN source.
+```
+⇒ ⭐⭐⭐ **THE SOURCE WAS REPLACED; THE PRESENTATION WAS COPIED.** The narrowing was created by the
+substitution, ⛔ and by nothing anyone wrote.
+
+⭐ **WHAT THE CHANGE WAS ACTUALLY SOLVING** (RFC_PERSONA_MEMORY §4.3, cited in the route comment):
+*"replaces today's **'dump all notes, unranked'** with a bounded, ranked working set"* + *"appended AFTER
+history so per-turn recall never busts the pinned prefix"* + *"best-effort + time-boxed."*
+⇒ CARDINALITY · PLACEMENT · LATENCY. ⛔ **NOT ONE WORD ABOUT FIELDS**, in the commit, comment or §4.3.
+
+```
+① 2026-07-23 ee9cd9f  the composer extraction CREATED today's `.map((m) => m.content)` — declared
+   *"Behavior-identical · same strings"*, with behaviour-lock tests that *"pin the exact prompt output"*.
+   ⇒ the reduction was FROZEN by a refactor whose whole promise was to change nothing.
+   ⚠️ That test passes `recallMemories: ['likes teal']` — a BARE STRING ARRAY. It locks the STRING;
+     ⛔ it establishes NOTHING about which fields were excluded.
+② 2026-08-10 99ecc6f  Sotera CLONES OLS WHOLESALE — *"start from something that works and subtract"*.
+③ 2026-08-26 3c5b87b  the ONE time anyone looked: *"THE RETRIEVAL TRACE… DIED IN ONE `.map()`"*
+   ⇒ repaired FOR THE IDS ONLY. ⛔ when/confidence/entity/attribute/source never mentioned.
+⛔ NOTHING ELSE HAS EVER TOUCHED IT — one pickaxe hit in Sotera's whole history: the clone.
+⛔ AND NO SOTERA TEST REFERENCES `recallMemories` AT ALL — the OLS lock-test did not come across.
+```
+
+✅ **IT PREDATES THE ENTIRE PROVENANCE ARCHITECTURE:** shape 2026-06-19/07-22 · provenance-to-store
+2026-08-12 · the four axes 2026-08-21 · temporal provenance into view() 2026-09-16.
+⛔ **"Was the 13-field view() considered too much for this channel?" — CHRONOLOGICALLY IMPOSSIBLE.**
+When the shape was set view() did not exist, then had 10 fields.
+
+## ⛔⛔ THE RETROACTIVE JUSTIFICATIONS I REFUSED — **INCLUDING MY OWN**
+
+```
+⚠️ ① MY OWN SENTENCE, 2026-09-17, in memory-v2-service.js: *"a developer/operator channel that
+  structurally cannot leak."* ⇒ ⛔ A 2026-09 RATIONALE FOR A 2026-06 SHAPE, AND I WROTE IT. Correct as a
+  description of today's consequence, ⛔ WORTHLESS as evidence of intent. ⓘ It stands (it was scoped to the
+  admission projection and claims nothing about origin) — ⛔ but it must NEVER be cited as why this exists.
+⛔ ② "view() is a deliberately narrow SHARED surface" — R4 is 2026-08-23, about `subject`, for COMPATIBILITY.
+  ⛔ It cannot justify a 2026-07-22 omission of a column that would not exist for 29 more days.
+⛔ ③ "prose because provenance belongs in cognition" — ANACHRONISTIC. Cognition did not exist until 2026-08-21.
+```
+
+⏸ **STILL UNKNOWN, AND LEFT SO (Ote: that result is valuable too):** whether anyone ever decided view()
+should not carry `author` · whether prose-ONLY was chosen OVER a structured passive shape · whether the loss
+of when/confidence/entity/attribute/source was ever noticed. ⚠️ **Absence of a record is not a decision** —
+git shows what was WRITTEN, ⛔ not what was considered and rejected in conversation.
+
 ## ✅⭐⭐ **CONTEXT-BOUNDARY LOSS MAP — 2026-09-18.** ⛔ Observation only, ZERO writes.
 
 `INVESTIGATION_SOTERA_CONTEXT_BOUNDARY_LOSSES.md`

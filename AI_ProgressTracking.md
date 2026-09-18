@@ -13432,3 +13432,67 @@ DB 236 memories · 97 slots · 1 question · 1 bound · ledger 45 (ALL test resi
 ```
 
 **Working tree:** `persona.lock.json` + `test/results/self-history-queries.jsonl` modified and LEFT AS-IS.
+
+
+---
+
+## 2026-09-18 · ✅ INTENT PROVENANCE — observation only, ZERO writes, no restart
+
+**Ote:** *"Can we establish why these boundaries exist, from evidence contemporary to their creation?"* ·
+*"whether view() and passive recall were designed as SEMANTIC BOUNDARIES or merely as TRANSPORT/PROJECTION
+CONVENIENCES."* ⛔ *"Do not use 'the code currently works this way' as evidence of intent."*
+
+### ⭐⭐⭐ THE FINDING THAT DECIDES BOTH
+**Neither boundary was created as a boundary.** Both came into being LATER, when something richer was
+substituted BEHIND an expression that was already correct for what it originally projected.
+
+```
+Ⓐ `author`       ⚠️ INTENT NOT RECOVERABLE — a GAP between two deliberate decisions about OTHER THINGS
+Ⓑ passive 13→1  ✅ INTENT FULLY ESTABLISHED — INHERITED SHAPE: the old "memory bullets" design
+⇒ DIFFERENT KINDS OF THING ⇒ ⛔ do not rule on them together.
+```
+
+### Ⓐ `author`
+```
+view() BORN 2026-07-22 (384bb42, OLS) · author column 2026-08-20 (mig 015)   ⇒ 29 DAYS APART
+view() HAS NEVER CARRIED author — pickaxe, ALL THREE repos, whole history: ZERO hits
+the consumer NEVER had a wider shape: at 51e5424 (the branch's birth) activateSemantic already read
+  svc.search() ⇒ m.author undefined from its FIRST LINE. No regression; it never fired once.
+```
+**The two real decisions, and neither is the one we need:** mig 015's *"written and NOT YET READ"* is scoped
+to **VISIBILITY** (`memory-author-check` **Z** asserts only on `visibleWhere`); R4 (2026-08-23) is the only
+statement about widening view() and its reason is **cross-project compatibility**, about `subject`.
+⚠️ R4 transcribes view()'s field list verbatim — `author` absent and unmentioned, while `m.author` is
+branched on two lines below in the same function.
+⚠️ Contemporaneous evidence points the OTHER way too: `ownerOf`'s JSDoc declares `author` an input
+(fail-closed `unknown`), and `memory-cognition-check` says the layer *"READS rather than decides"* — above
+a `.every()` over an always-empty set. No test has ever exercised the persona branch.
+⭐ **author / BASIS / RETENTION were never SEPARATED — they were deliberately COUPLED** (the axes file
+separates the FOUR AXES and defines RETENTION in terms of `author = persona`).
+
+### Ⓑ passive 13→1 — THE MEMORY-BULLETS ORIGIN, CONFIRMED
+```
+2026-06-19  pinned memories   mems.map((m) => `- ${m.content}`)      user_memories = FOUR columns
+                              *"A single fact/instruction"* ⇒ projected 100% OF THE ROW; nothing to lose
+2026-07-22  memory v2 recall  recall.memories.map((m) => `- ${m.content}`)  — SAME EXPRESSION, 22-col source
+```
+The stated problems in RFC_PERSONA_MEMORY §4.3 + the route comment are CARDINALITY (*"replaces 'dump all
+notes, unranked'"*), PLACEMENT and LATENCY — **not one word about fields.**
+Then: ee9cd9f froze it (*"behavior-identical · same strings"*, lock-test passes a BARE STRING ARRAY);
+99ecc6f cloned it into Sotera wholesale; 3c5b87b (2026-08-26) looked once and repaired **the IDs only**.
+⛔ One pickaxe hit in Sotera's whole history (the clone) · ⛔ no Sotera test references `recallMemories`.
+✅ The shape PREDATES provenance-to-store (08-12), the four axes (08-21) and temporal provenance (09-16).
+⛔ "Was the 13-field view() considered too much here?" — CHRONOLOGICALLY IMPOSSIBLE.
+
+### ⛔⛔ RETROACTIVE JUSTIFICATIONS REFUSED — INCLUDING MY OWN
+⚠️ My own 2026-09-17 comment (*"a developer/operator channel that structurally cannot leak"*) is a 2026-09
+rationale for a 2026-06 shape. ⛔ Never cite it as why the boundary exists. Also refused: R4 as a
+justification for a pre-existing omission, and "prose because cognition carries provenance" (anachronistic).
+
+### ⏸ LEFT UNKNOWN, DELIBERATELY
+Whether anyone ever decided view() should not carry `author` · whether prose-ONLY was chosen over a
+structured passive shape · whether the other field losses were ever noticed.
+⚠️ **Absence of a record is not a decision** — git shows what was written, not what was talked about.
+
+**DOC:** `INVESTIGATION_SOTERA_INTENT_PROVENANCE.md` · ⛔ zero writes · ⛔ no restart · ⛔ no traffic ·
+⛔ no cleanup · ⛔ OteLLMServices read-only, :8201 untouched · ⛔ neither UNKNOWN resolved
