@@ -233,81 +233,82 @@ export default async function memoriesAdminRoutes(fastify) {
   // Ote, 2026-09-18: *"add interface for root's console/memories to see log, so i can also read how sotera
   // run dreaming/reflaction"* · *"Keep run observability separate from memory."*
   //
-  // ⛔⛔ THIS IS OBSERVABILITY, ⛔ NOT COGNITION. Every table below is `log_*`; ⛔ none is read by recall,
-  // cognition or the composer, and this endpoint adds no path from one to the other. It answers *"what did
-  // the Dreaming subsystem DO?"* — ⛔ never *"what does Sotera know?"*.
+  // ⛔⛔ OBSERVABILITY, ⛔ NOT COGNITION. Every source is a `log_*` table; ⛔ none is read by recall,
+  // cognition or the composer, and this adds no path from one to the other. It answers *"what did the
+  // Dreaming subsystem DO?"* — ⛔ never *"what does Sotera know?"*.
   //
-  // ⭐ IT IS A JOIN, ⛔ NOT A NEW LOG. The record already exists across four tables with the correlation id
-  // missing — see `INVESTIGATION_SOTERA_DREAMING_RUN_OBSERVABILITY.md`:
-  //     log_conversation_revisits  the RUN       ← the spine
-  //     log_retention_decisions    the DECISION  ⚠️ `revisit_id` is NULL on the live path
-  //     log_tool_calls             the ACTION    ⚠️ same — only `origin='reflection'` + time
-  //     txn_memories               the OUTCOME   ✅ exact, via `wrote_memory_id`
-  // ⛔ NO SCHEMA CHANGE WAS MADE FOR THIS. The inexact links are LABELLED in the payload rather than
-  // presented as fact, so the UI cannot imply a certainty the data does not have.
+  // ⭐ IT IS A JOIN, ⛔ NOT A NEW LOG — the record already exists across four tables with the correlation
+  // id missing. See `INVESTIGATION_SOTERA_DREAMING_RUN_OBSERVABILITY.md`. ⛔ No schema change was made.
+  //
+  // ⚠⚠ RAW SQL, AND THAT IS NOT A STYLE CHOICE. `log_conversation_revisits`, `log_retention_decisions`
+  // and `log_tool_calls` have **NO SEQUELIZE MODEL** — they are created by migrations and every existing
+  // reader uses `seq.query` (see reflection-lifecycle-host). `fastify.db.log_conversation_revisits` is
+  // `undefined`, so `.findAll` throws *"Cannot read properties of undefined"*. ⓘ `log_memory_changes` DOES
+  // have a model, which is exactly what made the wrong generalisation look safe.
+  const dreamSeq = () => fastify.db.txn_memories.sequelize
+  const dreamSchema = () => fastify.db.txn_memories.getTableName().schema
+  const dreamQ = (sql, replacements = {}) =>
+    dreamSeq().query(sql, { replacements, type: dreamSeq().QueryTypes.SELECT })
+
   fastify.get('/admin/memories/dreams', { preHandler: systemConfig }, async (request) => {
+    const S = dreamSchema()
     const { limit, trigger, conversationId } = request.query || {}
     const cap = Math.min(Math.max(Number(limit) || 40, 1), 200)
-    const where = {}
-    if (trigger) where.trigger_source = trigger
-    if (conversationId) where.conversation_id = conversationId
-    const runs = await fastify.db.log_conversation_revisits.findAll({
-      where, order: [['rolling_id', 'DESC']], limit: cap, raw: true,
-    })
-    // ⭐ ONE query for the memories, ⛔ not one per run — an inspector that costs N+1 is opened once.
-    const memIds = runs.map((r) => r.wrote_memory_id).filter(Boolean)
-    const mems = memIds.length
-      ? await fastify.db.txn_memories.findAll({
-        where: { id: memIds },
-        raw: true,
-        attributes: ['id', 'importance', 'author', 'writer', 'kind', 'entity', 'attribute', 'content', 'invalid_at', 'access_count', 'last_access'],
-      })
-      : []
-    const memById = new Map(mems.map((m) => [String(m.id), m]))
+    const runs = await dreamQ(
+      `SELECT r.id::text AS id, r.rolling_id, r.conversation_id::text AS conversation_id,
+              r.trigger_source, r.requested_at, r.started_at, r.completed_at, r.created_at,
+              r.outcome, r.reason, r.failure, r.blocked_by_disclosure, r.model,
+              r.prompt_generation, r.tool_generation, r.dispatch_generation, r.code_mtime,
+              r.from_rolling_id, r.up_to_rolling_id, r.messages_considered,
+              r.tools_used, r.tools_refused, coalesce(length(r.text), 0) AS text_chars,
+              r.wrote_memory_id::text AS wrote_memory_id,
+              m.importance, m.author, m.writer, m.kind, m.entity, m.attribute,
+              (m.invalid_at IS NULL) AS mem_live, m.access_count, m.last_access,
+              left(m.content, 160) AS mem_excerpt
+         FROM "${S}"."log_conversation_revisits" r
+         LEFT JOIN "${S}"."txn_memories" m ON m.id = r.wrote_memory_id
+        WHERE (:trigger::text IS NULL OR r.trigger_source = :trigger)
+          AND (:conv::uuid IS NULL OR r.conversation_id = :conv)
+        ORDER BY r.rolling_id DESC
+        LIMIT :cap`,
+      { trigger: trigger || null, conv: conversationId || null, cap })
     return {
-      runs: runs.map((r) => {
-        const m = r.wrote_memory_id ? memById.get(String(r.wrote_memory_id)) ?? null : null
-        return {
-          id: r.id,
-          rollingId: r.rolling_id,
-          conversationId: r.conversation_id,
-          trigger: r.trigger_source,
-          requestedAt: r.requested_at,
-          startedAt: r.started_at,
-          completedAt: r.completed_at,
-          // ⭐ DERIVED, ⛔ not stored — two timestamps are the honest source for a duration.
-          // ⚠️ MEASURED 2026-09-18: `started_at` is populated on 67 LEGACY runs and on ZERO cron or manual
-          // ones, while `completed_at` is set on all 207. ⇒ anchoring a duration on `started_at` yields
-          // null for every run anyone will actually look at. `created_at` is the row's insert, which is
-          // the run's start in practice. ⭐ `durationFrom` says WHICH anchor was used — ⛔ a duration whose
-          // origin is unstated is a number nobody can check.
-          durationMs: r.completed_at
-            ? new Date(r.completed_at).getTime() - new Date(r.started_at ?? r.created_at).getTime() : null,
-          durationFrom: r.started_at ? 'started_at' : 'created_at',
-          outcome: r.outcome,
-          reason: r.reason,
-          failure: r.failure,
-          blockedByDisclosure: r.blocked_by_disclosure,
-          model: r.model,
-          promptGeneration: r.prompt_generation,
-          toolGeneration: r.tool_generation,
-          dispatchGeneration: r.dispatch_generation,
-          codeMtime: r.code_mtime,
-          fromRollingId: r.from_rolling_id,
-          upToRollingId: r.up_to_rolling_id,
-          messagesConsidered: r.messages_considered,
-          toolsUsed: r.tools_used ?? [],
-          toolsRefused: r.tools_refused ?? [],
-          textChars: r.text ? String(r.text).length : 0,
-          wroteMemoryId: r.wrote_memory_id,
-          memory: m ? {
-            id: m.id, importance: m.importance, author: m.author, writer: m.writer, kind: m.kind,
-            entity: m.entity, attribute: m.attribute, live: m.invalid_at == null,
-            accessCount: m.access_count, lastAccess: m.last_access,
-            excerpt: String(m.content ?? '').slice(0, 160),
-          } : null,
-        }
-      }),
+      runs: runs.map((r) => ({
+        id: r.id,
+        rollingId: r.rolling_id,
+        conversationId: r.conversation_id,
+        trigger: r.trigger_source,
+        requestedAt: r.requested_at,
+        startedAt: r.started_at,
+        completedAt: r.completed_at,
+        // ⚠️ ANCHORED ON `created_at`, ⛔ NOT `started_at`. Measured 2026-09-18: `started_at` is set on 67
+        // LEGACY runs and on ZERO cron/manual ones, while `completed_at` is set on all 207. ⭐ `durationFrom`
+        // names the anchor — a duration whose origin is unstated is a number nobody can check.
+        durationMs: r.completed_at
+          ? new Date(r.completed_at).getTime() - new Date(r.started_at ?? r.created_at).getTime() : null,
+        durationFrom: r.started_at ? 'started_at' : 'created_at',
+        outcome: r.outcome,
+        reason: r.reason,
+        failure: r.failure,
+        blockedByDisclosure: r.blocked_by_disclosure,
+        model: r.model,
+        promptGeneration: r.prompt_generation,
+        toolGeneration: r.tool_generation,
+        dispatchGeneration: r.dispatch_generation,
+        codeMtime: r.code_mtime,
+        fromRollingId: r.from_rolling_id,
+        upToRollingId: r.up_to_rolling_id,
+        messagesConsidered: r.messages_considered,
+        toolsUsed: r.tools_used ?? [],
+        toolsRefused: r.tools_refused ?? [],
+        textChars: Number(r.text_chars ?? 0),
+        wroteMemoryId: r.wrote_memory_id,
+        memory: r.wrote_memory_id ? {
+          id: r.wrote_memory_id, importance: r.importance, author: r.author, writer: r.writer,
+          kind: r.kind, entity: r.entity, attribute: r.attribute, live: r.mem_live,
+          accessCount: r.access_count, lastAccess: r.last_access, excerpt: r.mem_excerpt ?? '',
+        } : null,
+      })),
       shown: runs.length,
     }
   })
@@ -315,30 +316,30 @@ export default async function memoriesAdminRoutes(fastify) {
   // ONE run, with everything tie-able to it. ⭐ The full reflection text lives HERE, ⛔ never in the list —
   // a list that ships every transcript is a list nobody can load.
   fastify.get('/admin/memories/dreams/:id', { preHandler: systemConfig }, async (request, reply) => {
-    const run = await fastify.db.log_conversation_revisits.findByPk(request.params.id, { raw: true })
+    const S = dreamSchema()
+    const [run] = await dreamQ(
+      `SELECT * FROM "${S}"."log_conversation_revisits" WHERE id = :id`, { id: request.params.id })
     if (!run) return reply.code(404).send({ error: 'not_found' })
-    // ⚠️ THE HONEST WINDOW. `revisit_id` is unpopulated on the live path, so decisions and tool calls are
-    // matched by conversation + this run's own time span (+2s for the async write lane). ⛔ A HEURISTIC, and
-    // the response says so, so no reader mistakes it for a foreign key.
-    // ⚠⚠ THE ANCHOR IS `created_at`, ⛔ NOT `started_at`. Measured: `started_at` is set on 67 legacy runs
-    // and on ZERO cron/manual ones — a window opened on it collapses to nothing and the lifecycle renders
-    // EMPTY, which is the worst possible failure for an inspector: it looks like she did nothing.
-    // ⭐ `created_at` (row insert ≈ run start) and `completed_at` (set on all 207) are the reliable pair.
-    const from = new Date(new Date(run.created_at).getTime() - 2000)
-    const to = new Date(new Date(run.completed_at ?? run.created_at).getTime() + 2000)
-    const span = { [Op.gte]: from, [Op.lte]: to }
-    // ⭐ AND BOTH SIDE TABLES CARRY `conversation_id` — so the match is conversation + window, ⛔ never a
+    // ⚠⚠ THE WINDOW IS ANCHORED ON `created_at`/`completed_at` — the only pair that is reliably written.
+    // A window opened on `started_at` collapses on every cron/manual run and the lifecycle renders EMPTY,
+    // which is the worst failure an inspector can have: it looks exactly like she did nothing.
+    // ⭐ AND BOTH SIDE TABLES CARRY `conversation_id`, so the match is conversation + window — ⛔ never a
     // bare time range that would sweep in another conversation's dream running in the same seconds.
-    const [decisions, calls] = await Promise.all([
-      fastify.db.log_retention_decisions.findAll({
-        where: { [Op.or]: [{ revisit_id: run.id }, { conversation_id: run.conversation_id, created_at: span }] },
-        order: [['created_at', 'ASC']], raw: true,
-      }),
-      fastify.db.log_tool_calls.findAll({
-        where: { origin: 'reflection', conversation_id: run.conversation_id, created_at: span },
-        order: [['created_at', 'ASC']], raw: true,
-      }),
-    ])
+    const decisions = await dreamQ(
+      `SELECT * FROM "${S}"."log_retention_decisions"
+        WHERE revisit_id = :rid
+           OR (conversation_id = :conv
+               AND created_at BETWEEN :from::timestamptz - interval '2 seconds'
+                                  AND :to::timestamptz   + interval '2 seconds')
+        ORDER BY created_at ASC`,
+      { rid: run.id, conv: run.conversation_id, from: run.created_at, to: run.completed_at ?? run.created_at })
+    const calls = await dreamQ(
+      `SELECT * FROM "${S}"."log_tool_calls"
+        WHERE origin = 'reflection' AND conversation_id = :conv
+          AND created_at BETWEEN :from::timestamptz - interval '2 seconds'
+                             AND :to::timestamptz   + interval '2 seconds'
+        ORDER BY created_at ASC`,
+      { conv: run.conversation_id, from: run.created_at, to: run.completed_at ?? run.created_at })
     const mem = run.wrote_memory_id
       ? await fastify.db.txn_memories.findByPk(run.wrote_memory_id, { raw: true }) : null
     return {
@@ -347,6 +348,13 @@ export default async function memoriesAdminRoutes(fastify) {
         durationMs: run.completed_at
           ? new Date(run.completed_at).getTime() - new Date(run.started_at ?? run.created_at).getTime() : null,
         durationFrom: run.started_at ? 'started_at' : 'created_at',
+        textChars: run.text ? String(run.text).length : 0,
+        promptGeneration: run.prompt_generation,
+        toolGeneration: run.tool_generation,
+        messagesConsidered: run.messages_considered,
+        fromRollingId: run.from_rolling_id,
+        upToRollingId: run.up_to_rolling_id,
+        startedAt: run.started_at,
       },
       decisions: decisions.map((d) => ({
         id: d.id, at: d.created_at, state: d.state, why: d.why, kind: d.kind, mine: d.mine,
@@ -365,6 +373,7 @@ export default async function memoriesAdminRoutes(fastify) {
         entity: mem.entity, attribute: mem.attribute, content: mem.content, scope: mem.scope,
         live: mem.invalid_at == null, embedded: mem.embedding_hv != null,
         accessCount: mem.access_count, lastAccess: mem.last_access, createdAt: mem.created_at,
+        excerpt: String(mem.content ?? '').slice(0, 160),
       } : null,
       // ⚠️ SAID OUT LOUD so the UI can say it too.
       decisionsExact: decisions.length > 0 && decisions.every((d) => d.revisit_id === run.id),
