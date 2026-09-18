@@ -496,6 +496,49 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐ **PRESENTATION / ASSERTION BOUNDARY — CLEAN. 2026-09-18.** ⛔ Observation only, ZERO writes.
+
+`INVESTIGATION_SOTERA_PRESENTATION_ASSERTION_BOUNDARY.md`
+
+> ## ✅ **THE PRESENTATION PATH IS SEMANTICALLY CLEAN. ⛔ NONE of the eight relational claims is
+> ## producible by ANY mechanism** — and in five of the eight the refusal is WRITTEN DOWN as a prohibition.
+
+```
+⭐⭐⭐ ONLY A STRING LEAVES THE LAYER:  route → `return out.activated ? out.context : null`
+   ⇒ ⛔ contradictions · currentState · items · the four axes · supportedBy · confidence · scores · ids
+     ALL STAY IN THE HOST. ⛔ None is on the wire.
+⭐ EACH ITEM RENDERS ITS OWN SENTENCE, joined by a bare `\n` — ⛔ no connective, no grouping, no pairing.
+```
+
+⭐ **THE EIGHT, ALL ⛔ NOT PRODUCIBLE:**
+```
+same thing/duplicate    ⛔ fuse dedupes by ROW ID; "MERGES ITEMS, NEVER STATES … never by similarity of claim"
+equivalent propositions ⛔ nothing compares two claims
+corroborating           ⚠️ IDENTITY-BOUND ONLY (same row, two arms) ⇒ two distinct rows NEVER corroborate
+contradictory           ⛔ contradictsCurrentState needs owner=sotera ∧ source=ownUtterance ⇒ cannot see
+                          two stored memories. And: "⛔ nothing downstream may use `contradictions` to
+                          drop, reorder or annotate her history"
+mutually exclusive      ⛔ no winner selection anywhere
+one is the CURRENT one  ⛔ currentStateSentence speaks ONLY of conversations/reach; the loose-item count
+                          (`otherThings`) is computed and DELIBERATELY NOT RENDERED
+one supersedes other    ⛔ nothing renders supersession; datedPrefix "never appends '…and I was wrong'"
+synthesized claim       ⛔ BASIS is the axis "retrieval may never move"; N agreeing items → `synthesized`,
+                          NEVER attestation (findIllegalPromotions + combineBasis)
+```
+
+⭐ **AND THE GUARD IS STRUCTURAL:** the layer renders TWICE — real text + a `frame` with quotations
+tokenised — and scans the FRAME, so it polices what it WROTE, ⛔ not what it quotes. A leak **withholds
+the whole block**. ⇒ it fails closed on its own vocabulary.
+
+⚠️ **THE ONE RESIDUE: ORDER.** Items are sorted by score and rendered top-down ⇒ order is the only
+pair-property that survives into the prompt. ⛔ The system asserts nothing by ordering; ⭐ it is the same
+reader-inference residue already fenced for the recall bullets. ⛔ Nothing proposed.
+
+⏸⭐⭐ **THE NEXT ACTUAL BOUNDARY — named and LEFT CLOSED:**
+> **The same observation can reach the model TWICE in one turn — once as a CUSTODY claim with its
+> provenance (*"I have this on file"*), and once as a BARE BULLET with none. ⛔ Nothing reconciles them.**
+ⓘ And there is measured precedent that framing conflicts are won by the OTHER channel.
+
 ## ⭐⭐ ✅ **POST-ADMISSION ARCHAEOLOGY — 2026-09-18.** ⛔ Observation only, ZERO writes.
 
 `INVESTIGATION_SOTERA_POST_ADMISSION_ARCHAEOLOGY.md`

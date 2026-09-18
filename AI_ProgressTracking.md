@@ -13210,3 +13210,49 @@ budget truncation, and it IS reported. `corroborate()` fires only for the SAME r
 ⛔ UNKNOWN: what it does with one in practice — the semantic arm calls embed(), which writes.
 
 **DOC:** `INVESTIGATION_SOTERA_POST_ADMISSION_ARCHAEOLOGY.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no restart
+
+
+---
+
+## 2026-09-18 · ✅ PRESENTATION / ASSERTION BOUNDARY — CLEAN. Observation only, ZERO writes.
+
+**Ote:** *"What semantic claims may the presentation layer make from that evidence? If the path is already
+semantically clean, say so and stop at the next actual boundary rather than inventing a problem."*
+
+### ✅ THE ANSWER: CLEAN. None of the eight claims is producible.
+```
+⭐⭐⭐ ONLY A STRING LEAVES COGNITION: `return out.activated ? out.context : null`
+   ⇒ contradictions, currentState, items, the four axes, supportedBy, confidence, scores and ids
+     ALL stay in the host. None reaches the wire.
+⭐ Items are constructed INDEPENDENTLY (supportedBy: 1; every field from the row itself)
+⭐ Each renders its OWN sentence, joined by a bare newline — no connective, no grouping, no pairing
+```
+
+| claim | producible | why |
+|---|---|---|
+| same thing / duplicate | ⛔ NO | fuse dedupes by ROW ID; refuses similarity-merging in writing |
+| equivalent propositions | ⛔ NO | nothing compares two claims |
+| corroborating | ⚠️ identity-bound only | same row from two arms; two distinct rows never corroborate |
+| contradictory | ⛔ NO | marker limited to her own utterances; `contradictions` is observability-only |
+| mutually exclusive | ⛔ NO | no winner selection |
+| one is current | ⛔ NO | currentStateSentence = conversations/reach only; `otherThings` not rendered |
+| one supersedes | ⛔ NO | nothing renders supersession |
+| synthesized claim | ⛔ NO | BASIS may not be upgraded by retrieval; agreement → synthesized, never attested |
+
+⭐ **Structural guard:** the layer renders twice (text + a quotation-tokenised `frame`) and scans the
+FRAME, so it polices what it wrote rather than what it quotes; a leak withholds the WHOLE block.
+⭐ Truncation and the searched set are BOTH reported in prose.
+
+### ⚠️ THE ONE RESIDUE
+**ORDER** is the only pair-property that survives into the prompt (items sorted by score, rendered
+top-down). ⛔ The system asserts nothing by ordering — the same reader-inference residue already fenced
+for the recall bullets. ⛔ Nothing proposed, nothing touched.
+
+### ⏸ THE NEXT ACTUAL BOUNDARY — named, left closed
+> The same observation can reach the model TWICE in one turn — once as a custody claim with provenance
+> (*"I have this on file"*), once as a bare bullet with none. Nothing reconciles the two frames.
+
+⛔ UNKNOWN: what the model infers from adjacency and order in practice — not run; the semantic arm calls
+`embed()`, which writes, and this pass wrote nothing.
+
+**DOC:** `INVESTIGATION_SOTERA_PRESENTATION_ASSERTION_BOUNDARY.md` · ⛔ zero writes · ⛔ no restart needed
