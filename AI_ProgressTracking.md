@@ -12800,3 +12800,78 @@ organic admission verdicts: still ZERO. ⛔ No traffic was generated.
 ⛔ Both answers are coherent. ⏸ The presentation question stays open behind it, still undecided.
 
 **DOC:** `INVESTIGATION_SOTERA_RECALL_COEXISTENCE.md` · ⛔ zero DB writes · ⛔ no restart · ⛔ no code change
+
+
+---
+
+## 2026-09-18 · ✅ SUPPRESSION SEMANTICS — investigation only, ZERO DB writes
+
+**Ote:** *"Is removing a durable observation from the model's view a presentation convenience that needs
+no semantic warrant, or is suppression itself a semantic act that must be established before it occurs?"*
+
+### ⭐⭐⭐ THE FINDING THAT DECIDES MOST OF THE PASS
+
+**This system already has a RULED doctrine on suppression, and `dedupeByValue` is the one suppression
+that does not follow it.** `memory-pipeline-host.js:148`:
+
+> ⛔ *"A FILTER NOBODY CAN SEE IS HOW 'I COVERED EVERYTHING' GETS SAID ABOUT A FILTERED SET, and this
+> project has paid for that twice."*
+
+⇒ `withheldDecisions` / `withheldCorrections` report their split; a COUNT never the content; zero is
+omitted, not reported as 0. ⚠️ **Limit stated honestly:** that doctrine was ruled for **enumeration**
+reads. Recall is a **relevance** read, and nobody has ruled whether the duty attaches. ⇒ precedent,
+⛔ not answer.
+
+### ⭐⭐⭐ THE CONTRACT CLAIMS FACT-IDENTITY, NOT PRESENTATION REDUNDANCY
+
+The tests exist — ⛔ **in OteLLMServices and EAP, NOT in Sotera or `@ote/memory`** (the cognition moved
+in `51c80b1` and left them behind ⇒ the predicate is **entirely unpinned here**). Their titles:
+
+```
+'the real hermes_agent pair is recognised as ONE FACT'
+'the same value about DIFFERENT entities is TWO FACTS, not one'
+'keeps the FIRST row and REPORTS WHAT IT DROPPED'   // "auditable: which fact absorbed it"
+```
+⇒ ⭐ the operation claims **identity of fact** and speaks of one fact **ABSORBING** another. The
+"context-budget optimisation" framing is the module header's *siting* argument, ⛔ not its contract.
+⇒ ⭐⭐ **fact identity ≜ ⟨entity, polarity, content-tokens⟩ — `attribute`'s absence IS the theory**,
+⛔ not an implementation oversight. The operation tests *same ANSWER* while claiming *same PROPOSITION*;
+the step between them is *same QUESTION* — the one term the system may not infer.
+
+### ⭐⭐ ACCOUNTABILITY: THE PRODUCTION BRANCH IS THE SILENT ONE
+```
+#3 dedupeByValue (no-query)  → returns {kept, dropped}, one debug log — and `retrieve` DISCARDS dropped
+#4 inline (QUERY branch)     → `continue`. ⛔⛔ NO counter, NO log, NOTHING. ⭐ THIS is the live path.
+⇒ the contract requires `duplicateOf` as auditable; production delivers it to nobody.
+```
+
+### ⭐ DEDUP IS THE ONLY READ-PATH MECHANISM WHOSE CAUSE IS A RELATION BETWEEN ROWS
+All nine suppression points leave the durable row intact ⇒ row-survival does NOT discriminate. But #1,
+#2, #5-#9 judge a row **on its own terms**; ⭐ only #3/#4 says *"B goes because A is present"* —
+turn-local information exclusivity, **order-dependent and unrecorded** (Bangkok: `location` wins on
+importance 7 vs 1, ⛔ not on any property of the relation).
+
+### ⭐ STORAGE vs COGNITIVE REVERSIBILITY
+Reversible in storage; ⛔ **irreversible to cognition for that turn** — the model, the caller, the audit
+trail and Sotera-by-asking can none of them learn a row was omitted. ⭐⭐ And the repair already exists
+next door: `withCorrectionsWithheld` keeps content out of context **and hands her an integer** reachable
+through a dedicated tool. ⇒ dedup simply does not use it.
+
+### ⭐ THE CORPUS
+113 visible live rows · **1** colliding pair · **0** true restatements · the motivating `bullet points`
+pair **does not exist in Sotera at all** (it is OLS's `hermes_agent` pair). ⇒ **the mechanism has never
+had a true positive here.**
+
+### ⏸ THE OPEN DECISION — ⛔ not taken
+```
+① PRESENTATION CONVENIENCE — no warrant, better predicate
+② AN ACCOUNTABLE FILTER    — no warrant, but MUST report its split (the codebase's own precedent)
+③ A SEMANTIC ACT           — a claim about a relation, therefore must be established
+```
+> **When recall removes an eligible observation because another row is present, is that a budget act, an
+> accountable filter, or a claim about the relation between the two?**
+
+⛔ Nothing already ruled selects one; symmetry with A-D4 is ⛔ NOT an argument (the acts differ in
+durability, direction and record). ⏸ The presentation question stays closed behind this one.
+
+**DOC:** `INVESTIGATION_SOTERA_SUPPRESSION_SEMANTICS.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no restart

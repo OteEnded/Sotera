@@ -496,6 +496,51 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐⭐ ✅ **SUPPRESSION SEMANTICS — DELIVERED 2026-09-18.** ⛔ Read-only, ZERO DB writes.
+
+`INVESTIGATION_SOTERA_SUPPRESSION_SEMANTICS.md`
+
+⭐⭐⭐ **THE SYSTEM ALREADY HAS A RULED SUPPRESSION DOCTRINE, AND `dedupeByValue` IS THE ONE FILTER THAT
+DOES NOT FOLLOW IT.** `memory-pipeline-host.js:148` — *"A FILTER NOBODY CAN SEE IS HOW 'I COVERED
+EVERYTHING' GETS SAID ABOUT A FILTERED SET, and this project has paid for that twice."*
+⇒ `withheldDecisions` / `withheldCorrections` REPORT their split · a COUNT never the content · zero omitted.
+⚠️ **LIMIT:** ruled for ENUMERATION reads. Recall is a RELEVANCE read. ⇒ precedent, ⛔ not the answer.
+
+⭐⭐⭐ **THE CONTRACT CLAIMS FACT-IDENTITY, ⛔ NOT "redundant presentation".** The tests — which live in
+**OteLLMServices/EAP, ⛔ NOT in Sotera or `@ote/memory`** (left behind by `51c80b1` ⇒ the predicate is
+UNPINNED here) — are titled *"recognised as ONE FACT"*, *"DIFFERENT entities is TWO FACTS"*, and
+*"REPORTS WHAT IT DROPPED / auditable: which fact ABSORBED it"*.
+⇒ ⭐⭐ `fact identity ≜ ⟨entity, polarity, content-tokens⟩` — **`attribute`'s absence IS THE THEORY**,
+⛔ not an oversight. The operation tests *same ANSWER* and claims *same PROPOSITION*; the missing step is
+*same QUESTION* — the one term A-D4 forbids inferring.
+
+```
+⛔ ACCOUNTABILITY: the PRODUCTION branch is the SILENT one.
+  #3 dedupeByValue (no-query) → returns {kept,dropped}; `retrieve` DISCARDS dropped
+  #4 inline (QUERY branch)    → `continue`. ⛔⛔ no counter, no log, nothing. ⭐ THIS is the live path.
+⭐ DEDUP IS THE ONLY READ-PATH MECHANISM WHOSE CAUSE IS A RELATION BETWEEN ROWS.
+  All 9 suppression points leave the row durable ⇒ row-survival does NOT discriminate.
+  ⛔ #1/#2/#5-#9 judge a row ON ITS OWN TERMS. ⭐ Only #3/#4 says "B goes BECAUSE A is present."
+⭐ Order-dependent and unrecorded — Bangkok: `location` wins on importance 7 vs 1, ⛔ not on the relation.
+⭐ REVERSIBLE IN STORAGE · ⛔ IRREVERSIBLE TO COGNITION for that turn — model, caller, audit and
+  Sotera-by-asking can NONE of them learn a row was omitted. ⭐⭐ And the repair exists next door:
+  `withCorrectionsWithheld` keeps content out AND hands her an integer. ⇒ dedup does not use it.
+⭐ CORPUS: 113 live · 1 collision · 0 true restatements · the `bullet points` pair DOES NOT EXIST HERE
+  (it is OLS's `hermes_agent` pair) ⇒ **the mechanism has never had a true positive in Sotera.**
+```
+
+⏸ **THE OPEN DECISION — ⛔ NOT TAKEN. Three coherent positions, each backed by something already ruled:**
+```
+① PRESENTATION CONVENIENCE — no warrant, better predicate
+② AN ACCOUNTABLE FILTER    — no warrant, but MUST report its split (the codebase's own precedent)
+③ A SEMANTIC ACT           — a claim about a relation, therefore must be established
+```
+> **When recall removes an eligible observation because another row is present, is that a budget act, an
+> accountable filter, or a claim about the relation between the two?**
+
+⛔ Nothing ruled selects one, and ⛔ SYMMETRY WITH A-D4 IS NOT AN ARGUMENT — the two acts differ in
+durability, direction and record. ⏸ The presentation question stays closed behind this one.
+
 ## ⭐⭐⭐ ✅ **RECALL / COEXISTENCE INVESTIGATION — DELIVERED 2026-09-18.** ⛔ Read-only, ZERO DB writes.
 
 `INVESTIGATION_SOTERA_RECALL_COEXISTENCE.md`
