@@ -13864,3 +13864,45 @@ COUNTERFACTUAL (now printed every run): +0.4 closes **2 of 6** measured gaps
 [1.433 0.395 1.142 0.219 1.028 0.716].
 CORRECTION to my earlier "3/6" — that was reachable-at-<=10; at 7 it is 2 of 6. Four remain outside,
 reported rather than tuned away.
+
+
+---
+
+## 2026-09-18 · ⚠️ MANUAL DREAM RUN — real path, NOTHING ELIGIBLE. ⛔ NOT natural-cron evidence.
+
+**Ote:** *"Trigger one Dreaming run now through the real production Dreaming path… label it explicitly as
+MANUAL DREAM RUN; don't count it as natural cron evidence."*
+
+`reflectAllQuiet({ maxConvos: 3, triggerSource: 'manual' })` — ⛔ no force, ⛔ no synthetic memory, ⛔ no
+bypassing the model. The label is STRUCTURAL: `dreaming-v0-loop-check` counts `trigger_source='cron'` only.
+
+### THE GATE REFUSED TWICE, CORRECTLY, AND WAS WAITED OUT — ⛔ never bypassed
+```
+1 gate-registry-absent   no steer registry ⇒ "cannot tell whether she is BUSY" ⇒ FAIL CLOSED
+2 gate-cooling-down      activeCount=0, 300s to go — an ARTEFACT: a FRESH registry reads as just-active
+3 waited 5 min in-process ⇒ gate OPEN on its own terms. ⛔ force never set, ⛔ clock never faked.
+```
+
+### THE PASS RAN AND REFLECTED ON NOTHING
+```
+scanned 311 · backlogOffered 308 · reflected 0 · wroteMemory 0 · acts recorded 0
+skipped: thin 234 · probe 68 · empty 6 · memory-off 1 · unchanged 2      (= 311)
+```
+✅ **CAUGHT UP, ⛔ NOT STUCK.** The active conversation (196 messages, newest 08:17) was ALREADY revisited
+at **09:00:19 today**, up to rolling_id 12225, with **0 unreviewed messages**. The only never-revisited
+conversation has 2 messages ⇒ `thin` (minMessages 4).
+
+⚠️ **CORRECTION TO MY OWN EARLIER NUMBER.** I reported *"28 conversations eligible now"*. That was MY proxy
+query — it did not exclude the 68 `probe` fixtures and did not apply `minMessages`. ⛔ The real selector says
+**0**. ⭐ Do not quote the 28.
+
+### ⇒ THE CHAIN TERMINATES EARLY, AND THAT IS THE OUTCOME
+```
+manual dream ✅ → selection ✅ → NOTHING ELIGIBLE ⏸ → no reflection → no retention → no importance stamp
+```
+⛔ The `importance = 7` stamp is therefore STILL unexercised by an unprompted retention. ⓘ It IS proven
+through the SAME `retain()` path by 11 real-DB assertions (red-proved), ⛔ but not yet by a dream.
+⭐ WHAT IT NEEDS: genuinely NEW conversation — ≥4 messages, then 30 minutes quiet. ⛔ Nothing to tune.
+
+**STATE:** 236 memories (delta 0) · no act rows written · decline row still `access_count 0 / last_access NULL`
+· H6 untouched at 0/8 · temp script removed · ⛔ no recall called.
