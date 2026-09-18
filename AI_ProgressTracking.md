@@ -13306,3 +13306,49 @@ A cue-quality / context-cost observation, ⛔ not a semantic-relation one.
 A representability fact, ⛔ not a defect claim.
 
 **DOC:** `INVESTIGATION_SOTERA_DUAL_CHANNEL_FRAMING.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no traffic
+
+
+---
+
+## 2026-09-18 · ✅ CONTEXT-BOUNDARY LOSS MAP — observation only, ZERO writes
+
+**Ote:** *"What semantic information is lost at the model-context boundary, and which losses are
+intentional versus merely incidental?"*
+
+### ⭐⭐ THE BOUNDARY NARROWS TWICE
+```
+48 columns → view() → 13 fields → { TOOL: all 13 JSON · COGNITION: prose · PASSIVE: 1 field }
+```
+The tool path is the widest channel and the passive block the narrowest, by a factor of thirteen.
+
+### CLASSIFICATION
+```
+INTENTIONALLY PROHIBITED   row identity (cognition, "NO ids") · AVAILABILITY ("not language I want
+                           exposed to Sotera")
+INTENTIONALLY TRANSFORMED  SOURCE/BASIS/RETENTION · reachability · temporal basis · searched-set
+                           quantifier · truncation notice
+INTENTIONALLY OMITTED      row identity on passive (repair chosen = an in-process trace) ·
+                           ADMISSION STATUS (decision explicitly reserved to Ote)
+TECHNICALLY UNAVAILABLE    writer/act · question identity · inter-observation relationship · occasion
+UNKNOWN                    `author` · per-item retrieval reason · channel identity · the passive 13→1
+```
+
+### ⭐⭐⭐ `author` — THE LOSS THAT COLLAPSES AN AXIS. INTENT UNKNOWN.
+`activateSemantic` branches on `m.author === 'persona'`, but `view()` does not project `author`, so it is
+always undefined. **MEASURED: 142 `told/given`, 0 `inferred/retained`.**
+DERIVED ⇒ basis always told · retention always given · owner always unknown ⇒ two of the four rendered
+basis sentences can never appear, and `memory-utterance-boundary.js:83` reads that stamp.
+⛔ NOT a defect claim — both readings fit the evidence (a deliberately narrow shared projection, or a
+consumer written against a wider shape) and neither is established.
+
+### ⚠️ THE WIDEST UNKNOWN
+The passive path's 13→1 narrowing. The route's comment addresses only the IDs; nothing states why `when`,
+`confidence`, `entity`, `attribute` or `source` are dropped.
+
+### ⭐ WHAT SURVIVES WAS CHOSEN
+Searched-set quantifier, truncation notice, reachability counts, dated prose, withheld counts + a door —
+each citing the failure it prevents. The design is "say the fact in ordinary words, never the machinery".
+
+⏸ Stopped at the boundary. ⛔ Did not ask what should be exposed; the open items are questions about INTENT.
+
+**DOC:** `INVESTIGATION_SOTERA_CONTEXT_BOUNDARY_LOSSES.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no traffic

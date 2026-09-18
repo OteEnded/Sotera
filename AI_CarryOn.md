@@ -496,6 +496,54 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐ **CONTEXT-BOUNDARY LOSS MAP — 2026-09-18.** ⛔ Observation only, ZERO writes.
+
+`INVESTIGATION_SOTERA_CONTEXT_BOUNDARY_LOSSES.md`
+
+```
+⭐⭐ THE BOUNDARY NARROWS **TWICE**, ⛔ not once:
+   txn_memories  48 COLUMNS
+        ↓  view()                                 ← the narrowing that decides everything
+   13 FIELDS  id·kind·content·importance·confidence·pinned·entity·attribute·score·relevance·
+              source·sourceMessageId·when{date,basis}
+        ├─► TOOL PATH      ⭐ all 13 survive as structured JSON   (the WIDEST channel)
+        ├─► COGNITION      → typed → rendered as PROSE
+        └─► PASSIVE RECALL → route:1430 `.map(m => m.content)` ⇒ ⛔ **1 FIELD** (the NARROWEST)
+```
+
+⭐ **INTENTIONALLY PROHIBITED** — row identity (cognition: *"NO ids"*, a leak withholds the WHOLE block) ·
+AVAILABILITY (Ote: *"an internal cognition state, **not language I want exposed to Sotera**"*).
+⭐ **INTENTIONALLY TRANSFORMED INTO PROSE** — SOURCE/BASIS/RETENTION · reachability (*"Non-existence leaves
+nothing. **Unreachability leaves traces**"*) · temporal basis (`datedPrefix`, *"⛔ never invent a date"*) ·
+the searched-set quantifier · truncation (*"these are the nearest N"*).
+⭐ **INTENTIONALLY OMITTED** — row identity on the passive path (⭐ the repair chosen was an IN-PROCESS
+TRACE, *"never durable, and it grants no read"*) · **admission status** (⏸ decision EXPLICITLY RESERVED to Ote).
+⚠️ **TECHNICALLY UNAVAILABLE** — writer/act · question identity · relationship between observations · occasion.
+
+## ⭐⭐⭐ THE ONE LOSS THAT COLLAPSES A DOWNSTREAM AXIS — `author`. ⛔ INTENT **UNKNOWN**.
+
+```
+activateSemantic reads   m.author === 'persona' ? inferred/retained : told/given
+⛔ view() DOES NOT PROJECT `author`  ⇒  m.author is ALWAYS undefined
+⭐ MEASURED on the runtime's own debug log: 142 × `told/given` · **0 × `inferred/retained`**
+⇒ DERIVED: basis always `told` · retention always `given` · owner always `unknown`
+   ⇒ ⛔ "I decided to keep this" and "I worked this out rather than being told it" can NEVER render
+   ⇒ memory-utterance-boundary.js:83 reads that stamp ⇒ every stored memory takes the non-persona branch
+```
+> ⛔⛔ **NOT CALLED A DEFECT.** No statement anywhere establishes whether the omission was intentional.
+> ⚠️ BOTH readings fit: `view()` is a deliberately narrow SHARED surface (authorship may be withheld on
+> purpose), OR `activateSemantic` was written against a wider shape than it receives. ⛔ Neither established.
+
+⚠️ **THE WIDEST UNKNOWN IS THE PASSIVE NARROWING ITSELF.** The route's comment addresses **only the ids**;
+⛔ nothing states why `when` / `confidence` / `entity` / `attribute` / `source` are dropped.
+
+⭐ **AND WHAT SURVIVES WAS CHOSEN** — the searched-set quantifier, truncation, reachability, temporal basis,
+withheld counts + a door. Each cites the failure it prevents. ⇒ the boundary's design is *"say the fact in
+ordinary words, never the machinery"*, ⛔ not *"say less."*
+
+⏸ **STOPPED AT THE BOUNDARY.** ⛔ I did NOT ask what should be exposed. The two open items are questions
+about **INTENT**, ⛔ not about design.
+
 ## ✅⭐⭐ **DUAL-CHANNEL FRAMING — 2026-09-18.** ⛔ Observation only, ZERO writes, no restart.
 
 `INVESTIGATION_SOTERA_DUAL_CHANNEL_FRAMING.md`
