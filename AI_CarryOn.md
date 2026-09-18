@@ -496,6 +496,58 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐⭐ ✅ **RECALL / COEXISTENCE INVESTIGATION — DELIVERED 2026-09-18.** ⛔ Read-only, ZERO DB writes.
+
+`INVESTIGATION_SOTERA_RECALL_COEXISTENCE.md`
+
+```
+⛔⛔ THE HEADLINE IS THE **INVERSE** OF WHAT WE WENT LOOKING FOR.
+   We asked what happens when coexisting rows are shown TOGETHER.
+   ⭐ The measured defect is the opposite: **A ROW THAT SHOULD BE SHOWN IS BEING HIDDEN.**
+```
+
+⭐⭐⭐ **`dedupeByValue` IGNORES `attribute`.** Its predicate is `entity` + polarity + content-token SET.
+⇒ it cannot tell *"the same answer restated"* from *"the same answer to a DIFFERENT QUESTION."*
+
+⭐⭐ **OBSERVED END-TO-END, ZERO WRITES** (via `search(null)` — the no-query branch skips `embed()`):
+```
+8c9b2357  user | timezone | "Bangkok"   importance 1   ⛔⛔ SUPPRESSED
+038d00dc  user | location | "Bangkok"   importance 7   ✅ kept
+⇒ recall returns the user's LOCATION and silently withholds their TIMEZONE, because both
+  answers are the string "Bangkok".
+```
+
+⭐ **PRECISION, measured on the whole live corpus:** 113 visible live rows · **1** colliding pair ·
+**0** genuine restatements · **1** different-question collision. ⇒ ⛔ it fires ONCE and is WRONG 1-for-1.
+
+⭐ **AND IT SUPPRESSES NOTHING IN THE COEXISTENCE CASES** — restatement (A) · different values (B) ·
+granularity (C) · mutually exclusive (D) · simultaneous (E) · correction (G) · world-change (H) all pass
+through untouched. ⓘ The negation guard and the filler collapse both work correctly.
+
+⚠️⭐ **THE WRITE-SIDE MISTAKE HAS *NOT* REAPPEARED AS "retrieval ⇒ joint assertion".** ⛔ No stage merges,
+selects a winner or marks currency. ⭐ **BUT IT HAS REAPPEARED IN EXACTLY ONE PLACE:** `dedupeByValue`
+turns *"these share a token set"* into **authority to REMOVE a row from the model's view**.
+⇒ ⭐⭐ the read path's only over-claim is a **SUPPRESSION**, ⛔ not an assertion.
+
+⛔ **THE ADMISSION FACT STOPS AT `recall()`'s RETURN VALUE** — grep finds ZERO production readers.
+⇒ ⛔ the model CANNOT distinguish deliberately-admitted competitors from mere coexistence. Byte-identical.
+
+⭐ **A verdict is PAIRWISE, DIRECTIONAL and about a PAST ACT.** ⛔ There is no "this row's admission
+status", so nothing can be attached to a row on its way to the model. ⛔ The time gap between the
+admission act and a presentation act is UNBRIDGED, and this pass found no evidence it should be bridged.
+
+⭐ **FIRST ABSTAIN EVER RECORDED** (from a check fixture, ⛔ not organic) ⇒ the state is demonstrably
+reachable in the running system. ⚠️ The ledger's 16 rows are MY OWN `model-tool-claim-kind` residue —
+⛔ LEFT IN PLACE, because after the cleanup incident I issue no further DELETEs against this corpus.
+
+⏸⭐⭐ **THE RECOMMENDED NEXT DECISION — ⛔ NOT TAKEN:**
+
+> **Is removing a row from the model's view a presentation convenience that needs no warrant — or is it,
+> like exclusivity, a semantic act that must be ESTABLISHED before it may be performed?**
+
+⛔ Both answers are coherent and they lead to very different systems. ⏸ The PRESENTATION question
+(does a verdict authorize anything?) stays open BEHIND it, still undecided.
+
 ⏸⛔ **STOPPED AT THE ARCHITECTURAL BOUNDARY, DELIBERATELY.** The projection exists and is proven; ⛔ **NO
 model-facing representation was built**, because *"whether ADMIT/DEFER/ABSTAIN authorizes a particular
 presentation behavior"* is on Ote's own stop-condition list. ⏸ That decision is next.

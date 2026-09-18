@@ -12741,3 +12741,62 @@ unit 753/753 · @ote/memory 123/123 · ledger 0 · no migration
 
 > ## ⭐⭐ **THE NEXT MISSION STARTS FROM THE HONEST STATE WE HAVE NOW** — ⛔ not from a pretence that the
 > ## missing evidence never existed.
+
+---
+
+## 2026-09-18 · ✅ RECALL / COEXISTENCE INVESTIGATION — read-only, ZERO DB writes
+
+**Ote:** *"When multiple durable observations coexist because no competition was admitted, what semantic
+work, if any, must happen before Sotera presents them together as current information?"*
+
+### ⭐⭐⭐ THE HEADLINE IS THE INVERSE OF THE QUESTION
+
+```
+We asked what happens when coexisting rows are shown TOGETHER.
+⭐ The measured defect is the opposite: A ROW THAT SHOULD BE SHOWN IS BEING HIDDEN.
+```
+
+`dedupeByValue`'s predicate is `entity` + polarity + content-token SET — ⛔ **`attribute` is not in it.**
+⇒ it cannot distinguish a restatement from the same answer to a different question.
+
+**OBSERVED end-to-end, zero writes** (`search(null)` — the no-query branch skips `embed()`):
+```
+user | timezone | "Bangkok"  importance 1  ⛔ SUPPRESSED
+user | location | "Bangkok"  importance 7  ✅ kept
+```
+**Precision on the whole live corpus:** 113 visible live rows · 1 colliding pair · 0 genuine
+restatements · 1 different-question collision ⇒ it fires once and is wrong 1-for-1.
+
+⭐ And it suppresses **nothing** in cases A–E, G, H — the entire coexistence space passes through.
+ⓘ The negation guard and the filler collapse both work correctly.
+
+### ⭐⭐ READER AUTHORITY vs INTERPRETATION
+
+⛔ The write-side mistake has **not** reappeared as *"retrieval ⇒ joint assertion"* — no stage merges,
+selects a winner or marks currency. ⭐ **But it has reappeared in exactly one place:** `dedupeByValue`
+converts *"these share a token set"* into authority to **remove** a row from the model's view.
+⇒ the read path's only over-claim is a **suppression**, ⛔ not an assertion.
+
+### ⛔ THE MODEL-FACING BOUNDARY
+
+The admission fact stops at `recall()`'s return value — **zero production readers** (grep). ⇒ the model
+cannot distinguish deliberately-admitted competitors from mere coexistence; they are byte-identical.
+
+### ⭐ OTHER ESTABLISHED FACTS
+```
+a verdict is PAIRWISE, DIRECTIONAL, and about a PAST act ⇒ no "this row's admission status" exists
+the time gap between the admission act and a presentation act is UNBRIDGED
+FIRST ABSTAIN EVER RECORDED (check fixture, ⛔ not organic) ⇒ the state is reachable in the running system
+the suppression rule is implemented TWICE — dedupeByValue, and an inline copy in the query branch
+organic admission verdicts: still ZERO. ⛔ No traffic was generated.
+⚠️ the ledger's 16 rows are MY OWN model-tool-claim-kind residue — ⛔ LEFT IN PLACE (no further DELETEs)
+```
+
+### ⏸ RECOMMENDED NEXT DECISION — ⛔ not taken
+
+> **Is removing a row from the model's view a presentation convenience that needs no warrant — or is it,
+> like exclusivity, a semantic act that must be ESTABLISHED before it may be performed?**
+
+⛔ Both answers are coherent. ⏸ The presentation question stays open behind it, still undecided.
+
+**DOC:** `INVESTIGATION_SOTERA_RECALL_COEXISTENCE.md` · ⛔ zero DB writes · ⛔ no restart · ⛔ no code change
