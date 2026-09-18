@@ -13352,3 +13352,83 @@ each citing the failure it prevents. The design is "say the fact in ordinary wor
 ⏸ Stopped at the boundary. ⛔ Did not ask what should be exposed; the open items are questions about INTENT.
 
 **DOC:** `INVESTIGATION_SOTERA_CONTEXT_BOUNDARY_LOSSES.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no traffic
+
+
+---
+
+# ⭐⭐⭐ COMPACTION CHECKPOINT — 2026-09-18
+
+⛔ **Read `AI_CarryOn` §0-A ⓪ FIRST.** It was rewritten at this checkpoint and now states where the arc
+actually is; everything below it in §0-A is a dated record of a closed pass, newest first.
+
+## WHERE THE ARC IS, IN ONE BLOCK
+
+```
+WRITE — competition requires an established warrant.   (admission: shipped, accepted)
+READ  — suppression requires an established relation.  (Ⓒ: shipped, accepted)
+⇒ an unestablished heuristic may not silently become a semantic decision, on EITHER side.
+
+THE READ SIDE IS CONSISTENT END TO END, MEASURED:
+  memory PRESERVES both → recall RETURNS both → cognition KEEPS THEM INDEPENDENT
+```
+
+## WHAT SHIPPED SINCE THE LAST COMPACTION
+
+```
+✅ the read-side ADMISSION PROJECTION      4 states, pairwise, directional; NO-RECORDED-VERDICT ≠ DEFER
+                                           recall() only — ⛔ never search(), which reaches the model
+✅ Ⓒ SUPPRESSION OFF                       `valueSuppressionHeuristic` defaults FALSE
+                                           BEFORE 43 rows, timezone withheld · AFTER 44, timezone present
+                                           the heuristic is RETAINED and opt-in, ⛔ not deleted
+✅ tests                                   admission-read-projection 25/25 · value-suppression-off 9/9
+                                           recall-preserves-both (real Bangkok pair, ZERO writes)
+⛔ NO migration · ⛔ no schema change · ⛔ no admission change · ⛔ no composer/prompt change
+```
+
+## VERIFIED AT THIS CHECKPOINT
+
+```
+unit 753/753 · @ote/memory 132/132 · full suite 13 of 117 (the SAME 13 as the pre-change baseline)
+:8210 PID 15300 — running the accepted build since 2026-09-17 17:08Z · :8201 (OLS) untouched
+DB 236 memories · 97 slots · 1 question · 1 bound · ledger 45 (ALL test residue)
+```
+
+## ⚠️ THE FOUR TRAPS — in priority order
+
+```
+① evidence-baseline is RED **BY RULING** (slots 97/112 · aliases 4/8). I caused it with a bulk `zz_%`
+  delete. ⛔ DO NOT re-baseline · ⛔ do not repair · ⛔ do not clean canary/ledger residue. It is AUDIT HISTORY.
+  ⛔ 2 canary rows + 15 fixture slots + 4 aliases are PERMANENTLY LOST; recovery was proved impossible
+  and the forensic dump `_forensic/damaged-state-2026-09-17.dump` is KEPT AS-IS.
+② THE RED CHECKS ARE FIVE, not three. ⛔ Leave all five alone.
+③ ORGANIC ADMISSION EVIDENCE IS STILL ZERO. ⛔ `writer=chat-tool`+`act_kind=turn` does NOT mean organic;
+  `model-tool-claim-kind-check` impersonates it. ⭐ Discriminator: does `act_id` resolve to a real
+  conversation/message? ⛔ DO NOT generate traffic to change this number.
+④ DESTRUCTIVE DB WORKFLOW IS MANDATORY: SELECT ids → inspect → EXPLICIT TIMEZONE → snapshot → delete
+  → verify. ⛔ `zz_` is NOT a disposal contract.
+```
+
+## ⏸ OPEN, UNDECIDED, UNSTARTED
+
+```
+⏸ the PRESENTATION question — what may Sotera ASSERT about two coexisting rows (about HER, not the layer)
+⏸ whether an admission verdict authorizes any presentation behaviour
+⏸ `author` — collapses BASIS/RETENTION/owner; MEASURED 142 told/given vs 0 inferred/retained.
+  ⛔ INTENT UNKNOWN ⇒ ⛔ NOT a defect. Needs a ruling on intent BEFORE anyone decides it matters.
+⏸ the passive path's 13→1 narrowing — widest loss, no stated intent
+⏸ the five carried-forward items · ⑨ arena synthesis · A1 authority · B-D1 · B-D3 · Dreaming/M-series
+```
+
+## ⛔ SCOPE FENCES THAT SURVIVED EVERY PASS
+
+```
+⛔ OLS / EnterpriseAgentPlatform carry their OWN memory-rank.js copies — Ⓒ IS SOTERA-SPECIFIC and was
+  NOT propagated. Confirmed twice: every `@ote/memory` importer is under Personas/Sotera.
+⛔ `memory-cognition-projection.js:14` is cognition-vs-TOOL about ACCESS VOCABULARY — ⛔ never cite it for
+  cognition-vs-passive-recall.
+⛔ @ote/memory commits are LOCAL ONLY (that repo has no remote): e45d928 · c93cbe9 · 719bcb3
+⛔ never test on Ote's account (agent_dev) · :8201 is his · 047 untouched · canary UNARMED · A1 shadow ·
+  grayZone shadow · SEMANTIC_FIELDS untouched · no prompt/extractor change · commits use OteEnded[type]:
+```
+
+**Working tree:** `persona.lock.json` + `test/results/self-history-queries.jsonl` modified and LEFT AS-IS.

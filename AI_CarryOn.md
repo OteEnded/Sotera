@@ -1,12 +1,55 @@
 # AI_CarryOn — Sotera
 
-**Checkpoint 2026-09-17 (+07:00).** ⭐ Read §0-A first; §0-B..§0-E are the live state; everything below §0-F is history.
+**Checkpoint 2026-09-18 (+07:00).** ⭐ Read §0-A first; §0-B..§0-E are the live state; everything below §0-F is history.
 
 ---
 
 # 0-A · ⏸ WHAT IS OPEN. ⛔ NOTHING IS BLOCKED.
 
-## ⓪ ⭐⭐⭐ THE CURRENT ARC — ✅ **THE ADMISSION BUILD IS ACCEPTED.** ⛔ READ THIS FIRST.
+## ⓪ ⭐⭐⭐ WHERE THE ARC ACTUALLY IS — ⛔ READ THIS FIRST, THE REST OF §0-A IS HISTORY IN REVERSE ORDER.
+
+> ⭐⭐⭐⭐ **THE WRITE SIDE AND THE READ SIDE NOW HAVE MATCHING DISCIPLINE. That is the whole state:**
+>
+> ## **WRITE — competition requires an established warrant.  (admission, shipped + accepted)**
+> ## **READ  — suppression requires an established relation. (Ⓒ, shipped + accepted)**
+>
+> ⇒ ⭐ an unestablished heuristic may not silently become a semantic decision, on EITHER side.
+
+```
+THE READ SIDE IS NOW CONSISTENT END TO END — and this was MEASURED, ⛔ not assumed:
+   memory PRESERVES both  →  recall RETURNS both  →  cognition KEEPS THEM INDEPENDENT
+⛔ No layer between them invents a relation. Cognition's `fuse` refuses similarity-merging IN WRITING.
+```
+
+⚠️⭐ **THE FOUR THINGS A FRESH SESSION IS MOST LIKELY TO GET WRONG:**
+```
+① `evidence-baseline-check` IS RED **BY RULING** — slots 97/112 · aliases 4/8. ⛔ I caused it (a bulk
+  `zz_%` delete). ⛔ DO NOT re-baseline it, ⛔ do not "repair" the corpus, ⛔ do not clean the canary or
+  ledger residue. ⭐ Ote ruled the damage is AUDIT HISTORY. See §0-A "DAMAGE I CAUSED".
+② THE RED CHECKS ARE **FIVE**, not three: model-tool-claim-kind · declaration-self-authorisation ·
+  declaration-transport · m2-rollback · m2-bind-eligibility. ⛔ LEAVE THEM ALONE.
+③ ORGANIC ADMISSION EVIDENCE IS STILL **ZERO**. ⛔ And `writer=chat-tool` + `act_kind=turn` in the
+  ledger does NOT mean organic — `model-tool-claim-kind-check` IMPERSONATES it.
+  ⭐ THE DISCRIMINATOR: does `act_id` resolve to a REAL conversation or message?
+④ ⛔ DO NOT GENERATE TRAFFIC to exercise admission, and ⛔ never run a destructive DB query without
+  SELECT-the-ids → inspect → EXPLICIT TIMEZONE → snapshot → delete → verify.
+```
+
+⏸ **WHAT IS OPEN AND UNDECIDED (⛔ none of it blocked, ⛔ none of it started):**
+```
+⏸ THE PRESENTATION QUESTION — what may Sotera ASSERT about two coexisting rows?  (about HER, ⛔ not the layer)
+⏸ whether an admission verdict authorizes ANY presentation behaviour
+⏸ `author` — an information loss that collapses BASIS/RETENTION/owner. ⛔ INTENT UNKNOWN, ⛔ not a defect
+⏸ the passive path's 13→1 narrowing — the widest loss, ⛔ no statement of intent behind it
+⏸ the five carried-forward items below (ledger teardown · red checks · restore/W6 · lesson-host · extractor)
+```
+
+⭐ **READ ORDER FOR A FRESH SESSION:** this block → the five carried-forward items → §0-C (live state) →
+§0-B rules → §0-F lessons. ⓘ Everything else in §0-A is a dated record of a closed pass, newest first.
+
+---
+
+## ✓ THE ADMISSION ARC — CLOSED. Kept for reference.
 
 ⭐⭐⭐ **THE ARC RAN: evidence → rulings → design → contract → build → ACCEPTED (Ote, 2026-09-17).**
 ⛔ We are no longer ruling ①–⑧ and we are no longer designing the contract. **Both are closed.**
@@ -2501,14 +2544,23 @@ decision. ⛔ Not reopened.
 
 ---
 
-# 0-C · LIVE STATE — 2026-09-17
+# 0-C · LIVE STATE — 2026-09-18
 
 ```
-:8210 (Sotera, PID 29644, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
-⚠️⛔⛔ **:8210 IS *NOT* RUNNING THE ADMISSION BUILD.** MEASURED 2026-09-17: the process started
-   **2026-09-16 18:05:48**, and `@ote/memory` `e45d928` was committed **2026-09-17 22:08:30** — ⭐ ~28 h LATER.
-   ⇒ ⛔ the code on disk is accepted; ⛔ **the code in memory is the OLD topology.** ⓘ Ote's call, not mine.
-:54322 pg · ⭐ migrations through **053** · writer contracts 17 (+ `resolver`) · slots 112 · aliases 8 · memories 235
+:8210 (Sotera, PID 15300, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
+✅ **:8210 IS RUNNING THE ACCEPTED BUILD** — restarted 2026-09-17 17:08Z. ⭐ Admission has been LOADED AND
+   REACHABLE since then, and Ⓒ (suppression off) is live too.
+⛔⛔ BUT ORGANIC ADMISSION EVIDENCE IS STILL **ZERO**: 4 organic user turns have passed through it and
+   produced NO memory activity at all (0 rows · 0 ledger · 0 refusals · 0 audit · 0 tool calls).
+   ⚠️ The ledger's 45 rows are ALL TEST RESIDUE. ⛔ `writer=chat-tool`+`act_kind=turn` does NOT mean
+   organic — `model-tool-claim-kind-check` impersonates it. ⭐ Discriminator: does `act_id` resolve to a
+   REAL conversation/message? ⛔ DO NOT generate traffic to change this number.
+:54322 pg · ⭐ migrations through **053** · writer contracts 17 (+ `resolver`)
+⚠️ MEASURED 2026-09-18: memories **236** (154 live) · slots **105** · alias entries **4** · ledger **45**
+   ⛔ slots 105 and aliases 4 are BELOW the guarded baseline (112 / 8) — that is MY DAMAGE, RULED TO
+   STAND as audit history. ⛔ DO NOT re-baseline and ⛔ do not repair. `evidence-baseline` stays RED.
+   047 canary slot: 67 rows · 2 live · 34 pinned (was 67/1/35 — 2 rows lost, IRRECOVERABLE)
+   `sotera|lesson` canary: **18** ✅ intact
 resolver: grayZoneMode='shadow' · ontologyMode='shadow'  ⇒ BOTH ACCUMULATING, ⛔ neither has authority
 unit 753/753 · @ote/memory 123/123 · alias ledger 4 rows (all `refuse`)
 ⭐ 047 QUESTION LAYER: **1 question declared** (the harness canary) · 1 of 112 slots bound · 2 bind acts,
