@@ -539,6 +539,109 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐ **DID A DECLINE RECORD EVER CROSS? — 2026-09-18.** ⛔ Read-only, no traffic, no implementation.
+
+`INVESTIGATION_SOTERA_DECLINE_PASSIVE_OCCURRENCE.md`
+
+> ## ✅ **OUTCOME ② — REACHABLE BUT NO OCCURRENCE.** ⭐ And the negative is **STRUCTURAL**:
+> ## on the current build the decline record **CANNOT** be returned by `recall()` at all.
+
+```
+① OBSERVED OCCURRENCE       ⛔ NO — three independent DURABLE instruments all read zero
+② REACHABLE, NO OCCURRENCE  ✅ YES, and stronger than asked: VISIBLE to candidates(),
+                              ⛔ but NOT RETURNABLE by retrieve()
+③ UNOBSERVABLE              ⛔ NO — the instrumentation is adequate and PROVED NON-VACUOUS
+```
+
+## ⚠️⭐ **A CORRECTION TO MY OWN CLAIM OF YESTERDAY — made before anything was built on it.**
+`CONTRACT_SOTERA_BOUNDARY_SEMANTICS.md` §2.2 said the decline row is *"reachable by `recall()` in its
+room"*. ⛔ **THAT CONFLATED TWO GATES.** `visibleWhere` governs `candidates()` (eligibility); `retrieve()`
+applies a SECOND gate, and the row fails it. ⇒ **VISIBLE to candidates(), ⛔ REJECTED by retrieve().**
+⭐ The contract REQUIREMENT is unchanged and still unmet; ⛔ what changes is the EXPOSURE — there is none,
+and there never has been.
+
+## ⛔ WHY IT CANNOT BE RETURNED — `retrieve()`'s three grounds, ALL FALSE
+
+```
+if (!(r.pinned || lexSet.has(id) || r.relevance >= minRelevance)) continue
+   r.pinned              ⛔ false
+   r.relevance >= 0.15   ⛔ 0 — `embedding IS NULL` ⇒ absent from the pgvector map ⇒ rankMemories:
+                            *"A row absent from the map gets relevance 0"*; the 0.15 floor is PINNED-ONLY
+   lexSet.has(id)        ⛔ ALWAYS EMPTY — ⭐⭐ THE LEXICAL ARM IS DEAD
+```
+⭐⭐ **AND "NO EMBEDDING" IS STRUCTURAL FOR THIS WRITER:** `lesson-host.js:276` writes a decline with a
+**raw INSERT whose column list omits `embedding`**, and ⛔ no `embed()` call exists on that path.
+⇒ a decline record is **never embedded, BY CONSTRUCTION**. ⓘ Corpus: decline 1 live / 1 unembedded.
+
+## ⭐⭐⭐ THE LEXICAL ARM IS DEAD — **OBSERVED**, not inferred
+
+`memory-store-sequelize-host.js:843` queries `content_tsv` **on `txn_memories`**, ⛔ a column that does not
+exist — `information_schema` today: the ONLY tsvector in the schema is `txn_messages.content_tsv`, and ⛔ no
+migration adds one (005/006 are conversation-search). The catch **LATCHES** `lexicalDisabled = true`.
+**OBSERVED verbatim, 12×, PID 19924, 2026-08-25 23:59→00:27, in `Backend/.server-out.log`:**
+*"[memory.store] lexical arm disabled (tsvector column missing?) — vector-only recall"*.
+⚠️ ⛔ NOT observed on the CURRENT process (PID 15300's stdout is not on disk) ⇒ **DERIVED-CURRENT**:
+schema + code verified unchanged today, so it recurs on every `recall({query})`.
+
+## ⭐ THE THREE DURABLE INSTRUMENTS — and the proof they are not vacuous
+
+⭐ The instrument exists because **`recall()` REINFORCES what it surfaces** (`touch` → access_count +
+last_access; `update` → tier 'hot'). ⭐⭐ **AND `reinforce` HAS NO try/catch** ⇒ a failed touch throws out
+of `recall()`, the route swallows it, and the turn gets NO recall ⇒ ⛔ *"returned but not counted"* is
+**structurally impossible**. ⛔ And `access_count` is INCREMENT-ONLY — no reset exists anywhere.
+
+```
+                     DECLINE ROW      ⭐ POSITIVE CONTROL
+access_count            0             79 rows > 0, max 698
+last_access             NULL          79 rows set; most recent 2026-09-18 10:35 (TODAY)
+tier                    cold          in THIS room, 16 of 16 `hot` rows have access_count > 0
+⛔ AND IT IS NOT "THE ROOM WAS QUIET": 41 conversations · 443 user turns · 66 rows · 27 touched ·
+  26 touched in the last 30 days · last_access there spans 2026-08-10 → 2026-09-18 10:35.
+```
+
+⭐⭐⭐ **THE NATURAL EXPERIMENT THAT SETTLES IT:**
+```
+live rows WITHOUT an embedding   21  →  ever surfaced by recall():   0   ( 0 / 21)
+live rows WITH    an embedding  135  →  ever surfaced by recall():  68   (68 / 135)
+```
+⇒ ⛔ Not ONE embedding-less row has EVER been recalled, in the corpus's whole history. ⭐ The decline row's
+zero is ⛔ not an anomaly — **it is the whole class**, and the class boundary is exactly the mechanism above.
+
+## ⛔ THE QUERY THAT WOULD HAVE CAUSED IT **CANNOT EXIST**
+The only route bypassing the relevance gate is a LEXICAL hit (`lexSet.has(id)` admits a row REGARDLESS of
+relevance) — and that arm throws first. ⇒ ⛔ no user text, of any wording, can put this row in front of the
+model. ⓘ I did NOT replay `websearch_to_tsquery` over the 443 turns: the column it needs does not exist, so
+the replay would measure a predicate that never runs and produce a number that looks like evidence.
+⚠️ **AND THE CONTENT INVITES THE OPPOSITE ASSUMPTION** — it reads *"Casual conversation testing my
+understanding of cross-room memory access boundaries"*, whose stems are COMMON in this room. ⇒ ⭐ had the
+lexical arm worked, it would have been a plausible everyday match. **The protection comes from the defect.**
+
+## ⛔⛔ THE FINDING THAT MATTERS MORE THAN THE ANSWER
+
+```
+TWO independent things keep this path closed, and ⛔ NEITHER OF THEM IS THE GUARD:
+ ① the decline writer does not embed  — an OMISSION in a raw INSERT column list, ⛔ not a stated guard
+ ② the lexical arm is broken          — a DEFECT that looks like an obvious thing to fix
+⛔⛔ EITHER REPAIR OPENS THE OVER-CLAIMING PATH, SILENTLY. Add the missing tsvector — a one-line
+   migration any reasonable person would call a pure improvement — and a decision record becomes
+   lexically matchable THAT SAME DAY, with no guard anywhere on the passive path.
+```
+
+⭐⭐ **AND THIS IS THE THIRD INSTANCE OF ONE PATTERN IN THIS ARC:**
+```
+`owner` / utterance boundary  has no author stamp     → held up by ROOM SCOPING (unrelated predicate)
+passive `attribute`           projects one field      → held up by a FORMATTING CONVENTION
+the decline guard             absent on passive       → held up by a MISSING EMBEDDING + A BROKEN INDEX
+⇒ ⭐ each is correct TODAY; ⛔ NONE is correct BY ITS OWN CONTRACT — and in all three the thing holding
+  it up would be removed by an ordinary, well-intentioned improvement ELSEWHERE.
+```
+
+⏸ **WHAT I FOUND AND ⛔ DID NOT PURSUE — as instructed.** ⭐⭐ **THE LEXICAL ARM OF HYBRID RECALL HAS NEVER
+WORKED IN SOTERA.** RFC_PERSONA_MEMORY §4.3 specifies tsvector ∥ vector → RRF; the fusion runs with one
+input **always empty** (`rrfFuse([denseOrder, []])`). Recall is DENSE-ONLY and has been since the schema
+was created. ⛔ Its consequences for recall quality, for the 21 embedding-less rows (incl. **9 lessons**),
+and for `thai-retrieval-is-dense-not-lexical` are **A SEPARATE INVESTIGATION** and are ⛔ NOT opened here.
+
 ## ✅⭐⭐⭐ **THE MINIMUM SEMANTIC CONTRACT — 2026-09-18.** ⛔ Derivation only, ZERO writes.
 
 `CONTRACT_SOTERA_BOUNDARY_SEMANTICS.md`

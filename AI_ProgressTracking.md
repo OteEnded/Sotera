@@ -13559,3 +13559,66 @@ should carry author · where the decline guard belongs (package vs route) · adm
 
 **DOC:** `CONTRACT_SOTERA_BOUNDARY_SEMANTICS.md` · ⛔ read-only SELECTs · ⛔ no restart · ⛔ no traffic ·
 ⛔ no cleanup · ⛔ no implementation · ⛔ no recommendation on what to change
+
+
+---
+
+## 2026-09-18 · ✅ DID A DECLINE RECORD EVER CROSS PASSIVE RECALL? — read-only, no traffic
+
+**Ote:** *"Measure whether a live decline record has ever actually crossed the passive retrieval → model
+boundary in production."* ⛔ *"Don't broaden this into a general recall audit yet."*
+
+### ✅ OUTCOME ② — REACHABLE BUT NO OCCURRENCE, and the negative is STRUCTURAL
+On the current build the decline record **cannot be returned by `recall()` at all**.
+
+### ⚠️ CORRECTION TO MY OWN PRIOR CLAIM
+Yesterday's contract said the row is *"reachable by recall() in its room"*. That conflated two gates:
+`visibleWhere` governs candidates() (eligibility), `retrieve()` applies a second gate and the row fails it.
+⇒ VISIBLE to candidates(), REJECTED by retrieve(). The REQUIREMENT is unchanged and still unmet; the
+EXPOSURE is what changes — there is none, and there never has been.
+
+### WHY — retrieve()'s three grounds, all false
+```
+r.pinned            false
+r.relevance>=0.15   0   — embedding IS NULL ⇒ absent from the pgvector map ⇒ relevance 0;
+                            the 0.15 floor applies to PINNED rows only
+lexSet.has(id)      always empty — THE LEXICAL ARM IS DEAD
+```
+And "no embedding" is structural: lesson-host.js:276 writes a decline with a raw INSERT whose column list
+omits `embedding`, and no embed() call exists on that path ⇒ never embedded, by construction.
+
+### THE LEXICAL ARM IS DEAD — OBSERVED
+memory-store-sequelize-host.js:843 queries `content_tsv` on txn_memories; the only tsvector in the schema
+is txn_messages.content_tsv and no migration adds another. The catch LATCHES lexicalDisabled=true.
+Observed verbatim 12× (PID 19924, 2026-08-25/26): *"lexical arm disabled — vector-only recall"*.
+Not observed on the current process (its stdout is not on disk) ⇒ DERIVED-CURRENT from unchanged code+schema.
+
+### THE INSTRUMENTS, AND THE PROOF THEY FIRE
+recall() reinforces what it surfaces, and `reinforce` has NO try/catch ⇒ a failed touch aborts the recall
+⇒ "returned but not counted" is structurally impossible. access_count is increment-only, never reset.
+```
+                  DECLINE      POSITIVE CONTROL
+access_count      0            79 rows > 0, max 698
+last_access       NULL         79 set; most recent 2026-09-18 10:35 (today)
+tier              cold         16 of 16 `hot` rows in THIS room have access_count > 0
+room activity     41 conversations · 443 user turns · 26 rows touched in the last 30 days
+NATURAL EXPERIMENT   unembedded 0/21 ever recalled   ·   embedded 68/135 ever recalled
+```
+
+### ⛔⛔ THE FINDING THAT MATTERS MORE THAN THE ANSWER
+Two independent things keep the path closed and neither is the guard: the decline writer does not embed
+(an omission in a column list), and the lexical arm is broken (a defect that looks like an obvious fix).
+**Either repair opens the over-claiming path silently** — adding the missing tsvector is a one-line
+migration anyone would call an improvement.
+⭐ THIRD INSTANCE OF ONE PATTERN: `owner` held up by room scoping · passive `attribute` held up by a
+formatting convention · the decline guard held up by a missing embedding + a broken index. Each correct
+today; none correct by its own contract.
+
+### ⏸ FOUND, NOT PURSUED (as instructed)
+**The lexical arm of hybrid recall has never worked in Sotera** — RFC §4.3 specifies tsvector ∥ vector →
+RRF, and the fusion has always run with one input empty. Recall is dense-only. Consequences for recall
+quality, the 21 embedding-less rows (incl. 9 lessons) and thai-retrieval-is-dense-not-lexical are a
+SEPARATE investigation, deliberately not opened.
+
+**DOC:** `INVESTIGATION_SOTERA_DECLINE_PASSIVE_OCCURRENCE.md` · ⛔ read-only SELECTs · ⛔ no synthetic
+traffic · ⛔ no implementation · ⛔ no cleanup · ⛔ no repair of the row, the arm or the schema
