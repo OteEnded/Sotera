@@ -17,6 +17,9 @@
    ② the OCCASION IMPORTANCE  — retain() stamps 7 from the retention occasion
    ③ the RETENTION OWNERSHIP CLAUSE — prompt generation 3 → 7; she no longer asks permission
    ④ the DREAMING PANEL in root's console (Memories → Dreaming), read-only, root-only
+     ⭐ it now reads: SOURCE (room · conversation · exact rolling slice) → model/generations → the
+       LIFECYCLE IN ORDER (tool calls · the refusal · the retry) → what she kept → what she thought
+     ⚠️ 3 bugs of mine shipped and were caught by OTE, not by me — see trap ⑤
 ⏸ HOLDING: reflectionMaxTokens 2400 · ⛔ no 4096 · ⛔ no context/selector change
 ⛔ NEXT EXPERIMENT MUST COME FROM GENUINELY NEW CONVERSATION THROUGH THE NORMAL CRON PATH.
 ```
@@ -33,6 +36,11 @@
 ④ ⛔ log_conversation_revisits / log_retention_decisions / log_tool_calls have **NO SEQUELIZE MODEL**.
   `fastify.db.<table>` is undefined — use raw `seq.query`. ⓘ `log_memory_changes` DOES have one, which
   is exactly the trap.
+⑤ ⭐⭐ **A ROOT-ONLY SURFACE MUST BE VERIFIED AS ROOT.** Ote: *"you should use root's to verify if you
+  make ui for root."* I checked the 403 guard and the SQL, both green, and shipped a page that threw a
+  500 on open — then a second bug where the row-expand rendered below a 40-row table. ⇒ *"don't use
+  root"* protects HIS DATA; ⛔ it was never a reason to ship a surface unopened. **Reading is not
+  writing.** ⓘ Memory `never-test-on-his-account` amended.
 ```
 
 

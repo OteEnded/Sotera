@@ -14034,3 +14034,48 @@ detail returns 2 decisions + 2 tool calls + 642 chars of text
 
 **Working tree:** `persona.lock.json` + `test/results/self-history-queries.jsonl` modified and LEFT AS-IS.
 **Commits:** Sotera `2beb893` (pushed) · Reference `9e05c85` · @ote/memory `ff12c3b` (⛔ LOCAL ONLY, no remote).
+
+
+---
+
+# ⭐⭐ COMPACTION CHECKPOINT ADDENDUM — 2026-09-18 (third) · THE DREAMING INSPECTOR
+
+ⓘ The second checkpoint above still stands. This records only what shipped AFTER it.
+
+## THE PANEL — root console → Memories → Dreaming
+```
+SOURCE        room (name, not uuid) · conversation title · archived? · EXACT rolling slice · conv id
+INSTRUMENT    model · prompt gen · tool gen · messages · duration (+ durationFrom: which anchor)
+LIFECYCLE     tool calls and decisions IN ORDER — incl. the refusal and the retry
+WHAT SHE KEPT the memory, with importance / author / kind / live / recall count
+WHAT SHE      her reflection text, behind a fold
+⛔ Two read-only root-only endpoints, a JOIN over four existing log tables. ⛔ NO schema change.
+⛔ Arg KEYS and byte counts only — never values, never results (log_tool_calls' own stance).
+⚠️ decisionsExact=false ⇒ the panel PRINTS "matched by time, not by a stored link".
+```
+
+## ⚠️ THREE BUGS I SHIPPED, ALL FOUND BY OTE — the pattern matters more than the bugs
+```
+① 500 on open      fastify.db.<log table> is undefined — those tables have NO Sequelize model.
+                    I generalised from log_memory_changes, which DOES have one.
+② "button did      the row detail rendered AFTER the whole table ⇒ on 40 rows the panel opened
+   nothing"         ~40 rows below the fold. A ▸ on a row promises THAT ROW expands.
+③ no source        the ids were in the payload; nothing surfaced room/conversation/slice.
+⇒ ⭐ ALL THREE WERE INVISIBLE TO MY VERIFICATION because I verified the GUARD and the SQL and never
+  OPENED THE PAGE. The fix is trap ⑤ in §0-A: a root-only surface is verified as root.
+⚠️ AND ONE MORE, CAUGHT BY ME: my first typecheck ran `tsc --noEmit -p tsconfig.json` against a
+  SOLUTION tsconfig and passed vacuously. `tsc -b` (what `npm run build` runs) found two real errors,
+  incl. a missing `/v1` prefix that would have 404'd every call. ⛔ Do not trust a bare --noEmit here.
+```
+
+## VERIFIED AT THIS CHECKPOINT
+```
+unit 757/757 · @ote/memory 152/152
+endpoints verified AS ROOT, list + detail: room=Claude/agent_dev · conv="Knowing when to stop"
+  · slice 12362-12363 · 2 tool calls · refused→persisted · importance 7 · 642 chars of text
+⛔ NOT verified by me: the actual browser render — no Playwright in this repo. Ote reviewed it.
+:8210 PID 34348 healthy on the current build · :8201 (OLS, HIS) untouched
+```
+
+**Commits since the second checkpoint:** `2beb893` raw SQL · `78b4244` inline expand · `06a9177` source.
+**HEAD:** Sotera `06a9177` (pushed) · Reference `9e05c85` · @ote/memory `ff12c3b` (⛔ LOCAL ONLY).
