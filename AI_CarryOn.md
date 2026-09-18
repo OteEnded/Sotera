@@ -690,7 +690,11 @@ representation"*) is a REPRESENTATION rule; this is a READ PREDICATE.
 ✅ The forensic evidence is INTACT: the decline row is STILL access_count 0 · last_access NULL · tier cold.
 ```
 
-⚠️⭐ **⏸ NOT DEPLOYED — AND THAT IS DELIBERATE.** `:8210` is still **PID 15300**, running the PRE-CHANGE
+✅⭐ **DEPLOYED 2026-09-18 13:42:31 +07 — PID 24392, healthy.** The restart was Ote's call once the
+session concern cleared. ⭐ The process start time POSTDATES every changed file (12:15 · 12:16 · 13:37),
+which is this project's standard for *"which code is loaded"*. ⛔ NO runtime probe was run — exercising
+recall would reinforce rows and contaminate the H6 measurement we are now waiting on.
+ⓘ SUPERSEDED, kept for the record: **⏸ NOT DEPLOYED — AND THAT IS DELIBERATE.** `:8210` is still **PID 15300**, running the PRE-CHANGE
 build, and it had a **LIVE CLIENT CONNECTED** when I finished. ⛔ I did not restart into an active session.
 ⇒ **THE GUARD IS INERT UNTIL A RESTART.** ⓘ Restart is permitted by §0-D — it is a timing choice, ⛔ not a
 permission one. ⭐ `cd Backend && npm start`.
@@ -3118,7 +3122,7 @@ decision. ⛔ Not reopened.
 # 0-C · LIVE STATE — 2026-09-18
 
 ```
-:8210 (Sotera, PID 15300, HEALTHY) · :8201 (OLS, HIS, untouched, healthy)
+:8210 (Sotera, PID 24392, HEALTHY — RESTARTED 2026-09-18 13:42:31 +07) · :8201 (OLS, HIS, untouched, healthy)
 ✅ **:8210 IS RUNNING THE ACCEPTED BUILD** — restarted 2026-09-17 17:08Z. ⭐ Admission has been LOADED AND
    REACHABLE since then, and Ⓒ (suppression off) is live too.
 ⛔⛔ BUT ORGANIC ADMISSION EVIDENCE IS STILL **ZERO**: 4 organic user turns have passed through it and
