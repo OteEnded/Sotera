@@ -12875,3 +12875,61 @@ had a true positive here.**
 durability, direction and record). ⏸ The presentation question stays closed behind this one.
 
 **DOC:** `INVESTIGATION_SOTERA_SUPPRESSION_SEMANTICS.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no restart
+
+
+---
+
+## 2026-09-18 · ✅ SUPPRESSION-DOCTRINE SCOPE — investigation only, ZERO DB writes
+
+**Ote:** *"Does the existing 'reported suppression' doctrine apply only to enumeration reads, or is its
+underlying principle broader?"*
+
+### ⭐⭐⭐ THE PREMISE WAS FALSE — IT ALREADY GOVERNS A RELEVANCE READ
+
+**OBSERVED**, `memory-pipeline-host.js:294` — `recall_memory` IS `mem.search()`, the query/relevance path:
+```js
+const out = await withCorrectionsWithheld(withoutDecisions(await mem.search(query, opts)), readStore)
+```
+⇒ the same production call carries **two accounted filters and one unaccounted one**. The doctrine did
+not stop at the enumeration boundary; ⛔ it stopped at `dedupeByValue`.
+⚠️ INFERRED, ⛔ not observed: dedupe was never considered, not considered-and-excluded.
+
+### ⭐⭐ TWO ORIGINS, ONLY ONE ENUMERATION-SHAPED
+```
+① FALSE UNIVERSAL   "a scoped read reported as a global fact" (2026-08-20; Ote's marker: `what.`)
+   diagnosis: "the failure is a MISSING QUANTIFIER, and a quantifier is data, not instruction"
+② INVISIBLE WITHHOLDING  §B2 — "why did I believe that?"; she cannot know there is something to ask
+   about. ⇒ indifferent to whether the read claimed completeness.
+```
+
+### ⭐⭐⭐ THE STANDARD IS FOUR-PART
+```
+① structural exclusion ② visible signal ③ a deliberate DOOR ④ surfaced IN THE TURN
+⭐ ④ exists because "a tool she does not call is a capability she does not have" — MEASURED: keep()
+  shipped 38/38, unprompted calls ZERO. ⇒ THE PROJECT ALREADY JUDGED A COUNT ALONE INSUFFICIENT.
+⚠️ And the two accountings differ in shape: withheldDecisions is a TRUE PER-READ SPLIT;
+  withheldCorrections is a SCOPE-LEVEL EXISTENCE COUNT (countContradicted ignores this read's results).
+dedup: ⛔ no count, ⛔ no door — MEETS 1 OF 4.
+```
+
+### ⭐⭐⭐ OMISSION vs SUBSTITUTION
+```
+A relevance · B budget  omitted row UNRELATED to what is present ⇒ OMISSION
+C relational           absent BECAUSE of what is present        ⇒ SUBSTITUTION
+⇒ a count makes an invisible OMISSION visible.
+  ⛔ It does not make an invisible ASSERTION visible — and the dedupe contract ASSERTS ("one fact").
+  ⚠️ So accountability may be accounting for the wrong thing. INFERRED, flagged as such.
+```
+
+### ⭐ BANGKOK AGAINST THE FOUR-PART STANDARD
+structurally excluded ✅ · signal ⛔ · door ⛔ · in-turn ⛔ ⇒ **1 of 4**. And the winner is decided by
+`importance` 7 vs 1 — ⛔ not by any property of the relation the operation claims to have found.
+
+### ⏸ THE DECISION — ⛔ not taken
+> **Is hiding B because A is present an OMISSION (⇒ the four-part standard is the whole answer) or an
+> ASSERTION that the two are one fact (⇒ accountability answers the wrong question)?**
+
+✅ not enumeration-bound · ✅ four-part standard · ✅ dedupe meets 1 of 4 — all OBSERVED.
+⏸ Omission or assertion is Ote's. ⛔ Symmetry with admission is NOT an argument. ⛔ Presentation stays closed.
+
+**DOC:** `INVESTIGATION_SUPPRESSION_DOCTRINE_SCOPE.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no restart

@@ -496,6 +496,68 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐⭐ ✅ **SUPPRESSION-DOCTRINE SCOPE — DELIVERED 2026-09-18.** ⛔ Read-only, ZERO DB writes.
+
+`INVESTIGATION_SUPPRESSION_DOCTRINE_SCOPE.md`
+
+> ## ⭐⭐⭐ **THE PREMISE WAS FALSE: THE DOCTRINE IS *NOT* ENUMERATION-BOUND. IT ALREADY GOVERNS A
+> ## RELEVANCE READ IN PRODUCTION.**
+
+⭐ **OBSERVED**, `memory-pipeline-host.js:294` — this is `recall_memory`, the relevance read:
+```js
+const out = await withCorrectionsWithheld(withoutDecisions(await mem.search(query, opts)), readStore)
+```
+⇒ ⭐⭐ **the SAME production call carries TWO accounted filters and ONE unaccounted one.** The doctrine
+did not stop at the enumeration boundary — ⛔ it stopped at `dedupeByValue`.
+⚠️ **INFERRED (⛔ not observed):** dedupe was never CONSIDERED, rather than considered and excluded — no
+decision record weighs it.
+
+⭐⭐ **THE DOCTRINE HAS TWO ORIGINS, AND ONLY ONE IS ENUMERATION-SHAPED:**
+```
+① THE FALSE UNIVERSAL  `OBSERVATION_SOTERA_SCOPED_READ_AS_GLOBAL_FACT.md` (2026-08-20)
+   *"Every defect in this conversation is the same defect: A SCOPED READ REPORTED AS A GLOBAL FACT."*
+   ⭐ Its own diagnosis: *"the failure is a MISSING QUANTIFIER, and a quantifier is data, not instruction."*
+   ⭐ Sotera's own principle: *"Non-existence leaves nothing. Unreachability leaves traces."*
+② THE INVISIBLE WITHHOLDING  `DECISIONS_..._MODALITY_CONTRADICTION_CONFIDENCE.md` §B2
+   ⛔ NOT about completeness at all: *"why did I believe that?"* + she cannot know there is something to
+   ask about. ⇒ ⭐ THIS leg is indifferent to whether the read claimed completeness.
+```
+
+⭐⭐⭐ **THE STANDARD IS FOUR-PART, ⛔ NOT "report a count":**
+```
+① structural exclusion  ② a visible signal  ③ A DELIBERATE DOOR  ④ SURFACED IN THE TURN
+⭐ ④ exists because ⛔ *"a tool she does not call is a capability she does not have"* — MEASURED:
+  `keep()` shipped 38/38 and unprompted calls stayed at ZERO.
+⇒ ⭐⭐ THE PROJECT ALREADY JUDGED A COUNT ALONE INSUFFICIENT.
+decisions → withheldDecisions (per-read split) + `list_decisions`
+corrections → withheldCorrections (⚠️ a SCOPE-LEVEL existence count) + `recall_corrections`
+dedup → ⛔ NO count, ⛔ NO door, ⛔ NO id — **MEETS 1 OF 4.**
+```
+
+⭐⭐⭐ **A/B/C — AND C IS A DIFFERENT KIND OF THING:**
+```
+A relevance · B budget   the omitted row is UNRELATED to what is present ⇒ an OMISSION
+C relational            the row is absent BECAUSE of what is present   ⇒ a **SUBSTITUTION**
+⇒ ⭐ a COUNT converts an invisible OMISSION into a visible one.
+  ⛔ It does NOT convert an invisible **ASSERTION** into a visible one — and the dedupe contract
+  ASSERTS (*"one fact"*, *"absorbed"*). ⇒ ⚠️ accountability may be accounting for the WRONG THING.
+```
+
+⏸ **THE DECISION, AS THE EVIDENCE NOW POSES IT — ⛔ NOT TAKEN:**
+
+> **Is hiding B because A is present an OMISSION — in which case the four-part standard is the whole
+> answer — or is it an ASSERTION that the two are one fact, in which case accountability answers the
+> wrong question and the act needs establishing?**
+
+```
+✅ the doctrine is NOT enumeration-bound        OBSERVED
+✅ its standard is four-part, not a count       OBSERVED
+✅ dedupe meets one part of four                OBSERVED
+⏸ omission or assertion?                       ⛔ OTE'S
+```
+⛔ And ③ may NOT be argued from symmetry with admission — the acts differ in durability, direction,
+timing, reversibility, purpose and recordability. ⏸ The presentation question stays closed behind this.
+
 ## ⭐⭐⭐ ✅ **SUPPRESSION SEMANTICS — DELIVERED 2026-09-18.** ⛔ Read-only, ZERO DB writes.
 
 `INVESTIGATION_SOTERA_SUPPRESSION_SEMANTICS.md`
