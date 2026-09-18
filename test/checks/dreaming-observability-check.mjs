@@ -200,6 +200,26 @@ try {
   } catch { refusedBogus = true } finally { await pg.query('rollback') }
   check('C4 · ⛔ …and refuses an authority that is not one of derived/provider/loop', refusedBogus)
 
+  // ⭐⭐⭐ AND THE WRITER MUST NOT BE ABLE TO KILL THE ROW WITH IT. Ote's standing rule: *"Observability
+  // must never be load-bearing."* An ending 054 does not recognise would make the completion UPDATE throw
+  // and take the whole run record with it — the row is the ONLY evidence the pass happened.
+  const convoC = await mkConversation(`${MARK}unrecognised ending`)
+  const resC = await reflectOnConversation(fastify, {
+    triggerSource: 'check', conversationId: convoC, force: true,
+    // ⛔ `tool_calls` is a real value the injectable seam reports and the column refuses.
+    turn: async () => ({ message: { content: `${MARK}said something` }, doneReason: 'tool_calls', doneReasonSource: 'derived' }),
+  })
+  const runC = await one(
+    `select outcome, coalesce(length(text),0) as chars, termination_observed, termination_source, rounds
+       from ${S}.log_conversation_revisits where conversation_id=$1`, [convoC])
+  check('C5 · ⭐⭐⭐ AN UNRECOGNISED ENDING RECORDS AS ABSENT AND THE ROW STILL LANDS — ⛔ a value the '
+    + 'column refuses must never destroy the record of the pass',
+    resC?.ok === true && runC?.outcome === 'completed' && Number(runC?.chars) > 0
+    && runC?.termination_observed === null && runC?.termination_source === null,
+    `ok=${resC?.ok} outcome=${runC?.outcome} chars=${runC?.chars} term=${runC?.termination_observed}`)
+  check('C6 · ⭐ …and the rest of the runtime was still measured — ⛔ the clamp drops ONE field, not the row',
+    Number(runC?.rounds) >= 1, `rounds=${runC?.rounds}`)
+
   // ══ D · ⛔⛔⛔ THE LOGGING BOUNDARY — Dreaming run logs are OBSERVABILITY, ⛔ NEVER MEMORY ═════════
   //
   // Ote: *"Add a regression assertion if practical that no retrieval/cognition/composer path consumes

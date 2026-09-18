@@ -82,6 +82,11 @@ import { EVIDENTIAL_WHERE, evidentialSql } from './corpus-eligibility.js'
 // job is alive in THIS process, and a restart legitimately resets it.
 let ticks = 0
 
+// ⭐ 054's VOCABULARY, DECLARED BESIDE THE WRITER. ⛔ It must match the migration's CHECK exactly — the
+// database is the authority, and this is the clamp that keeps a value it would reject from failing the
+// row instead of just failing itself. ⓘ `dreaming-observability-check` C4 proves the database's half.
+const TERMINATIONS = new Set(['length', 'stop', 'tool-round-cap'])
+
 const CODE_MTIME = (() => {
   const at = (u) => { try { return statSync(new URL(u, import.meta.url)).mtime.toISOString() } catch { return '?' } }
   const host = at(import.meta.url)
@@ -722,8 +727,14 @@ export async function reflectOnConversation(fastify, { conversationId, force = f
         numCtx, maxTokens, lastPromptTokens, lastCompletionTokens, completionTotal, modelCalls || null,
         // ⭐ THE PAIR MOVES TOGETHER. 054's CHECK refuses one without the other, so a classification can
         // never be stored without the authority that qualifies it.
-        clipped && clippedSource ? clipped : null,
-        clipped && clippedSource ? clippedSource : null],
+        // ⚠️⚠️ AND IT IS CLAMPED TO THE VOCABULARY THE COLUMN ACCEPTS, because the alternative is that a
+        // value 054 does not recognise makes the UPDATE THROW — and the whole completion write, the row
+        // the pass is recorded by, goes with it. ⛔ **Observability must never be load-bearing.** ⓘ Live
+        // this cannot happen (`chat()` yields only length/stop/null today), but the injectable turn seam
+        // legitimately reports things like `tool_calls`, and a check must not be able to destroy a row.
+        // ⭐ An unrecognised ending records as ABSENT, which is the honest answer: we did not classify it.
+        TERMINATIONS.has(clipped) && clippedSource ? clipped : null,
+        TERMINATIONS.has(clipped) && clippedSource ? clippedSource : null],
       type: seq.QueryTypes.SELECT,
     })
   if (!row) {
