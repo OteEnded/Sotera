@@ -13622,3 +13622,47 @@ SEPARATE investigation, deliberately not opened.
 
 **DOC:** `INVESTIGATION_SOTERA_DECLINE_PASSIVE_OCCURRENCE.md` · ⛔ read-only SELECTs · ⛔ no synthetic
 traffic · ⛔ no implementation · ⛔ no cleanup · ⛔ no repair of the row, the arm or the schema
+
+
+---
+
+## 2026-09-18 · ✅✅ **CLOSED BY OTE** — DECLINE / PASSIVE RECALL: **OUTCOME ②, STRUCTURAL NO-OCCURRENCE**
+
+### ⛔⛔ TWO FACTS, RULED TO BE KEPT SEPARATE. ⛔ DO NOT COLLAPSE THEM.
+```
+① PRODUCTION EXPOSURE   NONE observed, and STRUCTURALLY IMPOSSIBLE on the current build.
+② SEMANTIC CONTRACT     STILL UNMET — the passive path has no decision-record guard.
+                         ⛔⛔ ACCIDENTAL SUPPRESSION IS NOT A SUBSTITUTE FOR THE GUARD.
+```
+⛔ The conclusion is NOT *"the guard isn't needed because nothing bad happened."*
+⭐ It is *"the guard is an unmet semantic contract, and two unrelated implementation conditions currently
+prevent the violating data from reaching the model."*
+
+### ⭐ WHY THE NEGATIVE IS STRUCTURAL
+Candidate VISIBILITY ≠ retrieval ELIGIBILITY. The row passes `visibleWhere` and then fails all three of
+`retrieve()`'s admission grounds: not pinned · relevance 0 (no embedding ⇒ absent from the pgvector map)
+· lexical arm unavailable. Corroborated by three durable instruments against a proven non-vacuous control
+(access_count 0 vs 79 rows >0 / max 698 · last_access NULL vs 79 set, latest today · tier cold vs 16/16
+hot rows touched in that same room), and by the natural experiment: **unembedded 0/21 ever recalled,
+embedded 68/135**.
+
+### ⛔⛔ THE FENCE THIS CLOSURE CREATES — now in §0-D
+```
+⛔ DO NOT add the missing tsvector column   ⛔ DO NOT repair the lexical recall arm
+⛔ DO NOT embed decline records             ⛔ DO NOT backfill embeddings onto the 21 unembedded rows
+— NOT WITHOUT A DECISION. Each looks like a pure improvement; each would ON ITS OWN open the path.
+```
+
+### ⭐⭐⭐⭐ THE PATTERN, NAMED BY OTE — now a standing lesson in §0-F
+> **Correctness currently depends on an accidental second mechanism rather than the mechanism that owns
+> the guarantee.** Three instances: `owner` → room scoping · passive `attribute` → the reconcileFact
+> formatting convention · decline safety → a missing embedding + a broken lexical arm.
+⇒ When the protection comes from a DEFECT the usual priority inverts: fixing the defect creates the risk.
+
+### ⏸ DELIBERATELY NOT OPENED — Ote agreed to stop here
+**Sotera's recall has been DENSE-ONLY since the schema was created** — RFC_PERSONA_MEMORY §4.3 specifies
+tsvector ∥ vector → RRF, and the fusion has always run with one input empty. ⛔ *"We should not turn this
+into 'fix hybrid recall'… that's a separate architectural question with potentially much larger
+consequences."* ⇒ recorded, fenced, ⛔ NOT investigated.
+
+**BASELINE FOR WHATEVER COMES NEXT:** exposure none · contract unmet · pattern named · fence in place.

@@ -539,7 +539,17 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
-## ✅⭐⭐⭐ **DID A DECLINE RECORD EVER CROSS? — 2026-09-18.** ⛔ Read-only, no traffic, no implementation.
+## ✅⭐⭐⭐ **DID A DECLINE RECORD EVER CROSS? — 2026-09-18. ✅✅ CLOSED BY OTE — OUTCOME ②, STRUCTURAL
+NO-OCCURRENCE.** ⛔ Read-only, no traffic, no implementation.
+
+> ## ⛔⛔ **TWO FACTS. OTE RULED THEY ARE TO BE KEPT SEPARATE. ⛔ DO NOT COLLAPSE THEM.**
+>
+> ## ① **PRODUCTION EXPOSURE — NONE.** None observed, and structurally impossible on the current build.
+> ## ② **SEMANTIC CONTRACT — STILL UNMET.** ⛔⛔ **ACCIDENTAL SUPPRESSION IS NOT A SUBSTITUTE FOR THE GUARD.**
+>
+> ⛔⛔ **THE CONCLUSION IS ⛔ NOT** *"the passive decline guard isn't needed because nothing bad happened."*
+> ⭐⭐ **IT IS:** *"the guard is an unmet semantic contract, and TWO UNRELATED IMPLEMENTATION CONDITIONS
+> currently prevent the violating data from reaching the model."* ⇒ ⛔ either 'improvement' removes it.
 
 `INVESTIGATION_SOTERA_DECLINE_PASSIVE_OCCURRENCE.md`
 
@@ -2984,6 +2994,12 @@ committed IN ITS OWN REPO, and any before/after comparison must revert THAT file
 ⛔ Do NOT change the `remember_fact` tool description or the extractor prompt — model steering AND a
    behaviour change. The finding is recorded; the fix is not authorised.
 ⛔ No cleanup merely because a tree would look nicer.
+⛔⛔⭐ **THE DECLINE PATH IS HELD CLOSED BY TWO DEFECTS, ⛔ NOT BY A GUARD (ruled CLOSED 2026-09-18).**
+   ⛔ DO NOT add the missing `tsvector` column to `txn_memories` · ⛔ DO NOT repair the lexical recall arm ·
+   ⛔ DO NOT embed decline records · ⛔ DO NOT backfill embeddings onto the 21 unembedded live rows
+   — ⛔ **NOT WITHOUT A DECISION.** Each looks like a pure improvement and each would, ON ITS OWN, open a
+   route for a DECISION RECORD to reach the model as an ordinary memory: the passive path has NO
+   decision-record guard (the tool and cognition paths both do). ⭐ Fix the guard FIRST, or rule on it.
 ```
 
 ---
@@ -3147,6 +3163,23 @@ M2     the deferred governance-READ decision (couples to ⓔ). Not urgent.
 # 0-F · ⭐⭐⭐ THE LESSONS THIS ARC PAID FOR — read before writing any proof
 
 ```
+⭐⭐⭐⭐ **CORRECTNESS THAT RESTS ON AN ACCIDENTAL SECOND MECHANISM IS NOT CORRECTNESS BY CONTRACT**
+      (named by Ote, 2026-09-18, after the THIRD instance). When a boundary turns out to be safe, ⛔ do
+      not stop at "safe" — **NAME WHAT IS HOLDING IT UP.** If that is a mechanism which exists for an
+      unrelated reason, or worse a DEFECT, then an ordinary well-intentioned improvement ELSEWHERE will
+      silently remove the protection, and nobody will be touching the guard when it happens.
+      ```
+      `owner` / utterance boundary   no author stamp, fails open  → held by ROOM SCOPING (a visibility
+                                                                    predicate with an unrelated purpose)
+      passive `attribute`            projects one field           → held by a FORMATTING CONVENTION in
+                                                                    reconcileFact (75/128 rows)
+      the passive DECLINE guard      absent entirely              → held by a MISSING EMBEDDING + A
+                                                                    BROKEN LEXICAL ARM — two DEFECTS
+      ```
+      ⇒ ⭐ each is correct TODAY; ⛔ NONE is correct BY ITS OWN CONTRACT. ⚠️ And when the protection comes
+      from a defect the usual priority INVERTS: **fixing the defect is what creates the risk**, so the
+      fence goes on the fix until the guarantee's real owner is in place. ⇒ report *"correct today, held
+      up by X"*, ⛔ never *"fine"*. ⓘ See §0-D's fence and the 2026-09-18 closure in AI_ProgressTracking.
 ⭐⭐⭐⭐ A BEFORE/AFTER COMPARISON IS ONLY VALID IF THE REVERT ACTUALLY REVERTED. I `git stash`-ed
       `Personas/Sotera` to test "pre-change" behaviour; `PortableComponents` IS NOT A GIT REPO, so that
       stash silently did NOTHING and the half that mattered stayed changed. ⇒ I reported three of MY OWN
