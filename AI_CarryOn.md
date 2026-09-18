@@ -8,6 +8,35 @@
 
 ## ⓪ ⭐⭐⭐ WHERE THE ARC ACTUALLY IS — ⛔ READ THIS FIRST, THE REST OF §0-A IS HISTORY IN REVERSE ORDER.
 
+> ## ⭐⭐⭐⭐ **THE CURRENT TRACK IS DREAMING v0, AND THE LOOP HAS CLOSED ONCE.**
+> ## real conversation → autonomous reflection → autonomous `retain` → **durable memory** (`1c854162`, imp 7)
+
+```
+✅ SHIPPED 2026-09-18, IN ORDER
+   ① the DECLINE GUARD at the recall SELECTION stage  (excludeFromRecall port, @ote/memory)
+   ② the OCCASION IMPORTANCE  — retain() stamps 7 from the retention occasion
+   ③ the RETENTION OWNERSHIP CLAUSE — prompt generation 3 → 7; she no longer asks permission
+   ④ the DREAMING PANEL in root's console (Memories → Dreaming), read-only, root-only
+⏸ HOLDING: reflectionMaxTokens 2400 · ⛔ no 4096 · ⛔ no context/selector change
+⛔ NEXT EXPERIMENT MUST COME FROM GENUINELY NEW CONVERSATION THROUGH THE NORMAL CRON PATH.
+```
+
+⚠️⭐ **THE FOUR THINGS A FRESH SESSION WILL GET WRONG ABOUT DREAMING:**
+```
+① ⛔ THE 2400 BUDGET IS *NOT* CREDITED with the retention. That run used 161 tokens — 7% — and would
+  have fitted the OLD 1600 ceiling four times over. n=1 each side. ⛔ Do not record it as the fix.
+② ⛔ H6 IS STILL 0/8 AND THAT IS CORRECT. `dreaming-v0-loop-check` counts `trigger_source='cron'`
+  ONLY, and the closure was a **manual** act. ⛔ DO NOT rewrite the baseline. ⭐ RED THERE = the loop
+  closed on cron, which is GOOD NEWS.
+③ ⛔ `started_at` IS NULL ON EVERY CRON AND MANUAL RUN (67/207, all legacy). Anchor anything on
+  `created_at` + `completed_at`. A window on `started_at` renders EMPTY — it looks like she did nothing.
+④ ⛔ log_conversation_revisits / log_retention_decisions / log_tool_calls have **NO SEQUELIZE MODEL**.
+  `fastify.db.<table>` is undefined — use raw `seq.query`. ⓘ `log_memory_changes` DOES have one, which
+  is exactly the trap.
+```
+
+
+
 > ⭐⭐⭐⭐ **THE WRITE SIDE AND THE READ SIDE NOW HAVE MATCHING DISCIPLINE. That is the whole state:**
 >
 > ## **WRITE — competition requires an established warrant.  (admission, shipped + accepted)**

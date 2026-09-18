@@ -13963,3 +13963,74 @@ reflects on, which is a selection question, not a context-size one.
 reflectionMaxTokens 2400 lives in Backend/config.json, which is GITIGNORED — this entry is its record.
 H6 unchanged at 0/8 (cron-only; this was manual) — baseline NOT rewritten. access_count=0: whether the
 memory comes back is a later real turn's job; no recall was called.
+
+
+---
+
+# ⭐⭐⭐ COMPACTION CHECKPOINT — 2026-09-18 (second)
+
+⛔ **Read `AI_CarryOn` §0-A ⓪ FIRST.** It was rewritten here and now opens on DREAMING v0.
+
+## WHERE THE TRACK IS
+```
+✅ THE LOOP CLOSED ONCE, MANUALLY, 14:33
+   real conversation → autonomous reflection → autonomous retain → memory 1c854162
+   importance 7 · author persona · writer reflection · act revisit · live · embedded · access_count 0
+⏸ THE LAST HOP IS OPEN: whether that memory COMES BACK needs a real later turn. ⛔ no recall was forced.
+```
+
+## WHAT SHIPPED TODAY, IN ORDER
+```
+① DECLINE GUARD          @ote/memory `excludeFromRecall` port, applied at the SELECTION stage
+                          (before ranking, limit and reinforcement). 20 tests, red-proved. 152/152.
+② OCCASION IMPORTANCE    retain() stamps REFLECTION_RETENTION_IMPORTANCE = 7 from the occasion,
+                          beside author/practiceOrigin. 11 real-DB assertions, red-proved.
+③ OWNERSHIP CLAUSE       THE_RETENTION_OWNERSHIP in buildReflectionTurnPrompt; prompt gen 3 → 7
+                          (gen 7 transport == gen 3, so ONE variable moves). 17 assertions, red-proved.
+                          ⭐ The cause was "tell me what and why" — it addresses a LISTENER.
+④ DREAMING PANEL         root console → Memories → Dreaming. Two read-only root-only endpoints,
+                          a JOIN over four existing log tables. ⛔ No schema change.
+```
+
+## ⚠️ FOUR TRAPS FOR A FRESH SESSION
+```
+① the 2400 budget is NOT credited with the retention (161 tokens used, 7%)
+② H6 stays 0/8 — cron-only, the closure was manual. ⛔ do not rewrite the baseline
+③ started_at is NULL on all cron/manual runs — anchor on created_at + completed_at
+④ the three log_ tables have NO Sequelize model — raw seq.query only
+```
+
+## VERIFIED AT THIS CHECKPOINT
+```
+unit 757/757 · @ote/memory 152/152
+reflection-lifecycle · reflection-generation-4 · dreaming-autonomous-retention · ALL PASSED
+dream endpoints: both queries replayed verbatim on the real corpus — list returns the retention run,
+detail returns 2 decisions + 2 tool calls + 642 chars of text
+:8210 PID 3616 healthy on the current build · :8201 (OLS, HIS) untouched
+```
+
+## ⏸ OPEN, AND OTE'S
+```
+⏸ does `stop_reason` become a column again? (mig 017 dropped `finish` deliberately)
+⏸ intra-round ORDERING — a run_events table, or is the four-table join enough?
+⏸ what LIFETIME does a Dreaming run record get? (log_conversation_revisits is pruned by NOTHING)
+⏸ should log_usage take a row per reflection model call?
+⏸ CONFIG ISSUE, recorded and UNFIXED: config sets `memory.reflectModel`, code reads `reflectionModel`
+  ⇒ the key never matches; reflection silently uses chat.defaultModel. ⛔ Do not fix mid-experiment.
+⏸ FUTURE ARCHITECTURE: 16,384 reflection context vs 143,360 measured-safe (8.75x headroom). ⚠️ And it
+  is a SELECTION question, ⛔ not a knob — more material changes WHAT she reflects on.
+⏸ the older carried-forward items: presentation question · author intent · passive 13→1 · five red checks
+```
+
+## ⛔ FENCES THAT SURVIVED
+```
+⛔ never test on Ote's account — agent_dev · :8201 is his · 047 untouched · canary UNARMED · A1 shadow
+⛔ the DECLINE PATH is held closed by TWO DEFECTS, not a guard: ⛔ do not add the tsvector column,
+  ⛔ do not repair lexical recall, ⛔ do not embed declines, ⛔ do not backfill embeddings — not without a decision
+⛔ evidence-baseline is RED BY RULING (97/112 · 4/8) · the red checks are FIVE · no cleanup, no re-baseline
+⛔ no generated traffic · destructive DB workflow mandatory · commits OteEnded[type]:, no Claude attribution
+⛔ Backend/config.json is GITIGNORED — reflectionMaxTokens 2400 lives only there; the docs are its record
+```
+
+**Working tree:** `persona.lock.json` + `test/results/self-history-queries.jsonl` modified and LEFT AS-IS.
+**Commits:** Sotera `2beb893` (pushed) · Reference `9e05c85` · @ote/memory `ff12c3b` (⛔ LOCAL ONLY, no remote).
