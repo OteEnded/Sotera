@@ -13168,3 +13168,45 @@ the PRESENTATION question · whether an admission verdict authorizes presentatio
 containment is establishable anywhere · the composer's unbuilt `'redundant'` stage (⛔ not a proposal).
 
 **COMMITS:** Sotera `a50bb5f` `4aa02c5` · @ote/memory `719bcb3` (⛔ local only)
+
+
+---
+
+## 2026-09-18 · ✅ POST-ADMISSION ARCHAEOLOGY — observation only, ZERO writes
+
+### ⛔⛔ ORGANIC ADMISSION EVIDENCE: STILL ZERO
+```
+admission live in the runtime since 2026-09-17 17:08Z (PID 15300)
+since then: 8 messages · 4 user turns · 1 conversation · 2 memories (both m2-rollback canary fixtures)
+THE ORGANIC WINDOW 01:11-01:17Z (Thai greetings + small talk):
+  memories 0 · ledger 0 · refusals 0 · audit 0 · tool_calls 0 · retention 0
+⛔ ADMIT 0 EVER · organic ABSTAIN/DEFER 0 · REPLACEMENT_REFUSED 0 EVER · new pins 0 · new supersedes 0
+```
+⚠️ UNKNOWN: whether the extractor RAN AND DECLINED or DID NOT RUN — nothing distinguishes them.
+INFERRED (not asserted): a greeting and "I slept some" is what extraction is meant to decline.
+
+### ⚠️⭐⭐ THE NEAR-MISS — the methodological lesson
+33 ledger rows carry `writer=chat-tool` + `act_kind=turn`, the REAL chat writer's signature. **All are
+`model-tool-claim-kind-check` residue.** I nearly reported them as the first organic evidence.
+```
+⛔ WRITER ALONE CANNOT DISTINGUISH ORGANIC FROM TEST — the check impersonates the chat writer.
+⭐ THE WORKING DISCRIMINATOR: does act_id resolve to a real conversation/message? (it does not)
+  + zz_mtck_* question keys + timestamps landing exactly on my own check runs.
+```
+
+### ⭐⭐⭐ COGNITION ALREADY HOLDS THE LINE Ⓒ JUST RULED
+`memory-cognition-host.js:823`:
+> ⛔⛔ *"MERGES ITEMS, NEVER STATES. Dedupe is by IDENTITY … never by similarity of claim: two items
+> that agree stay two items, because collapsing them is exactly how convergence would start looking
+> like corroborated fact."*
+
+⇒ coexisting rows are NOT treated as duplicates / equivalents / mutually exclusive / current-state
+alternatives / corroboration / contradiction. ⭐ They are two independent items, each with its own basis,
+and nothing relates them. Items are built independently (`supportedBy: 1`); the only reduction is a
+budget truncation, and it IS reported. `corroborate()` fires only for the SAME row from two arms.
+
+⇒ ⭐⭐ **the read side is now consistent from memory to cognition.**
+⚠️ DERIVED: post-Ⓒ the Bangkok pair now reaches cognition — its first exposure to a real coexisting pair.
+⛔ UNKNOWN: what it does with one in practice — the semantic arm calls embed(), which writes.
+
+**DOC:** `INVESTIGATION_SOTERA_POST_ADMISSION_ARCHAEOLOGY.md` · ⛔ zero writes · ⛔ no cleanup · ⛔ no restart

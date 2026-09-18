@@ -496,6 +496,58 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ⭐⭐ ✅ **POST-ADMISSION ARCHAEOLOGY — 2026-09-18.** ⛔ Observation only, ZERO writes.
+
+`INVESTIGATION_SOTERA_POST_ADMISSION_ARCHAEOLOGY.md`
+
+```
+⛔⛔ ORGANIC ADMISSION EVIDENCE: STILL ZERO.
+   admission live in the runtime since 2026-09-17 17:08Z (PID 15300)
+   traffic since: 8 messages · 4 user turns · 1 conversation
+   THE ORGANIC WINDOW (01:11-01:17Z, Thai greetings):
+     memories 0 · ledger 0 · refusals 0 · audit 0 · tool_calls 0 · retention 0
+   ⛔ ADMIT 0 ever · ⛔ organic ABSTAIN/DEFER 0 · ⛔ REPLACEMENT_REFUSED 0 EVER
+   ⛔ new pins 0 · ⛔ new supersedes 0 · ⛔ organic coexistence 0
+```
+
+⚠️⭐⭐⭐ **THE NEAR-MISS, AND IT IS THE LESSON OF THE PASS.** 33 ledger rows carry
+`writer=chat-tool` + `act_kind=turn` — **the real chat writer's signature** — and every one is
+`model-tool-claim-kind-check` residue. ⛔ I nearly reported it as the first organic evidence.
+```
+⛔ WRITER ALONE CANNOT DISTINGUISH ORGANIC FROM TEST — that check IMPERSONATES the chat writer.
+⭐ THE DISCRIMINATOR THAT WORKS: does `act_id` resolve to a REAL conversation or message?
+  (7543810b… and c81bd998… match NEITHER) · plus `zz_mtck_*` question keys · plus the timestamps
+  land exactly on my check runs.
+```
+
+## ⭐⭐⭐ **AND THE COGNITION ANSWER — IT ALREADY HOLDS THE LINE WE JUST RULED**
+
+> **When memory preserves multiple observations, what does cognition establish? ✅ NOTHING.
+> It receives and considers both — and REFUSES to merge them, explicitly.**
+
+⭐ `memory-cognition-host.js:823`, the fusion contract, verbatim:
+> ⛔⛔ *"**MERGES ITEMS, NEVER STATES.** Dedupe is by **IDENTITY** (the same row arriving from two
+> retrievers), **never by similarity of claim**: two items that agree stay two items, because
+> **collapsing them is exactly how convergence would start looking like corroborated fact**."*
+
+```
+⛔ duplicates? NO · ⛔ equivalent propositions? NO · ⛔ mutually exclusive? NO
+⛔ current-state alternatives? NO · ⛔ corroborating? NO (identity-bound) · ⛔ contradictory? NO
+⭐ THEY ARE TWO INDEPENDENT ITEMS, each rendered with its own basis, and NOTHING relates them.
+⭐ Items are built independently (`supportedBy: 1` hardcoded, every field from the row itself).
+⭐ The ONLY reduction is a budget truncation — and it IS reported (`dropped`).
+⚠️ `corroborate()` raises confidence asymptotically to 0.95 — but ONLY for the SAME ROW from two arms.
+  ⇒ two distinct observations NEVER corroborate one another. ⭐ The hazard is named in the code itself.
+```
+
+⇒ ⭐⭐ **THE READ SIDE IS NOW CONSISTENT FROM MEMORY TO COGNITION**: memory preserves both, recall
+returns both, cognition declines to merge them. ⛔ No layer between them invents a relation.
+⚠️ DERIVED: post-Ⓒ the Bangkok pair now REACHES cognition — its FIRST exposure to a real coexisting pair.
+⛔ UNKNOWN: what cognition does with one IN PRACTICE — its semantic arm calls `embed()`, which WRITES.
+
+⛔⛔ **AND I GENERATED NO TRAFFIC.** Organic evidence needs turns carrying DURABLE material, ⛔ not more
+turns — and a manufactured DEFER is exactly the evidence this arc has spent months refusing.
+
 ## ✅✅✅ **Ⓒ CLOSED / SHIPPED — ACCEPTED BY OTE, 2026-09-18. THIS BOUNDARY IS LOCKED.**
 
 > ## ⭐⭐⭐ **THE RULING, IN ITS NARROWEST CORRECT FORM — read this before touching `memory-rank.js`:**
