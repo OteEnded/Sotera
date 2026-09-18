@@ -13725,3 +13725,64 @@ REPRESENTATION; a selection-stage exclusion changes the read predicate and leave
 
 **DOC:** `INVESTIGATION_SOTERA_DECISION_RECORD_OWNER.md` · ⛔ no DB writes · ⛔ no implementation ·
 ⛔ fence unchanged and not relied upon
+
+
+---
+
+## 2026-09-18 · ✅⭐ THE DECLINE GUARD — IMPLEMENTED AT THE SELECTION STAGE
+
+**Ote's ruling:** *"Implement the minimum guard at the recall() selection stage, before
+limit/reinforcement/model return. Do not change the representation, schema, writer, embeddings, or
+lexical retrieval."*
+
+### WHAT SHIPPED — two files, one port
+```
+@ote/memory/cognition/memory-v2-service.js
+  + factory param `excludeFromRecall = null`   a PURE host predicate, injected like admissionFacts
+  + retrieve({ …, exclude })                   applied right after candidates(), BEFORE ranking/limit
+  + recall() passes it; ⛔ search() does NOT
+Personas/Sotera/Backend/app/components/memory-v2-host.js
+  + import { isDeclineRecord }; + excludeFromRecall: isDeclineRecord
+```
+⛔ ABSENT PORT ⇒ BYTE-IDENTICAL. ⛔ The package never learns Sotera's decline vocabulary (it is shared
+with OLS + EAP). ⛔ No migration · no schema · no writer · no embeddings · no tsvector · no lexical change.
+
+### WHY SELECTION, NOT A WRAPPER
+recall() reinforces what it returns (touch → access_count/last_access, update → tier hot) BEFORE any
+wrapper could act ⇒ a row nothing may recall would be recorded as recalled. And recall is limit-capped
+while a wrapper filters after the cap ⇒ limit 6 returns 5. Selection placement removes both.
+
+### ⛔ THE PORT IS ON recall() ALONE — LOAD-BEARING
+search/list/listArchived must STILL return the row: their host wrapper REPORTS the withholding
+(`withheldDecisions`), and a report needs the row to arrive. Filtering them would have silently deleted
+the visible half of the four-part withholding standard. Test group F pins this.
+
+### TESTS — 20 new, red-proved
+```
+A1-A3  POSITIVE CONTROLS   without the port the decline IS returned, on BOTH branches, and OUTRANKS an
+                           ordinary row (importance 10 vs 5) — so C is not vacuous
+B1-B4  never in the returned set · both branches · the getWorkingMemory alias · decisions-only ⇒ count 0
+C1-C2  does NOT spend a slot — limit 3 returns THREE ordinary memories (a post-cap filter returns 2)
+D1-D3  never touched, never promoted; D3 proves the spy fires without the port
+E1-E4  ordinary behaviour identical · Ⓒ Bangkok pair still BOTH survive · a near-miss row is NOT excluded
+F1-F4  search/list/listArchived UNAFFECTED · search still does not reinforce
++ 4 Sotera unit tests: the host DECLARES the predicate · never a wrapped call site · the vocabulary stays
+  in the host · the port is on recall only
+RED PROOF: neutering the filter ⇒ exactly B1-B4, C1-C2, D1-D2 go red; A/E/F stay green.
+```
+
+### VERIFIED
+```
+@ote/memory 152/152  ·  Sotera unit 757/757 (was 753)
+recall-preserves-both (Ⓒ) PASSED  ·  admission-read-projection PASSED
+forensic evidence INTACT — the decline row is still access_count 0 · last_access NULL · tier cold
+ⓘ NO live recall was run: recall() reinforces, and that would have damaged the very instrument the
+  no-occurrence finding rests on.
+```
+
+### ⏸ NOT DEPLOYED
+`:8210` is still PID 15300 on the PRE-CHANGE build, and a client was connected. The guard is INERT until
+restart (`cd Backend && npm start`). Restart is permitted by §0-D — this was a timing choice, not a
+permission one.
+
+**COMMITS:** @ote/memory `ff12c3b` (⛔ LOCAL ONLY — that repo has no remote) · Sotera: below.

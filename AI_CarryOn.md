@@ -539,6 +539,66 @@ guard. It correctly detected that something in the guarded population was delete
 ⛔ Never write a date predicate without an explicit timezone — the session TimeZone is **Asia/Bangkok**,
 so `created_at >= '2026-09-17 00:00:00'` means **2026-09-16T17:00Z**.
 
+## ✅⭐⭐⭐⭐ **THE DECLINE GUARD — SHIPPED 2026-09-18. ✅ RULED BY OTE, ✅ BUILT, ✅ RED-PROVED.**
+
+> ## ⭐⭐ **THE GUARANTEE MOVED TO THE SELECTION STAGE.** ⛔ Not a fourth `withoutDecisions` call site.
+
+**Ote's ruling:** *"decision records are durable cognitive-history events, not memories, and must be
+completely excluded from memory-facing recall. **Storage is not the owner; the guarantee belongs at the
+consumer/selection boundary.**"*
+
+```
+@ote/memory  `excludeFromRecall` — a PURE, HOST-SUPPLIED PREDICATE, injected like admitCompetition /
+             admissionFacts. ⛔ ABSENT ⇒ BYTE-IDENTICAL. ⛔ The package NEVER learns what a decision
+             record is — `entity='sotera' / attribute='declined'` is SOTERA's vocabulary and this
+             component is shared with OLS + EAP.
+             ⭐ It runs INSIDE `retrieve()`, right after `candidates()` — before ranking, before the
+             limit, before reinforcement ⇒ never RANKED · never RETURNED · never REINFORCED.
+Sotera       `memory-v2-host.js` passes `excludeFromRecall: isDeclineRecord` — ONE DECLARATION, so a
+             FIFTH read on the same service inherits it. ⛔ No new call site to remember.
+```
+
+⛔⛔ **AND THE PORT IS ON `recall()` ALONE — THIS IS LOAD-BEARING.** `search`/`list`/`listArchived` must
+STILL return the row, because their host wrapper **REPORTS** the withholding (`withheldDecisions`) and a
+report needs the row to arrive. ⚠️ Filtering them too would have silently deleted the VISIBLE half of the
+four-part withholding standard. ⭐ Asserted by test group F.
+
+⭐⭐ **WHY SELECTION AND ⛔ NOT A WRAPPER — two structural reasons, and they are why the old shape could
+never have worked here:**
+```
+① `recall()` REINFORCES what it returns (touch → access_count/last_access, update → tier 'hot'), and
+  that happens BEFORE any wrapper sees the result ⇒ a row nothing may recall would be RECORDED AS RECALLED.
+② `recall()` is LIMIT-CAPPED and a wrapper filters AFTER the cap ⇒ `limit: 6` silently returns 5.
+  ⓘ The same error Ⓒ already named: *"SUPPRESS INSIDE THE LOOP, NOT AFTER IT."*
+```
+
+⛔ **NO REPRESENTATION CHANGE** — ⛔ no delete · ⛔ no update · ⛔ no migration · ⛔ no writer change · ⛔ no
+schema change · ⛔ no embeddings · ⛔ no tsvector · ⛔ no lexical repair. The row stays durable,
+attributable, timestamped and auditable. ⭐ Ote's binding constraint (*"rather than changing the underlying
+representation"*) is a REPRESENTATION rule; this is a READ PREDICATE.
+
+```
+✅ @ote/memory  20 new tests · suite 152/152      ✅ Sotera unit 757/757 (was 753, +4)
+✅ RED-PROVED: neutering the filter turns EXACTLY the 8 guard assertions red (B1-B4 · C1-C2 · D1-D2)
+   while the POSITIVE CONTROLS (A1-A3, D3) and the AUDIT-SURFACE group (F1-F4) stay green.
+✅ recall-preserves-both (Ⓒ) PASSED · admission-read-projection PASSED — ⛔ neither ruling disturbed.
+✅ The forensic evidence is INTACT: the decline row is STILL access_count 0 · last_access NULL · tier cold.
+```
+
+⚠️⭐ **⏸ NOT DEPLOYED — AND THAT IS DELIBERATE.** `:8210` is still **PID 15300**, running the PRE-CHANGE
+build, and it had a **LIVE CLIENT CONNECTED** when I finished. ⛔ I did not restart into an active session.
+⇒ **THE GUARD IS INERT UNTIL A RESTART.** ⓘ Restart is permitted by §0-D — it is a timing choice, ⛔ not a
+permission one. ⭐ `cd Backend && npm start`.
+
+ⓘ **⛔ NO LIVE RECALL WAS RUN TO "CONFIRM" IT**, on purpose: `recall()` reinforces, so a live confirmation
+would have incremented `access_count` on real rows — the exact instrument the no-occurrence finding rests
+on. ⭐ The package's 20 tests + the red proof are the behavioural evidence.
+
+⚠️ **ONE THING LEFT ALONE AND REPORTED INSTEAD OF EDITED:** the sibling test
+`memory-decision-record.test.mjs` is titled *"the memory TOOL SERVICE filters decisions out of **every
+read**"* and asserts **three named methods**. ⛔ I did not rename it (out of scope) — the new tests state
+the scope beside it.
+
 ## ✅⭐⭐⭐ **THE DECISION-RECORD OWNER — 2026-09-18.** ⛔ Intent/contract only, no implementation, no DB writes.
 
 `INVESTIGATION_SOTERA_DECISION_RECORD_OWNER.md`

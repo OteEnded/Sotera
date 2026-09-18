@@ -150,3 +150,49 @@ test('⭐ consumer · the REFLECTION READER counts a decline as its own outcome'
   const sql = src.slice(src.indexOf('A DECISION IS NOT A RETENTION'), src.indexOf('declined_record,'))
   assert.ok(!sql.includes('`'), 'a backtick in this SQL comment would break the file')
 })
+
+// ══ ⭐⭐⭐ THE FOURTH CONSUMER — PASSIVE RECALL (ruled by Ote, 2026-09-18) ══════════════════════════
+//
+// ⚠️⚠️ AND IT IS DELIBERATELY NOT A FOURTH `withoutDecisions` CALL. The sibling test above is titled
+// *"every read"* and asserts THREE named methods — an enumeration wearing a universal's name, which is how
+// `recall()` went uncovered from the day this file was written. ⛔ Filtering recall's OUTPUT would not fix
+// it either: `recall()` REINFORCES what it returns and is LIMIT-CAPPED, so a wrapper acts after the row has
+// already been touched, promoted to `hot`, and has already spent a slot.
+//
+// ⇒ ⭐ THE GUARANTEE MOVED TO THE SELECTION STAGE, and the host's job is now to DECLARE the vocabulary
+// rather than to remember a call site. Behaviour is proved in the package's own suite
+// (`PortableComponents/Packages/Memory/test/decline-excluded-from-recall.test.mjs`, 20 tests, red-proved);
+// what this file owns is that Sotera actually declares it.
+
+test('⭐⭐⭐ consumer · PASSIVE RECALL — the host DECLARES the exclusion at the selection stage', () => {
+  const src = strip('../../Backend/app/components/memory-v2-host.js')
+  assert.ok(/excludeFromRecall:\s*isDeclineRecord/.test(src),
+    'buildMemoryV2 must hand the predicate to the memory service')
+  assert.ok(/import \{ isDeclineRecord \} from '\.\/memory-decision-record\.js'/.test(src),
+    'and it must be THIS predicate — ⛔ never a second, re-derived copy of the rule')
+})
+
+test('⛔⛔ …and the host declares a PREDICATE, never a filtered call site', () => {
+  const src = strip('../../Backend/app/components/memory-v2-host.js')
+  // ⭐ The point of the seam: one declaration, so a FIFTH read on the same service inherits it. If someone
+  // ever "fixes" this by wrapping a named method instead, this goes red and says why.
+  assert.ok(!/withoutDecisions\(await mem\.recall/.test(src),
+    'wrapping recall would filter AFTER reinforcement and AFTER the limit — the two failures this replaced')
+})
+
+test('⭐⭐ the vocabulary stays in the HOST — the portable package must not learn it', () => {
+  const pkg = readFileSync(
+    new URL('../../../../PortableComponents/Packages/Memory/cognition/memory-v2-service.js', import.meta.url), 'utf8')
+  assert.ok(/excludeFromRecall/.test(pkg), 'the port must exist')
+  assert.ok(!/attribute === 'declined'|DECLINE_ATTRIBUTE|isDeclineRecord/.test(pkg),
+    "⛔ @ote/memory is shared with OLS and EAP — it may hold the PORT, never Sotera's decline vocabulary")
+})
+
+test('⛔ and the port is on RECALL only — search/list keep returning decisions so the host can report them', () => {
+  const pkg = readFileSync(
+    new URL('../../../../PortableComponents/Packages/Memory/cognition/memory-v2-service.js', import.meta.url), 'utf8')
+  assert.ok(/const hits = await retrieve\(\{ \.\.\.opts, exclude: excludeFromRecall \}\)/.test(pkg),
+    'recall must pass the port')
+  assert.ok(/const hits = await retrieve\(\{ \.\.\.opts, query \}\)/.test(pkg),
+    '⛔ search must NOT — withheldDecisions is computed from the rows it returns')
+})

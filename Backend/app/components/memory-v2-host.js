@@ -10,6 +10,8 @@ import { createSlotStore } from './memory-slot-store-host.js'
 import { logMemoryChange, snapshot } from '../audit/memory-log.js'
 import { makeEmbedder } from './memory-embed-host.js'
 import { rowsBySlotIndex } from '@ote/memory/cognition/memory-slot-resolver.js'
+// ⭐ A DECISION IS NOT A MEMORY — the host owns this vocabulary; the package never learns it.
+import { isDeclineRecord } from './memory-decision-record.js'
 import { buildSlotResolver } from './memory-resolver-host.js'
 import { admitCandidates } from './memory-admission-gate.js'
 import { projectAdmissionFacts } from './memory-admission-read.js'
@@ -124,5 +126,13 @@ export function buildMemoryV2(fastify, { userId = null, persona = DEFAULT_PERSON
     store, slotStore, auditLog,
     embed, persona, userId, sourceMessageId, log, self, slotResolver, actor,
     admitCompetition, admissionFacts,
+    // ⭐⭐⭐ THE SELECTION-STAGE EXCLUSION (ruled by Ote, 2026-09-18). A decline record is an ACT of
+    // memory formation with negative polarity — durable, attributable and auditable — and *"no memory
+    // read returns it, no recall injects it"*. The tool path already filters `search`/`list`/
+    // `listArchived` AND REPORTS the withholding; `recall()` had nothing, so the guarantee goes where it
+    // can actually hold: before ranking, before the limit, before reinforcement.
+    // ⛔ The predicate is PURE and reads two DECLARED fields — it infers nothing from author, importance,
+    // kind or content, because a heuristic here would misclassify a real memory as a decision.
+    excludeFromRecall: isDeclineRecord,
   })
 }
