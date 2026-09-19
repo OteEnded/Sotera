@@ -8,17 +8,68 @@
 
 ## ⓪ ⭐⭐⭐ WHERE THE ARC ACTUALLY IS — ⛔ READ THIS FIRST, THE REST OF §0-A IS HISTORY IN REVERSE ORDER.
 
-> ## ⭐⭐⭐⭐ **NEXT TRACK (2026-09-19, Ote): THE ACCOUNT / ROOM BOUNDARY.**
-> ## ⏸ The occasion + corpus rulings are **PAUSED** behind it. ⛔ Do not resume M1 design until it is settled.
+> ## ⭐⭐⭐⭐ **NEXT TRACK (2026-09-19, Ote): THE CANONICAL ONTOLOGY OF SOTERA.**
+> ## The account/room question RESOLVED ITSELF UPWARD: Sotera is no longer the same KIND of thing as
+> ## an OLS assistant. ⏸ The occasion + corpus rulings are **PAUSED** behind the ontology.
+> ## 📄 `Reference/docs/ARCHITECTURE_SOTERA_CANONICAL_ONTOLOGY.md` — ⛔ READ IT BEFORE PROPOSING ANYTHING.
 
 ```
-⭐ THE THREE QUESTIONS NOW IN FRONT OF US, IN DEPENDENCY ORDER
-  ③ is the unit of WHO the ACCOUNT or the PERSON?     ← ⭐ UPSTREAM, and Ote is thinking about it now
-  ① what is an INDEPENDENT OCCASION?                   ⏸ paused behind ③
-  ② what is an ADMISSIBLE DREAMING CORPUS?             ⏸ paused behind ③
-⇒ §0-A ⓪-b below carries what the investigations already ANSWERED about ③. ⛔ Most of it is ratified
-  and a fresh session must read it BEFORE proposing anything — the answer is largely already made.
+⭐ THE FOUR QUESTIONS NOW IN FRONT OF US, IN DEPENDENCY ORDER
+  ④ what is SOTERA'S CANONICAL ONTOLOGY?  one persona · many people · many channels · strict non-mixing
+     ← ⭐ UPSTREAM OF EVERYTHING. Investigated 2026-09-19; the report is the doc above.
+  ③ is the unit of WHO the ACCOUNT or the PERSON?      ✅ ANSWERED — "both, per subsystem" (see ⓪-b)
+                                                        ⭐ and ④ reframes it: NEITHER is the wall — the VENUE is
+  ① what is an INDEPENDENT OCCASION?                    ⏸ paused behind ④
+  ② what is an ADMISSIBLE DREAMING CORPUS?              ⏸ paused behind ④
 ```
+
+## ⓪-c · ⭐⭐⭐ THE ONTOLOGY FINDINGS — ⛔ THE FOUR A FRESH SESSION WILL GET WRONG
+
+```
+⭐⭐ ① "ACCOUNT OWNS MEMORY" IS **NOT** WHAT THE CODE SAYS, AND THE BRIEF'S PREMISE IS HALF-WRONG.
+   RFC_PERSON_VS_ACCOUNT §0 ratified 2026-08-18: "THE MEMORY IS HERS. ONLY THE SUBJECT VARIES."
+   §0.1: "user_id is NOT ownership — it is VISIBILITY." ⇒ Sotera is ALREADY the invariant owner.
+   ⭐ THE REAL INHERITANCE: **ONE COLUMN ANSWERS SEVEN QUESTIONS** — auth · capability · room/scope ·
+     visibility · formation (029) · disclosure endpoint · speaker-by-default.
+   ⇒ the refactor is NAME THE SEVEN, not "make memory person-scoped". Merging into PERSON would be
+     the same mistake with a different noun.
+
+⛔⛔ ② EVERY DISCLOSURE PRIMITIVE IS **POSITIVE**. disclosure_authz = held_turn_card|root_session|
+   standing_grant — all GRANTS. 4,615 rows, ⛔ not one can express a prohibition.
+   ⇒ **THE ROOM WALL IS THE ONLY NEGATIVE IN THE SYSTEM** (the default-deny inside `WHERE user_id=:me`).
+   ⛔⛔ THE NEGATIVE CONSTRAINT MUST EXIST **BEFORE** THE WALL STOPS BEING THE ONLY NEGATIVE.
+   ⓘ "Don't tell Hermes this" is inexpressible today, in any table.
+
+⭐⭐ ③ THE KNOW/SAY SPLIT IS **ALREADY BUILT** — only its INPUT is account-grained.
+   memory-utterance-boundary: "retrieval is free; utterance is governed" · "PROTECTED CONTENT NEVER
+   ENTERS THE PROMPT — she cannot leak what she was never handed" · existence disclosable, contents
+   not · the refusal is a BYTE-CONSTANT. permissions.js: memory_access_scope is "may this account be
+   TOLD", ⛔ NOT "may Sotera remember". ⇒ account → audience is a change of INPUT, not of mechanism.
+
+⭐⭐ ④ THE MISSING RUNG IS THE **BOTTOM** ONE: PARTICIPANT / SPEAKER.
+   ⛔ txn_messages HAS NO AUTHOR COLUMN. Who spoke is WALKED: conversation_id → conversations.user_id.
+   ⇒ the system CANNOT represent a second human in a conversation. Not "does not" — cannot.
+   ⭐ BUT the four roles are already declared honestly in `memory-speaker-frame.js`:
+     roomOwner=recorded · messageAuthor=derivable · speakerIdentity=ABSENT · namingSubject=ABSENT
+     ("today it is ASSUMED to be the room owner. THAT ASSUMPTION IS THE DEFECT" — the Cogito bug).
+   ⇒ ⭐ FIRST STEP IS PARTICIPANT+SPEAKER: additive, non-breaking (one participant per interaction
+     today), and every other step needs it. ⛔ NOT "add a channel table", ⛔ NOT "person-scope memory".
+```
+
+## ⓪-d · ⭐ THE ONTOLOGY IN SIX LINES (full model in the doc)
+
+```
+SOTERA      singleton · invariant owner · ⛔ not an account, not a tenant, not a per-channel copy
+PERSON      the CONTINUITY OF A COUNTERPART   ⛔ not auth, not permission, not a scope
+IDENTITY    a verifiable handle ON a channel, BOUND to a person by an explicit revocable act
+CHANNEL     medium + vouching authority · READ·WRITE·CONVERSE independent · ⭐ GREENFIELD, 0 today
+VENUE       ⭐ THE RENAME THAT DOES THE WORK. room → venue: a bounded context WITH A PARTICIPANT SET.
+            ⛔ THE WALL DOES NOT MOVE — it stops being an accident of mst_users.id.
+KNOWLEDGE   hers, global · subject · provenance · formation · ⭐ DISCLOSURE AS A RELATION WITH POLARITY
+⛔ FORBIDDEN BY CONSTRUCTION: person from a NAME · venue from a PERSON · disclosure from ACCESS ·
+   speaker from the VENUE OWNER · occasion from a CONTAINER ID.
+```
+
 
 > ## ⭐ v0 REMAINS LIVE AND IS THE BASELINE. The loop has closed once:
 > ## real conversation → autonomous reflection → autonomous `retain` → **durable memory** (`1c854162`, imp 7)
