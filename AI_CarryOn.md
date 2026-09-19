@@ -12,6 +12,10 @@
 > ## The account/room question RESOLVED ITSELF UPWARD: Sotera is no longer the same KIND of thing as
 > ## an OLS assistant. ⏸ The occasion + corpus rulings are **PAUSED** behind the ontology.
 > ## 📄 `Reference/docs/ARCHITECTURE_SOTERA_CANONICAL_ONTOLOGY.md` — ⛔ READ IT BEFORE PROPOSING ANYTHING.
+> ## 📄 `Reference/docs/BRIEFING_SOTERA_ONTOLOGY_V1_REALITY_MAP.md` — the engineering evidence Ote + Cogito
+> ## asked for before drafting **Sotera Ontology v1**. ⭐ Written for a reader with NO repo access.
+> ## ⭐ THE SEQUENCE OTE SET: current reality → my evidence → THEIR semantic ontology → my implementation
+> ## mapping → migration design. ⛔ I do not draft the ontology; I supply evidence and then CHALLENGE it.
 
 ```
 ⭐ THE FOUR QUESTIONS NOW IN FRONT OF US, IN DEPENDENCY ORDER
@@ -796,6 +800,16 @@ the code reads    cfg(config, 'reflectionModel')          ← reflectION, not re
 ⚠️ A SILENT FALL-THROUGH, ⛔ not an error: the operator's declared choice is discarded without a word.
 ⛔ UNFIXED BY RULING · ⛔ do not touch it while a Dreaming variable is in flight — changing the MODEL would
   change the instrument. ⓘ Whether 35b-vs-9b is the RIGHT reflection model is a separate decision.
+
+⭐⭐ AMENDED 2026-09-19 — `memory.reflectModel` IS NOT A DEAD KEY. IT BELONGS TO THE OTHER REFLECTION.
+   reflection-host.js:134         READS memory.reflectModel  -> qwen3.5:9b   the L3 "PERSONA NOTES" lane
+                                  (operational sticky notes; rides the 04:10 daily pass)
+   reflection-lifecycle-host.js   READS reflectionModel (absent) -> chat.defaultModel -> qwen3.6:35b
+                                  THE DREAMING v0 REVISIT LANE — the act record M1 reads
+   => TWO SUBSYSTEMS, TWO KEYS, TWO MODELS, ONE WORD "reflection". The record above is correct AS WRITTEN
+     ("no effect ON THIS LANE") — but calling the key dead is wrong, and the 9b is genuinely in use.
+   (i) This is also the likely reason qwen3.5:9b appears in the console during chat: extractModel,
+     consolidateModel AND reflectModel are all configured to the 9b.
 ```
 
 ## ⏸⭐⭐ **A FUTURE ARCHITECTURE ITEM, OPENED BY OTE — ⛔ not started.**
