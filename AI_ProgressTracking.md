@@ -14170,3 +14170,91 @@ unit 757/757 · @ote/memory 152/152 · tsc -b clean · frontend rebuilt
 • memory.reflectModel vs reflectionModel naming                       (recorded, deliberately unfixed)
 • 16,384 reflection context vs 143,360 measured-safe — a SELECTION question, ⛔ not a knob
 ```
+
+
+---
+
+# ⭐⭐ CHECKPOINT — 2026-09-19 · THE M1 ARC, AND WHY IT PAUSED
+
+ⓘ Everything this day was **investigation**, except one small observe-only feature. ⛔ v0 untouched
+throughout: no model, budget, selector, retrieval, suppression, admission, provenance, author
+propagation, lexical, or lesson/decline change.
+
+## THE SEQUENCE
+```
+P0   ran the existing M1 instrument ONCE, unchanged        pass #88 · M 207 · N 207 · withheld 1 · 6a
+     withheld act = #656 Rome, excluded_from_evidence 3h46m AFTER the act  ⭐ E3 working on a real case
+P1   designed the smallest M1+M2 dry run
+P1a  probed live slots against ACT TEXT (read-only, no model, no ledger row)
+     ⇒ 11 of 85 slots clear O-2 · ⛔ NOT ONE IS TOPICAL
+⏸   PAUSED by Ote before P1b, to settle corpus identity, then account vs person
+```
+
+## ⭐⭐⭐ THE THREE FINDINGS THAT STOPPED THE TRACK
+
+```
+① "M1" IS NOT WHAT THE NAME SUGGESTS. The built M1 is an INSTRUMENT: no reasoner, no write path,
+   runOnePass() THROWS unless dryRun. "Enable Dreaming" is A BUILD, NOT A FLAG. M2's reasoner is also
+   already built and proposes without persisting.
+
+② THE INDEPENDENCE IS MANUFACTURED. 100 of 136 agent_dev acts are replay fixtures — 20 sources x 5.
+   Root-counting sees 100 roots where there are 20, because a replay is a COPY under a new
+   conversation_id and conversation_id IS the root. dreaming-independence guards DERIVED echoes and
+   structurally cannot see this. ⇒ 0 legitimate P1b slots.
+   ⚠️ Same mechanism defeats E3: Rome is excluded, its FIVE replays are all admitted.
+
+③ ACCOUNT vs PERSON IS UPSTREAM OF BOTH, and mostly ALREADY ANSWERED — see AI_CarryOn §0-A ⓪-b.
+   The grain rule is ratified; the answer is "both, per subsystem"; Kavi is measurably one relationship
+   and two knowledge contexts right now.
+```
+
+## ⚠⚠ TWO CORRECTIONS I OWED, BOTH MADE IN WRITING
+```
+① P0 close: I said one-act-per-conversation was the HARDER case for O-2. BACKWARDS — root = conversation,
+   so it is the BEST case. And the act corpus is the ONLY corpus where root-counting is decidable today
+   (an act is a leaf; memories have derivedFrom on 4 of 115).
+② P1a: I said the replay source id survives only as "a naming convention". INCOMPLETE — settings.source
+   carries the full UUID on 100/100. Corrected in place in the P1a doc.
+```
+
+## ⛔ A CLEANUP REQUESTED, STARTED, AND CANCELLED — CORRECTLY
+Ote asked me to clean the probe corpus so she would not dream over it, then cancelled. **Nothing was
+modified** — every step was a read-only SELECT. ⭐ And the inspection had already found the reason the
+cancellation was right on the merits: **19 LIVE MEMORIES** trace `source_message_id` into those fixture
+conversations (writers chat-tool, extractor, reflection). ⛔ Fixture status is not disposability.
+
+## ✅ THE ONE THING BUILT TODAY — `04e7e46`
+```
+tool-call-in-content.js   a text-form tool call is OBSERVED, ⛔ NEVER EXECUTED
+  measured: message 5f424d2d emitted <function=fetch_url_content> into CONTENT; ollama returned no
+  tool_calls; nothing ran; the markup reached Ote. Blast radius 2 turns / 1 conversation.
+  ⛔ no execution path (asserted against the source) · ⭐ arg KEYS + byte count only, never values
+  ⚠️ matches ONE observed format ⇒ reports a FLOOR, not an estimate
+  unit 768/768, incl. a RED PROOF that the value-leak guard fires, and the shared-g-regex lastIndex trap
+```
+
+## ⏸ NOTED, NOT FIXED — needs Ote's word
+**The reflection lane has the same text-form hole.** If she emits `retain` as text during a pass, the act
+records `tools_used: []` — reading as *"she reached for nothing"* — and that pollutes the exact corpus
+M1 reads. One line wires the same detector; ⛔ not done, because reflection-lifecycle-host is a v0 file.
+
+## THE P1a BASELINE, TO COMPARE AGAINST LATER
+```
+M 207 · withheld 1 · admitted 206 · N_room 136/130 nominal roots
+fixtures 100 · PROBE 23 · ORDINARY 13/10 · 11 of 85 slots clear O-2, none topical · 0 P1b slots
+⭐ first real cron act since: #1603, 2026-09-19 04:00, room `ote` — genuine material, not a fixture
+```
+
+## DOCS WRITTEN TODAY (all Reference/docs/)
+`PLAN_SOTERA_DREAMING_M1_WHERE_DO_WE_START.md` · `PLAN_SOTERA_DREAMING_P1_FIRST_REASONING_PASS.md` ·
+`MEASUREMENT_SOTERA_P1A_ACT_TEXT_PROBE.md` · `INVESTIGATION_SOTERA_CORPUS_IDENTITY.md` ·
+`INVESTIGATION_SOTERA_ROOM_ACCOUNT_PERSON_BOUNDARY.md` · `INVESTIGATION_SOTERA_ACCOUNT_VS_PERSON.md` ·
+`INVESTIGATION_SOTERA_COGNITIVE_LOOP_CURRENT_STATE.md`
+
+## VERIFIED AT THIS CHECKPOINT
+```
+unit 768/768 · :8210 healthy on the new build · :8201 (OLS) 200, untouched
+data unchanged by me: 6 passes (one added by P0, deliberately) · 4 excluded · 0 fixtures altered
+⛔ NOT verified by me: the browser render of anything — no Playwright in this repo.
+```
+

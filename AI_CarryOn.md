@@ -8,7 +8,19 @@
 
 ## ⓪ ⭐⭐⭐ WHERE THE ARC ACTUALLY IS — ⛔ READ THIS FIRST, THE REST OF §0-A IS HISTORY IN REVERSE ORDER.
 
-> ## ⭐⭐⭐⭐ **THE CURRENT TRACK IS DREAMING v0, AND THE LOOP HAS CLOSED ONCE.**
+> ## ⭐⭐⭐⭐ **NEXT TRACK (2026-09-19, Ote): THE ACCOUNT / ROOM BOUNDARY.**
+> ## ⏸ The occasion + corpus rulings are **PAUSED** behind it. ⛔ Do not resume M1 design until it is settled.
+
+```
+⭐ THE THREE QUESTIONS NOW IN FRONT OF US, IN DEPENDENCY ORDER
+  ③ is the unit of WHO the ACCOUNT or the PERSON?     ← ⭐ UPSTREAM, and Ote is thinking about it now
+  ① what is an INDEPENDENT OCCASION?                   ⏸ paused behind ③
+  ② what is an ADMISSIBLE DREAMING CORPUS?             ⏸ paused behind ③
+⇒ §0-A ⓪-b below carries what the investigations already ANSWERED about ③. ⛔ Most of it is ratified
+  and a fresh session must read it BEFORE proposing anything — the answer is largely already made.
+```
+
+> ## ⭐ v0 REMAINS LIVE AND IS THE BASELINE. The loop has closed once:
 > ## real conversation → autonomous reflection → autonomous `retain` → **durable memory** (`1c854162`, imp 7)
 
 ```
@@ -26,9 +38,54 @@
                   · termination_observed + termination_source  ⭐ A PAIR, never the word alone
      lifetime     REVISIT_RECORD_LIFETIME = keep 'forever' — ⭐ A DECISION, not an unpruned accident
      ⛔ NO run_events table · ⛔ no payloads · ⛔ no historical rewrite · ⛔ nothing cognitive changed
+   ⑥ ⭐ THE TEXT-FORM TOOL-CALL DETECTOR (2026-09-19) — observe, ⛔ never execute. `04e7e46`
 ⏸ HOLDING: reflectionMaxTokens 2400 · ⛔ no 4096 · ⛔ no context/selector change
 ⛔ NEXT EXPERIMENT MUST COME FROM GENUINELY NEW CONVERSATION THROUGH THE NORMAL CRON PATH.
 ⭐ AND IT CAN NOW BE READ FROM THE DATABASE instead of reconstructed run by run.
+⭐ FIRST REAL CRON ACT SINCE THE BASELINE: #1603, 2026-09-19 04:00, room `ote`, a genuine Thai
+  conversation. ⛔ Not a fixture. The corpus is finally growing from real material.
+```
+
+## ⓪-a · ⚠️⚠️ THE ONE THING I NOTED AND DID **NOT** FIX — ⛔ OTE'S CALL
+
+```
+⭐ THE REFLECTION LANE HAS THE SAME TEXT-FORM TOOL-CALL HOLE AS CHAT.
+   reflection-lifecycle-host reads `msg.tool_calls` exactly the way the chat route does. If she emits
+   `retain` as `<function=retain>…` TEXT during a pass:
+     · nothing executes — she keeps nothing
+     · the act row records `tools_used: []`  ⇒ it reads as "SHE REACHED FOR NOTHING"
+     · ⛔⛔ and that pollutes THE EXACT CORPUS M1 READS — a false "declined" in the recurrence data
+   ⓘ ONE LINE wires the same (already-built, already-tested) detector there.
+   ⛔ NOT DONE: reflection-lifecycle-host is a v0 file and the standing constraint says don't touch v0.
+   ⇒ Ote said "note that". It is noted. ⭐ It needs his word, not a judgement call.
+```
+
+## ⓪-b · ⭐⭐⭐ ACCOUNT vs PERSON — WHAT IS ALREADY ANSWERED. ⛔ READ BEFORE PROPOSING ANYTHING.
+
+```
+⭐ THE GOVERNING RULE IS ALREADY RATIFIED (RFC_SOTERA_ROOMS_AND_DISCLOSURE §2):
+     a layer whose privacy comes from a CLOSED VOCABULARY may be PERSON-grained
+     a layer whose privacy comes from SCOPE          must be ROOM-grained
+  ⇒ the grain is DERIVED, never chosen per case. A Dreaming commitment is FREE TEXT ⇒ points at ROOM.
+
+⭐ THE ANSWER IS "BOTH", PER SUBSYSTEM, AND IT IS DELIBERATE — measurable on Kavi right now:
+     stance / relational records   PERSON-grained (subject_person_id ONLY, no user_id)   2 records
+     account memory · intentions   ROOM-grained                                7 memories / 2 rooms
+  ⇒ ONE RELATIONSHIP and TWO KNOWLEDGE CONTEXTS, simultaneously, by design.
+
+⛔ ROOM ≡ ACCOUNT. There is no room entity; txn_conversations.user_id → mst_users. One column.
+⭐ PERSON IS REAL: 4 persons hold 8 accounts. Sotera is kind='persona', 0 accounts, never an account holder.
+⭐ mst_persons was created as the SUBJECT dimension (004), ⛔ NOT as a grouping of accounts.
+⭐ user_id is NOT ownership — it is VISIBILITY, and since 029 it means THE ROOM THE MEMORY WAS FORMED IN.
+   Owner is INVARIANT and DERIVED: always Sotera. "THE MEMORY IS HERS. ONLY THE SUBJECT VARIES."
+✅ D-8 IS RATIFIED: the ROOM is the disclosure boundary; root is a room with broader explicit authority.
+✅ 028: cross_room is "a DEV-ACCOUNT capability, not a change to the memory model" ⇒ that is why agent_dev
+   has it. ⛔ It never meant "same person across accounts".
+⚠️ ONE INTENT/IMPLEMENTATION DIVERGENCE, SHOWN AND NOT RECONCILED: 028 intends an ACCOUNT capability,
+   but `acrossRooms ? 'TRUE'` DELETES the predicate ⇒ the reach is cross-PERSON too.
+⛔ NO person tier exists (scope enum = room|persona_global) and ◐ the grain rule explains why: it would
+   be a free-text layer readable across rooms.
+📄 INVESTIGATION_SOTERA_ACCOUNT_VS_PERSON.md · INVESTIGATION_SOTERA_ROOM_ACCOUNT_PERSON_BOUNDARY.md
 ```
 
 ⚠️⭐ **THE FOUR THINGS A FRESH SESSION WILL GET WRONG ABOUT DREAMING:**
@@ -48,6 +105,23 @@
   500 on open — then a second bug where the row-expand rendered below a 40-row table. ⇒ *"don't use
   root"* protects HIS DATA; ⛔ it was never a reason to ship a surface unopened. **Reading is not
   writing.** ⓘ Memory `never-test-on-his-account` amended.
+⑥ ⭐⭐⭐ **"M1" MEANS SOMETHING NARROWER THAN IT SOUNDS.** The built M1 is a MEASURING INSTRUMENT with
+  **no reasoner and no write path** — `runOnePass()` THROWS unless `dryRun === true`. ⇒ *"enable
+  Dreaming"* is **A BUILD, NOT A FLAG.** What the phrase "M1 should reason over experience" describes is
+  **M2**, whose reasoner (`dreaming-reason-host`) is ALSO already built and proposes without persisting.
+  ⓘ And a THIRD thing is called Dreaming: the shipped CARD CONSOLIDATION (compresses + REPLACES, 0 cards
+  ever). ⛔ Rule ⑪ forbids merging them.
+⑦ ⭐⭐⭐ **THE REFLECTION CORPUS IS 73% SYNTHETIC, AND ITS INDEPENDENCE IS MANUFACTURED.**
+  agent_dev: 136 acts / 130 NOMINAL roots = **100 fixtures (20 sources × 5 replays)** + 23 PROBE + only
+  **13 ORDINARY acts / 10 roots**. Root-counting sees 100 independent roots where there are 20.
+  ⛔ A replay is NOT a derivation — it is a COPY under a new `conversation_id`, and `conversation_id` IS
+  the root, so `dreaming-independence`'s fail-safe cannot engage. ⇒ P1b has **NO legitimate slot**.
+  ⭐ The replay link IS machine-readable: `settings.source` on 100/100, and 0 of 409 ordinary rows.
+  ⛔ DO NOT make `settings.source` a consumer input — reading it asserts "replay = same occasion",
+  which is exactly the unmade ruling.
+⑧ ⛔ **FIXTURE STATUS IS NOT DISPOSABILITY.** Ote asked me to clean the probe corpus and then cancelled;
+  inspection had already found **19 LIVE MEMORIES** whose `source_message_id` points into those fixture
+  conversations. Excluding them would have made 19 memories' provenance unreachable. ⛔ No cleanup.
 ⑥ ⭐⭐⭐ **A `CHECK` CONSTRAINT ACCEPTS `NULL`, NOT ONLY `TRUE`.** 054's termination pair was first
   written as `(a IS NULL AND b IS NULL) OR (a IN (…) AND b IN (…))`. Against `a='length', b=NULL` that is
   `FALSE OR (TRUE AND NULL)` = **NULL**, and the database accepted the exact row the constraint existed to
