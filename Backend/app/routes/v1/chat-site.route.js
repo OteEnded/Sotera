@@ -27,6 +27,8 @@ import { recordTurn, recordCapture, recordAuto } from '@ote/memory/cognition/mem
 import { captureIdentity } from '../../components/memory-identity-host.js'
 import { composeSystemContext, composeRuntimeTail, composeAdaptiveContext, rankRelevance } from '../../components/context-composer.js'
 import { buildMemoryCognition } from '../../components/memory-cognition-host.js'
+// ⭐ OBSERVE-ONLY. A tool call that arrived as prose is recorded, ⛔ never executed — see the module.
+import { detectToolCallInContent, mightContainTextToolCall, describeTextToolCall } from '../../components/tool-call-in-content.js'
 import { plainSpokenToolResult, evidenceForModel, populationOf, countFromToolResult, queryOf } from '../../components/memory-cognition-projection.js'
 import { renderHolding, withStandingView, standingSnapshot } from '../../components/memory-working-render.js'
 import { applyUtteranceBoundary, findWithheldLeak } from '../../components/memory-utterance-boundary.js'
@@ -2598,6 +2600,35 @@ export default async function chatSiteRoutes(fastify) {
           }
         }
         if (toolCalls.length === 0) {
+          // ── ⭐⭐ A TOOL CALL THAT ARRIVED AS TEXT — OBSERVED HERE, ⛔ NEVER EXECUTED ──────────────
+          //
+          // ⚠️ Measured 2026-09-19 (message `5f424d2d`): the model emitted `<function=fetch_url_content>`
+          // into the CONTENT channel with no native `tool_calls`, so nothing ran and the markup reached
+          // him. This is the ONLY place that sees "a round ended with zero structured calls" together
+          // with the text that round produced, which is why the detector rides here.
+          //
+          // ⛔ IT CHANGES NOTHING ABOUT THE TURN. No execution, no nudge, no retry, no state — the two
+          // branches below run exactly as they did before. Whether prose counts as an EMITTED tool call
+          // is an unruled question and the dispatch boundary may not be widened by a parser.
+          // ⛔ Best-effort and fully swallowed: observability must never be load-bearing.
+          if (mightContainTextToolCall(turnAnswer)) {
+            try {
+              const textCall = detectToolCallInContent(turnAnswer)
+              if (textCall.found) {
+                fastify.log?.warn?.({
+                  conversationId: convo.id,
+                  round: rounds,
+                  model: settings.model ?? null,
+                  stream: settings.stream === true,
+                  reasoningEnabled: settings.reasoning?.enabled === true,
+                  reasoningEffort: settings.reasoning?.effort ?? null,
+                  toolsOffered: Array.isArray(toolDefs) ? toolDefs.length : null,
+                  calls: textCall.calls,          // ⭐ names + parameter KEYS only — ⛔ never values
+                  contentBytes: textCall.bytes,
+                }, `[tool-format] ⚠ a tool call arrived as TEXT and was NOT executed — ${describeTextToolCall(textCall)}`)
+              }
+            } catch { /* a detector must never be able to affect a turn */ }
+          }
           // Some models (seen live: gemma4:e4b) end their turn EMPTY right after a tool
           // result — mid-chain, planning "one call per response". A round with neither
           // text nor calls after tools ran is never a real answer: nudge the model to
