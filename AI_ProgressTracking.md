@@ -14258,3 +14258,87 @@ data unchanged by me: 6 passes (one added by P0, deliberately) · 4 excluded · 
 ⛔ NOT verified by me: the browser render of anything — no Playwright in this repo.
 ```
 
+
+---
+
+# ⭐⭐ CHECKPOINT — 2026-09-24 · THE THAI DRIFT, AND A FIX THAT HAD BEEN INERT FOR 9 DAYS
+
+ⓘ Ote asked one question — *"why she alway try to answer on thai? i talk to her in eng"* — and it
+turned into a measured two-cause diagnosis, a rejected fix of my own, a config audit, and a runtime
+correction. ⭐ ~100 model calls on qwen3.6:35b, GPU authorised by him mid-run.
+
+## ⭐⭐⭐ THE ANSWER: TWO CAUSES, BOTH NECESSARY, NEITHER SUFFICIENT
+```
+① THE RETRIEVAL PAYLOAD  her own tools returned 27,523 THAI CHARS across the turn — 8,181 before
+                        her FIRST reply — from a source thread that is 196 msgs / 185 Thai (94%).
+                        ⏸ PARKED by Ote: "we might have to do this one day, so be aware."
+② THE CONFIG STRING     config.json chat.assistantIdentity still held the UNCONDITIONAL Thai clause.
+                        The 2026-09-15 ruling that made it conditional landed in the CODE DEFAULT;
+                        CONFIG WINS ⇒ THE FIX WAS INERT FOR 9 DAYS.   ✅ FIXED TODAY.
+```
+⛔ EXCLUDED BY MEASUREMENT: memory (0 Thai in her cognition blocks) · a setting she chose · the
+reply-language rule being absent (it was present, unconditional, foundational — and it LOST).
+
+## ⭐⭐ THE A/B — her real turn-1 context replayed verbatim, think:'low'
+```
+LIVE (unchanged)                         10/11 = 91%   ← reproduces production (which was 5/5)
+LIVE + rule restated AFTER tool results  11/12 = 92%   ⛔ MY PROPOSED FIX. REJECTED ON EVIDENCE.
+config-fix + rule                         8/12 = 67%
+SCRUB — Thai lines removed from payload   4/11 = 36%   (a CAUSAL PROBE, ⛔ not a deployable fix)
+⭐ config-fix + SCRUB (BOTH)               0/12 =  0%
+   LIVE vs SCRUB p≈0.024 · SCRUB vs BOTH p≈0.037 · LIVE vs BOTH p<0.0001
+```
+⚠️ ⇒ config fix alone is 91% → ~67%. ⭐ HE WILL STILL SEE DRIFT. Reported as such, not as "fixed".
+
+## ✅ WHAT SHIPPED
+```
+① config.json chat.assistantIdentity → the ratified conditional wording.
+  Ote: "be careful adjusting that" → then "you can try, but make sure it wont effect sotera's identity."
+  ⇒ run as an EXECUTABLE GATE: 9 identity elements (Sotera · female · she/her · ฉัน · ดิฉัน · หนู ·
+    ค่ะ/คะ · not-ผม/ครับ · drafting-for-others) — ALL PRESERVED, NONE LOST.
+  4 write guards · backup to SCRATCHPAD not the repo (config.json holds the DB password) · 302→254 chars.
+② RUNTIME: off `node --watch`, onto `npm start`. ⭐ Root cause of the drift: run_windows.bat AT THE
+  REPO ROOT runs `npm run dev`. ⛔ The "touch server.js to restart" trick is now gone.
+③ SHADOW AUDIT (Ote-approved): 122 config leaves · 131 registry · 8 DB · ~31 direct paths
+  ⇒ EXACTLY ONE live member of the dangerous class. ⚠️ chat.systemPrompt is the same trap, null today.
+```
+
+## ⭐⭐ THE REUSABLE RULE
+```
+FREE-TEXT CONFIG CANNOT SELF-HEAL.
+  shapeOf()  Object.values(SHAPES).includes(v) ? v : DEFAULT   ENUMERATED ⇒ validates ⇒ self-heals
+  identity   assistantIdentity ?? DEFAULT_ASSISTANT_IDENTITY   FREE TEXT  ⇒ any value WINS FOREVER
+⇒ a code-side fix is UNREACHABLE while a free-text config value is set. CHECK THE LIVE VALUE.
+```
+
+## ⚠⚠ METHOD FAILURES — FOUR, ALL MINE, ALL CAUGHT
+```
+① a mangled Thai character class reported "0 Thai in every tool result". Truth: 27,523.
+  Caught only because 91,304 chars / 6,479 Latin letters did not add up.
+② a Python generator missing `yield from` reported "0 config settings". Truth: 122.
+  ⭐ 0 is exactly what a broken instrument returns.
+③ ⭐⭐ 64 OF ~100 MODEL CALLS WASTED: the harness passed assistantIdentity:null ⇒ the CODE DEFAULT
+  ⇒ I A/B-TESTED AGAINST A BUILD THAT DID NOT CONTAIN THE BUG. Every arm read 0/10, a clean-looking
+  negative. It only reproduced on replaying her REAL captured payloads + real config + think:'low'.
+④ empty model replies were counted as "English" — now excluded and reported separately.
+⇒ ⭐ every scan now carries a POSITIVE CONTROL that must find a known hit before it may report.
+```
+⚠️ AND THE TEST WAS GREEN THROUGHOUT: reply-language-rule.test L4 asserts the CODE DEFAULT is
+conditional — true for 9 days while every LIVE prompt carried the unconditional cue.
+
+## ⏸ FOUND, ⛔ NOT FIXED
+```
+#13703         reflection wrote a LANGUAGE-PREFERENCE MEMORY by itself ("Prefers to converse in
+               English, not Thai", imp 7) — the exact artifact the reply-language rule neutralises.
+               Needs a RULING, not a patch.
+#13701/#13702  ⛔ TWO LIVE ROWS ON ONE SLOT, same slot_id, 17s apart, neither superseding.
+               Violates "exactly one live row remains". ⭐ The real correctness defect. Cause untraced.
+```
+
+## VERIFIED AT THIS CHECKPOINT
+```
+:8210 200 (PID verified to start AFTER the config mtime) · :8201 200 untouched
+reply-language unit tests 5/5 · ⛔ no schema change, no memory row edited by me
+⭐ ⛔ NOT verified by me: any browser render.
+```
+

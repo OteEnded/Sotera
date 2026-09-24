@@ -101,6 +101,50 @@ KNOWLEDGE   hers, global · subject · provenance · formation · ⭐ DISCLOSURE
   conversation. ⛔ Not a fixture. The corpus is finally growing from real material.
 ```
 
+## ⓪-e · ⭐⭐ LIVE STATE CHANGED 2026-09-24 — THE THAI DRIFT, AND THE RUNTIME
+
+```
+✅ config.json chat.assistantIdentity → THE RATIFIED CONDITIONAL WORDING (was the 2026-09-15 fix's
+   UNCONDITIONAL predecessor, INERT FOR 9 DAYS because the fix landed in the code default and
+   CONFIG WINS). All 9 identity elements verified preserved before writing; 4 write guards passed.
+✅ RUNTIME: Sotera now runs `npm start` in Backend (own console). ⛔ node --watch is GONE.
+   ⭐ ROOT CAUSE of the drift back to watch: `run_windows.bat` AT THE REPO ROOT runs `npm run dev`.
+   ⭐ ⛔ THE "touch server.js to restart" TRICK NO LONGER WORKS. Every restart is explicit now.
+
+⚠⚠ EXPECTATION — THIS IS NOT A FIX FOR THE THAI PROBLEM. There are TWO causes, both necessary:
+   ① THE RETRIEVAL PAYLOAD  27,523 Thai chars via her own tools (8,181 before the first reply)
+                            from a 94%-Thai source thread.  ⏸ PARKED by Ote as future work.
+   ② the config string      ✅ fixed above.
+   MEASURED A/B on her REAL replayed turn:  LIVE 91% · config-fix ~67% · payload-scrub 36% · BOTH 0%
+   ⇒ config fix alone takes 91% → ~67%. ⭐ HE WILL STILL SEE THAI DRIFT. Say so; do not call it fixed.
+⛔ MY PROPOSED FIX FAILED AND WAS REJECTED ON EVIDENCE: restating the reply-language rule AFTER the
+   tool results gave 92% against a 91% baseline. ⛔ Do not re-propose it.
+⛔ SCRUB IS A CAUSAL PROBE, NOT A FIX — removing the Thai removes the content she was retrieving.
+⭐ The payload question IS the SDM's MATERIAL question. ⛔ Patching it now = designing it twice.
+   ⓘ A knob already exists, unset: `memory.retrievalPayloadShape` (default SHAPES.windowsFirst).
+
+⭐⭐ THE REUSABLE RULE — FREE-TEXT CONFIG CANNOT SELF-HEAL:
+   shapeOf()  Object.values(SHAPES).includes(v) ? v : DEFAULT   ⇒ ENUMERATED, validates, SELF-HEALS
+   identity   assistantIdentity ?? DEFAULT_ASSISTANT_IDENTITY   ⇒ FREE TEXT, any value WINS FOREVER
+   ⇒ a code-side fix is unreachable while a free-text config value is set. CHECK THE LIVE VALUE.
+   ⓘ SHADOW AUDIT DONE (122 config leaves · 131 registry · 8 DB · ~31 direct paths):
+     EXACTLY ONE live member of the dangerous class. ⚠️ `chat.systemPrompt` is the same trap,
+     disarmed only because it is currently null — it already misfired once.
+
+⚠️ THE TEST WAS GREEN THE WHOLE TIME. reply-language-rule.test L4 asserts the CODE DEFAULT is
+   conditional — true for 9 days while every LIVE prompt carried the unconditional cue.
+⚠️ THREE INSTRUMENTS LIED IN ONE DAY (mangled char class → "0 Thai" vs 27,523 · a generator missing
+   `yield from` → "0 settings" vs 122 · and 64 of ~100 model calls A/B-tested a build WITHOUT the bug
+   because the harness passed assistantIdentity:null ⇒ the CODE DEFAULT). ⭐ Positive control on every scan.
+
+⏸ FOUND, ⛔ NOT FIXED, NEEDS OTE:
+   #13703  reflection wrote a LANGUAGE-PREFERENCE MEMORY by itself — the exact artifact the
+           reply-language rule exists to neutralise. Needs a RULING, not a patch.
+   #13701/#13702  ⛔ TWO LIVE ROWS ON ONE SLOT, same slot_id, neither superseding. Violates
+           "exactly one live row remains". ⭐ THE REAL CORRECTNESS DEFECT of the two. Cause untraced.
+```
+📄 `Reference/docs/MEASUREMENT_SOTERA_THAI_LANGUAGE_DRIFT.md`
+
 ## ⓪-a · ⚠️⚠️ THE ONE THING I NOTED AND DID **NOT** FIX — ⛔ OTE'S CALL
 
 ```
