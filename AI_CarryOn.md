@@ -4,6 +4,29 @@
 
 ---
 
+# 0-☆ · ⚠⚠ THIS SESSION IS NOW ONE OF TWO — READ BEFORE ANY WRITE
+
+```
+2026-09-28, Ote FORKED the session: "one for still be here for sotera, and another one for OteRM."
+⇒ TWO Claude sessions, ONE workspace, ONE project id ⇒ ⭐ ONE SHARED MEMORY DIRECTORY.
+
+⛔⛔ THREE SURFACES THAT CAN SILENTLY CLOBBER:
+  ① the memory dir  MEMORY.md is read-modify-write ⇒ concurrent edits LOSE ONE.
+     ⭐ it IS a git repo — `git status` BEFORE editing, commit IMMEDIATELY after.
+  ② Reference/      one git repo, both sessions write docs, ⛔ AND IT HAS NO REMOTE.
+  ③ persona_sotera  ⭐ THIS session's. OteRM reads for evidence; its writes need Ote's ruling.
+
+⭐ THE OWNERSHIP SPLIT: OteRM owns HOW · THIS SESSION (the SDM) owns WHAT THE WORDS MEAN.
+  ⛔ OteRM may not unilaterally define Person · Identity · Channel · Participant · Venue ·
+    Interaction · Occasion · Experience · Presence · Observation.
+  ⇒ ⚠️ WHICH MEANS THE SDM IS NOW LOAD-BEARING FOR A SECOND CONSUMER. A ruling left open here
+    BLOCKS work over there — that is new, and it should change how long things stay "paused".
+ⓘ Assume the workspace moved since your last read. ⭐ `git status` is cheap.
+```
+📄 `OteRM/AI_CarryOn.md` (the fork kickoff) · memory `two-sessions-one-workspace`
+
+---
+
 # 0-A · ⏸ WHAT IS OPEN. ⛔ NOTHING IS BLOCKED.
 
 ## ⓪ ⭐⭐⭐ WHERE THE ARC ACTUALLY IS — ⛔ READ THIS FIRST, THE REST OF §0-A IS HISTORY IN REVERSE ORDER.
