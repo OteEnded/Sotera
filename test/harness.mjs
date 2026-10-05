@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs'
 import pg from 'pg'
 
-export const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8210'
+export const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8040'
 
 // ⛔ NEVER TEST AS ROOT. Root is OTE'S ACCOUNT — his chats, his memories, his data.
 // This rule already existed on OteLLMServices and I failed to carry it to Sotera: a night of testing

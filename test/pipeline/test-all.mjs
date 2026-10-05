@@ -10,7 +10,7 @@
 // cannot finish gets skipped, then gets ignored, then gets deleted. OteLLMServices carried a "standing
 // failure" for weeks that way. Run repros by hand, on purpose.
 //
-// The CHECKS need her running on :8210 — they drive the real HTTP surface, because the bugs they exist
+// The CHECKS need her running on :8040 — they drive the real HTTP surface, because the bugs they exist
 // to catch (an unowned row, a leaked conversation) only appear when the whole stack is wired together.
 import { spawn } from 'node:child_process'
 import { readdirSync } from 'node:fs'

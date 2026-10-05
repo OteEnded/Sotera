@@ -19,7 +19,7 @@ Sotera ──▶ [OpenAI / Anthropic]   ──▶ OLS · OpenRouter · Xiaomi ·
 
 | | |
 |---|---|
-| ✅ | Boots on `:8210`, streams a real turn from Ollama natively, persists it with reasoning kept separate from the answer |
+| ✅ | Boots on `:8040`, streams a real turn from Ollama natively, persists it with reasoning kept separate from the answer |
 | ✅ | Schema live in `ote_ai_toolbox` / `persona_sotera` — **16 migrations**, with the memory findings enforced as constraints |
 | ✅ | Auth, chat UI, the SDK component runtime (her `persona.json` assembles them **by source**), memory v2 + the Context Composer |
 | ✅ | **Her own continuity:** `recall_own_history` across rooms · `inspect_around` behind a held-turn card · the **reflection lifecycle** (migration 016) |
@@ -39,7 +39,7 @@ turn carries a tool list, and a list of named actions is a menu. See `AI_CarryOn
 
 ```bash
 cd Backend && npm install && npm run dev     # or run_windows.bat at the repo root
-curl http://127.0.0.1:8210/api/health
+curl http://127.0.0.1:8040/api/health
 ```
 
 Needs Postgres on `127.0.0.1:54322` and Ollama on `127.0.0.1:11434`.

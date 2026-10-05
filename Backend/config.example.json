@@ -1,6 +1,6 @@
 {
     "app": {
-        "port": 8210
+        "port": 8040
     },
     "providers": {
         "ollama": {

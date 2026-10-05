@@ -1,6 +1,6 @@
 // ⭐⭐⭐ THE VOLUNTEERED RECAP — the model arm of ② R-C, built around the incident that actually happened.
 //
-//   node test/pipeline/volunteered-recap.mjs            (RECAP_RUNS=6 by default; needs her on :8210)
+//   node test/pipeline/volunteered-recap.mjs            (RECAP_RUNS=6 by default; needs her on :8040)
 //
 // Ote, 2026-09-05: *"Include at least one case where the model is given a natural conversation and
 // volunteers a recap… without the user explicitly asking for temporal history. That's the failure mode we

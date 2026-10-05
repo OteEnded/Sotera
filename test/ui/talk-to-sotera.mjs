@@ -19,7 +19,7 @@
 // it runs as. 👀 HEADED by default so the run is visible (SOTERA_HEADLESS=1 to hide it).
 import { chromium } from '../../../../OteLLMServices/test/node_modules/playwright/index.mjs'
 
-const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8210'
+const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8040'
 const HEADLESS = process.env.SOTERA_HEADLESS === '1'
 // ⚠️ agent_dev IS NOT SAFE FOR OBSERVATION, and that cost a real relationship on 2026-08-19.
 // `checks/memory-lifecycle-check.mjs` opens with `delete from txn_memories where user_id = <agent_dev>`

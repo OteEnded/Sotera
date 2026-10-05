@@ -45,7 +45,7 @@ import { AUTHORITY, SCOPE, classifySection, declarePrecedence, ATTRIBUTION_PRINC
 //
 // The system prompt was not merely stale, it was LIVE: `chat.systemPrompt` is null in her config, so
 // every turn told her she was "in Ote's LLM Services" — a service she does not run on. She has her own,
-// on :8210, and OLS is now one API provider among several.
+// on :8040, and OLS is now one API provider among several.
 //
 // The identity default was latent — her config sets `chat.assistantIdentity` and boot-check asserts it —
 // but a wrong default is a trap, not a non-issue: clearing that one setting would have silently made her

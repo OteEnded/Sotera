@@ -22,7 +22,7 @@
 
 import { devPg, devSchema } from '../harness.mjs'
 
-const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8210'
+const BASE = process.env.SOTERA_BASE || 'http://127.0.0.1:8040'
 const SKILL = 'skill.research'
 const jar = {}
 

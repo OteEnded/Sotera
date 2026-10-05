@@ -4,6 +4,18 @@
 
 ---
 
+# 0-★ · ⭐ SOTERA'S PORT IS NOW **8040** (moved from 8210 on 2026-10-05, Ote's request)
+
+```
+config.json app.port = 8040 (gitignored) · config.example.json, test BASE defaults, README, the
+composer comment all follow. ⚠️ Every older note below that says :8210 means 8040 now.
+⭐ Link_OLS_Up.ps1 (workspace root, NOT in git) publishes SOTERA on the VPS :8202 despite its name —
+  its $localPort moved 8210 → 8040 with her, so the public link points at her, not at nothing.
+⚠️ NOT changed, flagged to Ote: OteServerManager's service row for Sotera (its own DB; my role cannot
+  read that schema) — if its port_source is 'fixed' it will show her DOWN at 8210.
+⚠️ Link_OLS_Down.ps1 still matches $localPort = 8201 — it never matched the Up forward before either.
+```
+
 # 0-☆ · ⚠⚠ THIS SESSION IS NOW ONE OF TWO — READ BEFORE ANY WRITE
 
 ```

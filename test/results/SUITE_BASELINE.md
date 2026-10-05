@@ -149,7 +149,7 @@ survives by testing less.
 
 ## Preconditions (a failure here is the environment, not the code)
 
-- Sotera answering on `127.0.0.1:8210` — the runner fails fast if not, and says so
+- Sotera answering on `127.0.0.1:8040` — the runner fails fast if not, and says so
 - Postgres on `127.0.0.1:54322`, schema `persona_sotera`
 - Ollama on `127.0.0.1:11434` (⛔ Ote's, always-on — never start or stop it)
 - `agent_dev` / `agentdev123` exists with the **admin** role. ⛔ Never run the suite as root: root is

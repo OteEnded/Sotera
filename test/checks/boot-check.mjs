@@ -5,7 +5,7 @@
 // deeper than OteLLMServices), a schema that has to be HERS and not OLS's, a config that documented
 // the wrong project, and an identity line that inherits "You are male" if left null.
 //
-// Run:  node checks/boot-check.mjs        (needs her server up on :8210)
+// Run:  node checks/boot-check.mjs        (needs her server up on :8040)
 import { readFileSync } from 'node:fs'
 import { makeChecker, makeClient, devPg, devSchema, pgConfig, BASE } from '../harness.mjs'
 
