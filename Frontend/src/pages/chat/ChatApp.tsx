@@ -3895,14 +3895,15 @@ ${parts.join('\n')}
                     onClick={() => void submitSteer()}
                     disabled={!input.trim()}
                     title="Send this to the reply that's generating — it pauses right away, keeps what it wrote, and reacts to your message (Stop still cancels outright)"
+                    aria-label="Steer the reply"
                   >
-                    ↳ Steer
+                    ↳<span className="chat-btn-label"> Steer</span>
                   </button>
-                  <button className="gw-btn chat-stop chat-stop-sm" onClick={handleStop} title="Stop generating">■</button>
+                  <button className="gw-btn chat-stop chat-stop-sm" onClick={handleStop} title="Stop generating" aria-label="Stop generating">■</button>
                 </div>
               ) : (
-                <button className="gw-btn chat-send chat-stop" onClick={handleStop} title="Stop generating">
-                  ■ Stop
+                <button className="gw-btn chat-send chat-stop" onClick={handleStop} title="Stop generating" aria-label="Stop generating">
+                  ■<span className="chat-btn-label"> Stop</span>
                 </button>
               )
             ) : atGenLimit ? (
@@ -3918,8 +3919,12 @@ ${parts.join('\n')}
                 className="gw-btn gw-btn-primary chat-send"
                 onClick={() => void handleSend()}
                 disabled={!input.trim() && attachments.length === 0 && docAttachments.length === 0}
+                aria-label="Send"
               >
-                Send
+                <svg className="chat-btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+                <span className="chat-btn-label">Send</span>
               </button>
             )}
 
@@ -3980,8 +3985,8 @@ ${parts.join('\n')}
                       />
                     </svg>
                     <span>{pct}%</span>
-                    <span className="font-medium text-muted">context</span>
-                    {canContextDetail && <span className="text-muted" aria-hidden="true">{ctxOpen ? '▾' : '▸'}</span>}
+                    <span className="chat-ctx-word font-medium text-muted">context</span>
+                    {canContextDetail && <span className="chat-ctx-word text-muted" aria-hidden="true">{ctxOpen ? '▾' : '▸'}</span>}
                   </button>
                 )
               })()}

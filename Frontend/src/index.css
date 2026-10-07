@@ -2471,3 +2471,32 @@ button.chat-step-marker:active { transform: scale(0.92); }
 .vol-range.is-muted::-webkit-slider-thumb { border-color: var(--muted); }
 .vol-range.is-muted::-moz-range-thumb { border-color: var(--muted); }
 .vol-range:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 999px; }
+
+/* ── Composer on phones (Ote, 2026-10-07: the textarea collapsed to one character wide while a reply
+   was generating — "Draft you" stacked vertically — because Steer + Stop + the context meter took the
+   whole row). Discord's pattern: the input owns the width, actions are compact icons. ───────────────── */
+.chat-btn-icon { display: none; }
+.chat-input { min-width: 0; }
+@media (max-width: 720px) {
+	.chat-composer { padding-left: 10px; padding-right: 10px; padding-bottom: 12px; }
+	/* static here so the floating meter (below) anchors to .chat-composer's top EDGE, not to this row —
+	   anchored to the row it landed on the steer-hint line and covered its right end */
+	.chat-composer-inner { gap: 6px; position: static; }
+	.chat-attach-btn { width: 40px; height: 40px; }
+	/* Send / Steer / Stop become 40px icon buttons */
+	.chat-send, .chat-stop-sm {
+		min-width: 40px; width: 40px; height: 40px; min-height: 40px;
+		padding: 0; display: grid; place-items: center; border-radius: 999px; font-size: 16px;
+	}
+	.chat-send .chat-btn-label { display: none; }
+	.chat-send .chat-btn-icon { display: block; }
+	.chat-send-limited { width: auto; padding: 0 10px; font-size: 12px; }
+	.chat-send-group { gap: 6px; }
+	/* context meter: ring + % only — the breakdown is still one tap away */
+	.chat-ctx-word { display: none; }
+	/* out of the row: a small chip floating just above the composer's top edge, right side — the input
+	   keeps the full width and the chip costs no height (Discord keeps extras out of the input row) */
+	.chat-ctx-meter { position: absolute; right: 10px; top: -40px; padding-bottom: 0; z-index: 5; }
+	.chat-ctx-btn { padding: 4px 8px 4px 6px; background: var(--panel); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+	.chat-steer-hint { font-size: 11px; padding: 2px 10px; }
+}
