@@ -2898,6 +2898,7 @@ export default function ChatApp() {
             if (s.type === 'steer') return `<div class="steer">👤 ${esc(s.text)}</div>`
             if (s.type === 'interaction') return '' // live-only narration — not part of the saved transcript/export
             if (s.type === 'draft') return '' // discarded output — preserved in data, not rendered as the answer
+            if (!String(s.text ?? '').trim()) return '' // blank text between rounds — not a step (same rule as the live weave)
             return `<div class="body">${md(s.text || '')}</div>`
           })
           blocks.push(`<div class="weave">${weave.join('\n')}</div>`)
@@ -3451,7 +3452,13 @@ ${parts.join('\n')}
                   <div className="chat-weave">
                     {(() => {
                       // the final text segment is the answer — flush against the rail, not a "step"
-                      const lastTextIdx = m.segments!.map((s) => s.type).lastIndexOf('text')
+                      // ⚠ BLANK TEXT SEGMENTS ARE NOT STEPS. Some models (seen on Qwen3.8-Flash-Next via OLS, 2026-10-09)
+                      // stream a bare "\n\n" as content between a think and the tool calls; the live weave opened a
+                      // text segment for it and drew an empty bubble per round. The server already refuses to SAVE
+                      // them (`if (t.trim())` in pushText), so they vanished on reload — live and stored disagreed.
+                      // ⇒ same rule here: a whitespace-only text segment renders nothing, and is never "the answer".
+                      const isBlankText = (s: { type: string; text?: string }) => s.type === 'text' && !String(s.text ?? '').trim()
+                      const lastTextIdx = m.segments!.map((s) => (s.type === 'text' && !isBlankText(s) ? 'text' : '')).lastIndexOf('text')
                       // Computed ONCE per reply, not per segment: locating each segment inside `content` is a
                       // forward scan, and doing it inside the map would make it quadratic on a long reply.
                       const srcOffsets = segmentSrcOffsets(m.segments, String(m.content || ''))
@@ -3481,6 +3488,7 @@ ${parts.join('\n')}
                         // still carry it as a segment (Ote 2026-07-29).
                         if (s.type === 'interaction') return null
                         if (s.type === 'draft') return null // discarded output — preserved in data, not shown as the answer
+                        if (isBlankText(s)) return null // whitespace between rounds — see lastTextIdx above
                         // text: the last one is the answer — ✓ when done, a spinner while it
                         // still streams; earlier text segments are inline notes
                         const isAnswer = si === lastTextIdx
